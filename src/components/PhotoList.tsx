@@ -30,7 +30,7 @@ export enum ITEM_TYPE {
     TIME = 'TIME',
     FILE = 'FILE',
     SIZE_AND_COUNT = 'SIZE_AND_COUNT',
-    STATIC = 'static',
+    OTHER = 'OTHER',
 }
 
 export interface TimeStampListItem {
@@ -141,6 +141,7 @@ export function PhotoList({
     resetFetching,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
+
     const timeStampListRef = useRef([]);
     const timeStampList = timeStampListRef?.current ?? [];
     const filteredDataCopyRef = useRef([]);
@@ -170,7 +171,15 @@ export function PhotoList({
         let timeStampList: TimeStampListItem[] = [];
 
         if (galleryContext.photoListHeader) {
-            timeStampList.push(getPhotoListHeader());
+            timeStampList.push(
+                getPhotoListHeader(galleryContext.photoListHeader)
+            );
+        } else if (publicCollectionGalleryContext.photoListHeader) {
+            timeStampList.push(
+                getPhotoListHeader(
+                    publicCollectionGalleryContext.photoListHeader
+                )
+            );
         }
         if (deduplicateContext.isOnDeduplicatePage) {
             skipMerge = true;
@@ -303,12 +312,12 @@ export function PhotoList({
         first.getMonth() === second.getMonth() &&
         first.getDate() === second.getDate();
 
-    const getPhotoListHeader = () => {
+    const getPhotoListHeader = (photoListHeader) => {
         return {
-            ...galleryContext.photoListHeader,
+            ...photoListHeader,
             item: (
                 <ListItemContainer span={columns}>
-                    {galleryContext.photoListHeader.item}
+                    {photoListHeader.item}
                 </ListItemContainer>
             ),
         };
@@ -316,7 +325,7 @@ export function PhotoList({
 
     const getEmptyListItem = () => {
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             item: (
                 <NothingContainer span={columns}>
                     <div>{constants.NOTHING_HERE}</div>
@@ -339,7 +348,7 @@ export function PhotoList({
             return sum;
         })();
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             item: <></>,
             height: Math.max(height - photoFrameHeight - FOOTER_HEIGHT, 0),
         };
@@ -347,7 +356,7 @@ export function PhotoList({
 
     const getAppDownloadFooter = () => {
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
@@ -359,7 +368,7 @@ export function PhotoList({
 
     const getAlbumsFooter = () => {
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>

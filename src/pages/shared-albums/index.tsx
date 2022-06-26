@@ -35,6 +35,7 @@ import { logError } from 'utils/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
+import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -61,6 +62,8 @@ export default function PublicCollectionGallery() {
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -119,6 +122,25 @@ export default function PublicCollectionGallery() {
         };
         main();
     }, []);
+
+    useEffect(
+        () =>
+            publicCollection &&
+            publicFiles &&
+            setPhotoListHeader({
+                item: (
+                    <CollectionInfoBarWrapper>
+                        <CollectionInfo
+                            name={publicCollection.name}
+                            fileCount={publicFiles.length}
+                        />
+                    </CollectionInfoBarWrapper>
+                ),
+                itemType: ITEM_TYPE.OTHER,
+                height: 68,
+            }),
+        [publicCollection, publicFiles]
+    );
 
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
@@ -278,14 +300,9 @@ export default function PublicCollectionGallery() {
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 openReportForm,
+                photoListHeader,
             }}>
             <SharedAlbumNavbar />
-            <CollectionInfoBarWrapper>
-                <CollectionInfo
-                    name={publicCollection.name}
-                    fileCount={publicFiles.length}
-                />
-            </CollectionInfoBarWrapper>
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}

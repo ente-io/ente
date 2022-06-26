@@ -317,7 +317,7 @@ export default function Gallery() {
                         searchResultSummary={searchResultSummary}
                     />
                 ),
-                itemType: ITEM_TYPE.STATIC,
+                itemType: ITEM_TYPE.OTHER,
             });
         }
     }, [isInSearchMode, searchResultSummary]);

@@ -69,7 +69,7 @@ export default function Collections(props: Iprops) {
                         }
                     />
                 ),
-                itemType: ITEM_TYPE.STATIC,
+                itemType: ITEM_TYPE.OTHER,
                 height: 68,
             }),
         [collectionSummaries, activeCollectionID, shouldBeHidden]
