@@ -1,24 +1,30 @@
 import isElectron from 'is-electron';
 import React, { useEffect, useState } from 'react';
-import { Button } from 'react-bootstrap';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
 import { User } from 'types/user';
-import { styled } from '@mui/material';
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    Divider,
+    Stack,
+    styled,
+} from '@mui/material';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
-import { Label, Row, Value } from './Container';
+import { FlexWrapper, Label, Value } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
 import FolderIcon from '@mui/icons-material/Folder';
-import DialogBox from './DialogBox';
 import { ExportStage, ExportType } from 'constants/export';
 import EnteSpinner from './EnteSpinner';
+import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 
 const FolderIconWrapper = styled('div')`
     width: 15%;
@@ -265,7 +271,7 @@ export default function ExportModal(props: Props) {
         }
     };
 
-    const ExportDynamicState = () => {
+    const ExportDynamicContent = () => {
         switch (exportStage) {
             case ExportStage.INIT:
                 return (
@@ -312,53 +318,49 @@ export default function ExportModal(props: Props) {
     };
 
     return (
-        <DialogBox
-            open={props.show}
-            onClose={props.onHide}
-            attributes={{
-                title: constants.EXPORT_DATA,
-            }}>
-            <div
-                style={{
-                    borderBottom: '1px solid #444',
-                    marginBottom: '20px',
-                    padding: '0 5%',
-                    width: '450px',
-                }}>
-                <Row>
-                    <Label width="40%">{constants.DESTINATION}</Label>
-                    <Value width="60%">
-                        {!exportFolder ? (
-                            <Button
-                                variant={'outline-success'}
-                                size={'sm'}
-                                onClick={selectExportDirectory}>
-                                {constants.SELECT_FOLDER}
-                            </Button>
-                        ) : (
-                            <>
-                                <ExportFolderPathContainer>
-                                    {exportFolder}
-                                </ExportFolderPathContainer>
-                                {(exportStage === ExportStage.FINISHED ||
-                                    exportStage === ExportStage.INIT) && (
-                                    <FolderIconWrapper
-                                        onClick={selectExportDirectory}>
-                                        <FolderIcon />
-                                    </FolderIconWrapper>
-                                )}
-                            </>
-                        )}
-                    </Value>
-                </Row>
-                <Row>
-                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label>
-                    <Value width="60%">
-                        {exportSize ? `${exportSize}` : <EnteSpinner />}
-                    </Value>
-                </Row>
-            </div>
-            <ExportDynamicState />
-        </DialogBox>
+        <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
+            <DialogTitleWithCloseButton onClose={props.onHide}>
+                {constants.EXPORT_DATA}
+            </DialogTitleWithCloseButton>
+            <DialogContent>
+                <Stack spacing={2} mb={4}>
+                    <FlexWrapper>
+                        <Label width="35%">{constants.DESTINATION}</Label>
+                        <Value width="65%">
+                            {!exportFolder ? (
+                                <Button
+                                    color={'accent'}
+                                    onClick={selectExportDirectory}>
+                                    {constants.SELECT_FOLDER}
+                                </Button>
+                            ) : (
+                                <>
+                                    <ExportFolderPathContainer>
+                                        {exportFolder}
+                                    </ExportFolderPathContainer>
+                                    {(exportStage === ExportStage.FINISHED ||
+                                        exportStage === ExportStage.INIT) && (
+                                        <FolderIconWrapper
+                                            onClick={selectExportDirectory}>
+                                            <FolderIcon />
+                                        </FolderIconWrapper>
+                                    )}
+                                </>
+                            )}
+                        </Value>
+                    </FlexWrapper>
+                    <FlexWrapper>
+                        <Label width="40%">
+                            {constants.TOTAL_EXPORT_SIZE}{' '}
+                        </Label>
+                        <Value width="60%">
+                            {exportSize ? `${exportSize}` : <EnteSpinner />}
+                        </Value>
+                    </FlexWrapper>
+                </Stack>
+                <Divider />
+                <ExportDynamicContent />
+            </DialogContent>
+        </Dialog>
     );
 }

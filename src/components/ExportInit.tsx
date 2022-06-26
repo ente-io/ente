@@ -1,6 +1,5 @@
-import { DeadCenter } from 'pages/gallery';
+import { Button, DialogActions } from '@mui/material';
 import React from 'react';
-import { Button } from 'react-bootstrap';
 import constants from 'utils/strings/constants';
 
 interface Props {
@@ -14,22 +13,10 @@ interface Props {
 }
 export default function ExportInit(props: Props) {
     return (
-        <>
-            <DeadCenter>
-                <Button
-                    variant="outline-success"
-                    size="lg"
-                    style={{
-                        padding: '6px 3em',
-                        margin: '0 20px',
-                        marginBottom: '20px',
-                        flex: 1,
-                        whiteSpace: 'nowrap',
-                    }}
-                    onClick={props.startExport}>
-                    {constants.START}
-                </Button>
-            </DeadCenter>
-        </>
+        <DialogActions>
+            <Button size="large" color="accent" onClick={props.startExport}>
+                {constants.START}
+            </Button>
+        </DialogActions>
     );
 }
