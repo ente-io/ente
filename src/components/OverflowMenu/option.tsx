@@ -1,16 +1,19 @@
-import { MenuItem, ListItemIcon, ButtonProps, Typography } from '@mui/material';
+import { MenuItem, ButtonProps, Typography, Box } from '@mui/material';
+import { FluidContainer } from 'components/Container';
 import React from 'react';
 
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps['color'];
     startIcon?: React.ReactNode;
+    endIcon?: React.ReactNode;
     children?: any;
 }
 export function OverflowMenuOption({
     onClick,
     color = 'primary',
     startIcon,
+    endIcon,
     children,
 }: Iprops) {
     return (
@@ -18,20 +21,32 @@ export function OverflowMenuOption({
             onClick={onClick}
             sx={{
                 color: (theme) => theme.palette[color].main,
-                padding: '12px',
+                padding: 1.5,
+                '& .MuiSvgIcon-root': {
+                    fontSize: '20px',
+                },
             }}>
-            {startIcon && (
-                <ListItemIcon
+            <FluidContainer>
+                {startIcon && (
+                    <Box
+                        sx={{
+                            padding: 0,
+                            marginRight: 1.5,
+                        }}>
+                        {startIcon}
+                    </Box>
+                )}
+                <Typography variant="button">{children}</Typography>
+            </FluidContainer>
+            {endIcon && (
+                <Box
                     sx={{
-                        color: 'inherit',
-                        padding: '0',
-                        paddingRight: '12px',
-                        fontSize: '20px',
+                        padding: 0,
+                        marginLeft: 1,
                     }}>
-                    {startIcon}
-                </ListItemIcon>
+                    {endIcon}
+                </Box>
             )}
-            <Typography variant="button">{children}</Typography>
         </MenuItem>
     );
 }

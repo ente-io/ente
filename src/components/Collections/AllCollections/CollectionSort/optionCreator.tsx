@@ -4,6 +4,7 @@ import TickIcon from '@mui/icons-material/Done';
 import { CollectionSortProps } from '.';
 import { OverflowMenuContext } from 'contexts/overflowMenu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
+import { SvgIcon } from '@mui/material';
 
 const SortByOptionCreator =
     ({ setCollectionSortBy, activeSortBy }: CollectionSortProps) =>
@@ -18,7 +19,9 @@ const SortByOptionCreator =
         return (
             <OverflowMenuOption
                 onClick={handleClick}
-                startIcon={activeSortBy === props.sortBy && <TickIcon />}>
+                endIcon={
+                    activeSortBy === props.sortBy ? <TickIcon /> : <SvgIcon />
+                }>
                 {props.children}
             </OverflowMenuOption>
         );
