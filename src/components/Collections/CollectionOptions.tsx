@@ -15,6 +15,12 @@ import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import EditIcon from '@mui/icons-material/Edit';
+import IosShareIcon from '@mui/icons-material/IosShare';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import VisibilityOnOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -157,30 +163,38 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     background: (theme) => theme.palette.background.paper,
                 },
             }}>
-            <OverflowMenuOption onClick={showRenameCollectionModal}>
+            <OverflowMenuOption
+                onClick={showRenameCollectionModal}
+                startIcon={<EditIcon />}>
                 {constants.RENAME}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={showCollectionShareModal}>
+            <OverflowMenuOption
+                onClick={showCollectionShareModal}
+                startIcon={<IosShareIcon />}>
                 {constants.SHARE}
             </OverflowMenuOption>
-            <OverflowMenuOption onClick={confirmDownloadCollection}>
+            <OverflowMenuOption
+                onClick={confirmDownloadCollection}
+                startIcon={<FileDownloadOutlinedIcon />}>
                 {constants.DOWNLOAD}
             </OverflowMenuOption>
             {IsArchived(activeCollection) ? (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(
                         CollectionActions.UNARCHIVE
-                    )}>
+                    )}
+                    startIcon={<VisibilityOnOutlinedIcon />}>
                     {constants.UNARCHIVE}
                 </OverflowMenuOption>
             ) : (
                 <OverflowMenuOption
-                    onClick={handleCollectionAction(CollectionActions.ARCHIVE)}>
+                    onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
+                    startIcon={<VisibilityOffOutlinedIcon />}>
                     {constants.ARCHIVE}
                 </OverflowMenuOption>
             )}
             <OverflowMenuOption
-                color="danger"
+                startIcon={<DeleteOutlinedIcon />}
                 onClick={confirmDeleteCollection}>
                 {constants.DELETE}
             </OverflowMenuOption>
