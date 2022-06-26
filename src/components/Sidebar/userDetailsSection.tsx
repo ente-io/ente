@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import SubscriptionCard from './SubscriptionCard';
 import { getUserDetailsV2 } from 'services/userService';
 import { UserDetails } from 'types/user';
@@ -9,12 +9,15 @@ import SubscriptionStatus from './SubscriptionStatus';
 import Stack from '@mui/material/Stack';
 import { Skeleton } from '@mui/material';
 import { MemberSubscriptionManage } from '../MemberSubscriptionManage';
+import { GalleryContext } from 'pages/gallery';
+import { isPartOfFamily, isFamilyAdmin } from 'utils/billing';
 
 export default function UserDetailsSection({ sidebarView }) {
+    const galleryContext = useContext(GalleryContext);
+
     const [userDetails, setUserDetails] = useLocalState<UserDetails>(
         LS_KEYS.USER_DETAILS
     );
-
     const [memberSubscriptionManageView, setMemberSubscriptionManageView] =
         useState(false);
 
@@ -34,6 +37,18 @@ export default function UserDetailsSection({ sidebarView }) {
         main();
     }, [sidebarView]);
 
+    const isMemberSubscription = useMemo(
+        () =>
+            userDetails &&
+            isPartOfFamily(userDetails.familyData) &&
+            !isFamilyAdmin(userDetails.familyData),
+        [userDetails]
+    );
+
+    const handleSubscriptionCardClick = isMemberSubscription
+        ? openMemberSubscriptionManage
+        : galleryContext.showPlanSelectorModal;
+
     return (
         <>
             <Stack spacing={1}>
@@ -47,16 +62,18 @@ export default function UserDetailsSection({ sidebarView }) {
 
                 <SubscriptionCard
                     userDetails={userDetails}
-                    openMemberSubscriptionDialog={openMemberSubscriptionManage}
+                    onClick={handleSubscriptionCardClick}
                 />
                 <SubscriptionStatus userDetails={userDetails} />
             </Stack>
 
-            <MemberSubscriptionManage
-                userDetails={userDetails}
-                open={memberSubscriptionManageView}
-                onClose={closeMemberSubscriptionManage}
-            />
+            {isMemberSubscription && (
+                <MemberSubscriptionManage
+                    userDetails={userDetails}
+                    open={memberSubscriptionManageView}
+                    onClose={closeMemberSubscriptionManage}
+                />
+            )}
         </>
     );
 }
