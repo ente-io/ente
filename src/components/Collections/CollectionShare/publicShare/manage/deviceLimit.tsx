@@ -20,7 +20,7 @@ export function ManageDeviceLimit({
 
     return (
         <Box>
-            <Typography>{constants.LINK_DEVICE_LIMIT}</Typography>
+            <Typography mb={0.5}>{constants.LINK_DEVICE_LIMIT}</Typography>
             <Select
                 menuPosition="fixed"
                 options={getDeviceLimitOptions()}

@@ -25,7 +25,7 @@ export function ManageDownloadAccess({
     const disableFileDownload = () => {
         appContext.setDialogMessage({
             title: constants.DISABLE_FILE_DOWNLOAD,
-            content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE,
+            content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE(),
             close: { text: constants.CANCEL },
             proceed: {
                 text: constants.DISABLE,
@@ -40,7 +40,7 @@ export function ManageDownloadAccess({
     };
     return (
         <Box>
-            <Typography>{constants.FILE_DOWNLOAD}</Typography>
+            <Typography mb={0.5}>{constants.FILE_DOWNLOAD}</Typography>
             <PublicShareSwitch
                 checked={publicShareProp?.enableDownload ?? false}
                 onChange={handleFileDownloadSetting}

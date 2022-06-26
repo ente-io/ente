@@ -639,8 +639,18 @@ const englishConstants = {
     LINK_EXPIRY: 'Link expiry',
     LINK_EXPIRY_NEVER: 'Never',
     DISABLE_FILE_DOWNLOAD: 'Disable download',
-    DISABLE_FILE_DOWNLOAD_MESSAGE:
-        'Are you sure that you want to disable the download button for files? \n viewers can still take screenshots or save a copy of your photos using external tools',
+    DISABLE_FILE_DOWNLOAD_MESSAGE: () => (
+        <>
+            <p>
+                Are you sure that you want to disable the download button for
+                files?{' '}
+            </p>{' '}
+            <p>
+                Viewers can still take screenshots or save a copy of your photos
+                using external tools'{' '}
+            </p>
+        </>
+    ),
     ABUSE_REPORT: 'Abuse report',
     ABUSE_REPORT_BUTTON_TEXT: 'Report abuse?',
     MALICIOUS_CONTENT: 'Contains malicious content',

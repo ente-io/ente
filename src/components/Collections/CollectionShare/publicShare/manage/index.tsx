@@ -33,7 +33,6 @@ export default function PublicShareManage({
             galleryContext.setBlockingLoad(true);
             const response = await updateShareableURL(req);
             setPublicShareProp(response);
-            galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -58,18 +57,8 @@ export default function PublicShareManage({
                 <ManageSectionLabel onClick={scrollToEnd}>
                     {constants.MANAGE_LINK}
                 </ManageSectionLabel>
-                {sharableLinkError && (
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            color: (theme) => theme.palette.danger.main,
-                            mt: 0.5,
-                        }}>
-                        {sharableLinkError}
-                    </Typography>
-                )}
                 <ManageSectionOptions>
-                    <Stack spacing={1}>
+                    <Stack spacing={'12px'}>
                         <ManageLinkExpiry
                             collection={collection}
                             publicShareProp={publicShareProp}
@@ -100,6 +89,17 @@ export default function PublicShareManage({
                             }
                         />
                     </Stack>
+                    {sharableLinkError && (
+                        <Typography
+                            textAlign={'center'}
+                            variant="body2"
+                            sx={{
+                                color: (theme) => theme.palette.danger.main,
+                                mt: 0.5,
+                            }}>
+                            {sharableLinkError}
+                        </Typography>
+                    )}
                 </ManageSectionOptions>
             </details>
             <PublicLinkSetPassword
