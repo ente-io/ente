@@ -53,6 +53,12 @@ declare module '@mui/material/Switch' {
     }
 }
 
+declare module '@mui/material/SvgIcon' {
+    interface SvgIconPropsColorOverrides {
+        accent: true;
+    }
+}
+
 // Create a theme instance.
 const darkThemeOptions = createTheme({
     components: {

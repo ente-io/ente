@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
-import FavButton from 'components/FavButton';
 import {
     addToFavorites,
     removeFromFavorites,
@@ -24,6 +23,9 @@ import { AppContext } from 'pages/_app';
 import { FileInfo } from './InfoDialog';
 import { defaultLivePhotoDefaultOptions } from 'constants/photoswipe';
 import { LivePhotoBtn } from './styledComponents/LivePhotoBtn';
+import DownloadIcon from '@mui/icons-material/Download';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import FavoriteIcon from '@mui/icons-material/Favorite';
 
 interface Iprops {
     isOpen: boolean;
@@ -359,12 +361,13 @@ function PhotoSwipe(props: Iprops) {
 
                             {props.enableDownload && (
                                 <button
-                                    className="pswp-custom download-btn"
+                                    className="pswp__button pswp__button--custom"
                                     title={constants.DOWNLOAD}
                                     onClick={() =>
                                         downloadFileHelper(photoSwipe.currItem)
-                                    }
-                                />
+                                    }>
+                                    <DownloadIcon fontSize="small" />
+                                </button>
                             )}
                             <button
                                 className="pswp__button pswp__button--fs"
@@ -376,20 +379,24 @@ function PhotoSwipe(props: Iprops) {
                             />
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
-                                    <FavButton
-                                        size={44}
-                                        isClick={isFav}
+                                    <button
+                                        className="pswp__button pswp__button--custom"
                                         onClick={() => {
                                             onFavClick(photoSwipe?.currItem);
-                                        }}
-                                    />
+                                        }}>
+                                        <FavoriteIcon
+                                            fontSize="small"
+                                            color={isFav ? 'accent' : 'inherit'}
+                                        />
+                                    </button>
                                 )}
                             {!props.isSharedCollection && (
                                 <button
-                                    className="pswp-custom info-btn"
+                                    className="pswp__button pswp__button--custom"
                                     title={constants.INFO}
-                                    onClick={handleOpenInfo}
-                                />
+                                    onClick={handleOpenInfo}>
+                                    <InfoIcon fontSize="small" />
+                                </button>
                             )}
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
