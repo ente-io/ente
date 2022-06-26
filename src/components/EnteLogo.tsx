@@ -16,7 +16,7 @@ export function EnteLogo({ height, width }: Iprops) {
             height={'18px'}
             style={{ width, height }}
             alt="logo"
-            src="/images/icon.svg"
+            src="/images/ente.svg"
         />
     );
 }
