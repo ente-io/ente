@@ -48,11 +48,13 @@ class _ZoomableImageState extends State<ZoomableImage>
   @override
   void initState() {
     _photo = widget.photo;
+    debugPrint('initState for ${_photo.toString()}');
     _scaleStateChangedCallback = (value) {
       if (widget.shouldDisableScroll != null) {
         widget.shouldDisableScroll(value != PhotoViewScaleState.initial);
       }
       _isZooming = value != PhotoViewScaleState.initial;
+      debugPrint("isZooming = $_isZooming, currentState $value");
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
     super.initState();
@@ -68,15 +70,18 @@ class _ZoomableImageState extends State<ZoomableImage>
     Widget content;
 
     if (_imageProvider != null) {
-      content = PhotoView(
-        imageProvider: _imageProvider,
-        scaleStateChangedCallback: _scaleStateChangedCallback,
-        minScale: PhotoViewComputedScale.contained,
-        gaplessPlayback: true,
-        heroAttributes: PhotoViewHeroAttributes(
-          tag: widget.tagPrefix + _photo.tag(),
+      content = PhotoViewGestureDetectorScope(
+        axis: Axis.vertical,
+        child: PhotoView(
+          imageProvider: _imageProvider,
+          scaleStateChangedCallback: _scaleStateChangedCallback,
+          minScale: PhotoViewComputedScale.contained,
+          gaplessPlayback: true,
+          heroAttributes: PhotoViewHeroAttributes(
+            tag: widget.tagPrefix + _photo.tag(),
+          ),
+          backgroundDecoration: widget.backgroundDecoration,
         ),
-        backgroundDecoration: widget.backgroundDecoration,
       );
     } else {
       content = loadWidget;
