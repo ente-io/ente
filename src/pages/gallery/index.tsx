@@ -96,13 +96,14 @@ import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Notification from 'components/Notification';
 import { ElectronFile } from 'types/upload';
-import importService from 'services/importService';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
 import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
+import UploadInputs from 'components/UploadSelectorInputs';
+import useFileInput from 'hooks/useFileInput';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -158,15 +159,27 @@ export default function Gallery() {
     const [search, setSearch] = useState<Search>(null);
     const [uploadInProgress, setUploadInProgress] = useState(false);
     const {
-        getRootProps,
-        getInputProps,
-        open: openFileUploader,
-        acceptedFiles,
-        fileRejections,
+        getRootProps: getDragAndDropRootProps,
+        getInputProps: getDragAndDropInputProps,
+        acceptedFiles: dragAndDropFiles,
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
         disabled: uploadInProgress,
+    });
+    const {
+        selectedFiles: fileSelectorFiles,
+        open: openFileSelector,
+        getInputProps: getFileSelectorInputProps,
+    } = useFileInput({
+        directory: false,
+    });
+    const {
+        selectedFiles: folderSelectorFiles,
+        open: openFolderSelector,
+        getInputProps: getFolderSelectorInputProps,
+    } = useFileInput({
+        directory: true,
     });
 
     const [isInSearchMode, setIsInSearchMode] = useState(false);
@@ -198,13 +211,13 @@ export default function Gallery() {
     const showPlanSelectorModal = () => setPlanModalView(true);
 
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
+    const [webFiles, setWebFiles] = useState([]);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
     const [sidebarView, setSidebarView] = useState(false);
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
-    const [droppedFiles, setDroppedFiles] = useState([]);
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
 
@@ -275,7 +288,15 @@ export default function Gallery() {
         [notificationAttributes]
     );
 
-    useEffect(() => setDroppedFiles(acceptedFiles), [acceptedFiles]);
+    useEffect(() => {
+        if (dragAndDropFiles?.length > 0) {
+            setWebFiles(dragAndDropFiles);
+        } else if (folderSelectorFiles?.length > 0) {
+            setWebFiles(folderSelectorFiles);
+        } else if (fileSelectorFiles?.length > 0) {
+            setWebFiles(fileSelectorFiles);
+        }
+    }, [dragAndDropFiles, fileSelectorFiles, folderSelectorFiles]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -587,18 +608,12 @@ export default function Gallery() {
         finishLoading();
     };
 
-    const openUploader = () => {
-        if (importService.checkAllElectronAPIsExists()) {
-            setUploadTypeSelectorView(true);
-        } else {
-            openFileUploader();
-        }
-    };
-
     const resetSearch = () => {
         setSearch(null);
         setSetSearchResultSummary(null);
     };
+
+    const openUploader = () => setUploadTypeSelectorView(true);
 
     return (
         <GalleryContext.Provider
@@ -612,8 +627,12 @@ export default function Gallery() {
                 photoListHeader: photoListHeader,
             }}>
             <FullScreenDropZone
-                getRootProps={getRootProps}
-                getInputProps={getInputProps}>
+                getDragAndDropRootProps={getDragAndDropRootProps}>
+                <UploadInputs
+                    getDragAndDropInputProps={getDragAndDropInputProps}
+                    getFileSelectorInputProps={getFileSelectorInputProps}
+                    getFolderSelectorInputProps={getFolderSelectorInputProps}
+                />
                 {blockingLoad && (
                     <LoadingOverlay>
                         <EnteSpinner />
@@ -675,8 +694,6 @@ export default function Gallery() {
 
                 <Upload
                     syncWithRemote={syncWithRemote}
-                    droppedFiles={droppedFiles}
-                    clearDroppedFiles={() => setDroppedFiles([])}
                     showCollectionSelector={setCollectionSelectorView.bind(
                         null,
                         true
@@ -692,13 +709,16 @@ export default function Gallery() {
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
                     uploadInProgress={uploadInProgress}
                     setUploadInProgress={setUploadInProgress}
-                    fileRejections={fileRejections}
                     setFiles={setFiles}
                     isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
                     electronFiles={electronFiles}
                     setElectronFiles={setElectronFiles}
+                    webFiles={webFiles}
+                    setWebFiles={setWebFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     setUploadTypeSelectorView={setUploadTypeSelectorView}
+                    showUploadFilesDialog={openFileSelector}
+                    showUploadDirsDialog={openFolderSelector}
                     showSessionExpiredMessage={showSessionExpiredMessage}
                 />
                 <Sidebar
