@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
-import { User } from 'types/user';
+import { User, UserDetails } from 'types/user';
 import {
     Button,
     Dialog,
@@ -11,6 +11,7 @@ import {
     Divider,
     Stack,
     styled,
+    Tooltip,
 } from '@mui/material';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
@@ -25,18 +26,11 @@ import FolderIcon from '@mui/icons-material/Folder';
 import { ExportStage, ExportType } from 'constants/export';
 import EnteSpinner from './EnteSpinner';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
-
-const FolderIconWrapper = styled('div')`
-    width: 15%;
-    margin-left: 10px;
-    cursor: pointer;
-    padding: 3px;
-    border: 1px solid #444;
-    border-radius: 15%;
-    &:hover {
-        background-color: #444;
-    }
-`;
+import MoreHoriz from '@mui/icons-material/MoreHoriz';
+import OverflowMenu from './OverflowMenu/menu';
+import { OverflowMenuOption } from './OverflowMenu/option';
+import { useLocalState } from 'hooks/useLocalState';
+import { convertBytesToHumanReadable } from 'utils/billing';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -52,9 +46,9 @@ const ExportFolderPathContainer = styled('span')`
 interface Props {
     show: boolean;
     onHide: () => void;
-    usage: string;
 }
 export default function ExportModal(props: Props) {
+    const [userDetails] = useLocalState<UserDetails>(LS_KEYS.USER_DETAILS);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
     const [exportSize, setExportSize] = useState('');
@@ -152,8 +146,8 @@ export default function ExportModal(props: Props) {
     }, [props.show]);
 
     useEffect(() => {
-        setExportSize(props.usage);
-    }, [props.usage]);
+        setExportSize(convertBytesToHumanReadable(userDetails?.usage));
+    }, [userDetails]);
 
     // =============
     // STATE UPDATERS
@@ -324,43 +318,75 @@ export default function ExportModal(props: Props) {
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <Stack spacing={2} mb={4}>
-                    <FlexWrapper>
-                        <Label width="35%">{constants.DESTINATION}</Label>
-                        <Value width="65%">
-                            {!exportFolder ? (
-                                <Button
-                                    color={'accent'}
-                                    onClick={selectExportDirectory}>
-                                    {constants.SELECT_FOLDER}
-                                </Button>
-                            ) : (
-                                <>
-                                    <ExportFolderPathContainer>
-                                        {exportFolder}
-                                    </ExportFolderPathContainer>
-                                    {(exportStage === ExportStage.FINISHED ||
-                                        exportStage === ExportStage.INIT) && (
-                                        <FolderIconWrapper
-                                            onClick={selectExportDirectory}>
-                                            <FolderIcon />
-                                        </FolderIconWrapper>
-                                    )}
-                                </>
-                            )}
-                        </Value>
-                    </FlexWrapper>
-                    <FlexWrapper>
-                        <Label width="40%">
-                            {constants.TOTAL_EXPORT_SIZE}{' '}
-                        </Label>
-                        <Value width="60%">
-                            {exportSize ? `${exportSize}` : <EnteSpinner />}
-                        </Value>
-                    </FlexWrapper>
+                    <ExportDirectory
+                        exportFolder={exportFolder}
+                        selectExportDirectory={selectExportDirectory}
+                        exportStage={exportStage}
+                    />
+                    <ExportSize exportSize={exportSize} />
                 </Stack>
                 <Divider />
                 <ExportDynamicContent />
             </DialogContent>
         </Dialog>
+    );
+}
+
+function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
+    return (
+        <FlexWrapper>
+            <Label width="35%">{constants.DESTINATION}</Label>
+            <Value width="65%">
+                {!exportFolder ? (
+                    <Button color={'accent'} onClick={selectExportDirectory}>
+                        {constants.SELECT_FOLDER}
+                    </Button>
+                ) : (
+                    <>
+                        <Tooltip title={exportFolder}>
+                            <ExportFolderPathContainer>
+                                {exportFolder}
+                            </ExportFolderPathContainer>
+                        </Tooltip>
+                        {(exportStage === ExportStage.FINISHED ||
+                            exportStage === ExportStage.INIT) && (
+                            <ExportDirectoryOption
+                                selectExportDirectory={selectExportDirectory}
+                            />
+                        )}
+                    </>
+                )}
+            </Value>
+        </FlexWrapper>
+    );
+}
+
+function ExportSize({ exportSize }) {
+    return (
+        <FlexWrapper>
+            <Label width="40%">{constants.EXPORT_SIZE} </Label>
+            <Value width="60%">
+                {exportSize ? `${exportSize}` : <EnteSpinner />}
+            </Value>
+        </FlexWrapper>
+    );
+}
+
+function ExportDirectoryOption({ selectExportDirectory }) {
+    return (
+        <OverflowMenu
+            triggerButtonProps={{
+                sx: {
+                    ml: 1,
+                },
+            }}
+            ariaControls={'export-option'}
+            triggerButtonIcon={<MoreHoriz />}>
+            <OverflowMenuOption
+                onClick={selectExportDirectory}
+                startIcon={<FolderIcon />}>
+                {constants.CHANGE_FOLDER}
+            </OverflowMenuOption>
+        </OverflowMenu>
     );
 }

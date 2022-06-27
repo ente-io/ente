@@ -475,7 +475,7 @@ const englishConstants = {
     EXPORT_DATA: 'Export data',
     SELECT_FOLDER: 'Select folder',
     DESTINATION: 'Destination',
-    TOTAL_EXPORT_SIZE: 'Total export size',
+    EXPORT_SIZE: 'Export size',
     START: 'Start',
     EXPORT_IN_PROGRESS: 'Export in progress...',
     PAUSE: 'Pause',
@@ -754,6 +754,7 @@ const englishConstants = {
             </p>
         </>
     ),
+    CHANGE_FOLDER: 'Change Folder',
 };
 
 export default englishConstants;

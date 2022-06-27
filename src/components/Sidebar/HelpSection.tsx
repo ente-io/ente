@@ -3,20 +3,15 @@ import SidebarButton from './Button';
 import constants from 'utils/strings/constants';
 import ExportModal from 'components/ExportModal';
 import exportService from 'services/exportService';
-import { convertBytesToHumanReadable } from 'utils/billing';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import isElectron from 'is-electron';
 import { downloadApp, initiateEmail } from 'utils/common';
 import { AppContext } from 'pages/_app';
-import { useLocalState } from 'hooks/useLocalState';
-import { LS_KEYS } from 'utils/storage/localStorage';
-import { UserDetails } from 'types/user';
 import EnteSpinner from 'components/EnteSpinner';
 
 export default function HelpSection() {
-    const [userDetails] = useLocalState<UserDetails>(LS_KEYS.USER_DETAILS);
-    const [exportModalView, setExportModalView] = useState(false);
+    const [exportModalView, setExportModalView] = useState(true);
 
     const { setDialogMessage } = useContext(AppContext);
 
@@ -72,7 +67,6 @@ export default function HelpSection() {
             <ExportModal
                 show={exportModalView}
                 onHide={() => setExportModalView(false)}
-                usage={convertBytesToHumanReadable(userDetails?.usage ?? 0)}
             />
         </>
     );
