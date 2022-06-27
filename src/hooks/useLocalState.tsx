@@ -5,7 +5,7 @@ export function useLocalState<T>(
     key: LS_KEYS,
     initialValue?: T
 ): [T, Dispatch<SetStateAction<T>>] {
-    const [value, setValue] = useState<T>(null);
+    const [value, setValue] = useState<T>();
 
     useEffect(() => {
         const { value } = getData(key) ?? {};
@@ -13,7 +13,9 @@ export function useLocalState<T>(
     }, []);
 
     useEffect(() => {
-        setData(key, { value });
+        if (typeof value !== 'undefined') {
+            setData(key, { value });
+        }
     }, [value]);
 
     return [value, setValue];
