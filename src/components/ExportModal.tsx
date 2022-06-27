@@ -37,7 +37,7 @@ const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 200px;
+    width: 100%;
 
     /* Beginning of string */
     direction: rtl;
@@ -315,10 +315,7 @@ export default function ExportModal(props: Props) {
             case ExportStage.FINISHED:
                 return (
                     <ExportFinished
-                        {...props}
-                        exportFolder={exportFolder}
-                        exportSize={exportSize}
-                        updateExportFolder={updateExportFolder}
+                        onHide={props.onHide}
                         lastExportTime={lastExportTime}
                         exportStats={exportStats}
                         exportFiles={startExport}
@@ -355,8 +352,8 @@ export default function ExportModal(props: Props) {
 function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
     return (
         <FlexWrapper>
-            <Label width="35%">{constants.DESTINATION}</Label>
-            <Value width="65%">
+            <Label width="30%">{constants.DESTINATION}</Label>
+            <Value width="70%">
                 {!exportFolder ? (
                     <Button color={'accent'} onClick={selectExportDirectory}>
                         {constants.SELECT_FOLDER}
@@ -384,8 +381,8 @@ function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
 function ExportSize({ exportSize }) {
     return (
         <FlexWrapper>
-            <Label width="40%">{constants.EXPORT_SIZE} </Label>
-            <Value width="60%">
+            <Label width="30%">{constants.EXPORT_SIZE} </Label>
+            <Value width="70%">
                 {exportSize ? `${exportSize}` : <EnteSpinner />}
             </Value>
         </FlexWrapper>
