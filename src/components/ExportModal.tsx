@@ -31,6 +31,7 @@ import OverflowMenu from './OverflowMenu/menu';
 import { OverflowMenuOption } from './OverflowMenu/option';
 import { useLocalState } from 'hooks/useLocalState';
 import { convertBytesToHumanReadable } from 'utils/billing';
+import { CustomError } from 'utils/error';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -179,11 +180,7 @@ export default function ExportModal(props: Props) {
     const preExportRun = async () => {
         const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
         if (!exportFolder) {
-            const folderSelected = await selectExportDirectory();
-            if (!folderSelected) {
-                // no-op as select folder aborted
-                return;
-            }
+            await selectExportDirectory();
         }
         updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);
@@ -193,75 +190,109 @@ export default function ExportModal(props: Props) {
             updateExportStage(ExportStage.FINISHED);
             await sleep(100);
             updateExportTime(Date.now());
-            syncExportStatsWithReport();
+            syncExportStatsWithRecord();
         }
-    };
-    const startExport = async () => {
-        await preExportRun();
-        updateExportProgress({ current: 0, total: 0 });
-        const exportResult = await exportService.exportFiles(
-            updateExportProgress,
-            ExportType.NEW
-        );
-        await postExportRun(exportResult);
-    };
-
-    const stopExport = async () => {
-        exportService.stopRunningExport();
-        postExportRun();
-    };
-
-    const pauseExport = () => {
-        updateExportStage(ExportStage.PAUSED);
-        exportService.pauseRunningExport();
-        postExportRun({ paused: true });
-    };
-
-    const resumeExport = async () => {
-        const exportRecord = await exportService.getExportRecord();
-        await preExportRun();
-
-        const pausedStageProgress = exportRecord.progress;
-        setExportProgress(pausedStageProgress);
-
-        const updateExportStatsWithOffset = (progress: ExportProgress) =>
-            updateExportProgress({
-                current: pausedStageProgress.current + progress.current,
-                total: pausedStageProgress.current + progress.total,
-            });
-        const exportResult = await exportService.exportFiles(
-            updateExportStatsWithOffset,
-            ExportType.PENDING
-        );
-
-        await postExportRun(exportResult);
-    };
-
-    const retryFailedExport = async () => {
-        await preExportRun();
-        updateExportProgress({ current: 0, total: exportStats.failed });
-
-        const exportResult = await exportService.exportFiles(
-            updateExportProgress,
-            ExportType.RETRY_FAILED
-        );
-        await postExportRun(exportResult);
-    };
-
-    const syncExportStatsWithReport = async () => {
-        const exportRecord = await exportService.getExportRecord();
-        const failed = exportRecord?.failedFiles?.length ?? 0;
-        const success = exportRecord?.exportedFiles?.length ?? 0;
-        setExportStats({ failed, success });
     };
 
     const selectExportDirectory = async () => {
         const newFolder = await exportService.selectExportDirectory();
         if (newFolder) {
             updateExportFolder(newFolder);
-            return true;
         } else {
-            return false;
+            throw Error(CustomError.REQUEST_CANCELLED);
+        }
+    };
+
+    const syncExportStatsWithRecord = async () => {
+        const exportRecord = await exportService.getExportRecord();
+        const failed = exportRecord?.failedFiles?.length ?? 0;
+        const success = exportRecord?.exportedFiles?.length ?? 0;
+        setExportStats({ failed, success });
+    };
+
+    // =============
+    // UI functions
+    // =============
+
+    const startExport = async () => {
+        try {
+            await preExportRun();
+            updateExportProgress({ current: 0, total: 0 });
+            const exportResult = await exportService.exportFiles(
+                updateExportProgress,
+                ExportType.NEW
+            );
+            await postExportRun(exportResult);
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'startExport failed');
+            }
+        }
+    };
+
+    const stopExport = async () => {
+        try {
+            exportService.stopRunningExport();
+            postExportRun();
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'stopExport failed');
+            }
+        }
+    };
+
+    const pauseExport = () => {
+        try {
+            updateExportStage(ExportStage.PAUSED);
+            exportService.pauseRunningExport();
+            postExportRun({ paused: true });
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'pauseExport failed');
+            }
+        }
+    };
+
+    const resumeExport = async () => {
+        try {
+            const exportRecord = await exportService.getExportRecord();
+            await preExportRun();
+
+            const pausedStageProgress = exportRecord.progress;
+            setExportProgress(pausedStageProgress);
+
+            const updateExportStatsWithOffset = (progress: ExportProgress) =>
+                updateExportProgress({
+                    current: pausedStageProgress.current + progress.current,
+                    total: pausedStageProgress.current + progress.total,
+                });
+            const exportResult = await exportService.exportFiles(
+                updateExportStatsWithOffset,
+                ExportType.PENDING
+            );
+
+            await postExportRun(exportResult);
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'resumeExport failed');
+            }
+        }
+    };
+
+    const retryFailedExport = async () => {
+        try {
+            await preExportRun();
+            updateExportProgress({ current: 0, total: exportStats.failed });
+
+            const exportResult = await exportService.exportFiles(
+                updateExportProgress,
+                ExportType.RETRY_FAILED
+            );
+            await postExportRun(exportResult);
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'retryFailedExport failed');
+            }
         }
     };
 
@@ -373,6 +404,15 @@ function ExportSize({ exportSize }) {
 }
 
 function ExportDirectoryOption({ selectExportDirectory }) {
+    const handleClick = () => {
+        try {
+            selectExportDirectory();
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'startExport failed');
+            }
+        }
+    };
     return (
         <OverflowMenu
             triggerButtonProps={{
@@ -383,7 +423,7 @@ function ExportDirectoryOption({ selectExportDirectory }) {
             ariaControls={'export-option'}
             triggerButtonIcon={<MoreHoriz />}>
             <OverflowMenuOption
-                onClick={selectExportDirectory}
+                onClick={handleClick}
                 startIcon={<FolderIcon />}>
                 {constants.CHANGE_FOLDER}
             </OverflowMenuOption>
