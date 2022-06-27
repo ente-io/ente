@@ -503,7 +503,19 @@ export default function Upload(props: Props) {
         } else if (type === UPLOAD_TYPE.FOLDERS) {
             props.showUploadDirsDialog();
         } else {
-            appContext.setDialogMessage({ title: 'only on desktop' });
+            appContext.setDialogMessage({
+                title: constants.DOWNLOAD_APP,
+                content: constants.DOWNLOAD_APP_MESSAGE,
+
+                proceed: {
+                    text: constants.DOWNLOAD,
+                    action: downloadApp,
+                    variant: 'accent',
+                },
+                close: {
+                    text: constants.CLOSE,
+                },
+            });
         }
     };
 
