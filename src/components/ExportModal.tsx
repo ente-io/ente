@@ -299,23 +299,12 @@ export default function ExportModal(props: Props) {
     const ExportDynamicContent = () => {
         switch (exportStage) {
             case ExportStage.INIT:
-                return (
-                    <ExportInit
-                        {...props}
-                        exportFolder={exportFolder}
-                        exportSize={exportSize}
-                        updateExportFolder={updateExportFolder}
-                        startExport={startExport}
-                        selectExportDirectory={selectExportDirectory}
-                    />
-                );
+                return <ExportInit startExport={startExport} />;
+
             case ExportStage.INPROGRESS:
             case ExportStage.PAUSED:
                 return (
                     <ExportInProgress
-                        {...props}
-                        exportFolder={exportFolder}
-                        exportSize={exportSize}
                         exportStage={exportStage}
                         exportProgress={exportProgress}
                         resumeExport={resumeExport}
@@ -348,7 +337,7 @@ export default function ExportModal(props: Props) {
                 {constants.EXPORT_DATA}
             </DialogTitleWithCloseButton>
             <DialogContent>
-                <Stack spacing={2} mb={4}>
+                <Stack spacing={2}>
                     <ExportDirectory
                         exportFolder={exportFolder}
                         selectExportDirectory={selectExportDirectory}
@@ -356,9 +345,9 @@ export default function ExportModal(props: Props) {
                     />
                     <ExportSize exportSize={exportSize} />
                 </Stack>
-                <Divider />
-                <ExportDynamicContent />
             </DialogContent>
+            <Divider />
+            <ExportDynamicContent />
         </Dialog>
     );
 }
