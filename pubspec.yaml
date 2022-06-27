@@ -127,7 +127,7 @@ dev_dependencies:
 
 flutter_icons:
   android: "launcher_icon"
-  adaptive_icon_foreground: "assets/launcher_icon/ente-foreground.png"
+  adaptive_icon_foreground: "assets/launcher_icon/ente-icon-foreground.png"
   adaptive_icon_background: "#ffffff"
   ios: true
   image_path: "assets/icon-light.png"
