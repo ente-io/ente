@@ -111,7 +111,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                                 onClick={props.secondaryButtonAction}
                                 size="large"
                                 color="secondary"
-                                sx={{ mt: 2, mr: 1, ...buttonSx }}
+                                sx={{ mt: 2, mb: 4, mr: 1, ...buttonSx }}
                                 {...restSubmitButtonProps}>
                                 {constants.CANCEL}
                             </Button>
