@@ -154,7 +154,7 @@ export default function SignUp(props: SignUpProps) {
                                 <FormControlLabel
                                     sx={{
                                         color: 'text.secondary',
-                                        ml: -1,
+                                        ml: 0,
                                         mt: 2,
                                     }}
                                     control={
