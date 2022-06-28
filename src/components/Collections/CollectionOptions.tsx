@@ -1,3 +1,4 @@
+import { AlbumCollectionOption } from './AlbumCollectionOption';
 import React, { useContext } from 'react';
 import * as CollectionAPI from 'services/collectionService';
 import {
@@ -13,14 +14,8 @@ import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
-import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import EditIcon from '@mui/icons-material/Edit';
-import IosShareIcon from '@mui/icons-material/IosShare';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import VisibilityOnOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import { CollectionType } from 'constants/collection';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -29,12 +24,16 @@ interface CollectionOptionsProps {
     redirectToAll: () => void;
 }
 
-enum CollectionActions {
+export enum CollectionActions {
+    SHOW_RENAME_DIALOG,
     RENAME,
+    CONFIRM_DOWNLOAD,
     DOWNLOAD,
     ARCHIVE,
     UNARCHIVE,
+    CONFIRM_DELETE,
     DELETE,
+    SHOW_SHARE_DIALOG,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
@@ -48,11 +47,20 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
 
-    const handleCollectionAction = (action: CollectionActions) => {
+    const handleCollectionAction = (
+        action: CollectionActions,
+        loader = true
+    ) => {
         let callback;
         switch (action) {
+            case CollectionActions.SHOW_RENAME_DIALOG:
+                callback = showRenameCollectionModal;
+                break;
             case CollectionActions.RENAME:
                 callback = renameCollection;
+                break;
+            case CollectionActions.CONFIRM_DOWNLOAD:
+                callback = confirmDownloadCollection;
                 break;
             case CollectionActions.DOWNLOAD:
                 callback = downloadCollection;
@@ -63,8 +71,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.UNARCHIVE:
                 callback = unArchiveCollection;
                 break;
+            case CollectionActions.CONFIRM_DELETE:
+                callback = confirmDeleteCollection;
+                break;
             case CollectionActions.DELETE:
                 callback = deleteCollection;
+                break;
+            case CollectionActions.SHOW_SHARE_DIALOG:
+                callback = showCollectionShareModal;
                 break;
             default:
                 logError(
@@ -76,8 +90,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 }
         }
         return async (...args) => {
-            startLoading();
             try {
+                loader && startLoading();
                 await callback(...args);
             } catch (e) {
                 setDialogMessage({
@@ -85,10 +99,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     content: constants.UNKNOWN_ERROR,
                     close: { variant: 'danger' },
                 });
+            } finally {
+                syncWithRemote();
+                loader && finishLoading();
             }
-
-            syncWithRemote();
-            finishLoading();
         };
     };
 
@@ -156,48 +170,19 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     return (
         <OverflowMenu
-            ariaControls={`collection-options-${props.activeCollection.id}`}
+            ariaControls={`collection-options-${activeCollection.id}`}
             triggerButtonIcon={<MoreVertIcon />}
             triggerButtonProps={{
                 sx: {
                     background: (theme) => theme.palette.background.paper,
                 },
             }}>
-            <OverflowMenuOption
-                onClick={showRenameCollectionModal}
-                startIcon={<EditIcon />}>
-                {constants.RENAME}
-            </OverflowMenuOption>
-            <OverflowMenuOption
-                onClick={showCollectionShareModal}
-                startIcon={<IosShareIcon />}>
-                {constants.SHARE}
-            </OverflowMenuOption>
-            <OverflowMenuOption
-                onClick={confirmDownloadCollection}
-                startIcon={<FileDownloadOutlinedIcon />}>
-                {constants.DOWNLOAD}
-            </OverflowMenuOption>
-            {IsArchived(activeCollection) ? (
-                <OverflowMenuOption
-                    onClick={handleCollectionAction(
-                        CollectionActions.UNARCHIVE
-                    )}
-                    startIcon={<VisibilityOnOutlinedIcon />}>
-                    {constants.UNARCHIVE}
-                </OverflowMenuOption>
-            ) : (
-                <OverflowMenuOption
-                    onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
-                    startIcon={<VisibilityOffOutlinedIcon />}>
-                    {constants.ARCHIVE}
-                </OverflowMenuOption>
+            {activeCollection.type === CollectionType.album && (
+                <AlbumCollectionOption
+                    IsArchived={IsArchived(activeCollection)}
+                    handleCollectionAction={handleCollectionAction}
+                />
             )}
-            <OverflowMenuOption
-                startIcon={<DeleteOutlinedIcon />}
-                onClick={confirmDeleteCollection}>
-                {constants.DELETE}
-            </OverflowMenuOption>
         </OverflowMenu>
     );
 };
