@@ -16,13 +16,13 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { CollectionType, TRASH_SECTION } from 'constants/collection';
+import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     activeCollection: Collection;
-    activeCollectionID: number;
+    collectionSummaryType: CollectionSummaryType;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
@@ -44,15 +44,12 @@ export enum CollectionActions {
 const CollectionOptions = (props: CollectionOptionsProps) => {
     const {
         activeCollection,
-        activeCollectionID,
+        collectionSummaryType,
         redirectToAll,
         setCollectionNamerAttributes,
         showCollectionShareModal,
     } = props;
 
-    if (!activeCollectionID) {
-        return <></>;
-    }
     const { startLoading, finishLoading, setDialogMessage } =
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
@@ -205,21 +202,20 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     return (
         <OverflowMenu
-            ariaControls={`collection-options-${activeCollectionID}`}
+            ariaControls={'collection-options'}
             triggerButtonIcon={<MoreVertIcon />}
             triggerButtonProps={{
                 sx: {
                     background: (theme) => theme.palette.fill.dark,
                 },
             }}>
-            {activeCollection?.type === CollectionType.album && (
-                <AlbumCollectionOption
-                    IsArchived={IsArchived(activeCollection)}
+            {collectionSummaryType === CollectionSummaryType.trash ? (
+                <TrashCollectionOption
                     handleCollectionAction={handleCollectionAction}
                 />
-            )}
-            {activeCollectionID === TRASH_SECTION && (
-                <TrashCollectionOption
+            ) : (
+                <AlbumCollectionOption
+                    IsArchived={IsArchived(activeCollection)}
                     handleCollectionAction={handleCollectionAction}
                 />
             )}

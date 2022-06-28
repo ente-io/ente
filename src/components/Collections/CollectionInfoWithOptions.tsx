@@ -58,7 +58,12 @@ export default function CollectionInfoWithOptions({
                     fileCount={fileCount}
                     endIcon={<EndIcon type={type} />}
                 />
-                {shouldShowOptions(type) && <CollectionOptions {...props} />}
+                {shouldShowOptions(type) && (
+                    <CollectionOptions
+                        {...props}
+                        collectionSummaryType={type}
+                    />
+                )}
             </SpaceBetweenFlex>
         </CollectionInfoBarWrapper>
     );
