@@ -8,7 +8,6 @@ import { handleSharingErrors } from 'utils/error';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { CollectionShareSharees } from './sharees';
-import CollectionShareSubmitButton from './submitButton';
 export default function EmailShare({ collection }) {
     const galleryContext = useContext(GalleryContext);
 
@@ -38,7 +37,10 @@ export default function EmailShare({ collection }) {
                 placeholder={constants.ENTER_EMAIL}
                 fieldType="email"
                 buttonText={constants.SHARE}
-                customSubmitButton={CollectionShareSubmitButton}
+                submitButtonProps={{
+                    size: 'medium',
+                    sx: { mt: 1, mb: 2 },
+                }}
             />
             <CollectionShareSharees collection={collection} />
         </>

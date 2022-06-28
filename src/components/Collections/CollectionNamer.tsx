@@ -43,7 +43,6 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
             open={props.show}
             attributes={{ title: attributes.title }}
             onClose={props.onHide}
-            titleCloseButton
             maxWidth="xs">
             <SingleInputForm
                 callback={onSubmit}
@@ -51,6 +50,8 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
                 buttonText={attributes.buttonText}
                 placeholder={constants.ENTER_ALBUM_NAME}
                 initialValue={attributes.autoFilledName}
+                submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                secondaryButtonAction={props.onHide}
             />
         </DialogBox>
     );
