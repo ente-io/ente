@@ -3,6 +3,7 @@ import { Dialog, styled } from '@mui/material';
 const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-paper': {
         padding: theme.spacing(1, 1.5),
+        maxWidth: '346px',
     },
     '& .MuiDialogTitle-root': {
         padding: theme.spacing(2),
@@ -13,6 +14,9 @@ const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     },
     '.MuiDialogTitle-root + .MuiDialogContent-root': {
         paddingTop: 0,
+    },
+    '.MuiDialogTitle-root + .MuiDialogActions-root': {
+        paddingTop: theme.spacing(3),
     },
 }));
 

@@ -200,7 +200,7 @@ const englishConstants = {
             <p>Your request will be processed within 72 hours.</p>
         </>
     ),
-    LOGOUT_MESSAGE: 'Sure you want to logout?',
+    LOGOUT_MESSAGE: 'Are you sure you want to logout?',
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
     OK: 'Ok',

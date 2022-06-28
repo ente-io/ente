@@ -10,9 +10,7 @@ export default function ExitSection() {
 
     const confirmLogout = () => {
         setDialogMessage({
-            title: `${constants.CONFIRM} ${constants.LOGOUT}`,
-            content: constants.LOGOUT_MESSAGE,
-
+            title: constants.LOGOUT_MESSAGE,
             proceed: {
                 text: constants.LOGOUT,
                 action: logoutUser,
