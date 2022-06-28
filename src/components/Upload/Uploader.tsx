@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import UploadProgress from '../../UploadProgress';
+import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
-import { SetCollectionNamerAttributes } from '../../Collections/CollectionNamer';
+import { SetCollectionNamerAttributes } from '../Collections/CollectionNamer';
 import { SetCollectionSelectorAttributes } from 'types/gallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
@@ -19,7 +19,6 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { ElectronFile, FileWithCollection } from 'types/upload';
-import UploadTypeSelector from '../../UploadTypeSelector';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
@@ -34,6 +33,7 @@ import {
 import { UPLOAD_STAGES } from 'constants/upload';
 import importService from 'services/importService';
 import { getDownloadAppMessage } from 'utils/ui';
+import UploadTypeSelector from './UploadTypeSelector';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -80,7 +80,7 @@ const NULL_ANALYSIS_RESULT = {
     multipleFolders: false,
 };
 
-export default function Upload(props: Props) {
+export default function Uploader(props: Props) {
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>();
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();

@@ -57,7 +57,7 @@ import CollectionNamer, {
     CollectionNamerAttributes,
 } from 'components/Collections/CollectionNamer';
 import PlanSelector from 'components/pages/gallery/PlanSelector';
-import Upload from 'components/pages/gallery/Upload';
+import Uploader from 'components/Upload/Uploader';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -692,7 +692,7 @@ export default function Gallery() {
                     setPhotoListHeader={setPhotoListHeader}
                 />
 
-                <Upload
+                <Uploader
                     syncWithRemote={syncWithRemote}
                     showCollectionSelector={setCollectionSelectorView.bind(
                         null,

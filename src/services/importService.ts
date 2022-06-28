@@ -1,4 +1,4 @@
-import { UPLOAD_TYPE } from 'components/pages/gallery/Upload';
+import { UPLOAD_TYPE } from 'components/Upload/Uploader';
 import { Collection } from 'types/collection';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
