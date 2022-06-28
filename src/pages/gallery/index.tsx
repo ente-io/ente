@@ -546,10 +546,10 @@ export default function Gallery() {
             setActiveCollection(newSearch?.collection);
         } else {
             setSearch(newSearch);
-            setSetSearchResultSummary(summary);
         }
-        if (!newSearch?.collection && !search?.file) {
+        if (!newSearch?.collection && !newSearch?.file) {
             setIsInSearchMode(!!newSearch);
+            setSetSearchResultSummary(summary);
         }
     };
 
