@@ -201,10 +201,7 @@ export default function Upload(props: Props) {
     };
 
     function analyseUploadFiles(): AnalysisResult {
-        if (
-            isElectron() &&
-            (!uploadType.current || uploadType.current === UPLOAD_TYPE.FILES)
-        ) {
+        if (isElectron() && uploadType.current === UPLOAD_TYPE.FILES) {
             return NULL_ANALYSIS_RESULT;
         }
 
@@ -498,6 +495,7 @@ export default function Upload(props: Props) {
     };
 
     const handleWebUpload = async (type: UPLOAD_TYPE) => {
+        uploadType.current = type;
         if (type === UPLOAD_TYPE.FILES) {
             props.showUploadFilesDialog();
         } else if (type === UPLOAD_TYPE.FOLDERS) {
