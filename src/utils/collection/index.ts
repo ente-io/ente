@@ -20,11 +20,12 @@ import {
     CollectionSummaries,
 } from 'types/collection';
 import {
+    CollectionSummaryType,
     CollectionType,
     HIDE_FROM_COLLECTION_BAR_TYPES,
-    OPTIONS_HAVING_COLLECTION_TYPES,
+    OPTIONS_NOT_HAVING_COLLECTION_TYPES,
     SYSTEM_COLLECTION_TYPES,
-    UPLOAD_ALLOWED_COLLECTION_TYPES,
+    UPLOAD_NOT_ALLOWED_COLLECTION_TYPES,
 } from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
@@ -208,18 +209,18 @@ export const hasNonEmptyCollections = (
     return collectionSummaries?.size <= 3;
 };
 
-export const isUploadAllowedCollection = (type: CollectionType) => {
-    return UPLOAD_ALLOWED_COLLECTION_TYPES.has(type);
+export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
+    return !UPLOAD_NOT_ALLOWED_COLLECTION_TYPES.has(type);
 };
 
-export const isSystemCollection = (type: CollectionType) => {
+export const isSystemCollection = (type: CollectionSummaryType) => {
     return SYSTEM_COLLECTION_TYPES.has(type);
 };
 
-export const isOptionsHavingCollection = (type: CollectionType) => {
-    return OPTIONS_HAVING_COLLECTION_TYPES.has(type);
+export const shouldShowOptions = (type: CollectionSummaryType) => {
+    return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
 };
 
-export const shouldBeShownOnCollectionBar = (type: CollectionType) => {
+export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };

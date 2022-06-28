@@ -1,6 +1,6 @@
 import { User } from 'types/user';
 import { EnteFile } from 'types/file';
-import { CollectionType } from 'constants/collection';
+import { CollectionSummaryType, CollectionType } from 'constants/collection';
 import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 
 export interface Collection {
@@ -91,7 +91,7 @@ export interface CollectionMagicMetadata
 export interface CollectionSummary {
     id: number;
     name: string;
-    type: CollectionType;
+    type: CollectionSummaryType;
     latestFile: EnteFile;
     fileCount: number;
     updationTime: number;
@@ -99,10 +99,3 @@ export interface CollectionSummary {
 
 export type CollectionSummaries = Map<number, CollectionSummary>;
 export type CollectionFilesCount = Map<number, number>;
-
-export interface CollectionInfo {
-    id: number;
-    name: string;
-    fileCount: number;
-    type: CollectionType;
-}

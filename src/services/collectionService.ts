@@ -32,6 +32,7 @@ import {
     TRASH_SECTION,
     COLLECTION_SORT_ORDER,
     ALL_SECTION,
+    CollectionSummaryType,
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { EncryptionResult } from 'types/upload';
@@ -786,8 +787,10 @@ export function getCollectionSummaries(
                 updationTime: collection.updationTime,
                 type:
                     collection.owner.id !== user.id
-                        ? CollectionType.shared
-                        : collection.type,
+                        ? CollectionSummaryType.shared
+                        : IsArchived(collection)
+                        ? CollectionSummaryType.archived
+                        : CollectionSummaryType[collection.type],
             });
         }
     }
@@ -853,7 +856,7 @@ function getAllCollectionSummaries(
     return {
         id: ALL_SECTION,
         name: constants.ALL_SECTION_NAME,
-        type: CollectionType.all,
+        type: CollectionSummaryType.all,
         latestFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: allSectionFileCount,
         updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
@@ -867,7 +870,7 @@ function getArchivedCollectionSummaries(
     return {
         id: ARCHIVE_SECTION,
         name: constants.ARCHIVE_SECTION_NAME,
-        type: CollectionType.archive,
+        type: CollectionSummaryType.archive,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
@@ -881,7 +884,7 @@ function getTrashedCollectionSummaries(
     return {
         id: TRASH_SECTION,
         name: constants.TRASH,
-        type: CollectionType.trash,
+        type: CollectionSummaryType.trash,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
