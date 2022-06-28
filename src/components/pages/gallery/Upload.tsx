@@ -518,7 +518,7 @@ export default function Upload(props: Props) {
     const closeUploadProgress = () => setUploadProgressView(false);
 
     const handleUpload = (type) => () => {
-        if (importService.checkAllElectronAPIsExists()) {
+        if (isElectron() && importService.checkAllElectronAPIsExists()) {
             handleDesktopUpload(type);
         } else {
             handleWebUpload(type);
