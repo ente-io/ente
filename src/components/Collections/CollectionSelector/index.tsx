@@ -36,7 +36,7 @@ function CollectionSelector({
         ]?.filter(
             ({ type, id }) =>
                 id !== attributes?.fromCollection &&
-                !isUploadAllowedCollection(type)
+                isUploadAllowedCollection(type)
         );
         return personalCollectionsOtherThanFrom;
     }, [collectionSummaries, attributes]);
