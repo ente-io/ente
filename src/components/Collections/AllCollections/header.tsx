@@ -29,7 +29,11 @@ export default function AllCollectionsHeader({
                         activeSortBy={collectionSortBy}
                         setCollectionSortBy={setCollectionSortBy}
                     />
-                    <IconButton onClick={onClose}>
+                    <IconButton
+                        onClick={onClose}
+                        sx={{
+                            background: (theme) => theme.palette.fill.dark,
+                        }}>
                         <Close />
                     </IconButton>
                 </Stack>

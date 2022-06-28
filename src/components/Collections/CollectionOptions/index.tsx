@@ -209,7 +209,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             triggerButtonIcon={<MoreVertIcon />}
             triggerButtonProps={{
                 sx: {
-                    background: (theme) => theme.palette.background.paper,
+                    background: (theme) => theme.palette.fill.dark,
                 },
             }}>
             {activeCollection?.type === CollectionType.album && (
