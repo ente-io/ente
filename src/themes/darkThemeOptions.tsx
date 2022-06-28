@@ -8,12 +8,14 @@ import {
 declare module '@mui/material/styles' {
     interface Palette {
         accent: PaletteColor;
+        fill: PaletteColor;
         danger: PaletteColor;
         stroke: TypeText;
     }
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
+        fill?: PaletteColorOptions;
         stroke?: Partial<TypeText>;
     }
 
@@ -210,6 +212,11 @@ const darkThemeOptions = createTheme({
             main: '#1dba54',
             dark: '#248546',
             light: '#2cd366',
+        },
+        fill: {
+            main: 'rgba(256, 256, 256, 0.2)',
+            dark: 'rgba(256, 256, 256, 0.1)',
+            light: 'rgba(256, 256, 256)',
         },
         text: {
             primary: '#fff',
