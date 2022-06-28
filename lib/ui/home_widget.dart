@@ -168,7 +168,24 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (mounted &&
           event.status == SyncStatus.completed_first_gallery_import) {
-        setState(() {});
+        Duration delayInRefresh = Duration(milliseconds: 0);
+        // Loading page will redirect to BackupFolderSelectionPage.
+        // To avoid showing folder hook in middle during routing,
+        // delay state refresh for home page
+        if (!LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+          delayInRefresh = Duration(milliseconds: 250);
+        }
+        Future.delayed(
+          delayInRefresh,
+          () => {
+            if (mounted)
+              {
+                setState(
+                  () {},
+                )
+              }
+          },
+        );
       }
     });
     _backupFoldersUpdatedEvent =
