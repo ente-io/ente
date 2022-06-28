@@ -10,7 +10,7 @@ import CollectionCard from '../CollectionCard';
 import TruncateText from 'components/TruncateText';
 import { Box } from '@mui/material';
 import { CollectionSummaryType } from 'constants/collection';
-import Favorite from '@mui/icons-material/Favorite';
+import Favorite from '@mui/icons-material/FavoriteRounded';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
 interface Iprops {

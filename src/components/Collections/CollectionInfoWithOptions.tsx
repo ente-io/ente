@@ -7,7 +7,7 @@ import { SpaceBetweenFlex } from 'components/Container';
 import { CollectionInfoBarWrapper } from './styledComponents';
 import { shouldShowOptions } from 'utils/collection';
 import { CollectionSummaryType } from 'constants/collection';
-import Favorite from '@mui/icons-material/Favorite';
+import Favorite from '@mui/icons-material/FavoriteRounded';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Delete from '@mui/icons-material/Delete';
 

@@ -25,7 +25,8 @@ import { defaultLivePhotoDefaultOptions } from 'constants/photoswipe';
 import { LivePhotoBtn } from './styledComponents/LivePhotoBtn';
 import DownloadIcon from '@mui/icons-material/Download';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorderRounded';
 
 interface Iprops {
     isOpen: boolean;
@@ -384,10 +385,11 @@ function PhotoSwipe(props: Iprops) {
                                         onClick={() => {
                                             onFavClick(photoSwipe?.currItem);
                                         }}>
-                                        <FavoriteIcon
-                                            fontSize="small"
-                                            color={isFav ? 'accent' : 'inherit'}
-                                        />
+                                        {isFav ? (
+                                            <FavoriteIcon fontSize="small" />
+                                        ) : (
+                                            <FavoriteBorderIcon fontSize="small" />
+                                        )}
                                     </button>
                                 )}
                             {!props.isSharedCollection && (
