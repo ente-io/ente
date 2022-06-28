@@ -37,5 +37,21 @@ export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionType.all,
     CollectionType.archive,
     CollectionType.trash,
-    CollectionType.shared,
+]);
+
+export const UPLOAD_ALLOWED_COLLECTION_TYPES = new Set([
+    CollectionType.album,
+    CollectionType.folder,
+    CollectionType.favorites,
+]);
+
+export const OPTIONS_HAVING_COLLECTION_TYPES = new Set([
+    CollectionType.folder,
+    CollectionType.album,
+    CollectionType.trash,
+]);
+
+export const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([
+    CollectionType.trash,
+    CollectionType.archive,
 ]);

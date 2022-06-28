@@ -19,7 +19,13 @@ import {
     CollectionMagicMetadataProps,
     CollectionSummaries,
 } from 'types/collection';
-import { CollectionType, SYSTEM_COLLECTION_TYPES } from 'constants/collection';
+import {
+    CollectionType,
+    HIDE_FROM_COLLECTION_BAR_TYPES,
+    OPTIONS_HAVING_COLLECTION_TYPES,
+    SYSTEM_COLLECTION_TYPES,
+    UPLOAD_ALLOWED_COLLECTION_TYPES,
+} from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import {
@@ -202,6 +208,18 @@ export const hasNonEmptyCollections = (
     return collectionSummaries?.size <= 3;
 };
 
+export const isUploadAllowedCollection = (type: CollectionType) => {
+    return UPLOAD_ALLOWED_COLLECTION_TYPES.has(type);
+};
+
 export const isSystemCollection = (type: CollectionType) => {
     return SYSTEM_COLLECTION_TYPES.has(type);
+};
+
+export const isOptionsHavingCollection = (type: CollectionType) => {
+    return OPTIONS_HAVING_COLLECTION_TYPES.has(type);
+};
+
+export const shouldBeShownOnCollectionBar = (type: CollectionType) => {
+    return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };

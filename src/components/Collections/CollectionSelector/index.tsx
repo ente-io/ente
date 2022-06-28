@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo } from 'react';
 import { Collection, CollectionSummaries } from 'types/collection';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
-import { isSystemCollection } from 'utils/collection';
+import { isUploadAllowedCollection } from 'utils/collection';
 import { AppContext } from 'pages/_app';
 import { AllCollectionDialog } from 'components/Collections/AllCollections/dialog';
 import { DialogContent } from '@mui/material';
@@ -35,7 +35,8 @@ function CollectionSelector({
             ...collectionSummaries.values(),
         ]?.filter(
             ({ type, id }) =>
-                id !== attributes?.fromCollection && !isSystemCollection(type)
+                id !== attributes?.fromCollection &&
+                !isUploadAllowedCollection(type)
         );
         return personalCollectionsOtherThanFrom;
     }, [collectionSummaries, attributes]);

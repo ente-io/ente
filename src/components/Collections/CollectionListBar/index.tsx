@@ -15,6 +15,7 @@ import useWindowSize from 'hooks/useWindowSize';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import { SpaceBetweenFlex } from 'components/Container';
 import { sortCollectionSummaries } from 'services/collectionService';
+import { shouldBeShownOnCollectionBar } from 'utils/collection';
 
 interface IProps {
     activeCollection?: number;
@@ -34,8 +35,8 @@ export default function CollectionListBar(props: IProps) {
     const sortedCollectionSummary = useMemo(
         () =>
             sortCollectionSummaries(
-                [...collectionSummaries.values()].filter(
-                    (c) => c.fileCount > 0
+                [...collectionSummaries.values()].filter((c) =>
+                    shouldBeShownOnCollectionBar(c.type)
                 ),
                 COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
             ),
