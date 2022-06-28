@@ -1,6 +1,7 @@
 import { AlbumCollectionOption } from './AlbumCollectionOption';
 import React, { useContext } from 'react';
 import * as CollectionAPI from 'services/collectionService';
+import * as TrashService from 'services/trashService';
 import {
     changeCollectionVisibility,
     downloadAllCollectionFiles,
@@ -15,11 +16,13 @@ import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { CollectionType } from 'constants/collection';
+import { CollectionType, TRASH_SECTION } from 'constants/collection';
+import { TrashCollectionOption } from './TrashCollectionOption';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     activeCollection: Collection;
+    activeCollectionID: number;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
@@ -34,15 +37,22 @@ export enum CollectionActions {
     CONFIRM_DELETE,
     DELETE,
     SHOW_SHARE_DIALOG,
+    CONFIRM_EMPTY_TRASH,
+    EMPTY_TRASH,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
     const {
         activeCollection,
+        activeCollectionID,
         redirectToAll,
         setCollectionNamerAttributes,
         showCollectionShareModal,
     } = props;
+
+    if (!activeCollectionID) {
+        return <></>;
+    }
     const { startLoading, finishLoading, setDialogMessage } =
         useContext(AppContext);
     const { syncWithRemote } = useContext(GalleryContext);
@@ -79,6 +89,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 break;
             case CollectionActions.SHOW_SHARE_DIALOG:
                 callback = showCollectionShareModal;
+                break;
+            case CollectionActions.CONFIRM_EMPTY_TRASH:
+                callback = confirmEmptyTrash;
+                break;
+            case CollectionActions.EMPTY_TRASH:
+                callback = emptyTrash;
                 break;
             default:
                 logError(
@@ -129,6 +145,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         downloadAllCollectionFiles(activeCollection.id);
     };
 
+    const emptyTrash = async () => {
+        await TrashService.emptyTrash();
+        await TrashService.clearLocalTrash();
+        redirectToAll();
+    };
+
     const showRenameCollectionModal = () => {
         setCollectionNamerAttributes({
             title: constants.RENAME_COLLECTION,
@@ -168,18 +190,36 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         });
     };
 
+    const confirmEmptyTrash = () =>
+        setDialogMessage({
+            title: constants.CONFIRM_EMPTY_TRASH,
+            content: constants.EMPTY_TRASH_MESSAGE,
+
+            proceed: {
+                action: handleCollectionAction(CollectionActions.EMPTY_TRASH),
+                text: constants.EMPTY_TRASH,
+                variant: 'danger',
+            },
+            close: { text: constants.CANCEL },
+        });
+
     return (
         <OverflowMenu
-            ariaControls={`collection-options-${activeCollection.id}`}
+            ariaControls={`collection-options-${activeCollectionID}`}
             triggerButtonIcon={<MoreVertIcon />}
             triggerButtonProps={{
                 sx: {
                     background: (theme) => theme.palette.background.paper,
                 },
             }}>
-            {activeCollection.type === CollectionType.album && (
+            {activeCollection?.type === CollectionType.album && (
                 <AlbumCollectionOption
                     IsArchived={IsArchived(activeCollection)}
+                    handleCollectionAction={handleCollectionAction}
+                />
+            )}
+            {activeCollectionID === TRASH_SECTION && (
+                <TrashCollectionOption
                     handleCollectionAction={handleCollectionAction}
                 />
             )}

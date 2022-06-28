@@ -6,6 +6,7 @@ import { SetCollectionNamerAttributes } from 'components/Collections/CollectionN
 import { SpaceBetweenFlex } from 'components/Container';
 import { CollectionInfoBarWrapper } from './styledComponents';
 import { isSystemCollection } from 'utils/collection';
+import { TRASH_SECTION } from 'constants/collection';
 
 interface Iprops {
     activeCollection: Collection;
@@ -19,6 +20,7 @@ interface Iprops {
     collectionSummary: CollectionSummary;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     activeCollection: Collection;
+    activeCollectionID: number;
     showCollectionShareModal: () => void;
     redirectToAll: () => void;
 }
@@ -30,13 +32,15 @@ export default function CollectionInfoWithOptions({
         return <></>;
     }
 
-    const { name, type, fileCount } = collectionSummary;
+    const { name, type, fileCount, id } = collectionSummary;
 
     return (
         <CollectionInfoBarWrapper>
             <SpaceBetweenFlex>
                 <CollectionInfo name={name} fileCount={fileCount} />
-                {!isSystemCollection(type) && <CollectionOptions {...props} />}
+                {(!isSystemCollection(type) || id === TRASH_SECTION) && (
+                    <CollectionOptions {...props} />
+                )}
             </SpaceBetweenFlex>
         </CollectionInfoBarWrapper>
     );

@@ -60,6 +60,7 @@ export default function Collections(props: Iprops) {
                             activeCollectionID
                         )}
                         activeCollection={activeCollection.current}
+                        activeCollectionID={activeCollectionID}
                         setCollectionNamerAttributes={
                             setCollectionNamerAttributes
                         }
