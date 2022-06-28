@@ -99,6 +99,7 @@ export default function CollectionListBar(props: IProps) {
                             ref={collectionChipsRef[item.id]}
                             active={activeCollection === item.id}
                             onClick={clickHandler(item.id)}
+                            collectionType={item.type}
                             collectionName={item.name}
                         />
                     ))}

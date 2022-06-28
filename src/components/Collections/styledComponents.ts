@@ -86,7 +86,16 @@ export const CollectionBarTileText = styled(Overlay)`
         rgba(0, 0, 0, 0.1) 0%,
         rgba(0, 0, 0, 0.5) 86.46%
     );
+`;
+
+export const CollectionBarTileIcon = styled(Overlay)`
+    padding: 4px;
     display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    & > .MuiSvgIcon-root {
+        font-size: 20px;
+    }
 `;
 
 export const AllCollectionTileText = styled(Overlay)`
