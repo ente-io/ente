@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 
-import { FileWithPath } from 'file-selector';
+export interface FileWithPath extends File {
+    readonly path?: string;
+}
 
 export default function useFileInput({ directory }: { directory?: boolean }) {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
