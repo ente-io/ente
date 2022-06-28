@@ -131,7 +131,16 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
-
+        MuiInputBase: {
+            styleOverrides: {
+                formControl: {
+                    borderRadius: '8px',
+                    '::before': {
+                        borderBottom: 'none !important',
+                    },
+                },
+            },
+        },
         MuiFilledInput: {
             styleOverrides: {
                 input: {
