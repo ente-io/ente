@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -25,6 +27,8 @@ class SupportSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final String bugsEmail =
+        Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
     return Column(
       children: [
         GestureDetector(
@@ -67,11 +71,11 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            await sendLogs(context, "Report bug", "bug@ente.io");
+            await sendLogs(context, "Report bug", bugsEmail);
           },
           onDoubleTap: () async {
             final zipFilePath = await getZippedLogsFile(context);
-            await shareLogs(context, "bug@ente.io", zipFilePath);
+            await shareLogs(context, bugsEmail, zipFilePath);
           },
           child: SettingsTextItem(
             text: "Report bug 🐞",
