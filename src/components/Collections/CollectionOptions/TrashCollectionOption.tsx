@@ -3,7 +3,7 @@ import React from 'react';
 
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import constants from 'utils/strings/constants';
-import { CollectionActions } from './CollectionOptions';
+import { CollectionActions } from '.';
 
 interface Iprops {
     handleCollectionAction: (

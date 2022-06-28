@@ -8,7 +8,7 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import VisibilityOnOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import constants from 'utils/strings/constants';
-import { CollectionActions } from './CollectionOptions';
+import { CollectionActions } from '.';
 
 interface Iprops {
     IsArchived: boolean;

@@ -7,7 +7,7 @@ import {
     downloadAllCollectionFiles,
 } from 'utils/collection';
 import constants from 'utils/strings/constants';
-import { SetCollectionNamerAttributes } from './CollectionNamer';
+import { SetCollectionNamerAttributes } from '../CollectionNamer';
 import { Collection } from 'types/collection';
 import { IsArchived } from 'utils/magicMetadata';
 import { GalleryContext } from 'pages/gallery';
