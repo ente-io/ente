@@ -187,7 +187,7 @@ const englishConstants = {
     SKIP_SUBSCRIPTION_PURCHASE: 'Continue with free plan',
     CANCEL: 'Cancel',
     LOGOUT: 'Logout',
-    DELETE_ACCOUNT: 'Delete Account',
+    DELETE_ACCOUNT: 'Delete account',
     DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
