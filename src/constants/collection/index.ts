@@ -35,6 +35,7 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.album, 2],
     [CollectionSummaryType.folder, 2],
     [CollectionSummaryType.shared, 2],
+    [CollectionSummaryType.archived, 2],
     [CollectionSummaryType.archive, 3],
     [CollectionSummaryType.trash, 4],
 ]);
@@ -45,16 +46,18 @@ export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionSummaryType.trash,
 ]);
 
-export const UPLOAD_ALLOWED_COLLECTION_TYPES = new Set([
-    CollectionSummaryType.album,
-    CollectionSummaryType.folder,
-    CollectionSummaryType.favorites,
+export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.shared,
+    CollectionSummaryType.trash,
 ]);
 
-export const OPTIONS_HAVING_COLLECTION_TYPES = new Set([
-    CollectionSummaryType.folder,
-    CollectionSummaryType.album,
-    CollectionSummaryType.trash,
+export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.shared,
+    CollectionSummaryType.favorites,
 ]);
 
 export const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([

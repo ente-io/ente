@@ -5,7 +5,7 @@ import CollectionOptions from 'components/Collections/CollectionOptions';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 import { SpaceBetweenFlex } from 'components/Container';
 import { CollectionInfoBarWrapper } from './styledComponents';
-import { isOptionsHavingCollection } from 'utils/collection';
+import { shouldShowOptions } from 'utils/collection';
 
 interface Iprops {
     activeCollection: Collection;
@@ -37,9 +37,7 @@ export default function CollectionInfoWithOptions({
         <CollectionInfoBarWrapper>
             <SpaceBetweenFlex>
                 <CollectionInfo name={name} fileCount={fileCount} />
-                {isOptionsHavingCollection(type) && (
-                    <CollectionOptions {...props} />
-                )}
+                {shouldShowOptions(type) && <CollectionOptions {...props} />}
             </SpaceBetweenFlex>
         </CollectionInfoBarWrapper>
     );
