@@ -6,12 +6,18 @@ export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
     album = 'album',
+}
+
+export enum CollectionSummaryType {
+    folder = 'folder',
+    favorites = 'favorites',
+    album = 'album',
     archive = 'archive',
     trash = 'trash',
     all = 'all',
     shared = 'shared',
+    archived = 'archived',
 }
-
 export enum COLLECTION_SORT_BY {
     NAME,
     CREATION_TIME_ASCENDING,
@@ -24,34 +30,34 @@ export const COLLECTION_SHARE_DEFAULT_VALID_DURATION =
 export const COLLECTION_SHARE_DEFAULT_DEVICE_LIMIT = 4;
 
 export const COLLECTION_SORT_ORDER = new Map([
-    [CollectionType.all, 0],
-    [CollectionType.favorites, 1],
-    [CollectionType.album, 2],
-    [CollectionType.folder, 2],
-    [CollectionType.shared, 2],
-    [CollectionType.archive, 3],
-    [CollectionType.trash, 4],
+    [CollectionSummaryType.all, 0],
+    [CollectionSummaryType.favorites, 1],
+    [CollectionSummaryType.album, 2],
+    [CollectionSummaryType.folder, 2],
+    [CollectionSummaryType.shared, 2],
+    [CollectionSummaryType.archive, 3],
+    [CollectionSummaryType.trash, 4],
 ]);
 
 export const SYSTEM_COLLECTION_TYPES = new Set([
-    CollectionType.all,
-    CollectionType.archive,
-    CollectionType.trash,
+    CollectionSummaryType.all,
+    CollectionSummaryType.archive,
+    CollectionSummaryType.trash,
 ]);
 
 export const UPLOAD_ALLOWED_COLLECTION_TYPES = new Set([
-    CollectionType.album,
-    CollectionType.folder,
-    CollectionType.favorites,
+    CollectionSummaryType.album,
+    CollectionSummaryType.folder,
+    CollectionSummaryType.favorites,
 ]);
 
 export const OPTIONS_HAVING_COLLECTION_TYPES = new Set([
-    CollectionType.folder,
-    CollectionType.album,
-    CollectionType.trash,
+    CollectionSummaryType.folder,
+    CollectionSummaryType.album,
+    CollectionSummaryType.trash,
 ]);
 
 export const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([
-    CollectionType.trash,
-    CollectionType.archive,
+    CollectionSummaryType.trash,
+    CollectionSummaryType.archive,
 ]);

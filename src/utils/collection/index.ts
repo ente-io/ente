@@ -20,6 +20,7 @@ import {
     CollectionSummaries,
 } from 'types/collection';
 import {
+    CollectionSummaryType,
     CollectionType,
     HIDE_FROM_COLLECTION_BAR_TYPES,
     OPTIONS_HAVING_COLLECTION_TYPES,
@@ -208,18 +209,18 @@ export const hasNonEmptyCollections = (
     return collectionSummaries?.size <= 3;
 };
 
-export const isUploadAllowedCollection = (type: CollectionType) => {
+export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
     return UPLOAD_ALLOWED_COLLECTION_TYPES.has(type);
 };
 
-export const isSystemCollection = (type: CollectionType) => {
+export const isSystemCollection = (type: CollectionSummaryType) => {
     return SYSTEM_COLLECTION_TYPES.has(type);
 };
 
-export const isOptionsHavingCollection = (type: CollectionType) => {
+export const isOptionsHavingCollection = (type: CollectionSummaryType) => {
     return OPTIONS_HAVING_COLLECTION_TYPES.has(type);
 };
 
-export const shouldBeShownOnCollectionBar = (type: CollectionType) => {
+export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };
