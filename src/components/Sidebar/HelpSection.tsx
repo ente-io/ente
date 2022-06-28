@@ -12,7 +12,7 @@ import EnteSpinner from 'components/EnteSpinner';
 import { getDownloadAppMessage } from 'utils/ui';
 
 export default function HelpSection() {
-    const [exportModalView, setExportModalView] = useState(true);
+    const [exportModalView, setExportModalView] = useState(false);
 
     const { setDialogMessage } = useContext(AppContext);
 
