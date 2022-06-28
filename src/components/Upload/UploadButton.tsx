@@ -34,7 +34,6 @@ function UploadButton({ isFirstFetch, openUploader }: Iprops) {
             <Button
                 className="desktop-button"
                 color="secondary"
-                sx={{ borderRadius: '2px' }}
                 startIcon={<FileUploadOutlinedIcon />}>
                 {constants.UPLOAD}
             </Button>
