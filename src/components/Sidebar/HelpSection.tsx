@@ -6,9 +6,10 @@ import exportService from 'services/exportService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import isElectron from 'is-electron';
-import { downloadApp, initiateEmail } from 'utils/common';
+import { initiateEmail } from 'utils/common';
 import { AppContext } from 'pages/_app';
 import EnteSpinner from 'components/EnteSpinner';
+import { getDownloadAppMessage } from 'utils/ui';
 
 export default function HelpSection() {
     const [exportModalView, setExportModalView] = useState(true);
@@ -29,19 +30,7 @@ export default function HelpSection() {
         if (isElectron()) {
             setExportModalView(true);
         } else {
-            setDialogMessage({
-                title: constants.DOWNLOAD_APP,
-                content: constants.DOWNLOAD_APP_MESSAGE,
-
-                proceed: {
-                    text: constants.DOWNLOAD,
-                    action: downloadApp,
-                    variant: 'accent',
-                },
-                close: {
-                    text: constants.CLOSE,
-                },
-            });
+            setDialogMessage(getDownloadAppMessage());
         }
     }
 

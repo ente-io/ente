@@ -1,7 +1,6 @@
 import React from 'react';
 import NavbarBase from 'components/Navbar/base';
 import SidebarToggler from 'components/Navbar/SidebarToggler';
-import UploadButton from './UploadButton';
 import { getNonTrashedUniqueUserFiles } from 'utils/file';
 import SearchBar from 'components/Search/SearchBar';
 import { FluidContainer } from 'components/Container';
@@ -9,6 +8,7 @@ import { EnteLogo } from 'components/EnteLogo';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { UpdateSearch } from 'types/search';
+import UploadButton from 'components/Upload/UploadButton';
 
 interface Iprops {
     openSidebar: () => void;

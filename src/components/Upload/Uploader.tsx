@@ -2,15 +2,14 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { syncCollections, createAlbum } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import UploadProgress from '../../UploadProgress';
+import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
-import { SetCollectionNamerAttributes } from '../../Collections/CollectionNamer';
+import { SetCollectionNamerAttributes } from '../Collections/CollectionNamer';
 import { SetCollectionSelectorAttributes } from 'types/gallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
-import { FileRejection } from 'react-dropzone';
 import UploadManager from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
@@ -20,7 +19,6 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { ElectronFile, FileWithCollection } from 'types/upload';
-import UploadTypeSelector from '../../UploadTypeSelector';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
@@ -33,13 +31,14 @@ import {
     InProgressUpload,
 } from 'types/upload/ui';
 import { UPLOAD_STAGES } from 'constants/upload';
+import importService from 'services/importService';
+import { getDownloadAppMessage } from 'utils/ui';
+import UploadTypeSelector from './UploadTypeSelector';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    droppedFiles: File[];
-    clearDroppedFiles: () => void;
     closeCollectionSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -47,14 +46,17 @@ interface Props {
     uploadInProgress: boolean;
     setUploadInProgress: (value: boolean) => void;
     showCollectionSelector: () => void;
-    fileRejections: FileRejection[];
     setFiles: SetFiles;
     isFirstUpload: boolean;
     electronFiles: ElectronFile[];
     setElectronFiles: (files: ElectronFile[]) => void;
+    webFiles: File[];
+    setWebFiles: (files: File[]) => void;
     uploadTypeSelectorView: boolean;
     setUploadTypeSelectorView: (open: boolean) => void;
     showSessionExpiredMessage: () => void;
+    showUploadFilesDialog: () => void;
+    showUploadDirsDialog: () => void;
 }
 
 enum UPLOAD_STRATEGY {
@@ -62,7 +64,7 @@ enum UPLOAD_STRATEGY {
     COLLECTION_PER_FOLDER,
 }
 
-export enum DESKTOP_UPLOAD_TYPE {
+export enum UPLOAD_TYPE {
     FILES = 'files',
     FOLDERS = 'folders',
     ZIPS = 'zips',
@@ -78,7 +80,7 @@ const NULL_ANALYSIS_RESULT = {
     multipleFolders: false,
 };
 
-export default function Upload(props: Props) {
+export default function Uploader(props: Props) {
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>();
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
@@ -103,7 +105,7 @@ export default function Upload(props: Props) {
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
     const isPendingDesktopUpload = useRef(false);
     const pendingDesktopUploadCollectionName = useRef<string>('');
-    const desktopUploadType = useRef<DESKTOP_UPLOAD_TYPE>(null);
+    const uploadType = useRef<UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
 
     useEffect(() => {
@@ -132,7 +134,7 @@ export default function Upload(props: Props) {
     useEffect(() => {
         if (
             props.electronFiles?.length > 0 ||
-            props.droppedFiles?.length > 0 ||
+            props.webFiles?.length > 0 ||
             appContext.sharedFiles?.length > 0
         ) {
             if (props.uploadInProgress) {
@@ -152,10 +154,10 @@ export default function Upload(props: Props) {
                 });
             } else {
                 props.setLoading(true);
-                if (props.droppedFiles?.length > 0) {
+                if (props.webFiles?.length > 0) {
                     // File selection by drag and drop or selection of file.
-                    toUploadFiles.current = props.droppedFiles;
-                    props.clearDroppedFiles();
+                    toUploadFiles.current = props.webFiles;
+                    props.setWebFiles([]);
                 } else if (appContext.sharedFiles?.length > 0) {
                     toUploadFiles.current = appContext.sharedFiles;
                     appContext.resetSharedFiles();
@@ -174,7 +176,7 @@ export default function Upload(props: Props) {
                 props.setLoading(false);
             }
         }
-    }, [props.droppedFiles, appContext.sharedFiles, props.electronFiles]);
+    }, [props.webFiles, appContext.sharedFiles, props.electronFiles]);
 
     const uploadInit = function () {
         setUploadStage(UPLOAD_STAGES.START);
@@ -187,24 +189,20 @@ export default function Upload(props: Props) {
     };
 
     const resumeDesktopUpload = async (
-        type: DESKTOP_UPLOAD_TYPE,
+        type: UPLOAD_TYPE,
         electronFiles: ElectronFile[],
         collectionName: string
     ) => {
         if (electronFiles && electronFiles?.length > 0) {
             isPendingDesktopUpload.current = true;
             pendingDesktopUploadCollectionName.current = collectionName;
-            desktopUploadType.current = type;
+            uploadType.current = type;
             props.setElectronFiles(electronFiles);
         }
     };
 
     function analyseUploadFiles(): AnalysisResult {
-        if (
-            isElectron() &&
-            (!desktopUploadType.current ||
-                desktopUploadType.current === DESKTOP_UPLOAD_TYPE.FILES)
-        ) {
+        if (isElectron() && uploadType.current === UPLOAD_TYPE.FILES) {
             return NULL_ANALYSIS_RESULT;
         }
 
@@ -343,13 +341,13 @@ export default function Upload(props: Props) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
                     await ImportService.setToUploadFiles(
-                        DESKTOP_UPLOAD_TYPE.ZIPS,
+                        UPLOAD_TYPE.ZIPS,
                         zipPaths.current
                     );
                     zipPaths.current = null;
                 }
                 await ImportService.setToUploadFiles(
-                    DESKTOP_UPLOAD_TYPE.FILES,
+                    UPLOAD_TYPE.FILES,
                     filesWithCollectionToUpload.map(
                         ({ file }) => (file as ElectronFile).path
                     )
@@ -457,10 +455,7 @@ export default function Upload(props: Props) {
             }
             return;
         }
-        if (
-            isElectron() &&
-            desktopUploadType.current === DESKTOP_UPLOAD_TYPE.ZIPS
-        ) {
+        if (isElectron() && uploadType.current === UPLOAD_TYPE.ZIPS) {
             uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
             return;
         }
@@ -482,12 +477,12 @@ export default function Upload(props: Props) {
             title: constants.UPLOAD_TO_COLLECTION,
         });
     };
-    const handleDesktopUploadTypes = async (type: DESKTOP_UPLOAD_TYPE) => {
+    const handleDesktopUpload = async (type: UPLOAD_TYPE) => {
         let files: ElectronFile[];
-        desktopUploadType.current = type;
-        if (type === DESKTOP_UPLOAD_TYPE.FILES) {
+        uploadType.current = type;
+        if (type === UPLOAD_TYPE.FILES) {
             files = await ImportService.showUploadFilesDialog();
-        } else if (type === DESKTOP_UPLOAD_TYPE.FOLDERS) {
+        } else if (type === UPLOAD_TYPE.FOLDERS) {
             files = await ImportService.showUploadDirsDialog();
         } else {
             const response = await ImportService.showUploadZipDialog();
@@ -500,16 +495,41 @@ export default function Upload(props: Props) {
         }
     };
 
+    const handleWebUpload = async (type: UPLOAD_TYPE) => {
+        uploadType.current = type;
+        if (type === UPLOAD_TYPE.FILES) {
+            props.showUploadFilesDialog();
+        } else if (type === UPLOAD_TYPE.FOLDERS) {
+            props.showUploadDirsDialog();
+        } else {
+            appContext.setDialogMessage(getDownloadAppMessage());
+        }
+    };
+
     const cancelUploads = async () => {
         setUploadProgressView(false);
         if (isElectron()) {
             ImportService.cancelRemainingUploads();
         }
-        await props.setUploadInProgress(false);
+        props.setUploadInProgress(false);
         Router.reload();
     };
 
     const closeUploadProgress = () => setUploadProgressView(false);
+
+    const handleUpload = (type) => () => {
+        if (isElectron() && importService.checkAllElectronAPIsExists()) {
+            handleDesktopUpload(type);
+        } else {
+            handleWebUpload(type);
+        }
+    };
+
+    const handleFileUpload = handleUpload(UPLOAD_TYPE.FILES);
+    const handleFolderUpload = handleUpload(UPLOAD_TYPE.FOLDERS);
+    const handleZipUpload = handleUpload(UPLOAD_TYPE.ZIPS);
+    const closeUploadTypeSelector = () =>
+        props.setUploadTypeSelectorView(false);
 
     return (
         <>
@@ -529,16 +549,10 @@ export default function Upload(props: Props) {
             />
             <UploadTypeSelector
                 show={props.uploadTypeSelectorView}
-                onHide={() => props.setUploadTypeSelectorView(false)}
-                uploadFiles={() =>
-                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FILES)
-                }
-                uploadFolders={() =>
-                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.FOLDERS)
-                }
-                uploadGoogleTakeoutZips={() =>
-                    handleDesktopUploadTypes(DESKTOP_UPLOAD_TYPE.ZIPS)
-                }
+                onHide={closeUploadTypeSelector}
+                uploadFiles={handleFileUpload}
+                uploadFolders={handleFolderUpload}
+                uploadGoogleTakeoutZips={handleZipUpload}
             />
             <UploadProgress
                 open={uploadProgressView}
