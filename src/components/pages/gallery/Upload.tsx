@@ -33,6 +33,7 @@ import {
 } from 'types/upload/ui';
 import { UPLOAD_STAGES } from 'constants/upload';
 import importService from 'services/importService';
+import { getDownloadAppMessage } from 'utils/ui';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -501,19 +502,7 @@ export default function Upload(props: Props) {
         } else if (type === UPLOAD_TYPE.FOLDERS) {
             props.showUploadDirsDialog();
         } else {
-            appContext.setDialogMessage({
-                title: constants.DOWNLOAD_APP,
-                content: constants.DOWNLOAD_APP_MESSAGE,
-
-                proceed: {
-                    text: constants.DOWNLOAD,
-                    action: downloadApp,
-                    variant: 'accent',
-                },
-                close: {
-                    text: constants.CLOSE,
-                },
-            });
+            appContext.setDialogMessage(getDownloadAppMessage());
         }
     };
 
