@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/ui/common/dynamicFAB.dart';
+import 'package:photos/ui/home_widget.dart';
 import 'package:photos/ui/recovery_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -76,7 +77,14 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           }
           await dialog.hide();
           Bus.instance.fire(SubscriptionPurchasedEvent());
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return HomeWidget();
+              },
+            ),
+            (route) => false,
+          );
         },
       ),
       floatingActionButtonLocation: fabLocation(),

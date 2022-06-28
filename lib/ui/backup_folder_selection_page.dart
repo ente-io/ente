@@ -191,7 +191,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         ),
                       ),
                     )
-                  : Container(),
+                  : const SizedBox.shrink(),
             ],
           ),
         ],
