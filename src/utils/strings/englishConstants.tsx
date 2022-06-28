@@ -750,7 +750,7 @@ const englishConstants = {
             </p>
             <p>
                 Please note that file names will be included to help track
-                issues with specific files."
+                issues with specific files.
             </p>
         </>
     ),
