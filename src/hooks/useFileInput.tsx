@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from 'react';
 import { FileWithPath } from 'file-selector';
 
 export default function useFileInput({ directory }: { directory?: boolean }) {
-    const [selectedFiles, setSelectedFiles] = useState<FileWithPath[]>([]);
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const inputRef = useRef<HTMLInputElement>();
 
     const openSelectorDialog = useCallback(() => {
@@ -18,7 +18,7 @@ export default function useFileInput({ directory }: { directory?: boolean }) {
     ) => {
         if (!!event.target && !!event.target.files) {
             const files = [...event.target.files].map((file) =>
-                toFileWithPath({ path: null, ...file })
+                toFileWithPath(file)
             );
             setSelectedFiles(files);
         }
@@ -43,11 +43,8 @@ export default function useFileInput({ directory }: { directory?: boolean }) {
 }
 
 // https://github.com/react-dropzone/file-selector/blob/master/src/file.ts#L88
-export function toFileWithPath(
-    file: FileWithPath,
-    path?: string
-): FileWithPath {
-    if (typeof file.path !== 'string') {
+export function toFileWithPath(file: File, path?: string): FileWithPath {
+    if (typeof (file as any).path !== 'string') {
         // on electron, path is already set to the absolute path
         const { webkitRelativePath } = file;
         Object.defineProperty(file, 'path', {
