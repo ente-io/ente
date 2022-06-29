@@ -42,7 +42,8 @@ html, body {
 }
 
 .pswp__button--custom{
-    background: transparent;    
+    background: none;    
+    background-image: none;    
     color:#fff;
 }
 
