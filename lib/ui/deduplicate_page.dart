@@ -378,6 +378,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               mode: DetailPageMode.minimalistic,
             ),
           ),
+          forceCustomPageRoute: true,
         );
       },
       child: Container(
