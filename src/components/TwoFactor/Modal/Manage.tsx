@@ -71,12 +71,11 @@ export default function TwoFactorModalManageSection(props: Iprops) {
     return (
         <>
             <Grid
-                mb={2}
-                container
+                mb={1.5}
                 rowSpacing={1}
+                container
                 alignItems="center"
-                justifyContent="center"
-                textAlign={'center'}>
+                justifyContent="center">
                 <Grid item sm={9} xs={12}>
                     {constants.UPDATE_TWO_FACTOR_LABEL}
                 </Grid>
@@ -84,17 +83,16 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                     <Button
                         color={'accent'}
                         onClick={warnTwoFactorReconfigure}
-                        style={{ width: '100%' }}>
+                        size="large">
                         {constants.RECONFIGURE}
                     </Button>
                 </Grid>
             </Grid>
             <Grid
-                container
                 rowSpacing={1}
+                container
                 alignItems="center"
-                justifyContent="center"
-                textAlign={'center'}>
+                justifyContent="center">
                 <Grid item sm={9} xs={12}>
                     {constants.DISABLE_TWO_FACTOR_LABEL}{' '}
                 </Grid>
@@ -103,7 +101,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                     <Button
                         color={'danger'}
                         onClick={warnTwoFactorDisable}
-                        style={{ width: '100%' }}>
+                        size="large">
                         {constants.DISABLE}
                     </Button>
                 </Grid>
