@@ -6,14 +6,37 @@ class SelectedFiles extends ChangeNotifier {
   final lastSelections = <File>{};
 
   void toggleSelection(File file) {
-    if (files.contains(file)) {
-      files.remove(file);
+    // To handle the cases, where the file might have changed due to upload
+    // or any other update, using file.generatedID to track if this file was already
+    // selected or not
+    File alreadySelected = files.firstWhere(
+      (element) => element.generatedID == file.generatedID,
+      orElse: () => null,
+    );
+    if (alreadySelected != null) {
+      files.remove(alreadySelected);
     } else {
       files.add(file);
     }
     lastSelections.clear();
-    lastSelections.add(file);
+    lastSelections.add(alreadySelected ?? file);
     notifyListeners();
+  }
+
+  bool isFileSelected(File file) {
+    File alreadySelected = files.firstWhere(
+      (element) => element.generatedID == file.generatedID,
+      orElse: () => null,
+    );
+    return alreadySelected != null;
+  }
+
+  bool isPartOfLastSection(File file) {
+    File alreadySelected = lastSelections.firstWhere(
+      (element) => element.generatedID == file.generatedID,
+      orElse: () => null,
+    );
+    return alreadySelected != null;
   }
 
   void clearAll() {

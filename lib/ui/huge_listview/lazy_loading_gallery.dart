@@ -217,7 +217,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     widget.selectedFiles.addListener(() {
       bool shouldRefresh = false;
       for (final file in widget.files) {
-        if (widget.selectedFiles.lastSelections.contains(file)) {
+        if (widget.selectedFiles.isPartOfLastSection(file)) {
           shouldRefresh = true;
         }
       }
@@ -322,7 +322,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
                     Colors.black.withOpacity(
-                      widget.selectedFiles.files.contains(file) ? 0.4 : 0,
+                      widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
                     ),
                     BlendMode.darken,
                   ),
@@ -336,7 +336,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                 ),
               ),
               Visibility(
-                visible: widget.selectedFiles.files.contains(file),
+                visible: widget.selectedFiles.isFileSelected(file),
                 child: Positioned(
                   right: 4,
                   top: 4,
