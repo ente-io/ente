@@ -540,7 +540,7 @@ const englishConstants = {
     UPLOAD_TO_COLLECTION: 'Upload to album',
     ARCHIVE: 'Hide',
     ARCHIVE_SECTION_NAME: 'Hidden',
-    ALL_SECTION_NAME: 'All memories',
+    ALL_SECTION_NAME: 'All',
     MOVE_TO_COLLECTION: 'Move to album',
     UNARCHIVE: 'Unhide',
     MOVE: 'Move',
