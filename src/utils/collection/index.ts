@@ -5,11 +5,10 @@ import {
     restoreToCollection,
     updateCollectionMagicMetadata,
 } from 'services/collectionService';
-import { downloadFiles, getSelectedFiles } from 'utils/file';
+import { downloadFiles } from 'utils/file';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError, ServerErrorCodes } from 'utils/error';
-import { SelectedState } from 'types/gallery';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
@@ -43,24 +42,15 @@ export enum COLLECTION_OPS_TYPE {
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
-    setCollectionSelectorView: (value: boolean) => void,
-    selected: SelectedState,
-    files: EnteFile[],
-    setActiveCollection: (id: number) => void,
-    collection: Collection
+    collection: Collection,
+    selectedFiles: EnteFile[]
 ) {
-    setCollectionSelectorView(false);
-    const selectedFiles = getSelectedFiles(selected, files);
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
             await addToCollection(collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.MOVE:
-            await moveToCollection(
-                selected.collectionID,
-                collection,
-                selectedFiles
-            );
+            await moveToCollection(collection.id, collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
             await removeFromCollection(collection, selectedFiles);
@@ -71,7 +61,6 @@ export async function handleCollectionOps(
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);
     }
-    setActiveCollection(collection.id);
 }
 
 export function getSelectedCollection(

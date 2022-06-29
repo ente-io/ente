@@ -413,15 +413,12 @@ export default function Gallery() {
         (ops: COLLECTION_OPS_TYPE) => async (collection: Collection) => {
             startLoading();
             try {
-                await handleCollectionOps(
-                    ops,
-                    setCollectionSelectorView,
-                    selected,
-                    files,
-                    setActiveCollection,
-                    collection
-                );
+                setCollectionSelectorView(false);
+                const selectedFiles = getSelectedFiles(selected, files);
+                await handleCollectionOps(ops, collection, selectedFiles);
                 clearSelection();
+                await syncWithRemote(false, true);
+                setActiveCollection(collection.id);
             } catch (e) {
                 logError(e, 'collection ops failed', { ops });
                 setDialogMessage({
@@ -431,7 +428,6 @@ export default function Gallery() {
                     content: constants.UNKNOWN_ERROR,
                 });
             } finally {
-                await syncWithRemote(false, true);
                 finishLoading();
             }
         };
