@@ -19,7 +19,7 @@ class SelectedFiles extends ChangeNotifier {
       files.add(file);
     }
     lastSelections.clear();
-    lastSelections.add(alreadySelected ?? file);
+    lastSelections.add(file);
     notifyListeners();
   }
 
