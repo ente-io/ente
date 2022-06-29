@@ -428,7 +428,8 @@ class RemoteSyncService {
             // File was updated since the app was uninstalled
             // mark it for re-upload
             _logger.info(
-              "re-upload because file was updated since last installation: ${file.toString()}",
+              "re-upload because file was updated since last installation: "
+              "remoteFile:  ${file.toString()}, localFile: ${existingFiles[0].toString()}",
             );
             file.modificationTime = existingFiles[0].modificationTime;
             file.updationTime = null;
