@@ -24,18 +24,21 @@ function TwoFactorModal(props: Props) {
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {
-        if (!props.show) {
-            return;
-        }
         const isTwoFactorEnabled =
             getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
         setTwoFactorStatus(isTwoFactorEnabled);
+    }, []);
+
+    useEffect(() => {
+        if (!props.show) {
+            return;
+        }
         const main = async () => {
             const isTwoFactorEnabled = await getTwoFactorStatus();
             setTwoFactorStatus(isTwoFactorEnabled);
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
-                isTwoFactorEnabled: false,
+                isTwoFactorEnabled,
             });
         };
         main();
