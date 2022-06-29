@@ -26,14 +26,6 @@ export function AlbumCollectionOption({
         <>
             <OverflowMenuOption
                 onClick={handleCollectionAction(
-                    CollectionActions.SHOW_RENAME_DIALOG,
-                    false
-                )}
-                startIcon={<EditIcon />}>
-                {constants.RENAME}
-            </OverflowMenuOption>
-            <OverflowMenuOption
-                onClick={handleCollectionAction(
                     CollectionActions.SHOW_SHARE_DIALOG,
                     false
                 )}
@@ -47,6 +39,14 @@ export function AlbumCollectionOption({
                 )}
                 startIcon={<FileDownloadOutlinedIcon />}>
                 {constants.DOWNLOAD}
+            </OverflowMenuOption>
+            <OverflowMenuOption
+                onClick={handleCollectionAction(
+                    CollectionActions.SHOW_RENAME_DIALOG,
+                    false
+                )}
+                startIcon={<EditIcon />}>
+                {constants.RENAME}
             </OverflowMenuOption>
             {IsArchived ? (
                 <OverflowMenuOption
