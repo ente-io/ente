@@ -3,10 +3,16 @@ import { getTwoFactorStatus } from 'services/userService';
 import { SetLoading } from 'types/gallery';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
-import DialogBox from '../../DialogBox';
 import TwoFactorModalSetupSection from './Setup';
 import TwoFactorModalManageSection from './Manage';
+import { Dialog, DialogContent, styled } from '@mui/material';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 
+const TwoFactorDialog = styled(Dialog)(({ theme }) => ({
+    '& .MuiDialogContent-root': {
+        padding: theme.spacing(2, 4),
+    },
+}));
 interface Props {
     show: boolean;
     onHide: () => void;
@@ -18,18 +24,21 @@ function TwoFactorModal(props: Props) {
     const [isTwoFactorEnabled, setTwoFactorStatus] = useState(false);
 
     useEffect(() => {
-        if (!props.show) {
-            return;
-        }
         const isTwoFactorEnabled =
             getData(LS_KEYS.USER).isTwoFactorEnabled ?? false;
         setTwoFactorStatus(isTwoFactorEnabled);
+    }, []);
+
+    useEffect(() => {
+        if (!props.show) {
+            return;
+        }
         const main = async () => {
             const isTwoFactorEnabled = await getTwoFactorStatus();
             setTwoFactorStatus(isTwoFactorEnabled);
             setData(LS_KEYS.USER, {
                 ...getData(LS_KEYS.USER),
-                isTwoFactorEnabled: false,
+                isTwoFactorEnabled,
             });
         };
         main();
@@ -41,22 +50,18 @@ function TwoFactorModal(props: Props) {
     };
 
     return (
-        <DialogBox
-            size="xs"
-            fullWidth
-            open={props.show}
-            onClose={props.onHide}
-            attributes={{
-                title: constants.TWO_FACTOR_AUTHENTICATION,
-            }}>
-            <>
+        <TwoFactorDialog maxWidth="xs" open={props.show} onClose={props.onHide}>
+            <DialogTitleWithCloseButton onClose={props.onHide}>
+                {constants.TWO_FACTOR_AUTHENTICATION}
+            </DialogTitleWithCloseButton>
+            <DialogContent sx={{ px: 4 }}>
                 {isTwoFactorEnabled ? (
                     <TwoFactorModalManageSection close={close} />
                 ) : (
                     <TwoFactorModalSetupSection close={close} />
                 )}
-            </>
-        </DialogBox>
+            </DialogContent>
+        </TwoFactorDialog>
     );
 }
 export default TwoFactorModal;

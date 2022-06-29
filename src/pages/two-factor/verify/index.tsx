@@ -55,7 +55,7 @@ export default function Home() {
     };
     return (
         <FormContainer>
-            <FormPaper sx={{ maxWidth: '400px' }}>
+            <FormPaper sx={{ maxWidth: '410px' }}>
                 <FormTitle>{constants.TWO_FACTOR}</FormTitle>
                 <VerifyTwoFactor
                     onSubmit={onSubmit}

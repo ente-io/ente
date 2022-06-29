@@ -113,7 +113,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     close: { variant: 'danger' },
                 });
             } finally {
-                syncWithRemote();
+                syncWithRemote(false, true);
                 loader && finishLoading();
             }
         };

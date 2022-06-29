@@ -1,9 +1,10 @@
 import React from 'react';
 import constants from 'utils/strings/constants';
-import DialogBox from 'components/DialogBox';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
+import DialogBoxBase from 'components/DialogBox/base';
+import { DialogContent, DialogTitle } from '@mui/material';
 
 export interface CollectionNamerAttributes {
     callback: (name: string) => void;
@@ -39,19 +40,19 @@ export default function CollectionNamer({ attributes, ...props }: Props) {
     };
 
     return (
-        <DialogBox
-            open={props.show}
-            attributes={{ title: attributes.title }}
-            onClose={props.onHide}
-            titleCloseButton
-            maxWidth="xs">
-            <SingleInputForm
-                callback={onSubmit}
-                fieldType="text"
-                buttonText={attributes.buttonText}
-                placeholder={constants.ENTER_ALBUM_NAME}
-                initialValue={attributes.autoFilledName}
-            />
-        </DialogBox>
+        <DialogBoxBase open={props.show} onClose={props.onHide}>
+            <DialogTitle>{attributes.title}</DialogTitle>
+            <DialogContent>
+                <SingleInputForm
+                    callback={onSubmit}
+                    fieldType="text"
+                    buttonText={attributes.buttonText}
+                    placeholder={constants.ENTER_ALBUM_NAME}
+                    initialValue={attributes.autoFilledName}
+                    submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
+                    secondaryButtonAction={props.onHide}
+                />
+            </DialogContent>
+        </DialogBoxBase>
     );
 }

@@ -50,38 +50,43 @@ export default function VerifyTwoFactor(props: Props) {
             validateOnBlur={false}
             onSubmit={submitForm}>
             {({ values, errors, handleChange, handleSubmit, submitForm }) => (
-                <form
-                    noValidate
-                    onSubmit={handleSubmit}
-                    style={{ width: '100%' }}>
-                    <Typography mb={2} variant="body2" color="text.secondary">
-                        {constants.ENTER_TWO_FACTOR_OTP}
-                    </Typography>
-                    <Box my={2}>
-                        <OtpInput
-                            ref={otpInputRef}
-                            shouldAutoFocus
-                            value={values.otp}
-                            onChange={onChange(handleChange('otp'), submitForm)}
-                            numInputs={6}
-                            separator={'-'}
-                            isInputNum
-                            className={'otp-input'}
+                <VerticallyCentered>
+                    <form noValidate onSubmit={handleSubmit}>
+                        <Typography
+                            mb={2}
+                            variant="body2"
+                            color="text.secondary">
+                            {constants.ENTER_TWO_FACTOR_OTP}
+                        </Typography>
+                        <Box my={2}>
+                            <OtpInput
+                                ref={otpInputRef}
+                                shouldAutoFocus
+                                value={values.otp}
+                                onChange={onChange(
+                                    handleChange('otp'),
+                                    submitForm
+                                )}
+                                numInputs={6}
+                                separator={'-'}
+                                isInputNum
+                                className={'otp-input'}
+                            />
+                            {errors.otp && (
+                                <CenteredFlex sx={{ mt: 1 }}>
+                                    <InvalidInputMessage>
+                                        {constants.INCORRECT_CODE}
+                                    </InvalidInputMessage>
+                                </CenteredFlex>
+                            )}
+                        </Box>
+                        <SubmitButton
+                            buttonText={props.buttonText}
+                            loading={waiting}
+                            disabled={values.otp.length < 6}
                         />
-                        {errors.otp && (
-                            <CenteredFlex sx={{ mt: 1 }}>
-                                <InvalidInputMessage>
-                                    {constants.INCORRECT_CODE}
-                                </InvalidInputMessage>
-                            </CenteredFlex>
-                        )}
-                    </Box>
-                    <SubmitButton
-                        buttonText={props.buttonText}
-                        loading={waiting}
-                        disabled={values.otp.length < 6}
-                    />
-                </form>
+                    </form>
+                </VerticallyCentered>
             )}
         </Formik>
     );

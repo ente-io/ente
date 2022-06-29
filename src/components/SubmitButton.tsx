@@ -4,13 +4,12 @@ import React, { FC } from 'react';
 export interface SubmitButtonProps {
     loading: boolean;
     buttonText: string;
-    inline?: any;
+
     disabled?: boolean;
 }
 const SubmitButton: FC<ButtonProps<'button', SubmitButtonProps>> = ({
     loading,
     buttonText,
-    inline,
     disabled,
     sx,
     ...props
@@ -21,7 +20,6 @@ const SubmitButton: FC<ButtonProps<'button', SubmitButtonProps>> = ({
             variant="contained"
             color="accent"
             type="submit"
-            fullWidth={!inline}
             disabled={loading || disabled}
             sx={{ my: 4, ...sx }}
             {...props}>
