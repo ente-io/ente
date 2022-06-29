@@ -33,9 +33,14 @@ class GrantPermissionsWidget extends StatelessWidget {
                             : Image.asset(
                                 'assets/loading_photos_background_dark.png'),
                         Center(
-                          child: Image.asset(
-                            "assets/gallery_locked.png",
-                            height: 160,
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 42),
+                              Image.asset(
+                                "assets/gallery_locked.png",
+                                height: 160,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -43,7 +48,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  padding: const EdgeInsets.fromLTRB(40, 0, 40, 105),
                   child: RichText(
                     text: TextSpan(
                       style: Theme.of(context)
@@ -74,9 +79,9 @@ class GrantPermissionsWidget extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: Theme.of(context).backgroundColor,
-              spreadRadius: 200,
-              blurRadius: 100,
-              offset: Offset(0, 160),
+              spreadRadius: 190,
+              blurRadius: 30,
+              offset: Offset(0, 170),
             )
           ],
         ),
