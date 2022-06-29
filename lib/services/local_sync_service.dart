@@ -245,6 +245,23 @@ class LocalSyncService {
         );
       }
       for (final file in updatedFiles) {
+        _logger.info(
+          're-upload locally updated file ${file.toString()}',
+        );
+        if (Platform.isIOS) {
+          var assetEntity = await AssetEntity.fromId(file.localID);
+          if (assetEntity == null) {
+            var isLocallyAvailable =
+                assetEntity.isLocallyAvailable(isOrigin: true);
+            _logger.info(
+              're-upload asset ${file.toString()} with localAvailableFlag '
+              '$isLocallyAvailable and fav ${assetEntity.isFavorite}',
+            );
+          } else {
+            _logger
+                .info('re-upload failed to fetch assetInfo ${file.toString()}');
+          }
+        }
         await _db.updateUploadedFile(
           file.localID,
           file.title,
