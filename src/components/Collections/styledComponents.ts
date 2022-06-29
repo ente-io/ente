@@ -59,7 +59,7 @@ export const Hider = styled('div')<{ hide: boolean }>`
 `;
 
 export const CollectionBarTile = styled(CollectionTile)`
-    width: 80px;
+    width: 90px;
     height: 64px;
 `;
 
