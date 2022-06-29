@@ -78,15 +78,11 @@ import {
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
-    clearLocalTrash,
-    emptyTrash,
     getLocalTrash,
     getTrashedFiles,
     syncTrash,
 } from 'services/trashService';
-import { Trash } from 'types/trash';
 
-import DeleteBtn from 'components/DeleteBtn';
 import FixCreationTime, {
     FixCreationTimeAttributes,
 } from 'components/FixCreationTime';
@@ -193,7 +189,6 @@ export default function Gallery() {
     const [collectionSummaries, setCollectionSummaries] =
         useState<CollectionSummaries>();
     const [activeCollection, setActiveCollection] = useState<number>(undefined);
-    const [trash, setTrash] = useState<Trash>([]);
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
@@ -256,7 +251,6 @@ export default function Gallery() {
             files.push(...getTrashedFiles(trash));
             setFiles(sortFiles(files));
             setCollections(collections);
-            setTrash(trash);
             await syncWithRemote(true);
             setIsFirstLoad(false);
             setJustSignedUp(false);
@@ -359,7 +353,6 @@ export default function Gallery() {
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);
             const trash = await syncTrash(collections, setFiles, files);
-            setTrash(trash);
             files.push(...getTrashedFiles(trash));
         } catch (e) {
             logError(e, 'syncWithRemote failed');
@@ -553,40 +546,6 @@ export default function Gallery() {
             appContext.resetSharedFiles();
         }
         setCollectionSelectorView(false);
-    };
-
-    const emptyTrashHandler = () =>
-        setDialogMessage({
-            title: constants.CONFIRM_EMPTY_TRASH,
-            content: constants.EMPTY_TRASH_MESSAGE,
-
-            proceed: {
-                action: emptyTrashHelper,
-                text: constants.EMPTY_TRASH,
-                variant: 'danger',
-            },
-            close: { text: constants.CANCEL },
-        });
-    const emptyTrashHelper = async () => {
-        startLoading();
-        try {
-            await emptyTrash();
-            if (selected.collectionID === TRASH_SECTION) {
-                clearSelection();
-            }
-            await clearLocalTrash();
-            setActiveCollection(ALL_SECTION);
-        } catch (e) {
-            setDialogMessage({
-                title: constants.ERROR,
-
-                close: { variant: 'danger' },
-                content: constants.UNKNOWN_ERROR,
-            });
-        } finally {
-            await syncWithRemote(false, true);
-            finishLoading();
-        }
     };
 
     const fixTimeHelper = async () => {
@@ -791,9 +750,6 @@ export default function Gallery() {
                             )}
                         />
                     )}
-                {activeCollection === TRASH_SECTION && trash?.length > 0 && (
-                    <DeleteBtn onClick={emptyTrashHandler} />
-                )}
             </FullScreenDropZone>
         </GalleryContext.Provider>
     );
