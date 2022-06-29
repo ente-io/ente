@@ -426,9 +426,10 @@ class RemoteSyncService {
           file.generatedID = existingFiles[0].generatedID;
           if (file.modificationTime != existingFiles[0].modificationTime) {
             // File was updated since the app was uninstalled
+            // mark it for re-upload
             _logger.info(
-              "Updated since last installation: " +
-                  file.uploadedFileID.toString(),
+              "re-upload because file was updated since last installation: "
+              "remoteFile:  ${file.toString()}, localFile: ${existingFiles[0].toString()}",
             );
             file.modificationTime = existingFiles[0].modificationTime;
             file.updationTime = null;
