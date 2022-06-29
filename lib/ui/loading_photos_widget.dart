@@ -104,9 +104,15 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                             color: Colors.white.withOpacity(0.25),
                             colorBlendMode: BlendMode.modulate,
                           ),
-                    Lottie.asset(
-                      'assets/loadingGalleryLottie.json',
-                      height: 400,
+                    const SizedBox(height: 20),
+                    Column(
+                      children: [
+                        const SizedBox(height: 50),
+                        Lottie.asset(
+                          'assets/loadingGalleryLottie.json',
+                          height: 400,
+                        ),
+                      ],
                     )
                   ],
                 ),
