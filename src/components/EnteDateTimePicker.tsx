@@ -50,6 +50,14 @@ const EnteDateTimePicker = ({
                         '.MuiPickersToolbar-penIconButton': {
                             display: 'none',
                         },
+                        '.MuiDialog-paper': { width: '320px' },
+                        '.MuiClockPicker-root': {
+                            position: 'relative',
+                            minHeight: '292px',
+                        },
+                        '.PrivatePickersSlideTransition-root': {
+                            minHeight: '200px',
+                        },
                     },
                 }}
                 renderInput={(params) => (
