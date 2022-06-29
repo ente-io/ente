@@ -472,7 +472,7 @@ export default function Gallery() {
         }
     };
 
-    const showCreateCollectionModal = (ops?: COLLECTION_OPS_TYPE) => {
+    const showCreateCollectionModal = (ops: COLLECTION_OPS_TYPE) => {
         const callback = async (collectionName: string) => {
             try {
                 startLoading();
@@ -481,9 +481,7 @@ export default function Gallery() {
                     CollectionType.album,
                     collections
                 );
-                if (ops) {
-                    await collectionOpsHelper(ops)(collection);
-                }
+                await collectionOpsHelper(ops)(collection);
             } catch (e) {
                 logError(e, 'create and collection ops failed', { ops });
                 setDialogMessage({
