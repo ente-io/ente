@@ -237,7 +237,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   }
 
   Future<void> _displayInfo(File file) async {
-    return showDialog<void>(
+    return showModalBottomSheet<void>(
       context: context,
       builder: (BuildContext context) {
         return FileInfoWidget(file);

@@ -52,7 +52,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       Row(
         children: [
           Icon(Icons.calendar_today_outlined, color: infoColor),
-          Padding(padding: EdgeInsets.all(4)),
+          const SizedBox(height: 8),
           Text(
             getFormattedTime(
               DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
@@ -61,7 +61,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
         ],
       ),
-      Padding(padding: EdgeInsets.all(6)),
+      const SizedBox(height: 12),
       Row(
         children: [
           Icon(Icons.folder_outlined, color: infoColor),
@@ -75,7 +75,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
         ],
       ),
-      Padding(padding: EdgeInsets.all(6)),
+      const SizedBox(height: 12),
     ];
     items.addAll(
       [
@@ -86,7 +86,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             _getFileSize(),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        const SizedBox(height: 12),
       ],
     );
     if (file.localID != null && !_isImage) {
@@ -118,7 +118,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             ],
           ),
-          Padding(padding: EdgeInsets.all(6)),
+          const SizedBox(height: 12),
         ],
       );
     }
@@ -144,7 +144,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
     items.add(
-      Padding(padding: EdgeInsets.all(12)),
+      const SizedBox(height: 12),
     );
     items.add(
       Row(
@@ -169,7 +169,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 style: Theme.of(context).textTheme.headline5,
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const SizedBox(width: 16),
             Icon(Icons.edit, color: infoColor),
           ],
         ),
@@ -180,13 +180,41 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
 
-    return AlertDialog(
-      title: titleContent,
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: items,
+    // return AlertDialog(
+    //   title: titleContent,
+    //   content: SingleChildScrollView(
+    //     child: ListBody(
+    //       children: items,
+    //     ),
+    //   ),
+    // );
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: Icon(
+                  Icons.close,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 2),
+                child: Text(
+                  'Details',
+                  style: Theme.of(context).textTheme.bodyText1,
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 
