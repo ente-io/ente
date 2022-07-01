@@ -54,10 +54,6 @@ export const ActiveIndicator = styled('div')`
     border-radius: 2px;
 `;
 
-export const Hider = styled('div')<{ hide: boolean }>`
-    display: ${(props) => (props.hide ? 'none' : 'block')};
-`;
-
 export const CollectionBarTile = styled(CollectionTile)`
     width: 90px;
     height: 64px;
@@ -67,10 +63,6 @@ export const AllCollectionTile = styled(CollectionTile)`
     width: 150px;
     height: 150px;
     margin: 2px;
-`;
-
-export const CollectionTitleWithDashedBorder = styled(CollectionTile)`
-    border: 1px dashed ${({ theme }) => theme.palette.grey.A200};
 `;
 
 export const ResultPreviewTile = styled(CollectionTile)`

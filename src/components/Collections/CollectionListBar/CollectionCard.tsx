@@ -39,7 +39,7 @@ export default CollectionListBarCard;
 
 function CollectionCardText({ collectionName }) {
     return (
-        <CollectionBarTileText>
+        <CollectionBarTileText zIndex={1}>
             <TruncateText text={collectionName} />
         </CollectionBarTileText>
     );
