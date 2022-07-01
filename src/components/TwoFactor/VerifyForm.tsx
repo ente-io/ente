@@ -7,25 +7,39 @@ import SubmitButton from 'components/SubmitButton';
 import VerticallyCentered, { CenteredFlex } from 'components/Container';
 import { Box, Typography, TypographyProps } from '@mui/material';
 import InvalidInputMessage from './InvalidInputMessage';
+import { sleep } from 'utils/common';
 
 interface formValues {
     otp: string;
 }
 interface Props {
-    onSubmit: any;
+    onSubmit: VerifyTwoFactorCallback;
     buttonText: string;
 }
+
+export type VerifyTwoFactorCallback = (
+    otp: string,
+    markSuccessful: () => Promise<void>
+) => Promise<void>;
 
 export default function VerifyTwoFactor(props: Props) {
     const [waiting, setWaiting] = useState(false);
     const otpInputRef = useRef(null);
+    const [success, setSuccess] = useState(false);
+
+    const markSuccessful = async () => {
+        setWaiting(false);
+        setSuccess(true);
+        await sleep(1000);
+    };
+
     const submitForm = async (
         { otp }: formValues,
         { setFieldError, resetForm }: FormikHelpers<formValues>
     ) => {
         try {
             setWaiting(true);
-            await props.onSubmit(otp);
+            await props.onSubmit(otp, markSuccessful);
         } catch (e) {
             resetForm();
             for (let i = 0; i < 6; i++) {
@@ -83,6 +97,7 @@ export default function VerifyTwoFactor(props: Props) {
                         <SubmitButton
                             buttonText={props.buttonText}
                             loading={waiting}
+                            success={success}
                             disabled={values.otp.length < 6}
                         />
                     </form>
