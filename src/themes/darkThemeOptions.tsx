@@ -61,6 +61,12 @@ declare module '@mui/material/SvgIcon' {
     }
 }
 
+declare module '@mui/material/Alert' {
+    export interface AlertPropsColorOverrides {
+        accent: true;
+    }
+}
+
 // Create a theme instance.
 const darkThemeOptions = createTheme({
     components: {
