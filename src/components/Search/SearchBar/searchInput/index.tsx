@@ -12,7 +12,6 @@ import {
 } from 'types/search';
 import constants from 'utils/strings/constants';
 import { ValueContainerWithIcon } from './valueContainerWithIcon';
-import { SearchInputWrapper } from './styledComponents';
 import { SelectStyles } from '../../../../styles/search';
 import AsyncSelect from 'react-select/async';
 import CloseIcon from '@mui/icons-material/Close';
@@ -20,11 +19,12 @@ import { UpdateSearch } from 'types/search';
 import { EnteFile } from 'types/file';
 import { Collection } from 'types/collection';
 import { OptionWithInfo } from './optionWithInfo';
+import { SearchInputWrapper } from '../styledComponents';
 
 interface Iprops {
     isOpen: boolean;
     updateSearch: UpdateSearch;
-    setOpen: (value: boolean) => void;
+    setIsOpen: (value: boolean) => void;
     files: EnteFile[];
     collections: Collection[];
     setActiveCollection: (id: number) => void;
@@ -46,7 +46,7 @@ export default function SearchInput(props: Iprops) {
             setTimeout(() => {
                 appContext.finishLoading();
             }, 10);
-            props.setOpen(false);
+            props.setIsOpen(false);
             setValue(null);
         }
     };
@@ -66,13 +66,13 @@ export default function SearchInput(props: Iprops) {
                 search = {
                     date: selectedOption.value as DateValue,
                 };
-                props.setOpen(true);
+                props.setIsOpen(true);
                 break;
             case SuggestionType.LOCATION:
                 search = {
                     location: selectedOption.value as Bbox,
                 };
-                props.setOpen(true);
+                props.setIsOpen(true);
                 break;
             case SuggestionType.COLLECTION:
                 search = { collection: selectedOption.value as number };

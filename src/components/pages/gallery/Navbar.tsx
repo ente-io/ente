@@ -15,6 +15,7 @@ interface Iprops {
     isFirstFetch: boolean;
     openUploader: () => void;
     isInSearchMode: boolean;
+    setIsInSearchMode: (v: boolean) => void;
     collections: Collection[];
     files: EnteFile[];
     setActiveCollection: (id: number) => void;
@@ -29,6 +30,7 @@ export function GalleryNavbar({
     files,
     setActiveCollection,
     updateSearch,
+    setIsInSearchMode,
 }: Iprops) {
     return (
         <NavbarBase>
@@ -40,7 +42,8 @@ export function GalleryNavbar({
                 </FluidContainer>
             ) : (
                 <SearchBar
-                    isFirstFetch={isFirstFetch}
+                    isInSearchMode={isInSearchMode}
+                    setIsInSearchMode={setIsInSearchMode}
                     collections={collections}
                     files={getNonTrashedUniqueUserFiles(files)}
                     setActiveCollection={setActiveCollection}

@@ -628,6 +628,7 @@ export default function Gallery() {
                 <GalleryNavbar
                     openSidebar={openSidebar}
                     isFirstFetch={isFirstFetch}
+                    setIsInSearchMode={setIsInSearchMode}
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     collections={collections}
