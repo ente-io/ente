@@ -14,7 +14,7 @@ const Ellipse = styled(Typography)`
 export default function TruncateText({ text }) {
     return (
         <Tooltip title={text}>
-            <Box height={'2em'} overflow="hidden">
+            <Box height={'2.1em'} overflow="hidden">
                 <Ellipse variant="body2" sx={{ wordBreak: 'break-word' }}>
                     {text}
                 </Ellipse>
