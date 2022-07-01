@@ -11,7 +11,7 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
-import 'package:photos/ui/share_collection_widget.dart';
+import 'package:photos/ui/sharing/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
 

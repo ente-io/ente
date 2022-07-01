@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/ui/app_lock.dart';
 import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 
 class LockScreen extends StatefulWidget {

@@ -11,7 +11,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/log_file_viewer.dart';
+import 'package:photos/ui/tools/debug/log_file_viewer.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:share_plus/share_plus.dart';
 

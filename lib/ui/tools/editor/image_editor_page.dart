@@ -15,7 +15,7 @@ import 'package:photos/models/location.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/editor/filtered_image.dart';
+import 'package:photos/ui/tools/editor/filtered_image.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';

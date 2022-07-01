@@ -7,7 +7,7 @@ import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/deduplication_service.dart';
-import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/common/common_elements.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/data_util.dart';

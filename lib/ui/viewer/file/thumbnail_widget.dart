@@ -11,7 +11,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
-import 'package:photos/ui/common_elements.dart';
+import 'package:photos/ui/common/common_elements.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
