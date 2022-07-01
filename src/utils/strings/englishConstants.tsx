@@ -246,6 +246,7 @@ const englishConstants = {
     MANAGEMENT_PORTAL: 'Manage payment method',
     MANAGE_FAMILY_PORTAL: 'Manage family',
     LEAVE_FAMILY_PLAN: 'Leave family plan',
+    LEAVE: 'Leave',
     LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
     CHOOSE_PLAN: 'Choose your subscription plan',
     MANAGE_PLAN: 'Manage your subscription',

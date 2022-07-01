@@ -22,11 +22,10 @@ export default function ExitSection() {
 
     const showDeleteAccountDirections = () => {
         setDialogMessage({
-            title: `${constants.DELETE_ACCOUNT}`,
+            title: constants.DELETE_ACCOUNT,
             content: constants.DELETE_ACCOUNT_MESSAGE(),
-
             proceed: {
-                text: constants.DELETE_ACCOUNT,
+                text: constants.DELETE,
                 action: () => {
                     initiateEmail('account-deletion@ente.io');
                 },

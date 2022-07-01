@@ -26,7 +26,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             title: `${constants.LEAVE_FAMILY_PLAN}`,
             content: constants.LEAVE_FAMILY_CONFIRM,
             proceed: {
-                text: constants.LEAVE_FAMILY_PLAN,
+                text: constants.LEAVE,
                 action: onLeaveFamilyClick,
                 variant: 'danger',
             },
