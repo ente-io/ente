@@ -4,10 +4,7 @@ import { isPartOfFamily } from 'utils/billing';
 import { SpaceBetweenFlex } from 'components/Container';
 import { UsageSection } from './usageSection';
 
-export function SubscriptionCardContent({
-    hasNonAdminFamilyMembers,
-    userDetails,
-}) {
+export function SubscriptionCardContent({ userDetails }) {
     const totalUsage = useMemo(() => {
         if (isPartOfFamily(userDetails.familyData)) {
             return userDetails.familyData.members.reduce(
@@ -36,10 +33,7 @@ export function SubscriptionCardContent({
                 totalStorage={totalStorage}
                 totalUsage={totalUsage}
             />
-            <UsageSection
-                hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
-                userDetails={userDetails}
-            />
+            <UsageSection userDetails={userDetails} />
         </SpaceBetweenFlex>
     );
 }

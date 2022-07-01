@@ -4,7 +4,6 @@ import React from 'react';
 import { Box, Skeleton } from '@mui/material';
 import { UserDetails } from 'types/user';
 
-import { hasNonAdminFamilyMembers } from 'utils/billing';
 import { SubscriptionCardContent } from './contentOverlay';
 
 const SUBSCRIPTION_CARD_SIZE = 152;
@@ -28,10 +27,7 @@ export default function SubscriptionCard({ userDetails, onClick }: Iprops) {
 
     return (
         <Box position="relative" height={SUBSCRIPTION_CARD_SIZE}>
-            <SubscriptionCardContent
-                hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
-                userDetails={userDetails}
-            />
+            <SubscriptionCardContent userDetails={userDetails} />
             <BackgroundOverlay />
             <ClickOverlay onClick={onClick} />
         </Box>
