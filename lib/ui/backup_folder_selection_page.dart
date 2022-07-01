@@ -10,8 +10,8 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
   final bool isOnboarding;

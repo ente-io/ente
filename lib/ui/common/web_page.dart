@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+
+class WebPage extends StatefulWidget {
+  final String title;
+  final String url;
+
+  const WebPage(this.title, this.url, {Key key}) : super(key: key);
+
+  @override
+  _WebPageState createState() => _WebPageState();
+}
+
+class _WebPageState extends State<WebPage> {
+  bool _hasLoadedPage = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color.fromRGBO(
+          10,
+          20,
+          20,
+          1.0,
+        ), // force dark theme for appBar till website/family plans add supports for light theme
+        foregroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text(widget.title),
+        actions: [_hasLoadedPage ? Container() : loadWidget],
+      ),
+      backgroundColor: Colors.black,
+      body: InAppWebView(
+        initialUrlRequest: URLRequest(url: Uri.parse(widget.url)),
+        initialOptions: InAppWebViewGroupOptions(
+          crossPlatform: InAppWebViewOptions(transparentBackground: true),
+        ),
+        onLoadStop: (c, url) {
+          setState(() {
+            _hasLoadedPage = true;
+          });
+        },
+      ),
+    );
+  }
+}

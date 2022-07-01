@@ -4,11 +4,11 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/account/email_entry_page.dart';
+import 'package:photos/ui/account/login_page.dart';
+import 'package:photos/ui/account/password_entry_page.dart';
+import 'package:photos/ui/account/password_reentry_page.dart';
 import 'package:photos/ui/common/gradientButton.dart';
-import 'package:photos/ui/email_entry_page.dart';
-import 'package:photos/ui/login_page.dart';
-import 'package:photos/ui/password_entry_page.dart';
-import 'package:photos/ui/password_reentry_page.dart';
 import 'package:photos/ui/payment/subscription.dart';
 
 class LandingPageWidget extends StatefulWidget {

@@ -9,12 +9,12 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/app_lock.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/sessions_page.dart';
+import 'package:photos/ui/account/sessions_page.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
+import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/toast_util.dart';
 

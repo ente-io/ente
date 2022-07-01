@@ -7,7 +7,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
 

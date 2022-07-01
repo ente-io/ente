@@ -1,11 +1,11 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
-import 'package:photos/ui/app_update_dialog.dart';
+import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
-import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
