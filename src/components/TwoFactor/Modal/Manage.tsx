@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
-import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { disableTwoFactor } from 'services/userService';
@@ -13,8 +13,7 @@ interface Iprops {
 
 export default function TwoFactorModalManageSection(props: Iprops) {
     const { close } = props;
-    const { setDialogMessage, setDisappearingFlashMessage } =
-        useContext(AppContext);
+    const { setDialogMessage } = useContext(AppContext);
 
     const warnTwoFactorDisable = async () => {
         setDialogMessage({
@@ -38,14 +37,9 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                 isTwoFactorEnabled: false,
             });
             close();
-            setDisappearingFlashMessage({
-                message: constants.TWO_FACTOR_DISABLE_SUCCESS,
-                type: FLASH_MESSAGE_TYPE.INFO,
-            });
         } catch (e) {
-            setDisappearingFlashMessage({
-                message: constants.TWO_FACTOR_DISABLE_FAILED,
-                type: FLASH_MESSAGE_TYPE.DANGER,
+            setDialogMessage({
+                title: constants.TWO_FACTOR_DISABLE_FAILED,
             });
         }
     };

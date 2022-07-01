@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { enableTwoFactor, setupTwoFactor } from 'services/userService';
 import constants from 'utils/strings/constants';
 import VerticallyCentered from 'components/Container';
@@ -8,7 +8,6 @@ import VerifyTwoFactor, {
 } from 'components/TwoFactor/VerifyForm';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { TwoFactorSecret } from 'types/user';
 import Card from '@mui/material/Card';
@@ -27,7 +26,6 @@ export default function SetupTwoFactor() {
         useState<TwoFactorSecret>(null);
 
     const router = useRouter();
-    const appContext = useContext(AppContext);
     useEffect(() => {
         if (twoFactorSecret) {
             return;
@@ -55,10 +53,6 @@ export default function SetupTwoFactor() {
         setData(LS_KEYS.USER, {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
-        });
-        appContext.setDisappearingFlashMessage({
-            message: constants.TWO_FACTOR_SETUP_SUCCESS,
-            type: FLASH_MESSAGE_TYPE.SUCCESS,
         });
         router.push(PAGES.GALLERY);
     };

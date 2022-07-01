@@ -8,7 +8,7 @@ import VerticallyCentered from 'components/Container';
 import { Button } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
-import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
@@ -70,10 +70,6 @@ export default function Recover() {
                 isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            appContext.setDisappearingFlashMessage({
-                message: constants.TWO_FACTOR_DISABLE_SUCCESS,
-                type: FLASH_MESSAGE_TYPE.INFO,
-            });
             router.push(PAGES.CREDENTIALS);
         } catch (e) {
             logError(e, 'two factor recovery failed');
