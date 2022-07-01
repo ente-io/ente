@@ -42,8 +42,8 @@ html, body {
 }
 
 .pswp__button--custom{
-    background: none;    
-    background-image: none;    
+    background: none !important;    
+    background-image: none !important;    
     color:#fff;
 }
 
