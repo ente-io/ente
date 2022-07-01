@@ -6,10 +6,10 @@ import exportService from 'services/exportService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
 import isElectron from 'is-electron';
-import { initiateEmail } from 'utils/common';
 import { AppContext } from 'pages/_app';
 import EnteSpinner from 'components/EnteSpinner';
 import { getDownloadAppMessage } from 'utils/ui';
+import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
 
 export default function HelpSection() {
     const [exportModalView, setExportModalView] = useState(false);
@@ -24,8 +24,6 @@ export default function HelpSection() {
         win.focus();
     }
 
-    const initToSupportMail = () => initiateEmail('contact@ente.io');
-
     function exportFiles() {
         if (isElectron()) {
             setExportModalView(true);
@@ -39,12 +37,10 @@ export default function HelpSection() {
             <SidebarButton onClick={openFeedbackURL}>
                 {constants.REQUEST_FEATURE}
             </SidebarButton>
-            <SidebarButton onClick={initToSupportMail}>
-                <a
-                    style={{ textDecoration: 'none', color: 'inherit' }}
-                    href="mailto:contact@ente.io">
-                    {constants.SUPPORT}
-                </a>
+            <SidebarButton
+                LinkComponent={NoStyleAnchor}
+                href="mailto:contact@ente.io">
+                {constants.SUPPORT}
             </SidebarButton>
             <SidebarButton onClick={exportFiles}>
                 <div style={{ display: 'flex' }}>

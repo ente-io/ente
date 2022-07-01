@@ -4,7 +4,7 @@ import { Button, styled } from '@mui/material';
 import GetDeviceOS, { OS } from 'utils/common/deviceDetection';
 import constants from 'utils/strings/constants';
 
-const NoStyleAnchor = styled('a')`
+export const NoStyleAnchor = styled('a')`
     color: inherit;
     text-decoration: none !important;
     &:hover {
