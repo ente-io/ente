@@ -27,6 +27,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
 import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorderRounded';
+import ChevronRight from '@mui/icons-material/ChevronRight';
 
 interface Iprops {
     isOpen: boolean;
@@ -334,18 +335,15 @@ function PhotoSwipe(props: Iprops) {
                 ref={pswpElement}>
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
-                    <LivePhotoBtn
-                        onClick={livePhotoBtnOptions.click}
-                        onMouseEnter={livePhotoBtnOptions.show}
-                        onMouseLeave={livePhotoBtnOptions.hide}
-                        disabled={livePhotoBtnOptions.loading}
-                        style={{
-                            display: livePhotoBtnOptions.visible
-                                ? 'block'
-                                : 'none',
-                        }}>
-                        {livePhotoBtnHTML} {constants.LIVE}
-                    </LivePhotoBtn>
+                    {livePhotoBtnOptions.visible && (
+                        <LivePhotoBtn
+                            onClick={livePhotoBtnOptions.click}
+                            onMouseEnter={livePhotoBtnOptions.show}
+                            onMouseLeave={livePhotoBtnOptions.hide}
+                            disabled={livePhotoBtnOptions.loading}>
+                            {livePhotoBtnHTML} {constants.LIVE}
+                        </LivePhotoBtn>
+                    )}
                     <div className="pswp__container">
                         <div className="pswp__item" />
                         <div className="pswp__item" />
@@ -414,11 +412,17 @@ function PhotoSwipe(props: Iprops) {
                         <button
                             className="pswp__button pswp__button--arrow--left"
                             title={constants.PREVIOUS}
-                        />
+                            onClick={photoSwipe?.prev}>
+                            <ChevronRight
+                                sx={{ transform: 'rotate(180deg)' }}
+                            />
+                        </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
                             title={constants.NEXT}
-                        />
+                            onClick={photoSwipe?.next}>
+                            <ChevronRight />
+                        </button>
                         <div className="pswp__caption">
                             <div />
                         </div>

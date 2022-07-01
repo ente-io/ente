@@ -98,16 +98,15 @@ html, body {
     object-fit: contain;
 }
 
-.pswp__button--arrow--left::before, .pswp__button--arrow--right::before {
-    background-color: #333333;
+.pswp__button--arrow--left, .pswp__button--arrow--right{
+    color:#fff;
+    background-color: #333333  !important;
     border-radius: 50%;
     width: 56px;
     height: 56px;
-    top:0;
 }
-
-.pswp__button--arrow--left::before {   
-    background-position: -128px -32px;
+.pswp__button--arrow--left::before, .pswp__button--arrow--right::before {
+     background: none !important; 
 }
 
 .pswp__button--arrow--left{
@@ -118,9 +117,6 @@ html, body {
     margin-right: 20px;
 }
 
-.pswp__button--arrow--right::before {   
-    background-position: -83px -30px;
-}
 
 .bg-upload-progress-bar {
     background-color: #51cd7c;
