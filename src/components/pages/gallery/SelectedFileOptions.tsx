@@ -79,8 +79,8 @@ const SelectedFileOptions = ({
 
     const trashHandler = () =>
         setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.TRASH_MESSAGE,
+            title: constants.TRASH_FILES_TITLE,
+            content: constants.TRASH_FILES_MESSAGE,
             proceed: {
                 action: deleteFileHelper,
                 text: constants.MOVE_TO_TRASH,
@@ -91,8 +91,8 @@ const SelectedFileOptions = ({
 
     const permanentlyDeleteHandler = () =>
         setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.DELETE_MESSAGE,
+            title: constants.DELETE_FILES_TITLE,
+            content: constants.DELETE_FILES_MESSAGE,
             proceed: {
                 action: () => deleteFileHelper(true),
                 text: constants.DELETE,

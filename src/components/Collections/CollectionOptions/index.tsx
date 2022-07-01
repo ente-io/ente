@@ -159,8 +159,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const confirmDeleteCollection = () => {
         setDialogMessage({
-            title: constants.CONFIRM_DELETE_COLLECTION,
-            content: constants.DELETE_COLLECTION_MESSAGE(),
+            title: constants.DELETE_COLLECTION_TITLE,
+            content: constants.DELETE_COLLECTION_MESSAGE,
             proceed: {
                 text: constants.DELETE_COLLECTION,
                 action: handleCollectionAction(CollectionActions.DELETE),
@@ -189,7 +189,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const confirmEmptyTrash = () =>
         setDialogMessage({
-            title: constants.CONFIRM_EMPTY_TRASH,
+            title: constants.EMPTY_TRASH_TITLE,
             content: constants.EMPTY_TRASH_MESSAGE,
 
             proceed: {

@@ -138,8 +138,10 @@ const englishConstants = {
     ),
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
-    CONFIRM_DELETE: 'Confirm deletion',
-    DELETE_MESSAGE: `The selected files will be permanently deleted and can't be restored `,
+    TRASH_FILES_TITLE: 'Delete files?',
+    DELETE_FILES_TITLE: 'Delete immediately?',
+    DELETE_FILES_MESSAGE:
+        'Selected files will be permanently deleted from your ente account.',
     DELETE_FILE: 'Delete files',
     DELETE: 'Delete',
     MULTI_FOLDER_UPLOAD: 'Multiple folders detected',
@@ -328,17 +330,11 @@ const englishConstants = {
     PAYPAL_MANAGE_NOT_SUPPORTED: 'Manage paypal plan',
     RENAME: 'Rename',
     RENAME_COLLECTION: 'Rename album',
-    CONFIRM_DELETE_COLLECTION: 'Confirm album deletion',
+    DELETE_COLLECTION_TITLE: 'Delete album?',
     DELETE_COLLECTION: 'Delete album',
     DELETE_COLLECTION_FAILED: 'Album deletion failed, please try again',
-    DELETE_COLLECTION_MESSAGE: () => (
-        <>
-            <p>Are you sure you want to delete this album?</p>
-            <p>
-                All files that are unique to this album will be moved to trash
-            </p>
-        </>
-    ),
+    DELETE_COLLECTION_MESSAGE:
+        'Files that are unique to this album will be moved to trash, and this album would be deleted.',
     SHARE: 'Share',
     SHARE_COLLECTION: 'Share album',
     SHARE_WITH_PEOPLE: 'Share with your loved ones',
@@ -550,8 +546,8 @@ const englishConstants = {
     CONFIRM_REMOVE: 'Confirm removal',
     TRASH: 'Trash',
     MOVE_TO_TRASH: 'Move to trash',
-    TRASH_MESSAGE:
-        'The selected files will be removed from all albums and moved to trash ',
+    TRASH_FILES_MESSAGE:
+        'Selected files will be removed from all albums and moved to trash.',
     DELETE_PERMANENTLY: 'Delete permanently',
     RESTORE: 'Restore',
     CONFIRM_RESTORE: 'Confirm restoration',
@@ -560,9 +556,9 @@ const englishConstants = {
     AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
         `Permanently deleted ${relativeTime}`,
     EMPTY_TRASH: 'Empty trash',
-    CONFIRM_EMPTY_TRASH: 'Empty trash?',
+    EMPTY_TRASH_TITLE: 'Empty trash?',
     EMPTY_TRASH_MESSAGE:
-        'All files will be permanently removed from your ente account',
+        'These files will be permanently deleted from your ente account.',
 
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
