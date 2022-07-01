@@ -1,10 +1,9 @@
 import { PeriodToggler } from './periodToggler';
 import { ManageSubscription } from './manageSubscription';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import constants from 'utils/strings/constants';
-import { Plan, Subscription } from 'types/billing';
+import { Plan } from 'types/billing';
 import {
-    getUserSubscription,
     isUserSubscribedPlan,
     isSubscriptionCancelled,
     updateSubscription,
@@ -14,6 +13,7 @@ import {
     planForSubscription,
     hasMobileSubscription,
     hasPaypalSubscription,
+    getLocalUserSubscription,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
 import { GalleryContext } from 'pages/gallery';
@@ -25,6 +25,8 @@ import Plans from './plans';
 import { Box, Dialog, DialogContent, styled } from '@mui/material';
 import { CenteredFlex } from 'components/Container';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import { useLocalState } from 'hooks/useLocalState';
+import { LS_KEYS } from 'utils/storage/localStorage';
 
 interface Props {
     modalView: boolean;
@@ -46,8 +48,8 @@ const BreakPointWrapper = styled(Box)`
     }
 `;
 function PlanSelector(props: Props) {
-    const subscription: Subscription = getUserSubscription();
-    const [plans, setPlans] = useState<Plan[]>(null);
+    const subscription = useMemo(() => getLocalUserSubscription(), []);
+    const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);

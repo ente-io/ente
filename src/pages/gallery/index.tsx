@@ -23,7 +23,6 @@ import {
     getCollectionSummaries,
 } from 'services/collectionService';
 import constants from 'utils/strings/constants';
-import billingService from 'services/billingService';
 import { checkSubscriptionPurchase } from 'utils/billing';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
@@ -348,7 +347,6 @@ export default function Gallery() {
                 throw new Error(ServerErrorCodes.SESSION_EXPIRED);
             }
             !silent && startLoading();
-            await billingService.syncSubscription();
             const collections = await syncCollections();
             setCollections(collections);
             const files = await syncFiles(collections, setFiles);

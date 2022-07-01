@@ -1,9 +1,9 @@
 import isElectron from 'is-electron';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
-import { User, UserDetails } from 'types/user';
+import { User } from 'types/user';
 import {
     Button,
     Dialog,
@@ -29,9 +29,9 @@ import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from './OverflowMenu/menu';
 import { OverflowMenuOption } from './OverflowMenu/option';
-import { useLocalState } from 'hooks/useLocalState';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { CustomError } from 'utils/error';
+import { getLocalUserDetails } from 'utils/user';
 
 const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
@@ -49,7 +49,7 @@ interface Props {
     onHide: () => void;
 }
 export default function ExportModal(props: Props) {
-    const [userDetails] = useLocalState<UserDetails>(LS_KEYS.USER_DETAILS);
+    const userDetails = useMemo(() => getLocalUserDetails(), []);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
     const [exportSize, setExportSize] = useState('');

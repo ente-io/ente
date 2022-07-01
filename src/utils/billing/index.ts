@@ -139,24 +139,14 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
     }
 }
 
-export function getStorage(familyData: FamilyData): number {
-    const subscription: Subscription = getUserSubscription();
-    return isPartOfFamily(familyData)
-        ? familyData.storage
-        : subscription.storage;
-}
-
-export function getUserSubscription(): Subscription {
+export function getLocalUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
 }
 
-export function getFamilyData(): FamilyData {
+export function getLocalFamilyData(): FamilyData {
     return getData(LS_KEYS.FAMILY_DATA);
 }
 
-export function getPlans(): Plan[] {
-    return getData(LS_KEYS.PLANS);
-}
 export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
     return (
         isSubscriptionActive(subscription) &&
