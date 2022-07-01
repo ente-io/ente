@@ -126,7 +126,7 @@ export default function Verify() {
     return (
         <FormContainer>
             <FormPaper>
-                <FormPaperTitle sx={{ mb: 14 }}>
+                <FormPaperTitle sx={{ mb: 14, wordBreak: 'break-word' }}>
                     {constants.EMAIL_SENT({ email })}
                 </FormPaperTitle>
                 <Typography color={'text.secondary'} mb={2} variant="body2">
