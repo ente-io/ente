@@ -9,10 +9,11 @@ import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import LivePhotoIcon from '@mui/icons-material/LightMode';
-import { isLivePhoto } from 'utils/file';
+import { formatDateRelative, isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from 'utils/sentry';
 import { Overlay } from 'components/Container';
+import { TRASH_SECTION } from 'constants/collection';
 
 interface IProps {
     file: EnteFile;
@@ -27,6 +28,7 @@ interface IProps {
     isRangeSelectActive?: boolean;
     selectOnClick?: boolean;
     isInsSelectRange?: boolean;
+    activeCollection?: number;
 }
 
 const Check = styled('input')<{ active: boolean }>`
@@ -327,6 +329,11 @@ export default function PreviewCard(props: IProps) {
                             file.collectionID
                         )}
                     </p>
+                </FileAndCollectionNameOverlay>
+            )}
+            {props?.activeCollection === TRASH_SECTION && (
+                <FileAndCollectionNameOverlay>
+                    <p>{formatDateRelative(file.deleteBy / 1000)}</p>
                 </FileAndCollectionNameOverlay>
             )}
         </Cont>

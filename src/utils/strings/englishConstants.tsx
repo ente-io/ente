@@ -553,8 +553,6 @@ const englishConstants = {
     CONFIRM_RESTORE: 'Confirm restoration',
     RESTORE_MESSAGE: 'Restore selected files ?',
     RESTORE_TO_COLLECTION: 'Restore to album',
-    AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
-        `Permanently deleted ${relativeTime}`,
     EMPTY_TRASH: 'Empty trash',
     EMPTY_TRASH_TITLE: 'Empty trash?',
     EMPTY_TRASH_MESSAGE:
