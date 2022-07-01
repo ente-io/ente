@@ -73,10 +73,7 @@ function CollectionSelector({
                 {attributes.title}
             </DialogTitleWithCloseButton>
             <DialogContent>
-                <FlexWrapper
-                    style={{
-                        flexWrap: 'wrap',
-                    }}>
+                <FlexWrapper flexWrap="wrap" gap={0.5}>
                     <AddCollectionButton
                         showNextModal={attributes.showNextModal}
                     />

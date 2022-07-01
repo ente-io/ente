@@ -14,7 +14,7 @@ export default function AllCollectionContent({
 }: Iprops) {
     return (
         <DialogContent>
-            <FlexWrapper flexWrap="wrap">
+            <FlexWrapper flexWrap="wrap" gap={0.5}>
                 {collectionSummaries.map((collectionSummary) => (
                     <AllCollectionCard
                         onCollectionClick={onCollectionClick}

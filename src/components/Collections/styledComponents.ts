@@ -26,9 +26,7 @@ export const ScrollContainer = styled('div')`
     overflow: auto;
     scroll-behavior: smooth;
     display: flex;
-    & > *:not(:last-child) {
-        margin-right: 4px;
-    }
+    gap: 4px;
 `;
 
 export const CollectionTile = styled('div')`
@@ -61,13 +59,11 @@ export const CollectionBarTile = styled(CollectionTile)`
 export const AllCollectionTile = styled(CollectionTile)`
     width: 150px;
     height: 150px;
-    margin: 2px;
 `;
 
 export const ResultPreviewTile = styled(CollectionTile)`
     width: 48px;
     height: 48px;
-    border-radius: 4px;
 `;
 
 export const CollectionBarTileText = styled(Overlay)`

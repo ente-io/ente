@@ -90,6 +90,7 @@ const darkThemeOptions = createTheme({
                     },
                     '& .MuiDialogContent-root': {
                         padding: '16px',
+                        overflowY: 'overlay',
                     },
                     '& .MuiDialogActions-root': {
                         padding: '16px',
