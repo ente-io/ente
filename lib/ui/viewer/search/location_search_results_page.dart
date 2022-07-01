@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/ui/gallery.dart';
+import 'package:photos/ui/viewer/gallery/gallery.dart';
 
 class ViewPort {
   final Location northEast;

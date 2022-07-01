@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 
 class LogFileViewer extends StatefulWidget {
   final File file;

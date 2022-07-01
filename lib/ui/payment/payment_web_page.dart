@@ -8,8 +8,8 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/progress_dialog.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PaymentWebPage extends StatefulWidget {

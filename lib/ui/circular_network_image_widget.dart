@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 
 class CircularNetworkImageWidget extends StatelessWidget {
   final String _url;

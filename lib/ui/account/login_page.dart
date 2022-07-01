@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamicFAB.dart';
-import 'package:photos/ui/web_page.dart';
+import 'package:photos/ui/common/web_page.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);

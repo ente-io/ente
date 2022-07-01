@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/exif_util.dart';
 
 class ExifInfoDialog extends StatefulWidget {

@@ -5,8 +5,8 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/location_search_results_page.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/search/location_search_results_page.dart';
 
 class LocationSearchWidget extends StatefulWidget {
   const LocationSearchWidget({

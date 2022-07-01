@@ -3,9 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/ui/video_widget.dart';
-import 'package:photos/ui/zoomable_image.dart';
-import 'package:photos/ui/zoomable_live_image.dart';
+import 'package:photos/ui/viewer/file/video_widget.dart';
+import 'package:photos/ui/viewer/file/zoomable_image.dart';
+import 'package:photos/ui/viewer/file/zoomable_live_image.dart';
 
 class FileWidget extends StatelessWidget {
   final File file;

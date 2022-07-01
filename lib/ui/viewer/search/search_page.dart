@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ui/location_search_widget.dart';
+import 'package:photos/ui/viewer/search/location_search_widget.dart';
 
 class SearchPage extends StatefulWidget {
   @override

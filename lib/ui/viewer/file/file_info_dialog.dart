@@ -6,7 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/exif_info_dialog.dart';
+import 'package:photos/ui/viewer/file/exif_info_dialog.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';

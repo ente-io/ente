@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/progress_dialog.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 
 ProgressDialog createProgressDialog(BuildContext context, String message) {
   final dialog = ProgressDialog(

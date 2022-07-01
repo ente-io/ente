@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/subscription.dart';
-import 'package:photos/ui/billing_questions_widget.dart';
+import 'package:photos/ui/payment/billing_questions_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 
