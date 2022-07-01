@@ -44,7 +44,7 @@ function TwoFactorModal(props: Props) {
         main();
     }, [props.show]);
 
-    const close = () => {
+    const closeDialog = () => {
         props.onHide();
         props.closeSidebar();
     };
@@ -56,9 +56,9 @@ function TwoFactorModal(props: Props) {
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ px: 4 }}>
                 {isTwoFactorEnabled ? (
-                    <TwoFactorModalManageSection close={close} />
+                    <TwoFactorModalManageSection closeDialog={closeDialog} />
                 ) : (
-                    <TwoFactorModalSetupSection close={close} />
+                    <TwoFactorModalSetupSection closeDialog={closeDialog} />
                 )}
             </DialogContent>
         </TwoFactorDialog>

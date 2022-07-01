@@ -8,11 +8,11 @@ import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { Button, Grid } from '@mui/material';
 
 interface Iprops {
-    close: () => void;
+    closeDialog: () => void;
 }
 
 export default function TwoFactorModalManageSection(props: Iprops) {
-    const { close } = props;
+    const { closeDialog } = props;
     const { setDialogMessage } = useContext(AppContext);
 
     const warnTwoFactorDisable = async () => {
@@ -36,10 +36,11 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                 ...getData(LS_KEYS.USER),
                 isTwoFactorEnabled: false,
             });
-            close();
+            closeDialog();
         } catch (e) {
             setDialogMessage({
                 title: constants.TWO_FACTOR_DISABLE_FAILED,
+                close: {},
             });
         }
     };
@@ -59,6 +60,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
     };
 
     const reconfigureTwoFactor = async () => {
+        closeDialog();
         router.push(PAGES.TWO_FACTOR_SETUP);
     };
 
