@@ -98,31 +98,6 @@ html, body {
     object-fit: contain;
 }
 
-.pswp__caption{
-    font-size:20px;
-    height:10%;
-    padding-left:5%;
-    color:#eee;
-}
-
-.pswp-custom {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0.75;
-    transition: opacity .2s;
-    padding-top: 4px;
-    float: right;
-    cursor: pointer;
-    border: none;
-    height: 44px;
-    width: 44px;
-}
-
-.pswp-custom:hover {
-    opacity: 1;
-}
-
 .pswp__button--arrow--left::before, .pswp__button--arrow--right::before {
     background-color: #333333;
     border-radius: 50%;
