@@ -1,4 +1,6 @@
-import VerifyTwoFactor from 'components/TwoFactor/VerifyForm';
+import VerifyTwoFactor, {
+    VerifyTwoFactorCallback,
+} from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { logoutUser, verifyTwoFactor } from 'services/userService';
@@ -33,7 +35,7 @@ export default function Home() {
         main();
     }, []);
 
-    const onSubmit = async (otp: string) => {
+    const onSubmit: VerifyTwoFactorCallback = async (otp) => {
         try {
             const resp = await verifyTwoFactor(otp, sessionID);
             const { keyAttributes, encryptedToken, token, id } = resp;
