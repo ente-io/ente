@@ -26,7 +26,7 @@ export const SelectStyles = {
     option: (style, { isFocused }) => ({
         ...style,
         padding: 0,
-        backgroundColor: 'transparent',
+        backgroundColor: 'transparent !important',
         '& :hover': {
             cursor: 'pointer',
         },
