@@ -7,13 +7,12 @@ export const CollectionListWrapper = styled(Box)`
     overflow: hidden;
     height: 86px;
     width: 100%;
+    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
 `;
 
 export const CollectionListBarWrapper = styled(Box)`
-    width: 100%;
-    margin-bottom: 16px;
-    border-bottom: 1px solid ${({ theme }) => theme.palette.divider};
     ${SpecialPadding}
+    margin-bottom: 16px;
 `;
 
 export const CollectionInfoBarWrapper = styled(Box)`
@@ -23,7 +22,7 @@ export const CollectionInfoBarWrapper = styled(Box)`
 
 export const ScrollContainer = styled('div')`
     width: 100%;
-    height: 100px;
+    height: 120px;
     overflow: auto;
     scroll-behavior: smooth;
     display: flex;
