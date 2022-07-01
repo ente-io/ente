@@ -54,24 +54,27 @@ class FadingAppBarState extends State<FadingAppBar> {
   @override
   Widget build(BuildContext context) {
     return CustomAppBar(
-      AnimatedOpacity(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withOpacity(0.72),
-                Colors.black.withOpacity(0.6),
-                Colors.transparent,
-              ],
-              stops: const [0, 0.2, 1],
+      IgnorePointer(
+        ignoring: _shouldHide,
+        child: AnimatedOpacity(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withOpacity(0.72),
+                  Colors.black.withOpacity(0.6),
+                  Colors.transparent,
+                ],
+                stops: const [0, 0.2, 1],
+              ),
             ),
+            child: _buildAppBar(),
           ),
-          child: _buildAppBar(),
+          opacity: _shouldHide ? 0 : 1,
+          duration: Duration(milliseconds: 150),
         ),
-        opacity: _shouldHide ? 0 : 1,
-        duration: Duration(milliseconds: 150),
       ),
       height: Platform.isAndroid ? 80 : 96,
     );
@@ -92,6 +95,7 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   AppBar _buildAppBar() {
+    debugPrint("building app bar");
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
@@ -213,7 +217,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           final shouldBlockUser = file.uploadedFileID == null;
           ProgressDialog dialog;
           if (shouldBlockUser) {
-            dialog = createProgressDialog(context, "Ddding to favorites...");
+            dialog = createProgressDialog(context, "Adding to favorites...");
             await dialog.show();
           }
           try {
