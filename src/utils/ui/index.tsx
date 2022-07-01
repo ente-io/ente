@@ -17,3 +17,16 @@ export const getDownloadAppMessage = (): DialogBoxAttributes => {
         },
     };
 };
+
+export const getTrashFilesMessage = (
+    deleteFileHelper
+): DialogBoxAttributes => ({
+    title: constants.TRASH_FILES_TITLE,
+    content: constants.TRASH_FILES_MESSAGE,
+    proceed: {
+        action: deleteFileHelper,
+        text: constants.MOVE_TO_TRASH,
+        variant: 'danger',
+    },
+    close: { text: constants.CANCEL },
+});

@@ -9,6 +9,7 @@ import { AppContext } from 'pages/_app';
 import CloseIcon from '@mui/icons-material/Close';
 import BackButton from '@mui/icons-material/ArrowBackOutlined';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { getTrashFilesMessage } from 'utils/ui';
 
 const VerticalLine = styled('div')`
     position: absolute;
@@ -41,16 +42,7 @@ export default function DeduplicateOptions({
     const { setDialogMessage } = useContext(AppContext);
 
     const trashHandler = () =>
-        setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.TRASH_MESSAGE,
-            proceed: {
-                action: deleteFileHelper,
-                text: constants.MOVE_TO_TRASH,
-                variant: 'danger',
-            },
-            close: { text: constants.CANCEL },
-        });
+        setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     return (
         <SelectionBar>

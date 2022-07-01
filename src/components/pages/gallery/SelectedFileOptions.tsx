@@ -25,6 +25,7 @@ import UnArchiveIcon from '@mui/icons-material/Visibility';
 import ArchiveIcon from '@mui/icons-material/VisibilityOff';
 import MoveIcon from '@mui/icons-material/ArrowForward';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
+import { getTrashFilesMessage } from 'utils/ui';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -78,16 +79,7 @@ const SelectedFileOptions = ({
         });
 
     const trashHandler = () =>
-        setDialogMessage({
-            title: constants.TRASH_FILES_TITLE,
-            content: constants.TRASH_FILES_MESSAGE,
-            proceed: {
-                action: deleteFileHelper,
-                text: constants.MOVE_TO_TRASH,
-                variant: 'danger',
-            },
-            close: { text: constants.CANCEL },
-        });
+        setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     const permanentlyDeleteHandler = () =>
         setDialogMessage({
