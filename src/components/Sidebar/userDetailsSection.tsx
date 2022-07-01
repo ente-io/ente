@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import SubscriptionCard from './SubscriptionCard';
 import { getUserDetailsV2 } from 'services/userService';
 import { UserDetails } from 'types/user';
-import { LS_KEYS } from 'utils/storage/localStorage';
+import { LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useLocalState } from 'hooks/useLocalState';
 import Typography from '@mui/material/Typography';
 import SubscriptionStatus from './SubscriptionStatus';
@@ -33,6 +33,8 @@ export default function UserDetailsSection({ sidebarView }) {
         const main = async () => {
             const userDetails = await getUserDetailsV2();
             setUserDetails(userDetails);
+            setData(LS_KEYS.SUBSCRIPTION, userDetails.subscription);
+            setData(LS_KEYS.FAMILY_DATA, userDetails.familyData);
         };
         main();
     }, [sidebarView]);
