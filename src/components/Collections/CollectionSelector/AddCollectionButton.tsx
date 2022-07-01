@@ -1,4 +1,3 @@
-import { Typography } from '@mui/material';
 import CollectionCard from 'components/Collections/CollectionCard';
 import {
     AllCollectionTile,
@@ -25,9 +24,7 @@ export default function AddCollectionButton({ showNextModal }: Iprops) {
             onClick={() => showNextModal()}
             latestFile={null}>
             <AllCollectionTileText>
-                <Typography variant="body2" fontWeight={'bold'}>
-                    {constants.CREATE_COLLECTION}
-                </Typography>
+                {constants.CREATE_COLLECTION}
             </AllCollectionTileText>
             <ImageContainer>
                 <CenteredFlex>+</CenteredFlex>
