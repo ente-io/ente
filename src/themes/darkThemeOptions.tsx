@@ -133,6 +133,9 @@ const darkThemeOptions = createTheme({
                 startIcon: {
                     marginRight: '12px',
                 },
+                endIcon: {
+                    marginLeft: '12px',
+                },
                 sizeLarge: {
                     width: '100%',
                 },
@@ -225,9 +228,9 @@ const darkThemeOptions = createTheme({
             contrastText: '#fff',
         },
         accent: {
-            main: '#1dba54',
-            dark: '#248546',
-            light: '#2cd366',
+            main: '#1DB954',
+            dark: '#2EB45D',
+            light: '#26CB5F',
         },
         fill: {
             main: 'rgba(256, 256, 256, 0.2)',
@@ -292,12 +295,12 @@ const darkThemeOptions = createTheme({
             lineHeight: '15px',
         },
         h1: {
-            fontSize: '36px',
-            lineHeight: '44px',
+            fontSize: '48px',
+            lineHeight: '58px',
         },
         h2: {
-            fontSize: '30px',
-            lineHeight: '36px',
+            fontSize: '36px',
+            lineHeight: '44px',
         },
         h3: {
             fontSize: '24px',
