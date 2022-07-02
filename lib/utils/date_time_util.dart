@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 Map<int, String> _months = {
   1: "Jan",
@@ -41,10 +42,12 @@ Map<int, String> _days = {
 };
 
 String getMonthAndYear(DateTime dateTime) {
+  //Jun 2022
   return _months[dateTime.month] + " " + dateTime.year.toString();
 }
 
 String getDayAndMonth(DateTime dateTime) {
+  //Thu, 30 Jun
   return _days[dateTime.weekday] +
       ", " +
       dateTime.day.toString() +
@@ -53,12 +56,21 @@ String getDayAndMonth(DateTime dateTime) {
 }
 
 String getDateAndMonthAndYear(DateTime dateTime) {
+  //30 Jun, 2022
   return dateTime.day.toString() +
       " " +
       _months[dateTime.month] +
       ", " +
       dateTime.year.toString();
 }
+
+// String getFullMonthAndDateAndYear(DateTime dateTime) {
+//   return _fullMonths[dateTime.month] +
+//       " " +
+//       dateTime.day.toString() +
+//       ", " +
+//       dateTime.year.toString();
+// }
 
 String getDay(DateTime dateTime) {
   return _days[dateTime.weekday];
@@ -77,6 +89,7 @@ String getAbbreviationOfYear(DateTime dateTime) {
 }
 
 String getTime(DateTime dateTime) {
+  //14:32
   final hours = dateTime.hour > 9
       ? dateTime.hour.toString()
       : "0" + dateTime.hour.toString();
@@ -86,7 +99,13 @@ String getTime(DateTime dateTime) {
   return hours + ":" + minutes;
 }
 
+String getTimeIn12hrFormat(DateTime dateTime) {
+  //11:22 AM
+  return DateFormat.jm().format(dateTime);
+}
+
 String getFormattedTime(DateTime dateTime) {
+  //Thu, Jun 30, 2022 - 14:32
   return getDay(dateTime) +
       ", " +
       getMonth(dateTime) +
@@ -99,11 +118,22 @@ String getFormattedTime(DateTime dateTime) {
 }
 
 String getFormattedDate(DateTime dateTime) {
+  //30 Jun'22
   return dateTime.day.toString() +
       " " +
       getMonth(dateTime) +
       "'" +
       getAbbreviationOfYear(dateTime);
+}
+
+String getFullDate(DateTime dateTime) {
+  return getDay(dateTime) +
+      ", " +
+      getMonth(dateTime) +
+      " " +
+      dateTime.day.toString() +
+      " " +
+      dateTime.year.toString();
 }
 
 String daysLeft(int futureTime) {

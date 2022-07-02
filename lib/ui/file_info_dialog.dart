@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:exif/exif.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +49,55 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   @override
   Widget build(BuildContext context) {
     final file = widget.file;
+    final dateTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
     infoColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.85);
+    var listTiles = <Widget>[
+      ListTile(
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8, left: 6),
+          child: Icon(Icons.calendar_today_rounded),
+        ),
+        title: Text(
+          getFullDate(
+            DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+          ),
+        ),
+        subtitle: Text(
+          getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+          style: Theme.of(context)
+              .textTheme
+              .bodyText2
+              .copyWith(color: Colors.black.withOpacity(0.5)),
+        ),
+        trailing: (widget.file.ownerID == null ||
+                    widget.file.ownerID ==
+                        Configuration.instance.getUserID()) &&
+                widget.file.uploadedFileID != null
+            ? IconButton(
+                onPressed: () {
+                  PopupMenuItem(
+                    value: 2,
+                    child: Row(
+                      children: [
+                        Icon(
+                          Platform.isAndroid
+                              ? Icons.access_time_rounded
+                              : CupertinoIcons.time,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
+                        Padding(
+                          padding: EdgeInsets.all(8),
+                        ),
+                        Text("Edit time"),
+                      ],
+                    ),
+                  );
+                },
+                icon: Icon(Icons.edit),
+              )
+            : const SizedBox.shrink(),
+      ),
+    ];
     var items = <Widget>[
       Row(
         children: [
@@ -214,6 +264,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             ],
           ),
         ),
+        ...listTiles
       ],
     );
   }
