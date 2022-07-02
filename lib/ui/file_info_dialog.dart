@@ -97,7 +97,38 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               )
             : const SizedBox.shrink(),
       ),
+      DividerWithPadding(),
+      ListTile(
+        leading: Padding(
+          padding: const EdgeInsets.only(top: 8, left: 6),
+          child: Icon(
+            Icons.image,
+          ),
+        ),
+        title: Text(
+          file.getDisplayName(),
+        ),
+        subtitle: Text(
+          getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+          style: Theme.of(context)
+              .textTheme
+              .bodyText2
+              .copyWith(color: Colors.black.withOpacity(0.5)),
+        ),
+        trailing: file.uploadedFileID == null ||
+                file.ownerID != Configuration.instance.getUserID()
+            ? const SizedBox.shrink()
+            : IconButton(
+                onPressed: () async {
+                  await editFilename(context, file);
+                  setState(() {});
+                },
+                icon: Icon(Icons.edit),
+              ),
+      ),
+      DividerWithPadding(),
     ];
+
     var items = <Widget>[
       Row(
         children: [
@@ -514,6 +545,20 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           );
         }
       },
+    );
+  }
+}
+
+class DividerWithPadding extends StatelessWidget {
+  const DividerWithPadding({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(70, 0, 20, 0),
+      child: Divider(
+        thickness: 0.5,
+      ),
     );
   }
 }
