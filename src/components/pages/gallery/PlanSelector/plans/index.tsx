@@ -1,25 +1,34 @@
-import { CenteredFlex } from 'components/Container';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import { Box, Typography } from '@mui/material';
+import { FlexWrapper, SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import { PlanCard } from './planCard';
+import constants from 'utils/strings/constants';
+import { PlanRow } from './planRow';
 
 const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
-    <CenteredFlex
-        mt={4}
-        sx={{
-            flexWrap: 'wrap',
-            minHeight: '228px',
-        }}>
+    <FlexWrapper flexDirection={'column'} gap={2}>
         {plans
             ?.filter((plan) => plan.period === planPeriod)
             ?.map((plan) => (
-                <PlanCard
+                <PlanRow
                     key={plan.stripeID}
                     plan={plan}
                     subscription={subscription}
                     onPlanSelect={onPlanSelect}
                 />
             ))}
-    </CenteredFlex>
+        <SpaceBetweenFlex gap={1.5} py={1.5} pr={1} sx={{ cursor: 'pointer' }}>
+            <Box>
+                <Typography> {constants.FREE_PLAN_OPTION_LABEL}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                    {constants.FREE_PLAN_DESCRIPTION}
+                </Typography>
+            </Box>
+            <Box>
+                <ArrowForward />
+            </Box>
+        </SpaceBetweenFlex>
+    </FlexWrapper>
 );
 
 export default Plans;
