@@ -1,5 +1,4 @@
 import { PeriodToggler } from './periodToggler';
-import { ManageSubscription } from './manageSubscription';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Plan } from 'types/billing';
@@ -8,7 +7,6 @@ import {
     isSubscriptionCancelled,
     updateSubscription,
     hasStripeSubscription,
-    hasPaidSubscription,
     isOnFreePlan,
     planForSubscription,
     hasMobileSubscription,
@@ -22,9 +20,7 @@ import { SetLoading } from 'types/gallery';
 import { logError } from 'utils/sentry';
 import { AppContext } from 'pages/_app';
 import Plans from './plans';
-import { Box, Dialog, DialogContent, styled } from '@mui/material';
-import { CenteredFlex } from 'components/Container';
-import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import { Box, Dialog, Stack, Typography } from '@mui/material';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 
@@ -39,14 +35,6 @@ export enum PLAN_PERIOD {
     YEAR = 'year',
 }
 
-const BreakPointWrapper = styled(Box)`
-    @media (max-width: 1151px) {
-        width: 520px;
-    }
-    @media (max-width: 551px) {
-        width: 260px;
-    }
-`;
 function PlanSelector(props: Props) {
     const subscription = useMemo(() => getLocalUserSubscription(), []);
     const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
@@ -164,35 +152,38 @@ function PlanSelector(props: Props) {
             fullScreen={appContext.isMobile}
             open={props.modalView}
             onClose={props.closeModal}
-            maxWidth={'xl'}
-            fullWidth={false}>
-            <DialogTitleWithCloseButton onClose={props.closeModal}>
-                {hasPaidSubscription(subscription)
+            PaperProps={{ sx: { width: '400px' } }}>
+            <Box p={1}>
+                <Stack spacing={3} p={1.5}>
+                    <Typography variant="h3" fontWeight={'bold'}>
+                        {
+                            /* hasPaidSubscription(subscription)
                     ? constants.MANAGE_PLAN
-                    : constants.CHOOSE_PLAN}
-            </DialogTitleWithCloseButton>
-            <DialogContent>
-                <PeriodToggler
-                    planPeriod={planPeriod}
-                    togglePeriod={togglePeriod}
-                />
-
-                <CenteredFlex>
-                    <BreakPointWrapper>
-                        <Plans
-                            plans={plans}
+                    : */ constants.CHOOSE_PLAN
+                        }
+                    </Typography>
+                    <Box>
+                        <PeriodToggler
                             planPeriod={planPeriod}
-                            onPlanSelect={onPlanSelect}
-                            subscription={subscription}
+                            togglePeriod={togglePeriod}
                         />
-                        <ManageSubscription
-                            subscription={subscription}
-                            closeModal={props.closeModal}
-                            setLoading={props.setLoading}
-                        />
-                    </BreakPointWrapper>
-                </CenteredFlex>
-            </DialogContent>
+                        <Typography mt={0.5} color="text.secondary">
+                            {constants.TWO_MONTHS_FREE}
+                        </Typography>
+                    </Box>
+                    <Plans
+                        plans={plans}
+                        planPeriod={planPeriod}
+                        onPlanSelect={onPlanSelect}
+                        subscription={subscription}
+                    />
+                    {/* <ManageSubscription
+                    subscription={subscription}
+                    closeModal={props.closeModal}
+                    setLoading={props.setLoading}
+                /> */}
+                </Stack>
+            </Box>
         </Dialog>
     );
 }
