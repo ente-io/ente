@@ -11,11 +11,11 @@ export function PeriodToggler({ planPeriod, togglePeriod }) {
         color: theme.palette.text.disabled,
         '&.Mui-selected': {
             backgroundColor: theme.palette.accent.main,
-            color: theme.palette.primary.contrastText,
+            color: theme.palette.accent.contrastText,
         },
         '&.Mui-selected:hover': {
             backgroundColor: theme.palette.accent.main,
-            color: theme.palette.primary.contrastText,
+            color: theme.palette.accent.contrastText,
         },
     }));
 
