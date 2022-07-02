@@ -32,7 +32,8 @@ export function PlanRow({ plan, subscription, onPlanSelect }) {
             <Button
                 onClick={handleClick}
                 sx={{ width: '136px' }}
-                color="accent">
+                color="accent"
+                endIcon={<ArrowForward />}>
                 <Box>
                     <Typography fontWeight={'bold'} variant="h4">
                         {plan.price}{' '}
@@ -43,9 +44,6 @@ export function PlanRow({ plan, subscription, onPlanSelect }) {
                             ? constants.MONTH_SHORT
                             : constants.YEAR_SHORT}
                     </Typography>
-                </Box>
-                <Box>
-                    <ArrowForward />
                 </Box>
             </Button>
         </FlexWrapper>

@@ -132,9 +132,11 @@ const darkThemeOptions = createTheme({
                 },
                 startIcon: {
                     marginRight: '12px',
+                    fontSize: '20px',
                 },
                 endIcon: {
                     marginLeft: '12px',
+                    fontSize: '20px',
                 },
                 sizeLarge: {
                     width: '100%',
