@@ -248,7 +248,7 @@ const englishConstants = {
     LEAVE_FAMILY_PLAN: 'Leave family plan',
     LEAVE: 'Leave',
     LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
-    CHOOSE_PLAN: 'Choose your subscription plan',
+    CHOOSE_PLAN: 'Choose your plan',
     MANAGE_PLAN: 'Manage your subscription',
     ACTIVE: 'Active',
 
@@ -750,6 +750,10 @@ const englishConstants = {
         </>
     ),
     CHANGE_FOLDER: 'Change Folder',
+    TWO_MONTHS_FREE: 'Get 2 months free on yearly plans',
+    GB: 'GB',
+    FREE_PLAN_OPTION_LABEL: 'Continue with free trial',
+    FREE_PLAN_DESCRIPTION: '1 GB for 1 year',
 };
 
 export default englishConstants;
