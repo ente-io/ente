@@ -53,7 +53,9 @@ class SettingsPage extends StatelessWidget {
               },
             ),
 
-            (Platform.isAndroid) ? ThemeSwitchWidget() : const SizedBox.shrink(),
+            (Platform.isAndroid)
+                ? ThemeSwitchWidget()
+                : const SizedBox.shrink(),
           ],
         ),
       ),

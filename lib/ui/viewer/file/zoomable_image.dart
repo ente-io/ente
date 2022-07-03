@@ -31,7 +31,8 @@ class ZoomableImage extends StatefulWidget {
   State<ZoomableImage> createState() => _ZoomableImageState();
 }
 
-class _ZoomableImageState extends State<ZoomableImage> with SingleTickerProviderStateMixin {
+class _ZoomableImageState extends State<ZoomableImage>
+    with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableImage");
   File _photo;
   ImageProvider _imageProvider;
@@ -88,7 +89,8 @@ class _ZoomableImageState extends State<ZoomableImage> with SingleTickerProvider
     GestureDragUpdateCallback verticalDragCallback = _isZooming
         ? null
         : (d) => {
-              if (!_isZooming && d.delta.dy > kDragSensitivity) {Navigator.of(context).pop()}
+              if (!_isZooming && d.delta.dy > kDragSensitivity)
+                {Navigator.of(context).pop()}
             };
     return GestureDetector(
       onVerticalDragUpdate: verticalDragCallback,
@@ -134,15 +136,20 @@ class _ZoomableImageState extends State<ZoomableImage> with SingleTickerProvider
   }
 
   void _loadLocalImage(BuildContext context) {
-    if (!_loadedSmallThumbnail && !_loadedLargeThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailLruCache.get(_photo, kThumbnailSmallSize);
+    if (!_loadedSmallThumbnail &&
+        !_loadedLargeThumbnail &&
+        !_loadedFinalImage) {
+      final cachedThumbnail =
+          ThumbnailLruCache.get(_photo, kThumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
       }
     }
 
-    if (!_loadingLargeThumbnail && !_loadedLargeThumbnail && !_loadedFinalImage) {
+    if (!_loadingLargeThumbnail &&
+        !_loadedLargeThumbnail &&
+        !_loadedFinalImage) {
       _loadingLargeThumbnail = true;
       getThumbnailFromLocal(_photo, size: kThumbnailLargeSize, quality: 100)
           .then((cachedThumbnail) {

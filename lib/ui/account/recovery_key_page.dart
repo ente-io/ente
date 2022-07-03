@@ -66,7 +66,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                   currentStep: 3,
                   selectedColor: Theme.of(context).buttonColor,
                   roundedEdges: Radius.circular(10),
-                  unselectedColor: Theme.of(context).colorScheme.stepProgressUnselectedColor,
+                  unselectedColor:
+                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
                 ),
               ),
             )
@@ -115,7 +116,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               child: SizedBox(
                 //inner container
                 height: 120, //height of inner container
-                width: double.infinity, //width to 100% match to parent container.
+                width:
+                    double.infinity, //width to 100% match to parent container.
                 // ignore: prefer_const_literals_to_create_immutables
                 child: Column(
                   children: [
@@ -137,7 +139,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           borderRadius: BorderRadius.all(
                             Radius.circular(2),
                           ),
-                          color: Theme.of(context).colorScheme.recoveryKeyBoxColor,
+                          color:
+                              Theme.of(context).colorScheme.recoveryKeyBoxColor,
                         ),
                         height: 120,
                         padding: EdgeInsets.all(20),
@@ -158,7 +161,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 20),
                 child: Text(
-                  widget.subText ?? "We don’t store this key, please save this in a safe place.",
+                  widget.subText ??
+                      "We don’t store this key, please save this in a safe place.",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
               ),

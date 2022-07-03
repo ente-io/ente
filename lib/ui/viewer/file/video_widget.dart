@@ -114,7 +114,8 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final content = _videoPlayerController != null && _videoPlayerController.value.isInitialized
+    final content = _videoPlayerController != null &&
+            _videoPlayerController.value.isInitialized
         ? _getVideoPlayer()
         : _getLoadingWidget();
     final contentWithDetector = GestureDetector(

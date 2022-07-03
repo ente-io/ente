@@ -253,7 +253,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   }
 
   Future<void> _enableTwoFactor(String code) async {
-    final success = await UserService.instance.enableTwoFactor(context, widget.secretCode, code);
+    final success = await UserService.instance
+        .enableTwoFactor(context, widget.secretCode, code);
     if (success) {
       _showSuccessPage();
     }
@@ -270,7 +271,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         onDone: () {},
         title: "⚡ setup complete",
         text: "save your recovery key if you haven't already",
-        subText: "this can be used to recover your account if you lose your second factor",
+        subText:
+            "this can be used to recover your account if you lose your second factor",
       ),
     );
   }

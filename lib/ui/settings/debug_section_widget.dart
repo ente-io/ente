@@ -56,7 +56,8 @@ class DebugSectionWidget extends StatelessWidget {
             Text("Key", style: TextStyle(fontWeight: FontWeight.bold)),
             Text(Sodium.bin2base64(Configuration.instance.getKey())),
             Padding(padding: EdgeInsets.all(12)),
-            Text("Encrypted Key", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text("Encrypted Key",
+                style: TextStyle(fontWeight: FontWeight.bold)),
             Text(keyAttributes.encryptedKey),
             Padding(padding: EdgeInsets.all(12)),
             Text(

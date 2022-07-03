@@ -67,7 +67,8 @@ Future<List<File>> getUnsyncedFiles(
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
-  final unsyncedAssets = await computer.compute(_getUnsyncedAssets, param: args);
+  final unsyncedAssets =
+      await computer.compute(_getUnsyncedAssets, param: args);
   if (unsyncedAssets.isEmpty) {
     return [];
   }

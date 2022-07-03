@@ -48,7 +48,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   static const double kSaturationMax = 2;
 
   final _logger = Logger("ImageEditor");
-  final GlobalKey<ExtendedImageEditorState> editorKey = GlobalKey<ExtendedImageEditorState>();
+  final GlobalKey<ExtendedImageEditorState> editorKey =
+      GlobalKey<ExtendedImageEditorState>();
 
   double _brightness = kBrightnessDefault;
   double _saturation = kSaturationDefault;
@@ -105,7 +106,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   bool _hasBeenEdited() {
-    return _hasEdited || _saturation != kSaturationDefault || _brightness != kBrightnessDefault;
+    return _hasEdited ||
+        _saturation != kSaturationDefault ||
+        _brightness != kBrightnessDefault;
   }
 
   Widget _buildImage() {
@@ -331,15 +334,17 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       return;
     }
     try {
-      final fileName = path.basenameWithoutExtension(widget.originalFile.title) +
-          "_edited_" +
-          DateTime.now().microsecondsSinceEpoch.toString() +
-          path.extension(widget.originalFile.title);
+      final fileName =
+          path.basenameWithoutExtension(widget.originalFile.title) +
+              "_edited_" +
+              DateTime.now().microsecondsSinceEpoch.toString() +
+              path.extension(widget.originalFile.title);
       final newAsset = await PhotoManager.editor.saveImage(
         result,
         title: fileName,
       );
-      final newFile = await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
+      final newFile =
+          await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
@@ -368,7 +373,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         DetailPage(
           widget.detailPageConfig.copyWith(
             files: files,
-            selectedIndex: files.indexWhere((file) => file.generatedID == newFile.generatedID),
+            selectedIndex: files
+                .indexWhere((file) => file.generatedID == newFile.generatedID),
           ),
         ),
       );

@@ -37,8 +37,10 @@ class DynamicFAB extends StatelessWidget {
           children: [
             FloatingActionButton(
               heroTag: 'FAB',
-              backgroundColor: Theme.of(context).colorScheme.dynamicFABBackgroundColor,
-              foregroundColor: Theme.of(context).colorScheme.dynamicFABTextColor,
+              backgroundColor:
+                  Theme.of(context).colorScheme.dynamicFABBackgroundColor,
+              foregroundColor:
+                  Theme.of(context).colorScheme.dynamicFABTextColor,
               onPressed: isFormValid
                   ? onPressedFunction
                   : () {

@@ -156,7 +156,8 @@ class _VideoControlsState extends State<VideoControls> {
           color: Colors.transparent,
           child: Center(
             child: AnimatedOpacity(
-              opacity: _latestValue != null && !_hideStuff && !_dragging ? 1.0 : 0.0,
+              opacity:
+                  _latestValue != null && !_hideStuff && !_dragging ? 1.0 : 0.0,
               duration: Duration(milliseconds: 300),
               child: GestureDetector(
                 onTap: _playPause,
@@ -225,7 +226,8 @@ class _VideoControlsState extends State<VideoControls> {
 
     _updateState();
 
-    if ((controller.value != null && controller.value.isPlaying) || chewieController.autoPlay) {
+    if ((controller.value != null && controller.value.isPlaying) ||
+        chewieController.autoPlay) {
       _startHideTimer();
     }
 

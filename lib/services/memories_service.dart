@@ -65,12 +65,16 @@ class MemoriesService extends ChangeNotifier {
     final List<List<int>> durations = [];
     for (var yearAgo = 1; yearAgo <= yearsBefore; yearAgo++) {
       final date = _getDate(present, yearAgo);
-      final startCreationTime = date.subtract(Duration(days: daysBefore)).microsecondsSinceEpoch;
-      final endCreationTime = date.add(Duration(days: daysAfter)).microsecondsSinceEpoch;
+      final startCreationTime =
+          date.subtract(Duration(days: daysBefore)).microsecondsSinceEpoch;
+      final endCreationTime =
+          date.add(Duration(days: daysAfter)).microsecondsSinceEpoch;
       durations.add([startCreationTime, endCreationTime]);
     }
-    final archivedCollectionIds = CollectionsService.instance.getArchivedCollections();
-    final files = await _filesDB.getFilesCreatedWithinDurations(durations, archivedCollectionIds);
+    final archivedCollectionIds =
+        CollectionsService.instance.getArchivedCollections();
+    final files = await _filesDB.getFilesCreatedWithinDurations(
+        durations, archivedCollectionIds);
     final seenTimes = await _memoriesDB.getSeenTimes();
     final List<Memory> memories = [];
     final filter = ImportantItemsFilter();
@@ -86,8 +90,11 @@ class MemoriesService extends ChangeNotifier {
 
   DateTime _getDate(DateTime present, int yearAgo) {
     final year = (present.year - yearAgo).toString();
-    final month = present.month > 9 ? present.month.toString() : "0" + present.month.toString();
-    final day = present.day > 9 ? present.day.toString() : "0" + present.day.toString();
+    final month = present.month > 9
+        ? present.month.toString()
+        : "0" + present.month.toString();
+    final day =
+        present.day > 9 ? present.day.toString() : "0" + present.day.toString();
     final date = DateTime.parse(year + "-" + month + "-" + day);
     return date;
   }

@@ -38,7 +38,9 @@ class DeviceFolderPage extends StatelessWidget {
       },
       tagPrefix: "device_folder:" + folder.path,
       selectedFiles: _selectedFiles,
-      header: Configuration.instance.hasConfiguredAccount() ? _getHeaderWidget() : Container(),
+      header: Configuration.instance.hasConfiguredAccount()
+          ? _getHeaderWidget()
+          : Container(),
       initialFiles: [folder.thumbnail],
       footer: SizedBox(height: 32),
     );
@@ -76,13 +78,16 @@ class BackupConfigurationHeaderWidget extends StatefulWidget {
   BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
 
   @override
-  State<BackupConfigurationHeaderWidget> createState() => _BackupConfigurationHeaderWidgetState();
+  State<BackupConfigurationHeaderWidget> createState() =>
+      _BackupConfigurationHeaderWidgetState();
 }
 
-class _BackupConfigurationHeaderWidgetState extends State<BackupConfigurationHeaderWidget> {
+class _BackupConfigurationHeaderWidgetState
+    extends State<BackupConfigurationHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    final isBackedUp = Configuration.instance.getPathsToBackUp().contains(widget.path);
+    final isBackedUp =
+        Configuration.instance.getPathsToBackUp().contains(widget.path);
     return Container(
       padding: EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
       margin: EdgeInsets.only(bottom: 12),
@@ -95,7 +100,10 @@ class _BackupConfigurationHeaderWidgetState extends State<BackupConfigurationHea
               : Text(
                   "Backup disabled",
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.defaultTextColor.withOpacity(0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .defaultTextColor
+                        .withOpacity(0.7),
                   ),
                 ),
           Switch(

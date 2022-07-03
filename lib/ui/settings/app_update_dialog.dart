@@ -78,7 +78,8 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         ),
       ],
     );
-    final shouldForceUpdate = UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo);
+    final shouldForceUpdate =
+        UpdateService.instance.shouldForceUpdate(widget.latestVersionInfo);
     return WillPopScope(
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
@@ -107,8 +108,10 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
   @override
   void initState() {
     super.initState();
-    _saveUrl =
-        Configuration.instance.getTempDirectory() + "ente-" + widget.versionInfo.name + ".apk";
+    _saveUrl = Configuration.instance.getTempDirectory() +
+        "ente-" +
+        widget.versionInfo.name +
+        ".apk";
     _downloadApk();
   }
 
@@ -126,7 +129,8 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
         ),
         content: LinearProgressIndicator(
           value: _downloadProgress,
-          valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).buttonColor),
+          valueColor:
+              AlwaysStoppedAnimation<Color>(Theme.of(context).buttonColor),
         ),
       ),
     );

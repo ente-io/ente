@@ -5,7 +5,8 @@ class GradientButton extends StatelessWidget {
   final List<Color> linearGradientColors;
   final Function onTap;
 
-  GradientButton({Key key, this.child, this.linearGradientColors, this.onTap}) : super(key: key);
+  GradientButton({Key key, this.child, this.linearGradientColors, this.onTap})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

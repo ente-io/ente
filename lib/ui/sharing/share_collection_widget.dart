@@ -146,10 +146,13 @@ class _SharingDialogState extends State<SharingDialog> {
                     // Add local folder in backup patch before creating
                     // sharable link
                     if (widget.collection.type == CollectionType.folder) {
-                      final path =
-                          CollectionsService.instance.decryptCollectionPath(widget.collection);
-                      if (!Configuration.instance.getPathsToBackUp().contains(path)) {
-                        await Configuration.instance.addPathToFoldersToBeBackedUp(path);
+                      final path = CollectionsService.instance
+                          .decryptCollectionPath(widget.collection);
+                      if (!Configuration.instance
+                          .getPathsToBackUp()
+                          .contains(path)) {
+                        await Configuration.instance
+                            .addPathToFoldersToBeBackedUp(path);
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                       }
                     }
@@ -161,8 +164,10 @@ class _SharingDialogState extends State<SharingDialog> {
                   try {
                     await dialog.show();
                     enable
-                        ? await CollectionsService.instance.createShareUrl(widget.collection)
-                        : await CollectionsService.instance.disableShareUrl(widget.collection);
+                        ? await CollectionsService.instance
+                            .createShareUrl(widget.collection)
+                        : await CollectionsService.instance
+                            .disableShareUrl(widget.collection);
                     dialog.hide();
                     setState(() {});
                   } catch (e) {
@@ -291,7 +296,10 @@ class _SharingDialogState extends State<SharingDialog> {
                       style: TextStyle(
                         fontSize: 16,
                         fontFeatures: const [FontFeature.tabularFigures()],
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.68),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.68),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -389,7 +397,9 @@ class _SharingDialogState extends State<SharingDialog> {
       final dialog = AlertDialog(
         title: Text("Invite to ente?"),
         content: Text(
-          "Looks like " + email + " hasn't signed up for ente yet. would you like to invite them?",
+          "Looks like " +
+              email +
+              " hasn't signed up for ente yet. would you like to invite them?",
           style: TextStyle(
             height: 1.4,
           ),
@@ -422,12 +432,14 @@ class _SharingDialogState extends State<SharingDialog> {
       final collection = widget.collection;
       try {
         if (collection.type == CollectionType.folder) {
-          final path = CollectionsService.instance.decryptCollectionPath(collection);
+          final path =
+              CollectionsService.instance.decryptCollectionPath(collection);
           if (!Configuration.instance.getPathsToBackUp().contains(path)) {
             await Configuration.instance.addPathToFoldersToBeBackedUp(path);
           }
         }
-        await CollectionsService.instance.share(widget.collection.id, email, publicKey);
+        await CollectionsService.instance
+            .share(widget.collection.id, email, publicKey);
         await dialog.hide();
         showShortToast(context, "Shared successfully!");
         setState(() {
@@ -449,7 +461,8 @@ class _SharingDialogState extends State<SharingDialog> {
   void _showUnSupportedAlert() {
     AlertDialog alert = AlertDialog(
       title: Text("Sorry"),
-      content: Text("Sharing is not permitted for free accounts, please subscribe"),
+      content:
+          Text("Sharing is not permitted for free accounts, please subscribe"),
       actions: [
         TextButton(
           child: Text(

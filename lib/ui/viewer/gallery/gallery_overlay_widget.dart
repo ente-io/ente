@@ -50,7 +50,8 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
       setState(() {});
     };
     widget.selectedFiles.addListener(_selectedFilesListener);
-    _userAuthEventSubscription = Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+    _userAuthEventSubscription =
+        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -121,7 +122,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       setState(() {});
     };
     widget.selectedFiles.addListener(_selectedFilesListener);
-    _userAuthEventSubscription = Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+    _userAuthEventSubscription =
+        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
     super.initState();
@@ -151,7 +153,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
                   child: Container(
-                    color: Theme.of(context).colorScheme.frostyBlurBackdropFilterColor,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .frostyBlurBackdropFilterColor,
                     width: double.infinity,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -159,10 +163,15 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(13, 13, 0, 13),
                           child: Text(
-                            widget.selectedFiles.files.length.toString() + ' selected',
-                            style: Theme.of(context).textTheme.subtitle2.copyWith(
+                            widget.selectedFiles.files.length.toString() +
+                                ' selected',
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle2
+                                .copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: Theme.of(context).colorScheme.iconColor,
+                                  color:
+                                      Theme.of(context).colorScheme.iconColor,
                                 ),
                           ),
                         ),
@@ -190,7 +199,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                       padding: EdgeInsets.symmetric(vertical: 8),
                       //height: 32,
                       width: 86,
-                      color: Theme.of(context).colorScheme.frostyBlurBackdropFilterColor,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .frostyBlurBackdropFilterColor,
                       child: Center(
                         child: Text(
                           'Cancel',
@@ -256,7 +267,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       // show upload icon instead of add for files selected in local gallery
       if (widget.type == GalleryType.localFolder) {
         msg = "Upload";
-        iconData = Platform.isAndroid ? Icons.cloud_upload : CupertinoIcons.cloud_upload;
+        iconData = Platform.isAndroid
+            ? Icons.cloud_upload
+            : CupertinoIcons.cloud_upload;
       }
       actions.add(
         Tooltip(
@@ -280,7 +293,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           child: IconButton(
             color: Theme.of(context).colorScheme.iconColor,
             icon: Icon(
-              Platform.isAndroid ? Icons.arrow_forward : CupertinoIcons.arrow_right,
+              Platform.isAndroid
+                  ? Icons.arrow_forward
+                  : CupertinoIcons.arrow_right,
             ),
             onPressed: () {
               _moveFiles();
@@ -310,7 +325,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           message: "Delete",
           child: IconButton(
             color: Theme.of(context).colorScheme.iconColor,
-            icon: Icon(Platform.isAndroid ? Icons.delete : CupertinoIcons.delete),
+            icon:
+                Icon(Platform.isAndroid ? Icons.delete : CupertinoIcons.delete),
             onPressed: () {
               _showDeleteSheet(context);
             },
@@ -351,7 +367,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       }
     }
 
-    if (widget.type == GalleryType.homepage || widget.type == GalleryType.archive) {
+    if (widget.type == GalleryType.homepage ||
+        widget.type == GalleryType.archive) {
       bool showArchive = widget.type == GalleryType.homepage;
       actions.add(
         Tooltip(

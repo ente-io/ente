@@ -93,7 +93,8 @@ class ProgressDialog {
     _textAlign = textAlign ?? _textAlign;
     _progressWidget = child ?? _progressWidget;
     _dialogPadding = padding ?? _dialogPadding;
-    _progressWidgetAlignment = progressWidgetAlignment ?? _progressWidgetAlignment;
+    _progressWidgetAlignment =
+        progressWidgetAlignment ?? _progressWidgetAlignment;
   }
 
   void update({
@@ -157,7 +158,8 @@ class ProgressDialog {
                 insetAnimationDuration: Duration(milliseconds: 100),
                 elevation: _dialogElevation,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(_borderRadius)),
+                  borderRadius:
+                      BorderRadius.all(Radius.circular(_borderRadius)),
                 ),
                 child: _dialog,
               ),

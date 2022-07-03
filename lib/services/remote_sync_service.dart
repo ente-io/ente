@@ -32,7 +32,8 @@ class RemoteSyncService {
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
-  final FileMigrationService _fileMigrationService = FileMigrationService.instance;
+  final FileMigrationService _fileMigrationService =
+      FileMigrationService.instance;
   int _completedUploads = 0;
   SharedPreferences _prefs;
   Completer<void> _existingSync;
@@ -48,7 +49,8 @@ class RemoteSyncService {
 
   static const kMaximumPermissibleUploadsInThrottledMode = 4;
 
-  static final RemoteSyncService instance = RemoteSyncService._privateConstructor();
+  static final RemoteSyncService instance =
+      RemoteSyncService._privateConstructor();
 
   RemoteSyncService._privateConstructor();
 
@@ -139,7 +141,8 @@ class RemoteSyncService {
   }
 
   Future<void> _syncUpdatedCollections(bool silently) async {
-    final updatedCollections = await _collectionsService.getCollectionsToBeSynced();
+    final updatedCollections =
+        await _collectionsService.getCollectionsToBeSynced();
 
     if (updatedCollections.isNotEmpty && !silently) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
@@ -166,10 +169,12 @@ class RemoteSyncService {
   }
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
-    final diff = await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
+    final diff =
+        await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
       final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID).toList();
-      final deletedFiles = (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
+      final deletedFiles =
+          (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
       await FilesDB.instance.deleteFilesFromCollection(collectionID, fileIDs);
       Bus.instance.fire(
         CollectionUpdatedEvent(
@@ -194,7 +199,8 @@ class RemoteSyncService {
             collectionID.toString(),
       );
       Bus.instance.fire(LocalPhotosUpdatedEvent(diff.updatedFiles));
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collectionID, diff.updatedFiles));
     }
 
     if (diff.latestUpdatedAtTime > 0) {
@@ -214,23 +220,28 @@ class RemoteSyncService {
   Future<List<File>> _getFilesToBeUploaded() async {
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
-    if (LocalSyncService.instance.hasGrantedLimitedPermissions() && foldersToBackUp.isEmpty) {
+    if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+        foldersToBackUp.isEmpty) {
       filesToBeUploaded = await _db.getAllLocalFiles();
     } else {
-      filesToBeUploaded = await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+      filesToBeUploaded =
+          await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
     }
     if (!Configuration.instance.shouldBackupVideos() || _shouldThrottleSync()) {
-      filesToBeUploaded.removeWhere((element) => element.fileType == FileType.video);
+      filesToBeUploaded
+          .removeWhere((element) => element.fileType == FileType.video);
     }
     if (filesToBeUploaded.isNotEmpty) {
       final int prevCount = filesToBeUploaded.length;
       final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
       filesToBeUploaded.removeWhere(
-        (file) => IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file),
+        (file) =>
+            IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, file),
       );
       if (prevCount != filesToBeUploaded.length) {
         _logger.info(
-          (prevCount - filesToBeUploaded.length).toString() + " files were ignored for upload",
+          (prevCount - filesToBeUploaded.length).toString() +
+              " files were ignored for upload",
         );
       }
     }
@@ -254,7 +265,8 @@ class RemoteSyncService {
     _logger.info(editedFiles.length.toString() + " files edited.");
 
     _completedUploads = 0;
-    int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length + editedFiles.length;
+    int toBeUploaded =
+        filesToBeUploaded.length + updatedFileIDs.length + editedFiles.length;
 
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
@@ -265,8 +277,10 @@ class RemoteSyncService {
     }
     final List<Future> futures = [];
     for (final uploadedFileID in updatedFileIDs) {
-      if (_shouldThrottleSync() && futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info("Skipping some updated files as we are throttling uploads");
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+        _logger
+            .info("Skipping some updated files as we are throttling uploads");
         break;
       }
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
@@ -274,19 +288,23 @@ class RemoteSyncService {
     }
 
     for (final file in filesToBeUploaded) {
-      if (_shouldThrottleSync() && futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger.info("Skipping some new files as we are throttling uploads");
         break;
       }
       // prefer existing collection ID for manually uploaded files.
       // See https://github.com/ente-io/frame/pull/187
       final collectionID = file.collectionID ??
-          (await CollectionsService.instance.getOrCreateForPath(file.deviceFolder)).id;
+          (await CollectionsService.instance
+                  .getOrCreateForPath(file.deviceFolder))
+              .id;
       _uploadFile(file, collectionID, futures);
     }
 
     for (final file in editedFiles) {
-      if (_shouldThrottleSync() && futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
+      if (_shouldThrottleSync() &&
+          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
         _logger.info("Skipping some edited files as we are throttling uploads");
         break;
       }
@@ -314,15 +332,17 @@ class RemoteSyncService {
   }
 
   void _uploadFile(File file, int collectionID, List<Future> futures) {
-    final future =
-        _uploader.upload(file, collectionID).then((uploadedFile) => _onFileUploaded(uploadedFile));
+    final future = _uploader
+        .upload(file, collectionID)
+        .then((uploadedFile) => _onFileUploaded(uploadedFile));
     futures.add(future);
   }
 
   Future<void> _onFileUploaded(File file) async {
     Bus.instance.fire(CollectionUpdatedEvent(file.collectionID, [file]));
     _completedUploads++;
-    final toBeUploadedInThisSession = FileUploader.instance.getCurrentSessionUploadCount();
+    final toBeUploadedInThisSession =
+        FileUploader.instance.getCurrentSessionUploadCount();
     if (toBeUploadedInThisSession == 0) {
       return;
     }
@@ -360,7 +380,9 @@ class RemoteSyncService {
       final existingFiles = file.deviceFolder == null
           ? null
           : await _db.getMatchingFiles(file.title, file.deviceFolder);
-      if (existingFiles == null || existingFiles.isEmpty || userID != file.ownerID) {
+      if (existingFiles == null ||
+          existingFiles.isEmpty ||
+          userID != file.ownerID) {
         // File uploaded from a different device or uploaded by different user
         // Other rare possibilities : The local file is present on
         // device but it's not imported in local db due to missing permission
@@ -378,7 +400,10 @@ class RemoteSyncService {
         // case when localID for a file changes and the file is uploaded again in
         // the same collection
         final fileWithLocalID = existingFiles.firstWhere(
-          (e) => file.localID != null && e.localID != null && e.localID == file.localID,
+          (e) =>
+              file.localID != null &&
+              e.localID != null &&
+              e.localID == file.localID,
           orElse: () => existingFiles.firstWhere(
             (e) => e.localID != null,
             orElse: () => null,
@@ -462,7 +487,8 @@ class RemoteSyncService {
   // return true if the client needs to re-sync the collections from previous
   // version
   bool _hasReSynced() {
-    return _prefs.containsKey(kHasSyncedEditTime) && _prefs.containsKey(kHasSyncedArchiveKey);
+    return _prefs.containsKey(kHasSyncedEditTime) &&
+        _prefs.containsKey(kHasSyncedArchiveKey);
   }
 
   Future<void> _markReSyncAsDone() async {

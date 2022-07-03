@@ -27,13 +27,14 @@ class LocalSyncService {
   static const kPermissionStateKey = "permission_state";
   static const kEditedFileIDsKey = "edited_file_ids";
   static const kDownloadedFileIDsKey = "downloaded_file_ids";
+
   // Adding `_2` as a suffic to pull files that were earlier ignored due to permission errors
   // See https://github.com/CaiJingLong/flutter_photo_manager/issues/589
   static const kInvalidFileIDsKey = "invalid_file_ids_2";
-
   LocalSyncService._privateConstructor();
 
-  static final LocalSyncService instance = LocalSyncService._privateConstructor();
+  static final LocalSyncService instance =
+      LocalSyncService._privateConstructor();
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -113,7 +114,8 @@ class LocalSyncService {
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
       _logger.fine("first gallery import finished");
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
+      Bus.instance
+          .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
     }
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
@@ -136,7 +138,8 @@ class LocalSyncService {
     );
     final existingIDs = await _db.getExistingLocalFileIDs();
     final invalidIDs = getInvalidFileIDs().toSet();
-    final unsyncedFiles = await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
+    final unsyncedFiles =
+        await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
     if (unsyncedFiles.isNotEmpty) {
       await _db.insertMultiple(unsyncedFiles);
       _logger.info(
@@ -199,7 +202,8 @@ class LocalSyncService {
   }
 
   bool hasGrantedLimitedPermissions() {
-    return _prefs.getString(kPermissionStateKey) == PermissionState.limited.toString();
+    return _prefs.getString(kPermissionStateKey) ==
+        PermissionState.limited.toString();
   }
 
   Future<void> onPermissionGranted(PermissionState state) async {
@@ -228,10 +232,12 @@ class LocalSyncService {
     final files = await getDeviceFiles(fromTime, toTime, _computer);
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
-      final updatedFiles =
-          files.where((file) => existingLocalFileIDs.contains(file.localID)).toList();
+      final updatedFiles = files
+          .where((file) => existingLocalFileIDs.contains(file.localID))
+          .toList();
       updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
-      updatedFiles.removeWhere((file) => downloadedFileIDs.contains(file.localID));
+      updatedFiles
+          .removeWhere((file) => downloadedFileIDs.contains(file.localID));
       if (updatedFiles.isNotEmpty) {
         _logger.info(
           updatedFiles.length.toString() + " local files were updated.",
@@ -269,13 +275,15 @@ class LocalSyncService {
       if (Platform.isIOS) {
         var assetEntity = await AssetEntity.fromId(file.localID);
         if (assetEntity != null) {
-          var isLocallyAvailable = await assetEntity.isLocallyAvailable(isOrigin: true);
+          var isLocallyAvailable =
+              await assetEntity.isLocallyAvailable(isOrigin: true);
           _logger.info(
             're-upload asset ${file.toString()} with localAvailableFlag '
             '$isLocallyAvailable and fav ${assetEntity.isFavorite}',
           );
         } else {
-          _logger.info('re-upload failed to fetch assetInfo ${file.toString()}');
+          _logger
+              .info('re-upload failed to fetch assetInfo ${file.toString()}');
         }
       }
     } catch (ignore) {

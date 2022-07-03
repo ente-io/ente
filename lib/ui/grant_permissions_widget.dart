@@ -8,7 +8,8 @@ class GrantPermissionsWidget extends StatelessWidget {
   const GrantPermissionsWidget({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final isLightMode = MediaQuery.of(context).platformBrightness == Brightness.light;
+    final isLightMode =
+        MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -95,7 +96,8 @@ class GrantPermissionsWidget extends StatelessWidget {
           child: Text("Grant permission"),
           onPressed: () async {
             final state = await PhotoManager.requestPermissionExtend();
-            if (state == PermissionState.authorized || state == PermissionState.limited) {
+            if (state == PermissionState.authorized ||
+                state == PermissionState.limited) {
               await SyncService.instance.onPermissionGranted(state);
             } else if (state == PermissionState.denied) {
               AlertDialog alert = AlertDialog(
