@@ -101,9 +101,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         ],
       ),
     );
-    _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.page_view) {
+    _tabChangedEventSubscription = Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.source != TabChangedEventSource.pageView) {
         _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
@@ -112,16 +111,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
       }
     });
-    _subscriptionPurchaseEvent =
-        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+    _subscriptionPurchaseEvent = Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
-    _accountConfiguredEvent =
-        Bus.instance.on<AccountConfiguredEvent>().listen((event) {
+    _accountConfiguredEvent = Bus.instance.on<AccountConfiguredEvent>().listen((event) {
       setState(() {});
     });
-    _triggerLogoutEvent =
-        Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
+    _triggerLogoutEvent = Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       AlertDialog alert = AlertDialog(
         title: Text("Session expired"),
         content: Text("Please login again"),
@@ -158,16 +154,13 @@ class _HomeWidgetState extends State<HomeWidget> {
         setState(() {});
       }
     });
-    _permissionGrantedEvent =
-        Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
+    _permissionGrantedEvent = Bus.instance.on<PermissionGrantedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
       }
     });
-    _firstImportEvent =
-        Bus.instance.on<SyncStatusUpdate>().listen((event) async {
-      if (mounted &&
-          event.status == SyncStatus.completed_first_gallery_import) {
+    _firstImportEvent = Bus.instance.on<SyncStatusUpdate>().listen((event) async {
+      if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
         Duration delayInRefresh = Duration(milliseconds: 0);
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
@@ -188,8 +181,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
       }
     });
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) async {
+    _backupFoldersUpdatedEvent = Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) async {
       if (mounted) {
         setState(() {});
       }
@@ -229,8 +221,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   void _initMediaShareSubscription() {
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getMediaStream().listen(
+    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream().listen(
       (List<SharedMediaFile> value) {
         setState(() {
           _sharedFiles = value;
@@ -269,8 +260,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             return true;
           }
         } else {
-          Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.back_button));
+          Bus.instance.fire(TabChangedEvent(0, TabChangedEventSource.backButton));
           return false;
         }
       },
@@ -292,17 +282,14 @@ class _HomeWidgetState extends State<HomeWidget> {
       return CreateCollectionPage(null, _sharedFiles);
     }
 
-    final bool showBackupFolderHook =
-        Configuration.instance.getPathsToBackUp().isEmpty &&
-            !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
-            CollectionsService.instance.getActiveCollections().isEmpty;
+    final bool showBackupFolderHook = Configuration.instance.getPathsToBackUp().isEmpty &&
+        !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
+        CollectionsService.instance.getActiveCollections().isEmpty;
     return Stack(
       children: [
         ExtentsPageView(
           children: [
-            showBackupFolderHook
-                ? _getBackupFolderSelectionHook()
-                : _getMainGalleryWidget(),
+            showBackupFolderHook ? _getBackupFolderSelectionHook() : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
             _sharedCollectionGallery,
             _settingsPage,
@@ -311,7 +298,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             Bus.instance.fire(
               TabChangedEvent(
                 page,
-                TabChangedEventSource.page_view,
+                TabChangedEventSource.pageView,
               ),
             );
           },
@@ -387,8 +374,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
-        final archivedCollectionIds =
-            CollectionsService.instance.getArchivedCollections();
+        final archivedCollectionIds = CollectionsService.instance.getArchivedCollections();
         FileLoadResult result;
         if (importantPaths.isNotEmpty) {
           result = await FilesDB.instance.getImportantFiles(
@@ -493,8 +479,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                     Color(0xFF1DB954),
                   ],
                   onTap: () async {
-                    if (LocalSyncService.instance
-                        .hasGrantedLimitedPermissions()) {
+                    if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
                       PhotoManager.presentLimited();
                     } else {
                       routeToPage(
@@ -566,13 +551,11 @@ class HomeBottomNavigationBar extends StatefulWidget {
   final int selectedTabIndex;
 
   @override
-  _HomeBottomNavigationBarState createState() =>
-      _HomeBottomNavigationBarState();
+  _HomeBottomNavigationBarState createState() => _HomeBottomNavigationBarState();
 }
 
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
-  final _logger = Logger((_HomeBottomNavigationBarState).toString());
   int currentTabIndex = 0;
 
   @override
@@ -582,9 +565,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     widget.selectedFiles.addListener(() {
       setState(() {});
     });
-    _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.tab_bar) {
+    _tabChangedEventSubscription = Bus.instance.on<TabChangedEvent>().listen((event) {
+      if (event.source != TabChangedEventSource.tabBar) {
         debugPrint('index changed to ${event.selectedIndex}');
         if (mounted) {
           setState(() {
@@ -605,7 +587,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     Bus.instance.fire(
       TabChangedEvent(
         index,
-        TabChangedEventSource.tab_bar,
+        TabChangedEventSource.tabBar,
       ),
     );
   }
@@ -640,32 +622,23 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                           child: GNav(
                             curve: Curves.easeOutExpo,
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .gNavBackgroundColor,
+                            backgroundColor: Theme.of(context).colorScheme.gNavBackgroundColor,
                             mainAxisAlignment: MainAxisAlignment.center,
                             rippleColor: Colors.white.withOpacity(0.1),
-                            activeColor: Theme.of(context)
-                                .colorScheme
-                                .gNavBarActiveColor,
+                            activeColor: Theme.of(context).colorScheme.gNavBarActiveColor,
                             iconSize: 24,
                             padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
                             duration: Duration(milliseconds: 200),
                             gap: 0,
                             tabBorderRadius: 24,
-                            tabBackgroundColor: Theme.of(context)
-                                .colorScheme
-                                .gNavBarActiveColor,
+                            tabBackgroundColor: Theme.of(context).colorScheme.gNavBarActiveColor,
                             haptic: false,
                             tabs: [
                               GButton(
                                 margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
                                 icon: Icons.home,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                iconColor: Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context).colorScheme.gNavActiveIconColor,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
@@ -676,11 +649,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               GButton(
                                 margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
                                 icon: Icons.photo_library,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                iconColor: Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context).colorScheme.gNavActiveIconColor,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
@@ -691,11 +661,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               GButton(
                                 margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
                                 icon: Icons.folder_shared,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                iconColor: Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context).colorScheme.gNavActiveIconColor,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
@@ -706,11 +673,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               GButton(
                                 margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
                                 icon: Icons.person,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                iconColor: Theme.of(context).colorScheme.gNavIconColor,
+                                iconActiveColor: Theme.of(context).colorScheme.gNavActiveIconColor,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(

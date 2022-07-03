@@ -28,8 +28,7 @@ class SharedCollectionGallery extends StatefulWidget {
   const SharedCollectionGallery({Key key}) : super(key: key);
 
   @override
-  _SharedCollectionGalleryState createState() =>
-      _SharedCollectionGalleryState();
+  _SharedCollectionGalleryState createState() => _SharedCollectionGalleryState();
 }
 
 class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
@@ -41,13 +40,11 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
 
   @override
   void initState() {
-    _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _logger.info("Files updated");
       setState(() {});
     });
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+    _collectionUpdatesSubscription = Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       setState(() {});
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
@@ -61,13 +58,11 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     super.build(context);
     return FutureBuilder<SharedCollections>(
       future:
-          Future.value(CollectionsService.instance.getLatestCollectionFiles())
-              .then((files) async {
+          Future.value(CollectionsService.instance.getLatestCollectionFiles()).then((files) async {
         final List<CollectionWithThumbnail> outgoing = [];
         final List<CollectionWithThumbnail> incoming = [];
         for (final file in files) {
-          final c =
-              CollectionsService.instance.getCollectionByID(file.collectionID);
+          final c = CollectionsService.instance.getCollectionByID(file.collectionID);
           if (c.owner.id == Configuration.instance.getUserID()) {
             if (c.sharees.isNotEmpty || c.publicURLs.isNotEmpty) {
               outgoing.add(
@@ -87,12 +82,10 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           }
         }
         outgoing.sort((first, second) {
-          return second.collection.updationTime
-              .compareTo(first.collection.updationTime);
+          return second.collection.updationTime.compareTo(first.collection.updationTime);
         });
         incoming.sort((first, second) {
-          return second.collection.updationTime
-              .compareTo(first.collection.updationTime);
+          return second.collection.updationTime.compareTo(first.collection.updationTime);
         });
         return SharedCollections(outgoing, incoming);
       }),
@@ -114,10 +107,10 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     const double crossAxisSpacingOfGrid = 9;
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
-    double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
-        (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
-    final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
-        (totalWhiteSpaceOfRow / albumsCountInOneRow);
+    double totalWhiteSpaceOfRow =
+        (horizontalPaddingOfGridRow * 2) + (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
+    final double sideOfThumbnail =
+        (size.width / albumsCountInOneRow) - (totalWhiteSpaceOfRow / albumsCountInOneRow);
     return SingleChildScrollView(
       child: Container(
         margin: const EdgeInsets.only(bottom: 50),
@@ -142,8 +135,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                         crossAxisCount: albumsCountInOneRow,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: crossAxisSpacingOfGrid,
-                        childAspectRatio:
-                            sideOfThumbnail / (sideOfThumbnail + 24),
+                        childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 24),
                       ), //24 is height of album title
                     ),
                   )
@@ -257,7 +249,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   toastLength: Toast.LENGTH_LONG,
                 );
                 Bus.instance.fire(
-                  TabChangedEvent(1, TabChangedEventSource.collections_page),
+                  TabChangedEvent(1, TabChangedEventSource.collectionsPage),
                 );
               },
             ),
@@ -293,8 +285,7 @@ class OutgoingCollectionItem extends StatelessWidget {
     final sharees = <String>[];
     for (int index = 0; index < c.collection.sharees.length; index++) {
       final sharee = c.collection.sharees[index];
-      final name =
-          (sharee.name?.isNotEmpty ?? false) ? sharee.name : sharee.email;
+      final name = (sharee.name?.isNotEmpty ?? false) ? sharee.name : sharee.email;
       if (index < 2) {
         sharees.add(name);
       } else {
@@ -304,10 +295,7 @@ class OutgoingCollectionItem extends StatelessWidget {
           sharees.add(name);
         } else {
           sharees.add(
-            "and " +
-                remaining.toString() +
-                " other" +
-                (remaining > 1 ? "s" : ""),
+            "and " + remaining.toString() + " other" + (remaining > 1 ? "s" : ""),
           );
         }
         break;
@@ -347,9 +335,7 @@ class OutgoingCollectionItem extends StatelessWidget {
                         ),
                       ),
                       Padding(padding: EdgeInsets.all(2)),
-                      c.collection.publicURLs.isEmpty
-                          ? Container()
-                          : Icon(Icons.link),
+                      c.collection.publicURLs.isEmpty ? Container() : Icon(Icons.link),
                     ],
                   ),
                   sharees.isEmpty
@@ -375,7 +361,7 @@ class OutgoingCollectionItem extends StatelessWidget {
       onTap: () {
         final page = CollectionPage(
           c,
-          appBarType: GalleryType.owned_collection,
+          appBarType: GalleryType.ownedCollection,
           tagPrefix: "outgoing_collection",
         );
         routeToPage(context, page);
@@ -396,14 +382,13 @@ class IncomingCollectionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
-    TextStyle albumTitleTextStyle =
-        Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
+    TextStyle albumTitleTextStyle = Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
-    double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
-        (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
-    final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
-        (totalWhiteSpaceOfRow / albumsCountInOneRow);
+    double totalWhiteSpaceOfRow =
+        (horizontalPaddingOfGridRow * 2) + (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
+    final double sideOfThumbnail =
+        (size.width / albumsCountInOneRow) - (totalWhiteSpaceOfRow / albumsCountInOneRow);
     return GestureDetector(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,8 +409,7 @@ class IncomingCollectionItem extends StatelessWidget {
                     alignment: Alignment.bottomRight,
                     child: Container(
                       child: Text(
-                        c.collection.owner.name == null ||
-                                c.collection.owner.name.isEmpty
+                        c.collection.owner.name == null || c.collection.owner.name.isEmpty
                             ? c.collection.owner.email.substring(0, 1)
                             : c.collection.owner.name.substring(0, 1),
                         textAlign: TextAlign.center,
@@ -434,9 +418,7 @@ class IncomingCollectionItem extends StatelessWidget {
                       margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .defaultBackgroundColor,
+                        color: Theme.of(context).colorScheme.defaultBackgroundColor,
                       ),
                     ),
                   ),
@@ -486,7 +468,7 @@ class IncomingCollectionItem extends StatelessWidget {
           context,
           CollectionPage(
             c,
-            appBarType: GalleryType.shared_collection,
+            appBarType: GalleryType.sharedCollection,
             tagPrefix: "shared_collection",
           ),
         );

@@ -95,7 +95,7 @@ class LocationSearchResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: new EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
+      padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
       margin: EdgeInsets.symmetric(vertical: 6.0),
       child: Column(
         children: <Widget>[

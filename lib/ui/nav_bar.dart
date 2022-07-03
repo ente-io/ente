@@ -101,20 +101,16 @@ class _GNavState extends State<GNav> {
                 iconColor: t.iconColor ?? widget.color,
                 iconSize: t.iconSize ?? widget.iconSize,
                 textColor: t.textColor ?? widget.activeColor,
-                rippleColor:
-                    t.rippleColor ?? widget.rippleColor ?? Colors.transparent,
-                hoverColor:
-                    t.hoverColor ?? widget.hoverColor ?? Colors.transparent,
+                rippleColor: t.rippleColor ?? widget.rippleColor ?? Colors.transparent,
+                hoverColor: t.hoverColor ?? widget.hoverColor ?? Colors.transparent,
                 padding: t.padding ?? widget.padding,
                 icon: t.icon,
                 haptic: widget.haptic ?? true,
                 leading: t.leading,
                 curve: widget.curve ?? Curves.easeInCubic,
-                backgroundGradient:
-                    t.backgroundGradient ?? widget.tabBackgroundGradient,
-                backgroundColor: t.backgroundColor ??
-                    widget.tabBackgroundColor ??
-                    Colors.transparent,
+                backgroundGradient: t.backgroundGradient ?? widget.tabBackgroundGradient,
+                backgroundColor:
+                    t.backgroundColor ?? widget.tabBackgroundColor ?? Colors.transparent,
                 duration: widget.duration ?? const Duration(milliseconds: 500),
                 onPressed: () {
                   if (!clickable) return;
@@ -124,8 +120,7 @@ class _GNavState extends State<GNav> {
                   });
                   widget.onTabChange(selectedIndex);
 
-                  Future.delayed(
-                      widget.duration ?? const Duration(milliseconds: 500), () {
+                  Future.delayed(widget.duration ?? const Duration(milliseconds: 500), () {
                     setState(() {
                       clickable = true;
                     });
@@ -301,9 +296,8 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
     super.initState();
     _expanded = widget.active;
 
-    expandController =
-        AnimationController(vsync: this, duration: widget.duration)
-          ..addListener(() => setState(() {}));
+    expandController = AnimationController(vsync: this, duration: widget.duration)
+      ..addListener(() => setState(() {}));
   }
 
   @override
@@ -315,12 +309,6 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    var curveValue = expandController
-        .drive(
-          CurveTween(curve: _expanded ? widget.curve : widget.curve.flipped),
-        )
-        .value;
-
     _expanded = !widget.active;
     if (_expanded) {
       expandController.reverse();
@@ -356,9 +344,7 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
             // curve: !_expanded ? widget.curve : widget.curve.flipped,
             decoration: BoxDecoration(
               boxShadow: widget.shadow,
-              border: widget.active
-                  ? (widget.activeBorder ?? widget.border)
-                  : widget.border,
+              border: widget.active ? (widget.activeBorder ?? widget.border) : widget.border,
               gradient: widget.gradient,
               color: _expanded
                   ? widget.color.withOpacity(0)

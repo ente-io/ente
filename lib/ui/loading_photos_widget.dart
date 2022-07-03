@@ -37,10 +37,8 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   @override
   void initState() {
     super.initState();
-    _firstImportEvent =
-        Bus.instance.on<SyncStatusUpdate>().listen((event) async {
-      if (mounted &&
-          event.status == SyncStatus.completed_first_gallery_import) {
+    _firstImportEvent = Bus.instance.on<SyncStatusUpdate>().listen((event) async {
+      if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
         if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
           // Do nothing, let HomeWidget refresh
         } else {
@@ -80,8 +78,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isLightMode =
-        MediaQuery.of(context).platformBrightness == Brightness.light;
+    final isLightMode = MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(

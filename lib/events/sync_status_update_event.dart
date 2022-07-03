@@ -27,12 +27,12 @@ class SyncStatusUpdate extends Event {
 }
 
 enum SyncStatus {
-  started_first_gallery_import,
-  completed_first_gallery_import,
-  applying_remote_diff,
-  preparing_for_upload,
-  in_progress,
+  startedFirstGalleryImport,
+  completedFirstGalleryImport,
+  applyingRemoteDiff,
+  preparingForUpload,
+  inProgress,
   paused,
-  completed_backup,
+  completedBackup,
   error,
 }

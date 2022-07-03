@@ -99,8 +99,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           child: ListView(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 child: Text(
                   'Welcome back!',
                   style: Theme.of(context).textTheme.headline4,
@@ -121,9 +120,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                     suffixIcon: _passwordInFocus
                         ? IconButton(
                             icon: Icon(
-                              _passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
+                              _passwordVisible ? Icons.visibility : Icons.visibility_off,
                               color: Theme.of(context).iconTheme.color,
                               size: 20,
                             ),
@@ -171,40 +168,32 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           ),
                         );
                       },
-                      child: Container(
-                        child: Center(
-                          child: Text(
-                            "Forgot password",
-                            style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                          ),
+                      child: Center(
+                        child: Text(
+                          "Forgot password",
+                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       ),
                     ),
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () async {
-                        final dialog =
-                            createProgressDialog(context, "Please wait...");
+                        final dialog = createProgressDialog(context, "Please wait...");
                         await dialog.show();
                         await Configuration.instance.logout();
                         await dialog.hide();
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
+                        Navigator.of(context).popUntil((route) => route.isFirst);
                       },
-                      child: Container(
-                        child: Center(
-                          child: Text(
-                            "Change email",
-                            style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                          ),
+                      child: Center(
+                        child: Text(
+                          "Change email",
+                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       ),
                     ),

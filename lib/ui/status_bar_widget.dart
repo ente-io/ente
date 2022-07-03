@@ -22,8 +22,8 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
-      if (event.status == SyncStatus.completed_first_gallery_import ||
-          event.status == SyncStatus.completed_backup) {
+      if (event.status == SyncStatus.completedFirstGalleryImport ||
+          event.status == SyncStatus.completedBackup) {
         Future.delayed(Duration(milliseconds: 2000), () {
           if (mounted) {
             setState(() {
@@ -110,17 +110,16 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
   @override
   Widget build(BuildContext context) {
     bool isNotOutdatedEvent = _event != null &&
-        (_event.status == SyncStatus.completed_backup ||
-            _event.status == SyncStatus.completed_first_gallery_import) &&
-        (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
-            kSleepDuration.inMicroseconds);
+        (_event.status == SyncStatus.completedBackup ||
+            _event.status == SyncStatus.completedFirstGalleryImport) &&
+        (DateTime.now().microsecondsSinceEpoch - _event.timestamp > kSleepDuration.inMicroseconds);
     if (_event == null || isNotOutdatedEvent) {
       return Container();
     }
     if (_event.status == SyncStatus.error) {
       return HeaderErrorWidget(error: _event.error);
     }
-    if (_event.status == SyncStatus.completed_backup) {
+    if (_event.status == SyncStatus.completedBackup) {
       return SyncStatusCompletedWidget();
     }
     return RefreshIndicatorWidget(_event);
@@ -172,21 +171,18 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 
   String _getRefreshingText() {
-    if (event.status == SyncStatus.started_first_gallery_import ||
-        event.status == SyncStatus.completed_first_gallery_import) {
+    if (event.status == SyncStatus.startedFirstGalleryImport ||
+        event.status == SyncStatus.completedFirstGalleryImport) {
       return "Loading gallery...";
     }
-    if (event.status == SyncStatus.applying_remote_diff) {
+    if (event.status == SyncStatus.applyingRemoteDiff) {
       return "Syncing...";
     }
-    if (event.status == SyncStatus.preparing_for_upload) {
+    if (event.status == SyncStatus.preparingForUpload) {
       return "Encrypting backup...";
     }
-    if (event.status == SyncStatus.in_progress) {
-      return event.completed.toString() +
-          "/" +
-          event.total.toString() +
-          " memories preserved";
+    if (event.status == SyncStatus.inProgress) {
+      return event.completed.toString() + "/" + event.total.toString() + " memories preserved";
     }
     if (event.status == SyncStatus.paused) {
       return event.reason;
@@ -194,7 +190,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
     if (event.status == SyncStatus.error) {
       return event.reason ?? "Upload failed";
     }
-    if (event.status == SyncStatus.completed_backup) {
+    if (event.status == SyncStatus.completedBackup) {
       if (event.wasStopped) {
         return "Sync stopped";
       }

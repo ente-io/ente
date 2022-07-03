@@ -27,7 +27,7 @@ class HexEncoder extends Converter<List<int>, String> {
 
   @override
   String convert(List<int> bytes) {
-    StringBuffer buffer = new StringBuffer();
+    StringBuffer buffer = StringBuffer();
     for (int part in bytes) {
       if (part & 0xff != part) {
         throw FormatException("Non-byte integer detected");

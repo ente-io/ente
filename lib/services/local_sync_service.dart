@@ -33,8 +33,7 @@ class LocalSyncService {
 
   LocalSyncService._privateConstructor();
 
-  static final LocalSyncService instance =
-      LocalSyncService._privateConstructor();
+  static final LocalSyncService instance = LocalSyncService._privateConstructor();
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -86,8 +85,7 @@ class LocalSyncService {
       );
     } else {
       // Load from 0 - 01.01.2010
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.started_first_gallery_import));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
       var startTime = 0;
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
@@ -115,8 +113,7 @@ class LocalSyncService {
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
       _logger.fine("first gallery import finished");
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
     }
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
@@ -139,8 +136,7 @@ class LocalSyncService {
     );
     final existingIDs = await _db.getExistingLocalFileIDs();
     final invalidIDs = getInvalidFileIDs().toSet();
-    final unsyncedFiles =
-        await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
+    final unsyncedFiles = await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
     if (unsyncedFiles.isNotEmpty) {
       await _db.insertMultiple(unsyncedFiles);
       _logger.info(
@@ -203,8 +199,7 @@ class LocalSyncService {
   }
 
   bool hasGrantedLimitedPermissions() {
-    return _prefs.getString(kPermissionStateKey) ==
-        PermissionState.limited.toString();
+    return _prefs.getString(kPermissionStateKey) == PermissionState.limited.toString();
   }
 
   Future<void> onPermissionGranted(PermissionState state) async {
@@ -233,12 +228,10 @@ class LocalSyncService {
     final files = await getDeviceFiles(fromTime, toTime, _computer);
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
-      final updatedFiles = files
-          .where((file) => existingLocalFileIDs.contains(file.localID))
-          .toList();
+      final updatedFiles =
+          files.where((file) => existingLocalFileIDs.contains(file.localID)).toList();
       updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
-      updatedFiles
-          .removeWhere((file) => downloadedFileIDs.contains(file.localID));
+      updatedFiles.removeWhere((file) => downloadedFileIDs.contains(file.localID));
       if (updatedFiles.isNotEmpty) {
         _logger.info(
           updatedFiles.length.toString() + " local files were updated.",
@@ -276,15 +269,13 @@ class LocalSyncService {
       if (Platform.isIOS) {
         var assetEntity = await AssetEntity.fromId(file.localID);
         if (assetEntity != null) {
-          var isLocallyAvailable =
-              await assetEntity.isLocallyAvailable(isOrigin: true);
+          var isLocallyAvailable = await assetEntity.isLocallyAvailable(isOrigin: true);
           _logger.info(
             're-upload asset ${file.toString()} with localAvailableFlag '
             '$isLocallyAvailable and fav ${assetEntity.isFavorite}',
           );
         } else {
-          _logger
-              .info('re-upload failed to fetch assetInfo ${file.toString()}');
+          _logger.info('re-upload failed to fetch assetInfo ${file.toString()}');
         }
       }
     } catch (ignore) {

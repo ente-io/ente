@@ -17,7 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   final _config = Configuration.instance;
   bool _emailIsValid = false;
   String _email;
-  Color _emailInputFieldColor = null;
+  Color _emailInputFieldColor;
 
   @override
   void initState() {
@@ -56,8 +56,7 @@ class _LoginPageState extends State<LoginPage> {
         buttonText: 'Log in',
         onPressedFunction: () {
           UserService.instance.setEmail(_email);
-          UserService.instance
-              .getOtt(context, _email, isCreateAccountScreen: false);
+          UserService.instance.getOtt(context, _email, isCreateAccountScreen: false);
           FocusScope.of(context).unfocus();
         },
       ),
@@ -73,8 +72,7 @@ class _LoginPageState extends State<LoginPage> {
           child: ListView(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                 child: Text(
                   'Welcome back!',
                   style: Theme.of(context).textTheme.headline4,
@@ -88,8 +86,7 @@ class _LoginPageState extends State<LoginPage> {
                     fillColor: _emailInputFieldColor,
                     filled: true,
                     hintText: 'Email',
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                     border: UnderlineInputBorder(
                       borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(6),
@@ -111,8 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                       _email = value.trim();
                       _emailIsValid = EmailValidator.validate(_email);
                       if (_emailIsValid) {
-                        _emailInputFieldColor =
-                            Color.fromRGBO(45, 194, 98, 0.2);
+                        _emailInputFieldColor = Color.fromRGBO(45, 194, 98, 0.2);
                       } else {
                         _emailInputFieldColor = null;
                       }
@@ -138,10 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                       flex: 5,
                       child: RichText(
                         text: TextSpan(
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1
-                              .copyWith(fontSize: 12),
+                          style: Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 12),
                           children: [
                             TextSpan(
                               text: "By clicking log in, I agree to the ",

@@ -18,12 +18,10 @@ class LocationSearchResultsPage extends StatefulWidget {
   final ViewPort viewPort;
   final String name;
 
-  LocationSearchResultsPage(this.viewPort, this.name, {Key key})
-      : super(key: key);
+  LocationSearchResultsPage(this.viewPort, this.name, {Key key}) : super(key: key);
 
   @override
-  _LocationSearchResultsPageState createState() =>
-      _LocationSearchResultsPageState();
+  _LocationSearchResultsPageState createState() => _LocationSearchResultsPageState();
 }
 
 class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
@@ -35,12 +33,10 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
       appBar: AppBar(
         title: Text(widget.name),
       ),
-      body: Container(
-        child: Gallery(
-          tagPrefix: "location_search",
-          selectedFiles: _selectedFiles,
-          footer: SizedBox(height: 32),
-        ),
+      body: Gallery(
+        tagPrefix: "location_search",
+        selectedFiles: _selectedFiles,
+        footer: SizedBox(height: 32),
       ),
     );
   }

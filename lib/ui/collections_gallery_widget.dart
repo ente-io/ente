@@ -304,7 +304,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                         color: Theme.of(context).iconTheme.color.withOpacity(0.24),
                       ),
                     ),
-                    child: Container(
+                    child: SizedBox(
                       height: 48,
                       width: double.infinity,
                       child: Padding(
@@ -488,7 +488,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             "long press to select photos and click + to create an album",
             toastLength: Toast.LENGTH_LONG,
           );
-          Bus.instance.fire(TabChangedEvent(0, TabChangedEventSource.collections_page));
+          Bus.instance.fire(TabChangedEvent(0, TabChangedEventSource.collectionsPage));
         },
       );
     }

@@ -24,7 +24,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
       ),
       content: Scrollbar(
         controller: scrollController,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: SingleChildScrollView(
           controller: scrollController,
           child: _getInfo(),
@@ -71,10 +71,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
                       FontFeature.tabularFigures(),
                     ],
                     height: 1.4,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withOpacity(0.7),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                   ),
                 ),
               ),

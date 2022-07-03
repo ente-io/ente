@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -33,8 +32,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     Logger("FreeSpacePage").info(
       "Number of uploaded files: " + widget.status.localIDs.length.toString(),
     );
-    Logger("FreeSpacePage")
-        .info("Space consumed: " + widget.status.size.toString());
+    Logger("FreeSpacePage").info("Space consumed: " + widget.status.size.toString());
     return SingleChildScrollView(
       child: _getWidget(widget.status),
     );
@@ -49,8 +47,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.8),
       fontWeight: FontWeight.w500,
     );
-    final isLightMode =
-        MediaQuery.of(context).platformBrightness == Brightness.light;
+    final isLightMode = MediaQuery.of(context).platformBrightness == Brightness.light;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -83,8 +80,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               Expanded(
                 child: Text(
                   count == 1
-                      ? formattedCount.toString() +
-                          " file on this device has been backed up safely"
+                      ? formattedCount.toString() + " file on this device has been backed up safely"
                       : formattedCount.toString() +
                           " files on this device have been backed up safely",
                   style: informationTextStyle,

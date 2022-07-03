@@ -26,9 +26,10 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.type,
     this.title,
     this.selectedFiles, {
+    Key key,
     this.path,
     this.collection,
-  });
+  }) : super(key: key);
 
   @override
   _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
@@ -46,8 +47,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       setState(() {});
     };
     widget.selectedFiles.addListener(_selectedFilesListener);
-    _userAuthEventSubscription =
-        Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
+    _userAuthEventSubscription = Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
       setState(() {});
     });
     _appBarTitle = widget.title;
@@ -65,8 +65,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Widget build(BuildContext context) {
     // if (widget.selectedFiles.files.isEmpty) {
     return AppBar(
-      backgroundColor:
-          widget.type == GalleryType.homepage ? Color(0x00000000) : null,
+      backgroundColor: widget.type == GalleryType.homepage ? Color(0x00000000) : null,
       elevation: 0,
       centerTitle: false,
       title: widget.type == GalleryType.homepage
@@ -74,10 +73,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           : TextButton(
               child: Text(
                 _appBarTitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .headline5
-                    .copyWith(fontSize: 16),
+                style: Theme.of(context).textTheme.headline5.copyWith(fontSize: 16),
               ),
               onPressed: () => _renameAlbum(context),
             ),
@@ -86,7 +82,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
-    if (widget.type != GalleryType.owned_collection) {
+    if (widget.type != GalleryType.ownedCollection) {
       return;
     }
     final result = await showDialog<String>(
@@ -120,8 +116,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
-        (widget.type == GalleryType.local_folder ||
-            widget.type == GalleryType.owned_collection)) {
+        (widget.type == GalleryType.localFolder || widget.type == GalleryType.ownedCollection)) {
       actions.add(
         Tooltip(
           message: "Share",
@@ -134,7 +129,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (widget.type == GalleryType.owned_collection) {
+    if (widget.type == GalleryType.ownedCollection) {
       actions.add(
         PopupMenuButton(
           itemBuilder: (context) {
@@ -180,9 +175,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
               await changeCollectionVisibility(
                 context,
                 widget.collection,
-                widget.collection.isArchived()
-                    ? kVisibilityVisible
-                    : kVisibilityArchive,
+                widget.collection.isArchived() ? kVisibilityVisible : kVisibilityArchive,
               );
             }
           },
@@ -198,17 +191,15 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await dialog.show();
     try {
       if (collection == null) {
-        if (widget.type == GalleryType.local_folder) {
-          collection =
-              await CollectionsService.instance.getOrCreateForPath(widget.path);
+        if (widget.type == GalleryType.localFolder) {
+          collection = await CollectionsService.instance.getOrCreateForPath(widget.path);
         } else {
           throw Exception(
             "Cannot create a collection of type" + widget.type.toString(),
           );
         }
       } else {
-        final sharees =
-            await CollectionsService.instance.getSharees(collection.id);
+        final sharees = await CollectionsService.instance.getSharees(collection.id);
         collection = collection.copyWith(sharees: sharees);
       }
       await dialog.hide();

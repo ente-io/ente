@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/ui/viewer/search/location_search_widget.dart';
 
 class SearchPage extends StatefulWidget {
+  const SearchPage({Key key}) : super(key: key);
+
   @override
   _SearchPageState createState() => _SearchPageState();
 }

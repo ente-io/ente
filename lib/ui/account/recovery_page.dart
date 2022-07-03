@@ -82,8 +82,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
             child: ListView(
               children: [
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     'Forgot password',
                     style: Theme.of(context).textTheme.headline4,
@@ -103,7 +102,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                     ),
                     style: TextStyle(
                       fontSize: 14,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                     controller: _recoveryKey,
                     autofocus: false,
@@ -137,11 +136,10 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         child: Center(
                           child: Text(
                             "No recovery key?",
-                            style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
+                            style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                  fontSize: 14,
+                                  decoration: TextDecoration.underline,
+                                ),
                           ),
                         ),
                       ),

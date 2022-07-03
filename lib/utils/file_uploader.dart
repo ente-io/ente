@@ -42,7 +42,7 @@ class FileUploader {
 
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
-  final _queue = LinkedHashMap<String, FileUploadItem>();
+  final LinkedHashMap _queue = LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
   final kSafeBufferForLockExpiry = Duration(days: 1).inMicroseconds;
   final kBGTaskDeathTimeout = Duration(seconds: 5).inMicroseconds;
@@ -68,19 +68,17 @@ class FileUploader {
   Future<void> init(bool isBackground) async {
     _prefs = await SharedPreferences.getInstance();
     _isBackground = isBackground;
-    _processType =
-        isBackground ? ProcessType.background : ProcessType.foreground;
+    _processType = isBackground ? ProcessType.background : ProcessType.foreground;
     final currentTime = DateTime.now().microsecondsSinceEpoch;
     await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
       _processType.toString(),
       currentTime,
     );
-    await _uploadLocks
-        .releaseAllLocksAcquiredBefore(currentTime - kSafeBufferForLockExpiry);
+    await _uploadLocks.releaseAllLocksAcquiredBefore(currentTime - kSafeBufferForLockExpiry);
     if (!isBackground) {
       await _prefs.reload();
-      final isBGTaskDead = (_prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0) <
-          (currentTime - kBGTaskDeathTimeout);
+      final isBGTaskDead =
+          (_prefs.getInt(kLastBGTaskHeartBeatTime) ?? 0) < (currentTime - kBGTaskDeathTimeout);
       if (isBGTaskDead) {
         await _uploadLocks.releaseLocksAcquiredByOwnerBefore(
           ProcessType.background.toString(),
@@ -138,10 +136,7 @@ class FileUploader {
 
   Future<File> forceUpload(File file, int collectionID) async {
     _logger.info(
-      "Force uploading " +
-          file.toString() +
-          " into collection " +
-          collectionID.toString(),
+      "Force uploading " + file.toString() + " into collection " + collectionID.toString(),
     );
     _totalCountInUploadSession++;
     // If the file hasn't been queued yet, ez.
@@ -151,22 +146,20 @@ class FileUploader {
         file,
         collectionID,
         completer,
-        status: UploadStatus.in_progress,
+        status: UploadStatus.inProgress,
       );
       _encryptAndUploadFileToCollection(file, collectionID, forcedUpload: true);
       return completer.future;
     }
     var item = _queue[file.localID];
     // If the file is being uploaded right now, wait and proceed
-    if (item.status == UploadStatus.in_progress ||
-        item.status == UploadStatus.in_background) {
+    if (item.status == UploadStatus.inProgress || item.status == UploadStatus.inBackground) {
       _totalCountInUploadSession--;
       final uploadedFile = await item.completer.future;
       if (uploadedFile.collectionID == collectionID) {
         // Do nothing
       } else {
-        await CollectionsService.instance
-            .addToCollection(collectionID, [uploadedFile]);
+        await CollectionsService.instance.addToCollection(collectionID, [uploadedFile]);
       }
       return uploadedFile;
     } else {
@@ -175,7 +168,7 @@ class FileUploader {
       // 2. Force upload the file
       // 3. Add to the relevant collection
       item = _queue[file.localID];
-      item.status = UploadStatus.in_progress;
+      item.status = UploadStatus.inProgress;
       final uploadedFile = await _encryptAndUploadFileToCollection(
         file,
         collectionID,
@@ -184,8 +177,7 @@ class FileUploader {
       if (item.collectionID == collectionID) {
         return uploadedFile;
       } else {
-        await CollectionsService.instance
-            .addToCollection(item.collectionID, [uploadedFile]);
+        await CollectionsService.instance.addToCollection(item.collectionID, [uploadedFile]);
         return uploadedFile;
       }
     }
@@ -198,7 +190,7 @@ class FileUploader {
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
-        .where((entry) => entry.value.status == UploadStatus.not_started)
+        .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
       uploadsToBeRemoved.add(pendingUpload.key);
     });
@@ -211,7 +203,7 @@ class FileUploader {
   void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
     List<String> uploadsToBeRemoved = [];
     _queue.entries
-        .where((entry) => entry.value.status == UploadStatus.not_started)
+        .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
       if (fn(pendingUpload.value.file)) {
         uploadsToBeRemoved.add(pendingUpload.key);
@@ -235,7 +227,7 @@ class FileUploader {
     if (_uploadCounter < kMaximumConcurrentUploads) {
       var pendingEntry = _queue.entries
           .firstWhere(
-            (entry) => entry.value.status == UploadStatus.not_started,
+            (entry) => entry.value.status == UploadStatus.notStarted,
             orElse: () => null,
           )
           ?.value;
@@ -247,14 +239,14 @@ class FileUploader {
         pendingEntry = _queue.entries
             .firstWhere(
               (entry) =>
-                  entry.value.status == UploadStatus.not_started &&
+                  entry.value.status == UploadStatus.notStarted &&
                   entry.value.file.fileType != FileType.video,
               orElse: () => null,
             )
             ?.value;
       }
       if (pendingEntry != null) {
-        pendingEntry.status = UploadStatus.in_progress;
+        pendingEntry.status = UploadStatus.inProgress;
         _encryptAndUploadFileToCollection(
           pendingEntry.file,
           pendingEntry.collectionID,
@@ -274,8 +266,7 @@ class FileUploader {
     }
     final localID = file.localID;
     try {
-      final uploadedFile =
-          await _tryToUpload(file, collectionID, forcedUpload).timeout(
+      final uploadedFile = await _tryToUpload(file, collectionID, forcedUpload).timeout(
         kFileUploadTimeout,
         onTimeout: () {
           final message = "Upload timed out for file " + file.toString();
@@ -287,7 +278,7 @@ class FileUploader {
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
-        _queue[localID].status = UploadStatus.in_background;
+        _queue[localID].status = UploadStatus.inBackground;
         return _queue[localID].completer.future;
       } else {
         _queue.remove(localID).completer.completeError(e);
@@ -308,9 +299,8 @@ class FileUploader {
     bool forcedUpload,
   ) async {
     final connectivityResult = await (Connectivity().checkConnectivity());
-    var canUploadUnderCurrentNetworkConditions =
-        (connectivityResult == ConnectivityResult.wifi ||
-            Configuration.instance.shouldBackupOverMobileData());
+    var canUploadUnderCurrentNetworkConditions = (connectivityResult == ConnectivityResult.wifi ||
+        Configuration.instance.shouldBackupOverMobileData());
     if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
       throw WiFiUnavailableError();
     }
@@ -334,10 +324,8 @@ class FileUploader {
     }
 
     final tempDirectory = Configuration.instance.getTempDirectory();
-    final encryptedFilePath = tempDirectory +
-        file.generatedID.toString() +
-        (_isBackground ? "_bg" : "") +
-        ".encrypted";
+    final encryptedFilePath =
+        tempDirectory + file.generatedID.toString() + (_isBackground ? "_bg" : "") + ".encrypted";
     final encryptedThumbnailPath = tempDirectory +
         file.generatedID.toString() +
         "_thumbnail" +
@@ -347,10 +335,7 @@ class FileUploader {
 
     try {
       _logger.info(
-        "Trying to upload " +
-            file.toString() +
-            ", isForced: " +
-            forcedUpload.toString(),
+        "Trying to upload " + file.toString() + ", isForced: " + forcedUpload.toString(),
       );
       try {
         mediaUploadData = await getUploadDataFromEnteFile(file);
@@ -362,8 +347,7 @@ class FileUploader {
         }
       }
       Uint8List key;
-      bool isUpdatedFile =
-          file.uploadedFileID != null && file.updationTime == -1;
+      bool isUpdatedFile = file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
         _logger.info("File was updated " + file.toString());
         key = decryptFileKey(file);
@@ -388,29 +372,23 @@ class FileUploader {
         await io.File(encryptedThumbnailPath).delete();
       }
       final encryptedThumbnailFile = io.File(encryptedThumbnailPath);
-      await encryptedThumbnailFile
-          .writeAsBytes(encryptedThumbnailData.encryptedData);
+      await encryptedThumbnailFile.writeAsBytes(encryptedThumbnailData.encryptedData);
 
       final thumbnailUploadURL = await _getUploadURL();
-      String thumbnailObjectKey =
-          await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
+      String thumbnailObjectKey = await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
-      final metadata =
-          await file.getMetadataForUpload(mediaUploadData.sourceFile);
+      final metadata = await file.getMetadataForUpload(mediaUploadData.sourceFile);
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
         fileAttributes.key,
       );
       final fileDecryptionHeader = Sodium.bin2base64(fileAttributes.header);
-      final thumbnailDecryptionHeader =
-          Sodium.bin2base64(encryptedThumbnailData.header);
-      final encryptedMetadata =
-          Sodium.bin2base64(encryptedMetadataData.encryptedData);
-      final metadataDecryptionHeader =
-          Sodium.bin2base64(encryptedMetadataData.header);
+      final thumbnailDecryptionHeader = Sodium.bin2base64(encryptedThumbnailData.header);
+      final encryptedMetadata = Sodium.bin2base64(encryptedMetadataData.encryptedData);
+      final metadataDecryptionHeader = Sodium.bin2base64(encryptedMetadataData.header);
       if (SyncService.instance.shouldStopSync()) {
         throw SyncStopRequestedError();
       }
@@ -434,10 +412,8 @@ class FileUploader {
           fileAttributes.key,
           CollectionsService.instance.getCollectionKey(collectionID),
         );
-        final encryptedKey =
-            Sodium.bin2base64(encryptedFileKeyData.encryptedData);
-        final keyDecryptionNonce =
-            Sodium.bin2base64(encryptedFileKeyData.nonce);
+        final encryptedKey = Sodium.bin2base64(encryptedFileKeyData.encryptedData);
+        final keyDecryptionNonce = Sodium.bin2base64(encryptedFileKeyData.nonce);
         remoteFile = await _uploadFile(
           file,
           collectionID,
@@ -474,9 +450,7 @@ class FileUploader {
       }
       rethrow;
     } finally {
-      if (io.Platform.isIOS &&
-          mediaUploadData != null &&
-          mediaUploadData.sourceFile != null) {
+      if (io.Platform.isIOS && mediaUploadData != null && mediaUploadData.sourceFile != null) {
         await mediaUploadData.sourceFile.delete();
       }
       if (io.File(encryptedFilePath).existsSync()) {
@@ -680,9 +654,7 @@ class FileUploader {
             headers: {"X-Auth-Token": Configuration.instance.getToken()},
           ),
         );
-        final urls = (response.data["urls"] as List)
-            .map((e) => UploadURL.fromMap(e))
-            .toList();
+        final urls = (response.data["urls"] as List).map((e) => UploadURL.fromMap(e)).toList();
         _uploadURLs.addAll(urls);
       } on DioError catch (e, s) {
         if (e.response != null) {
@@ -719,10 +691,7 @@ class FileUploader {
   }) async {
     final fileSize = contentLength ?? await file.length();
     _logger.info(
-      "Putting object for " +
-          file.toString() +
-          " of size: " +
-          fileSize.toString(),
+      "Putting object for " + file.toString() + " of size: " + fileSize.toString(),
     );
     final startTime = DateTime.now().millisecondsSinceEpoch;
     try {
@@ -737,8 +706,7 @@ class FileUploader {
       );
       _logger.info(
         "Upload speed : " +
-            (fileSize / (DateTime.now().millisecondsSinceEpoch - startTime))
-                .toString() +
+            (fileSize / (DateTime.now().millisecondsSinceEpoch - startTime)).toString() +
             " kilo bytes per second",
       );
 
@@ -773,9 +741,8 @@ class FileUploader {
   }
 
   Future<void> _pollBackgroundUploadStatus() async {
-    final blockedUploads = _queue.entries
-        .where((e) => e.value.status == UploadStatus.in_background)
-        .toList();
+    final blockedUploads =
+        _queue.entries.where((e) => e.value.status == UploadStatus.inBackground).toList();
     for (final upload in blockedUploads) {
       final file = upload.value.file;
       final isStillLocked = await _uploadLocks.isLocked(
@@ -784,8 +751,7 @@ class FileUploader {
       );
       if (!isStillLocked) {
         final completer = _queue.remove(upload.key).completer;
-        final dbFile =
-            await FilesDB.instance.getFile(upload.value.file.generatedID);
+        final dbFile = await FilesDB.instance.getFile(upload.value.file.generatedID);
         if (dbFile.uploadedFileID != null) {
           _logger.info("Background upload success detected");
           completer.complete(dbFile);
@@ -811,14 +777,14 @@ class FileUploadItem {
     this.file,
     this.collectionID,
     this.completer, {
-    this.status = UploadStatus.not_started,
+    this.status = UploadStatus.notStarted,
   });
 }
 
 enum UploadStatus {
-  not_started,
-  in_progress,
-  in_background,
+  notStarted,
+  inProgress,
+  inBackground,
   completed,
 }
 

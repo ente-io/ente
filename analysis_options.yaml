@@ -41,6 +41,9 @@ analyzer:
     unused_import: error
     prefer_is_empty: warning
     use_rethrow_when_possible: info
+    unused_field: warning
+    use_key_in_widget_constructors: warning
+
 
     prefer_const_constructors: ignore # too many warnings
     prefer_const_declarations: ignore # too many warnings
