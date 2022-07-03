@@ -192,7 +192,7 @@ function PlanSelectorCard(props: Props) {
                 )}
                 <Box>
                     <Stack
-                        spacing={2}
+                        spacing={3}
                         border={(theme) =>
                             hasPaidSubscription(subscription) &&
                             `1px solid ${theme.palette.divider}`
@@ -217,17 +217,23 @@ function PlanSelectorCard(props: Props) {
                             subscription={subscription}
                         />
                     </Stack>
-                    <Box py={1} px={1.5}>
-                        <Typography color={'text.secondary'}>
-                            Renews on 26 July, 2022
-                        </Typography>
-                    </Box>
+                    {hasPaidSubscription(subscription) && (
+                        <Box py={1} px={1.5}>
+                            <Typography color={'text.secondary'}>
+                                {constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
+                                    subscription.expiryTime
+                                )}
+                            </Typography>
+                        </Box>
+                    )}
                 </Box>
-                <ManageSubscription
-                    subscription={subscription}
-                    closeModal={props.closeModal}
-                    setLoading={props.setLoading}
-                />
+                {hasPaidSubscription(subscription) && (
+                    <ManageSubscription
+                        subscription={subscription}
+                        closeModal={props.closeModal}
+                        setLoading={props.setLoading}
+                    />
+                )}
             </Stack>
         </>
     );
