@@ -52,7 +52,6 @@ export function convertBytesToHumanReadable(
 
 export function makeHumanReadableStorage(
     bytes: number,
-
     round: 'round-up' | 'round-down' = 'round-down'
 ): string {
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -137,6 +136,13 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
             'invalid getFamilyPlanAdmin call'
         );
     }
+}
+
+export function getTotalFamilyUsage(familyData: FamilyData): number {
+    return familyData.members.reduce(
+        (sum, currentMember) => sum + currentMember.usage,
+        0
+    );
 }
 
 export function getLocalUserSubscription(): Subscription {

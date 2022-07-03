@@ -2,6 +2,7 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import { Box, Typography } from '@mui/material';
 import { FlexWrapper, SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
+import { isUserSubscribedPlan } from 'utils/billing';
 import constants from 'utils/strings/constants';
 import { PlanRow } from './planRow';
 
@@ -11,6 +12,7 @@ const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
             ?.filter((plan) => plan.period === planPeriod)
             ?.map((plan) => (
                 <PlanRow
+                    disabled={isUserSubscribedPlan(plan, subscription)}
                     key={plan.stripeID}
                     plan={plan}
                     subscription={subscription}

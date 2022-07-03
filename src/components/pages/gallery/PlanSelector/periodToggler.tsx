@@ -1,7 +1,7 @@
 import { styled, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { PLAN_PERIOD } from 'constants/gallery';
 import React from 'react';
 import constants from 'utils/strings/constants';
-import { PLAN_PERIOD } from '.';
 export function PeriodToggler({ planPeriod, togglePeriod }) {
     const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
         textTransform: 'none',
