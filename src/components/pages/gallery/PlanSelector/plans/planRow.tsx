@@ -35,9 +35,16 @@ const DisabledPlanButton = styled((props: ButtonProps) => (
     },
 }));
 
-const ActivePlanButton = (props: ButtonProps) => (
+const ActivePlanButton = styled((props: ButtonProps) => (
     <Button color="accent" {...props} endIcon={<ArrowForward />} />
-);
+))(() => ({
+    '.MuiButton-endIcon': {
+        transition: 'transform .2s ease-in-out',
+    },
+    '&:hover .MuiButton-endIcon': {
+        transform: 'translateX(10px)',
+    },
+}));
 
 export function PlanRow({
     plan,

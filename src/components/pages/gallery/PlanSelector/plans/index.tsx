@@ -1,13 +1,11 @@
-import ArrowForward from '@mui/icons-material/ArrowForward';
-import { Box, Stack, Typography } from '@mui/material';
-import { SpaceBetweenFlex } from 'components/Container';
+import { FreePlanRow } from './FreePlanRow';
+import { Stack } from '@mui/material';
 import React from 'react';
 import {
     hasPaidSubscription,
     isPopularPlan,
     isUserSubscribedPlan,
 } from 'utils/billing';
-import constants from 'utils/strings/constants';
 import { PlanRow } from './planRow';
 
 const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
@@ -24,23 +22,7 @@ const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
                     onPlanSelect={onPlanSelect}
                 />
             ))}
-        {!hasPaidSubscription(subscription) && (
-            <SpaceBetweenFlex
-                gap={1.5}
-                py={1.5}
-                pr={1}
-                sx={{ cursor: 'pointer' }}>
-                <Box>
-                    <Typography> {constants.FREE_PLAN_OPTION_LABEL}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {constants.FREE_PLAN_DESCRIPTION}
-                    </Typography>
-                </Box>
-                <Box>
-                    <ArrowForward />
-                </Box>
-            </SpaceBetweenFlex>
-        )}
+        {!hasPaidSubscription(subscription) && <FreePlanRow />}
     </Stack>
 );
 
