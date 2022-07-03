@@ -102,7 +102,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             ),
           ),
           _userDetails == null
-              ? loadWidget
+              ? const EnteLoadingWidget()
               : Padding(
                   padding:
                       EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 16),

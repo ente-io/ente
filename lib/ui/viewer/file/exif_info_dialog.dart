@@ -82,7 +82,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
             ),
           );
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );

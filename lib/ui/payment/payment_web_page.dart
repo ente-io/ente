@@ -49,7 +49,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   Widget build(BuildContext context) {
     _dialog = createProgressDialog(context, "Please wait...");
     if (initPaymentUrl == null) {
-      return loadWidget;
+      return const EnteLoadingWidget();
     }
     return WillPopScope(
       onWillPop: () async => _buildPageExitWidget(context),

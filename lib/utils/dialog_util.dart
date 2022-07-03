@@ -16,7 +16,7 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
     message: message,
     messageTextStyle: Theme.of(context).textTheme.caption,
     backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-    progressWidget: loadWidget,
+    progressWidget: const EnteLoadingWidget(),
     borderRadius: 10,
     elevation: 10.0,
     insetAnimCurve: Curves.easeInOut,

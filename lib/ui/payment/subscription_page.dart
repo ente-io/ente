@@ -171,7 +171,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         return _buildPlans();
       }
     }
-    return loadWidget;
+    return const EnteLoadingWidget();
   }
 
   Widget _buildPlans() {

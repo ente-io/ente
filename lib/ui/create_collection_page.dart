@@ -153,7 +153,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             physics: NeverScrollableScrollPhysics(),
           );
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );

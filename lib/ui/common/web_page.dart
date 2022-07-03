@@ -28,7 +28,7 @@ class _WebPageState extends State<WebPage> {
         foregroundColor: Colors.white,
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(widget.title),
-        actions: [_hasLoadedPage ? Container() : loadWidget],
+        actions: [_hasLoadedPage ? Container() : const EnteLoadingWidget()],
       ),
       backgroundColor: Colors.black,
       body: InAppWebView(

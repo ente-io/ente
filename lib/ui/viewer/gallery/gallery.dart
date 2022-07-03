@@ -11,10 +11,10 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/ui/common/common_elements.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/huge_listview/huge_listview.dart';
 import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
+import 'package:photos/ui/viewer/gallery/empte_state.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -164,7 +164,7 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
     if (!_hasLoadedFiles) {
-      return loadWidget;
+      return const EnteLoadingWidget();
     }
     return _getListView();
   }
@@ -177,7 +177,7 @@ class _GalleryState extends State<Gallery> {
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 30,
       waitBuilder: (_) {
-        return loadWidget;
+        return const EnteLoadingWidget();
       },
       emptyResultBuilder: (_) {
         List<Widget> children = [];
@@ -185,10 +185,8 @@ class _GalleryState extends State<Gallery> {
           children.add(widget.header);
         }
         children.add(
-          Expanded(
-            child: nothingToSeeHere(
-              textColor: Theme.of(context).colorScheme.defaultTextColor,
-            ),
+          const Expanded(
+            child: EmptyState(),
           ),
         );
         if (widget.footer != null) {
