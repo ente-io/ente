@@ -62,7 +62,7 @@ class ArchivePage extends StatelessWidget {
     );
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
           "Hidden",

@@ -18,12 +18,12 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/common/common_elements.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/archive_page.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
+import 'package:photos/ui/viewer/gallery/empte_state.dart';
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -153,11 +153,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             SectionTitle("On device"),
             const SizedBox(height: 12),
             items.folders.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: nothingToSeeHere(
-                      textColor: Theme.of(context).colorScheme.defaultTextColor,
-                    ),
+                ? const Padding(
+                    padding: EdgeInsets.all(22),
+                    child: EmptyState(),
                   )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -166,11 +164,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: items.folders.isEmpty
-                            ? nothingToSeeHere(
-                                textColor: Theme.of(context)
-                                    .colorScheme
-                                    .defaultTextColor,
-                              )
+                            ? const EmptyState()
                             : ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -221,9 +215,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       ), //24 is height of album title
                     ),
                   )
-                : nothingToSeeHere(
-                    textColor: Theme.of(context).colorScheme.defaultTextColor,
-                  ),
+                : const EmptyState(),
             const SizedBox(height: 10),
             const Divider(),
             const SizedBox(height: 16),
