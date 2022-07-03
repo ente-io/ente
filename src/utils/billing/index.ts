@@ -401,7 +401,7 @@ function handleFailureReason(
     }
 }
 
-export function planForSubscription(subscription: Subscription) {
+export function planForSubscription(subscription: Subscription): Plan {
     return {
         id: subscription.productID,
         storage: subscription.storage,

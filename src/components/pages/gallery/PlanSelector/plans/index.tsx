@@ -7,8 +7,24 @@ import {
     isUserSubscribedPlan,
 } from 'utils/billing';
 import { PlanRow } from './planRow';
+import { Plan, Subscription } from 'types/billing';
+import { PLAN_PERIOD } from 'constants/gallery';
 
-const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
+interface Iprops {
+    plans: Plan[];
+    planPeriod: PLAN_PERIOD;
+    subscription: Subscription;
+    onPlanSelect: (plan: Plan) => void;
+    closeModal: () => void;
+}
+
+const Plans = ({
+    plans,
+    planPeriod,
+    subscription,
+    onPlanSelect,
+    closeModal,
+}: Iprops) => (
     <Stack spacing={2}>
         {plans
             ?.filter((plan) => plan.period === planPeriod)
@@ -22,7 +38,9 @@ const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
                     onPlanSelect={onPlanSelect}
                 />
             ))}
-        {!hasPaidSubscription(subscription) && <FreePlanRow />}
+        {!hasPaidSubscription(subscription) && (
+            <FreePlanRow closeModal={closeModal} />
+        )}
     </Stack>
 );
 

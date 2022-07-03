@@ -41,7 +41,10 @@ interface Props {
 function PlanSelectorCard(props: Props) {
     const subscription = useMemo(() => getLocalUserSubscription(), []);
     const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
-    const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
+
+    const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(
+        subscription?.period || PLAN_PERIOD.MONTH
+    );
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
 
@@ -215,6 +218,7 @@ function PlanSelectorCard(props: Props) {
                             planPeriod={planPeriod}
                             onPlanSelect={onPlanSelect}
                             subscription={subscription}
+                            closeModal={props.closeModal}
                         />
                     </Stack>
                     {hasPaidSubscription(subscription) && (

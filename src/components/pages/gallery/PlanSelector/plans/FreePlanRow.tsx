@@ -12,9 +12,9 @@ const RowContainer = styled(SpaceBetweenFlex)(({ theme }) => ({
         backgroundColor: 'rgba(255,255,255,0.08)',
     },
 }));
-export function FreePlanRow() {
+export function FreePlanRow({ closeModal }) {
     return (
-        <RowContainer>
+        <RowContainer onClick={closeModal}>
             <Box>
                 <Typography> {constants.FREE_PLAN_OPTION_LABEL}</Typography>
                 <Typography variant="body2" color="text.secondary">
