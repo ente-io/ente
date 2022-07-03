@@ -17,8 +17,7 @@ interface Iprops {
 const DisabledPlanButton = styled((props: ButtonProps) => (
     <Button disabled endIcon={<Done />} {...props} />
 ))(({ theme }) => ({
-    '&&': {
-        cursor: 'default',
+    '&.Mui-disabled': {
         backgroundColor: 'transparent',
         color: theme.palette.text.primary,
     },
