@@ -43,8 +43,10 @@ analyzer:
     use_rethrow_when_possible: info
     unused_field: warning
     use_key_in_widget_constructors: warning
+    sort_child_properties_last: warning
 
-
+    use_build_context_synchronously: ignore # experimental lint, requires many changes
+    prefer_interpolation_to_compose_strings: ignore # later too many warnings
     prefer_const_constructors: ignore # too many warnings
     prefer_const_declarations: ignore # too many warnings
     prefer_const_constructors_in_immutables: ignore # too many warnings
