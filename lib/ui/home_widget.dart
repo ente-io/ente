@@ -23,7 +23,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -32,8 +32,8 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/bottom_shadow.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
@@ -225,6 +225,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _firstImportEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
+    _intentDataStreamSubscription?.cancel();
     super.dispose();
   }
 

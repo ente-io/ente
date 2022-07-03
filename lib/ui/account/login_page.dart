@@ -3,7 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dynamicFAB.dart';
+import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
 
 class LoginPage extends StatefulWidget {

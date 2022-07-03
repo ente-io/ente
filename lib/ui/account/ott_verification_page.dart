@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dynamicFAB.dart';
+import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class OTTVerificationPage extends StatefulWidget {

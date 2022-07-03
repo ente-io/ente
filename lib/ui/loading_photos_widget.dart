@@ -7,7 +7,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
+import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {

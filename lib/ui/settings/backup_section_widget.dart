@@ -143,7 +143,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             BackupStatus status;
             try {
               status = await SyncService.instance.getBackupStatus();
-            } catch (e, s) {
+            } catch (e) {
               await dialog.hide();
               showGenericErrorDialog(context);
               return;

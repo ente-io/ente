@@ -8,7 +8,7 @@ import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/payment/subscription.dart';
 
 class LandingPageWidget extends StatefulWidget {

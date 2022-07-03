@@ -16,7 +16,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';

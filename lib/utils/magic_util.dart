@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/event_bus.dart';
@@ -85,7 +84,7 @@ Future<bool> editTime(
       editedTime,
     );
     return true;
-  } catch (e, s) {
+  } catch (e) {
     showToast(context, 'something went wrong');
     return false;
   }
@@ -118,7 +117,7 @@ Future<bool> editFilename(
       result,
     );
     return true;
-  } catch (e, s) {
+  } catch (e) {
     showToast(context, 'something went wrong');
     return false;
   }

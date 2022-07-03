@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/backup_status.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 

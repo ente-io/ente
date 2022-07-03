@@ -656,7 +656,7 @@ class FileUploader {
     }
     try {
       return _uploadURLs.removeFirst();
-    } catch (e, s) {
+    } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isNotEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
         return _getUploadURL();

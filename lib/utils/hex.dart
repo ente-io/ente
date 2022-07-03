@@ -1,10 +1,10 @@
 import "dart:convert";
 import "dart:typed_data";
 
-const String _ALPHABET = "0123456789abcdef";
+const String _alphabet = "0123456789abcdef";
 
 /// An instance of the default implementation of the [HexCodec].
-const HEX = const HexCodec();
+const hex = HexCodec();
 
 /// A codec for encoding and decoding byte arrays to and from
 /// hexadecimal strings.
@@ -55,8 +55,8 @@ class HexDecoder extends Converter<String, List<int>> {
     }
     Uint8List result = Uint8List(str.length ~/ 2);
     for (int i = 0; i < result.length; i++) {
-      int firstDigit = _ALPHABET.indexOf(str[i * 2]);
-      int secondDigit = _ALPHABET.indexOf(str[i * 2 + 1]);
+      int firstDigit = _alphabet.indexOf(str[i * 2]);
+      int secondDigit = _alphabet.indexOf(str[i * 2 + 1]);
       if (firstDigit == -1 || secondDigit == -1) {
         throw FormatException("Non-hex character detected in $hex");
       }

@@ -116,7 +116,7 @@ class SyncService {
     } on UnauthorizedError {
       _logger.info("Logging user out");
       Bus.instance.fire(TriggerLogoutEvent());
-    } catch (e, s) {
+    } catch (e) {
       if (e is DioError) {
         if (e.type == DioErrorType.connectTimeout ||
             e.type == DioErrorType.sendTimeout ||

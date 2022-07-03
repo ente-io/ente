@@ -107,11 +107,9 @@ class LocationSearchResultWidget extends StatelessWidget {
               ),
               Padding(padding: EdgeInsets.only(left: 20.0)),
               Flexible(
-                child: Container(
-                  child: Text(
-                    name,
-                    overflow: TextOverflow.clip,
-                  ),
+                child: Text(
+                  name,
+                  overflow: TextOverflow.clip,
                 ),
               ),
             ],

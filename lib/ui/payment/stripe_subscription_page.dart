@@ -8,7 +8,7 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
+import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';

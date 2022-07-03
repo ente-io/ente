@@ -9,7 +9,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -313,7 +313,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       widget.selectedFiles?.clearAll();
 
       return true;
-    } on AssertionError catch (e, s) {
+    } on AssertionError catch (e) {
       await dialog.hide();
       showErrorDialog(context, "Oops", e.message);
       return false;
@@ -335,7 +335,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       widget.selectedFiles?.clearAll();
       await dialog.hide();
       return true;
-    } on AssertionError catch (e, s) {
+    } on AssertionError catch (e) {
       await dialog.hide();
       showErrorDialog(context, "Oops", e.message);
       return false;
