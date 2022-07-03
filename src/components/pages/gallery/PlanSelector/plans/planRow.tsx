@@ -1,6 +1,10 @@
 import { Box, Button, ButtonProps, styled, Typography } from '@mui/material';
 import React from 'react';
-import { isUserSubscribedPlan, convertBytesToGBs } from 'utils/billing';
+import {
+    isUserSubscribedPlan,
+    convertBytesToGBs,
+    hasPaidSubscription,
+} from 'utils/billing';
 import constants from 'utils/strings/constants';
 import { FlexWrapper, FluidContainer } from 'components/Container';
 import ArrowForward from '@mui/icons-material/ArrowForward';
@@ -69,7 +73,9 @@ export function PlanRow({
                     <Typography variant="h3" color="text.secondary">
                         {constants.GB}
                     </Typography>
-                    {popular && <Badge>{constants.POPULAR}</Badge>}
+                    {popular && !hasPaidSubscription(subscription) && (
+                        <Badge>{constants.POPULAR}</Badge>
+                    )}
                 </FlexWrapper>
             </TopAlignedFluidContainer>
             <Box width="136px">
