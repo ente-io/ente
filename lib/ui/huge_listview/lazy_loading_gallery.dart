@@ -70,10 +70,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
     _reloadEventSubscription = widget.reloadEvent.listen((e) => _onReload(e));
 
-    _currentIndexSubscription =
-        widget.currentIndexStream.listen((currentIndex) {
-      bool shouldRender = (currentIndex - widget.index).abs() <
-          kNumberOfDaysToRenderBeforeAndAfter;
+    _currentIndexSubscription = widget.currentIndexStream.listen((currentIndex) {
+      bool shouldRender = (currentIndex - widget.index).abs() < kNumberOfDaysToRenderBeforeAndAfter;
       if (mounted && shouldRender != _shouldRender) {
         setState(() {
           _shouldRender = shouldRender;
@@ -83,8 +81,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   Future _onReload(FilesUpdatedEvent event) async {
-    final galleryDate =
-        DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
+    final galleryDate = DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
     final filesUpdatedThisDay = event.updatedFiles.where((file) {
       final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
       return fileDate.year == galleryDate.year &&
@@ -98,8 +95,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             getDayTitle(galleryDate.microsecondsSinceEpoch),
       );
       if (event.type == EventType.addedOrUpdated) {
-        final dayStartTime =
-            DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
+        final dayStartTime = DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(
           dayStartTime.microsecondsSinceEpoch,
           dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1,
@@ -170,7 +166,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         LazyLoadingGridView(
           widget.tag,
           _files.sublist(
-              index, min(index + kSubGalleryItemLimit, _files.length)),
+            index,
+            min(index + kSubGalleryItemLimit, _files.length),
+          ),
           widget.asyncLoader,
           widget.selectedFiles,
           index == 0,
@@ -255,9 +253,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
           });
         }
       },
-      child: _shouldRender
-          ? _getGridView()
-          : PlaceHolderWidget(widget.files.length),
+      child: _shouldRender ? _getGridView() : PlaceHolderWidget(widget.files.length),
     );
   }
 
@@ -282,8 +278,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   Widget _getGridView() {
     return GridView.builder(
       shrinkWrap: true,
-      physics:
-          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+      physics: NeverScrollableScrollPhysics(), // to disable GridView's scrolling
       itemBuilder: (context, index) {
         return _buildFile(context, widget.files[index]);
       },

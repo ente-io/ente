@@ -16,7 +16,7 @@ class ThemeSwitchWidget extends StatelessWidget {
       current: selectedTheme,
       values: const [0, 1],
       onChanged: (i) {
-        print("Changed to ${i}, selectedTheme is ${selectedTheme} ");
+        debugPrint("Changed to {i}, selectedTheme is {selectedTheme} ");
         if (i == 0) {
           AdaptiveTheme.of(context).setLight();
         } else {
@@ -42,10 +42,7 @@ class ThemeSwitchWidget extends StatelessWidget {
       height: 36,
       indicatorSize: Size(36, 36),
       indicatorColor: Theme.of(context).colorScheme.themeSwitchIndicatorColor,
-      borderColor: Theme.of(context)
-          .colorScheme
-          .themeSwitchInactiveIconColor
-          .withOpacity(0.1),
+      borderColor: Theme.of(context).colorScheme.themeSwitchInactiveIconColor.withOpacity(0.1),
       borderWidth: 1,
     );
   }

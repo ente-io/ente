@@ -17,8 +17,12 @@ import 'package:photos/ui/viewer/gallery/empte_state.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-typedef GalleryLoader = Future<FileLoadResult> Function(int creationStartTime, int creationEndTime,
-    {int limit, bool asc});
+typedef GalleryLoader = Future<FileLoadResult> Function(
+  int creationStartTime,
+  int creationEndTime, {
+  int limit,
+  bool asc,
+});
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;

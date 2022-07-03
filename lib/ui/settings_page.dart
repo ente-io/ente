@@ -53,9 +53,7 @@ class SettingsPage extends StatelessWidget {
               },
             ),
 
-            (Platform.isAndroid)
-                ? ThemeSwitchWidget()
-                : const SizedBox.shrink(),
+            (Platform.isAndroid) ? ThemeSwitchWidget() : const SizedBox.shrink(),
           ],
         ),
       ),
@@ -103,15 +101,16 @@ class SettingsPage extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 350),
-              child: Column(
-                children: contents,
-              ),
+        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 350),
+            child: Column(
+              children: contents,
             ),
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

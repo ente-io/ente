@@ -28,12 +28,10 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   void initState() {
     super.initState();
     _fetchUserDetails();
-    _userDetailsChangedEvent =
-        Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
+    _userDetailsChangedEvent = Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
       _fetchUserDetails();
     });
-    _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
+    _tabChangedEventSubscription = Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.selectedIndex == 3) {
         _fetchUserDetails();
       }
@@ -104,8 +102,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
           _userDetails == null
               ? const EnteLoadingWidget()
               : Padding(
-                  padding:
-                      EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 16),
+                  padding: EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 16),
                   child: Container(
                     color: Colors.transparent,
                     child: Column(
@@ -122,8 +119,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 style: Theme.of(context)
                                     .textTheme
                                     .subtitle2
-                                    .copyWith(
-                                        color: Colors.white.withOpacity(0.7)),
+                                    .copyWith(color: Colors.white.withOpacity(0.7)),
                               ),
                               Text(
                                 "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
@@ -150,16 +146,14 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 Container(
                                   color: Colors.white.withOpacity(0.75),
                                   width: MediaQuery.of(context).size.width *
-                                      ((_userDetails
-                                              .getFamilyOrPersonalUsage()) /
+                                      ((_userDetails.getFamilyOrPersonalUsage()) /
                                           _userDetails.getTotalStorage()),
                                   height: 4,
                                 ),
                                 Container(
                                   color: Colors.white,
                                   width: MediaQuery.of(context).size.width *
-                                      (_userDetails.usage /
-                                          _userDetails.getTotalStorage()),
+                                      (_userDetails.usage / _userDetails.getTotalStorage()),
                                   height: 4,
                                 ),
                               ],
@@ -179,41 +173,30 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                               color: Colors.white,
                                             ),
                                           ),
-                                          Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 4)),
+                                          Padding(padding: EdgeInsets.only(right: 4)),
                                           Text(
                                             "You",
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyText1
-                                                .copyWith(
-                                                    color: Colors.white,
-                                                    fontSize: 12),
+                                                .copyWith(color: Colors.white, fontSize: 12),
                                           ),
-                                          Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 12)),
+                                          Padding(padding: EdgeInsets.only(right: 12)),
                                           Container(
                                             width: 8.71,
                                             height: 8.99,
                                             decoration: BoxDecoration(
                                               shape: BoxShape.circle,
-                                              color: Colors.white
-                                                  .withOpacity(0.75),
+                                              color: Colors.white.withOpacity(0.75),
                                             ),
                                           ),
-                                          Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 4)),
+                                          Padding(padding: EdgeInsets.only(right: 4)),
                                           Text(
                                             "Family",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1
-                                                .copyWith(
-                                                    color: Colors.white,
-                                                    fontSize: 12),
+                                            style: Theme.of(context).textTheme.bodyText1.copyWith(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                ),
                                           ),
                                         ],
                                       )
@@ -222,9 +205,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText1
-                                            .copyWith(
-                                                color: Colors.white,
-                                                fontSize: 12),
+                                            .copyWith(color: Colors.white, fontSize: 12),
                                       ),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 16.0),
@@ -233,8 +214,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyText1
-                                        .copyWith(
-                                            color: Colors.white, fontSize: 12),
+                                        .copyWith(color: Colors.white, fontSize: 12),
                                   ),
                                 )
                               ],

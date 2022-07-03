@@ -35,6 +35,7 @@ analyzer:
     exhaustive_cases: error
     curly_braces_in_flow_control_structures: error
     directives_ordering: error
+    require_trailing_commas: warning
     always_use_package_imports: error
     prefer_final_fields: error
     unused_import: error
