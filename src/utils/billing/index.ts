@@ -8,7 +8,7 @@ import { CustomError } from '../error';
 import { logError } from '../sentry';
 import { SetDialogBoxAttributes } from 'types/dialogBox';
 import { getFamilyPortalRedirectURL } from 'services/userService';
-import { FamilyData, FamilyMember, User } from 'types/user';
+import { FamilyData, FamilyMember, User, UserDetails } from 'types/user';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -184,6 +184,15 @@ export function hasPaypalSubscription(subscription: Subscription) {
         subscription.paymentProvider.length > 0 &&
         subscription.paymentProvider === PAYMENT_PROVIDER_PAYPAL
     );
+}
+
+export function hasExceededStorageQuota(userDetails: UserDetails) {
+    if (isPartOfFamily(userDetails.familyData)) {
+        const usage = getTotalFamilyUsage(userDetails.familyData);
+        return usage > userDetails.familyData.storage;
+    } else {
+        return userDetails.usage > userDetails.subscription.storage;
+    }
 }
 
 export async function updateSubscription(

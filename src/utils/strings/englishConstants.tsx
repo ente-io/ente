@@ -264,13 +264,14 @@ const englishConstants = {
     FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
 
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>Your subscription will renew on {dateString(expiryTime)}</>
+        <>Renew on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
+    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: `You have exceeded your storage quota, please upgrade your plan.`,
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>We've received your payment</p>

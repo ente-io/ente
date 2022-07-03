@@ -5,6 +5,7 @@ import {
     isFamilyAdmin,
     isOnFreePlan,
     isPartOfFamily,
+    hasExceededStorageQuota,
     isSubscriptionActive,
     isSubscriptionCancelled,
 } from 'utils/billing';
@@ -55,10 +56,12 @@ export default function SubscriptionStatus({
                         ? constants.FREE_SUBSCRIPTION_INFO(
                               userDetails.subscription?.expiryTime
                           )
-                        : isSubscriptionCancelled(userDetails.subscription) &&
-                          constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
+                        : isSubscriptionCancelled(userDetails.subscription)
+                        ? constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
                               userDetails.subscription?.expiryTime
                           )
+                        : hasExceededStorageQuota(userDetails) &&
+                          constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO
                     : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
                           showPlanSelectorModal
                       )}
