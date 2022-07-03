@@ -1,13 +1,13 @@
 import ArrowForward from '@mui/icons-material/ArrowForward';
-import { Box, Typography } from '@mui/material';
-import { FlexWrapper, SpaceBetweenFlex } from 'components/Container';
+import { Box, Stack, Typography } from '@mui/material';
+import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import { isUserSubscribedPlan } from 'utils/billing';
+import { hasPaidSubscription, isUserSubscribedPlan } from 'utils/billing';
 import constants from 'utils/strings/constants';
 import { PlanRow } from './planRow';
 
 const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
-    <FlexWrapper flexDirection={'column'} gap={2}>
+    <Stack spacing={2}>
         {plans
             ?.filter((plan) => plan.period === planPeriod)
             ?.map((plan) => (
@@ -19,18 +19,24 @@ const Plans = ({ plans, planPeriod, subscription, onPlanSelect }) => (
                     onPlanSelect={onPlanSelect}
                 />
             ))}
-        <SpaceBetweenFlex gap={1.5} py={1.5} pr={1} sx={{ cursor: 'pointer' }}>
-            <Box>
-                <Typography> {constants.FREE_PLAN_OPTION_LABEL}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                    {constants.FREE_PLAN_DESCRIPTION}
-                </Typography>
-            </Box>
-            <Box>
-                <ArrowForward />
-            </Box>
-        </SpaceBetweenFlex>
-    </FlexWrapper>
+        {!hasPaidSubscription(subscription) && (
+            <SpaceBetweenFlex
+                gap={1.5}
+                py={1.5}
+                pr={1}
+                sx={{ cursor: 'pointer' }}>
+                <Box>
+                    <Typography> {constants.FREE_PLAN_OPTION_LABEL}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                        {constants.FREE_PLAN_DESCRIPTION}
+                    </Typography>
+                </Box>
+                <Box>
+                    <ArrowForward />
+                </Box>
+            </SpaceBetweenFlex>
+        )}
+    </Stack>
 );
 
 export default Plans;
