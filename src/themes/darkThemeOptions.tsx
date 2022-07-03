@@ -79,6 +79,14 @@ const darkThemeOptions = createTheme({
                 strong: { fontWeight: 900 },
             },
         },
+
+        MuiBackdrop: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: 'rgba(0,0,0,0.65)',
+                },
+            },
+        },
         MuiDialog: {
             styleOverrides: {
                 root: {
@@ -248,7 +256,7 @@ const darkThemeOptions = createTheme({
             secondary: 'rgba(256,256,256,0.24)',
             disabled: 'rgba(256,256,256,0.16)',
         },
-        background: { default: '#000000', paper: '#1b1b1b' },
+        background: { default: '#000000', paper: '#141414' },
         grey: {
             A100: '#ccc',
             A200: 'rgba(256, 256, 256, 0.24)',
