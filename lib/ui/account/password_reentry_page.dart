@@ -12,7 +12,7 @@ class PasswordReentryPage extends StatefulWidget {
   PasswordReentryPage({Key key}) : super(key: key);
 
   @override
-  _PasswordReentryPageState createState() => _PasswordReentryPageState();
+  State<PasswordReentryPage> createState() => _PasswordReentryPageState();
 }
 
 class _PasswordReentryPageState extends State<PasswordReentryPage> {

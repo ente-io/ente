@@ -15,7 +15,7 @@ class DetailsSectionWidget extends StatefulWidget {
   DetailsSectionWidget({Key key}) : super(key: key);
 
   @override
-  _DetailsSectionWidgetState createState() => _DetailsSectionWidgetState();
+  State<DetailsSectionWidget> createState() => _DetailsSectionWidgetState();
 }
 
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {

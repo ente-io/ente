@@ -14,7 +14,7 @@ class LoadingPhotosWidget extends StatefulWidget {
   const LoadingPhotosWidget({Key key}) : super(key: key);
 
   @override
-  _LoadingPhotosWidgetState createState() => _LoadingPhotosWidgetState();
+  State<LoadingPhotosWidget> createState() => _LoadingPhotosWidgetState();
 }
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {

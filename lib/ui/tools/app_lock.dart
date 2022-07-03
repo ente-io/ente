@@ -23,7 +23,7 @@ import 'package:flutter/material.dart';
 /// shown upon returning. It defaults to instantly.
 ///
 
-// ignore_for_file: unnecessary_this
+// ignore_for_file: unnecessary_this, library_private_types_in_public_api
 class AppLock extends StatefulWidget {
   final Widget Function(Object) builder;
   final Widget lockScreen;
@@ -42,10 +42,11 @@ class AppLock extends StatefulWidget {
     this.lightTheme,
   }) : super(key: key);
 
-  static _AppLockState of(BuildContext context) => context.findAncestorStateOfType<_AppLockState>();
+  static _AppLockState of(BuildContext context) =>
+      context.findAncestorStateOfType<_AppLockState>();
 
   @override
-  _AppLockState createState() => _AppLockState();
+  State<AppLock> createState() => _AppLockState();
 }
 
 class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
@@ -74,7 +75,8 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
       return;
     }
 
-    if (state == AppLifecycleState.paused && (!this._isLocked && this._didUnlockForAppLaunch)) {
+    if (state == AppLifecycleState.paused &&
+        (!this._isLocked && this._didUnlockForAppLaunch)) {
       this._backgroundLockLatencyTimer =
           Timer(this.widget.backgroundLockLatency, () => this.showLockScreen());
     }
@@ -111,7 +113,8 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
             );
           case '/unlocked':
             return PageRouteBuilder(
-              pageBuilder: (_, __, ___) => this.widget.builder(settings.arguments),
+              pageBuilder: (_, __, ___) =>
+                  this.widget.builder(settings.arguments),
             );
         }
         return PageRouteBuilder(pageBuilder: (_, __, ___) => this._lockScreen);
@@ -178,7 +181,8 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
 
   void _didUnlockOnAppLaunch(Object args) {
     this._didUnlockForAppLaunch = true;
-    _navigatorKey.currentState.pushReplacementNamed('/unlocked', arguments: args);
+    _navigatorKey.currentState
+        .pushReplacementNamed('/unlocked', arguments: args);
   }
 
   void _didUnlockOnAppPaused() {

@@ -28,7 +28,7 @@ class ZoomableImage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ZoomableImageState createState() => _ZoomableImageState();
+  State<ZoomableImage> createState() => _ZoomableImageState();
 }
 
 class _ZoomableImageState extends State<ZoomableImage> with SingleTickerProviderStateMixin {
@@ -91,8 +91,8 @@ class _ZoomableImageState extends State<ZoomableImage> with SingleTickerProvider
               if (!_isZooming && d.delta.dy > kDragSensitivity) {Navigator.of(context).pop()}
             };
     return GestureDetector(
-      child: content,
       onVerticalDragUpdate: verticalDragCallback,
+      child: content,
     );
   }
 

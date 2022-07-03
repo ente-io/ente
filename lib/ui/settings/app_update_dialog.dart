@@ -11,7 +11,7 @@ class AppUpdateDialog extends StatefulWidget {
   AppUpdateDialog(this.latestVersionInfo, {Key key}) : super(key: key);
 
   @override
-  _AppUpdateDialogState createState() => _AppUpdateDialogState();
+  State<AppUpdateDialog> createState() => _AppUpdateDialogState();
 }
 
 class _AppUpdateDialogState extends State<AppUpdateDialog> {
@@ -54,9 +54,6 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
           width: double.infinity,
           height: 64,
           child: OutlinedButton(
-            child: Text(
-              "Update",
-            ),
             style: Theme.of(context).outlinedButtonTheme.style.copyWith(
               textStyle: MaterialStateProperty.resolveWith<TextStyle>(
                 (Set<MaterialState> states) {
@@ -74,6 +71,9 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 barrierDismissible: false,
               );
             },
+            child: Text(
+              "Update",
+            ),
           ),
         ),
       ],
@@ -97,7 +97,7 @@ class ApkDownloaderDialog extends StatefulWidget {
   ApkDownloaderDialog(this.versionInfo, {Key key}) : super(key: key);
 
   @override
-  _ApkDownloaderDialogState createState() => _ApkDownloaderDialogState();
+  State<ApkDownloaderDialog> createState() => _ApkDownloaderDialogState();
 }
 
 class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {

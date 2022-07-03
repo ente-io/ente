@@ -78,6 +78,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget _headerWidgetWithSettingsButton;
 
   // for receiving media files
+  // ignore: unused_field
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
 
@@ -288,12 +289,6 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Stack(
       children: [
         ExtentsPageView(
-          children: [
-            showBackupFolderHook ? _getBackupFolderSelectionHook() : _getMainGalleryWidget(),
-            _deviceFolderGalleryWidget,
-            _sharedCollectionGallery,
-            _settingsPage,
-          ],
           onPageChanged: (page) {
             Bus.instance.fire(
               TabChangedEvent(
@@ -303,6 +298,12 @@ class _HomeWidgetState extends State<HomeWidget> {
             );
           },
           controller: _pageController,
+          children: [
+            showBackupFolderHook ? _getBackupFolderSelectionHook() : _getMainGalleryWidget(),
+            _deviceFolderGalleryWidget,
+            _sharedCollectionGallery,
+            _settingsPage,
+          ],
         ),
         Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
         Align(
@@ -470,10 +471,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                 height: 64,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: GradientButton(
-                  child: Text(
-                    'Start backup',
-                    style: gradientButtonTextTheme(),
-                  ),
                   linearGradientColors: const [
                     Color(0xFF2CD267),
                     Color(0xFF1DB954),
@@ -490,6 +487,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                       );
                     }
                   },
+                  child: Text(
+                    'Start backup',
+                    style: gradientButtonTextTheme(),
+                  ),
                 ),
               ),
             ),
@@ -510,7 +511,7 @@ class HomePageAppBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
 
   @override
-  _HomePageAppBarState createState() => _HomePageAppBarState();
+  State<HomePageAppBar> createState() => _HomePageAppBarState();
 }
 
 class _HomePageAppBarState extends State<HomePageAppBar> {
@@ -551,7 +552,7 @@ class HomeBottomNavigationBar extends StatefulWidget {
   final int selectedTabIndex;
 
   @override
-  _HomeBottomNavigationBarState createState() => _HomeBottomNavigationBarState();
+  State<HomeBottomNavigationBar> createState() => _HomeBottomNavigationBarState();
 }
 
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
@@ -716,8 +717,8 @@ class HeaderWidget extends StatelessWidget {
       _memoriesWidget,
     ];
     return Column(
-      children: list,
       crossAxisAlignment: CrossAxisAlignment.start,
+      children: list,
     );
   }
 }

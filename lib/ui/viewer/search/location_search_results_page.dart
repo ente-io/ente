@@ -18,10 +18,12 @@ class LocationSearchResultsPage extends StatefulWidget {
   final ViewPort viewPort;
   final String name;
 
-  LocationSearchResultsPage(this.viewPort, this.name, {Key key}) : super(key: key);
+  LocationSearchResultsPage(this.viewPort, this.name, {Key key})
+      : super(key: key);
 
   @override
-  _LocationSearchResultsPageState createState() => _LocationSearchResultsPageState();
+  State<LocationSearchResultsPage> createState() =>
+      _LocationSearchResultsPageState();
 }
 
 class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
@@ -43,7 +45,7 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
 
   List<File> _getResult() {
     List<File> files = [];
-    final args = Map<String, dynamic>();
+    final Map<String, dynamic> args = <String, dynamic>{};
     args['files'] = files;
     args['viewPort'] = widget.viewPort;
     return _filterPhotos(args);

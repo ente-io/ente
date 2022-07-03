@@ -14,21 +14,6 @@ class GalleryFooterWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
       child: GradientButton(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_upload_outlined,
-              color: Colors.white,
-            ),
-            Padding(padding: EdgeInsets.all(6)),
-            Text(
-              "Preserve more",
-              style: gradientButtonTextTheme(),
-            ),
-          ],
-        ),
         linearGradientColors: const [
           Color(0xFF2CD267),
           Color(0xFF1DB954),
@@ -45,6 +30,21 @@ class GalleryFooterWidget extends StatelessWidget {
             );
           }
         },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_upload_outlined,
+              color: Colors.white,
+            ),
+            Padding(padding: EdgeInsets.all(6)),
+            Text(
+              "Preserve more",
+              style: gradientButtonTextTheme(),
+            ),
+          ],
+        ),
       ),
     );
   }

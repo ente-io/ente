@@ -43,7 +43,7 @@ class LazyLoadingGallery extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
+  State<LazyLoadingGallery> createState() => _LazyLoadingGalleryState();
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
@@ -202,7 +202,7 @@ class LazyLoadingGridView extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  _LazyLoadingGridViewState createState() => _LazyLoadingGridViewState();
+  State<LazyLoadingGridView> createState() => _LazyLoadingGridViewState();
 }
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {

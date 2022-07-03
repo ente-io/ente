@@ -13,7 +13,7 @@ class LocationSearchWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _LocationSearchWidgetState createState() => _LocationSearchWidgetState();
+  State<LocationSearchWidget> createState() => _LocationSearchWidgetState();
 }
 
 class _LocationSearchWidgetState extends State<LocationSearchWidget> {

@@ -57,6 +57,8 @@ class FadingAppBarState extends State<FadingAppBar> {
       IgnorePointer(
         ignoring: _shouldHide,
         child: AnimatedOpacity(
+          opacity: _shouldHide ? 0 : 1,
+          duration: Duration(milliseconds: 150),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -72,8 +74,6 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
             child: _buildAppBar(),
           ),
-          opacity: _shouldHide ? 0 : 1,
-          duration: Duration(milliseconds: 150),
         ),
       ),
       height: Platform.isAndroid ? 80 : 96,
@@ -114,9 +114,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                 child: Row(
                   children: [
                     Icon(
-                      Platform.isAndroid
-                          ? Icons.download
-                          : CupertinoIcons.cloud_download,
+                      Platform.isAndroid ? Icons.download : CupertinoIcons.cloud_download,
                       color: Theme.of(context).iconTheme.color,
                     ),
                     Padding(
@@ -129,8 +127,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             );
           }
           // options for files owned by the user
-          if (widget.file.ownerID == null ||
-              widget.file.ownerID == widget.userID) {
+          if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
             if (widget.file.uploadedFileID != null) {
               items.add(
                 PopupMenuItem(
@@ -138,9 +135,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                   child: Row(
                     children: [
                       Icon(
-                        Platform.isAndroid
-                            ? Icons.access_time_rounded
-                            : CupertinoIcons.time,
+                        Platform.isAndroid ? Icons.access_time_rounded : CupertinoIcons.time,
                         color: Theme.of(context).iconTheme.color,
                       ),
                       Padding(
@@ -159,9 +154,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                 child: Row(
                   children: [
                     Icon(
-                      Platform.isAndroid
-                          ? Icons.delete_outline
-                          : CupertinoIcons.delete,
+                      Platform.isAndroid ? Icons.delete_outline : CupertinoIcons.delete,
                       color: Theme.of(context).iconTheme.color,
                     ),
                     Padding(
@@ -245,8 +238,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       likeBuilder: (isLiked) {
         return Icon(
           isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-          color:
-              isLiked ? Colors.pinkAccent : Colors.white, //same for both themes
+          color: isLiked ? Colors.pinkAccent : Colors.white, //same for both themes
           size: 24,
         );
       },
@@ -289,20 +281,19 @@ class FadingAppBarState extends State<FadingAppBar> {
     if (file.uploadedFileID == null || file.localID == null) {
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Everywhere"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
             widget.onFileDeleted(file);
           },
+          child: Text("Everywhere"),
         ),
       );
     } else {
       // uploaded file which is present locally too
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Device"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesOnDeviceOnly(context, [file]);
@@ -310,12 +301,12 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             // TODO: Fix behavior when inside a device folder
           },
+          child: Text("Device"),
         ),
       );
 
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("ente"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesFromRemoteOnly(context, [file]);
@@ -323,18 +314,19 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             // TODO: Fix behavior when inside a collection
           },
+          child: Text("ente"),
         ),
       );
 
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Everywhere"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
             widget.onFileDeleted(file);
           },
+          child: Text("Everywhere"),
         ),
       );
     }
@@ -359,8 +351,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     io.File fileToSave = await getFile(file);
     final savedAsset = type == FileType.video
         ? (await PhotoManager.editor.saveVideo(fileToSave, title: file.title))
-        : (await PhotoManager.editor
-            .saveImageWithPath(fileToSave.path, title: file.title));
+        : (await PhotoManager.editor.saveImageWithPath(fileToSave.path, title: file.title));
     // immediately track assetID to avoid duplicate upload
     await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
     file.localID = savedAsset.id;

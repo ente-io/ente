@@ -32,7 +32,7 @@ class StripeSubscriptionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _StripeSubscriptionPageState createState() => _StripeSubscriptionPageState();
+  State<StripeSubscriptionPage> createState() => _StripeSubscriptionPageState();
 }
 
 class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {

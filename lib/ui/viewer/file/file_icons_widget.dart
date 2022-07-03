@@ -98,6 +98,8 @@ class TrashedFileOverlayText extends StatelessWidget {
           colors: [Colors.black.withOpacity(0.33), Colors.transparent],
         ),
       ),
+      alignment: Alignment.bottomCenter,
+      padding: EdgeInsets.only(bottom: 5),
       child: Text(
         daysLeft(file.deleteBy),
         style: Theme.of(context)
@@ -105,8 +107,6 @@ class TrashedFileOverlayText extends StatelessWidget {
             .subtitle2
             .copyWith(color: Colors.white), //same for both themes
       ),
-      alignment: Alignment.bottomCenter,
-      padding: EdgeInsets.only(bottom: 5),
     );
   }
 }

@@ -7,7 +7,7 @@ class ChangeEmailDialog extends StatefulWidget {
   const ChangeEmailDialog({Key key}) : super(key: key);
 
   @override
-  _ChangeEmailDialogState createState() => _ChangeEmailDialogState();
+  State<ChangeEmailDialog> createState() => _ChangeEmailDialogState();
 }
 
 class _ChangeEmailDialogState extends State<ChangeEmailDialog> {

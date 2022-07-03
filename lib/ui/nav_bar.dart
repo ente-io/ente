@@ -60,7 +60,7 @@ class GNav extends StatefulWidget {
   final MainAxisAlignment mainAxisAlignment;
 
   @override
-  _GNavState createState() => _GNavState();
+  State<GNav> createState() => _GNavState();
 }
 
 class _GNavState extends State<GNav> {
@@ -193,7 +193,7 @@ class GButton extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GButtonState createState() => _GButtonState();
+  State<GButton> createState() => _GButtonState();
 }
 
 class _GButtonState extends State<GButton> {
@@ -282,7 +282,7 @@ class Button extends StatefulWidget {
   final List<BoxShadow> shadow;
 
   @override
-  _ButtonState createState() => _ButtonState();
+  State<Button> createState() => _ButtonState();
 }
 
 class _ButtonState extends State<Button> with TickerProviderStateMixin {

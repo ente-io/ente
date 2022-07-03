@@ -81,7 +81,7 @@ class SyncStatusWidget extends StatefulWidget {
   const SyncStatusWidget({Key key}) : super(key: key);
 
   @override
-  _SyncStatusWidgetState createState() => _SyncStatusWidgetState();
+  State<SyncStatusWidget> createState() => _SyncStatusWidgetState();
 }
 
 class _SyncStatusWidgetState extends State<SyncStatusWidget> {
@@ -112,7 +112,8 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
     bool isNotOutdatedEvent = _event != null &&
         (_event.status == SyncStatus.completedBackup ||
             _event.status == SyncStatus.completedFirstGalleryImport) &&
-        (DateTime.now().microsecondsSinceEpoch - _event.timestamp > kSleepDuration.inMicroseconds);
+        (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
+            kSleepDuration.inMicroseconds);
     if (_event == null || isNotOutdatedEvent) {
       return Container();
     }
@@ -182,7 +183,10 @@ class RefreshIndicatorWidget extends StatelessWidget {
       return "Encrypting backup...";
     }
     if (event.status == SyncStatus.inProgress) {
-      return event.completed.toString() + "/" + event.total.toString() + " memories preserved";
+      return event.completed.toString() +
+          "/" +
+          event.total.toString() +
+          " memories preserved";
     }
     if (event.status == SyncStatus.paused) {
       return event.reason;

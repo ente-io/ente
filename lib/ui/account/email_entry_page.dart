@@ -20,7 +20,7 @@ class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
 
   @override
-  _EmailEntryPageState createState() => _EmailEntryPageState();
+  State<EmailEntryPage> createState() => _EmailEntryPageState();
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {

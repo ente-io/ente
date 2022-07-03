@@ -22,7 +22,7 @@ class FileInfoWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FileInfoWidgetState createState() => _FileInfoWidgetState();
+  State<FileInfoWidget> createState() => _FileInfoWidgetState();
 }
 
 class _FileInfoWidgetState extends State<FileInfoWidget> {

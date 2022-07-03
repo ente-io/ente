@@ -21,7 +21,7 @@ class DeduplicatePage extends StatefulWidget {
   DeduplicatePage(this.duplicates, {Key key}) : super(key: key);
 
   @override
-  _DeduplicatePageState createState() => _DeduplicatePageState();
+  State<DeduplicatePage> createState() => _DeduplicatePageState();
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {

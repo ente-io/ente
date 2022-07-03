@@ -155,6 +155,8 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     return IgnorePointer(
       ignoring: _shouldHide,
       child: AnimatedOpacity(
+        opacity: _shouldHide ? 0 : 1,
+        duration: Duration(milliseconds: 150),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Container(
@@ -179,8 +181,6 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             ),
           ),
         ),
-        opacity: _shouldHide ? 0 : 1,
-        duration: Duration(milliseconds: 150),
       ),
     );
   }

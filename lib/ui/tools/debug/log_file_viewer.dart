@@ -9,7 +9,7 @@ class LogFileViewer extends StatefulWidget {
   const LogFileViewer(this.file, {Key key}) : super(key: key);
 
   @override
-  _LogFileViewerState createState() => _LogFileViewerState();
+  State<LogFileViewer> createState() => _LogFileViewerState();
 }
 
 class _LogFileViewerState extends State<LogFileViewer> {

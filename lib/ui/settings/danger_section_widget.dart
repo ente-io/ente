@@ -11,7 +11,7 @@ class DangerSectionWidget extends StatefulWidget {
   DangerSectionWidget({Key key}) : super(key: key);
 
   @override
-  _DangerSectionWidgetState createState() => _DangerSectionWidgetState();
+  State<DangerSectionWidget> createState() => _DangerSectionWidgetState();
 }
 
 class _DangerSectionWidgetState extends State<DangerSectionWidget> {

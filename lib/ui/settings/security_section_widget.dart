@@ -22,7 +22,7 @@ class SecuritySectionWidget extends StatefulWidget {
   SecuritySectionWidget({Key key}) : super(key: key);
 
   @override
-  _SecuritySectionWidgetState createState() => _SecuritySectionWidgetState();
+  State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {

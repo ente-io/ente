@@ -15,7 +15,7 @@ class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({Key key}) : super(key: key);
 
   @override
-  _LandingPageWidgetState createState() => _LandingPageWidgetState();
+  State<LandingPageWidget> createState() => _LandingPageWidgetState();
 }
 
 class _LandingPageWidgetState extends State<LandingPageWidget> {
@@ -51,8 +51,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               dotsCount: 3,
               position: _featureIndex,
               decorator: DotsDecorator(
-                activeColor:
-                    Theme.of(context).colorScheme.dotsIndicatorActiveColor,
+                activeColor: Theme.of(context).colorScheme.dotsIndicatorActiveColor,
                 color: Theme.of(context).colorScheme.dotsIndicatorInactiveColor,
                 activeShape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(3),
@@ -75,15 +74,14 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
               child: Hero(
                 tag: "log_in",
                 child: ElevatedButton(
-                  style:
-                      Theme.of(context).colorScheme.optionalActionButtonStyle,
+                  style: Theme.of(context).colorScheme.optionalActionButtonStyle,
+                  onPressed: _navigateToSignInPage,
                   child: Text(
                     "Existing user",
                     style: TextStyle(
                       color: Colors.black, // same for both themes
                     ),
                   ),
-                  onPressed: _navigateToSignInPage,
                 ),
               ),
             ),
@@ -101,15 +99,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: GradientButton(
-        child: Text(
-          "New to ente",
-          style: gradientButtonTextTheme(),
-        ),
         linearGradientColors: const [
           Color(0xFF2CD267),
           Color(0xFF1DB954),
         ],
         onTap: _navigateToSignUpPage,
+        child: Text(
+          "New to ente",
+          style: gradientButtonTextTheme(),
+        ),
       ),
     );
   }
@@ -135,9 +133,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
             "assets/onboarding_lock.png",
             "Available",
             "everywhere",
-            Platform.isAndroid
-                ? "Android, iOS, Web, Desktop"
-                : "iOS, Android, Web, Desktop",
+            Platform.isAndroid ? "Android, iOS, Web, Desktop" : "iOS, Android, Web, Desktop",
           ),
         ],
         onPageChanged: (index) {
@@ -203,10 +199,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 }
 
 class FeatureItemWidget extends StatelessWidget {
-  final String assetPath,
-      featureTitleFirstLine,
-      featureTitleSecondLine,
-      subText;
+  final String assetPath, featureTitleFirstLine, featureTitleSecondLine, subText;
 
   const FeatureItemWidget(
     this.assetPath,

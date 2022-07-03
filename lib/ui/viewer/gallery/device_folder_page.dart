@@ -76,7 +76,7 @@ class BackupConfigurationHeaderWidget extends StatefulWidget {
   BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
 
   @override
-  _BackupConfigurationHeaderWidgetState createState() => _BackupConfigurationHeaderWidgetState();
+  State<BackupConfigurationHeaderWidget> createState() => _BackupConfigurationHeaderWidgetState();
 }
 
 class _BackupConfigurationHeaderWidgetState extends State<BackupConfigurationHeaderWidget> {

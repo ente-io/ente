@@ -28,7 +28,7 @@ class VideoWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _VideoWidgetState createState() => _VideoWidgetState();
+  State<VideoWidget> createState() => _VideoWidgetState();
 }
 
 class _VideoWidgetState extends State<VideoWidget> {
@@ -170,11 +170,11 @@ class _VideoWidgetState extends State<VideoWidget> {
   Widget _getThumbnail() {
     return Container(
       color: Colors.black,
+      constraints: BoxConstraints.expand(),
       child: ThumbnailWidget(
         widget.file,
         fit: BoxFit.contain,
       ),
-      constraints: BoxConstraints.expand(),
     );
   }
 
@@ -198,8 +198,8 @@ class _VideoWidgetState extends State<VideoWidget> {
       customControls: VideoControls(),
     );
     return Container(
-      child: Chewie(controller: _chewieController),
       color: Colors.black,
+      child: Chewie(controller: _chewieController),
     );
   }
 }

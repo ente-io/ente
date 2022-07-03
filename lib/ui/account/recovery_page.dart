@@ -11,7 +11,7 @@ class RecoveryPage extends StatefulWidget {
   const RecoveryPage({Key key}) : super(key: key);
 
   @override
-  _RecoveryPageState createState() => _RecoveryPageState();
+  State<RecoveryPage> createState() => _RecoveryPageState();
 }
 
 class _RecoveryPageState extends State<RecoveryPage> {
@@ -82,7 +82,8 @@ class _RecoveryPageState extends State<RecoveryPage> {
             child: ListView(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
                     'Forgot password',
                     style: Theme.of(context).textTheme.headline4,
@@ -136,10 +137,11 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         child: Center(
                           child: Text(
                             "No recovery key?",
-                            style: Theme.of(context).textTheme.subtitle1.copyWith(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.underline,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline,
+                                    ),
                           ),
                         ),
                       ),

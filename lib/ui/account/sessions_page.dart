@@ -14,7 +14,7 @@ class SessionsPage extends StatefulWidget {
   SessionsPage({Key key}) : super(key: key);
 
   @override
-  _SessionsPageState createState() => _SessionsPageState();
+  State<SessionsPage> createState() => _SessionsPageState();
 }
 
 class _SessionsPageState extends State<SessionsPage> {

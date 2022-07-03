@@ -126,7 +126,7 @@ class ExtentsPageView extends StatefulWidget {
   /// ```dart
   /// class MyPageView extends StatefulWidget {
   ///   @override
-  ///   _MyPageViewState createState() => _MyPageViewState();
+  ///   _MyPageView> createState() => _MyPageViewState();
   /// }
   ///
   /// class _MyPageViewState extends State<MyPageView> {
@@ -180,7 +180,7 @@ class ExtentsPageView extends StatefulWidget {
   ///   final String data;
   ///
   ///   @override
-  ///   _KeepAliveState createState() => _KeepAliveState();
+  ///   _KeepAlive> createState() => _KeepAliveState();
   /// }
   ///
   /// class _KeepAliveState extends State<KeepAlive> with AutomaticKeepAliveClientMixin{
@@ -271,7 +271,7 @@ class ExtentsPageView extends StatefulWidget {
   final DragStartBehavior dragStartBehavior;
 
   @override
-  _PageViewState createState() => _PageViewState();
+  State<ExtentsPageView> createState() => _PageViewState();
 }
 
 class _PageViewState extends State<ExtentsPageView> {

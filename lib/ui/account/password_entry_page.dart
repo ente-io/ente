@@ -28,7 +28,7 @@ class PasswordEntryPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _PasswordEntryPageState createState() => _PasswordEntryPageState();
+  State<PasswordEntryPage> createState() => _PasswordEntryPageState();
 }
 
 class _PasswordEntryPageState extends State<PasswordEntryPage> {

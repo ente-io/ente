@@ -12,7 +12,7 @@ class SetWallpaperDialog extends StatefulWidget {
   const SetWallpaperDialog(this.file, {Key key}) : super(key: key);
 
   @override
-  _SetWallpaperDialogState createState() => _SetWallpaperDialogState();
+  State<SetWallpaperDialog> createState() => _SetWallpaperDialogState();
 }
 
 class _SetWallpaperDialogState extends State<SetWallpaperDialog> {

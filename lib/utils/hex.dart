@@ -23,7 +23,7 @@ class HexEncoder extends Converter<List<int>, String> {
   /// If true, the encoder will encode into uppercase hexadecimal strings.
   final bool upperCase;
 
-  const HexEncoder({bool this.upperCase: false});
+  const HexEncoder({this.upperCase = false});
 
   @override
   String convert(List<int> bytes) {
@@ -53,12 +53,12 @@ class HexDecoder extends Converter<String, List<int>> {
     if (str.length % 2 != 0) {
       str = "0" + str;
     }
-    Uint8List result = new Uint8List(str.length ~/ 2);
+    Uint8List result = Uint8List(str.length ~/ 2);
     for (int i = 0; i < result.length; i++) {
       int firstDigit = _ALPHABET.indexOf(str[i * 2]);
       int secondDigit = _ALPHABET.indexOf(str[i * 2 + 1]);
       if (firstDigit == -1 || secondDigit == -1) {
-        throw new FormatException("Non-hex character detected in $hex");
+        throw FormatException("Non-hex character detected in $hex");
       }
       result[i] = (firstDigit << 4) + secondDigit;
     }

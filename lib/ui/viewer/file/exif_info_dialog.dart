@@ -10,7 +10,7 @@ class ExifInfoDialog extends StatefulWidget {
   ExifInfoDialog(this.file, {Key key}) : super(key: key);
 
   @override
-  _ExifInfoDialogState createState() => _ExifInfoDialogState();
+  State<ExifInfoDialog> createState() => _ExifInfoDialogState();
 }
 
 class _ExifInfoDialogState extends State<ExifInfoDialog> {

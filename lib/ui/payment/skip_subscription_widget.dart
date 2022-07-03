@@ -22,7 +22,6 @@ class SkipSubscriptionWidget extends StatelessWidget {
       margin: const EdgeInsets.fromLTRB(0, 30, 0, 0),
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: OutlinedButton(
-        child: Text("Continue on free plan"),
         style: Theme.of(context).outlinedButtonTheme.style.copyWith(
           textStyle: MaterialStateProperty.resolveWith<TextStyle>(
             (Set<MaterialState> states) {
@@ -43,6 +42,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
           BillingService.instance
               .verifySubscription(kFreeProductID, "", paymentProvider: "ente");
         },
+        child: Text("Continue on free plan"),
       ),
     );
   }

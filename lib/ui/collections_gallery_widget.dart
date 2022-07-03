@@ -33,7 +33,7 @@ class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
 
   @override
-  _CollectionsGalleryWidgetState createState() => _CollectionsGalleryWidgetState();
+  State<CollectionsGalleryWidget> createState() => _CollectionsGalleryWidgetState();
 }
 
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
@@ -555,6 +555,8 @@ class DeviceFolderIcon extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: SizedBox(
+                  height: 120,
+                  width: 120,
                   child: Hero(
                     tag: "device_folder:" + folder.path + folder.thumbnail.tag(),
                     child: Stack(
@@ -570,8 +572,6 @@ class DeviceFolderIcon extends StatelessWidget {
                       ],
                     ),
                   ),
-                  height: 120,
-                  width: 120,
                 ),
               ),
               Padding(
@@ -619,6 +619,8 @@ class CollectionItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: SizedBox(
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
               child: Hero(
                 tag: "collection" + c.thumbnail.tag(),
                 child: ThumbnailWidget(
@@ -629,8 +631,6 @@ class CollectionItem extends StatelessWidget {
                   ),
                 ),
               ),
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
             ),
           ),
           SizedBox(height: 4),

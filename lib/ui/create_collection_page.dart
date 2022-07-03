@@ -51,7 +51,7 @@ class CreateCollectionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _CreateCollectionPageState createState() => _CreateCollectionPageState();
+  State<CreateCollectionPage> createState() => _CreateCollectionPageState();
 }
 
 class _CreateCollectionPageState extends State<CreateCollectionPage> {
@@ -87,6 +87,13 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                     right: 40,
                   ),
                   child: GradientButton(
+                    linearGradientColors: const [
+                      Color(0xFF2CD267),
+                      Color(0xFF1DB954),
+                    ],
+                    onTap: () async {
+                      _showNameAlbumDialog();
+                    },
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -103,13 +110,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                         ),
                       ],
                     ),
-                    linearGradientColors: const [
-                      Color(0xFF2CD267),
-                      Color(0xFF1DB954),
-                    ],
-                    onTap: () async {
-                      _showNameAlbumDialog();
-                    },
                   ),
                 ),
               ),
@@ -169,10 +169,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(2.0),
               child: SizedBox(
-                child: ThumbnailWidget(item.thumbnail),
                 height: 64,
                 width: 64,
                 key: Key("collection_item:" + item.thumbnail.tag()),
+                child: ThumbnailWidget(item.thumbnail),
               ),
             ),
             Padding(padding: EdgeInsets.all(8)),

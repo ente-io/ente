@@ -11,7 +11,7 @@ class TwoFactorAuthenticationPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _TwoFactorAuthenticationPageState createState() =>
+  State<TwoFactorAuthenticationPage> createState() =>
       _TwoFactorAuthenticationPageState();
 }
 
@@ -111,12 +111,12 @@ class _TwoFactorAuthenticationPageState
           width: double.infinity,
           height: 64,
           child: OutlinedButton(
-            child: Text("Verify"),
             onPressed: _code.length == 6
                 ? () async {
                     _verifyTwoFactorCode(_code);
                   }
                 : null,
+            child: Text("Verify"),
           ),
         ),
         Padding(padding: EdgeInsets.all(30)),

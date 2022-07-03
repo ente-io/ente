@@ -13,7 +13,7 @@ class FreeSpacePage extends StatefulWidget {
   FreeSpacePage(this.status, {Key key}) : super(key: key);
 
   @override
-  _FreeSpacePageState createState() => _FreeSpacePageState();
+  State<FreeSpacePage> createState() => _FreeSpacePageState();
 }
 
 class _FreeSpacePageState extends State<FreeSpacePage> {
@@ -139,10 +139,6 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           ),
           padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
           child: GradientButton(
-            child: Text(
-              "Free up " + formatBytes(status.size),
-              style: gradientButtonTextTheme(),
-            ),
             linearGradientColors: const [
               Color(0xFF2CD267),
               Color(0xFF1DB954),
@@ -150,6 +146,10 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             onTap: () async {
               await _freeStorage(status);
             },
+            child: Text(
+              "Free up " + formatBytes(status.size),
+              style: gradientButtonTextTheme(),
+            ),
           ),
         ),
         Padding(padding: EdgeInsets.all(24)),

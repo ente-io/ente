@@ -17,7 +17,7 @@ class OTTVerificationPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _OTTVerificationPageState createState() => _OTTVerificationPageState();
+  State<OTTVerificationPage> createState() => _OTTVerificationPageState();
 }
 
 class _OTTVerificationPageState extends State<OTTVerificationPage> {

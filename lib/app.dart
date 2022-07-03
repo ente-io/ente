@@ -27,7 +27,7 @@ class EnteApp extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _EnteAppState createState() => _EnteAppState();
+  State<EnteApp> createState() => _EnteAppState();
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {

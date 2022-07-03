@@ -103,10 +103,11 @@ class OverlayWidget extends StatefulWidget {
     this.selectedFiles, {
     this.path,
     this.collection,
-  });
+    Key key,
+  }) : super(key: key);
 
   @override
-  _OverlayWidgetState createState() => _OverlayWidgetState();
+  State<OverlayWidget> createState() => _OverlayWidgetState();
 }
 
 class _OverlayWidgetState extends State<OverlayWidget> {
@@ -182,6 +183,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: GestureDetector(
+                  onTap: _clearSelectedFiles,
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
                     child: Container(
@@ -200,7 +202,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                       ),
                     ),
                   ),
-                  onTap: _clearSelectedFiles,
                 ),
               ),
             ],
@@ -460,7 +461,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (containsUploadedFile && containsLocalFile) {
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Device"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -471,11 +471,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _clearSelectedFiles();
             showToast(context, "Files deleted from device");
           },
+          child: Text("Device"),
         ),
       );
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("ente"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -486,11 +486,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _clearSelectedFiles();
             showShortToast(context, "Moved to trash");
           },
+          child: Text("ente"),
         ),
       );
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Everywhere"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -500,12 +500,12 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             );
             _clearSelectedFiles();
           },
+          child: Text("Everywhere"),
         ),
       );
     } else {
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Delete"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -515,6 +515,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             );
             _clearSelectedFiles();
           },
+          child: Text("Delete"),
         ),
       );
     }
@@ -555,7 +556,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       ),
       actions: <Widget>[
         CupertinoActionSheetAction(
-          child: Text("Remove"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -574,6 +574,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
               showGenericErrorDialog(context);
             }
           },
+          child: Text("Remove"),
         ),
       ],
       cancelButton: CupertinoActionSheetAction(

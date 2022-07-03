@@ -32,7 +32,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
+  State<GalleryAppBarWidget> createState() => _GalleryAppBarWidgetState();
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {

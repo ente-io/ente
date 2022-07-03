@@ -27,10 +27,11 @@ class ZoomableLiveImage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ZoomableLiveImageState createState() => _ZoomableLiveImageState();
+  State<ZoomableLiveImage> createState() => _ZoomableLiveImageState();
 }
 
-class _ZoomableLiveImageState extends State<ZoomableLiveImage> with SingleTickerProviderStateMixin {
+class _ZoomableLiveImageState extends State<ZoomableLiveImage>
+    with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableLiveImage");
   File _file;
   bool _showVideo = false;
@@ -107,8 +108,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage> with SingleTicker
       showControls: false,
     );
     return Container(
-      child: Chewie(controller: _chewieController),
-      color: Colors.black, // same for both theme
+      color: Colors.black,
+      child: Chewie(controller: _chewieController), // same for both theme
     );
   }
 
@@ -122,13 +123,15 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage> with SingleTicker
       showToast(context, "Downloading...", toastLength: Toast.LENGTH_LONG);
     }
 
-    var videoFile =
-        await getFile(widget.file, liveVideo: true).timeout(Duration(seconds: 15)).onError((e, s) {
+    var videoFile = await getFile(widget.file, liveVideo: true)
+        .timeout(Duration(seconds: 15))
+        .onError((e, s) {
       _logger.info("getFile failed ${_file.tag()}", e);
       return null;
     });
 
-    if ((videoFile == null || !videoFile.existsSync()) && _file.isRemoteFile()) {
+    if ((videoFile == null || !videoFile.existsSync()) &&
+        _file.isRemoteFile()) {
       videoFile = await getFileFromServer(widget.file, liveVideo: true)
           .timeout(Duration(seconds: 15))
           .onError((e, s) {
