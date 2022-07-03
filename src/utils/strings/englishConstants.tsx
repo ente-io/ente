@@ -248,7 +248,7 @@ const englishConstants = {
     LEAVE_FAMILY_PLAN: 'Leave family plan',
     LEAVE: 'Leave',
     LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
-    CHOOSE_PLAN: 'Choose your subscription plan',
+    CHOOSE_PLAN: 'Choose your plan',
     MANAGE_PLAN: 'Manage your subscription',
     ACTIVE: 'Active',
 
@@ -264,13 +264,14 @@ const englishConstants = {
     FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
 
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>Your subscription will renew on {dateString(expiryTime)}</>
+        <>Renew on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
+    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: `You have exceeded your storage quota, please upgrade your plan.`,
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>We've received your payment</p>
@@ -750,6 +751,16 @@ const englishConstants = {
         </>
     ),
     CHANGE_FOLDER: 'Change Folder',
+    TWO_MONTHS_FREE: 'Get 2 months free on yearly plans',
+    GB: 'GB',
+    POPULAR: 'Popular',
+    FREE_PLAN_OPTION_LABEL: 'Continue with free trial',
+    FREE_PLAN_DESCRIPTION: '1 GB for 1 year',
+    CURRENT_USAGE: (usage) => (
+        <>
+            Current usage is <strong>{usage}</strong>
+        </>
+    ),
 };
 
 export default englishConstants;

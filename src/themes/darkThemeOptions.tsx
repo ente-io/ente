@@ -9,6 +9,7 @@ declare module '@mui/material/styles' {
     interface Palette {
         accent: PaletteColor;
         fill: PaletteColor;
+        glass: PaletteColor;
         danger: PaletteColor;
         stroke: TypeText;
     }
@@ -16,17 +17,20 @@ declare module '@mui/material/styles' {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
         fill?: PaletteColorOptions;
+        glass?: PaletteColorOptions;
         stroke?: Partial<TypeText>;
     }
 
     interface TypographyVariants {
         title: React.CSSProperties;
         subtitle: React.CSSProperties;
+        mini: React.CSSProperties;
     }
 
     interface TypographyVariantsOptions {
         title?: React.CSSProperties;
         subtitle?: React.CSSProperties;
+        mini?: React.CSSProperties;
     }
 }
 
@@ -140,6 +144,11 @@ const darkThemeOptions = createTheme({
                 },
                 startIcon: {
                     marginRight: '12px',
+                    fontSize: '20px',
+                },
+                endIcon: {
+                    marginLeft: '12px',
+                    fontSize: '20px',
                 },
                 sizeLarge: {
                     width: '100%',
@@ -233,14 +242,20 @@ const darkThemeOptions = createTheme({
             contrastText: '#fff',
         },
         accent: {
-            main: '#1dba54',
-            dark: '#248546',
-            light: '#2cd366',
+            main: '#1DB954',
+            dark: '#2EB45D',
+            light: '#26CB5F',
         },
         fill: {
             main: 'rgba(256, 256, 256, 0.16)',
             dark: 'rgba(256, 256, 256, 0.12)',
             light: 'rgba(256, 256, 256)',
+        },
+        glass: {
+            main: 'rgba(256, 256, 256, 0.7)',
+            dark: 'rgba(256, 256, 256, 0.9)',
+            light: 'rgba(256, 256, 256,0.3)',
+            contrastText: '#000',
         },
         text: {
             primary: '#fff',
@@ -276,6 +291,10 @@ const darkThemeOptions = createTheme({
             fontSize: '14px',
             lineHeight: '17px',
         },
+        mini: {
+            fontSize: '10px',
+            lineHeight: '12px',
+        },
         button: {
             fontSize: '16px',
             lineHeight: '20px',
@@ -300,12 +319,12 @@ const darkThemeOptions = createTheme({
             lineHeight: '15px',
         },
         h1: {
-            fontSize: '36px',
-            lineHeight: '44px',
+            fontSize: '48px',
+            lineHeight: '58px',
         },
         h2: {
-            fontSize: '30px',
-            lineHeight: '36px',
+            fontSize: '36px',
+            lineHeight: '44px',
         },
         h3: {
             fontSize: '24px',

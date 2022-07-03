@@ -5,7 +5,7 @@ import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlin
 import GoogleIcon from '@mui/icons-material/Google';
 import { UploadTypeOption } from './option';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
-import { Dialog, DialogContent } from '@mui/material';
+import { Dialog, DialogContent, Stack } from '@mui/material';
 
 export default function UploadTypeSelector({
     onHide,
@@ -15,26 +15,31 @@ export default function UploadTypeSelector({
     uploadGoogleTakeoutZips,
 }) {
     return (
-        <Dialog open={show} maxWidth={'xs'} onClose={onHide}>
+        <Dialog
+            open={show}
+            PaperProps={{ sx: { maxWidth: '375px' } }}
+            onClose={onHide}>
             <DialogTitleWithCloseButton onClose={onHide}>
                 {constants.UPLOAD}
             </DialogTitleWithCloseButton>
             <DialogContent sx={{ '&&&&': { pt: 0 } }}>
-                <UploadTypeOption
-                    uploadFunc={uploadFiles}
-                    Icon={FileUploadIcon}
-                    uploadName={constants.UPLOAD_FILES}
-                />
-                <UploadTypeOption
-                    uploadFunc={uploadFolders}
-                    Icon={FolderUploadIcon}
-                    uploadName={constants.UPLOAD_DIRS}
-                />
-                <UploadTypeOption
-                    uploadFunc={uploadGoogleTakeoutZips}
-                    Icon={GoogleIcon}
-                    uploadName={constants.UPLOAD_GOOGLE_TAKEOUT}
-                />
+                <Stack spacing={1}>
+                    <UploadTypeOption
+                        uploadFunc={uploadFiles}
+                        Icon={FileUploadIcon}
+                        uploadName={constants.UPLOAD_FILES}
+                    />
+                    <UploadTypeOption
+                        uploadFunc={uploadFolders}
+                        Icon={FolderUploadIcon}
+                        uploadName={constants.UPLOAD_DIRS}
+                    />
+                    <UploadTypeOption
+                        uploadFunc={uploadGoogleTakeoutZips}
+                        Icon={GoogleIcon}
+                        uploadName={constants.UPLOAD_GOOGLE_TAKEOUT}
+                    />
+                </Stack>
             </DialogContent>
         </Dialog>
     );

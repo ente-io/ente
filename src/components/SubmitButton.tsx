@@ -29,8 +29,6 @@ const SubmitButton: FC<ButtonProps<'button', SubmitButtonProps>> = ({
                 '&.Mui-disabled': {
                     backgroundColor: (theme) => theme.palette.accent.main,
                     color: (theme) => theme.palette.text.primary,
-                    cursor: 'not-allowed',
-                    pointerEvents: 'auto',
                 },
                 ...sx,
             }}

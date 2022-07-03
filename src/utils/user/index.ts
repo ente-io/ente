@@ -24,5 +24,5 @@ export function getUserAnonymizedID() {
 }
 
 export function getLocalUserDetails(): UserDetails {
-    return getData(LS_KEYS.USER_DETAILS);
+    return getData(LS_KEYS.USER_DETAILS)?.value;
 }
