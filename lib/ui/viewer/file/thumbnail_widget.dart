@@ -11,8 +11,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
-import 'package:photos/ui/common/common_elements.dart';
-import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
@@ -40,101 +39,8 @@ class ThumbnailWidget extends StatefulWidget {
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
 }
 
-Widget getFileInfoContainer(BuildContext context, File file) {
-  if (file is TrashFile) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          colors: [Colors.black.withOpacity(0.33), Colors.transparent],
-        ),
-      ),
-      child: Text(
-        daysLeft(file.deleteBy),
-        style: Theme.of(context)
-            .textTheme
-            .subtitle2
-            .copyWith(color: Colors.white), //same for both themes
-      ),
-      alignment: Alignment.bottomCenter,
-      padding: EdgeInsets.only(bottom: 5),
-    );
-  }
-  return emptyContainer;
-}
-
 class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   static final _logger = Logger("ThumbnailWidget");
-
-  static final kVideoIconOverlay = SizedBox(
-    height: 64,
-    child: Icon(
-      Icons.play_circle_outline,
-      size: 40,
-      color: Colors.white70,
-    ),
-  );
-
-  static final kLiveVideoIconOverlay = Align(
-    alignment: Alignment.topRight,
-    child: Padding(
-      padding: const EdgeInsets.only(right: 8, top: 4),
-      child: Icon(
-        Icons.wb_sunny_outlined,
-        size: 14,
-        color: Colors.white.withOpacity(0.9),
-      ),
-    ),
-  );
-
-  static final kArchiveIconOverlay = Align(
-    alignment: Alignment.bottomRight,
-    child: Padding(
-      padding: const EdgeInsets.only(right: 8, bottom: 8),
-      child: Icon(
-        Icons.visibility_off,
-        size: 24,
-        color: Colors.white.withOpacity(0.9),
-      ),
-    ),
-  );
-
-  static final kUnsyncedIconOverlay = Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.transparent,
-          Colors.black.withOpacity(0.6),
-        ],
-        stops: const [0.75, 1],
-      ),
-    ),
-    child: Align(
-      alignment: Alignment.bottomRight,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 8, bottom: 4),
-        child: Icon(
-          Icons.cloud_off_outlined,
-          size: 18,
-          color: Colors.white.withOpacity(0.9),
-        ),
-      ),
-    ),
-  );
-
-  static final Widget lightLoadWidget = Container(
-    alignment: Alignment.center,
-    color: Color.fromRGBO(240, 240, 240, 1),
-  );
-
-  static final Widget darkLoadWidget = Container(
-    alignment: Alignment.center,
-    color: Color.fromRGBO(20, 20, 20, 1),
-  );
-
   bool _hasLoadedThumbnail = false;
   bool _isLoadingLocalThumbnail = false;
   bool _errorLoadingLocalThumbnail = false;
@@ -180,46 +86,46 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         fit: widget.fit,
       );
     }
-
+    // todo: [2ndJuly22] pref-review if the content Widget which depends on
+    // thumbnail fetch logic should be part of separate stateFull widget.
+    // If yes, parent thumbnail widget can be stateless
     Widget content;
     if (image != null) {
+      List<Widget> contentChildren = [image];
       if (widget.file.fileType == FileType.video) {
-        content = Stack(
-          children: [
-            image,
-            kVideoIconOverlay,
-          ],
-          fit: StackFit.expand,
-        );
+        contentChildren.add(const VideoOverlayIcon());
       } else if (widget.file.fileType == FileType.livePhoto &&
           widget.shouldShowLivePhotoOverlay) {
-        content = Stack(
-          children: [
-            image,
-            kLiveVideoIconOverlay,
-          ],
-          fit: StackFit.expand,
-        );
-      } else {
-        content = image;
+        contentChildren.add(const LivePhotoOverlayIcon());
       }
+      content = contentChildren.length == 1
+          ? contentChildren.first
+          : Stack(
+              children: contentChildren,
+              fit: StackFit.expand,
+            );
     }
-    List<Widget> viewChildrens = [
-      _getLoadingWidget(),
+    List<Widget> viewChildren = [
+      const ThumbnailPlaceHolder(),
       AnimatedOpacity(
         opacity: content == null ? 0 : 1.0,
         duration: Duration(milliseconds: 200),
         child: content,
-      ),
-      widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
-          ? kUnsyncedIconOverlay
-          : getFileInfoContainer(context, widget.file),
+      )
     ];
-    if (widget.shouldShowArchiveStatus) {
-      viewChildrens.add(kArchiveIconOverlay);
+    if (widget.shouldShowSyncStatus && widget.file.uploadedFileID == null) {
+      viewChildren.add(const UnSyncedIcon());
     }
+    if (widget.file is TrashFile) {
+      viewChildren.add(TrashedFileOverlayText(widget.file));
+    }
+    // todo: Move this icon overlay to the collection widget.
+    if (widget.shouldShowArchiveStatus) {
+      viewChildren.add(const ArchiveOverlayIcon());
+    }
+
     return Stack(
-      children: viewChildrens,
+      children: viewChildren,
       fit: StackFit.expand,
     );
   }
@@ -355,11 +261,5 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     _errorLoadingLocalThumbnail = false;
     _errorLoadingRemoteThumbnail = false;
     _imageProvider = null;
-  }
-
-  Widget _getLoadingWidget() {
-    return Theme.of(context).brightness == Brightness.light
-        ? lightLoadWidget
-        : darkLoadWidget;
   }
 }
