@@ -755,7 +755,11 @@ const englishConstants = {
     GB: 'GB',
     FREE_PLAN_OPTION_LABEL: 'Continue with free trial',
     FREE_PLAN_DESCRIPTION: '1 GB for 1 year',
-    CURRENT_USAGE: (usage) => `Current usage is ${usage}`,
+    CURRENT_USAGE: (usage) => (
+        <>
+            Current usage is <strong>{usage}</strong>
+        </>
+    ),
 };
 
 export default englishConstants;
