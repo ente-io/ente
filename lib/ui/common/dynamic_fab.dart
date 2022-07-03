@@ -41,18 +41,18 @@ class DynamicFAB extends StatelessWidget {
                   Theme.of(context).colorScheme.dynamicFABBackgroundColor,
               foregroundColor:
                   Theme.of(context).colorScheme.dynamicFABTextColor,
+              onPressed: isFormValid
+                  ? onPressedFunction
+                  : () {
+                      FocusScope.of(context).unfocus();
+                    },
               child: Transform.rotate(
                 angle: isFormValid ? 0 : math.pi / 2,
                 child: Icon(
                   Icons.chevron_right,
                   size: 36,
                 ),
-              ),
-              onPressed: isFormValid
-                  ? onPressedFunction
-                  : () {
-                      FocusScope.of(context).unfocus();
-                    }, //keypad down here
+              ), //keypad down here
             ),
           ],
         ),

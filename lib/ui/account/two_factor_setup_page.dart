@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -19,7 +18,7 @@ class TwoFactorSetupPage extends StatefulWidget {
   TwoFactorSetupPage(this.secretCode, this.qrCode, {Key key}) : super(key: key);
 
   @override
-  _TwoFactorSetupPageState createState() => _TwoFactorSetupPageState();
+  State<TwoFactorSetupPage> createState() => _TwoFactorSetupPageState();
 }
 
 class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
@@ -102,11 +101,11 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   ),
                   Expanded(
                     child: TabBarView(
+                      controller: _tabController,
                       children: [
                         _getSecretCode(),
                         _getBarCode(),
                       ],
-                      controller: _tabController,
                     ),
                   ),
                 ],
@@ -148,6 +147,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             padding: const EdgeInsets.only(left: 10, right: 10),
             child: Container(
               padding: EdgeInsets.all(16),
+              color: textColor.withOpacity(0.1),
               child: Center(
                 child: Text(
                   widget.secretCode,
@@ -158,7 +158,6 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
                   ),
                 ),
               ),
-              color: textColor.withOpacity(0.1),
             ),
           ),
           Padding(padding: EdgeInsets.all(6)),
@@ -240,12 +239,12 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         ),
         Padding(padding: EdgeInsets.all(24)),
         OutlinedButton(
-          child: Text("Confirm"),
           onPressed: _code.length == 6
               ? () async {
                   _enableTwoFactor(_code);
                 }
               : null,
+          child: Text("Confirm"),
         ),
         Padding(padding: EdgeInsets.only(bottom: 24)),
       ],

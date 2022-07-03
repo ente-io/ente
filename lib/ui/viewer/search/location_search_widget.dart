@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
@@ -14,7 +13,7 @@ class LocationSearchWidget extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _LocationSearchWidgetState createState() => _LocationSearchWidgetState();
+  State<LocationSearchWidget> createState() => _LocationSearchWidgetState();
 }
 
 class _LocationSearchWidgetState extends State<LocationSearchWidget> {
@@ -96,7 +95,7 @@ class LocationSearchResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: new EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
+      padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
       margin: EdgeInsets.symmetric(vertical: 6.0),
       child: Column(
         children: <Widget>[
@@ -108,11 +107,9 @@ class LocationSearchResultWidget extends StatelessWidget {
               ),
               Padding(padding: EdgeInsets.only(left: 20.0)),
               Flexible(
-                child: Container(
-                  child: Text(
-                    name,
-                    overflow: TextOverflow.clip,
-                  ),
+                child: Text(
+                  name,
+                  overflow: TextOverflow.clip,
                 ),
               ),
             ],

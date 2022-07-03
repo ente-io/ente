@@ -10,7 +10,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dynamicFAB.dart';
+import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/utils/data_util.dart';
@@ -20,7 +20,7 @@ class EmailEntryPage extends StatefulWidget {
   EmailEntryPage({Key key}) : super(key: key);
 
   @override
-  _EmailEntryPageState createState() => _EmailEntryPageState();
+  State<EmailEntryPage> createState() => _EmailEntryPageState();
 }
 
 class _EmailEntryPageState extends State<EmailEntryPage> {

@@ -33,7 +33,7 @@ class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
 
   @override
-  _CollectionsGalleryWidgetState createState() =>
+  State<CollectionsGalleryWidget> createState() =>
       _CollectionsGalleryWidgetState();
 }
 
@@ -322,7 +322,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                             Theme.of(context).iconTheme.color.withOpacity(0.24),
                       ),
                     ),
-                    child: Container(
+                    child: SizedBox(
                       height: 48,
                       width: double.infinity,
                       child: Padding(
@@ -512,7 +512,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             toastLength: Toast.LENGTH_LONG,
           );
           Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.collections_page));
+              .fire(TabChangedEvent(0, TabChangedEventSource.collectionsPage));
         },
       );
     }
@@ -571,7 +571,7 @@ class DeviceFolderIcon extends StatelessWidget {
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Container(
+        child: SizedBox(
           height: 140,
           width: 120,
           // padding: const EdgeInsets.all(8.0),
@@ -580,6 +580,8 @@ class DeviceFolderIcon extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: SizedBox(
+                  height: 120,
+                  width: 120,
                   child: Hero(
                     tag:
                         "device_folder:" + folder.path + folder.thumbnail.tag(),
@@ -598,8 +600,6 @@ class DeviceFolderIcon extends StatelessWidget {
                       ],
                     ),
                   ),
-                  height: 120,
-                  width: 120,
                 ),
               ),
               Padding(
@@ -651,6 +651,8 @@ class CollectionItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: SizedBox(
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
               child: Hero(
                 tag: "collection" + c.thumbnail.tag(),
                 child: ThumbnailWidget(
@@ -661,8 +663,6 @@ class CollectionItem extends StatelessWidget {
                   ),
                 ),
               ),
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
             ),
           ),
           SizedBox(height: 4),

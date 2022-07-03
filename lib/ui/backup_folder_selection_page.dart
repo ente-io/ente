@@ -24,7 +24,7 @@ class BackupFolderSelectionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _BackupFolderSelectionPageState createState() =>
+  State<BackupFolderSelectionPage> createState() =>
       _BackupFolderSelectionPageState();
 }
 
@@ -161,7 +161,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           bottom: Platform.isIOS ? 60 : 32,
                         ),
                   child: OutlinedButton(
-                    child: Text(widget.buttonText),
                     onPressed: _selectedFolders.isEmpty
                         ? null
                         : () async {
@@ -170,6 +169,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                             Bus.instance.fire(BackupFoldersUpdatedEvent());
                             Navigator.of(context).pop();
                           },
+                    child: Text(widget.buttonText),
                   ),
                 ),
               ),
@@ -378,6 +378,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: SizedBox(
+        height: 88,
+        width: 88,
         child: Stack(
           alignment: AlignmentDirectional.bottomEnd,
           children: [
@@ -397,8 +399,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             ),
           ],
         ),
-        height: 88,
-        width: 88,
       ),
     );
   }

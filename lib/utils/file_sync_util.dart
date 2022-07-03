@@ -63,7 +63,7 @@ Future<List<File>> getUnsyncedFiles(
   Set<String> invalidIDs,
   Computer computer,
 ) async {
-  final args = Map<String, dynamic>();
+  final Map<String, dynamic> args = <String, dynamic>{};
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
@@ -158,7 +158,7 @@ Future<List<File>> _computeFiles(
   List<File> files,
   Computer computer,
 ) async {
-  final args = Map<String, dynamic>();
+  final Map<String, dynamic> args = <String, dynamic>{};
   args["pathEntity"] = pathEntity;
   args["assetList"] = await _getAllAssetLists(pathEntity);
   args["fromTime"] = fromTime;

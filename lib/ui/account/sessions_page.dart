@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -14,7 +13,7 @@ class SessionsPage extends StatefulWidget {
   SessionsPage({Key key}) : super(key: key);
 
   @override
-  _SessionsPageState createState() => _SessionsPageState();
+  State<SessionsPage> createState() => _SessionsPageState();
 }
 
 class _SessionsPageState extends State<SessionsPage> {

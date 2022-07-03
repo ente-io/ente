@@ -201,7 +201,7 @@ class FullScreenMemory extends StatefulWidget {
       : super(key: key);
 
   @override
-  _FullScreenMemoryState createState() => _FullScreenMemoryState();
+  State<FullScreenMemory> createState() => _FullScreenMemoryState();
 }
 
 class _FullScreenMemoryState extends State<FullScreenMemory> {

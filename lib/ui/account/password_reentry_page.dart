@@ -4,7 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/ui/account/recovery_page.dart';
-import 'package:photos/ui/common/dynamicFAB.dart';
+import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -12,7 +12,7 @@ class PasswordReentryPage extends StatefulWidget {
   PasswordReentryPage({Key key}) : super(key: key);
 
   @override
-  _PasswordReentryPageState createState() => _PasswordReentryPageState();
+  State<PasswordReentryPage> createState() => _PasswordReentryPageState();
 }
 
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
@@ -171,16 +171,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           ),
                         );
                       },
-                      child: Container(
-                        child: Center(
-                          child: Text(
-                            "Forgot password",
-                            style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                          ),
+                      child: Center(
+                        child: Text(
+                          "Forgot password",
+                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       ),
                     ),
@@ -195,16 +192,13 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         Navigator.of(context)
                             .popUntil((route) => route.isFirst);
                       },
-                      child: Container(
-                        child: Center(
-                          child: Text(
-                            "Change email",
-                            style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                          ),
+                      child: Center(
+                        child: Text(
+                          "Change email",
+                          style: Theme.of(context).textTheme.subtitle1.copyWith(
+                                fontSize: 14,
+                                decoration: TextDecoration.underline,
+                              ),
                         ),
                       ),
                     ),

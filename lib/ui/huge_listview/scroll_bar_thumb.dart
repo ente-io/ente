@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ScrollBarThumb extends StatelessWidget {
-  final backgroundColor;
-  final drawColor;
-  final height;
-  final title;
-  final labelAnimation;
-  final thumbAnimation;
+  final Color backgroundColor;
+  final Color drawColor;
+  final double height;
+  final String title;
+  final Animation labelAnimation;
+  final Animation thumbAnimation;
   final Function(DragStartDetails details) onDragStart;
   final Function(DragUpdateDetails details) onDragUpdate;
   final Function(DragEndDetails details) onDragEnd;
@@ -61,15 +61,15 @@ class ScrollBarThumb extends StatelessWidget {
               foregroundPainter: _ArrowCustomPainter(drawColor),
               child: Material(
                 elevation: 4.0,
-                child: Container(
-                  constraints: BoxConstraints.tight(Size(height * 0.6, height)),
-                ),
                 color: backgroundColor,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(height),
                   bottomLeft: Radius.circular(height),
                   topRight: Radius.circular(4.0),
                   bottomRight: Radius.circular(4.0),
+                ),
+                child: Container(
+                  constraints: BoxConstraints.tight(Size(height * 0.6, height)),
                 ),
               ),
             ),

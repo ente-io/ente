@@ -14,9 +14,7 @@ class BottomShadowWidget extends StatelessWidget {
         color: Colors.transparent,
         boxShadow: [
           BoxShadow(
-            color: shadowColor == null
-                ? Theme.of(context).backgroundColor
-                : shadowColor,
+            color: shadowColor ?? Theme.of(context).backgroundColor,
             spreadRadius: 42,
             blurRadius: 42,
             offset: Offset(0, offsetDy), // changes position of shadow

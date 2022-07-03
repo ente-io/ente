@@ -8,14 +8,14 @@ import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/payment/subscription.dart';
 
 class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({Key key}) : super(key: key);
 
   @override
-  _LandingPageWidgetState createState() => _LandingPageWidgetState();
+  State<LandingPageWidget> createState() => _LandingPageWidgetState();
 }
 
 class _LandingPageWidgetState extends State<LandingPageWidget> {
@@ -77,13 +77,13 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                 child: ElevatedButton(
                   style:
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
+                  onPressed: _navigateToSignInPage,
                   child: Text(
                     "Existing user",
                     style: TextStyle(
                       color: Colors.black, // same for both themes
                     ),
                   ),
-                  onPressed: _navigateToSignInPage,
                 ),
               ),
             ),
@@ -101,15 +101,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: GradientButton(
-        child: Text(
-          "New to ente",
-          style: gradientButtonTextTheme(),
-        ),
         linearGradientColors: const [
           Color(0xFF2CD267),
           Color(0xFF1DB954),
         ],
         onTap: _navigateToSignUpPage,
+        child: Text(
+          "New to ente",
+          style: gradientButtonTextTheme(),
+        ),
       ),
     );
   }

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -29,7 +28,7 @@ class ZoomableImage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ZoomableImageState createState() => _ZoomableImageState();
+  State<ZoomableImage> createState() => _ZoomableImageState();
 }
 
 class _ZoomableImageState extends State<ZoomableImage>
@@ -94,8 +93,8 @@ class _ZoomableImageState extends State<ZoomableImage>
                 {Navigator.of(context).pop()}
             };
     return GestureDetector(
-      child: content,
       onVerticalDragUpdate: verticalDragCallback,
+      child: content,
     );
   }
 

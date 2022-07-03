@@ -13,10 +13,10 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -28,7 +28,7 @@ class SharedCollectionGallery extends StatefulWidget {
   const SharedCollectionGallery({Key key}) : super(key: key);
 
   @override
-  _SharedCollectionGalleryState createState() =>
+  State<SharedCollectionGallery> createState() =>
       _SharedCollectionGalleryState();
 }
 
@@ -185,6 +185,13 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             width: 200,
             height: 50,
             child: GradientButton(
+              linearGradientColors: const [
+                Color(0xFF2CD267),
+                Color(0xFF1DB954),
+              ],
+              onTap: () async {
+                shareText("Check out https://ente.io");
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -200,13 +207,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   ),
                 ],
               ),
-              linearGradientColors: const [
-                Color(0xFF2CD267),
-                Color(0xFF1DB954),
-              ],
-              onTap: () async {
-                shareText("Check out https://ente.io");
-              },
             ),
           ),
           const SizedBox(height: 60),
@@ -230,6 +230,20 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             width: 200,
             height: 50,
             child: GradientButton(
+              linearGradientColors: const [
+                Color(0xFF2CD267),
+                Color(0xFF1DB954),
+              ],
+              onTap: () async {
+                await showToast(
+                  context,
+                  "Open an album and tap the share button on the top right to share.",
+                  toastLength: Toast.LENGTH_LONG,
+                );
+                Bus.instance.fire(
+                  TabChangedEvent(1, TabChangedEventSource.collectionsPage),
+                );
+              },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -246,20 +260,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   ),
                 ],
               ),
-              linearGradientColors: const [
-                Color(0xFF2CD267),
-                Color(0xFF1DB954),
-              ],
-              onTap: () async {
-                await showToast(
-                  context,
-                  "Open an album and tap the share button on the top right to share.",
-                  toastLength: Toast.LENGTH_LONG,
-                );
-                Bus.instance.fire(
-                  TabChangedEvent(1, TabChangedEventSource.collections_page),
-                );
-              },
             ),
           ),
           const SizedBox(height: 60),
@@ -322,6 +322,8 @@ class OutgoingCollectionItem extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(3),
               child: SizedBox(
+                height: 60,
+                width: 60,
                 child: Hero(
                   tag: "outgoing_collection" + c.thumbnail.tag(),
                   child: ThumbnailWidget(
@@ -329,8 +331,6 @@ class OutgoingCollectionItem extends StatelessWidget {
                     key: Key("outgoing_collection" + c.thumbnail.tag()),
                   ),
                 ),
-                height: 60,
-                width: 60,
               ),
             ),
             Padding(padding: EdgeInsets.all(8)),
@@ -375,7 +375,7 @@ class OutgoingCollectionItem extends StatelessWidget {
       onTap: () {
         final page = CollectionPage(
           c,
-          appBarType: GalleryType.owned_collection,
+          appBarType: GalleryType.ownedCollection,
           tagPrefix: "outgoing_collection",
         );
         routeToPage(context, page);
@@ -411,6 +411,8 @@ class IncomingCollectionItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: SizedBox(
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
               child: Stack(
                 children: [
                   Hero(
@@ -423,13 +425,6 @@ class IncomingCollectionItem extends StatelessWidget {
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
-                      child: Text(
-                        c.collection.owner.name == null ||
-                                c.collection.owner.name.isEmpty
-                            ? c.collection.owner.email.substring(0, 1)
-                            : c.collection.owner.name.substring(0, 1),
-                        textAlign: TextAlign.center,
-                      ),
                       padding: EdgeInsets.all(8),
                       margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
                       decoration: BoxDecoration(
@@ -438,12 +433,17 @@ class IncomingCollectionItem extends StatelessWidget {
                             .colorScheme
                             .defaultBackgroundColor,
                       ),
+                      child: Text(
+                        c.collection.owner.name == null ||
+                                c.collection.owner.name.isEmpty
+                            ? c.collection.owner.email.substring(0, 1)
+                            : c.collection.owner.name.substring(0, 1),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                 ],
               ),
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
             ),
           ),
           SizedBox(height: 4),
@@ -486,7 +486,7 @@ class IncomingCollectionItem extends StatelessWidget {
           context,
           CollectionPage(
             c,
-            appBarType: GalleryType.shared_collection,
+            appBarType: GalleryType.sharedCollection,
             tagPrefix: "shared_collection",
           ),
         );

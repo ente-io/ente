@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/exif_util.dart';
@@ -11,7 +10,7 @@ class ExifInfoDialog extends StatefulWidget {
   ExifInfoDialog(this.file, {Key key}) : super(key: key);
 
   @override
-  _ExifInfoDialogState createState() => _ExifInfoDialogState();
+  State<ExifInfoDialog> createState() => _ExifInfoDialogState();
 }
 
 class _ExifInfoDialogState extends State<ExifInfoDialog> {
@@ -25,7 +24,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
       ),
       content: Scrollbar(
         controller: scrollController,
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: SingleChildScrollView(
           controller: scrollController,
           child: _getInfo(),

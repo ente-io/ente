@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class onlyOuterShadow extends BoxShadow {
+class OnlyOuterShadow extends BoxShadow {
   final BlurStyle blurStyle;
 
-  const onlyOuterShadow({
+  const OnlyOuterShadow({
     Color color = const Color(0xFF000000),
     Offset offset = Offset.zero,
     double blurRadius = 0.0,

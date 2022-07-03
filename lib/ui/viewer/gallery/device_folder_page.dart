@@ -7,7 +7,7 @@ import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_folder.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -48,7 +48,7 @@ class DeviceFolderPage extends StatelessWidget {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          GalleryType.local_folder,
+          GalleryType.localFolder,
           folder.name,
           _selectedFiles,
           path: folder.thumbnail.deviceFolder,
@@ -59,7 +59,7 @@ class DeviceFolderPage extends StatelessWidget {
         children: [
           gallery,
           GalleryOverlayWidget(
-            GalleryType.local_folder,
+            GalleryType.localFolder,
             _selectedFiles,
           )
         ],
@@ -78,7 +78,7 @@ class BackupConfigurationHeaderWidget extends StatefulWidget {
   BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
 
   @override
-  _BackupConfigurationHeaderWidgetState createState() =>
+  State<BackupConfigurationHeaderWidget> createState() =>
       _BackupConfigurationHeaderWidgetState();
 }
 

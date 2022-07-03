@@ -2,9 +2,9 @@ enum GalleryType {
   homepage,
   archive,
   trash,
-  local_folder,
+  localFolder,
   // indicator for gallery view of collections shared with the user
-  shared_collection,
-  owned_collection,
-  search_results
+  sharedCollection,
+  ownedCollection,
+  searchResults
 }

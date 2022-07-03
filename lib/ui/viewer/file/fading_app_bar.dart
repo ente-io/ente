@@ -57,6 +57,8 @@ class FadingAppBarState extends State<FadingAppBar> {
       IgnorePointer(
         ignoring: _shouldHide,
         child: AnimatedOpacity(
+          opacity: _shouldHide ? 0 : 1,
+          duration: Duration(milliseconds: 150),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -72,8 +74,6 @@ class FadingAppBarState extends State<FadingAppBar> {
             ),
             child: _buildAppBar(),
           ),
-          opacity: _shouldHide ? 0 : 1,
-          duration: Duration(milliseconds: 150),
         ),
       ),
       height: Platform.isAndroid ? 80 : 96,
@@ -289,20 +289,19 @@ class FadingAppBarState extends State<FadingAppBar> {
     if (file.uploadedFileID == null || file.localID == null) {
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Everywhere"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
             widget.onFileDeleted(file);
           },
+          child: Text("Everywhere"),
         ),
       );
     } else {
       // uploaded file which is present locally too
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Device"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesOnDeviceOnly(context, [file]);
@@ -310,12 +309,12 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             // TODO: Fix behavior when inside a device folder
           },
+          child: Text("Device"),
         ),
       );
 
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("ente"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesFromRemoteOnly(context, [file]);
@@ -323,18 +322,19 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             // TODO: Fix behavior when inside a collection
           },
+          child: Text("ente"),
         ),
       );
 
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Everywhere"),
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
             widget.onFileDeleted(file);
           },
+          child: Text("Everywhere"),
         ),
       );
     }

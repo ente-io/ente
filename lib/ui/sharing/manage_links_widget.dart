@@ -20,7 +20,7 @@ class ManageSharedLinkWidget extends StatefulWidget {
   ManageSharedLinkWidget({Key key, this.collection}) : super(key: key);
 
   @override
-  _ManageSharedLinkWidgetState createState() => _ManageSharedLinkWidgetState();
+  State<ManageSharedLinkWidget> createState() => _ManageSharedLinkWidgetState();
 }
 
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
@@ -235,10 +235,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   CupertinoButton(
-                    child: Text(
-                      'Cancel',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
                     onPressed: () {
                       Navigator.of(context).pop('cancel');
                     },
@@ -246,12 +242,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       horizontal: 8.0,
                       vertical: 5.0,
                     ),
-                  ),
-                  CupertinoButton(
                     child: Text(
-                      'Confirm',
+                      'Cancel',
                       style: Theme.of(context).textTheme.subtitle1,
                     ),
+                  ),
+                  CupertinoButton(
                     onPressed: () async {
                       int newValidTill = -1;
                       int expireAfterInMicroseconds = _selectedExpiry.item3;
@@ -282,6 +278,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       horizontal: 16.0,
                       vertical: 2.0,
                     ),
+                    child: Text(
+                      'Confirm',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                   )
                 ],
               ),
@@ -292,8 +292,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: CupertinoPicker(
                 backgroundColor:
                     Theme.of(context).backgroundColor.withOpacity(0.95),
-                children:
-                    _expiryOptions.map((e) => getOptionText(e.item2)).toList(),
                 onSelectedItemChanged: (value) {
                   var firstWhere = _expiryOptions
                       .firstWhere((element) => element.item1 == value);
@@ -305,6 +303,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 useMagnifier: true,
                 itemExtent: 25,
                 diameterRatio: 1,
+                children:
+                    _expiryOptions.map((e) => getOptionText(e.item2)).toList(),
               ),
             )
           ],
@@ -498,10 +498,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   CupertinoButton(
-                    child: Text(
-                      'Cancel',
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
                     onPressed: () {
                       Navigator.of(context).pop('cancel');
                     },
@@ -509,12 +505,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       horizontal: 8.0,
                       vertical: 5.0,
                     ),
-                  ),
-                  CupertinoButton(
                     child: Text(
-                      'Confirm',
+                      'Cancel',
                       style: Theme.of(context).textTheme.subtitle1,
                     ),
+                  ),
+                  CupertinoButton(
                     onPressed: () async {
                       await _updateUrlSettings(context, {
                         'deviceLimit': int.tryParse(
@@ -528,6 +524,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       horizontal: 16.0,
                       vertical: 2.0,
                     ),
+                    child: Text(
+                      'Confirm',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                   )
                 ],
               ),
@@ -538,7 +538,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: CupertinoPicker(
                 backgroundColor:
                     Theme.of(context).backgroundColor.withOpacity(0.95),
-                children: options,
                 onSelectedItemChanged: (value) {
                   _selectedDeviceLimitIndex = value;
                 },
@@ -546,6 +545,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 useMagnifier: true,
                 itemExtent: 25,
                 diameterRatio: 1,
+                children: options,
               ),
             )
           ],

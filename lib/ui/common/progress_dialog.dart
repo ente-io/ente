@@ -1,8 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 
-enum ProgressDialogType { Normal, Download }
+enum ProgressDialogType { normal, download }
 
 String _dialogMessage = "Loading...";
 double _progress = 0.0, _maxProgress = 100.0;
@@ -54,7 +52,7 @@ class ProgressDialog {
     Color barrierColor,
   }) {
     _context = context;
-    _progressDialogType = type ?? ProgressDialogType.Normal;
+    _progressDialogType = type ?? ProgressDialogType.normal;
     _barrierDismissible = isDismissible ?? true;
     _showLogs = showLogs ?? false;
     _customBody = customBody ?? null;
@@ -79,7 +77,7 @@ class ProgressDialog {
     Alignment progressWidgetAlignment,
   }) {
     if (_isShowing) return;
-    if (_progressDialogType == ProgressDialogType.Download) {
+    if (_progressDialogType == ProgressDialogType.download) {
       _progress = progress ?? _progress;
     }
 
@@ -107,7 +105,7 @@ class ProgressDialog {
     TextStyle progressTextStyle,
     TextStyle messageTextStyle,
   }) {
-    if (_progressDialogType == ProgressDialogType.Download) {
+    if (_progressDialogType == ProgressDialogType.download) {
       _progress = progress ?? _progress;
     }
 
@@ -145,7 +143,7 @@ class ProgressDialog {
   Future<bool> show() async {
     try {
       if (!_isShowing) {
-        _dialog = new _Body();
+        _dialog = _Body();
         showDialog<dynamic>(
           context: _context,
           barrierDismissible: _barrierDismissible,
@@ -225,7 +223,7 @@ class _BodyState extends State<_Body> {
     );
 
     final text = Expanded(
-      child: _progressDialogType == ProgressDialogType.Normal
+      child: _progressDialogType == ProgressDialogType.normal
           ? Text(
               _dialogMessage,
               textAlign: _textAlign,

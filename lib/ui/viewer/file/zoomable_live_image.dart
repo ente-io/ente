@@ -1,9 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:chewie/chewie.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -29,7 +27,7 @@ class ZoomableLiveImage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ZoomableLiveImageState createState() => _ZoomableLiveImageState();
+  State<ZoomableLiveImage> createState() => _ZoomableLiveImageState();
 }
 
 class _ZoomableLiveImageState extends State<ZoomableLiveImage>
@@ -110,8 +108,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       showControls: false,
     );
     return Container(
-      child: Chewie(controller: _chewieController),
-      color: Colors.black, // same for both theme
+      color: Colors.black,
+      child: Chewie(controller: _chewieController), // same for both theme
     );
   }
 

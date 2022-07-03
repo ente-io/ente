@@ -74,7 +74,9 @@ class MemoriesService extends ChangeNotifier {
     final archivedCollectionIds =
         CollectionsService.instance.getArchivedCollections();
     final files = await _filesDB.getFilesCreatedWithinDurations(
-        durations, archivedCollectionIds);
+      durations,
+      archivedCollectionIds,
+    );
     final seenTimes = await _memoriesDB.getSeenTimes();
     final List<Memory> memories = [];
     final filter = ImportantItemsFilter();

@@ -12,7 +12,7 @@ class SetWallpaperDialog extends StatefulWidget {
   const SetWallpaperDialog(this.file, {Key key}) : super(key: key);
 
   @override
-  _SetWallpaperDialogState createState() => _SetWallpaperDialogState();
+  State<SetWallpaperDialog> createState() => _SetWallpaperDialogState();
 }
 
 class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
@@ -22,42 +22,40 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
   Widget build(BuildContext context) {
     final alert = AlertDialog(
       title: Text("Set wallpaper"),
-      content: Container(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListTile(
-              title: const Text("Homescreen"),
-              value: WallpaperManagerFlutter.HOME_SCREEN,
-              groupValue: _lockscreenValue,
-              onChanged: (v) {
-                setState(() {
-                  _lockscreenValue = v;
-                });
-              },
-            ),
-            RadioListTile(
-              title: const Text("Lockscreen"),
-              value: WallpaperManagerFlutter.LOCK_SCREEN,
-              groupValue: _lockscreenValue,
-              onChanged: (v) {
-                setState(() {
-                  _lockscreenValue = v;
-                });
-              },
-            ),
-            RadioListTile(
-              title: const Text("Both"),
-              value: WallpaperManagerFlutter.BOTH_SCREENS,
-              groupValue: _lockscreenValue,
-              onChanged: (v) {
-                setState(() {
-                  _lockscreenValue = v;
-                });
-              },
-            ),
-          ],
-        ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          RadioListTile(
+            title: const Text("Homescreen"),
+            value: WallpaperManagerFlutter.HOME_SCREEN,
+            groupValue: _lockscreenValue,
+            onChanged: (v) {
+              setState(() {
+                _lockscreenValue = v;
+              });
+            },
+          ),
+          RadioListTile(
+            title: const Text("Lockscreen"),
+            value: WallpaperManagerFlutter.LOCK_SCREEN,
+            groupValue: _lockscreenValue,
+            onChanged: (v) {
+              setState(() {
+                _lockscreenValue = v;
+              });
+            },
+          ),
+          RadioListTile(
+            title: const Text("Both"),
+            value: WallpaperManagerFlutter.BOTH_SCREENS,
+            groupValue: _lockscreenValue,
+            onChanged: (v) {
+              setState(() {
+                _lockscreenValue = v;
+              });
+            },
+          ),
+        ],
       ),
       actions: [
         TextButton(

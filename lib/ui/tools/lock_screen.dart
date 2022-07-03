@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 
@@ -9,7 +9,7 @@ class LockScreen extends StatefulWidget {
   LockScreen({Key key}) : super(key: key);
 
   @override
-  _LockScreenState createState() => _LockScreenState();
+  State<LockScreen> createState() => _LockScreenState();
 }
 
 class _LockScreenState extends State<LockScreen> {
@@ -40,10 +40,6 @@ class _LockScreenState extends State<LockScreen> {
                 SizedBox(
                   width: 172,
                   child: GradientButton(
-                    child: Text(
-                      'Unlock',
-                      style: gradientButtonTextTheme(),
-                    ),
                     linearGradientColors: const [
                       Color(0xFF2CD267),
                       Color(0xFF1DB954),
@@ -51,6 +47,10 @@ class _LockScreenState extends State<LockScreen> {
                     onTap: () async {
                       _showLockScreen();
                     },
+                    child: Text(
+                      'Unlock',
+                      style: gradientButtonTextTheme(),
+                    ),
                   ),
                 ),
               ],

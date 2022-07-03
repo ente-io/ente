@@ -3,21 +3,21 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dynamicFAB.dart';
+import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
   final _config = Configuration.instance;
   bool _emailIsValid = false;
   String _email;
-  Color _emailInputFieldColor = null;
+  Color _emailInputFieldColor;
 
   @override
   void initState() {

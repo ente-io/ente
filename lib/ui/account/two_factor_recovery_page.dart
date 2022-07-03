@@ -17,7 +17,7 @@ class TwoFactorRecoveryPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _TwoFactorRecoveryPageState createState() => _TwoFactorRecoveryPageState();
+  State<TwoFactorRecoveryPage> createState() => _TwoFactorRecoveryPageState();
 }
 
 class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
@@ -66,7 +66,6 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
             width: double.infinity,
             height: 64,
             child: OutlinedButton(
-              child: Text("Recover"),
               onPressed: _recoveryKey.text.isNotEmpty
                   ? () async {
                       await UserService.instance.removeTwoFactor(
@@ -78,6 +77,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                       );
                     }
                   : null,
+              child: Text("Recover"),
             ),
           ),
           GestureDetector(

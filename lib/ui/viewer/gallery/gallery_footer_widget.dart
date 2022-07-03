@@ -3,7 +3,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class GalleryFooterWidget extends StatelessWidget {
@@ -14,21 +14,6 @@ class GalleryFooterWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
       child: GradientButton(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.cloud_upload_outlined,
-              color: Colors.white,
-            ),
-            Padding(padding: EdgeInsets.all(6)),
-            Text(
-              "Preserve more",
-              style: gradientButtonTextTheme(),
-            ),
-          ],
-        ),
         linearGradientColors: const [
           Color(0xFF2CD267),
           Color(0xFF1DB954),
@@ -45,6 +30,21 @@ class GalleryFooterWidget extends StatelessWidget {
             );
           }
         },
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_upload_outlined,
+              color: Colors.white,
+            ),
+            Padding(padding: EdgeInsets.all(6)),
+            Text(
+              "Preserve more",
+              style: gradientButtonTextTheme(),
+            ),
+          ],
+        ),
       ),
     );
   }

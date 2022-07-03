@@ -16,7 +16,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
@@ -32,7 +32,7 @@ class SharingDialog extends StatefulWidget {
   SharingDialog(this.collection, {Key key}) : super(key: key);
 
   @override
-  _SharingDialogState createState() => _SharingDialogState();
+  State<SharingDialog> createState() => _SharingDialogState();
 }
 
 class _SharingDialogState extends State<SharingDialog> {
@@ -65,6 +65,15 @@ class _SharingDialogState extends State<SharingDialog> {
         SizedBox(
           width: 220,
           child: GradientButton(
+            linearGradientColors: const [
+              Color(0xFF2CD267),
+              Color(0xFF1DB954),
+            ],
+            onTap: () async {
+              setState(() {
+                _showEntryField = true;
+              });
+            },
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -75,15 +84,6 @@ class _SharingDialogState extends State<SharingDialog> {
                 ),
               ],
             ),
-            linearGradientColors: const [
-              Color(0xFF2CD267),
-              Color(0xFF1DB954),
-            ],
-            onTap: () async {
-              setState(() {
-                _showEntryField = true;
-              });
-            },
           ),
           // child: OutlinedButton(
           //   child: Icon(
@@ -286,6 +286,7 @@ class _SharingDialogState extends State<SharingDialog> {
             },
             child: Container(
               padding: EdgeInsets.all(16),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.02),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -310,7 +311,6 @@ class _SharingDialogState extends State<SharingDialog> {
                   ),
                 ],
               ),
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.02),
             ),
           ),
           Padding(padding: EdgeInsets.all(2)),

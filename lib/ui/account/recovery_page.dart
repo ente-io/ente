@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
-import 'package:photos/ui/common/dynamicFAB.dart';
+import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -11,7 +11,7 @@ class RecoveryPage extends StatefulWidget {
   const RecoveryPage({Key key}) : super(key: key);
 
   @override
-  _RecoveryPageState createState() => _RecoveryPageState();
+  State<RecoveryPage> createState() => _RecoveryPageState();
 }
 
 class _RecoveryPageState extends State<RecoveryPage> {
@@ -103,7 +103,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                     ),
                     style: TextStyle(
                       fontSize: 14,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                      fontFeatures: const [FontFeature.tabularFigures()],
                     ),
                     controller: _recoveryKey,
                     autofocus: false,

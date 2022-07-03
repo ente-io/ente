@@ -23,7 +23,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -32,8 +32,8 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/bottom_shadow.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
@@ -78,6 +78,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget _headerWidgetWithSettingsButton;
 
   // for receiving media files
+  // ignore: unused_field
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
 
@@ -103,7 +104,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.page_view) {
+      if (event.source != TabChangedEventSource.pageView) {
         _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
@@ -166,8 +167,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
-      if (mounted &&
-          event.status == SyncStatus.completed_first_gallery_import) {
+      if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
         Duration delayInRefresh = Duration(milliseconds: 0);
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
@@ -225,6 +225,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _firstImportEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
+    _intentDataStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -270,7 +271,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           }
         } else {
           Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.back_button));
+              .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
           return false;
         }
       },
@@ -299,6 +300,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Stack(
       children: [
         ExtentsPageView(
+          onPageChanged: (page) {
+            Bus.instance.fire(
+              TabChangedEvent(
+                page,
+                TabChangedEventSource.pageView,
+              ),
+            );
+          },
+          controller: _pageController,
           children: [
             showBackupFolderHook
                 ? _getBackupFolderSelectionHook()
@@ -307,15 +317,6 @@ class _HomeWidgetState extends State<HomeWidget> {
             _sharedCollectionGallery,
             _settingsPage,
           ],
-          onPageChanged: (page) {
-            Bus.instance.fire(
-              TabChangedEvent(
-                page,
-                TabChangedEventSource.page_view,
-              ),
-            );
-          },
-          controller: _pageController,
         ),
         Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
         Align(
@@ -484,10 +485,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                 height: 64,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: GradientButton(
-                  child: Text(
-                    'Start backup',
-                    style: gradientButtonTextTheme(),
-                  ),
                   linearGradientColors: const [
                     Color(0xFF2CD267),
                     Color(0xFF1DB954),
@@ -505,6 +502,10 @@ class _HomeWidgetState extends State<HomeWidget> {
                       );
                     }
                   },
+                  child: Text(
+                    'Start backup',
+                    style: gradientButtonTextTheme(),
+                  ),
                 ),
               ),
             ),
@@ -525,7 +526,7 @@ class HomePageAppBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
 
   @override
-  _HomePageAppBarState createState() => _HomePageAppBarState();
+  State<HomePageAppBar> createState() => _HomePageAppBarState();
 }
 
 class _HomePageAppBarState extends State<HomePageAppBar> {
@@ -566,13 +567,12 @@ class HomeBottomNavigationBar extends StatefulWidget {
   final int selectedTabIndex;
 
   @override
-  _HomeBottomNavigationBarState createState() =>
+  State<HomeBottomNavigationBar> createState() =>
       _HomeBottomNavigationBarState();
 }
 
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
-  final _logger = Logger((_HomeBottomNavigationBarState).toString());
   int currentTabIndex = 0;
 
   @override
@@ -584,7 +584,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     });
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.tab_bar) {
+      if (event.source != TabChangedEventSource.tabBar) {
         debugPrint('index changed to ${event.selectedIndex}');
         if (mounted) {
           setState(() {
@@ -605,7 +605,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     Bus.instance.fire(
       TabChangedEvent(
         index,
-        TabChangedEventSource.tab_bar,
+        TabChangedEventSource.tabBar,
       ),
     );
   }
@@ -752,8 +752,8 @@ class HeaderWidget extends StatelessWidget {
       _memoriesWidget,
     ];
     return Column(
-      children: list,
       crossAxisAlignment: CrossAxisAlignment.start,
+      children: list,
     );
   }
 }

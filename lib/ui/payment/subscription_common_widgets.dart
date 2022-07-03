@@ -107,6 +107,8 @@ class ValidityWidget extends StatelessWidget {
 }
 
 class SubFaqWidget extends StatelessWidget {
+  const SubFaqWidget({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Align(

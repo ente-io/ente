@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -18,8 +17,12 @@ import 'package:photos/ui/viewer/gallery/empte_state.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-typedef GalleryLoader = Future<FileLoadResult>
-    Function(int creationStartTime, int creationEndTime, {int limit, bool asc});
+typedef GalleryLoader = Future<FileLoadResult> Function(
+  int creationStartTime,
+  int creationEndTime, {
+  int limit,
+  bool asc,
+});
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
@@ -50,7 +53,7 @@ class Gallery extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _GalleryState createState() {
+  State<Gallery> createState() {
     return _GalleryState();
   }
 }

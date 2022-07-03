@@ -11,7 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -104,10 +104,11 @@ class OverlayWidget extends StatefulWidget {
     this.selectedFiles, {
     this.path,
     this.collection,
-  });
+    Key key,
+  }) : super(key: key);
 
   @override
-  _OverlayWidgetState createState() => _OverlayWidgetState();
+  State<OverlayWidget> createState() => _OverlayWidgetState();
 }
 
 class _OverlayWidgetState extends State<OverlayWidget> {
@@ -191,6 +192,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(24),
                 child: GestureDetector(
+                  onTap: _clearSelectedFiles,
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
                     child: Container(
@@ -211,7 +213,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                       ),
                     ),
                   ),
-                  onTap: _clearSelectedFiles,
                 ),
               ),
             ],
@@ -260,11 +261,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type != GalleryType.shared_collection) {
+        widget.type != GalleryType.sharedCollection) {
       String msg = "Add";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
-      if (widget.type == GalleryType.local_folder) {
+      if (widget.type == GalleryType.localFolder) {
         msg = "Upload";
         iconData = Platform.isAndroid
             ? Icons.cloud_upload
@@ -284,7 +285,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       );
     }
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type == GalleryType.owned_collection &&
+        widget.type == GalleryType.ownedCollection &&
         widget.collection.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
@@ -318,7 +319,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     );
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive ||
-        widget.type == GalleryType.local_folder) {
+        widget.type == GalleryType.localFolder) {
       actions.add(
         Tooltip(
           message: "Delete",
@@ -332,7 +333,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
           ),
         ),
       );
-    } else if (widget.type == GalleryType.owned_collection) {
+    } else if (widget.type == GalleryType.ownedCollection) {
       if (widget.collection.type == CollectionType.folder) {
         actions.add(
           Tooltip(
@@ -477,7 +478,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (containsUploadedFile && containsLocalFile) {
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Device"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -488,11 +488,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _clearSelectedFiles();
             showToast(context, "Files deleted from device");
           },
+          child: Text("Device"),
         ),
       );
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("ente"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -503,11 +503,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _clearSelectedFiles();
             showShortToast(context, "Moved to trash");
           },
+          child: Text("ente"),
         ),
       );
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Everywhere"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -517,12 +517,12 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             );
             _clearSelectedFiles();
           },
+          child: Text("Everywhere"),
         ),
       );
     } else {
       actions.add(
         CupertinoActionSheetAction(
-          child: Text("Delete"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -532,6 +532,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             );
             _clearSelectedFiles();
           },
+          child: Text("Delete"),
         ),
       );
     }
@@ -572,7 +573,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       ),
       actions: <Widget>[
         CupertinoActionSheetAction(
-          child: Text("Remove"),
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
@@ -591,6 +591,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
               showGenericErrorDialog(context);
             }
           },
+          child: Text("Remove"),
         ),
       ],
       cancelButton: CupertinoActionSheetAction(

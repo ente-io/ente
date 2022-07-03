@@ -6,7 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
@@ -26,12 +26,13 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.type,
     this.title,
     this.selectedFiles, {
+    Key key,
     this.path,
     this.collection,
-  });
+  }) : super(key: key);
 
   @override
-  _GalleryAppBarWidgetState createState() => _GalleryAppBarWidgetState();
+  State<GalleryAppBarWidget> createState() => _GalleryAppBarWidgetState();
 }
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
@@ -86,7 +87,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
-    if (widget.type != GalleryType.owned_collection) {
+    if (widget.type != GalleryType.ownedCollection) {
       return;
     }
     final result = await showDialog<String>(
@@ -120,8 +121,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
-        (widget.type == GalleryType.local_folder ||
-            widget.type == GalleryType.owned_collection)) {
+        (widget.type == GalleryType.localFolder ||
+            widget.type == GalleryType.ownedCollection)) {
       actions.add(
         Tooltip(
           message: "Share",
@@ -134,7 +135,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-    if (widget.type == GalleryType.owned_collection) {
+    if (widget.type == GalleryType.ownedCollection) {
       actions.add(
         PopupMenuButton(
           itemBuilder: (context) {
@@ -198,7 +199,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await dialog.show();
     try {
       if (collection == null) {
-        if (widget.type == GalleryType.local_folder) {
+        if (widget.type == GalleryType.localFolder) {
           collection =
               await CollectionsService.instance.getOrCreateForPath(widget.path);
         } else {

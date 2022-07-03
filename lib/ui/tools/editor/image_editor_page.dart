@@ -36,7 +36,7 @@ class ImageEditorPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ImageEditorPageState createState() => _ImageEditorPageState();
+  State<ImageEditorPage> createState() => _ImageEditorPageState();
 }
 
 class _ImageEditorPageState extends State<ImageEditorPage> {
@@ -133,9 +133,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         loadStateChanged: (state) {
           if (state.extendedImageLoadState == LoadState.completed) {
             return FilteredImage(
-              child: state.completedWidget,
               brightness: _brightness,
               saturation: _saturation,
+              child: state.completedWidget,
             );
           }
           return const EnteLoadingWidget();

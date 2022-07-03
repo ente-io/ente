@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
@@ -36,7 +37,7 @@ class RecoveryKeyPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _RecoveryKeyPageState createState() => _RecoveryKeyPageState();
+  State<RecoveryKeyPage> createState() => _RecoveryKeyPageState();
 }
 
 class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
@@ -158,12 +159,12 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               height: 80,
               width: double.infinity,
               child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 20),
                 child: Text(
                   widget.subText ??
                       "We don’t store this key, please save this in a safe place.",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
-                padding: EdgeInsets.symmetric(vertical: 20),
               ),
             ),
             Expanded(
@@ -189,11 +190,11 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     if (!_hasTriedToSave) {
       childrens.add(
         ElevatedButton(
-          child: Text('Do this later'),
           style: Theme.of(context).colorScheme.optionalActionButtonStyle,
           onPressed: () async {
             await _saveKeys();
           },
+          child: Text('Do this later'),
         ),
       );
       childrens.add(SizedBox(height: 10));
@@ -201,10 +202,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
     childrens.add(
       GradientButton(
-        child: Text(
-          'Save key',
-          style: gradientButtonTextTheme(),
-        ),
         linearGradientColors: const [
           Color(0xFF2CD267),
           Color(0xFF1DB954),
@@ -212,6 +209,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         onTap: () async {
           await _shareRecoveryKey(recoveryKey);
         },
+        child: Text(
+          'Save key',
+          style: gradientButtonTextTheme(),
+        ),
       ),
     );
     if (_hasTriedToSave) {

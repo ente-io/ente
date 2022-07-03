@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +42,7 @@ class LazyLoadingGallery extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
+  State<LazyLoadingGallery> createState() => _LazyLoadingGalleryState();
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
@@ -170,7 +169,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         LazyLoadingGridView(
           widget.tag,
           _files.sublist(
-              index, min(index + kSubGalleryItemLimit, _files.length)),
+            index,
+            min(index + kSubGalleryItemLimit, _files.length),
+          ),
           widget.asyncLoader,
           widget.selectedFiles,
           index == 0,
@@ -204,7 +205,7 @@ class LazyLoadingGridView extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  _LazyLoadingGridViewState createState() => _LazyLoadingGridViewState();
+  State<LazyLoadingGridView> createState() => _LazyLoadingGridViewState();
 }
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {

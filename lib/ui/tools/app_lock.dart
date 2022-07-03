@@ -21,6 +21,9 @@ import 'package:flutter/material.dart';
 /// [backgroundLockLatency] determines how much time is allowed to pass when
 /// the app is in the background state before the [lockScreen] widget should be
 /// shown upon returning. It defaults to instantly.
+///
+
+// ignore_for_file: unnecessary_this, library_private_types_in_public_api
 class AppLock extends StatefulWidget {
   final Widget Function(Object) builder;
   final Widget lockScreen;
@@ -43,7 +46,7 @@ class AppLock extends StatefulWidget {
       context.findAncestorStateOfType<_AppLockState>();
 
   @override
-  _AppLockState createState() => _AppLockState();
+  State<AppLock> createState() => _AppLockState();
 }
 
 class _AppLockState extends State<AppLock> with WidgetsBindingObserver {

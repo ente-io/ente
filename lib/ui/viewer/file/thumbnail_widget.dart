@@ -36,7 +36,7 @@ class ThumbnailWidget extends StatefulWidget {
   }) : super(key: key ?? Key(file.tag()));
 
   @override
-  _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
+  State<ThumbnailWidget> createState() => _ThumbnailWidgetState();
 }
 
 class _ThumbnailWidgetState extends State<ThumbnailWidget> {
@@ -101,8 +101,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       content = contentChildren.length == 1
           ? contentChildren.first
           : Stack(
-              children: contentChildren,
               fit: StackFit.expand,
+              children: contentChildren,
             );
     }
     List<Widget> viewChildren = [
@@ -125,8 +125,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     }
 
     return Stack(
-      children: viewChildren,
       fit: StackFit.expand,
+      children: viewChildren,
     );
   }
 

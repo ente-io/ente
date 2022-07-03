@@ -22,7 +22,7 @@ class LocationSearchResultsPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  _LocationSearchResultsPageState createState() =>
+  State<LocationSearchResultsPage> createState() =>
       _LocationSearchResultsPageState();
 }
 
@@ -35,19 +35,17 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
       appBar: AppBar(
         title: Text(widget.name),
       ),
-      body: Container(
-        child: Gallery(
-          tagPrefix: "location_search",
-          selectedFiles: _selectedFiles,
-          footer: SizedBox(height: 32),
-        ),
+      body: Gallery(
+        tagPrefix: "location_search",
+        selectedFiles: _selectedFiles,
+        footer: SizedBox(height: 32),
       ),
     );
   }
 
   List<File> _getResult() {
     List<File> files = [];
-    final args = Map<String, dynamic>();
+    final Map<String, dynamic> args = <String, dynamic>{};
     args['files'] = files;
     args['viewPort'] = widget.viewPort;
     return _filterPhotos(args);

@@ -123,7 +123,7 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  lints: ^1.0.1
+  flutter_lints: ^2.0.1
 
 flutter_icons:
   android: "launcher_icon"

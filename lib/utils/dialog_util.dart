@@ -8,7 +8,7 @@ import 'package:photos/ui/common/progress_dialog.dart';
 ProgressDialog createProgressDialog(BuildContext context, String message) {
   final dialog = ProgressDialog(
     context,
-    type: ProgressDialogType.Normal,
+    type: ProgressDialogType.normal,
     isDismissible: false,
     barrierColor: Colors.black12,
   );

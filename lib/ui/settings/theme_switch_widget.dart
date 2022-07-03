@@ -16,7 +16,7 @@ class ThemeSwitchWidget extends StatelessWidget {
       current: selectedTheme,
       values: const [0, 1],
       onChanged: (i) {
-        print("Changed to ${i}, selectedTheme is ${selectedTheme} ");
+        debugPrint("Changed to {i}, selectedTheme is {selectedTheme} ");
         if (i == 0) {
           AdaptiveTheme.of(context).setLight();
         } else {

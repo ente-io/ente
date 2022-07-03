@@ -10,7 +10,7 @@ class RenameDialog extends StatefulWidget {
       : super(key: key);
 
   @override
-  _RenameDialogState createState() => _RenameDialogState();
+  State<RenameDialog> createState() => _RenameDialogState();
 }
 
 class _RenameDialogState extends State<RenameDialog> {

@@ -146,7 +146,7 @@ Future<bool> isFileCached(ente.File file, {bool liveVideo = false}) async {
   return fileInfo != null;
 }
 
-final Map<int, Future<_LivePhoto>> livePhotoDownloadsTracker =
+final Map<int, Future<_LivePhoto>> _livePhotoDownloadsTracker =
     <int, Future<_LivePhoto>>{};
 
 Future<io.File> _getLivePhotoFromServer(
@@ -156,19 +156,19 @@ Future<io.File> _getLivePhotoFromServer(
 }) async {
   final downloadID = file.uploadedFileID;
   try {
-    if (!livePhotoDownloadsTracker.containsKey(downloadID)) {
-      livePhotoDownloadsTracker[downloadID] =
+    if (!_livePhotoDownloadsTracker.containsKey(downloadID)) {
+      _livePhotoDownloadsTracker[downloadID] =
           _downloadLivePhoto(file, progressCallback: progressCallback);
     }
-    final livePhoto = await livePhotoDownloadsTracker[file.uploadedFileID];
-    livePhotoDownloadsTracker.remove(downloadID);
+    final livePhoto = await _livePhotoDownloadsTracker[file.uploadedFileID];
+    _livePhotoDownloadsTracker.remove(downloadID);
     if (livePhoto == null) {
       return null;
     }
     return needLiveVideo ? livePhoto.video : livePhoto.image;
   } catch (e, s) {
     _logger.warning("live photo get failed", e, s);
-    livePhotoDownloadsTracker.remove(downloadID);
+    _livePhotoDownloadsTracker.remove(downloadID);
     return null;
   }
 }

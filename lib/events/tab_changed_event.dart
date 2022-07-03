@@ -16,8 +16,8 @@ class TabChangedEvent extends Event {
 }
 
 enum TabChangedEventSource {
-  tab_bar,
-  page_view,
-  collections_page,
-  back_button,
+  tabBar,
+  pageView,
+  collectionsPage,
+  backButton,
 }
