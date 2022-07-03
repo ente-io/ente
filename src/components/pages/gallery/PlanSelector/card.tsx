@@ -25,11 +25,13 @@ import { SetLoading } from 'types/gallery';
 import { logError } from 'utils/sentry';
 import { AppContext } from 'pages/_app';
 import Plans from './plans';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import { useLocalState } from 'hooks/useLocalState';
 import { LS_KEYS } from 'utils/storage/localStorage';
 import { getLocalUserDetails } from 'utils/user';
 import { ManageSubscription } from './manageSubscription';
+import { SpaceBetweenFlex } from 'components/Container';
+import Close from '@mui/icons-material/Close';
 
 interface Props {
     closeModal: any;
@@ -38,14 +40,15 @@ interface Props {
 
 function PlanSelectorCard(props: Props) {
     const subscription = useMemo(() => getLocalUserSubscription(), []);
-    const totalFamilyUsage = useMemo(
-        () => getTotalFamilyUsage(getLocalUserDetails().familyData),
-        []
-    );
     const [plans, setPlans] = useLocalState<Plan[]>(LS_KEYS.PLANS);
     const [planPeriod, setPlanPeriod] = useState<PLAN_PERIOD>(PLAN_PERIOD.YEAR);
     const galleryContext = useContext(GalleryContext);
     const appContext = useContext(AppContext);
+
+    const totalFamilyUsage = useMemo(() => {
+        const familyData = getLocalUserDetails()?.familyData;
+        return familyData ? getTotalFamilyUsage(familyData) : 0;
+    }, []);
 
     const togglePeriod = () => {
         setPlanPeriod((prevPeriod) =>
@@ -152,43 +155,74 @@ function PlanSelectorCard(props: Props) {
     return (
         <>
             <Stack spacing={3} p={1.5}>
-                {hasPaidSubscription(subscription) ? (
-                    <Box>
+                <Box py={0.5} px={1.5}>
+                    {hasPaidSubscription(subscription) ? (
+                        <SpaceBetweenFlex>
+                            <Box>
+                                <Typography variant="h3" fontWeight={'bold'}>
+                                    {constants.SUBSCRIPTION}
+                                </Typography>
+                                <Typography
+                                    variant="body2"
+                                    color={'text.secondary'}>
+                                    {convertBytesToGBs(subscription.storage)}{' '}
+                                    {constants.GB}
+                                </Typography>
+                            </Box>
+                            <IconButton onClick={props.closeModal}>
+                                <Close />
+                            </IconButton>
+                        </SpaceBetweenFlex>
+                    ) : (
                         <Typography variant="h3" fontWeight={'bold'}>
-                            {constants.SUBSCRIPTION}
+                            {constants.CHOOSE_PLAN}
                         </Typography>
-                        <Typography variant="body2" color={'text.secondary'}>
-                            {convertBytesToGBs(subscription.storage)}{' '}
-                            {constants.GB}
+                    )}
+                </Box>
+                {totalFamilyUsage > 0 && (
+                    <Box px={1.5}>
+                        <Typography
+                            color={'text.secondary'}
+                            fontWeight={'bold'}>
+                            {constants.CURRENT_USAGE(
+                                makeHumanReadableStorage(totalFamilyUsage)
+                            )}
                         </Typography>
                     </Box>
-                ) : (
-                    <Typography variant="h3" fontWeight={'bold'}>
-                        {constants.CHOOSE_PLAN}
-                    </Typography>
-                )}
-                {totalFamilyUsage > 0 && (
-                    <Typography color={'text.secondary'} fontWeight={'bold'}>
-                        {constants.CURRENT_USAGE(
-                            makeHumanReadableStorage(totalFamilyUsage)
-                        )}
-                    </Typography>
                 )}
                 <Box>
-                    <PeriodToggler
-                        planPeriod={planPeriod}
-                        togglePeriod={togglePeriod}
-                    />
-                    <Typography mt={0.5} color="text.secondary">
-                        {constants.TWO_MONTHS_FREE}
-                    </Typography>
+                    <Stack
+                        spacing={2}
+                        border={(theme) =>
+                            hasPaidSubscription(subscription) &&
+                            `1px solid ${theme.palette.divider}`
+                        }
+                        p={1.5}
+                        borderRadius={(theme) =>
+                            `${theme.shape.borderRadius}px`
+                        }>
+                        <Box>
+                            <PeriodToggler
+                                planPeriod={planPeriod}
+                                togglePeriod={togglePeriod}
+                            />
+                            <Typography mt={0.5} color="text.secondary">
+                                {constants.TWO_MONTHS_FREE}
+                            </Typography>
+                        </Box>
+                        <Plans
+                            plans={plans}
+                            planPeriod={planPeriod}
+                            onPlanSelect={onPlanSelect}
+                            subscription={subscription}
+                        />
+                    </Stack>
+                    <Box py={1} px={1.5}>
+                        <Typography color={'text.secondary'}>
+                            Renews on 26 July, 2022
+                        </Typography>
+                    </Box>
                 </Box>
-                <Plans
-                    plans={plans}
-                    planPeriod={planPeriod}
-                    onPlanSelect={onPlanSelect}
-                    subscription={subscription}
-                />
                 <ManageSubscription
                     subscription={subscription}
                     closeModal={props.closeModal}
