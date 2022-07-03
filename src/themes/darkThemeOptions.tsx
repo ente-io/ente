@@ -189,7 +189,7 @@ const darkThemeOptions = createTheme({
                             };
                         case 'disabled':
                             return {
-                                color: 'rgba(255, 255, 255, 0.12)',
+                                color: 'rgba(255, 255, 255, 0.16)',
                             };
                     }
                 },
@@ -211,7 +211,7 @@ const darkThemeOptions = createTheme({
                     }
                     if (ownerState.disabled) {
                         return {
-                            color: 'rgba(255, 255, 255, 0.12)',
+                            color: 'rgba(255, 255, 255, 0.16)',
                         };
                     }
                 },
@@ -226,7 +226,7 @@ const darkThemeOptions = createTheme({
             contrastText: '#000',
         },
         secondary: {
-            main: 'rgba(256, 256, 256, 0.1)',
+            main: 'rgba(256, 256, 256, 0.12)',
             contrastText: '#fff',
         },
         accent: {
@@ -235,8 +235,8 @@ const darkThemeOptions = createTheme({
             light: '#26CB5F',
         },
         fill: {
-            main: 'rgba(256, 256, 256, 0.2)',
-            dark: 'rgba(256, 256, 256, 0.1)',
+            main: 'rgba(256, 256, 256, 0.16)',
+            dark: 'rgba(256, 256, 256, 0.12)',
             light: 'rgba(256, 256, 256)',
         },
         text: {
@@ -251,7 +251,7 @@ const darkThemeOptions = createTheme({
         stroke: {
             primary: '#ffffff',
             secondary: 'rgba(256,256,256,0.24)',
-            disabled: 'rgba(256,256,256,0.12)',
+            disabled: 'rgba(256,256,256,0.16)',
         },
         background: { default: '#000000', paper: '#1b1b1b' },
         grey: {
@@ -259,7 +259,7 @@ const darkThemeOptions = createTheme({
             A200: 'rgba(256, 256, 256, 0.24)',
             A400: '#434343',
         },
-        divider: 'rgba(256, 256, 256, 0.12)',
+        divider: 'rgba(256, 256, 256, 0.16)',
     },
     shape: {
         borderRadius: 8,
