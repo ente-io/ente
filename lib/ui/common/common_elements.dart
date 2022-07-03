@@ -14,5 +14,3 @@ Widget nothingToSeeHere({Color textColor}) {
     ),
   );
 }
-
-final emptyContainer = const SizedBox.shrink();

@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/utils/date_time_util.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
-  final Color backgroundColor;
-
-  const ThumbnailPlaceHolder(this.backgroundColor, {Key key}) : super(key: key);
+  const ThumbnailPlaceHolder({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     debugPrint("building placeHolder for thumbnail");
     return Container(
       alignment: Alignment.center,
-      color: backgroundColor,
+      color: Theme.of(context).colorScheme.galleryThumbBackgroundColor,
     );
   }
 }
@@ -70,7 +69,7 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Align(
+    return Align(
       alignment: Alignment.topRight,
       child: Padding(
         padding: const EdgeInsets.only(right: 8, top: 4),
@@ -117,7 +116,7 @@ class ArchiveOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Align(
+    return Align(
       alignment: Alignment.bottomRight,
       child: Padding(
         padding: const EdgeInsets.only(right: 8, bottom: 8),

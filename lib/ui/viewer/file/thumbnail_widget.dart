@@ -11,7 +11,6 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
-import 'package:photos/ui/common/common_elements.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
@@ -38,13 +37,6 @@ class ThumbnailWidget extends StatefulWidget {
 
   @override
   _ThumbnailWidgetState createState() => _ThumbnailWidgetState();
-}
-
-Widget getFileInfoContainer(BuildContext context, File file) {
-  if (file is TrashFile) {
-    return TrashedFileOverlayText(file);
-  }
-  return emptyContainer;
 }
 
 class _ThumbnailWidgetState extends State<ThumbnailWidget> {
@@ -94,51 +86,46 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         fit: widget.fit,
       );
     }
-    // todo: [2ndJuly22] pref-review if the content Widget which contains depends on thumbnail fetch
-    // logic should be part of separate stateFull widget and
-    // Thumbnail widget can be stateless
+    // todo: [2ndJuly22] pref-review if the content Widget which depends on
+    // thumbnail fetch logic should be part of separate stateFull widget.
+    // If yes, parent thumbnail widget can be stateless
     Widget content;
     if (image != null) {
+      List<Widget> contentChildren = [image];
       if (widget.file.fileType == FileType.video) {
-        content = Stack(
-          children: [
-            image,
-            const VideoOverlayIcon(),
-          ],
-          fit: StackFit.expand,
-        );
+        contentChildren.add(const VideoOverlayIcon());
       } else if (widget.file.fileType == FileType.livePhoto &&
           widget.shouldShowLivePhotoOverlay) {
-        content = Stack(
-          children: [
-            image,
-            const LivePhotoOverlayIcon(),
-          ],
-          fit: StackFit.expand,
-        );
-      } else {
-        content = image;
+        contentChildren.add(const LivePhotoOverlayIcon());
       }
+      content = contentChildren.length == 1
+          ? contentChildren.first
+          : Stack(
+              children: contentChildren,
+              fit: StackFit.expand,
+            );
     }
-    List<Widget> viewChildrens = [
-      Theme.of(context).brightness == Brightness.light
-          ? const ThumbnailPlaceHolder(Color.fromRGBO(240, 240, 240, 1))
-          : const ThumbnailPlaceHolder(Color.fromRGBO(20, 20, 20, 1)),
+    List<Widget> viewChildren = [
+      const ThumbnailPlaceHolder(),
       AnimatedOpacity(
         opacity: content == null ? 0 : 1.0,
         duration: Duration(milliseconds: 200),
         child: content,
-      ),
-      widget.shouldShowSyncStatus && widget.file.uploadedFileID == null
-          ? const UnSyncedIcon()
-          : getFileInfoContainer(context, widget.file),
+      )
     ];
+    if (widget.shouldShowSyncStatus && widget.file.uploadedFileID == null) {
+      viewChildren.add(const UnSyncedIcon());
+    }
+    if (widget.file is TrashFile) {
+      viewChildren.add(TrashedFileOverlayText(widget.file));
+    }
     // todo: Move this icon overlay to the collection widget.
     if (widget.shouldShowArchiveStatus) {
-      viewChildrens.add(const ArchiveOverlayIcon());
+      viewChildren.add(const ArchiveOverlayIcon());
     }
+
     return Stack(
-      children: viewChildrens,
+      children: viewChildren,
       fit: StackFit.expand,
     );
   }
