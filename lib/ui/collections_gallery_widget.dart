@@ -33,8 +33,7 @@ class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
 
   @override
-  _CollectionsGalleryWidgetState createState() =>
-      _CollectionsGalleryWidgetState();
+  _CollectionsGalleryWidgetState createState() => _CollectionsGalleryWidgetState();
 }
 
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
@@ -49,13 +48,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
 
   @override
   void initState() {
-    _localFilesSubscription =
-        Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+    _localFilesSubscription = Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _loadReason = (LocalPhotosUpdatedEvent).toString();
       setState(() {});
     });
-    _collectionUpdatesSubscription =
-        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+    _collectionUpdatesSubscription = Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
       _loadReason = (CollectionUpdatedEvent).toString();
       setState(() {});
     });
@@ -63,8 +60,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       _loadReason = (UserLoggedOutEvent).toString();
       setState(() {});
     });
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
+    _backupFoldersUpdatedEvent = Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
       _loadReason = (BackupFoldersUpdatedEvent).toString();
       setState(() {});
     });
@@ -100,13 +96,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));
     }
     folders.sort(
-      (first, second) =>
-          second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime),
+      (first, second) => second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime),
     );
 
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
-    final latestCollectionFiles =
-        await collectionsService.getLatestCollectionFiles();
+    final latestCollectionFiles = await collectionsService.getLatestCollectionFiles();
     for (final file in latestCollectionFiles) {
       final c = collectionsService.getCollectionByID(file.collectionID);
       if (c.owner.id == userID) {
@@ -119,11 +113,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
           // alphabetical ASC order
           return first.collection.name.compareTo(second.collection.name);
         } else if (sortKey == AlbumSortKey.newestPhoto) {
-          return second.thumbnail.creationTime
-              .compareTo(first.thumbnail.creationTime);
+          return second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime);
         } else {
-          return second.collection.updationTime
-              .compareTo(first.collection.updationTime);
+          return second.collection.updationTime.compareTo(first.collection.updationTime);
         }
       },
     );
@@ -133,10 +125,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
-    final TextStyle trashAndHiddenTextStyle = Theme.of(context)
-        .textTheme
-        .subtitle1
-        .copyWith(
+    final TextStyle trashAndHiddenTextStyle = Theme.of(context).textTheme.subtitle1.copyWith(
           color: Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5),
         );
     Size size = MediaQuery.of(context).size;
@@ -210,8 +199,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                         crossAxisCount: albumsCountInOneRow,
                         mainAxisSpacing: 12,
                         crossAxisSpacing: crossAxisSpacingOfGrid,
-                        childAspectRatio:
-                            sideOfThumbnail / (sideOfThumbnail + 24),
+                        childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 24),
                       ), //24 is height of album title
                     ),
                   )
@@ -232,8 +220,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       padding: EdgeInsets.all(0),
                       side: BorderSide(
                         width: 0.5,
-                        color:
-                            Theme.of(context).iconTheme.color.withOpacity(0.24),
+                        color: Theme.of(context).iconTheme.color.withOpacity(0.24),
                       ),
                     ),
                     child: SizedBox(
@@ -261,9 +248,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                           children: [
                                             TextSpan(
                                               text: "Trash",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .subtitle1,
+                                              style: Theme.of(context).textTheme.subtitle1,
                                             ),
                                             TextSpan(text: "  \u2022  "),
                                             TextSpan(
@@ -280,9 +265,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                           children: [
                                             TextSpan(
                                               text: "Trash",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .subtitle1,
+                                              style: Theme.of(context).textTheme.subtitle1,
                                             ),
                                             //need to query in db and bring this value
                                           ],
@@ -318,8 +301,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       padding: EdgeInsets.all(0),
                       side: BorderSide(
                         width: 0.5,
-                        color:
-                            Theme.of(context).iconTheme.color.withOpacity(0.24),
+                        color: Theme.of(context).iconTheme.color.withOpacity(0.24),
                       ),
                     ),
                     child: Container(
@@ -338,8 +320,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                 ),
                                 Padding(padding: EdgeInsets.all(6)),
                                 FutureBuilder<int>(
-                                  future:
-                                      FilesDB.instance.fileCountWithVisibility(
+                                  future: FilesDB.instance.fileCountWithVisibility(
                                     kVisibilityArchive,
                                     Configuration.instance.getUserID(),
                                   ),
@@ -351,9 +332,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                           children: [
                                             TextSpan(
                                               text: "Hidden",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .subtitle1,
+                                              style: Theme.of(context).textTheme.subtitle1,
                                             ),
                                             TextSpan(text: "  \u2022  "),
                                             TextSpan(
@@ -370,9 +349,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                           children: [
                                             TextSpan(
                                               text: "Hidden",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .subtitle1,
+                                              style: Theme.of(context).textTheme.subtitle1,
                                             ),
                                             //need to query in db and bring this value
                                           ],
@@ -511,8 +488,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             "long press to select photos and click + to create an album",
             toastLength: Toast.LENGTH_LONG,
           );
-          Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.collections_page));
+          Bus.instance.fire(TabChangedEvent(0, TabChangedEventSource.collections_page));
         },
       );
     }
@@ -566,12 +542,11 @@ class DeviceFolderIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(folder.path);
+    final isBackedUp = Configuration.instance.getPathsToBackUp().contains(folder.path);
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Container(
+        child: SizedBox(
           height: 140,
           width: 120,
           // padding: const EdgeInsets.all(8.0),
@@ -581,17 +556,14 @@ class DeviceFolderIcon extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
                 child: SizedBox(
                   child: Hero(
-                    tag:
-                        "device_folder:" + folder.path + folder.thumbnail.tag(),
+                    tag: "device_folder:" + folder.path + folder.thumbnail.tag(),
                     child: Stack(
                       children: [
                         ThumbnailWidget(
                           folder.thumbnail,
                           shouldShowSyncStatus: false,
                           key: Key(
-                            "device_folder:" +
-                                folder.path +
-                                folder.thumbnail.tag(),
+                            "device_folder:" + folder.path + folder.thumbnail.tag(),
                           ),
                         ),
                         isBackedUp ? Container() : kUnsyncedIconOverlay,
@@ -606,10 +578,7 @@ class DeviceFolderIcon extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
                   folder.name,
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle1
-                      .copyWith(fontSize: 12),
+                  style: Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 12),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -638,12 +607,11 @@ class CollectionItem extends StatelessWidget {
     const double crossAxisSpacingOfGrid = 9;
     Size size = MediaQuery.of(context).size;
     int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
-    double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
-        (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
-    TextStyle albumTitleTextStyle =
-        Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
-    final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
-        (totalWhiteSpaceOfRow / albumsCountInOneRow);
+    double totalWhiteSpaceOfRow =
+        (horizontalPaddingOfGridRow * 2) + (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
+    TextStyle albumTitleTextStyle = Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
+    final double sideOfThumbnail =
+        (size.width / albumsCountInOneRow) - (totalWhiteSpaceOfRow / albumsCountInOneRow);
     return GestureDetector(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -729,8 +697,7 @@ class SectionTitle extends StatelessWidget {
             alignment: alignment,
             child: Text(
               title,
-              style:
-                  Theme.of(context).textTheme.headline6.copyWith(fontSize: 22),
+              style: Theme.of(context).textTheme.headline6.copyWith(fontSize: 22),
             ),
           ),
         ],
@@ -760,10 +727,7 @@ class EnteSectionTitle extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: "On ",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline6
-                        .copyWith(fontSize: 22),
+                    style: Theme.of(context).textTheme.headline6.copyWith(fontSize: 22),
                   ),
                   TextSpan(
                     text: "ente",

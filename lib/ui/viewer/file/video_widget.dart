@@ -3,7 +3,6 @@ import 'dart:io' as io;
 import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
@@ -115,8 +114,7 @@ class _VideoWidgetState extends State<VideoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final content = _videoPlayerController != null &&
-            _videoPlayerController.value.isInitialized
+    final content = _videoPlayerController != null && _videoPlayerController.value.isInitialized
         ? _getVideoPlayer()
         : _getLoadingWidget();
     final contentWithDetector = GestureDetector(

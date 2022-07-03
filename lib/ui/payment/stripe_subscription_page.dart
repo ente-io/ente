@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
@@ -59,9 +58,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Future<void> _fetchSub() async {
-    return _userService
-        .getUserDetailsV2(memoryCount: false)
-        .then((userDetails) async {
+    return _userService.getUserDetailsV2(memoryCount: false).then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
@@ -136,9 +133,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     currentStep: 4,
                     selectedColor: Theme.of(context).buttonColor,
                     roundedEdges: Radius.circular(10),
-                    unselectedColor: Theme.of(context)
-                        .colorScheme
-                        .stepProgressUnselectedColor,
+                    unselectedColor: Theme.of(context).colorScheme.stepProgressUnselectedColor,
                   ),
                 ),
               )
@@ -254,9 +249,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                         color: Theme.of(context).colorScheme.onSurface,
                         fontFamily: 'Inter-Medium',
                         fontSize: 14,
-                        decoration: _isStripeSubscriber
-                            ? TextDecoration.underline
-                            : TextDecoration.none,
+                        decoration:
+                            _isStripeSubscriber ? TextDecoration.underline : TextDecoration.none,
                       ),
                     ),
                     textAlign: TextAlign.center,
@@ -353,17 +347,13 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _stripeRenewOrCancelButton() {
-    bool isRenewCancelled =
-        _currentSubscription.attributes?.isCancelled ?? false;
-    String title =
-        isRenewCancelled ? "Renew subscription" : "Cancel subscription";
+    bool isRenewCancelled = _currentSubscription.attributes?.isCancelled ?? false;
+    String title = isRenewCancelled ? "Renew subscription" : "Cancel subscription";
     return TextButton(
       child: Text(
         title,
         style: TextStyle(
-          color: (isRenewCancelled
-                  ? Colors.greenAccent
-                  : Theme.of(context).colorScheme.onSurface)
+          color: (isRenewCancelled ? Colors.greenAccent : Theme.of(context).colorScheme.onSurface)
               .withOpacity(isRenewCancelled ? 1.0 : 0.2),
         ),
       ),
@@ -420,8 +410,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       if (productID == null || productID.isEmpty) {
         continue;
       }
-      final isActive =
-          _hasActiveSubscription && _currentSubscription.productID == productID;
+      final isActive = _hasActiveSubscription && _currentSubscription.productID == productID;
       if (isActive) {
         foundActivePlan = true;
       }
@@ -502,10 +491,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         child: Text(
           title,
           style: TextStyle(
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface
-                .withOpacity(reduceOpacity ? 0.5 : 1.0),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(reduceOpacity ? 0.5 : 1.0),
           ),
         ),
       );

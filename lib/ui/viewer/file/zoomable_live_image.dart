@@ -1,9 +1,7 @@
 import 'dart:io' as io;
 
 import 'package:chewie/chewie.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -32,8 +30,7 @@ class ZoomableLiveImage extends StatefulWidget {
   _ZoomableLiveImageState createState() => _ZoomableLiveImageState();
 }
 
-class _ZoomableLiveImageState extends State<ZoomableLiveImage>
-    with SingleTickerProviderStateMixin {
+class _ZoomableLiveImageState extends State<ZoomableLiveImage> with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableLiveImage");
   File _file;
   bool _showVideo = false;
@@ -125,15 +122,13 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       showToast(context, "Downloading...", toastLength: Toast.LENGTH_LONG);
     }
 
-    var videoFile = await getFile(widget.file, liveVideo: true)
-        .timeout(Duration(seconds: 15))
-        .onError((e, s) {
+    var videoFile =
+        await getFile(widget.file, liveVideo: true).timeout(Duration(seconds: 15)).onError((e, s) {
       _logger.info("getFile failed ${_file.tag()}", e);
       return null;
     });
 
-    if ((videoFile == null || !videoFile.existsSync()) &&
-        _file.isRemoteFile()) {
+    if ((videoFile == null || !videoFile.existsSync()) && _file.isRemoteFile()) {
       videoFile = await getFileFromServer(widget.file, liveVideo: true)
           .timeout(Duration(seconds: 15))
           .onError((e, s) {

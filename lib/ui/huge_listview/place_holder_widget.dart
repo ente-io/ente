@@ -8,7 +8,7 @@ class PlaceHolderWidget extends StatelessWidget {
 
   final int count;
 
-  static final _gridViewCache = Map<int, GridView>();
+  static final _gridViewCache = <int, GridView>{};
 
   @override
   Widget build(BuildContext context) {

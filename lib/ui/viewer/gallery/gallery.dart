@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -18,8 +17,8 @@ import 'package:photos/ui/viewer/gallery/empte_state.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-typedef GalleryLoader = Future<FileLoadResult>
-    Function(int creationStartTime, int creationEndTime, {int limit, bool asc});
+typedef GalleryLoader = Future<FileLoadResult> Function(int creationStartTime, int creationEndTime,
+    {int limit, bool asc});
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
@@ -136,8 +135,7 @@ class _GalleryState extends State<Gallery> {
   // Collates files and returns `true` if it resulted in a gallery reload
   bool _onFilesLoaded(List<File> files) {
     final collatedFiles = _collateFiles(files);
-    if (_collatedFiles.length != collatedFiles.length ||
-        _collatedFiles.isEmpty) {
+    if (_collatedFiles.length != collatedFiles.length || _collatedFiles.isEmpty) {
       if (mounted) {
         setState(() {
           _hasLoadedFiles = true;
@@ -228,12 +226,10 @@ class _GalleryState extends State<Gallery> {
           ),
         );
       },
-      thumbBackgroundColor:
-          Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      thumbBackgroundColor: Theme.of(context).colorScheme.galleryThumbBackgroundColor,
       thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
       firstShown: (int firstIndex) {
-        Bus.instance
-            .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
+        Bus.instance.fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
       },
     );
   }
@@ -257,8 +253,7 @@ class _GalleryState extends State<Gallery> {
     if (dailyFiles.isNotEmpty) {
       collatedFiles.add(dailyFiles);
     }
-    collatedFiles
-        .sort((a, b) => b[0].creationTime.compareTo(a[0].creationTime));
+    collatedFiles.sort((a, b) => b[0].creationTime.compareTo(a[0].creationTime));
     return collatedFiles;
   }
 

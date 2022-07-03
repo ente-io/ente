@@ -63,10 +63,8 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
                 ),
                 TextSpan(
                   text: formatBytes(widget.currentUsage),
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle1
-                      .copyWith(fontWeight: FontWeight.bold),
+                  style:
+                      Theme.of(context).textTheme.subtitle1.copyWith(fontWeight: FontWeight.bold),
                 )
               ],
             ),
@@ -107,6 +105,8 @@ class ValidityWidget extends StatelessWidget {
 }
 
 class SubFaqWidget extends StatelessWidget {
+  const SubFaqWidget({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Align(

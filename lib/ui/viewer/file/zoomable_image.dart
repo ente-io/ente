@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -32,8 +31,7 @@ class ZoomableImage extends StatefulWidget {
   _ZoomableImageState createState() => _ZoomableImageState();
 }
 
-class _ZoomableImageState extends State<ZoomableImage>
-    with SingleTickerProviderStateMixin {
+class _ZoomableImageState extends State<ZoomableImage> with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableImage");
   File _photo;
   ImageProvider _imageProvider;
@@ -90,8 +88,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     GestureDragUpdateCallback verticalDragCallback = _isZooming
         ? null
         : (d) => {
-              if (!_isZooming && d.delta.dy > kDragSensitivity)
-                {Navigator.of(context).pop()}
+              if (!_isZooming && d.delta.dy > kDragSensitivity) {Navigator.of(context).pop()}
             };
     return GestureDetector(
       child: content,
@@ -137,20 +134,15 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _loadLocalImage(BuildContext context) {
-    if (!_loadedSmallThumbnail &&
-        !_loadedLargeThumbnail &&
-        !_loadedFinalImage) {
-      final cachedThumbnail =
-          ThumbnailLruCache.get(_photo, kThumbnailSmallSize);
+    if (!_loadedSmallThumbnail && !_loadedLargeThumbnail && !_loadedFinalImage) {
+      final cachedThumbnail = ThumbnailLruCache.get(_photo, kThumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
       }
     }
 
-    if (!_loadingLargeThumbnail &&
-        !_loadedLargeThumbnail &&
-        !_loadedFinalImage) {
+    if (!_loadingLargeThumbnail && !_loadedLargeThumbnail && !_loadedFinalImage) {
       _loadingLargeThumbnail = true;
       getThumbnailFromLocal(_photo, size: kThumbnailLargeSize, quality: 100)
           .then((cachedThumbnail) {

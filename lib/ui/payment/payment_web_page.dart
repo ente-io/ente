@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -16,8 +15,7 @@ class PaymentWebPage extends StatefulWidget {
   final String planId;
   final String actionType;
 
-  const PaymentWebPage({Key key, this.planId, this.actionType})
-      : super(key: key);
+  const PaymentWebPage({Key key, this.planId, this.actionType}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _PaymentWebPageState();
@@ -59,14 +57,11 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         ),
         body: Column(
           children: <Widget>[
-            (progress != 1.0)
-                ? LinearProgressIndicator(value: progress)
-                : Container(),
+            (progress != 1.0) ? LinearProgressIndicator(value: progress) : Container(),
             Expanded(
               child: InAppWebView(
                 initialUrlRequest: URLRequest(url: initPaymentUrl),
-                onProgressChanged:
-                    (InAppWebViewController controller, int progress) {
+                onProgressChanged: (InAppWebViewController controller, int progress) {
                   setState(() {
                     this.progress = progress / 100;
                   });
@@ -99,8 +94,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                     await _dialog.hide();
                   }
                 },
-                onLoadHttpError:
-                    (controller, navigationAction, code, msg) async {
+                onLoadHttpError: (controller, navigationAction, code, msg) async {
                   _logger.info("onHttpError with $code and msg = $msg");
                 },
                 onLoadStop: (controller, navigationAction) async {
