@@ -345,6 +345,7 @@ Future<List<String>> _deleteLocalFilesInOneShot(
   BuildContext context,
   List<String> localIDs,
 ) async {
+  _logger.info('starting _deleteLocalFilesInOneShot for ${localIDs.length}');
   final List<String> deletedIDs = [];
   final dialog = createProgressDialog(
     context,
@@ -356,6 +357,8 @@ Future<List<String>> _deleteLocalFilesInOneShot(
   } catch (e, s) {
     _logger.severe("Could not delete files ", e, s);
   }
+  _logger.info('_deleteLocalFilesInOneShot deleted ${deletedIDs.length} out '
+      'of ${localIDs.length}');
   await dialog.hide();
   return deletedIDs;
 }
