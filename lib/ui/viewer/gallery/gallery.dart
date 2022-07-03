@@ -164,7 +164,7 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     _logger.info("Building " + widget.tagPrefix);
     if (!_hasLoadedFiles) {
-      return loadWidget;
+      return const EnteLoadingWidget();
     }
     return _getListView();
   }
@@ -177,7 +177,7 @@ class _GalleryState extends State<Gallery> {
       totalCount: _collatedFiles.length,
       isDraggableScrollbarEnabled: _collatedFiles.length > 30,
       waitBuilder: (_) {
-        return loadWidget;
+        return const EnteLoadingWidget();
       },
       emptyResultBuilder: (_) {
         List<Widget> children = [];

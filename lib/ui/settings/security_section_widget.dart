@@ -106,7 +106,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         color: Colors.white.withOpacity(0.8),
                       );
                     }
-                    return loadWidget;
+                    return const EnteLoadingWidget();
                   },
                 ),
               ],

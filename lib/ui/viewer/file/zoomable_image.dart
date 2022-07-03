@@ -84,7 +84,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         ),
       );
     } else {
-      content = loadWidget;
+      content = const EnteLoadingWidget();
     }
 
     GestureDragUpdateCallback verticalDragCallback = _isZooming

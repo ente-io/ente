@@ -201,7 +201,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   Widget _getFolders() {
     if (_latestFiles == null) {
-      return loadWidget;
+      return const EnteLoadingWidget();
     }
     _sortFiles();
     final scrollController = ScrollController();

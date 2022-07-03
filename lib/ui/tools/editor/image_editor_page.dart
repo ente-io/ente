@@ -138,7 +138,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               saturation: _saturation,
             );
           }
-          return loadWidget;
+          return const EnteLoadingWidget();
         },
       ),
     );

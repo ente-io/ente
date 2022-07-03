@@ -37,7 +37,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
 
   Widget _getBody() {
     if (_logs == null) {
-      return loadWidget;
+      return const EnteLoadingWidget();
     }
     return Container(
       padding: EdgeInsets.only(left: 12, top: 8, right: 12),

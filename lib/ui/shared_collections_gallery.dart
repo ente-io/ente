@@ -103,7 +103,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           _logger.shout(snapshot.error);
           return Center(child: Text(snapshot.error.toString()));
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );

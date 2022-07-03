@@ -507,7 +507,7 @@ class PricingWidget extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Text("Oops, Something went wrong.");
         }
-        return loadWidget;
+        return const EnteLoadingWidget();
       },
     );
   }

@@ -175,7 +175,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         return _buildPlans();
       }
     }
-    return loadWidget;
+    return const EnteLoadingWidget();
   }
 
   Widget _buildPlans() {

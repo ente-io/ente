@@ -40,7 +40,7 @@ class _SessionsPageState extends State<SessionsPage> {
 
   Widget _getBody() {
     if (_sessions == null) {
-      return Center(child: loadWidget);
+      return Center(child: const EnteLoadingWidget());
     }
     List<Widget> rows = [];
     rows.add(Padding(padding: const EdgeInsets.all(4)));

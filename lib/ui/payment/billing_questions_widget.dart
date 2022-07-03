@@ -52,7 +52,7 @@ class BillingQuestionsWidget extends StatelessWidget {
             ),
           );
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );

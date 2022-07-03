@@ -84,7 +84,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );

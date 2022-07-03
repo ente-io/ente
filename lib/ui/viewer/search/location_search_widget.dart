@@ -33,7 +33,7 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
       ),
       hideOnEmpty: true,
       loadingBuilder: (context) {
-        return loadWidget;
+        return const EnteLoadingWidget();
       },
       suggestionsCallback: (pattern) async {
         if (pattern.isEmpty || pattern.length < 2) {

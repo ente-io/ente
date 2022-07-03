@@ -228,7 +228,7 @@ class _SharingDialogState extends State<SharingDialog> {
             ),
             hideOnEmpty: true,
             loadingBuilder: (context) {
-              return loadWidget;
+              return const EnteLoadingWidget();
             },
             suggestionsCallback: (pattern) async {
               _email = pattern;
