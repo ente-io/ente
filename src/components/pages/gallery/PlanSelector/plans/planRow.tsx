@@ -7,13 +7,25 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import { PLAN_PERIOD } from 'constants/gallery';
 import Done from '@mui/icons-material/Done';
 import { Plan, Subscription } from 'types/billing';
+import { Badge } from 'components/Badge';
 
 interface Iprops {
     plan: Plan;
     subscription: Subscription;
     onPlanSelect: (plan: Plan) => void;
     disabled: boolean;
+    popular: boolean;
 }
+
+const PlanRowContainer = styled(FlexWrapper)(() => ({
+    background:
+        'linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)',
+}));
+
+const TopAlignedFluidContainer = styled(FluidContainer)`
+    align-items: flex-start;
+`;
+
 const DisabledPlanButton = styled((props: ButtonProps) => (
     <Button disabled endIcon={<Done />} {...props} />
 ))(({ theme }) => ({
@@ -32,6 +44,7 @@ export function PlanRow({
     subscription,
     onPlanSelect,
     disabled,
+    popular,
 }: Iprops) {
     const handleClick = () => {
         !isUserSubscribedPlan(plan, subscription) && onPlanSelect(plan);
@@ -40,20 +53,18 @@ export function PlanRow({
     const PlanButton = disabled ? DisabledPlanButton : ActivePlanButton;
 
     return (
-        <FlexWrapper
-            sx={{
-                background:
-                    'linear-gradient(268.22deg, rgba(256, 256, 256, 0.08) -3.72%, rgba(256, 256, 256, 0) 85.73%)',
-            }}
-            onClick={handleClick}>
-            <FluidContainer sx={{ '&&': { alignItems: 'flex-start' } }}>
+        <PlanRowContainer>
+            <TopAlignedFluidContainer>
                 <Typography variant="h1" fontWeight={'bold'}>
                     {convertBytesToGBs(plan.storage)}
                 </Typography>
-                <Typography variant="h3" color="text.secondary">
-                    {constants.GB}
-                </Typography>
-            </FluidContainer>
+                <FlexWrapper flexWrap={'wrap'} gap={1}>
+                    <Typography variant="h3" color="text.secondary">
+                        {constants.GB}
+                    </Typography>
+                    {popular && <Badge>{constants.POPULAR}</Badge>}
+                </FlexWrapper>
+            </TopAlignedFluidContainer>
             <Box width="136px">
                 <PlanButton size="large" onClick={handleClick}>
                     <Box>
@@ -69,6 +80,6 @@ export function PlanRow({
                     </Box>
                 </PlanButton>
             </Box>
-        </FlexWrapper>
+        </PlanRowContainer>
     );
 }

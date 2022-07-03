@@ -31,7 +31,7 @@ enum RESPONSE_STATUS {
 
 const StorageUnits = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-const TEN_GB = 10 * 1024 * 1024 * 1024;
+const ONE_GB = 1024 * 1024 * 1024;
 
 export function convertBytesToGBs(bytes: number): string {
     return (bytes / (1024 * 1024 * 1024)).toFixed(0);
@@ -66,7 +66,7 @@ export function makeHumanReadableStorage(
 
     quantity = Number(quantity.toFixed(1));
 
-    if (bytes >= TEN_GB) {
+    if (bytes >= 10 * ONE_GB) {
         if (round === 'round-up') {
             quantity = Math.round(quantity + 1);
         } else {
@@ -193,6 +193,10 @@ export function hasExceededStorageQuota(userDetails: UserDetails) {
     } else {
         return userDetails.usage > userDetails.subscription.storage;
     }
+}
+
+export function isPopularPlan(plan: Plan) {
+    return plan.storage === 100 * ONE_GB;
 }
 
 export async function updateSubscription(

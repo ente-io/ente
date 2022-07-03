@@ -753,6 +753,7 @@ const englishConstants = {
     CHANGE_FOLDER: 'Change Folder',
     TWO_MONTHS_FREE: 'Get 2 months free on yearly plans',
     GB: 'GB',
+    POPULAR: 'Popular',
     FREE_PLAN_OPTION_LABEL: 'Continue with free trial',
     FREE_PLAN_DESCRIPTION: '1 GB for 1 year',
     CURRENT_USAGE: (usage) => (

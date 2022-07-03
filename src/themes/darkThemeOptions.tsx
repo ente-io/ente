@@ -9,6 +9,7 @@ declare module '@mui/material/styles' {
     interface Palette {
         accent: PaletteColor;
         fill: PaletteColor;
+        glass: PaletteColor;
         danger: PaletteColor;
         stroke: TypeText;
     }
@@ -16,17 +17,20 @@ declare module '@mui/material/styles' {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
         fill?: PaletteColorOptions;
+        glass?: PaletteColorOptions;
         stroke?: Partial<TypeText>;
     }
 
     interface TypographyVariants {
         title: React.CSSProperties;
         subtitle: React.CSSProperties;
+        mini: React.CSSProperties;
     }
 
     interface TypographyVariantsOptions {
         title?: React.CSSProperties;
         subtitle?: React.CSSProperties;
+        mini?: React.CSSProperties;
     }
 }
 
@@ -247,6 +251,12 @@ const darkThemeOptions = createTheme({
             dark: 'rgba(256, 256, 256, 0.12)',
             light: 'rgba(256, 256, 256)',
         },
+        glass: {
+            main: 'rgba(256, 256, 256, 0.7)',
+            dark: 'rgba(256, 256, 256, 0.9)',
+            light: 'rgba(256, 256, 256,0.3)',
+            contrastText: '#000',
+        },
         text: {
             primary: '#fff',
             secondary: 'rgba(255, 255, 255, 0.7)',
@@ -280,6 +290,10 @@ const darkThemeOptions = createTheme({
         body2: {
             fontSize: '14px',
             lineHeight: '17px',
+        },
+        mini: {
+            fontSize: '10px',
+            lineHeight: '12px',
         },
         button: {
             fontSize: '16px',
