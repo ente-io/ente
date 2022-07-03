@@ -1,4 +1,3 @@
-import { PLAN_PERIOD } from './../../../../constants/gallery/index';
 import { PeriodToggler } from './periodToggler';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import constants from 'utils/strings/constants';
@@ -32,6 +31,7 @@ import { getLocalUserDetails } from 'utils/user';
 import { ManageSubscription } from './manageSubscription';
 import { SpaceBetweenFlex } from 'components/Container';
 import Close from '@mui/icons-material/Close';
+import { PLAN_PERIOD } from 'constants/gallery';
 
 interface Props {
     closeModal: any;
