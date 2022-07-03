@@ -1,3 +1,4 @@
+import { Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { Subscription } from 'types/billing';
@@ -24,20 +25,15 @@ export function ManageSubscription({
     setLoading,
 }: Iprops) {
     return (
-        <>
-            {hasPaidSubscription(subscription) ? (
+        <Stack spacing={1}>
+            {hasPaidSubscription(subscription) && (
                 <PaidSubscriptionOptions
                     subscription={subscription}
                     setLoading={setLoading}
                     closeModal={closeModal}
                 />
-            ) : (
-                <FreeSubscriptionOptions
-                    subscription={subscription}
-                    closeModal={closeModal}
-                />
             )}
-        </>
+        </Stack>
     );
 }
 
@@ -95,19 +91,19 @@ function StripeSubscriptionOptions({
         <>
             {isSubscriptionCancelled(subscription) ? (
                 <ManageSubscriptionButton
-                    color="accent"
+                    color="secondary"
                     onClick={confirmActivation}>
                     {constants.ACTIVATE_SUBSCRIPTION}
                 </ManageSubscriptionButton>
             ) : (
                 <ManageSubscriptionButton
-                    color="danger"
+                    color="secondary"
                     onClick={confirmCancel}>
                     {constants.CANCEL_SUBSCRIPTION}
                 </ManageSubscriptionButton>
             )}
             <ManageSubscriptionButton
-                color="accent"
+                color="secondary"
                 onClick={openManagementPortal}>
                 {constants.MANAGEMENT_PORTAL}
             </ManageSubscriptionButton>
@@ -133,17 +129,11 @@ function PaidSubscriptionOptions({
                     setLoading={setLoading}
                 />
             )}
-            <ManageSubscriptionButton color="accent" onClick={openFamilyPortal}>
+            <ManageSubscriptionButton
+                color="secondary"
+                onClick={openFamilyPortal}>
                 {constants.MANAGE_FAMILY_PORTAL}
             </ManageSubscriptionButton>
         </>
-    );
-}
-
-function FreeSubscriptionOptions({ closeModal }: Omit<Iprops, 'setLoading'>) {
-    return (
-        <ManageSubscriptionButton color="accent" onClick={closeModal}>
-            {constants.SKIP_SUBSCRIPTION_PURCHASE}
-        </ManageSubscriptionButton>
     );
 }
