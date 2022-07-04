@@ -202,17 +202,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
 
     childrens.add(
       GradientButton(
-        linearGradientColors: const [
-          Color(0xFF2CD267),
-          Color(0xFF1DB954),
-        ],
         onTap: () async {
           await _shareRecoveryKey(recoveryKey);
         },
-        child: Text(
-          'Save key',
-          style: gradientButtonTextTheme(),
-        ),
+        text: 'Save key',
       ),
     );
     if (_hasTriedToSave) {

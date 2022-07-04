@@ -185,28 +185,12 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             width: 200,
             height: 50,
             child: GradientButton(
-              linearGradientColors: const [
-                Color(0xFF2CD267),
-                Color(0xFF1DB954),
-              ],
               onTap: () async {
                 shareText("Check out https://ente.io");
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.outgoing_mail,
-                    color: Colors.white,
-                  ),
-                  Padding(padding: EdgeInsets.all(2)),
-                  Text(
-                    "Invite",
-                    style: gradientButtonTextTheme().copyWith(fontSize: 16),
-                  ),
-                ],
-              ),
+              iconData: Icons.outgoing_mail,
+              paddingValue: 2,
+              text: "Invite",
             ),
           ),
           const SizedBox(height: 60),
@@ -230,10 +214,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             width: 200,
             height: 50,
             child: GradientButton(
-              linearGradientColors: const [
-                Color(0xFF2CD267),
-                Color(0xFF1DB954),
-              ],
               onTap: () async {
                 await showToast(
                   context,
@@ -244,22 +224,9 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   TabChangedEvent(1, TabChangedEventSource.collectionsPage),
                 );
               },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.person_add,
-                    color: Colors.white,
-                  ),
-                  Padding(padding: EdgeInsets.all(2)),
-                  Text(
-                    "Share",
-                    style: gradientButtonTextTheme().copyWith(fontSize: 16),
-                  ),
-                ],
-              ),
+              iconData: Icons.person_add,
+              paddingValue: 2,
+              text: "Share",
             ),
           ),
           const SizedBox(height: 60),

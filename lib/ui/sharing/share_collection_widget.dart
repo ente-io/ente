@@ -65,38 +65,13 @@ class _SharingDialogState extends State<SharingDialog> {
         SizedBox(
           width: 220,
           child: GradientButton(
-            linearGradientColors: const [
-              Color(0xFF2CD267),
-              Color(0xFF1DB954),
-            ],
             onTap: () async {
               setState(() {
                 _showEntryField = true;
               });
             },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ),
-              ],
-            ),
+            iconData: Icons.add,
           ),
-          // child: OutlinedButton(
-          //   child: Icon(
-          //     Icons.add,
-          //     color: Colors.pink,
-          //   ),
-          //   onPressed: () {
-          //     setState(() {
-          //       _showEntryField = true;
-          //     });
-          //   },
-          // ),
-          // ),
         ),
       );
     } else {

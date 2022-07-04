@@ -87,29 +87,12 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                     right: 40,
                   ),
                   child: GradientButton(
-                    linearGradientColors: const [
-                      Color(0xFF2CD267),
-                      Color(0xFF1DB954),
-                    ],
                     onTap: () async {
                       _showNameAlbumDialog();
                     },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      //mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.create_new_folder_outlined,
-                          color: Colors.white,
-                        ),
-                        Padding(padding: EdgeInsets.all(6)),
-                        Text(
-                          "To a new album",
-                          style: gradientButtonTextTheme(),
-                        ),
-                      ],
-                    ),
+                    iconData: Icons.create_new_folder_outlined,
+                    paddingValue: 6,
+                    text: "To a new album",
                   ),
                 ),
               ),
@@ -123,7 +106,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 "To an existing album",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  // color: Theme.of(context).primaryColorLight.withOpacity(0.8),
                 ),
               ),
             ),
