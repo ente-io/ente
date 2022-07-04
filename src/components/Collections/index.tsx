@@ -1,13 +1,16 @@
 import { Collection, CollectionSummaries } from 'types/collection';
 import CollectionListBar from 'components/Collections/CollectionListBar';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import AllCollections from 'components/Collections/AllCollections';
 import CollectionInfoWithOptions from 'components/Collections/CollectionInfoWithOptions';
-import { ALL_SECTION } from 'constants/collection';
+import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
-import { hasNonEmptyCollections } from 'utils/collection';
+import { hasNonEmptyCollections, isSystemCollection } from 'utils/collection';
+import { useLocalState } from 'hooks/useLocalState';
+import { sortCollectionSummaries } from 'services/collectionService';
+import { LS_KEYS } from 'utils/storage/localStorage';
 
 interface Iprops {
     collections: Collection[];
@@ -33,6 +36,12 @@ export default function Collections(props: Iprops) {
     const [allCollectionView, setAllCollectionView] = useState(false);
     const [collectionShareModalView, setCollectionShareModalView] =
         useState(false);
+
+    const [collectionSortBy, setCollectionSortBy] =
+        useLocalState<COLLECTION_SORT_BY>(
+            LS_KEYS.COLLECTION_SORT_BY,
+            COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
+        );
     const collectionsMap = useRef<Map<number, Collection>>(new Map());
     const activeCollection = useRef<Collection>(null);
 
@@ -84,20 +93,35 @@ export default function Collections(props: Iprops) {
     const openAllCollections = () => setAllCollectionView(true);
     const closeCollectionShare = () => setCollectionShareModalView(false);
 
+    const sortedCollectionSummaries = useMemo(
+        () =>
+            sortCollectionSummaries(
+                [...collectionSummaries.values()],
+                collectionSortBy
+            ),
+        [collectionSortBy, collectionSummaries]
+    );
+
     return (
         <>
             <CollectionListBar
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}
-                collectionSummaries={collectionSummaries}
+                sortedCollectionSummaries={sortedCollectionSummaries}
                 showAllCollections={openAllCollections}
+                setCollectionSortBy={setCollectionSortBy}
+                collectionSortBy={collectionSortBy}
             />
 
             <AllCollections
                 open={allCollectionView}
                 onClose={closeAllCollections}
-                collectionSummaries={collectionSummaries}
+                sortedCollectionSummaries={sortedCollectionSummaries.filter(
+                    (x) => !isSystemCollection(x.type)
+                )}
                 setActiveCollection={setActiveCollectionID}
+                setCollectionSortBy={setCollectionSortBy}
+                collectionSortBy={collectionSortBy}
             />
 
             <CollectionShare

@@ -7,6 +7,7 @@ import OverflowMenu from 'components/OverflowMenu/menu';
 export interface CollectionSortProps {
     setCollectionSortBy: (sortBy: COLLECTION_SORT_BY) => void;
     activeSortBy: COLLECTION_SORT_BY;
+    disableBG?: boolean;
 }
 
 export default function CollectionSort(props: CollectionSortProps) {
@@ -16,7 +17,8 @@ export default function CollectionSort(props: CollectionSortProps) {
             triggerButtonIcon={<SortIcon />}
             triggerButtonProps={{
                 sx: {
-                    background: (theme) => theme.palette.fill.dark,
+                    background: (theme) =>
+                        !props.disableBG && theme.palette.fill.dark,
                 },
             }}>
             <CollectionSortOptions {...props} />

@@ -1,9 +1,8 @@
 import ScrollButton from 'components/Collections/CollectionListBar/ScrollButton';
-import React, { useEffect, useMemo } from 'react';
-import { CollectionSummaries } from 'types/collection';
+import React, { useContext, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
-import { Typography } from '@mui/material';
+import { Box, IconButton, Typography } from '@mui/material';
 import {
     CollectionListBarWrapper,
     ScrollContainer,
@@ -12,50 +11,39 @@ import {
 import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
 import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
-import LinkButton from 'components/pages/gallery/LinkButton';
 import { SpaceBetweenFlex } from 'components/Container';
-import { sortCollectionSummaries } from 'services/collectionService';
-import { shouldBeShownOnCollectionBar } from 'utils/collection';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { AppContext } from 'pages/_app';
+import { CollectionSummary } from 'types/collection';
+import CollectionSort from '../AllCollections/CollectionSort';
 
 interface IProps {
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
-    collectionSummaries: CollectionSummaries;
+    sortedCollectionSummaries: CollectionSummary[];
     showAllCollections: () => void;
+    collectionSortBy: COLLECTION_SORT_BY;
+    setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
 }
 
 export default function CollectionListBar(props: IProps) {
     const {
         activeCollection,
         setActiveCollection,
-        collectionSummaries,
+        sortedCollectionSummaries,
         showAllCollections,
     } = props;
 
-    const sortedCollectionSummary = useMemo(
-        () =>
-            sortCollectionSummaries(
-                [...collectionSummaries.values()].filter((c) =>
-                    shouldBeShownOnCollectionBar(c.type)
-                ),
-                COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING
-            ),
-        [collectionSummaries]
-    );
+    const appContext = useContext(AppContext);
 
     const windowSize = useWindowSize();
 
-    const {
-        componentRef,
-        scrollComponent,
-        hasScrollBar,
-        onFarLeft,
-        onFarRight,
-    } = useComponentScroll({
-        dependencies: [windowSize, collectionSummaries],
-    });
+    const { componentRef, scrollComponent, onFarLeft, onFarRight } =
+        useComponentScroll({
+            dependencies: [windowSize, sortedCollectionSummaries],
+        });
 
-    const collectionChipsRef = sortedCollectionSummary.reduce(
+    const collectionChipsRef = sortedCollectionSummaries.reduce(
         (refMap, collectionSummary) => {
             refMap[collectionSummary.id] = React.createRef();
             return refMap;
@@ -64,9 +52,7 @@ export default function CollectionListBar(props: IProps) {
     );
 
     useEffect(() => {
-        collectionChipsRef[activeCollection]?.current.scrollIntoView({
-            inline: 'center',
-        });
+        collectionChipsRef[activeCollection]?.current.scrollIntoView();
     }, [activeCollection]);
 
     const clickHandler = (collectionID?: number) => () => {
@@ -77,40 +63,67 @@ export default function CollectionListBar(props: IProps) {
         <CollectionListBarWrapper>
             <SpaceBetweenFlex mb={1}>
                 <Typography>{constants.ALBUMS}</Typography>
-                {hasScrollBar && (
-                    <LinkButton onClick={showAllCollections}>
-                        {constants.VIEW_ALL_ALBUMS}
-                    </LinkButton>
+                {appContext.isMobile && (
+                    <Box display="flex" alignItems={'center'} gap={1}>
+                        <CollectionSort
+                            setCollectionSortBy={props.setCollectionSortBy}
+                            activeSortBy={props.collectionSortBy}
+                            disableBG
+                        />
+                        <IconButton onClick={showAllCollections}>
+                            <ExpandMore />
+                        </IconButton>
+                    </Box>
                 )}
             </SpaceBetweenFlex>
-
-            <CollectionListWrapper>
-                {!onFarLeft && (
-                    <ScrollButton
-                        scrollDirection={SCROLL_DIRECTION.LEFT}
-                        onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
-                    />
-                )}
-                <ScrollContainer ref={componentRef}>
-                    {sortedCollectionSummary.map((item) => (
-                        <CollectionListBarCard
-                            key={item.id}
-                            latestFile={item.latestFile}
-                            ref={collectionChipsRef[item.id]}
-                            active={activeCollection === item.id}
-                            onClick={clickHandler(item.id)}
-                            collectionType={item.type}
-                            collectionName={item.name}
+            <Box display="flex" alignItems="flex-start" gap={2}>
+                <CollectionListWrapper>
+                    {!onFarLeft && (
+                        <ScrollButton
+                            scrollDirection={SCROLL_DIRECTION.LEFT}
+                            onClick={scrollComponent(SCROLL_DIRECTION.LEFT)}
                         />
-                    ))}
-                </ScrollContainer>
-                {!onFarRight && (
-                    <ScrollButton
-                        scrollDirection={SCROLL_DIRECTION.RIGHT}
-                        onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
-                    />
+                    )}
+                    <ScrollContainer ref={componentRef}>
+                        {sortedCollectionSummaries.map((item) => (
+                            <CollectionListBarCard
+                                key={item.id}
+                                latestFile={item.latestFile}
+                                ref={collectionChipsRef[item.id]}
+                                active={activeCollection === item.id}
+                                onClick={clickHandler(item.id)}
+                                collectionType={item.type}
+                                collectionName={item.name}
+                            />
+                        ))}
+                    </ScrollContainer>
+                    {!onFarRight && (
+                        <ScrollButton
+                            scrollDirection={SCROLL_DIRECTION.RIGHT}
+                            onClick={scrollComponent(SCROLL_DIRECTION.RIGHT)}
+                        />
+                    )}
+                </CollectionListWrapper>
+                {!appContext.isMobile && (
+                    <Box
+                        display="flex"
+                        alignItems={'center'}
+                        gap={1}
+                        height={'64px'}>
+                        <CollectionSort
+                            setCollectionSortBy={props.setCollectionSortBy}
+                            activeSortBy={props.collectionSortBy}
+                        />
+                        <IconButton
+                            onClick={showAllCollections}
+                            sx={{
+                                background: (theme) => theme.palette.fill.dark,
+                            }}>
+                            <ExpandMore />
+                        </IconButton>
+                    </Box>
                 )}
-            </CollectionListWrapper>
+            </Box>
         </CollectionListBarWrapper>
     );
 }
