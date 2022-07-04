@@ -13,7 +13,7 @@ import { AppContext } from 'pages/_app';
 interface Iprops {
     open: boolean;
     onClose: () => void;
-    sortedCollectionSummaries: CollectionSummary[];
+    collectionSummaries: CollectionSummary[];
     setActiveCollection: (id?: number) => void;
     collectionSortBy: COLLECTION_SORT_BY;
     setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
@@ -23,7 +23,7 @@ const LeftSlideTransition = Transition('up');
 
 export default function AllCollections(props: Iprops) {
     const {
-        sortedCollectionSummaries,
+        collectionSummaries,
         open,
         onClose,
         setActiveCollection,
@@ -46,13 +46,13 @@ export default function AllCollections(props: Iprops) {
             fullScreen={isMobile}>
             <AllCollectionsHeader
                 onClose={onClose}
-                collectionCount={props.sortedCollectionSummaries.length}
+                collectionCount={props.collectionSummaries.length}
                 collectionSortBy={collectionSortBy}
                 setCollectionSortBy={setCollectionSortBy}
             />
             <Divider />
             <AllCollectionContent
-                collectionSummaries={sortedCollectionSummaries}
+                collectionSummaries={collectionSummaries}
                 onCollectionClick={onCollectionClick}
             />
         </AllCollectionDialog>

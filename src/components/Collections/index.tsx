@@ -7,7 +7,11 @@ import { ALL_SECTION, COLLECTION_SORT_BY } from 'constants/collection';
 import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
-import { hasNonEmptyCollections, isSystemCollection } from 'utils/collection';
+import {
+    hasNonEmptyCollections,
+    isSystemCollection,
+    shouldBeShownOnCollectionBar,
+} from 'utils/collection';
 import { useLocalState } from 'hooks/useLocalState';
 import { sortCollectionSummaries } from 'services/collectionService';
 import { LS_KEYS } from 'utils/storage/localStorage';
@@ -107,7 +111,9 @@ export default function Collections(props: Iprops) {
             <CollectionListBar
                 activeCollection={activeCollectionID}
                 setActiveCollection={setActiveCollectionID}
-                sortedCollectionSummaries={sortedCollectionSummaries}
+                collectionSummaries={sortedCollectionSummaries.filter((x) =>
+                    shouldBeShownOnCollectionBar(x.type)
+                )}
                 showAllCollections={openAllCollections}
                 setCollectionSortBy={setCollectionSortBy}
                 collectionSortBy={collectionSortBy}
@@ -116,8 +122,8 @@ export default function Collections(props: Iprops) {
             <AllCollections
                 open={allCollectionView}
                 onClose={closeAllCollections}
-                sortedCollectionSummaries={sortedCollectionSummaries.filter(
-                    (x) => !isSystemCollection(x.type)
+                collectionSummaries={sortedCollectionSummaries.filter((x) =>
+                    isSystemCollection(x.type)
                 )}
                 setActiveCollection={setActiveCollectionID}
                 setCollectionSortBy={setCollectionSortBy}

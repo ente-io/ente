@@ -20,7 +20,7 @@ import CollectionSort from '../AllCollections/CollectionSort';
 interface IProps {
     activeCollection?: number;
     setActiveCollection: (id?: number) => void;
-    sortedCollectionSummaries: CollectionSummary[];
+    collectionSummaries: CollectionSummary[];
     showAllCollections: () => void;
     collectionSortBy: COLLECTION_SORT_BY;
     setCollectionSortBy: (v: COLLECTION_SORT_BY) => void;
@@ -30,7 +30,7 @@ export default function CollectionListBar(props: IProps) {
     const {
         activeCollection,
         setActiveCollection,
-        sortedCollectionSummaries,
+        collectionSummaries,
         showAllCollections,
     } = props;
 
@@ -40,10 +40,10 @@ export default function CollectionListBar(props: IProps) {
 
     const { componentRef, scrollComponent, onFarLeft, onFarRight } =
         useComponentScroll({
-            dependencies: [windowSize, sortedCollectionSummaries],
+            dependencies: [windowSize, collectionSummaries],
         });
 
-    const collectionChipsRef = sortedCollectionSummaries.reduce(
+    const collectionChipsRef = collectionSummaries.reduce(
         (refMap, collectionSummary) => {
             refMap[collectionSummary.id] = React.createRef();
             return refMap;
@@ -85,7 +85,7 @@ export default function CollectionListBar(props: IProps) {
                         />
                     )}
                     <ScrollContainer ref={componentRef}>
-                        {sortedCollectionSummaries.map((item) => (
+                        {collectionSummaries.map((item) => (
                             <CollectionListBarCard
                                 key={item.id}
                                 latestFile={item.latestFile}
