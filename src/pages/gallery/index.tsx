@@ -27,7 +27,7 @@ import { checkSubscriptionPurchase } from 'utils/billing';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
-import { checkConnectivity } from 'utils/common';
+import { checkConnectivity, preloadImage } from 'utils/common';
 import {
     isFirstLogin,
     justSignedUp,
@@ -254,6 +254,7 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
+            preloadImage('/images/subscription-card-background');
         };
         main();
     }, []);

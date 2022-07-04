@@ -1,14 +1,19 @@
 import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
 import VerticallyCentered, { FlexWrapper } from 'components/Container';
 import { AppContext } from 'pages/_app';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import billingService from 'services/billingService';
 import { getFamilyPlanAdmin } from 'utils/billing';
+import { preloadImage } from 'utils/common';
 import constants from 'utils/strings/constants';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     const { setDialogMessage, isMobile } = useContext(AppContext);
+
+    useEffect(() => {
+        preloadImage('/images/family-plan');
+    }, []);
 
     async function onLeaveFamilyClick() {
         try {
@@ -64,6 +69,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
                             {getFamilyPlanAdmin(userDetails.familyData)?.email}
                         </Typography>
                     </Box>
+
                     <img
                         height={256}
                         src="/images/family-plan/1x.png"
