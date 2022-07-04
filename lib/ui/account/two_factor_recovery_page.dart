@@ -9,7 +9,7 @@ class TwoFactorRecoveryPage extends StatefulWidget {
   final String encryptedSecret;
   final String secretDecryptionNonce;
 
-  TwoFactorRecoveryPage(
+  const TwoFactorRecoveryPage(
     this.sessionID,
     this.encryptedSecret,
     this.secretDecryptionNonce, {

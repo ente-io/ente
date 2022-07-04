@@ -7,7 +7,7 @@ import 'package:photos/utils/exif_util.dart';
 
 class ExifInfoDialog extends StatefulWidget {
   final File file;
-  ExifInfoDialog(this.file, {Key key}) : super(key: key);
+  const ExifInfoDialog(this.file, {Key key}) : super(key: key);
 
   @override
   State<ExifInfoDialog> createState() => _ExifInfoDialogState();

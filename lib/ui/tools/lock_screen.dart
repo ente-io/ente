@@ -5,7 +5,7 @@ import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 
 class LockScreen extends StatefulWidget {
-  LockScreen({Key key}) : super(key: key);
+  const LockScreen({Key key}) : super(key: key);
 
   @override
   State<LockScreen> createState() => _LockScreenState();

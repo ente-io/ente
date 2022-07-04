@@ -18,7 +18,7 @@ class ZoomableLiveImage extends StatefulWidget {
   final String tagPrefix;
   final Decoration backgroundDecoration;
 
-  ZoomableLiveImage(
+  const ZoomableLiveImage(
     this.file, {
     Key key,
     this.shouldDisableScroll,

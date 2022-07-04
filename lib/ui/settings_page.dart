@@ -67,16 +67,16 @@ class SettingsPage extends StatelessWidget {
     contents.add(const Padding(padding: EdgeInsets.all(4)));
     if (hasLoggedIn) {
       contents.addAll([
-        DetailsSectionWidget(),
+        const DetailsSectionWidget(),
         const Padding(padding: EdgeInsets.only(bottom: 24)),
-        BackupSectionWidget(),
+        const BackupSectionWidget(),
         sectionDivider,
-        AccountSectionWidget(),
+        const AccountSectionWidget(),
         sectionDivider,
       ]);
     }
     contents.addAll([
-      SecuritySectionWidget(),
+      const SecuritySectionWidget(),
       sectionDivider,
       const SupportSectionWidget(),
       sectionDivider,
@@ -87,7 +87,7 @@ class SettingsPage extends StatelessWidget {
     if (hasLoggedIn) {
       contents.addAll([
         sectionDivider,
-        DangerSectionWidget(),
+        const DangerSectionWidget(),
       ]);
     }
 

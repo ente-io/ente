@@ -15,7 +15,8 @@ class TwoFactorSetupPage extends StatefulWidget {
   final String secretCode;
   final String qrCode;
 
-  TwoFactorSetupPage(this.secretCode, this.qrCode, {Key key}) : super(key: key);
+  const TwoFactorSetupPage(this.secretCode, this.qrCode, {Key key})
+      : super(key: key);
 
   @override
   State<TwoFactorSetupPage> createState() => _TwoFactorSetupPageState();

@@ -57,7 +57,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                 builder: (BuildContext context) {
                   return WillPopScope(
                     onWillPop: () async => false,
-                    child: PasswordEntryPage(
+                    child: const PasswordEntryPage(
                       mode: PasswordEntryMode.reset,
                     ),
                   );

@@ -9,7 +9,7 @@ import 'package:photos/utils/delete_file_util.dart';
 class FreeSpacePage extends StatefulWidget {
   final BackupStatus status;
 
-  FreeSpacePage(this.status, {Key key}) : super(key: key);
+  const FreeSpacePage(this.status, {Key key}) : super(key: key);
 
   @override
   State<FreeSpacePage> createState() => _FreeSpacePageState();

@@ -18,7 +18,7 @@ class DraggableScrollbar extends StatefulWidget {
   final String Function(int) labelTextBuilder;
   final bool isEnabled;
 
-  DraggableScrollbar({
+  const DraggableScrollbar({
     Key key,
     @required this.child,
     this.backgroundColor = Colors.white,

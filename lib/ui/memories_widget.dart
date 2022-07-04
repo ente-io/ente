@@ -197,7 +197,7 @@ class FullScreenMemory extends StatefulWidget {
   final List<Memory> memories;
   final int index;
 
-  FullScreenMemory(this.title, this.memories, this.index, {Key key})
+  const FullScreenMemory(this.title, this.memories, this.index, {Key key})
       : super(key: key);
 
   @override

@@ -31,7 +31,7 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool shouldShowActions;
   final int userID;
 
-  FadingAppBar(
+  const FadingAppBar(
     this.file,
     this.onFileDeleted,
     this.userID,

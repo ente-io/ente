@@ -60,8 +60,8 @@ Future<void> _runInForeground() async {
     _scheduleFGSync('appStart in FG');
     runApp(
       AppLock(
-        builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
-        lockScreen: LockScreen(),
+        builder: (args) => const EnteApp(_runBackgroundTask, _killBGTask),
+        lockScreen: const LockScreen(),
         enabled: Configuration.instance.shouldShowLockScreen(),
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,

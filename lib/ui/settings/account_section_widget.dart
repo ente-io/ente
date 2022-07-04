@@ -16,7 +16,7 @@ import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class AccountSectionWidget extends StatefulWidget {
-  AccountSectionWidget({Key key}) : super(key: key);
+  const AccountSectionWidget({Key key}) : super(key: key);
 
   @override
   AccountSectionWidgetState createState() => AccountSectionWidgetState();
@@ -114,7 +114,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return PasswordEntryPage(
+                  return const PasswordEntryPage(
                     mode: PasswordEntryMode.update,
                   );
                 },
