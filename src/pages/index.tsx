@@ -224,7 +224,7 @@ export default function LandingPage() {
                         </Button>
                     </MobileBox>
                     <DesktopBox>
-                        <SideBox style={{ maxWidth: '320px' }}>
+                        <SideBox>
                             {showLogin ? (
                                 <Login signUp={signUp} />
                             ) : (

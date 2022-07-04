@@ -3,7 +3,8 @@ import CircleIcon from '@mui/icons-material/Circle';
 
 export const DrawerSidebar = styled(Drawer)(({ theme }) => ({
     '& .MuiPaper-root': {
-        width: '320px',
+        maxWidth: '375px',
+        width: '100%',
         padding: theme.spacing(2, 1, 4, 1),
         scrollbarWidth: 'thin',
     },
