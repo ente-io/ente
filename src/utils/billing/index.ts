@@ -33,8 +33,8 @@ const StorageUnits = ['B', 'KB', 'MB', 'GB', 'TB'];
 
 const ONE_GB = 1024 * 1024 * 1024;
 
-export function convertBytesToGBs(bytes: number): string {
-    return (bytes / (1024 * 1024 * 1024)).toFixed(0);
+export function convertBytesToGBs(bytes: number, precision = 0): string {
+    return (bytes / (1024 * 1024 * 1024)).toFixed(precision);
 }
 
 export function convertBytesToHumanReadable(

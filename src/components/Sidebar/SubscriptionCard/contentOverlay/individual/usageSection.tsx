@@ -19,9 +19,8 @@ export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
                     marginTop: 1.5,
                 }}>
                 <Typography variant="caption">{`${makeHumanReadableStorage(
-                    usage,
-                    'round-up'
-                )} ${constants.USED}`}</Typography>
+                    storage - usage
+                )} ${constants.FREE}`}</Typography>
                 <Typography variant="caption" fontWeight={'bold'}>
                     {constants.PHOTO_COUNT(fileCount ?? 0)}
                 </Typography>

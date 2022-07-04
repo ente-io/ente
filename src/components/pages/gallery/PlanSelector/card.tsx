@@ -168,7 +168,7 @@ function PlanSelectorCard(props: Props) {
                                 <Typography
                                     variant="body2"
                                     color={'text.secondary'}>
-                                    {convertBytesToGBs(subscription.storage)}{' '}
+                                    {convertBytesToGBs(subscription.storage, 2)}{' '}
                                     {constants.GB}
                                 </Typography>
                             </Box>

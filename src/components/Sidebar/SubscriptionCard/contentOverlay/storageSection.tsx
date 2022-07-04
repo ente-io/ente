@@ -1,8 +1,21 @@
-import { Box, Typography } from '@mui/material';
+import { Box, styled, Typography } from '@mui/material';
 import React from 'react';
-import { makeHumanReadableStorage } from 'utils/billing';
+import { convertBytesToGBs, makeHumanReadableStorage } from 'utils/billing';
 import constants from 'utils/strings/constants';
 
+const MobileSmallBox = styled(Box)`
+    display: none;
+    @media (max-width: 359px) {
+        display: block;
+    }
+`;
+
+const DefaultBox = styled(Box)`
+    display: none;
+    @media (min-width: 360px) {
+        display: block;
+    }
+`;
 interface Iprops {
     usage: number;
     storage: number;
@@ -17,9 +30,16 @@ export default function StorageSection({ usage, storage }: Iprops) {
             <Typography
                 fontWeight={'bold'}
                 sx={{ fontSize: '24px', lineHeight: '30px' }}>
-                {`${makeHumanReadableStorage(storage - usage)} ${
-                    constants.OF
-                } ${makeHumanReadableStorage(storage)} ${constants.FREE}`}
+                <DefaultBox>
+                    {`${makeHumanReadableStorage(usage, 'round-up')} ${
+                        constants.OF
+                    } ${makeHumanReadableStorage(storage)} ${constants.USED}`}
+                </DefaultBox>
+                <MobileSmallBox>
+                    {`${convertBytesToGBs(usage)} /  ${convertBytesToGBs(
+                        storage
+                    )} ${constants.GB} ${constants.USED}`}
+                </MobileSmallBox>
             </Typography>
         </Box>
     );
