@@ -50,7 +50,7 @@ PageRouteBuilder<T> _buildPageRoute<T extends Object>(Widget page) {
         ),
       );
     },
-    transitionDuration: Duration(milliseconds: 200),
+    transitionDuration: const Duration(milliseconds: 200),
     opaque: false,
   );
 }

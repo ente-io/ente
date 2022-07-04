@@ -43,6 +43,7 @@ class Network {
 class RequestIdInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    // ignore: prefer_const_constructors
     options.headers.putIfAbsent("x-request-id", () => Uuid().v4().toString());
     return super.onRequest(options, handler);
   }

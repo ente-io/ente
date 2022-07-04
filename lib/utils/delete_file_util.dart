@@ -357,8 +357,10 @@ Future<List<String>> _deleteLocalFilesInOneShot(
   } catch (e, s) {
     _logger.severe("Could not delete files ", e, s);
   }
-  _logger.info('_deleteLocalFilesInOneShot deleted ${deletedIDs.length} out '
-      'of ${localIDs.length}');
+  _logger.info(
+    '_deleteLocalFilesInOneShot deleted ${deletedIDs.length} out '
+    'of ${localIDs.length}',
+  );
   await dialog.hide();
   return deletedIDs;
 }

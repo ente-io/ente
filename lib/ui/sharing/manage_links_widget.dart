@@ -26,14 +26,14 @@ class ManageSharedLinkWidget extends StatefulWidget {
 class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   // index, title, milliseconds in future post which link should expire (when >0)
   final List<Tuple3<int, String, int>> _expiryOptions = [
-    Tuple3(0, "Never", 0),
-    Tuple3(1, "After 1 hour", Duration(hours: 1).inMicroseconds),
-    Tuple3(2, "After 1 day", Duration(days: 1).inMicroseconds),
-    Tuple3(3, "After 1 week", Duration(days: 7).inMicroseconds),
+    const Tuple3(0, "Never", 0),
+    Tuple3(1, "After 1 hour", const Duration(hours: 1).inMicroseconds),
+    Tuple3(2, "After 1 day", const Duration(days: 1).inMicroseconds),
+    Tuple3(3, "After 1 week", const Duration(days: 7).inMicroseconds),
     // todo: make this time calculation perfect
-    Tuple3(4, "After 1 month", Duration(days: 30).inMicroseconds),
-    Tuple3(5, "After 1 year", Duration(days: 365).inMicroseconds),
-    Tuple3(6, "Custom", -1),
+    Tuple3(4, "After 1 month", const Duration(days: 30).inMicroseconds),
+    Tuple3(5, "After 1 year", const Duration(days: 365).inMicroseconds),
+    const Tuple3(6, "Custom", -1),
   ];
 
   Tuple3<int, String, int> _selectedExpiry;
@@ -51,7 +51,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
         elevation: 0,
-        title: Text(
+        title: const Text(
           "Manage link",
         ),
       ),
@@ -62,7 +62,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Column(
                 children: [
-                  Padding(padding: EdgeInsets.all(4)),
+                  const Padding(padding: EdgeInsets.all(4)),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () async {
@@ -76,18 +76,18 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Link expiry"),
-                            Padding(padding: EdgeInsets.all(4)),
+                            const Text("Link expiry"),
+                            const Padding(padding: EdgeInsets.all(4)),
                             _getLinkExpiryTimeWidget(),
                           ],
                         ),
-                        Icon(Icons.navigate_next),
+                        const Icon(Icons.navigate_next),
                       ],
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(4)),
-                  Divider(height: 4),
-                  Padding(padding: EdgeInsets.all(4)),
+                  const Padding(padding: EdgeInsets.all(4)),
+                  const Divider(height: 4),
+                  const Padding(padding: EdgeInsets.all(4)),
                   GestureDetector(
                     behavior: HitTestBehavior.translucent,
                     onTap: () {
@@ -101,30 +101,30 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Device limit"),
-                            Padding(padding: EdgeInsets.all(4)),
+                            const Text("Device limit"),
+                            const Padding(padding: EdgeInsets.all(4)),
                             Text(
                               widget.collection.publicURLs.first.deviceLimit
                                   .toString(),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.grey,
                               ),
                             ),
                           ],
                         ),
-                        Icon(Icons.navigate_next),
+                        const Icon(Icons.navigate_next),
                       ],
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(4)),
-                  Divider(height: 4),
-                  Padding(padding: EdgeInsets.all(4)),
+                  const Padding(padding: EdgeInsets.all(4)),
+                  const Divider(height: 4),
+                  const Padding(padding: EdgeInsets.all(4)),
                   SizedBox(
                     height: 36,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("Password lock"),
+                        const Text("Password lock"),
                         Switch.adaptive(
                           value: widget.collection.publicURLs?.first
                                   ?.passwordEnabled ??
@@ -153,15 +153,15 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       ],
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(4)),
-                  Divider(height: 4),
-                  Padding(padding: EdgeInsets.all(4)),
+                  const Padding(padding: EdgeInsets.all(4)),
+                  const Divider(height: 4),
+                  const Padding(padding: EdgeInsets.all(4)),
                   SizedBox(
                     height: 36,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text("File download"),
+                        const Text("File download"),
                         Switch.adaptive(
                           value: widget.collection.publicURLs?.first
                                   ?.enableDownload ??
@@ -224,7 +224,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
-                border: Border(
+                border: const Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
                     width: 0.0,
@@ -288,7 +288,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
             ),
             Container(
               height: 220.0,
-              color: Color(0xfff7f7f7),
+              color: const Color(0xfff7f7f7),
               child: CupertinoPicker(
                 backgroundColor:
                     Theme.of(context).backgroundColor.withOpacity(0.95),
@@ -350,12 +350,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Enter password'),
+              title: const Text('Enter password'),
               content: TextFormField(
                 autofillHints: const [AutofillHints.newPassword],
                 decoration: InputDecoration(
                   hintText: "Password",
-                  contentPadding: EdgeInsets.all(12),
+                  contentPadding: const EdgeInsets.all(12),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _passwordVisible
@@ -448,7 +448,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Text _getLinkExpiryTimeWidget() {
     int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
     if (validTill == 0) {
-      return Text(
+      return const Text(
         'Never',
         style: TextStyle(
           color: Colors.grey,
@@ -465,7 +465,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     }
     return Text(
       getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill)),
-      style: TextStyle(
+      style: const TextStyle(
         color: Colors.grey,
       ),
     );
@@ -487,7 +487,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
             Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
-                border: Border(
+                border: const Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
                     width: 0.0,
@@ -534,7 +534,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
             ),
             Container(
               height: 220.0,
-              color: Color(0xfff7f7f7),
+              color: const Color(0xfff7f7f7),
               child: CupertinoPicker(
                 backgroundColor:
                     Theme.of(context).backgroundColor.withOpacity(0.95),

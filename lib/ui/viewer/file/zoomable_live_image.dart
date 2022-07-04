@@ -124,7 +124,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     }
 
     var videoFile = await getFile(widget.file, liveVideo: true)
-        .timeout(Duration(seconds: 15))
+        .timeout(const Duration(seconds: 15))
         .onError((e, s) {
       _logger.info("getFile failed ${_file.tag()}", e);
       return null;
@@ -133,7 +133,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     if ((videoFile == null || !videoFile.existsSync()) &&
         _file.isRemoteFile()) {
       videoFile = await getFileFromServer(widget.file, liveVideo: true)
-          .timeout(Duration(seconds: 15))
+          .timeout(const Duration(seconds: 15))
           .onError((e, s) {
         _logger.info("getRemoteFile failed ${_file.tag()}", e);
         return null;

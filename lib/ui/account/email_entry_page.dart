@@ -30,7 +30,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   final _config = Configuration.instance;
   final _passwordController1 = TextEditingController();
   final _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = Color.fromRGBO(45, 194, 98, 0.2);
+  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
 
   String _email;
   String _password;
@@ -80,7 +80,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     final appBar = AppBar(
       elevation: 0,
       leading: IconButton(
-        icon: Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         color: Theme.of(context).iconTheme.color,
         onPressed: () {
           Navigator.of(context).pop();
@@ -92,7 +92,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           totalSteps: 4,
           currentStep: 1,
           selectedColor: Theme.of(context).buttonColor,
-          roundedEdges: Radius.circular(10),
+          roundedEdges: const Radius.circular(10),
           unselectedColor:
               Theme.of(context).colorScheme.stepProgressUnselectedColor,
         ),
@@ -152,8 +152,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       fillColor: _emailIsValid ? _validFieldValueColor : null,
                       filled: true,
                       hintText: 'Email',
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(6),
@@ -184,7 +186,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     textInputAction: TextInputAction.next,
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(4)),
+                const Padding(padding: EdgeInsets.all(4)),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: TextFormField(
@@ -198,8 +200,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                           _passwordIsValid ? _validFieldValueColor : null,
                       filled: true,
                       hintText: "Password",
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       suffixIcon: _password1InFocus
                           ? IconButton(
                               icon: Icon(
@@ -263,8 +267,10 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                       fillColor: _passwordsMatch ? _validFieldValueColor : null,
                       filled: true,
                       hintText: "Confirm password",
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                       suffixIcon: _password2InFocus
                           ? IconButton(
                               icon: Icon(
@@ -369,12 +375,12 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             child: RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text: "I agree to the ",
                   ),
                   TextSpan(
                     text: "terms of service",
-                    style: TextStyle(
+                    style: const TextStyle(
                       decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
@@ -382,16 +388,19 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return WebPage("Terms", "https://ente.io/terms");
+                              return const WebPage(
+                                "Terms",
+                                "https://ente.io/terms",
+                              );
                             },
                           ),
                         );
                       },
                   ),
-                  TextSpan(text: " and "),
+                  const TextSpan(text: " and "),
                   TextSpan(
                     text: "privacy policy",
-                    style: TextStyle(
+                    style: const TextStyle(
                       decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
@@ -399,7 +408,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return WebPage(
+                              return const WebPage(
                                 "Privacy",
                                 "https://ente.io/privacy",
                               );
@@ -445,13 +454,13 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             child: RichText(
               text: TextSpan(
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text:
                         "I understand that if I lose my password, I may lose my data since my data is ",
                   ),
                   TextSpan(
                     text: "end-to-end encrypted",
-                    style: TextStyle(
+                    style: const TextStyle(
                       decoration: TextDecoration.underline,
                     ),
                     recognizer: TapGestureRecognizer()
@@ -459,7 +468,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return WebPage(
+                              return const WebPage(
                                 "Encryption",
                                 "https://ente.io/architecture",
                               );
@@ -468,7 +477,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                         );
                       },
                   ),
-                  TextSpan(text: " with ente"),
+                  const TextSpan(text: " with ente"),
                 ],
                 style: Theme.of(context)
                     .textTheme
@@ -505,7 +514,7 @@ class PricingWidget extends StatelessWidget {
         if (snapshot.hasData) {
           return _buildPlans(context, snapshot.data);
         } else if (snapshot.hasError) {
-          return Text("Oops, Something went wrong.");
+          return const Text("Oops, Something went wrong.");
         }
         return const EnteLoadingWidget();
       },
@@ -527,7 +536,7 @@ class PricingWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Text(
+          const Text(
             "Pricing",
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -594,23 +603,23 @@ class BillingPlanWidget extends StatelessWidget {
         ),
         color: Colors.black.withOpacity(0.2),
         child: Container(
-          padding: EdgeInsets.fromLTRB(12, 20, 12, 20),
+          padding: const EdgeInsets.fromLTRB(12, 20, 12, 20),
           child: Column(
             children: [
               Text(
                 convertBytesToGBs(plan.storage, precision: 0).toString() +
                     " GB",
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
-              Padding(
+              const Padding(
                 padding: EdgeInsets.all(4),
               ),
               Text(
                 plan.price + " / " + plan.period,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
                   color: Colors.white70,
                 ),

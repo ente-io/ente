@@ -124,14 +124,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            SectionTitle("Shared with me"),
+            const SectionTitle("Shared with me"),
             const SizedBox(height: 12),
             collections.incoming.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: GridView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         return IncomingCollectionItem(
                           collections.incoming[index],
@@ -148,13 +148,13 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
-            SectionTitle("Shared by me"),
+            const SectionTitle("Shared by me"),
             const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
                 ? ListView.builder(
                     shrinkWrap: true,
-                    padding: EdgeInsets.only(bottom: 12),
-                    physics: NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 12),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       return OutgoingCollectionItem(
                         collections.outgoing[index],
@@ -180,7 +180,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             "Ask your loved ones to share",
             style: Theme.of(context).textTheme.caption,
           ),
-          Padding(padding: EdgeInsets.only(top: 14)),
+          const Padding(padding: EdgeInsets.only(top: 14)),
           SizedBox(
             width: 200,
             height: 50,
@@ -209,7 +209,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             "Share your first album",
             style: Theme.of(context).textTheme.caption,
           ),
-          Padding(padding: EdgeInsets.only(top: 14)),
+          const Padding(padding: EdgeInsets.only(top: 14)),
           SizedBox(
             width: 200,
             height: 50,
@@ -283,7 +283,7 @@ class OutgoingCollectionItem extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: EdgeInsets.fromLTRB(16, 12, 16, 12),
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: Row(
           children: <Widget>[
             ClipRRect(
@@ -300,7 +300,7 @@ class OutgoingCollectionItem extends StatelessWidget {
                 ),
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,20 +309,20 @@ class OutgoingCollectionItem extends StatelessWidget {
                     children: [
                       Text(
                         c.collection.name,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                         ),
                       ),
-                      Padding(padding: EdgeInsets.all(2)),
+                      const Padding(padding: EdgeInsets.all(2)),
                       c.collection.publicURLs.isEmpty
                           ? Container()
-                          : Icon(Icons.link),
+                          : const Icon(Icons.link),
                     ],
                   ),
                   sharees.isEmpty
                       ? Container()
                       : Padding(
-                          padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                          padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                           child: Text(
                             "Shared with " + sharees.join(", "),
                             style: TextStyle(
@@ -392,8 +392,8 @@ class IncomingCollectionItem extends StatelessWidget {
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
-                      padding: EdgeInsets.all(8),
-                      margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
+                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.fromLTRB(0, 0, 4, 0),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Theme.of(context)
@@ -413,7 +413,7 @@ class IncomingCollectionItem extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Row(
             children: [
               Container(
@@ -434,7 +434,7 @@ class IncomingCollectionItem extends StatelessWidget {
                           color: albumTitleTextStyle.color.withOpacity(0.5),
                         ),
                         children: [
-                          TextSpan(text: "  \u2022  "),
+                          const TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
                         ],
                       ),

@@ -32,24 +32,24 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       children: [
         Text(
           widget.latestVersionInfo.name,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
-        Padding(padding: EdgeInsets.all(8)),
-        Text(
+        const Padding(padding: EdgeInsets.all(8)),
+        const Text(
           "Changelog",
           style: TextStyle(
             fontSize: 18,
           ),
         ),
-        Padding(padding: EdgeInsets.all(4)),
+        const Padding(padding: EdgeInsets.all(4)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: changelog,
         ),
-        Padding(padding: EdgeInsets.all(8)),
+        const Padding(padding: EdgeInsets.all(8)),
         SizedBox(
           width: double.infinity,
           height: 64,
@@ -71,7 +71,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
                 barrierDismissible: false,
               );
             },
-            child: Text(
+            child: const Text(
               "Update",
             ),
           ),
@@ -120,7 +120,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
     return WillPopScope(
       onWillPop: () async => false,
       child: AlertDialog(
-        title: Text(
+        title: const Text(
           "Downloading...",
           style: TextStyle(
             fontSize: 16,
@@ -152,11 +152,11 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
     } catch (e) {
       Logger("ApkDownloader").severe(e);
       AlertDialog alert = AlertDialog(
-        title: Text("Sorry"),
-        content: Text("The download could not be completed"),
+        title: const Text("Sorry"),
+        content: const Text("The download could not be completed"),
         actions: [
           TextButton(
-            child: Text(
+            child: const Text(
               "Ignore",
               style: TextStyle(
                 color: Colors.white,

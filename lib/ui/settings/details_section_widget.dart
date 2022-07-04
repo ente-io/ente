@@ -38,7 +38,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         _fetchUserDetails();
       }
     });
-    _background = Image(
+    _background = const Image(
       image: AssetImage("assets/storage_card_background.png"),
       fit: BoxFit.fill,
     );
@@ -104,8 +104,12 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
           _userDetails == null
               ? const EnteLoadingWidget()
               : Padding(
-                  padding:
-                      EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 16),
+                  padding: const EdgeInsets.only(
+                    top: 20,
+                    bottom: 20,
+                    left: 16,
+                    right: 16,
+                  ),
                   child: Container(
                     color: Colors.transparent,
                     child: Column(
@@ -165,7 +169,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 ),
                               ],
                             ),
-                            Padding(padding: EdgeInsets.symmetric(vertical: 8)),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -175,12 +181,12 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                           Container(
                                             width: 8.71,
                                             height: 8.99,
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: Colors.white,
                                             ),
                                           ),
-                                          Padding(
+                                          const Padding(
                                             padding: EdgeInsets.only(right: 4),
                                           ),
                                           Text(
@@ -193,7 +199,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                                   fontSize: 12,
                                                 ),
                                           ),
-                                          Padding(
+                                          const Padding(
                                             padding: EdgeInsets.only(right: 12),
                                           ),
                                           Container(
@@ -205,7 +211,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                                   .withOpacity(0.75),
                                             ),
                                           ),
-                                          Padding(
+                                          const Padding(
                                             padding: EdgeInsets.only(right: 4),
                                           ),
                                           Text(
@@ -251,7 +257,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                     ),
                   ),
                 ),
-          Align(
+          const Align(
             alignment: Alignment.centerRight,
             child: Icon(
               Icons.chevron_right,

@@ -68,7 +68,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       },
       child: Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0x00000000),
+          backgroundColor: const Color(0x00000000),
           elevation: 0,
           actions: _hasBeenEdited()
               ? [
@@ -81,7 +81,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                         _saturation = kSaturationDefault;
                       });
                     },
-                    icon: Icon(Icons.history),
+                    icon: const Icon(Icons.history),
                   )
                 ]
               : [],
@@ -89,14 +89,14 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         body: Column(
           children: [
             Expanded(child: _buildImage()),
-            Padding(padding: EdgeInsets.all(4)),
+            const Padding(padding: EdgeInsets.all(4)),
             Column(
               children: [
                 _buildBrightness(),
                 _buildSat(),
               ],
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             _buildBottomBar(),
             Padding(padding: EdgeInsets.all(Platform.isIOS ? 16 : 6)),
           ],
@@ -123,7 +123,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           maxScale: 8.0,
           cropRectPadding: const EdgeInsets.all(20.0),
           hitTestSize: 20.0,
-          cornerColor: Color.fromRGBO(45, 150, 98, 1),
+          cornerColor: const Color.fromRGBO(45, 150, 98, 1),
           editActionDetailsIsChanged: (_) {
             setState(() {
               _hasEdited = true;
@@ -176,7 +176,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 size: 20,
               ),
             ),
-            Padding(padding: EdgeInsets.all(2)),
+            const Padding(padding: EdgeInsets.all(2)),
             Text(
               "Flip",
               style: subtitle2.copyWith(
@@ -206,7 +206,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               Icons.rotate_left,
               color: Theme.of(context).iconTheme.color.withOpacity(0.8),
             ),
-            Padding(padding: EdgeInsets.all(2)),
+            const Padding(padding: EdgeInsets.all(2)),
             Text(
               "Rotate left",
               style: subtitle2.copyWith(
@@ -236,7 +236,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               Icons.rotate_right,
               color: Theme.of(context).iconTheme.color.withOpacity(0.8),
             ),
-            Padding(padding: EdgeInsets.all(2)),
+            const Padding(padding: EdgeInsets.all(2)),
             Text(
               "Rotate right",
               style: subtitle2.copyWith(
@@ -266,7 +266,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               Icons.save_alt_outlined,
               color: Theme.of(context).iconTheme.color.withOpacity(0.8),
             ),
-            Padding(padding: EdgeInsets.all(2)),
+            const Padding(padding: EdgeInsets.all(2)),
             Text(
               "Save copy",
               style: subtitle2.copyWith(
@@ -397,7 +397,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
         children: [
           SizedBox(
@@ -415,8 +415,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
                 activeTrackHeight: 4,
                 inactiveTrackHeight: 2,
                 inactiveTrackColor: Colors.grey[900],
-                activeTrackColor: Color.fromRGBO(45, 150, 98, 1),
-                thumbColor: Color.fromRGBO(45, 150, 98, 1),
+                activeTrackColor: const Color.fromRGBO(45, 150, 98, 1),
+                thumbColor: const Color.fromRGBO(45, 150, 98, 1),
                 thumbRadius: 10,
                 tooltipBackgroundColor: Colors.grey[900],
               ),
@@ -443,7 +443,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     TextStyle subtitle2 = Theme.of(context).textTheme.subtitle2;
 
     return Container(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
       child: Row(
         children: [
           SizedBox(
@@ -460,9 +460,9 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               data: SfSliderThemeData(
                 activeTrackHeight: 4,
                 inactiveTrackHeight: 2,
-                activeTrackColor: Color.fromRGBO(45, 150, 98, 1),
+                activeTrackColor: const Color.fromRGBO(45, 150, 98, 1),
                 inactiveTrackColor: Colors.grey[900],
-                thumbColor: Color.fromRGBO(45, 150, 98, 1),
+                thumbColor: const Color.fromRGBO(45, 150, 98, 1),
                 thumbRadius: 10,
                 tooltipBackgroundColor: Colors.grey[900],
               ),
@@ -487,17 +487,17 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Future<void> _showExitConfirmationDialog() async {
     AlertDialog alert = AlertDialog(
-      title: Text("Discard edits?"),
+      title: const Text("Discard edits?"),
       actions: [
         TextButton(
-          child: Text("Yes", style: TextStyle(color: Colors.red)),
+          child: const Text("Yes", style: TextStyle(color: Colors.red)),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             replacePage(context, DetailPage(widget.detailPageConfig));
           },
         ),
         TextButton(
-          child: Text("No", style: TextStyle(color: Colors.white)),
+          child: const Text("No", style: TextStyle(color: Colors.white)),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },

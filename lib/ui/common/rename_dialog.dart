@@ -25,7 +25,7 @@ class _RenameDialogState extends State<RenameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Enter a new name"),
+      title: const Text("Enter a new name"),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -34,10 +34,10 @@ class _RenameDialogState extends State<RenameDialog> {
             TextFormField(
               decoration: InputDecoration(
                 hintText: '${widget.type} name',
-                hintStyle: TextStyle(
+                hintStyle: const TextStyle(
                   color: Colors.white30,
                 ),
-                contentPadding: EdgeInsets.all(12),
+                contentPadding: const EdgeInsets.all(12),
               ),
               onChanged: (value) {
                 setState(() {
@@ -54,7 +54,7 @@ class _RenameDialogState extends State<RenameDialog> {
       ),
       actions: [
         TextButton(
-          child: Text(
+          child: const Text(
             "Cancel",
             style: TextStyle(
               color: Colors.redAccent,

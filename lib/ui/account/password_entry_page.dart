@@ -38,7 +38,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   final _logger = Logger((_PasswordEntryPageState).toString());
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
-  final Color _validFieldValueColor = Color.fromRGBO(45, 194, 98, 0.2);
+  final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
   String _volatilePassword;
   String _passwordInInputBox = '';
   String _passwordInInputConfirmationBox = '';
@@ -101,7 +101,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         leading: widget.mode == PasswordEntryMode.reset
             ? Container()
             : IconButton(
-                icon: Icon(Icons.arrow_back),
+                icon: const Icon(Icons.arrow_back),
                 color: Theme.of(context).iconTheme.color,
                 onPressed: () {
                   Navigator.of(context).pop();
@@ -169,7 +169,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         .copyWith(fontSize: 14),
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(8)),
+                const Padding(padding: EdgeInsets.all(8)),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: RichText(
@@ -179,7 +179,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           .subtitle1
                           .copyWith(fontSize: 14),
                       children: [
-                        TextSpan(
+                        const TextSpan(
                           text:
                               "We don't store this password, so if you forget, ",
                         ),
@@ -194,7 +194,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     ),
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(12)),
+                const Padding(padding: EdgeInsets.all(12)),
                 Visibility(
                   // hidden textForm for suggesting auto-fill service for saving
                   // password
@@ -218,7 +218,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                           _isPasswordValid ? _validFieldValueColor : null,
                       filled: true,
                       hintText: "Password",
-                      contentPadding: EdgeInsets.all(20),
+                      contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(6),
@@ -281,7 +281,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                       fillColor: _passwordsMatch ? _validFieldValueColor : null,
                       filled: true,
                       hintText: "Confirm password",
-                      contentPadding: EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 20,
                       ),
@@ -349,7 +349,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (BuildContext context) {
-                          return WebPage(
+                          return const WebPage(
                             "How it works",
                             "https://ente.io/architecture",
                           );
@@ -358,7 +358,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     );
                   },
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: RichText(
                       text: TextSpan(
                         text: "How it works",
@@ -370,7 +370,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     ),
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(20)),
+                const Padding(padding: EdgeInsets.all(20)),
               ],
             ),
           ),

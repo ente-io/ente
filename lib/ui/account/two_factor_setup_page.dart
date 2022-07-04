@@ -26,7 +26,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   TabController _tabController;
   final _pinController = TextEditingController();
   final _pinPutDecoration = BoxDecoration(
-    border: Border.all(color: Color.fromRGBO(45, 194, 98, 1.0)),
+    border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
     borderRadius: BorderRadius.circular(15.0),
   );
   String _code = "";
@@ -66,7 +66,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text(
+        title: const Text(
           "Two-factor setup",
         ),
       ),
@@ -133,8 +133,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(padding: EdgeInsets.all(12)),
-          Text(
+          const Padding(padding: EdgeInsets.all(12)),
+          const Text(
             "Copy-paste this code\nto your authenticator app",
             style: TextStyle(
               height: 1.4,
@@ -142,11 +142,11 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             ),
             textAlign: TextAlign.center,
           ),
-          Padding(padding: EdgeInsets.all(16)),
+          const Padding(padding: EdgeInsets.all(16)),
           Padding(
             padding: const EdgeInsets.only(left: 10, right: 10),
             child: Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               color: textColor.withOpacity(0.1),
               child: Center(
                 child: Text(
@@ -160,7 +160,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
               ),
             ),
           ),
-          Padding(padding: EdgeInsets.all(6)),
+          const Padding(padding: EdgeInsets.all(6)),
           Text(
             "tap to copy",
             style: TextStyle(color: textColor.withOpacity(0.5)),
@@ -174,8 +174,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     return Center(
       child: Column(
         children: [
-          Padding(padding: EdgeInsets.all(12)),
-          Text(
+          const Padding(padding: EdgeInsets.all(12)),
+          const Text(
             "Scan this barcode with\nyour authenticator app",
             style: TextStyle(
               height: 1.4,
@@ -183,7 +183,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             ),
             textAlign: TextAlign.center,
           ),
-          Padding(padding: EdgeInsets.all(12)),
+          const Padding(padding: EdgeInsets.all(12)),
           Image(
             image: _imageProvider,
             height: 180,
@@ -197,8 +197,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   Widget _getVerificationWidget() {
     return Column(
       children: [
-        Padding(padding: EdgeInsets.all(12)),
-        Text(
+        const Padding(padding: EdgeInsets.all(12)),
+        const Text(
           "Enter the 6-digit code from\nyour authenticator app",
           style: TextStyle(
             height: 1.4,
@@ -206,7 +206,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
           ),
           textAlign: TextAlign.center,
         ),
-        Padding(padding: EdgeInsets.all(16)),
+        const Padding(padding: EdgeInsets.all(16)),
         Padding(
           padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
           child: PinPut(
@@ -227,26 +227,26 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             followingFieldDecoration: _pinPutDecoration.copyWith(
               borderRadius: BorderRadius.circular(5.0),
               border: Border.all(
-                color: Color.fromRGBO(45, 194, 98, 0.5),
+                color: const Color.fromRGBO(45, 194, 98, 0.5),
               ),
             ),
-            inputDecoration: InputDecoration(
+            inputDecoration: const InputDecoration(
               focusedBorder: InputBorder.none,
               border: InputBorder.none,
               counterText: '',
             ),
           ),
         ),
-        Padding(padding: EdgeInsets.all(24)),
+        const Padding(padding: EdgeInsets.all(24)),
         OutlinedButton(
           onPressed: _code.length == 6
               ? () async {
                   _enableTwoFactor(_code);
                 }
               : null,
-          child: Text("Confirm"),
+          child: const Text("Confirm"),
         ),
-        Padding(padding: EdgeInsets.only(bottom: 24)),
+        const Padding(padding: EdgeInsets.only(bottom: 24)),
       ],
     );
   }

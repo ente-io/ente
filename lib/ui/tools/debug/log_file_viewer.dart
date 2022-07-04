@@ -29,7 +29,7 @@ class _LogFileViewerState extends State<LogFileViewer> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("Today's logs"),
+        title: const Text("Today's logs"),
       ),
       body: _getBody(),
     );
@@ -40,12 +40,12 @@ class _LogFileViewerState extends State<LogFileViewer> {
       return const EnteLoadingWidget();
     }
     return Container(
-      padding: EdgeInsets.only(left: 12, top: 8, right: 12),
+      padding: const EdgeInsets.only(left: 12, top: 8, right: 12),
       child: SingleChildScrollView(
         child: Text(
           _logs,
-          style: TextStyle(
-            fontFeatures: const [
+          style: const TextStyle(
+            fontFeatures: [
               FontFeature.tabularFigures(),
             ],
             height: 1.2,

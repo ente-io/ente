@@ -31,7 +31,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Backup"),
+      header: const SettingsSectionTitle("Backup"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -45,12 +45,12 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         onTap: () async {
           routeToPage(
             context,
-            BackupFolderSelectionPage(
+            const BackupFolderSelectionPage(
               buttonText: "Backup",
             ),
           );
         },
-        child: SettingsTextItem(
+        child: const SettingsTextItem(
           text: "Backed up folders",
           icon: Icons.navigate_next,
         ),
@@ -163,7 +163,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               }
             }
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Free up space",
             icon: Icons.navigate_next,
           ),
@@ -199,7 +199,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               }
             }
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Deduplicate files",
             icon: Icons.navigate_next,
           ),
@@ -213,7 +213,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
   void _showSpaceFreedDialog(BackupStatus status) {
     AlertDialog alert = AlertDialog(
-      title: Text("Success"),
+      title: const Text("Success"),
       content: Text(
         "You have successfully freed up " + formatBytes(status.size) + "!",
       ),
@@ -238,7 +238,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           },
         ),
         TextButton(
-          child: Text(
+          child: const Text(
             "Ok",
           ),
           onPressed: () {
@@ -269,7 +269,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         " duplicate file" +
         (result.count == 1 ? "" : "s");
     AlertDialog alert = AlertDialog(
-      title: Text("✨ Success"),
+      title: const Text("✨ Success"),
       content: Text(
         "You have cleaned up " +
             countText +
@@ -298,7 +298,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           },
         ),
         TextButton(
-          child: Text(
+          child: const Text(
             "Ok",
           ),
           onPressed: () {

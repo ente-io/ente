@@ -34,7 +34,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return HomeWidget();
+                return const HomeWidget();
               },
             ),
             (route) => false,
@@ -42,7 +42,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
           BillingService.instance
               .verifySubscription(kFreeProductID, "", paymentProvider: "ente");
         },
-        child: Text("Continue on free plan"),
+        child: const Text("Continue on free plan"),
       ),
     );
   }

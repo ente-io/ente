@@ -56,7 +56,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   @override
   void dispose() {
     super.dispose();
-    Future.delayed(Duration(milliseconds: 10), () {
+    Future.delayed(const Duration(milliseconds: 10), () {
       // Cancel request only if the widget has been unmounted
       if (!mounted && widget.file.isRemoteFile() && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
@@ -109,7 +109,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       const ThumbnailPlaceHolder(),
       AnimatedOpacity(
         opacity: content == null ? 0 : 1.0,
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         child: content,
       )
     ];

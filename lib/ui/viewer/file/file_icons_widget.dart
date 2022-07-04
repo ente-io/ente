@@ -53,7 +53,7 @@ class VideoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return const SizedBox(
       height: 64,
       child: Icon(
         Icons.play_circle_outline,
@@ -99,7 +99,7 @@ class TrashedFileOverlayText extends StatelessWidget {
         ),
       ),
       alignment: Alignment.bottomCenter,
-      padding: EdgeInsets.only(bottom: 5),
+      padding: const EdgeInsets.only(bottom: 5),
       child: Text(
         daysLeft(file.deleteBy),
         style: Theme.of(context)

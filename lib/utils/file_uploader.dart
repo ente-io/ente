@@ -44,8 +44,8 @@ class FileUploader {
   final _dio = Network.instance.getDio();
   final LinkedHashMap _queue = LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
-  final kSafeBufferForLockExpiry = Duration(days: 1).inMicroseconds;
-  final kBGTaskDeathTimeout = Duration(seconds: 5).inMicroseconds;
+  final kSafeBufferForLockExpiry = const Duration(days: 1).inMicroseconds;
+  final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
   // Maintains the count of files in the current upload session.
@@ -561,7 +561,7 @@ class FileUploader {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Upload file failed, will retry in 3 seconds");
-        await Future.delayed(Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
           collectionID,
@@ -632,7 +632,7 @@ class FileUploader {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Update file failed, will retry in 3 seconds");
-        await Future.delayed(Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 3));
         return _updateFile(
           file,
           fileObjectKey,

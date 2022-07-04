@@ -38,7 +38,7 @@ Future<void> sendLogs(
             Icons.feed_outlined,
             color: Theme.of(context).iconTheme.color.withOpacity(0.85),
           ),
-          Padding(padding: EdgeInsets.all(4)),
+          const Padding(padding: EdgeInsets.all(4)),
           Text(
             "View logs",
             style: TextStyle(
@@ -80,14 +80,14 @@ Future<void> sendLogs(
   final List<Widget> content = [];
   content.addAll(
     [
-      Text(
+      const Text(
         "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
         style: TextStyle(
           height: 1.5,
           fontSize: 16,
         ),
       ),
-      Padding(padding: EdgeInsets.all(12)),
+      const Padding(padding: EdgeInsets.all(12)),
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: actions,
@@ -97,7 +97,7 @@ Future<void> sendLogs(
   final confirmation = AlertDialog(
     title: Text(
       title,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 18,
       ),
     ),

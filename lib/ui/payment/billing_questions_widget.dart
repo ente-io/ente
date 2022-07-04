@@ -27,8 +27,8 @@ class BillingQuestionsWidget extends StatelessWidget {
         if (snapshot.hasData) {
           final faqs = <Widget>[];
           faqs.add(
-            Padding(
-              padding: const EdgeInsets.all(24),
+            const Padding(
+              padding: EdgeInsets.all(24),
               child: Text(
                 "FAQs",
                 style: TextStyle(
@@ -42,7 +42,7 @@ class BillingQuestionsWidget extends StatelessWidget {
             faqs.add(FaqWidget(faq: faq));
           }
           faqs.add(
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(16),
             ),
           );
@@ -70,7 +70,7 @@ class FaqWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(2),
+      padding: const EdgeInsets.all(2),
       child: ExpansionTileCard(
         elevation: 0,
         title: Text(faq.q),
@@ -85,7 +85,7 @@ class FaqWidget extends StatelessWidget {
             ),
             child: Text(
               faq.a,
-              style: TextStyle(
+              style: const TextStyle(
                 height: 1.5,
               ),
             ),

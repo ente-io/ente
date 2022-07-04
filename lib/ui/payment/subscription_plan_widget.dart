@@ -29,13 +29,14 @@ class SubscriptionPlanWidget extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: isActive ? 8 : 16, vertical: 4),
       child: Container(
         decoration: BoxDecoration(
-          color:
-              isActive ? Color(0xFF22763F) : Color.fromRGBO(240, 240, 240, 1.0),
+          color: isActive
+              ? const Color(0xFF22763F)
+              : const Color.fromRGBO(240, 240, 240, 1.0),
           gradient: isActive
-              ? LinearGradient(
+              ? const LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: const [
+                  colors: [
                     Color(0xFF2CD267),
                     Color(0xFF1DB954),
                   ],

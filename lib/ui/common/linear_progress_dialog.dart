@@ -31,7 +31,7 @@ class LinearProgressDialogState extends State<LinearProgressDialog> {
       child: AlertDialog(
         title: Text(
           widget.message,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
           ),
           textAlign: TextAlign.center,

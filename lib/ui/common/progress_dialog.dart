@@ -18,12 +18,12 @@ ProgressDialogType _progressDialogType;
 bool _barrierDismissible = true, _showLogs = false;
 Color _barrierColor;
 
-TextStyle _progressTextStyle = TextStyle(
+TextStyle _progressTextStyle = const TextStyle(
       color: Colors.black,
       fontSize: 12.0,
       fontWeight: FontWeight.w400,
     ),
-    _messageStyle = TextStyle(
+    _messageStyle = const TextStyle(
       color: Colors.black,
       fontSize: 18.0,
       fontWeight: FontWeight.w600,
@@ -155,7 +155,7 @@ class ProgressDialog {
               child: Dialog(
                 backgroundColor: _backgroundColor,
                 insetAnimationCurve: _insetAnimCurve,
-                insetAnimationDuration: Duration(milliseconds: 100),
+                insetAnimationDuration: const Duration(milliseconds: 100),
                 elevation: _dialogElevation,
                 shape: RoundedRectangleBorder(
                   borderRadius:
@@ -168,7 +168,7 @@ class ProgressDialog {
         );
         // Delaying the function for 200 milliseconds
         // [Default transitionDuration of DialogRoute]
-        await Future.delayed(Duration(milliseconds: 200));
+        await Future.delayed(const Duration(milliseconds: 200));
         if (_showLogs) debugPrint('ProgressDialog shown');
         _isShowing = true;
         return true;
@@ -235,7 +235,7 @@ class _BodyState extends State<_Body> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  SizedBox(height: 8.0),
+                  const SizedBox(height: 8.0),
                   Row(
                     children: <Widget>[
                       Expanded(
@@ -247,7 +247,7 @@ class _BodyState extends State<_Body> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 4.0),
+                  const SizedBox(height: 4.0),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Text(

@@ -113,10 +113,10 @@ class _VideoControlsState extends State<VideoControls> {
     final iconColor = Theme.of(context).textTheme.button.color;
 
     return Container(
-      padding: EdgeInsets.only(bottom: 60),
+      padding: const EdgeInsets.only(bottom: 60),
       child: AnimatedOpacity(
         opacity: _hideStuff ? 0.0 : 1.0,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         child: Container(
           height: barHeight,
           color: Colors.transparent,
@@ -158,11 +158,11 @@ class _VideoControlsState extends State<VideoControls> {
             child: AnimatedOpacity(
               opacity:
                   _latestValue != null && !_hideStuff && !_dragging ? 1.0 : 0.0,
-              duration: Duration(milliseconds: 300),
+              duration: const Duration(milliseconds: 300),
               child: GestureDetector(
                 onTap: _playPause,
                 child: Padding(
-                  padding: EdgeInsets.all(12.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: Icon(
                     _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
                     color: Colors.white, // same for both themes
@@ -183,10 +183,10 @@ class _VideoControlsState extends State<VideoControls> {
         : Duration.zero;
 
     return Container(
-      margin: EdgeInsets.only(left: 20.0, right: 16.0),
+      margin: const EdgeInsets.only(left: 20.0, right: 16.0),
       child: Text(
         formatDuration(position),
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 12.0,
           color: Colors.white,
         ),
@@ -200,10 +200,10 @@ class _VideoControlsState extends State<VideoControls> {
         : Duration.zero;
 
     return Padding(
-      padding: EdgeInsets.only(right: 20.0),
+      padding: const EdgeInsets.only(right: 20.0),
       child: Text(
         formatDuration(duration),
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 12.0,
           color: Colors.white,
         ),
@@ -232,7 +232,7 @@ class _VideoControlsState extends State<VideoControls> {
     }
 
     if (chewieController.showControlsOnInitialize) {
-      _initTimer = Timer(Duration(milliseconds: 200), () {
+      _initTimer = Timer(const Duration(milliseconds: 200), () {
         setState(() {
           _hideStuff = false;
         });
@@ -257,7 +257,7 @@ class _VideoControlsState extends State<VideoControls> {
           });
         } else {
           if (isFinished) {
-            controller.seekTo(Duration(seconds: 0));
+            controller.seekTo(const Duration(seconds: 0));
           }
           controller.play();
         }
@@ -282,7 +282,7 @@ class _VideoControlsState extends State<VideoControls> {
   Widget _buildProgressBar() {
     return Expanded(
       child: Padding(
-        padding: EdgeInsets.only(right: 16.0),
+        padding: const EdgeInsets.only(right: 16.0),
         child: MaterialVideoProgressBar(
           controller,
           onDragStart: () {

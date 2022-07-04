@@ -19,7 +19,7 @@ class GalleryFooterWidget extends StatelessWidget {
           } else {
             routeToPage(
               context,
-              BackupFolderSelectionPage(
+              const BackupFolderSelectionPage(
                 buttonText: "Preserve",
               ),
             );

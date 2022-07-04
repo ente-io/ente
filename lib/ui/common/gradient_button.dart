@@ -32,7 +32,7 @@ class GradientButton extends StatelessWidget {
     } else if (iconData == null) {
       buttonContent = Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w600,
           fontFamily: 'Inter-SemiBold',
@@ -51,7 +51,7 @@ class GradientButton extends StatelessWidget {
           Padding(padding: EdgeInsets.all(paddingValue)),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.w600,
               fontFamily: 'Inter-SemiBold',
@@ -67,8 +67,8 @@ class GradientButton extends StatelessWidget {
         height: 56,
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment(0.1, -0.9),
-            end: Alignment(-0.6, 0.9),
+            begin: const Alignment(0.1, -0.9),
+            end: const Alignment(-0.6, 0.9),
             colors: linearGradientColors,
           ),
           borderRadius: BorderRadius.circular(8),

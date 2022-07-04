@@ -114,14 +114,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = PreferredSize(
-      preferredSize: Size(double.infinity, 60),
+      preferredSize: const Size(double.infinity, 60),
       child: Container(
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
               color: Theme.of(context).backgroundColor,
               blurRadius: 16,
-              offset: Offset(0, 8),
+              offset: const Offset(0, 8),
             )
           ],
         ),
@@ -134,7 +134,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                     totalSteps: 4,
                     currentStep: 4,
                     selectedColor: Theme.of(context).buttonColor,
-                    roundedEdges: Radius.circular(10),
+                    roundedEdges: const Radius.circular(10),
                     unselectedColor: Theme.of(context)
                         .colorScheme
                         .stepProgressUnselectedColor,
@@ -143,7 +143,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               )
             : AppBar(
                 elevation: 0,
-                title: Text("Subscription"),
+                title: const Text("Subscription"),
               ),
       ),
     );
@@ -153,7 +153,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         alignment: Alignment.bottomCenter,
         children: [
           _getBody(),
-          BottomShadowWidget(
+          const BottomShadowWidget(
             offsetDy: 40,
           )
         ],
@@ -192,7 +192,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: _getStripePlanWidgets(),
       ),
-      Padding(padding: EdgeInsets.all(4)),
+      const Padding(padding: EdgeInsets.all(4)),
     ]);
 
     widgets.add(_showSubscriptionToggle());
@@ -205,7 +205,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
-      widgets.add(SubFaqWidget());
+      widgets.add(const SubFaqWidget());
     }
 
     // only active subscription can be renewed/canceled
@@ -241,7 +241,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
+              padding: const EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
@@ -277,7 +277,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               await _launchFamilyPortal();
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+              padding: const EdgeInsets.fromLTRB(40, 0, 40, 80),
               child: Column(
                 children: [
                   RichText(
@@ -511,8 +511,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     }
 
     return Container(
-      padding: EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
-      margin: EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
+      margin: const EdgeInsets.only(bottom: 12),
       // color: Color.fromRGBO(10, 40, 40, 0.3),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,

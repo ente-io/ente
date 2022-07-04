@@ -42,8 +42,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   bool isDeleted;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
-  final asset =
-      await file.getAsset().timeout(Duration(seconds: 3)).catchError((e) async {
+  final asset = await file
+      .getAsset()
+      .timeout(const Duration(seconds: 3))
+      .catchError((e) async {
     if (e is TimeoutException) {
       _logger.info("Asset fetch timed out for " + file.toString());
       return await file.getAsset();
@@ -55,7 +57,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     throw InvalidFileError("asset is null");
   }
   sourceFile = await asset.originFile
-      .timeout(Duration(seconds: 3))
+      .timeout(const Duration(seconds: 3))
       .catchError((e) async {
     if (e is TimeoutException) {
       _logger.info("Origin file fetch timed out for " + file.toString());
@@ -97,7 +99,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   }
 
   thumbnailData = await asset.thumbnailDataWithSize(
-    ThumbnailSize(kThumbnailLargeSize, kThumbnailLargeSize),
+    const ThumbnailSize(kThumbnailLargeSize, kThumbnailLargeSize),
     quality: kThumbnailQuality,
   );
   if (thumbnailData == null) {

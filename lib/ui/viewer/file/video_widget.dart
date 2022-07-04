@@ -146,19 +146,19 @@ class _VideoWidgetState extends State<VideoWidget> {
         _getThumbnail(),
         Container(
           color: Colors.black12,
-          constraints: BoxConstraints.expand(),
+          constraints: const BoxConstraints.expand(),
         ),
         Center(
           child: SizedBox.fromSize(
-            size: Size.square(30),
+            size: const Size.square(30),
             child: _progress == null || _progress == 1
-                ? CupertinoActivityIndicator(
+                ? const CupertinoActivityIndicator(
                     color: Colors.white,
                   )
                 : CircularProgressIndicator(
                     backgroundColor: Colors.black,
                     value: _progress,
-                    valueColor: AlwaysStoppedAnimation<Color>(
+                    valueColor: const AlwaysStoppedAnimation<Color>(
                       Color.fromRGBO(45, 194, 98, 1.0),
                     ),
                   ),
@@ -171,7 +171,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   Widget _getThumbnail() {
     return Container(
       color: Colors.black,
-      constraints: BoxConstraints.expand(),
+      constraints: const BoxConstraints.expand(),
       child: ThumbnailWidget(
         widget.file,
         fit: BoxFit.contain,
@@ -196,7 +196,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       looping: true,
       allowMuting: true,
       allowFullScreen: false,
-      customControls: VideoControls(),
+      customControls: const VideoControls(),
     );
     return Container(
       color: Colors.black,

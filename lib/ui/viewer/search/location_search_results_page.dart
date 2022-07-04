@@ -38,7 +38,7 @@ class _LocationSearchResultsPageState extends State<LocationSearchResultsPage> {
       body: Gallery(
         tagPrefix: "location_search",
         selectedFiles: _selectedFiles,
-        footer: SizedBox(height: 32),
+        footer: const SizedBox(height: 32),
       ),
     );
   }

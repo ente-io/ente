@@ -31,7 +31,7 @@ class _SessionsPageState extends State<SessionsPage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("Active sessions"),
+        title: const Text("Active sessions"),
       ),
       body: _getBody(),
     );
@@ -39,10 +39,10 @@ class _SessionsPageState extends State<SessionsPage> {
 
   Widget _getBody() {
     if (_sessions == null) {
-      return Center(child: const EnteLoadingWidget());
+      return const Center(child: EnteLoadingWidget());
     }
     List<Widget> rows = [];
-    rows.add(Padding(padding: const EdgeInsets.all(4)));
+    rows.add(const Padding(padding: EdgeInsets.all(4)));
     for (final session in _sessions.sessions) {
       rows.add(_getSessionWidget(session));
     }
@@ -68,7 +68,7 @@ class _SessionsPageState extends State<SessionsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _getUAWidget(session),
-                Padding(padding: EdgeInsets.all(4)),
+                const Padding(padding: EdgeInsets.all(4)),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -84,7 +84,7 @@ class _SessionsPageState extends State<SessionsPage> {
                         ),
                       ),
                     ),
-                    Padding(padding: EdgeInsets.all(8)),
+                    const Padding(padding: EdgeInsets.all(8)),
                     Flexible(
                       child: Text(
                         getFormattedTime(lastUsedTime),
@@ -103,7 +103,7 @@ class _SessionsPageState extends State<SessionsPage> {
             ),
           ),
         ),
-        Divider(),
+        const Divider(),
       ],
     );
   }
@@ -144,17 +144,17 @@ class _SessionsPageState extends State<SessionsPage> {
         session.token == Configuration.instance.getToken();
     Widget text;
     if (isLoggingOutFromThisDevice) {
-      text = Text(
+      text = const Text(
         "This will log you out of this device!",
       );
     } else {
       text = SingleChildScrollView(
         child: Column(
           children: [
-            Text(
+            const Text(
               "This will log you out of the following device:",
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Text(
               session.ua,
               style: Theme.of(context).textTheme.caption,
@@ -164,11 +164,11 @@ class _SessionsPageState extends State<SessionsPage> {
       );
     }
     AlertDialog alert = AlertDialog(
-      title: Text("Terminate session?"),
+      title: const Text("Terminate session?"),
       content: text,
       actions: [
         TextButton(
-          child: Text(
+          child: const Text(
             "Terminate",
             style: TextStyle(
               color: Colors.red,

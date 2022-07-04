@@ -49,7 +49,7 @@ class FileWidget extends StatelessWidget {
       );
     } else {
       Logger('FileWidget').severe('unsupported file type ${file.fileType}');
-      return Icon(Icons.error);
+      return const Icon(Icons.error);
     }
   }
 }

@@ -25,7 +25,7 @@ class DeduplicatePage extends StatefulWidget {
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
-  static final kHeaderRowCount = 3;
+  static const kHeaderRowCount = 3;
   static final kDeleteIconOverlay = Container(
     decoration: BoxDecoration(
       gradient: LinearGradient(
@@ -87,7 +87,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("Deduplicate Files"),
+        title: const Text("Deduplicate Files"),
       ),
       body: _getBody(),
     );
@@ -123,9 +123,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 if (_duplicates.isNotEmpty) {
                   return _getSortMenu();
                 } else {
-                  return Padding(
+                  return const Padding(
                     padding: EdgeInsets.only(top: 32),
-                    child: const EmptyState(),
+                    child: EmptyState(),
                   );
                 }
               }
@@ -148,7 +148,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Padding _getHeader() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -157,17 +157,17 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 ((_shouldClubByCaptureTime ? " and capture times." : ".")),
             style: Theme.of(context).textTheme.subtitle2,
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(2),
           ),
           Text(
             "Please review and delete the items you believe are duplicates.",
             style: Theme.of(context).textTheme.subtitle2,
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(12),
           ),
-          Divider(
+          const Divider(
             height: 0,
           ),
         ],
@@ -177,7 +177,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
 
   Widget _getClubbingConfig() {
     return Padding(
-      padding: EdgeInsets.fromLTRB(12, 0, 12, 4),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 4),
       child: CheckboxListTile(
         value: _shouldClubByCaptureTime,
         onChanged: (value) {
@@ -185,7 +185,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           _resetEntriesAndSelection();
           setState(() {});
         },
-        title: Text("Club by capture time"),
+        title: const Text("Club by capture time"),
       ),
     );
   }
@@ -238,7 +238,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 sortOptionText(sortKey),
-                Padding(padding: EdgeInsets.only(left: 4)),
+                const Padding(padding: EdgeInsets.only(left: 4)),
                 Icon(
                   Icons.sort,
                   color: Theme.of(context).colorScheme.iconColor,
@@ -289,17 +289,17 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              Padding(padding: EdgeInsets.all(2)),
+              const Padding(padding: EdgeInsets.all(2)),
               Text(
                 text,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                   color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
               ),
-              Padding(padding: EdgeInsets.all(2)),
+              const Padding(padding: EdgeInsets.all(2)),
               Text(
                 formatBytes(size),
                 style: TextStyle(
@@ -307,7 +307,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                   fontSize: 12,
                 ),
               ),
-              Padding(padding: EdgeInsets.all(2)),
+              const Padding(padding: EdgeInsets.all(2)),
             ],
           ),
           onPressed: () async {
@@ -337,16 +337,16 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         ),
         GridView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           // to disable GridView's scrolling
           itemBuilder: (context, index) {
             return _buildFile(context, duplicates.files[index], itemIndex);
           },
           itemCount: duplicates.files.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
           ),
-          padding: EdgeInsets.all(0),
+          padding: const EdgeInsets.all(0),
         ),
       ],
     );

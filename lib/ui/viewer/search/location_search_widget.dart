@@ -22,12 +22,12 @@ class _LocationSearchWidgetState extends State<LocationSearchWidget> {
   @override
   Widget build(BuildContext context) {
     return TypeAheadField(
-      textFieldConfiguration: TextFieldConfiguration(
+      textFieldConfiguration: const TextFieldConfiguration(
         autofocus: true,
         decoration: InputDecoration(
           border: InputBorder.none,
           hintText: 'Eg: Rome, Paris, New York',
-          contentPadding: const EdgeInsets.all(0.0),
+          contentPadding: EdgeInsets.all(0.0),
         ),
       ),
       hideOnEmpty: true,
@@ -95,17 +95,17 @@ class LocationSearchResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
-      margin: EdgeInsets.symmetric(vertical: 6.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 6.0),
+      margin: const EdgeInsets.symmetric(vertical: 6.0),
       child: Column(
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Icon(
+              const Icon(
                 Icons.location_on,
               ),
-              Padding(padding: EdgeInsets.only(left: 20.0)),
+              const Padding(padding: EdgeInsets.only(left: 20.0)),
               Flexible(
                 child: Text(
                   name,

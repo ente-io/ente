@@ -42,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
@@ -88,8 +88,10 @@ class _LoginPageState extends State<LoginPage> {
                     fillColor: _emailInputFieldColor,
                     filled: true,
                     hintText: 'Email',
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 15,
+                      vertical: 15,
+                    ),
                     border: UnderlineInputBorder(
                       borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(6),
@@ -112,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                       _emailIsValid = EmailValidator.validate(_email);
                       if (_emailIsValid) {
                         _emailInputFieldColor =
-                            Color.fromRGBO(45, 194, 98, 0.2);
+                            const Color.fromRGBO(45, 194, 98, 0.2);
                       } else {
                         _emailInputFieldColor = null;
                       }
@@ -124,8 +126,8 @@ class _LoginPageState extends State<LoginPage> {
                   autofocus: true,
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 18),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 18),
                 child: Divider(
                   thickness: 1,
                 ),
@@ -143,12 +145,12 @@ class _LoginPageState extends State<LoginPage> {
                               .subtitle1
                               .copyWith(fontSize: 12),
                           children: [
-                            TextSpan(
+                            const TextSpan(
                               text: "By clicking log in, I agree to the ",
                             ),
                             TextSpan(
                               text: "terms of service",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                               recognizer: TapGestureRecognizer()
@@ -156,7 +158,7 @@ class _LoginPageState extends State<LoginPage> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (BuildContext context) {
-                                        return WebPage(
+                                        return const WebPage(
                                           "terms",
                                           "https://ente.io/terms",
                                         );
@@ -165,10 +167,10 @@ class _LoginPageState extends State<LoginPage> {
                                   );
                                 },
                             ),
-                            TextSpan(text: " and "),
+                            const TextSpan(text: " and "),
                             TextSpan(
                               text: "privacy policy",
-                              style: TextStyle(
+                              style: const TextStyle(
                                 decoration: TextDecoration.underline,
                               ),
                               recognizer: TapGestureRecognizer()
@@ -176,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (BuildContext context) {
-                                        return WebPage(
+                                        return const WebPage(
                                           "privacy",
                                           "https://ente.io/privacy",
                                         );
@@ -200,7 +202,7 @@ class _LoginPageState extends State<LoginPage> {
             ],
           ),
         ),
-        Padding(padding: EdgeInsets.all(8)),
+        const Padding(padding: EdgeInsets.all(8)),
       ],
     );
   }

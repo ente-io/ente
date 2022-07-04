@@ -6,12 +6,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class FilesMigrationDB {
-  static final _databaseName = "ente.files_migration.db";
-  static final _databaseVersion = 1;
+  static const _databaseName = "ente.files_migration.db";
+  static const _databaseVersion = 1;
   static final Logger _logger = Logger((FilesMigrationDB).toString());
-  static final tableName = 're_upload_tracker';
+  static const tableName = 're_upload_tracker';
 
-  static final columnLocalID = 'local_id';
+  static const columnLocalID = 'local_id';
 
   Future _onCreate(Database db, int version) async {
     await db.execute(

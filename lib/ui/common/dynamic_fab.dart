@@ -27,7 +27,7 @@ class DynamicFAB extends StatelessWidget {
               color: Theme.of(context).backgroundColor,
               spreadRadius: 200,
               blurRadius: 100,
-              offset: Offset(0, 230),
+              offset: const Offset(0, 230),
             )
           ],
         ),
@@ -48,7 +48,7 @@ class DynamicFAB extends StatelessWidget {
                     },
               child: Transform.rotate(
                 angle: isFormValid ? 0 : math.pi / 2,
-                child: Icon(
+                child: const Icon(
                   Icons.chevron_right,
                   size: 36,
                 ),
@@ -61,7 +61,7 @@ class DynamicFAB extends StatelessWidget {
       return Container(
         width: double.infinity,
         height: 56,
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: OutlinedButton(
           onPressed: isFormValid //var here
               ? onPressedFunction

@@ -48,7 +48,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
@@ -80,7 +80,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return HomeWidget();
+                return const HomeWidget();
               },
             ),
             (route) => false,
@@ -113,7 +113,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   decoration: InputDecoration(
                     hintText: "Enter your password",
                     filled: true,
-                    contentPadding: EdgeInsets.all(20),
+                    contentPadding: const EdgeInsets.all(20),
                     border: UnderlineInputBorder(
                       borderSide: BorderSide.none,
                       borderRadius: BorderRadius.circular(6),
@@ -135,7 +135,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           )
                         : null,
                   ),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                   ),
                   controller: _passwordController,
@@ -149,8 +149,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   },
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 18),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 18),
                 child: Divider(
                   thickness: 1,
                 ),
@@ -166,7 +166,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (BuildContext context) {
-                              return RecoveryPage();
+                              return const RecoveryPage();
                             },
                           ),
                         );

@@ -121,12 +121,12 @@ class SubFaqWidget extends StatelessWidget {
             barrierColor: Colors.black87,
             context: context,
             builder: (context) {
-              return BillingQuestionsWidget();
+              return const BillingQuestionsWidget();
             },
           );
         },
         child: Container(
-          padding: EdgeInsets.all(40),
+          padding: const EdgeInsets.all(40),
           child: RichText(
             text: TextSpan(
               text: "Questions?",

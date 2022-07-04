@@ -25,7 +25,7 @@ class MemoriesWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildMemories(snapshot.data),
-              Divider(),
+              const Divider(),
             ],
           );
         }
@@ -106,7 +106,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
           child: Column(
             children: [
               _buildMemoryItem(context, index),
-              Padding(padding: EdgeInsets.all(4)),
+              const Padding(padding: EdgeInsets.all(4)),
               Hero(
                 tag: title,
                 child: Material(
@@ -134,7 +134,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
     return Container(
       decoration: BoxDecoration(
         border: isSeen
-            ? Border()
+            ? const Border()
             : Border.all(
                 color: Theme.of(context).buttonColor,
                 width: isSeen ? 0 : 2,
@@ -218,7 +218,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   void initState() {
     super.initState();
     _index = widget.index;
-    Future.delayed(Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
           _opacity = 0;
@@ -246,7 +246,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               selectedColor: Colors.white, //same for both themes
               unselectedColor: Colors.white.withOpacity(0.4),
             ),
-            SizedBox(
+            const SizedBox(
               height: 18,
             ),
             Row(
@@ -257,7 +257,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                     onTap: () {
                       Navigator.pop(context);
                     },
-                    child: Icon(
+                    child: const Icon(
                       Icons.close,
                       color: Colors.white, //same for both themes
                     ),
@@ -290,7 +290,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
             ),
           ),
         ),
-        backgroundColor: Color(0x00000000),
+        backgroundColor: const Color(0x00000000),
         elevation: 0,
       ),
       extendBodyBehindAppBar: true,
@@ -314,7 +314,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       tag: widget.title,
       child: Container(
         alignment: Alignment.bottomCenter,
-        padding: EdgeInsets.fromLTRB(0, 0, 0, 28),
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 28),
         child: _showCounter
             ? Text(
                 '${_index + 1}/${widget.memories.length}',
@@ -325,7 +325,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               )
             : AnimatedOpacity(
                 opacity: _opacity,
-                duration: Duration(milliseconds: 500),
+                duration: const Duration(milliseconds: 500),
                 child: Text(
                   widget.title,
                   style: Theme.of(context)
@@ -342,7 +342,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
     final file = widget.memories[_index].file;
     return Container(
       alignment: Alignment.bottomRight,
-      padding: EdgeInsets.fromLTRB(0, 0, 26, 20),
+      padding: const EdgeInsets.fromLTRB(0, 0, 26, 20),
       child: IconButton(
         icon: Icon(
           Icons.adaptive.share,
@@ -392,7 +392,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
               _shouldDisableScroll = value;
             });
           },
-          backgroundDecoration: BoxDecoration(
+          backgroundDecoration: const BoxDecoration(
             color: Colors.transparent,
           ),
         );
@@ -407,8 +407,8 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         });
       },
       physics: _shouldDisableScroll
-          ? NeverScrollableScrollPhysics()
-          : PageScrollPhysics(),
+          ? const NeverScrollableScrollPhysics()
+          : const PageScrollPhysics(),
     );
   }
 }

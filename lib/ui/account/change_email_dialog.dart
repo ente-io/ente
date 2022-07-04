@@ -16,14 +16,14 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("Enter your email address"),
+      title: const Text("Enter your email address"),
       content: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Email',
                 hintStyle: TextStyle(
                   color: Colors.white30,
@@ -45,7 +45,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
       ),
       actions: [
         TextButton(
-          child: Text(
+          child: const Text(
             "Cancel",
             style: TextStyle(
               color: Colors.redAccent,
@@ -56,7 +56,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
           },
         ),
         TextButton(
-          child: Text(
+          child: const Text(
             "Verify",
             style: TextStyle(
               color: Colors.green,

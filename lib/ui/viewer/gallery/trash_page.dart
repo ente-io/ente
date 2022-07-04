@@ -79,7 +79,7 @@ class _TrashPageState extends State<TrashPage> {
 
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           widget.appBarType,
           "Trash",
@@ -90,20 +90,20 @@ class _TrashPageState extends State<TrashPage> {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          BottomShadowWidget(
+          const BottomShadowWidget(
             offsetDy: 20,
           ),
           AnimatedContainer(
-            duration: Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             height: filesAreSelected ? 0 : 80,
             child: AnimatedOpacity(
-              duration: Duration(milliseconds: 100),
+              duration: const Duration(milliseconds: 100),
               opacity: filesAreSelected ? 0.0 : 1.0,
               curve: Curves.easeIn,
               child: IgnorePointer(
                 ignoring: filesAreSelected,
-                child: SafeArea(
+                child: const SafeArea(
                   minimum: EdgeInsets.only(bottom: 6),
                   child: BottomButtonsWidget(),
                 ),
@@ -125,7 +125,7 @@ class _TrashPageState extends State<TrashPage> {
       builder: (context, snapshot) {
         if (snapshot.hasData && snapshot.data > 0) {
           return Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Text(
               'Items show the number the days remaining before permanent deletion',
               style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16),
@@ -155,7 +155,7 @@ class BottomButtonsWidget extends StatelessWidget {
               filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
               child: Container(
                 height: 40,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color.fromRGBO(255, 101, 101, 0.2),
                 ),
                 child: Center(
@@ -167,7 +167,7 @@ class BottomButtonsWidget extends StatelessWidget {
                     child: Text(
                       'Delete All',
                       style: Theme.of(context).textTheme.subtitle2.copyWith(
-                            color: Color.fromRGBO(255, 101, 101, 1),
+                            color: const Color.fromRGBO(255, 101, 101, 1),
                           ),
                     ),
                   ),

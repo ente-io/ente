@@ -71,11 +71,11 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
     return Padding(
       padding: EdgeInsets.only(bottom: bottomPadding),
       child: AnimatedContainer(
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
         height: filesAreSelected ? 108 : 0,
         child: AnimatedOpacity(
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           opacity: filesAreSelected ? 1.0 : 0.0,
           curve: Curves.easeIn,
           child: IgnorePointer(
@@ -196,7 +196,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 50, sigmaY: 50),
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 8),
                       //height: 32,
                       width: 86,
                       color: Theme.of(context)
@@ -355,7 +355,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             message: "Remove",
             child: IconButton(
               color: Theme.of(context).colorScheme.iconColor,
-              icon: Icon(
+              icon: const Icon(
                 Icons.remove_circle_rounded,
               ),
               onPressed: () {
@@ -397,7 +397,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         message: "Restore",
         child: IconButton(
           color: Theme.of(context).colorScheme.iconColor,
-          icon: Icon(
+          icon: const Icon(
             Icons.restore,
           ),
           onPressed: () {
@@ -421,7 +421,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         message: "Delete permanently",
         child: IconButton(
           color: Theme.of(context).colorScheme.iconColor,
-          icon: Icon(
+          icon: const Icon(
             Icons.delete_forever,
           ),
           onPressed: () async {
@@ -488,7 +488,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _clearSelectedFiles();
             showToast(context, "Files deleted from device");
           },
-          child: Text("Device"),
+          child: const Text("Device"),
         ),
       );
       actions.add(
@@ -503,7 +503,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             _clearSelectedFiles();
             showShortToast(context, "Moved to trash");
           },
-          child: Text("ente"),
+          child: const Text("ente"),
         ),
       );
       actions.add(
@@ -517,7 +517,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             );
             _clearSelectedFiles();
           },
-          child: Text("Everywhere"),
+          child: const Text("Everywhere"),
         ),
       );
     } else {
@@ -532,7 +532,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             );
             _clearSelectedFiles();
           },
-          child: Text("Delete"),
+          child: const Text("Delete"),
         ),
       );
     }
@@ -546,7 +546,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       ),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
+        child: const Text("Cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },
@@ -591,11 +591,11 @@ class _OverlayWidgetState extends State<OverlayWidget> {
               showGenericErrorDialog(context);
             }
           },
-          child: Text("Remove"),
+          child: const Text("Remove"),
         ),
       ],
       cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
+        child: const Text("Cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },

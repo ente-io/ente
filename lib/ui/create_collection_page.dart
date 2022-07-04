@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -98,8 +97,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(40, 24, 40, 20),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(40, 24, 40, 20),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
@@ -132,7 +131,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             },
             itemCount: snapshot.data.length,
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
           );
         } else {
           return const EnteLoadingWidget();
@@ -143,7 +142,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Widget _buildCollectionItem(CollectionWithThumbnail item) {
     return Container(
-      padding: EdgeInsets.only(left: 24, bottom: 16),
+      padding: const EdgeInsets.only(left: 24, bottom: 16),
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         child: Row(
@@ -157,11 +156,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 child: ThumbnailWidget(item.thumbnail),
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Expanded(
               child: Text(
                 item.collection.name,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
@@ -203,9 +202,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _showNameAlbumDialog() async {
     AlertDialog alert = AlertDialog(
-      title: Text("Album title"),
+      title: const Text("Album title"),
       content: TextFormField(
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           hintText: "Christmas 2020 / Dinner at Alice's",
           contentPadding: EdgeInsets.all(8),
         ),

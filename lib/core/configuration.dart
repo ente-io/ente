@@ -64,7 +64,7 @@ class Configuration {
       "has_selected_all_folders_for_backup";
   static const anonymousUserIDKey = "anonymous_user_id";
 
-  final kTempFolderDeletionTimeBuffer = Duration(days: 1).inMicroseconds;
+  final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
   static final _logger = Logger("Configuration");
 
@@ -80,11 +80,11 @@ class Configuration {
   String _volatilePassword;
 
   final _secureStorageOptionsIOS =
-      IOSOptions(accessibility: IOSAccessibility.first_unlock);
+      const IOSOptions(accessibility: IOSAccessibility.first_unlock);
 
   Future<void> init() async {
     _preferences = await SharedPreferences.getInstance();
-    _secureStorage = FlutterSecureStorage();
+    _secureStorage = const FlutterSecureStorage();
     _documentsDirectory = (await getApplicationDocumentsDirectory()).path;
     _tempDirectory = _documentsDirectory + "/temp/";
     final tempDirectory = io.Directory(_tempDirectory);
@@ -128,7 +128,9 @@ class Configuration {
     if (SyncService.instance.isSyncInProgress()) {
       SyncService.instance.stopSync();
       try {
-        await SyncService.instance.existingSync().timeout(Duration(seconds: 5));
+        await SyncService.instance
+            .existingSync()
+            .timeout(const Duration(seconds: 5));
       } catch (e) {
         // ignore
       }
@@ -590,6 +592,7 @@ class Configuration {
 
   Future<String> _getOrCreateAnonymousUserID() async {
     if (!_preferences.containsKey(anonymousUserIDKey)) {
+      //ignore: prefer_const_constructors
       await _preferences.setString(anonymousUserIDKey, Uuid().v4());
     }
     return _preferences.getString(anonymousUserIDKey);

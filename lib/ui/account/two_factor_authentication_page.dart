@@ -19,7 +19,7 @@ class _TwoFactorAuthenticationPageState
     extends State<TwoFactorAuthenticationPage> {
   final _pinController = TextEditingController();
   final _pinPutDecoration = BoxDecoration(
-    border: Border.all(color: Color.fromRGBO(45, 194, 98, 1.0)),
+    border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
     borderRadius: BorderRadius.circular(15.0),
   );
   String _code = "";
@@ -51,7 +51,7 @@ class _TwoFactorAuthenticationPageState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Two-factor authentication",
         ),
       ),
@@ -65,7 +65,7 @@ class _TwoFactorAuthenticationPageState
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        Text(
+        const Text(
           "Enter the 6-digit code from\nyour authenticator app",
           style: TextStyle(
             height: 1.4,
@@ -73,7 +73,7 @@ class _TwoFactorAuthenticationPageState
           ),
           textAlign: TextAlign.center,
         ),
-        Padding(padding: EdgeInsets.all(32)),
+        const Padding(padding: EdgeInsets.all(32)),
         Padding(
           padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
           child: PinPut(
@@ -94,10 +94,10 @@ class _TwoFactorAuthenticationPageState
             followingFieldDecoration: _pinPutDecoration.copyWith(
               borderRadius: BorderRadius.circular(5.0),
               border: Border.all(
-                color: Color.fromRGBO(45, 194, 98, 0.5),
+                color: const Color.fromRGBO(45, 194, 98, 0.5),
               ),
             ),
-            inputDecoration: InputDecoration(
+            inputDecoration: const InputDecoration(
               focusedBorder: InputBorder.none,
               border: InputBorder.none,
               counterText: '',
@@ -105,7 +105,7 @@ class _TwoFactorAuthenticationPageState
             autofocus: true,
           ),
         ),
-        Padding(padding: EdgeInsets.all(24)),
+        const Padding(padding: EdgeInsets.all(24)),
         Container(
           padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
           width: double.infinity,
@@ -116,18 +116,18 @@ class _TwoFactorAuthenticationPageState
                     _verifyTwoFactorCode(_code);
                   }
                 : null,
-            child: Text("Verify"),
+            child: const Text("Verify"),
           ),
         ),
-        Padding(padding: EdgeInsets.all(30)),
+        const Padding(padding: EdgeInsets.all(30)),
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () {
             UserService.instance.recoverTwoFactor(context, widget.sessionID);
           },
           child: Container(
-            padding: EdgeInsets.all(10),
-            child: Center(
+            padding: const EdgeInsets.all(10),
+            child: const Center(
               child: Text(
                 "Lost device?",
                 style: TextStyle(
