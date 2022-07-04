@@ -33,7 +33,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
@@ -95,15 +95,15 @@ class _RecoveryPageState extends State<RecoveryPage> {
                     decoration: InputDecoration(
                       filled: true,
                       hintText: "Enter your recovery key",
-                      contentPadding: EdgeInsets.all(20),
+                      contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(6),
                       ),
                     ),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
-                      fontFeatures: const [FontFeature.tabularFigures()],
+                      fontFeatures: [FontFeature.tabularFigures()],
                     ),
                     controller: _recoveryKey,
                     autofocus: false,
@@ -115,8 +115,8 @@ class _RecoveryPageState extends State<RecoveryPage> {
                     },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 18),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 18),
                   child: Divider(
                     thickness: 1,
                   ),
@@ -133,7 +133,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                         );
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
                         child: Center(
                           child: Text(
                             "No recovery key?",

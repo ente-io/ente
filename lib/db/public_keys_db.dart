@@ -7,13 +7,13 @@ import 'package:photos/models/public_key.dart';
 import 'package:sqflite/sqflite.dart';
 
 class PublicKeysDB {
-  static final _databaseName = "ente.public_keys.db";
-  static final _databaseVersion = 1;
+  static const _databaseName = "ente.public_keys.db";
+  static const _databaseVersion = 1;
 
-  static final table = 'public_keys';
+  static const table = 'public_keys';
 
-  static final columnEmail = 'email';
-  static final columnPublicKey = 'public_key';
+  static const columnEmail = 'email';
+  static const columnPublicKey = 'public_key';
 
   PublicKeysDB._privateConstructor();
   static final PublicKeysDB instance = PublicKeysDB._privateConstructor();

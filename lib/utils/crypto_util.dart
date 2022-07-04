@@ -6,7 +6,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/encryption_result.dart';
 
-final int encryptionChunkSize = 4 * 1024 * 1024;
+const int encryptionChunkSize = 4 * 1024 * 1024;
 final int decryptionChunkSize =
     encryptionChunkSize + Sodium.cryptoSecretstreamXchacha20poly1305Abytes;
 

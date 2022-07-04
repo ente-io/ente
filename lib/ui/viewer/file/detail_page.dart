@@ -153,7 +153,7 @@ class _DetailPageState extends State<DetailPage> {
               _toggleFullScreen();
             });
           },
-          backgroundDecoration: BoxDecoration(color: Colors.black),
+          backgroundDecoration: const BoxDecoration(color: Colors.black),
         );
         _preloadFiles(index);
         return GestureDetector(
@@ -173,8 +173,8 @@ class _DetailPageState extends State<DetailPage> {
         _preloadFiles(index);
       },
       physics: _shouldDisableScroll
-          ? NeverScrollableScrollPhysics()
-          : PageScrollPhysics(),
+          ? const NeverScrollableScrollPhysics()
+          : const PageScrollPhysics(),
       controller: _pageController,
       itemCount: _files.length,
     );
@@ -255,7 +255,7 @@ class _DetailPageState extends State<DetailPage> {
     if (_selectedIndex == totalFiles - 1) {
       // Deleted the last file
       await _pageController.previousPage(
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
       setState(() {
@@ -263,7 +263,7 @@ class _DetailPageState extends State<DetailPage> {
       });
     } else {
       await _pageController.nextPage(
-        duration: Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
       );
       setState(() {

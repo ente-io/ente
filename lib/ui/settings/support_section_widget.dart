@@ -19,7 +19,7 @@ class SupportSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Support"),
+      header: const SettingsSectionTitle("Support"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -45,7 +45,8 @@ class SupportSectionWidget extends StatelessWidget {
               showErrorDialog(context, "", "Please email us at $kSupportEmail");
             }
           },
-          child: SettingsTextItem(text: "Email", icon: Icons.navigate_next),
+          child:
+              const SettingsTextItem(text: "Email", icon: Icons.navigate_next),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -65,7 +66,10 @@ class SupportSectionWidget extends StatelessWidget {
               ),
             );
           },
-          child: SettingsTextItem(text: "Roadmap", icon: Icons.navigate_next),
+          child: const SettingsTextItem(
+            text: "Roadmap",
+            icon: Icons.navigate_next,
+          ),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -77,7 +81,7 @@ class SupportSectionWidget extends StatelessWidget {
             final zipFilePath = await getZippedLogsFile(context);
             await shareLogs(context, bugsEmail, zipFilePath);
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Report bug 🐞",
             icon: Icons.navigate_next,
           ),

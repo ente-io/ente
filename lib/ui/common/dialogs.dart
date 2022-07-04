@@ -29,7 +29,7 @@ Future<DialogUserChoice> showChoiceDialog<T>(
     ),
     content: Text(
       content,
-      style: TextStyle(
+      style: const TextStyle(
         height: 1.4,
       ),
     ),

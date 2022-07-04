@@ -87,7 +87,7 @@ Future<void> _runBackgroundTask(String taskId) async {
 }
 
 Future<void> _runInBackground(String taskId) async {
-  await Future.delayed(Duration(seconds: 3));
+  await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
     BackgroundFetch.finish(taskId);

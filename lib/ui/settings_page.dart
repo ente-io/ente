@@ -31,7 +31,7 @@ class SettingsPage extends StatelessWidget {
     final List<Widget> contents = [];
     contents.add(
       Container(
-        padding: EdgeInsets.symmetric(horizontal: 2, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -54,7 +54,7 @@ class SettingsPage extends StatelessWidget {
             ),
 
             (Platform.isAndroid)
-                ? ThemeSwitchWidget()
+                ? const ThemeSwitchWidget()
                 : const SizedBox.shrink(),
           ],
         ),
@@ -64,11 +64,11 @@ class SettingsPage extends StatelessWidget {
       height: 20,
       color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
     );
-    contents.add(Padding(padding: EdgeInsets.all(4)));
+    contents.add(const Padding(padding: EdgeInsets.all(4)));
     if (hasLoggedIn) {
       contents.addAll([
         DetailsSectionWidget(),
-        Padding(padding: EdgeInsets.only(bottom: 24)),
+        const Padding(padding: EdgeInsets.only(bottom: 24)),
         BackupSectionWidget(),
         sectionDivider,
         AccountSectionWidget(),
@@ -78,11 +78,11 @@ class SettingsPage extends StatelessWidget {
     contents.addAll([
       SecuritySectionWidget(),
       sectionDivider,
-      SupportSectionWidget(),
+      const SupportSectionWidget(),
       sectionDivider,
-      SocialSectionWidget(),
+      const SocialSectionWidget(),
       sectionDivider,
-      InfoSectionWidget(),
+      const InfoSectionWidget(),
     ]);
     if (hasLoggedIn) {
       contents.addAll([
@@ -92,11 +92,11 @@ class SettingsPage extends StatelessWidget {
     }
 
     if (kDebugMode && hasLoggedIn) {
-      contents.addAll([sectionDivider, DebugSectionWidget()]);
+      contents.addAll([sectionDivider, const DebugSectionWidget()]);
     }
-    contents.add(AppVersionWidget());
+    contents.add(const AppVersionWidget());
     contents.add(
-      Padding(
+      const Padding(
         padding: EdgeInsets.only(bottom: 60),
       ),
     );
@@ -106,7 +106,7 @@ class SettingsPage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 350),
+            constraints: const BoxConstraints(maxWidth: 350),
             child: Column(
               children: contents,
             ),

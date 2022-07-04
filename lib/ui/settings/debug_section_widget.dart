@@ -12,7 +12,7 @@ class DebugSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Debug"),
+      header: const SettingsSectionTitle("Debug"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -27,7 +27,7 @@ class DebugSectionWidget extends StatelessWidget {
           onTap: () async {
             _showKeyAttributesDialog(context);
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Key attributes",
             icon: Icons.navigate_next,
           ),
@@ -37,7 +37,7 @@ class DebugSectionWidget extends StatelessWidget {
           onTap: () async {
             Network.instance.getAlice().showInspector();
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Network requests",
             icon: Icons.navigate_next,
           ),
@@ -49,34 +49,40 @@ class DebugSectionWidget extends StatelessWidget {
   void _showKeyAttributesDialog(BuildContext context) {
     final keyAttributes = Configuration.instance.getKeyAttributes();
     AlertDialog alert = AlertDialog(
-      title: Text("key attributes"),
+      title: const Text("key attributes"),
       content: SingleChildScrollView(
         child: Column(
           children: [
-            Text("Key", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              "Key",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             Text(Sodium.bin2base64(Configuration.instance.getKey())),
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
+            const Padding(padding: EdgeInsets.all(12)),
+            const Text(
               "Encrypted Key",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(keyAttributes.encryptedKey),
-            Padding(padding: EdgeInsets.all(12)),
-            Text(
+            const Padding(padding: EdgeInsets.all(12)),
+            const Text(
               "Key Decryption Nonce",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Text(keyAttributes.keyDecryptionNonce),
-            Padding(padding: EdgeInsets.all(12)),
-            Text("KEK Salt", style: TextStyle(fontWeight: FontWeight.bold)),
+            const Padding(padding: EdgeInsets.all(12)),
+            const Text(
+              "KEK Salt",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             Text(keyAttributes.kekSalt),
-            Padding(padding: EdgeInsets.all(12)),
+            const Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       ),
       actions: [
         TextButton(
-          child: Text("OK"),
+          child: const Text("OK"),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },

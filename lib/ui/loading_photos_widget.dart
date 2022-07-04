@@ -45,7 +45,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         } else {
           routeToPage(
             context,
-            BackupFolderSelectionPage(
+            const BackupFolderSelectionPage(
               isOnboarding: true,
               buttonText: "Start backup",
             ),
@@ -53,7 +53,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         }
       }
     });
-    Timer.periodic(Duration(seconds: 5), (Timer timer) {
+    Timer.periodic(const Duration(seconds: 5), (Timer timer) {
       if (!mounted) {
         return;
       }
@@ -65,7 +65,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
       _pageController.animateToPage(
         _currentPage,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
       );
     });
@@ -149,9 +149,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                               return _getMessage(_messages[index]);
                             },
                             itemCount: _messages.length,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                           ),
-                          Positioned(
+                          const Positioned(
                             bottom: 0,
                             left: 0,
                             right: 0,

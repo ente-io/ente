@@ -18,7 +18,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Exit", color: Colors.red),
+      header: const SettingsSectionTitle("Exit", color: Colors.red),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -33,7 +33,8 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
           onTap: () {
             _onLogoutTapped();
           },
-          child: SettingsTextItem(text: "Logout", icon: Icons.navigate_next),
+          child:
+              const SettingsTextItem(text: "Logout", icon: Icons.navigate_next),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -41,7 +42,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
           onTap: () {
             _onDeleteAccountTapped();
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Delete account",
             icon: Icons.navigate_next,
           ),
@@ -52,7 +53,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
 
   Future<void> _onDeleteAccountTapped() async {
     AlertDialog alert = AlertDialog(
-      title: Text(
+      title: const Text(
         "Delete account",
         style: TextStyle(
           color: Colors.red,
@@ -61,7 +62,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
       content: RichText(
         text: TextSpan(
           children: [
-            TextSpan(
+            const TextSpan(
               text: "Please send an email to ",
             ),
             TextSpan(
@@ -70,7 +71,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
                 color: Colors.orange[300],
               ),
             ),
-            TextSpan(
+            const TextSpan(
               text:
                   " from your registered email address.\n\nYour request will be processed within 72 hours.",
             ),
@@ -84,7 +85,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
       ),
       actions: [
         TextButton(
-          child: Text(
+          child: const Text(
             "Send email",
             style: TextStyle(
               color: Colors.red,
@@ -127,16 +128,16 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
 
   Future<void> _onLogoutTapped() async {
     AlertDialog alert = AlertDialog(
-      title: Text(
+      title: const Text(
         "Logout",
         style: TextStyle(
           color: Colors.red,
         ),
       ),
-      content: Text("Are you sure you want to logout?"),
+      content: const Text("Are you sure you want to logout?"),
       actions: [
         TextButton(
-          child: Text(
+          child: const Text(
             "Yes, logout",
             style: TextStyle(
               color: Colors.red,

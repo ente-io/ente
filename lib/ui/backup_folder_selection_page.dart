@@ -65,17 +65,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           ? null
           : AppBar(
               elevation: 0,
-              title: Text(""),
+              title: const Text(""),
             ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 0,
           ),
           SafeArea(
             child: Container(
-              padding: EdgeInsets.fromLTRB(24, 32, 24, 8),
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 8),
               child: Text(
                 'Select folders for backup',
                 textAlign: TextAlign.left,
@@ -95,7 +95,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
               style: Theme.of(context).textTheme.caption.copyWith(height: 1.3),
             ),
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(10),
           ),
           _latestFiles == null
@@ -111,7 +111,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                             ? "Unselect all"
                             : "Select all",
                         textAlign: TextAlign.right,
-                        style: TextStyle(
+                        style: const TextStyle(
                           decoration: TextDecoration.underline,
                           fontSize: 16,
                         ),
@@ -147,13 +147,13 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       BoxShadow(
                         color: Theme.of(context).backgroundColor,
                         blurRadius: 24,
-                        offset: Offset(0, -8),
+                        offset: const Offset(0, -8),
                         spreadRadius: 4,
                       )
                     ],
                   ),
                   padding: widget.isOnboarding
-                      ? EdgeInsets.only(left: 20, right: 20)
+                      ? const EdgeInsets.only(left: 20, right: 20)
                       : EdgeInsets.only(
                           top: 16,
                           left: 20,
@@ -206,7 +206,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     _sortFiles();
     final scrollController = ScrollController();
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Scrollbar(
         controller: scrollController,
         thumbVisibility: true,
@@ -262,15 +262,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           border: Border.all(
             color: Theme.of(context).colorScheme.boxUnSelectColor,
           ),
-          borderRadius: BorderRadius.all(
+          borderRadius: const BorderRadius.all(
             Radius.circular(12),
           ),
           // color: isSelected
           //     ? Theme.of(context).colorScheme.boxSelectColor
           //     : Theme.of(context).colorScheme.boxUnSelectColor,
           gradient: isSelected
-              ? LinearGradient(
-                  colors: const [Color(0xFF00DD4D), Color(0xFF43BA6C)],
+              ? const LinearGradient(
+                  colors: [Color(0xFF00DD4D), Color(0xFF43BA6C)],
                 ) //same for both themes
               : LinearGradient(
                   colors: [
@@ -279,7 +279,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                   ],
                 ),
         ),
-        padding: EdgeInsets.fromLTRB(8, 4, 4, 4),
+        padding: const EdgeInsets.fromLTRB(8, 4, 4, 4),
         child: InkWell(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -303,7 +303,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        constraints: BoxConstraints(maxWidth: 180),
+                        constraints: const BoxConstraints(maxWidth: 180),
                         child: Text(
                           file.deviceFolder,
                           textAlign: TextAlign.left,
@@ -322,7 +322,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                           maxLines: 2,
                         ),
                       ),
-                      Padding(padding: EdgeInsets.only(top: 2)),
+                      const Padding(padding: EdgeInsets.only(top: 2)),
                       Text(
                         _itemCount[file.deviceFolder].toString() +
                             " item" +
@@ -391,7 +391,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             Padding(
               padding: const EdgeInsets.all(9),
               child: isSelected
-                  ? Icon(
+                  ? const Icon(
                       Icons.local_police,
                       color: Colors.white,
                     )

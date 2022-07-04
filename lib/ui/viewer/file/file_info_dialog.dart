@@ -52,7 +52,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       Row(
         children: [
           Icon(Icons.calendar_today_outlined, color: infoColor),
-          Padding(padding: EdgeInsets.all(4)),
+          const Padding(padding: EdgeInsets.all(4)),
           Text(
             getFormattedTime(
               DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
@@ -61,11 +61,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
         ],
       ),
-      Padding(padding: EdgeInsets.all(6)),
+      const Padding(padding: EdgeInsets.all(6)),
       Row(
         children: [
           Icon(Icons.folder_outlined, color: infoColor),
-          Padding(padding: EdgeInsets.all(4)),
+          const Padding(padding: EdgeInsets.all(4)),
           Text(
             file.deviceFolder ??
                 CollectionsService.instance
@@ -75,18 +75,18 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
         ],
       ),
-      Padding(padding: EdgeInsets.all(6)),
+      const Padding(padding: EdgeInsets.all(6)),
     ];
     items.addAll(
       [
         Row(
           children: [
             Icon(Icons.sd_storage_outlined, color: infoColor),
-            Padding(padding: EdgeInsets.all(4)),
+            const Padding(padding: EdgeInsets.all(4)),
             _getFileSize(),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        const Padding(padding: EdgeInsets.all(6)),
       ],
     );
     if (file.localID != null && !_isImage) {
@@ -95,7 +95,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           Row(
             children: [
               Icon(Icons.timer_outlined, color: infoColor),
-              Padding(padding: EdgeInsets.all(4)),
+              const Padding(padding: EdgeInsets.all(4)),
               FutureBuilder(
                 future: file.getAsset(),
                 builder: (context, snapshot) {
@@ -107,8 +107,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   } else {
                     return Center(
                       child: SizedBox.fromSize(
-                        size: Size.square(24),
-                        child: CupertinoActivityIndicator(
+                        size: const Size.square(24),
+                        child: const CupertinoActivityIndicator(
                           radius: 8,
                         ),
                       ),
@@ -118,7 +118,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             ],
           ),
-          Padding(padding: EdgeInsets.all(6)),
+          const Padding(padding: EdgeInsets.all(6)),
         ],
       );
     }
@@ -131,7 +131,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           Row(
             children: [
               Icon(Icons.cloud_upload_outlined, color: infoColor),
-              Padding(padding: EdgeInsets.all(4)),
+              const Padding(padding: EdgeInsets.all(4)),
               Text(
                 getFormattedTime(
                   DateTime.fromMicrosecondsSinceEpoch(file.updationTime),
@@ -144,7 +144,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
     items.add(
-      Padding(padding: EdgeInsets.all(12)),
+      const Padding(padding: EdgeInsets.all(12)),
     );
     items.add(
       Row(
@@ -169,7 +169,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 style: Theme.of(context).textTheme.headline5,
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Icon(Icons.edit, color: infoColor),
           ],
         ),
@@ -201,13 +201,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               children: [
                 Center(
                   child: SizedBox.fromSize(
-                    size: Size.square(24),
-                    child: CupertinoActivityIndicator(
+                    size: const Size.square(24),
+                    child: const CupertinoActivityIndicator(
                       radius: 8,
                     ),
                   ),
                 ),
-                Padding(padding: EdgeInsets.all(4)),
+                const Padding(padding: EdgeInsets.all(4)),
                 Text(
                   "EXIF",
                   style: TextStyle(color: infoColor),
@@ -232,7 +232,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 Icon(Icons.feed_outlined, color: infoColor),
-                Padding(padding: EdgeInsets.all(4)),
+                const Padding(padding: EdgeInsets.all(4)),
                 Text(
                   "View raw EXIF",
                   style: TextStyle(color: infoColor),
@@ -263,7 +263,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                       .defaultTextColor
                       .withOpacity(0.5),
                 ),
-                Padding(padding: EdgeInsets.all(4)),
+                const Padding(padding: EdgeInsets.all(4)),
                 Text(
                   "No exif",
                   style: TextStyle(
@@ -314,7 +314,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Row(
           children: [
             Icon(Icons.photo_size_select_actual_outlined, color: infoColor),
-            Padding(padding: EdgeInsets.all(4)),
+            const Padding(padding: EdgeInsets.all(4)),
             Text(
               exif["EXIF ExifImageWidth"].toString() +
                   " x " +
@@ -323,7 +323,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             ),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        const Padding(padding: EdgeInsets.all(6)),
       ]);
     } else if (exif["Image ImageWidth"] != null &&
         exif["Image ImageLength"] != null) {
@@ -331,7 +331,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Row(
           children: [
             Icon(Icons.photo_size_select_actual_outlined, color: infoColor),
-            Padding(padding: EdgeInsets.all(4)),
+            const Padding(padding: EdgeInsets.all(4)),
             Text(
               exif["Image ImageWidth"].toString() +
                   " x " +
@@ -340,7 +340,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             ),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        const Padding(padding: EdgeInsets.all(6)),
       ]);
     }
     if (exif["Image Make"] != null && exif["Image Model"] != null) {
@@ -349,7 +349,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           Row(
             children: [
               Icon(Icons.camera_outlined, color: infoColor),
-              Padding(padding: EdgeInsets.all(4)),
+              const Padding(padding: EdgeInsets.all(4)),
               Flexible(
                 child: Text(
                   exif["Image Make"].toString() +
@@ -361,7 +361,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             ],
           ),
-          Padding(padding: EdgeInsets.all(6)),
+          const Padding(padding: EdgeInsets.all(6)),
         ],
       );
     }
@@ -370,14 +370,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Row(
           children: [
             Icon(CupertinoIcons.f_cursive, color: infoColor),
-            Padding(padding: EdgeInsets.all(4)),
+            const Padding(padding: EdgeInsets.all(4)),
             Text(
               fNumber.toString(),
               style: TextStyle(color: infoColor),
             ),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        const Padding(padding: EdgeInsets.all(6)),
       ]);
     }
     if (focalLength != null) {
@@ -385,14 +385,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Row(
           children: [
             Icon(Icons.center_focus_strong_outlined, color: infoColor),
-            Padding(padding: EdgeInsets.all(4)),
+            const Padding(padding: EdgeInsets.all(4)),
             Text(
               focalLength.toString() + " mm",
               style: TextStyle(color: infoColor),
             ),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        const Padding(padding: EdgeInsets.all(6)),
       ]);
     }
     if (exif["EXIF ExposureTime"] != null) {
@@ -400,14 +400,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Row(
           children: [
             Icon(Icons.shutter_speed, color: infoColor),
-            Padding(padding: EdgeInsets.all(4)),
+            const Padding(padding: EdgeInsets.all(4)),
             Text(
               exif["EXIF ExposureTime"].toString(),
               style: TextStyle(color: infoColor),
             ),
           ],
         ),
-        Padding(padding: EdgeInsets.all(6)),
+        const Padding(padding: EdgeInsets.all(6)),
       ]);
     }
     return Column(
@@ -427,8 +427,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         } else {
           return Center(
             child: SizedBox.fromSize(
-              size: Size.square(24),
-              child: CupertinoActivityIndicator(
+              size: const Size.square(24),
+              child: const CupertinoActivityIndicator(
                 radius: 8,
               ),
             ),

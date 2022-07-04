@@ -40,7 +40,7 @@ class ThemeSwitchWidget extends StatelessWidget {
         }
       },
       height: 36,
-      indicatorSize: Size(36, 36),
+      indicatorSize: const Size(36, 36),
       indicatorColor: Theme.of(context).colorScheme.themeSwitchIndicatorColor,
       borderColor: Theme.of(context)
           .colorScheme

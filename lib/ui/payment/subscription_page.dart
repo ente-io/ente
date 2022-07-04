@@ -130,7 +130,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     _dialog = createProgressDialog(context, "Please wait...");
     final appBar = AppBar(
-      title: widget.isOnboarding ? null : Text("Subscription"),
+      title: widget.isOnboarding ? null : const Text("Subscription"),
     );
     return Scaffold(
       appBar: appBar,
@@ -188,7 +188,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ? _getStripePlanWidgets()
             : _getMobilePlanWidgets(),
       ),
-      Padding(padding: EdgeInsets.all(8)),
+      const Padding(padding: EdgeInsets.all(8)),
     ]);
 
     if (_hasActiveSubscription) {
@@ -199,7 +199,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
-      widgets.add(SubFaqWidget());
+      widgets.add(const SubFaqWidget());
     }
 
     if (_hasActiveSubscription &&
@@ -223,7 +223,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
+              padding: const EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
@@ -258,7 +258,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               _launchFamilyPortal();
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+              padding: const EdgeInsets.fromLTRB(40, 0, 40, 80),
               child: Column(
                 children: [
                   RichText(

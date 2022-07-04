@@ -16,7 +16,7 @@ class InfoSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("About"),
+      header: const SettingsSectionTitle("About"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -32,12 +32,12 @@ class InfoSectionWidget extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage("FAQ", "https://ente.io/faq");
+                  return const WebPage("FAQ", "https://ente.io/faq");
                 },
               ),
             );
           },
-          child: SettingsTextItem(text: "FAQ", icon: Icons.navigate_next),
+          child: const SettingsTextItem(text: "FAQ", icon: Icons.navigate_next),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -46,12 +46,13 @@ class InfoSectionWidget extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage("terms", "https://ente.io/terms");
+                  return const WebPage("terms", "https://ente.io/terms");
                 },
               ),
             );
           },
-          child: SettingsTextItem(text: "Terms", icon: Icons.navigate_next),
+          child:
+              const SettingsTextItem(text: "Terms", icon: Icons.navigate_next),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -60,12 +61,15 @@ class InfoSectionWidget extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {
-                  return WebPage("privacy", "https://ente.io/privacy");
+                  return const WebPage("privacy", "https://ente.io/privacy");
                 },
               ),
             );
           },
-          child: SettingsTextItem(text: "Privacy", icon: Icons.navigate_next),
+          child: const SettingsTextItem(
+            text: "Privacy",
+            icon: Icons.navigate_next,
+          ),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -73,8 +77,10 @@ class InfoSectionWidget extends StatelessWidget {
           onTap: () async {
             launchUrl(Uri.parse("https://github.com/ente-io/frame"));
           },
-          child:
-              SettingsTextItem(text: "Source code", icon: Icons.navigate_next),
+          child: const SettingsTextItem(
+            text: "Source code",
+            icon: Icons.navigate_next,
+          ),
         ),
         sectionOptionDivider,
         UpdateService.instance.isIndependent()
@@ -103,7 +109,7 @@ class InfoSectionWidget extends StatelessWidget {
                         showToast(context, "You are on the latest version");
                       }
                     },
-                    child: SettingsTextItem(
+                    child: const SettingsTextItem(
                       text: "Check for updates",
                       icon: Icons.navigate_next,
                     ),

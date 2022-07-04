@@ -213,7 +213,7 @@ Future<_LivePhoto> _downloadLivePhoto(
             file.getDownloadUrl(),
             await imageConvertedFile.readAsBytes(),
             eTag: file.getDownloadUrl(),
-            maxAge: Duration(days: 365),
+            maxAge: const Duration(days: 365),
             fileExtension: fileExtension,
           );
           await imageConvertedFile.delete();
@@ -225,7 +225,7 @@ Future<_LivePhoto> _downloadLivePhoto(
             file.getDownloadUrl(),
             await videoFile.readAsBytes(),
             eTag: file.getDownloadUrl(),
-            maxAge: Duration(days: 365),
+            maxAge: const Duration(days: 365),
             fileExtension: fileExtension,
           );
           await videoFile.delete();
@@ -265,7 +265,7 @@ Future<io.File> _downloadAndCache(
       file.getDownloadUrl(),
       await outputFile.readAsBytes(),
       eTag: file.getDownloadUrl(),
-      maxAge: Duration(days: 365),
+      maxAge: const Duration(days: 365),
       fileExtension: fileExtension,
     );
     await outputFile.delete();

@@ -21,7 +21,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
   @override
   Widget build(BuildContext context) {
     final alert = AlertDialog(
-      title: Text("Set wallpaper"),
+      title: const Text("Set wallpaper"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -59,7 +59,7 @@ class _SetWallpaperDialogState extends State<SetWallpaperDialog> {
       ),
       actions: [
         TextButton(
-          child: Text(
+          child: const Text(
             "Ok",
             style: TextStyle(
               color: Colors.white,

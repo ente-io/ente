@@ -48,7 +48,7 @@ class TunneledTransport implements Transport {
           'body = ${response.body}',
         );
       }
-      return SentryId.empty();
+      return const SentryId.empty();
     } else {
       _options.logger(
         SentryLevel.debug,

@@ -65,7 +65,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                   totalSteps: 4,
                   currentStep: 3,
                   selectedColor: Theme.of(context).buttonColor,
-                  roundedEdges: Radius.circular(10),
+                  roundedEdges: const Radius.circular(10),
                   unselectedColor:
                       Theme.of(context).colorScheme.stepProgressUnselectedColor,
                 ),
@@ -104,14 +104,14 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                   "If you forget your password, the only way you can recover your data is with this key.",
               style: Theme.of(context).textTheme.subtitle1,
             ),
-            Padding(padding: EdgeInsets.only(top: 24)),
+            const Padding(padding: EdgeInsets.only(top: 24)),
             DottedBorder(
-              color: Color.fromRGBO(17, 127, 56, 1),
+              color: const Color.fromRGBO(17, 127, 56, 1),
               //color of dotted/dash line
               strokeWidth: 1,
               //thickness of dash/dots
               dashPattern: const [6, 6],
-              radius: Radius.circular(8),
+              radius: const Radius.circular(8),
               //dash patterns, 10 is dash width, 6 is space width
               child: SizedBox(
                 //inner container
@@ -134,16 +134,16 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                       child: Container(
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: Color.fromRGBO(49, 155, 86, .2),
+                            color: const Color.fromRGBO(49, 155, 86, .2),
                           ),
-                          borderRadius: BorderRadius.all(
+                          borderRadius: const BorderRadius.all(
                             Radius.circular(2),
                           ),
                           color:
                               Theme.of(context).colorScheme.recoveryKeyBoxColor,
                         ),
                         height: 120,
-                        padding: EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(20),
                         width: double.infinity,
                         child: Text(
                           recoveryKey,
@@ -159,7 +159,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               height: 80,
               width: double.infinity,
               child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
+                padding: const EdgeInsets.symmetric(vertical: 20),
                 child: Text(
                   widget.subText ??
                       "We don’t store this key, please save this in a safe place.",
@@ -171,7 +171,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
               child: Container(
                 alignment: Alignment.bottomCenter,
                 width: double.infinity,
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 24),
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -194,10 +194,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           onPressed: () async {
             await _saveKeys();
           },
-          child: Text('Do this later'),
+          child: const Text('Do this later'),
         ),
       );
-      childrens.add(SizedBox(height: 10));
+      childrens.add(const SizedBox(height: 10));
     }
 
     childrens.add(
@@ -209,7 +209,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       ),
     );
     if (_hasTriedToSave) {
-      childrens.add(SizedBox(height: 10));
+      childrens.add(const SizedBox(height: 10));
       childrens.add(
         ElevatedButton(
           child: Text(widget.doneText),
@@ -219,7 +219,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         ),
       );
     }
-    childrens.add(SizedBox(height: 12));
+    childrens.add(const SizedBox(height: 12));
     return childrens;
   }
 
@@ -229,7 +229,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     }
     _recoveryKeyFile.writeAsStringSync(recoveryKey);
     await Share.shareFiles([_recoveryKeyFile.path]);
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
           _hasTriedToSave = true;

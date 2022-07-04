@@ -15,7 +15,7 @@ class HeaderErrorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_error is NoActiveSubscriptionError) {
       return Container(
-        margin: EdgeInsets.only(top: 8),
+        margin: const EdgeInsets.only(top: 8),
         child: Column(
           children: [
             Row(
@@ -30,13 +30,13 @@ class HeaderErrorWidget extends StatelessWidget {
                 Text("Your subscription has expired"),
               ],
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Container(
               width: 400,
               height: 52,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
-                child: Text("Subscribe"),
+                child: const Text("Subscribe"),
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -48,18 +48,18 @@ class HeaderErrorWidget extends StatelessWidget {
                 },
               ),
             ),
-            Padding(padding: EdgeInsets.all(12)),
-            Divider(
+            const Padding(padding: EdgeInsets.all(12)),
+            const Divider(
               thickness: 2,
               height: 0,
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            const Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );
     } else if (_error is StorageLimitExceededError) {
       return Container(
-        margin: EdgeInsets.only(top: 8),
+        margin: const EdgeInsets.only(top: 8),
         child: Column(
           children: [
             Row(
@@ -74,13 +74,13 @@ class HeaderErrorWidget extends StatelessWidget {
                 Text("Storage limit exceeded"),
               ],
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Container(
               width: 400,
               height: 52,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
-                child: Text("Upgrade"),
+                child: const Text("Upgrade"),
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -92,12 +92,12 @@ class HeaderErrorWidget extends StatelessWidget {
                 },
               ),
             ),
-            Padding(padding: EdgeInsets.all(12)),
-            Divider(
+            const Padding(padding: EdgeInsets.all(12)),
+            const Divider(
               thickness: 2,
               height: 0,
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            const Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );
@@ -109,13 +109,13 @@ class HeaderErrorWidget extends StatelessWidget {
               Icons.error_outline,
               color: Colors.red[400],
             ),
-            Padding(padding: EdgeInsets.all(4)),
-            Text(
+            const Padding(padding: EdgeInsets.all(4)),
+            const Text(
               "We could not backup your data.\nWe will retry later.",
               style: TextStyle(height: 1.4),
               textAlign: TextAlign.center,
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             InkWell(
               child: OutlinedButton(
                 style: OutlinedButton.styleFrom(
@@ -124,7 +124,7 @@ class HeaderErrorWidget extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
+                  padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
                   side: BorderSide(
                     width: 2,
                     color: Colors.orange[600],
@@ -149,12 +149,12 @@ class HeaderErrorWidget extends StatelessWidget {
                 },
               ),
             ),
-            Padding(padding: EdgeInsets.all(16)),
-            Divider(
+            const Padding(padding: EdgeInsets.all(16)),
+            const Divider(
               thickness: 2,
               height: 0,
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            const Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );

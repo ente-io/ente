@@ -24,7 +24,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       if (event.status == SyncStatus.completedFirstGalleryImport ||
           event.status == SyncStatus.completedBackup) {
-        Future.delayed(Duration(milliseconds: 2000), () {
+        Future.delayed(const Duration(milliseconds: 2000), () {
           if (mounted) {
             setState(() {
               _showStatus = false;
@@ -56,20 +56,20 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             children: [
               AnimatedOpacity(
                 opacity: _showStatus ? 0 : 1,
-                duration: Duration(milliseconds: 1000),
-                child: StatusBarBrandingWidget(),
+                duration: const Duration(milliseconds: 1000),
+                child: const StatusBarBrandingWidget(),
               ),
               AnimatedOpacity(
                 opacity: _showStatus ? 1 : 0,
-                duration: Duration(milliseconds: 1000),
-                child: SyncStatusWidget(),
+                duration: const Duration(milliseconds: 1000),
+                child: const SyncStatusWidget(),
               ),
             ],
           ),
           AnimatedOpacity(
             opacity: _showStatus ? 1 : 0,
-            duration: Duration(milliseconds: 1000),
-            child: Divider(),
+            duration: const Duration(milliseconds: 1000),
+            child: const Divider(),
           ),
         ],
       ),
@@ -121,7 +121,7 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
       return HeaderErrorWidget(error: _event.error);
     }
     if (_event.status == SyncStatus.completedBackup) {
-      return SyncStatusCompletedWidget();
+      return const SyncStatusCompletedWidget();
     }
     return RefreshIndicatorWidget(_event);
   }
@@ -144,7 +144,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
       width: double.infinity,
       alignment: Alignment.center,
       child: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -154,7 +154,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: EdgeInsets.all(2),
+                  padding: const EdgeInsets.all(2),
                   width: 22,
                   height: 22,
                   child: _inProgressIcon,
@@ -210,8 +210,8 @@ class StatusBarBrandingWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: kContainerHeight,
-      padding: EdgeInsets.only(left: 12),
-      child: Align(
+      padding: const EdgeInsets.only(left: 12),
+      child: const Align(
         alignment: Alignment.centerLeft,
         child: Text(
           "ente",
@@ -249,8 +249,8 @@ class SyncStatusCompletedWidget extends StatelessWidget {
                   color: Theme.of(context).buttonColor,
                   size: 22,
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
+                const Padding(
+                  padding: EdgeInsets.only(left: 12),
                   child: Text("All memories preserved"),
                 ),
               ],

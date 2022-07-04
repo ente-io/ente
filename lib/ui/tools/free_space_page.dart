@@ -21,7 +21,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: Text("Free up space"),
+        title: const Text("Free up space"),
       ),
       body: _getBody(),
     );
@@ -73,11 +73,11 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           padding: const EdgeInsets.only(left: 36, right: 40),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.cloud_done_outlined,
                 color: Color.fromRGBO(45, 194, 98, 1.0),
               ),
-              Padding(padding: EdgeInsets.all(10)),
+              const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
                   count == 1
@@ -91,16 +91,16 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             ],
           ),
         ),
-        Padding(padding: EdgeInsets.all(12)),
+        const Padding(padding: EdgeInsets.all(12)),
         Padding(
           padding: const EdgeInsets.only(left: 36, right: 40),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.delete_outline,
                 color: Color.fromRGBO(45, 194, 98, 1.0),
               ),
-              Padding(padding: EdgeInsets.all(10)),
+              const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
                   (count == 1 ? "It" : "They") +
@@ -112,16 +112,16 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             ],
           ),
         ),
-        Padding(padding: EdgeInsets.all(12)),
+        const Padding(padding: EdgeInsets.all(12)),
         Padding(
           padding: const EdgeInsets.only(left: 36, right: 40),
           child: Row(
             children: [
-              Icon(
+              const Icon(
                 Icons.devices,
                 color: Color.fromRGBO(45, 194, 98, 1.0),
               ),
-              Padding(padding: EdgeInsets.all(10)),
+              const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
                   "You can still access " +
@@ -133,10 +133,10 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             ],
           ),
         ),
-        Padding(padding: EdgeInsets.all(24)),
+        const Padding(padding: EdgeInsets.all(24)),
         Container(
           width: double.infinity,
-          constraints: BoxConstraints(
+          constraints: const BoxConstraints(
             minHeight: 64,
           ),
           padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
@@ -147,7 +147,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
             text: "Free up " + formatBytes(status.size),
           ),
         ),
-        Padding(padding: EdgeInsets.all(24)),
+        const Padding(padding: EdgeInsets.all(24)),
       ],
     );
   }

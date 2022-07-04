@@ -108,7 +108,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           curve: Curves.easeIn,
         );
       }
@@ -124,8 +124,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       AlertDialog alert = AlertDialog(
-        title: Text("Session expired"),
-        content: Text("Please login again"),
+        title: const Text("Session expired"),
+        content: const Text("Please login again"),
         actions: [
           TextButton(
             child: Text(
@@ -168,12 +168,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
       if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
-        Duration delayInRefresh = Duration(milliseconds: 0);
+        Duration delayInRefresh = const Duration(milliseconds: 0);
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
         // delay state refresh for home page
         if (!LocalSyncService.instance.hasGrantedLimitedPermissions()) {
-          delayInRefresh = Duration(milliseconds: 250);
+          delayInRefresh = const Duration(milliseconds: 250);
         }
         Future.delayed(
           delayInRefresh,
@@ -256,7 +256,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return WillPopScope(
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(0),
+          preferredSize: const Size.fromHeight(0),
           child: Container(),
         ),
         body: _getBody(),
@@ -280,13 +280,13 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getBody() {
     if (!Configuration.instance.hasConfiguredAccount()) {
-      return LandingPageWidget();
+      return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
-      return GrantPermissionsWidget();
+      return const GrantPermissionsWidget();
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
-      return LoadingPhotosWidget();
+      return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null && _sharedFiles.isNotEmpty) {
       ReceiveSharingIntent.reset();
@@ -318,11 +318,14 @@ class _HomeWidgetState extends State<HomeWidget> {
             _settingsPage,
           ],
         ),
-        Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
+        const Align(
+          alignment: Alignment.bottomCenter,
+          child: BottomShadowWidget(),
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: SafeArea(
-            minimum: EdgeInsets.only(bottom: 8),
+            minimum: const EdgeInsets.only(bottom: 8),
             child: HomeBottomNavigationBar(
               _selectedFiles,
               selectedTabIndex: _selectedTabIndex,
@@ -444,7 +447,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
       header: header,
-      footer: GalleryFooterWidget(),
+      footer: const GalleryFooterWidget(),
     );
     return Stack(
       children: [
@@ -492,7 +495,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                     } else {
                       routeToPage(
                         context,
-                        BackupFolderSelectionPage(
+                        const BackupFolderSelectionPage(
                           buttonText: "Start backup",
                         ),
                       );
@@ -504,7 +507,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           ),
         ),
-        Padding(padding: EdgeInsets.all(50)),
+        const Padding(padding: EdgeInsets.all(50)),
       ],
     );
   }
@@ -607,11 +610,11 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   Widget build(BuildContext context) {
     bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       height: filesAreSelected ? 0 : 52,
       child: AnimatedOpacity(
-        duration: Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         opacity: filesAreSelected ? 0.0 : 1.0,
         curve: Curves.easeIn,
         child: IgnorePointer(
@@ -642,8 +645,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 .colorScheme
                                 .gNavBarActiveColor,
                             iconSize: 24,
-                            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            duration: Duration(milliseconds: 200),
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            duration: const Duration(milliseconds: 200),
                             gap: 0,
                             tabBorderRadius: 24,
                             tabBackgroundColor: Theme.of(context)
@@ -652,7 +655,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                             haptic: false,
                             tabs: [
                               GButton(
-                                margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(6, 6, 0, 6),
                                 icon: Icons.home,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -667,7 +670,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
                                 icon: Icons.photo_library,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -682,7 +685,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
                                 icon: Icons.folder_shared,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -697,7 +700,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                                margin: const EdgeInsets.fromLTRB(0, 6, 6, 6),
                                 icon: Icons.person,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,

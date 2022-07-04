@@ -142,10 +142,10 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Are you sure you want to exit?'),
+        title: const Text('Are you sure you want to exit?'),
         actions: <Widget>[
           TextButton(
-            child: Text(
+            child: const Text(
               'Yes',
               style: TextStyle(
                 color: Colors.redAccent,
@@ -192,11 +192,11 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Payment failed'),
+        title: const Text('Payment failed'),
         content: Text("Unfortunately your payment failed due to $reason"),
         actions: <Widget>[
           TextButton(
-            child: Text('Ok'),
+            child: const Text('Ok'),
             onPressed: () {
               Navigator.of(context).pop('dialog');
             },

@@ -42,11 +42,11 @@ class DeviceFolderPage extends StatelessWidget {
           ? _getHeaderWidget()
           : Container(),
       initialFiles: [folder.thumbnail],
-      footer: SizedBox(height: 32),
+      footer: const SizedBox(height: 32),
     );
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(50.0),
+        preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           GalleryType.localFolder,
           folder.name,
@@ -89,14 +89,14 @@ class _BackupConfigurationHeaderWidgetState
     final isBackedUp =
         Configuration.instance.getPathsToBackUp().contains(widget.path);
     return Container(
-      padding: EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
-      margin: EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
+      margin: const EdgeInsets.only(bottom: 12),
       color: Theme.of(context).colorScheme.backupEnabledBgColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           isBackedUp
-              ? Text("Backup enabled")
+              ? const Text("Backup enabled")
               : Text(
                   "Backup disabled",
                   style: TextStyle(

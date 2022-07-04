@@ -150,7 +150,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            SectionTitle("On device"),
+            const SectionTitle("On device"),
             const SizedBox(height: 12),
             items.folders.isEmpty
                 ? const Padding(
@@ -168,8 +168,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                             : ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
-                                padding: EdgeInsets.fromLTRB(6, 0, 6, 0),
-                                physics: ScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+                                physics: const ScrollPhysics(),
                                 // to disable GridView's scrolling
                                 itemBuilder: (context, index) {
                                   return DeviceFolderIcon(items.folders[index]);
@@ -185,7 +185,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                EnteSectionTitle(),
+                const EnteSectionTitle(),
                 _sortMenu(),
               ],
             ),
@@ -195,7 +195,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: GridView.builder(
                       shrinkWrap: true,
-                      physics: ScrollPhysics(),
+                      physics: const ScrollPhysics(),
                       // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         return _buildCollection(
@@ -229,7 +229,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: EdgeInsets.all(0),
+                      padding: const EdgeInsets.all(0),
                       side: BorderSide(
                         width: 0.5,
                         color:
@@ -250,7 +250,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   Icons.delete,
                                   color: Theme.of(context).iconTheme.color,
                                 ),
-                                Padding(padding: EdgeInsets.all(6)),
+                                const Padding(padding: EdgeInsets.all(6)),
                                 FutureBuilder<int>(
                                   future: TrashDB.instance.count(),
                                   builder: (context, snapshot) {
@@ -265,7 +265,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                   .textTheme
                                                   .subtitle1,
                                             ),
-                                            TextSpan(text: "  \u2022  "),
+                                            const TextSpan(text: "  \u2022  "),
                                             TextSpan(
                                               text: snapshot.data.toString(),
                                             ),
@@ -308,14 +308,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       );
                     },
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Theme.of(context).backgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: EdgeInsets.all(0),
+                      padding: const EdgeInsets.all(0),
                       side: BorderSide(
                         width: 0.5,
                         color:
@@ -336,7 +336,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   Icons.visibility_off,
                                   color: Theme.of(context).iconTheme.color,
                                 ),
-                                Padding(padding: EdgeInsets.all(6)),
+                                const Padding(padding: EdgeInsets.all(6)),
                                 FutureBuilder<int>(
                                   future:
                                       FilesDB.instance.fileCountWithVisibility(
@@ -355,7 +355,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                   .textTheme
                                                   .subtitle1,
                                             ),
-                                            TextSpan(text: "  \u2022  "),
+                                            const TextSpan(text: "  \u2022  "),
                                             TextSpan(
                                               text: snapshot.data.toString(),
                                             ),
@@ -401,7 +401,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 ],
               ),
             ),
-            Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 36)),
+            const Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 36)),
           ],
         ),
       ),
@@ -433,14 +433,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     return Padding(
       padding: const EdgeInsets.only(right: 24),
       child: PopupMenuButton(
-        offset: Offset(10, 50),
+        offset: const Offset(10, 50),
         initialValue: sortKey?.index ?? 0,
         child: Align(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(left: 5.0),
               ),
               Container(
@@ -487,14 +487,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     } else {
       return InkWell(
         child: Container(
-          margin: EdgeInsets.fromLTRB(30, 30, 30, 54),
+          margin: const EdgeInsets.fromLTRB(30, 30, 30, 54),
           decoration: BoxDecoration(
             color: Theme.of(context).backgroundColor,
             boxShadow: [
               BoxShadow(
                 blurRadius: 2,
                 spreadRadius: 0,
-                offset: Offset(0, 0),
+                offset: const Offset(0, 0),
                 color: Theme.of(context).iconTheme.color.withOpacity(0.3),
               )
             ],
@@ -665,7 +665,7 @@ class CollectionItem extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Row(
             children: [
               Container(
@@ -686,7 +686,7 @@ class CollectionItem extends StatelessWidget {
                           color: albumTitleTextStyle.color.withOpacity(0.5),
                         ),
                         children: [
-                          TextSpan(text: "  \u2022  "),
+                          const TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
                         ],
                       ),
@@ -722,7 +722,7 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 12, 0, 0),
+      margin: const EdgeInsets.fromLTRB(16, 12, 0, 0),
       child: Column(
         children: [
           Align(
@@ -750,7 +750,7 @@ class EnteSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 12, 0, 0),
+      margin: const EdgeInsets.fromLTRB(16, 12, 0, 0),
       child: Column(
         children: [
           Align(

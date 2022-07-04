@@ -13,33 +13,33 @@ import 'package:sqflite/sqflite.dart';
 // column or not while showing trashed items. Even if we miss storing any new attributes,
 // during restore, all file attributes will be fetched & stored as required.
 class TrashDB {
-  static final _databaseName = "ente.trash.db";
-  static final _databaseVersion = 1;
+  static const _databaseName = "ente.trash.db";
+  static const _databaseVersion = 1;
   static final Logger _logger = Logger("TrashDB");
-  static final tableName = 'trash';
+  static const tableName = 'trash';
 
-  static final columnUploadedFileID = 'uploaded_file_id';
-  static final columnCollectionID = 'collection_id';
-  static final columnOwnerID = 'owner_id';
-  static final columnTrashUpdatedAt = 't_updated_at';
-  static final columnTrashDeleteBy = 't_delete_by';
-  static final columnEncryptedKey = 'encrypted_key';
-  static final columnKeyDecryptionNonce = 'key_decryption_nonce';
-  static final columnFileDecryptionHeader = 'file_decryption_header';
-  static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
-  static final columnUpdationTime = 'updation_time';
+  static const columnUploadedFileID = 'uploaded_file_id';
+  static const columnCollectionID = 'collection_id';
+  static const columnOwnerID = 'owner_id';
+  static const columnTrashUpdatedAt = 't_updated_at';
+  static const columnTrashDeleteBy = 't_delete_by';
+  static const columnEncryptedKey = 'encrypted_key';
+  static const columnKeyDecryptionNonce = 'key_decryption_nonce';
+  static const columnFileDecryptionHeader = 'file_decryption_header';
+  static const columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
+  static const columnUpdationTime = 'updation_time';
 
-  static final columnCreationTime = 'creation_time';
-  static final columnLocalID = 'local_id';
+  static const columnCreationTime = 'creation_time';
+  static const columnLocalID = 'local_id';
 
   // standard file metadata, which isn't editable
-  static final columnFileMetadata = 'file_metadata';
+  static const columnFileMetadata = 'file_metadata';
 
-  static final columnMMdEncodedJson = 'mmd_encoded_json';
-  static final columnMMdVersion = 'mmd_ver';
+  static const columnMMdEncodedJson = 'mmd_encoded_json';
+  static const columnMMdVersion = 'mmd_ver';
 
-  static final columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
-  static final columnPubMMdVersion = 'pub_mmd_ver';
+  static const columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
+  static const columnPubMMdVersion = 'pub_mmd_ver';
 
   Future _onCreate(Database db, int version) async {
     await db.execute(

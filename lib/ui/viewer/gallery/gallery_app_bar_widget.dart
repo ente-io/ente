@@ -67,7 +67,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     // if (widget.selectedFiles.files.isEmpty) {
     return AppBar(
       backgroundColor:
-          widget.type == GalleryType.homepage ? Color(0x00000000) : null,
+          widget.type == GalleryType.homepage ? const Color(0x00000000) : null,
       elevation: 0,
       centerTitle: false,
       title: widget.type == GalleryType.homepage
@@ -163,7 +163,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 child: Row(
                   children: [
                     Icon(isArchived ? Icons.visibility : Icons.visibility_off),
-                    Padding(
+                    const Padding(
                       padding: EdgeInsets.all(8),
                     ),
                     Text(isArchived ? "Unhide" : "Hide"),

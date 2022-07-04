@@ -39,8 +39,8 @@ class DraggableScrollbar extends StatefulWidget {
 
 class DraggableScrollbarState extends State<DraggableScrollbar>
     with TickerProviderStateMixin {
-  static final thumbAnimationDuration = Duration(milliseconds: 1000);
-  static final labelAnimationDuration = Duration(milliseconds: 1000);
+  static const thumbAnimationDuration = Duration(milliseconds: 1000);
+  static const labelAnimationDuration = Duration(milliseconds: 1000);
   double thumbOffset = 0.0;
   bool isDragging = false;
   int currentFirstIndex;
@@ -194,28 +194,28 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
         onDragUpdate(
           DragUpdateDetails(
             globalPosition: Offset.zero,
-            delta: Offset(0, 2),
+            delta: const Offset(0, 2),
           ),
         );
       } else if (value.logicalKey == LogicalKeyboardKey.arrowUp) {
         onDragUpdate(
           DragUpdateDetails(
             globalPosition: Offset.zero,
-            delta: Offset(0, -2),
+            delta: const Offset(0, -2),
           ),
         );
       } else if (value.logicalKey == LogicalKeyboardKey.pageDown) {
         onDragUpdate(
           DragUpdateDetails(
             globalPosition: Offset.zero,
-            delta: Offset(0, 25),
+            delta: const Offset(0, 25),
           ),
         );
       } else if (value.logicalKey == LogicalKeyboardKey.pageUp) {
         onDragUpdate(
           DragUpdateDetails(
             globalPosition: Offset.zero,
-            delta: Offset(0, -25),
+            delta: const Offset(0, -25),
           ),
         );
       }

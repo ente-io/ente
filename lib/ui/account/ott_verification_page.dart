@@ -40,7 +40,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       appBar: AppBar(
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
           onPressed: () {
             Navigator.of(context).pop();
@@ -53,7 +53,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                   totalSteps: 4,
                   currentStep: 2,
                   selectedColor: Theme.of(context).buttonColor,
-                  roundedEdges: Radius.circular(10),
+                  roundedEdges: const Radius.circular(10),
                   unselectedColor:
                       Theme.of(context).colorScheme.stepProgressUnselectedColor,
                 ),
@@ -115,7 +115,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                                   .subtitle1
                                   .copyWith(fontSize: 14),
                               children: [
-                                TextSpan(text: "We've sent a mail to "),
+                                const TextSpan(text: "We've sent a mail to "),
                                 TextSpan(
                                   text: widget.email,
                                   style: TextStyle(
@@ -150,7 +150,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 decoration: InputDecoration(
                   filled: true,
                   hintText: 'Tap to enter code',
-                  contentPadding: EdgeInsets.all(15),
+                  contentPadding: const EdgeInsets.all(15),
                   border: UnderlineInputBorder(
                     borderSide: BorderSide.none,
                     borderRadius: BorderRadius.circular(6),
@@ -165,7 +165,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 },
               ),
             ),
-            Divider(
+            const Divider(
               thickness: 1,
             ),
             Padding(

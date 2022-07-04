@@ -58,7 +58,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
             data = "no exif data found";
           }
           return Container(
-            padding: EdgeInsets.all(2),
+            padding: const EdgeInsets.all(2),
             color: Colors.white.withOpacity(0.05),
             child: Center(
               child: Padding(

@@ -11,15 +11,15 @@ import 'package:sqflite/sqflite.dart';
 // Common use case:
 // when a user deletes a file just from ente on current or different device.
 class IgnoredFilesDB {
-  static final _databaseName = "ente.ignored_files.db";
-  static final _databaseVersion = 1;
+  static const _databaseName = "ente.ignored_files.db";
+  static const _databaseVersion = 1;
   static final Logger _logger = Logger("IgnoredFilesDB");
-  static final tableName = 'ignored_files';
+  static const tableName = 'ignored_files';
 
-  static final columnLocalID = 'local_id';
-  static final columnTitle = 'title';
-  static final columnDeviceFolder = 'device_folder';
-  static final columnReason = 'reason';
+  static const columnLocalID = 'local_id';
+  static const columnTitle = 'title';
+  static const columnDeviceFolder = 'device_folder';
+  static const columnReason = 'reason';
 
   Future _onCreate(Database db, int version) async {
     await db.execute(

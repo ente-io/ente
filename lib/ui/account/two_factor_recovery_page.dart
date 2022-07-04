@@ -27,7 +27,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Recover account",
           style: TextStyle(
             fontSize: 18,
@@ -42,13 +42,13 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
           Padding(
             padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
             child: TextFormField(
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: "Enter your recovery key",
                 contentPadding: EdgeInsets.all(20),
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
-                fontFeatures: const [FontFeature.tabularFigures()],
+                fontFeatures: [FontFeature.tabularFigures()],
               ),
               controller: _recoveryKey,
               autofocus: false,
@@ -60,7 +60,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
               },
             ),
           ),
-          Padding(padding: EdgeInsets.all(24)),
+          const Padding(padding: EdgeInsets.all(24)),
           Container(
             padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
             width: double.infinity,
@@ -77,7 +77,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
                       );
                     }
                   : null,
-              child: Text("Recover"),
+              child: const Text("Recover"),
             ),
           ),
           GestureDetector(
@@ -90,7 +90,7 @@ class _TwoFactorRecoveryPageState extends State<TwoFactorRecoveryPage> {
               );
             },
             child: Container(
-              padding: EdgeInsets.all(40),
+              padding: const EdgeInsets.all(40),
               child: Center(
                 child: Text(
                   "No recovery key?",

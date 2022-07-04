@@ -284,15 +284,15 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     return GridView.builder(
       shrinkWrap: true,
       physics:
-          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+          const NeverScrollableScrollPhysics(), // to disable GridView's scrolling
       itemBuilder: (context, index) {
         return _buildFile(context, widget.files[index]);
       },
       itemCount: widget.files.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
       ),
-      padding: EdgeInsets.all(0),
+      padding: const EdgeInsets.all(0),
     );
   }
 
@@ -338,7 +338,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
               ),
               Visibility(
                 visible: widget.selectedFiles.isFileSelected(file),
-                child: Positioned(
+                child: const Positioned(
                   right: 4,
                   top: 4,
                   child: Icon(

@@ -7,8 +7,8 @@ class EnteLoadingWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SizedBox.fromSize(
-        size: Size.square(30),
-        child: CupertinoActivityIndicator(),
+        size: const Size.square(30),
+        child: const CupertinoActivityIndicator(),
       ),
     );
   }

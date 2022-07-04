@@ -58,7 +58,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         ignoring: _shouldHide,
         child: AnimatedOpacity(
           opacity: _shouldHide ? 0 : 1,
-          duration: Duration(milliseconds: 150),
+          duration: const Duration(milliseconds: 150),
           child: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -119,10 +119,10 @@ class FadingAppBarState extends State<FadingAppBar> {
                           : CupertinoIcons.cloud_download,
                       color: Theme.of(context).iconTheme.color,
                     ),
-                    Padding(
+                    const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("Download"),
+                    const Text("Download"),
                   ],
                 ),
               ),
@@ -143,10 +143,10 @@ class FadingAppBarState extends State<FadingAppBar> {
                             : CupertinoIcons.time,
                         color: Theme.of(context).iconTheme.color,
                       ),
-                      Padding(
+                      const Padding(
                         padding: EdgeInsets.all(8),
                       ),
-                      Text("Edit time"),
+                      const Text("Edit time"),
                     ],
                   ),
                 ),
@@ -164,10 +164,10 @@ class FadingAppBarState extends State<FadingAppBar> {
                           : CupertinoIcons.delete,
                       color: Theme.of(context).iconTheme.color,
                     ),
-                    Padding(
+                    const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("Delete"),
+                    const Text("Delete"),
                   ],
                 ),
               ),
@@ -187,10 +187,11 @@ class FadingAppBarState extends State<FadingAppBar> {
       ),
     );
     return AppBar(
-      iconTheme: IconThemeData(color: Colors.white), //same for both themes
+      iconTheme:
+          const IconThemeData(color: Colors.white), //same for both themes
       actions: shouldShowActions ? actions : [],
       elevation: 0,
-      backgroundColor: Color(0x00000000),
+      backgroundColor: const Color(0x00000000),
     );
   }
 
@@ -295,7 +296,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             widget.onFileDeleted(file);
           },
-          child: Text("Everywhere"),
+          child: const Text("Everywhere"),
         ),
       );
     } else {
@@ -309,7 +310,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             // TODO: Fix behavior when inside a device folder
           },
-          child: Text("Device"),
+          child: const Text("Device"),
         ),
       );
 
@@ -322,7 +323,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             // TODO: Fix behavior when inside a collection
           },
-          child: Text("ente"),
+          child: const Text("ente"),
         ),
       );
 
@@ -334,15 +335,15 @@ class FadingAppBarState extends State<FadingAppBar> {
             Navigator.of(context, rootNavigator: true).pop();
             widget.onFileDeleted(file);
           },
-          child: Text("Everywhere"),
+          child: const Text("Everywhere"),
         ),
       );
     }
     final action = CupertinoActionSheet(
-      title: Text("Delete file?"),
+      title: const Text("Delete file?"),
       actions: actions,
       cancelButton: CupertinoActionSheetAction(
-        child: Text("Cancel"),
+        child: const Text("Cancel"),
         onPressed: () {
           Navigator.of(context, rootNavigator: true).pop();
         },

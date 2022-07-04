@@ -53,7 +53,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Security"),
+      header: const SettingsSectionTitle("Security"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -65,7 +65,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
-          Padding(padding: EdgeInsets.all(2)),
+          const Padding(padding: EdgeInsets.all(2)),
           SizedBox(
             height: 48,
             child: Row(
@@ -165,7 +165,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   onChanged: (value) async {
                     if (value) {
                       AlertDialog alert = AlertDialog(
-                        title: Text("Hide from recents?"),
+                        title: const Text("Hide from recents?"),
                         content: SingleChildScrollView(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -266,7 +266,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             ),
           );
         },
-        child: SettingsTextItem(
+        child: const SettingsTextItem(
           text: "Active sessions",
           icon: Icons.navigate_next,
         ),
@@ -279,9 +279,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   void _disableTwoFactor() {
     AlertDialog alert = AlertDialog(
-      title: Text("Disable two-factor"),
-      content:
-          Text("Are you sure you want to disable two-factor authentication?"),
+      title: const Text("Disable two-factor"),
+      content: const Text(
+        "Are you sure you want to disable two-factor authentication?",
+      ),
       actions: [
         TextButton(
           child: Text(
@@ -295,7 +296,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           },
         ),
         TextButton(
-          child: Text(
+          child: const Text(
             "Yes",
             style: TextStyle(
               color: Colors.red,

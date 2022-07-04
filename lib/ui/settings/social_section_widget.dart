@@ -14,7 +14,7 @@ class SocialSectionWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Social"),
+      header: const SettingsSectionTitle("Social"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -28,7 +28,8 @@ class SocialSectionWidget extends StatelessWidget {
         onTap: () {
           launch("https://twitter.com/enteio");
         },
-        child: SettingsTextItem(text: "Twitter", icon: Icons.navigate_next),
+        child:
+            const SettingsTextItem(text: "Twitter", icon: Icons.navigate_next),
       ),
       sectionOptionDivider,
       GestureDetector(
@@ -36,7 +37,8 @@ class SocialSectionWidget extends StatelessWidget {
         onTap: () {
           launch("https://ente.io/discord");
         },
-        child: SettingsTextItem(text: "Discord", icon: Icons.navigate_next),
+        child:
+            const SettingsTextItem(text: "Discord", icon: Icons.navigate_next),
       ),
       sectionOptionDivider,
       GestureDetector(
@@ -44,7 +46,8 @@ class SocialSectionWidget extends StatelessWidget {
         onTap: () {
           launch("https://reddit.com/r/enteio");
         },
-        child: SettingsTextItem(text: "Reddit", icon: Icons.navigate_next),
+        child:
+            const SettingsTextItem(text: "Reddit", icon: Icons.navigate_next),
       ),
     ];
     if (!UpdateService.instance.isIndependent()) {
@@ -64,7 +67,7 @@ class SocialSectionWidget extends StatelessWidget {
                 );
               }
             },
-            child: SettingsTextItem(
+            child: const SettingsTextItem(
               text: "Rate us! ✨",
               icon: Icons.navigate_next,
             ),

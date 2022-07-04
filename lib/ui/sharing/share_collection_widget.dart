@@ -56,7 +56,7 @@ class _SharingDialogState extends State<SharingDialog> {
       children.add(_getEmailField());
     }
     children.add(
-      Padding(
+      const Padding(
         padding: EdgeInsets.all(8),
       ),
     );
@@ -80,7 +80,7 @@ class _SharingDialogState extends State<SharingDialog> {
           width: 240,
           height: 50,
           child: OutlinedButton(
-            child: Text("Add"),
+            child: const Text("Add"),
             onPressed: () {
               _addEmailToCollection(_email?.trim() ?? '');
             },
@@ -92,15 +92,15 @@ class _SharingDialogState extends State<SharingDialog> {
     if (!FeatureFlagService.instance.disableUrlSharing()) {
       bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
       children.addAll([
-        Padding(padding: EdgeInsets.all(16)),
-        Divider(height: 1),
-        Padding(padding: EdgeInsets.all(12)),
+        const Padding(padding: EdgeInsets.all(16)),
+        const Divider(height: 1),
+        const Padding(padding: EdgeInsets.all(12)),
         SizedBox(
           height: 36,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text("Public link"),
+              const Text("Public link"),
               Switch(
                 value: hasUrl,
                 onChanged: (enable) async {
@@ -159,11 +159,11 @@ class _SharingDialogState extends State<SharingDialog> {
             ],
           ),
         ),
-        Padding(padding: EdgeInsets.all(8)),
+        const Padding(padding: EdgeInsets.all(8)),
       ]);
       if (widget.collection.publicURLs?.isNotEmpty ?? false) {
         children.add(
-          Padding(
+          const Padding(
             padding: EdgeInsets.all(2),
           ),
         );
@@ -172,7 +172,7 @@ class _SharingDialogState extends State<SharingDialog> {
     }
 
     return AlertDialog(
-      title: Text("Sharing"),
+      title: const Text("Sharing"),
       content: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
@@ -185,7 +185,7 @@ class _SharingDialogState extends State<SharingDialog> {
           ],
         ),
       ),
-      contentPadding: EdgeInsets.fromLTRB(24, 24, 24, 4),
+      contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 4),
     );
   }
 
@@ -194,7 +194,7 @@ class _SharingDialogState extends State<SharingDialog> {
       children: [
         Expanded(
           child: TypeAheadField(
-            textFieldConfiguration: TextFieldConfiguration(
+            textFieldConfiguration: const TextFieldConfiguration(
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
                 border: InputBorder.none,
@@ -211,7 +211,7 @@ class _SharingDialogState extends State<SharingDialog> {
             },
             itemBuilder: (context, suggestion) {
               return Container(
-                padding: EdgeInsets.fromLTRB(12, 8, 12, 8),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
                 child: Text(
                   suggestion.email,
                   overflow: TextOverflow.clip,
@@ -226,7 +226,7 @@ class _SharingDialogState extends State<SharingDialog> {
             },
           ),
         ),
-        Padding(padding: EdgeInsets.all(8)),
+        const Padding(padding: EdgeInsets.all(8)),
         IconButton(
           icon: Icon(
             Icons.contact_mail_outlined,
@@ -253,14 +253,14 @@ class _SharingDialogState extends State<SharingDialog> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(padding: EdgeInsets.all(4)),
+          const Padding(padding: EdgeInsets.all(4)),
           GestureDetector(
             onTap: () async {
               await Clipboard.setData(ClipboardData(text: url));
               showToast(context, "Link copied to clipboard");
             },
             child: Container(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               color: Theme.of(context).colorScheme.onSurface.withOpacity(0.02),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -279,8 +279,8 @@ class _SharingDialogState extends State<SharingDialog> {
                       ),
                     ),
                   ),
-                  Padding(padding: EdgeInsets.all(2)),
-                  Icon(
+                  const Padding(padding: EdgeInsets.all(2)),
+                  const Icon(
                     Icons.copy,
                     size: 18,
                   ),
@@ -288,7 +288,7 @@ class _SharingDialogState extends State<SharingDialog> {
               ),
             ),
           ),
-          Padding(padding: EdgeInsets.all(2)),
+          const Padding(padding: EdgeInsets.all(2)),
           TextButton(
             child: Padding(
               padding: const EdgeInsets.all(12),
@@ -299,7 +299,7 @@ class _SharingDialogState extends State<SharingDialog> {
                     Icons.adaptive.share,
                     color: Theme.of(context).buttonColor,
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.all(4),
                   ),
                   Text(
@@ -315,7 +315,7 @@ class _SharingDialogState extends State<SharingDialog> {
               shareText(url);
             },
           ),
-          Padding(padding: EdgeInsets.all(4)),
+          const Padding(padding: EdgeInsets.all(4)),
           TextButton(
             child: Center(
               child: Text(
@@ -370,12 +370,12 @@ class _SharingDialogState extends State<SharingDialog> {
     if (publicKey == null) {
       Navigator.of(context, rootNavigator: true).pop('dialog');
       final dialog = AlertDialog(
-        title: Text("Invite to ente?"),
+        title: const Text("Invite to ente?"),
         content: Text(
           "Looks like " +
               email +
               " hasn't signed up for ente yet. would you like to invite them?",
-          style: TextStyle(
+          style: const TextStyle(
             height: 1.4,
           ),
         ),
@@ -435,9 +435,10 @@ class _SharingDialogState extends State<SharingDialog> {
 
   void _showUnSupportedAlert() {
     AlertDialog alert = AlertDialog(
-      title: Text("Sorry"),
-      content:
-          Text("Sharing is not permitted for free accounts, please subscribe"),
+      title: const Text("Sorry"),
+      content: const Text(
+        "Sharing is not permitted for free accounts, please subscribe",
+      ),
       actions: [
         TextButton(
           child: Text(
@@ -498,12 +499,12 @@ class EmailItemWidget extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
           child: Text(
             email,
-            style: TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16),
           ),
         ),
-        Expanded(child: SizedBox()),
+        const Expanded(child: SizedBox()),
         IconButton(
-          icon: Icon(Icons.delete_forever),
+          icon: const Icon(Icons.delete_forever),
           color: Colors.redAccent,
           onPressed: () async {
             final dialog = createProgressDialog(context, "Please wait...");

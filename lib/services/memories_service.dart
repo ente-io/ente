@@ -11,10 +11,10 @@ class MemoriesService extends ChangeNotifier {
   final _logger = Logger("MemoryService");
   final _memoriesDB = MemoriesDB.instance;
   final _filesDB = FilesDB.instance;
-  static final daysInAYear = 365;
-  static final yearsBefore = 30;
-  static final daysBefore = 7;
-  static final daysAfter = 1;
+  static const daysInAYear = 365;
+  static const yearsBefore = 30;
+  static const daysBefore = 7;
+  static const daysAfter = 1;
 
   List<Memory> _cachedMemories;
   Future<List<Memory>> _future;
@@ -65,10 +65,11 @@ class MemoriesService extends ChangeNotifier {
     final List<List<int>> durations = [];
     for (var yearAgo = 1; yearAgo <= yearsBefore; yearAgo++) {
       final date = _getDate(present, yearAgo);
-      final startCreationTime =
-          date.subtract(Duration(days: daysBefore)).microsecondsSinceEpoch;
+      final startCreationTime = date
+          .subtract(const Duration(days: daysBefore))
+          .microsecondsSinceEpoch;
       final endCreationTime =
-          date.add(Duration(days: daysAfter)).microsecondsSinceEpoch;
+          date.add(const Duration(days: daysAfter)).microsecondsSinceEpoch;
       durations.add([startCreationTime, endCreationTime]);
     }
     final archivedCollectionIds =

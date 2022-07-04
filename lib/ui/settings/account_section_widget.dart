@@ -26,7 +26,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Account"),
+      header: const SettingsSectionTitle("Account"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -66,8 +66,10 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               ),
             );
           },
-          child:
-              SettingsTextItem(text: "Recovery key", icon: Icons.navigate_next),
+          child: const SettingsTextItem(
+            text: "Recovery key",
+            icon: Icons.navigate_next,
+          ),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -85,14 +87,16 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             showDialog(
               context: context,
               builder: (BuildContext context) {
-                return ChangeEmailDialog();
+                return const ChangeEmailDialog();
               },
               barrierColor: Colors.black.withOpacity(0.85),
               barrierDismissible: false,
             );
           },
-          child:
-              SettingsTextItem(text: "Change email", icon: Icons.navigate_next),
+          child: const SettingsTextItem(
+            text: "Change email",
+            icon: Icons.navigate_next,
+          ),
         ),
         sectionOptionDivider,
         GestureDetector(
@@ -117,7 +121,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               ),
             );
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Change password",
             icon: Icons.navigate_next,
           ),

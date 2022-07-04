@@ -89,7 +89,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
-                icon: Icon(
+                icon: const Icon(
                   Icons.tune_outlined,
                   color: Colors.white,
                 ),
@@ -156,7 +156,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       ignoring: _shouldHide,
       child: AnimatedOpacity(
         opacity: _shouldHide ? 0 : 1,
-        duration: Duration(milliseconds: 150),
+        duration: const Duration(milliseconds: 150),
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Container(
@@ -192,7 +192,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.restore_outlined,
               color: Colors.white,
             ),
@@ -222,7 +222,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         child: Padding(
           padding: const EdgeInsets.only(top: 12, bottom: 12),
           child: IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.delete_forever_outlined,
               color: Colors.white,
             ),
