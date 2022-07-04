@@ -1,14 +1,22 @@
 import { Box } from '@mui/material';
 import React from 'react';
 import { Progressbar } from '../../../styledComponents';
-export function FamilyUsageProgressBar({ totalUsage, userDetails }) {
+interface Iprops {
+    userUsage: number;
+    totalUsage: number;
+    totalStorage: number;
+}
+
+export function FamilyUsageProgressBar({
+    userUsage,
+    totalUsage,
+    totalStorage,
+}: Iprops) {
     return (
         <Box position={'relative'} width="100%">
             <Progressbar
                 sx={{ backgroundColor: 'transparent' }}
-                value={
-                    (userDetails.usage * 100) / userDetails.familyData.storage
-                }
+                value={(userUsage * 100) / totalStorage}
             />
             <Progressbar
                 sx={{
@@ -20,7 +28,7 @@ export function FamilyUsageProgressBar({ totalUsage, userDetails }) {
                     },
                     width: '100%',
                 }}
-                value={(totalUsage * 100) / userDetails.familyData.storage}
+                value={(totalUsage * 100) / totalStorage}
             />
         </Box>
     );
