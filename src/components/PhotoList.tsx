@@ -80,6 +80,21 @@ const getTemplateColumns = (
     }
 };
 
+function getFractionFittableColumns(width: number): number {
+    return (
+        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
+        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
+    );
+}
+
+function getGapFromScreenEdge(width: number) {
+    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
+        return 24;
+    } else {
+        return 4;
+    }
+}
+
 const ListContainer = styled(Box)<{
     columns: number;
     shrinkRatio: number;
@@ -164,17 +179,15 @@ export function PhotoList({
     );
     const deduplicateContext = useContext(DeduplicateContext);
 
-    let desiredColumns = Math.ceil((width - 48) / IMAGE_CONTAINER_MAX_WIDTH);
-    const fittableColumns = (width - 48) / IMAGE_CONTAINER_MAX_WIDTH;
+    const fittableColumns = getFractionFittableColumns(width);
+    let columns = Math.ceil(fittableColumns);
 
     let skipMerge = false;
-    if (desiredColumns < MIN_COLUMNS) {
-        desiredColumns = MIN_COLUMNS - 1;
+    if (columns < MIN_COLUMNS) {
+        columns = MIN_COLUMNS - 1;
         skipMerge = true;
     }
-    const shrinkRatio = fittableColumns / desiredColumns;
-
-    const columns = desiredColumns;
+    const shrinkRatio = fittableColumns / columns;
     const listItemHeight =
         IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
 

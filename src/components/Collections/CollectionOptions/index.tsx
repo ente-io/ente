@@ -15,9 +15,9 @@ import { logError } from 'utils/sentry';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
+import MoreHoriz from '@mui/icons-material/MoreHoriz';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -203,7 +203,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     return (
         <OverflowMenu
             ariaControls={'collection-options'}
-            triggerButtonIcon={<MoreVertIcon />}
+            triggerButtonIcon={<MoreHoriz />}
             triggerButtonProps={{
                 sx: {
                     background: (theme) => theme.palette.fill.dark,
