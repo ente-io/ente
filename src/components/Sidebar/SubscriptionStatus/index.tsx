@@ -45,7 +45,7 @@ export default function SubscriptionStatus({
     }
 
     return (
-        <Box px={1}>
+        <Box px={1} pt={0.5}>
             <Typography
                 variant="body2"
                 color={'text.secondary'}

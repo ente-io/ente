@@ -5,10 +5,11 @@ import UtilitySection from './UtilitySection';
 import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
 import DebugLogs from './DebugLogs';
-import { DrawerSidebar, PaddedDivider } from './styledComponents';
+import { DrawerSidebar } from './styledComponents';
 import HeaderSection from './Header';
 import { CollectionSummaries } from 'types/collection';
 import UserDetailsSection from './userDetailsSection';
+import { Divider, Stack } from '@mui/material';
 
 interface Iprops {
     collectionSummaries: CollectionSummaries;
@@ -23,20 +24,21 @@ export default function Sidebar({
     return (
         <DrawerSidebar open={sidebarView} onClose={closeSidebar}>
             <HeaderSection closeSidebar={closeSidebar} />
-            <PaddedDivider spaced />
+            <Divider />
             <UserDetailsSection sidebarView={sidebarView} />
-            <PaddedDivider invisible />
-            <ShortcutSection
-                closeSidebar={closeSidebar}
-                collectionSummaries={collectionSummaries}
-            />
-            <UtilitySection closeSidebar={closeSidebar} />
-            <PaddedDivider />
-            <HelpSection />
-            <PaddedDivider />
-            <ExitSection />
-            <PaddedDivider />
-            <DebugLogs />
+            <Stack spacing={0.5} mb={3}>
+                <ShortcutSection
+                    closeSidebar={closeSidebar}
+                    collectionSummaries={collectionSummaries}
+                />
+                <UtilitySection closeSidebar={closeSidebar} />
+                <Divider />
+                <HelpSection />
+                <Divider />
+                <ExitSection />
+                <Divider />
+                <DebugLogs />
+            </Stack>
         </DrawerSidebar>
     );
 }

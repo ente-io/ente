@@ -30,13 +30,13 @@ export default function ShortcutSection({
     return (
         <>
             <ShortcutButton
-                icon={<DeleteIcon />}
+                startIcon={<DeleteIcon />}
                 label={constants.TRASH}
                 count={collectionSummaries.get(TRASH_SECTION)?.fileCount}
                 onClick={openTrashSection}
             />
             <ShortcutButton
-                icon={<VisibilityOffIcon />}
+                startIcon={<VisibilityOffIcon />}
                 label={constants.ARCHIVE_SECTION_NAME}
                 count={collectionSummaries.get(ARCHIVE_SECTION)?.fileCount}
                 onClick={openArchiveSection}

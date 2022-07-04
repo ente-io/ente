@@ -6,8 +6,7 @@ import { LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useLocalState } from 'hooks/useLocalState';
 import Typography from '@mui/material/Typography';
 import SubscriptionStatus from './SubscriptionStatus';
-import Stack from '@mui/material/Stack';
-import { Skeleton } from '@mui/material';
+import { Box, Skeleton } from '@mui/material';
 import { MemberSubscriptionManage } from '../MemberSubscriptionManage';
 import { GalleryContext } from 'pages/gallery';
 import { isPartOfFamily, isFamilyAdmin } from 'utils/billing';
@@ -53,8 +52,8 @@ export default function UserDetailsSection({ sidebarView }) {
 
     return (
         <>
-            <Stack spacing={1}>
-                <Typography px={1} color="text.secondary">
+            <Box px={0.5} mt={2} pb={1.5} mb={1}>
+                <Typography px={1} pb={1} color="text.secondary">
                     {userDetails ? (
                         userDetails.email
                     ) : (
@@ -67,8 +66,7 @@ export default function UserDetailsSection({ sidebarView }) {
                     onClick={handleSubscriptionCardClick}
                 />
                 <SubscriptionStatus userDetails={userDetails} />
-            </Stack>
-
+            </Box>
             {isMemberSubscription && (
                 <MemberSubscriptionManage
                     userDetails={userDetails}
