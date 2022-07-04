@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/data_util.dart';
@@ -142,17 +141,10 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
           ),
           padding: const EdgeInsets.fromLTRB(60, 0, 60, 0),
           child: GradientButton(
-            linearGradientColors: const [
-              Color(0xFF2CD267),
-              Color(0xFF1DB954),
-            ],
             onTap: () async {
               await _freeStorage(status);
             },
-            child: Text(
-              "Free up " + formatBytes(status.size),
-              style: gradientButtonTextTheme(),
-            ),
+            text: "Free up " + formatBytes(status.size),
           ),
         ),
         Padding(padding: EdgeInsets.all(24)),

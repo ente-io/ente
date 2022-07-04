@@ -485,10 +485,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                 height: 64,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: GradientButton(
-                  linearGradientColors: const [
-                    Color(0xFF2CD267),
-                    Color(0xFF1DB954),
-                  ],
                   onTap: () async {
                     if (LocalSyncService.instance
                         .hasGrantedLimitedPermissions()) {
@@ -502,10 +498,7 @@ class _HomeWidgetState extends State<HomeWidget> {
                       );
                     }
                   },
-                  child: Text(
-                    'Start backup',
-                    style: gradientButtonTextTheme(),
-                  ),
+                  text: "Start backup",
                 ),
               ),
             ),

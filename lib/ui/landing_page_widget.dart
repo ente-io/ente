@@ -101,15 +101,8 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 20),
       child: GradientButton(
-        linearGradientColors: const [
-          Color(0xFF2CD267),
-          Color(0xFF1DB954),
-        ],
         onTap: _navigateToSignUpPage,
-        child: Text(
-          "New to ente",
-          style: gradientButtonTextTheme(),
-        ),
+        text: "New to ente",
       ),
     );
   }
