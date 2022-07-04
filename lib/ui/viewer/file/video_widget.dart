@@ -19,7 +19,7 @@ class VideoWidget extends StatefulWidget {
   final String tagPrefix;
   final Function(bool) playbackCallback;
 
-  VideoWidget(
+  const VideoWidget(
     this.file, {
     this.autoPlay = false,
     this.tagPrefix,

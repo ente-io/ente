@@ -29,7 +29,7 @@ import 'package:photos/utils/toast_util.dart';
 class SharingDialog extends StatefulWidget {
   final Collection collection;
 
-  SharingDialog(this.collection, {Key key}) : super(key: key);
+  const SharingDialog(this.collection, {Key key}) : super(key: key);
 
   @override
   State<SharingDialog> createState() => _SharingDialogState();

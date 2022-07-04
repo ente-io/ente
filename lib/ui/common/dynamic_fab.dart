@@ -9,7 +9,7 @@ class DynamicFAB extends StatelessWidget {
   final String buttonText;
   final Function onPressedFunction;
 
-  DynamicFAB({
+  const DynamicFAB({
     Key key,
     this.isKeypadOpen,
     this.buttonText,

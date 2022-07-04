@@ -8,7 +8,7 @@ import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DangerSectionWidget extends StatefulWidget {
-  DangerSectionWidget({Key key}) : super(key: key);
+  const DangerSectionWidget({Key key}) : super(key: key);
 
   @override
   State<DangerSectionWidget> createState() => _DangerSectionWidgetState();

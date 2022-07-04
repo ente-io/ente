@@ -22,7 +22,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   final String path;
   final Collection collection;
 
-  GalleryAppBarWidget(
+  const GalleryAppBarWidget(
     this.type,
     this.title,
     this.selectedFiles, {

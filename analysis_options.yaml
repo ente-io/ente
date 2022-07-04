@@ -50,12 +50,12 @@ analyzer:
     constant_identifier_names: warning
     prefer_const_constructors: warning
     prefer_const_declarations: warning
+    prefer_const_constructors_in_immutables: warning
     unnecessary_const: error
     cancel_subscriptions: error
 
     use_build_context_synchronously: ignore # experimental lint, requires many changes
     prefer_interpolation_to_compose_strings: ignore # later too many warnings
-    prefer_const_constructors_in_immutables: ignore # too many warnings
     prefer_double_quotes: ignore # too many warnings
     avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
 

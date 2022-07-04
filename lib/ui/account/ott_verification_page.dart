@@ -9,7 +9,7 @@ class OTTVerificationPage extends StatefulWidget {
   final bool isChangeEmail;
   final bool isCreateAccountScreen;
 
-  OTTVerificationPage(
+  const OTTVerificationPage(
     this.email, {
     this.isChangeEmail = false,
     this.isCreateAccountScreen = false,

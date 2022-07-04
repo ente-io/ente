@@ -18,7 +18,7 @@ class LocationSearchResultsPage extends StatefulWidget {
   final ViewPort viewPort;
   final String name;
 
-  LocationSearchResultsPage(this.viewPort, this.name, {Key key})
+  const LocationSearchResultsPage(this.viewPort, this.name, {Key key})
       : super(key: key);
 
   @override

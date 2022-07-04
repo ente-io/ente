@@ -17,7 +17,7 @@ import 'package:tuple/tuple.dart';
 class ManageSharedLinkWidget extends StatefulWidget {
   final Collection collection;
 
-  ManageSharedLinkWidget({Key key, this.collection}) : super(key: key);
+  const ManageSharedLinkWidget({Key key, this.collection}) : super(key: key);
 
   @override
   State<ManageSharedLinkWidget> createState() => _ManageSharedLinkWidgetState();

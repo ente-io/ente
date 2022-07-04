@@ -21,7 +21,7 @@ import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BackupSectionWidget extends StatefulWidget {
-  BackupSectionWidget({Key key}) : super(key: key);
+  const BackupSectionWidget({Key key}) : super(key: key);
 
   @override
   BackupSectionWidgetState createState() => BackupSectionWidgetState();

@@ -230,9 +230,9 @@ class UserService {
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            page = PasswordReentryPage();
+            page = const PasswordReentryPage();
           } else {
-            page = PasswordEntryPage();
+            page = const PasswordEntryPage();
           }
         }
         Navigator.of(context).pushAndRemoveUntil(
@@ -418,7 +418,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage();
+              return const PasswordReentryPage();
             },
           ),
           (route) => route.isFirst,
@@ -432,7 +432,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return LoginPage();
+              return const LoginPage();
             },
           ),
           (route) => route.isFirst,
@@ -486,7 +486,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return LoginPage();
+              return const LoginPage();
             },
           ),
           (route) => route.isFirst,
@@ -551,7 +551,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage();
+              return const PasswordReentryPage();
             },
           ),
           (route) => route.isFirst,
@@ -564,7 +564,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return LoginPage();
+              return const LoginPage();
             },
           ),
           (route) => route.isFirst,

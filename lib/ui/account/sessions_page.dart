@@ -10,7 +10,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class SessionsPage extends StatefulWidget {
-  SessionsPage({Key key}) : super(key: key);
+  const SessionsPage({Key key}) : super(key: key);
 
   @override
   State<SessionsPage> createState() => _SessionsPageState();

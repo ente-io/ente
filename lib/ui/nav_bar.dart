@@ -74,12 +74,13 @@ class _GNavState extends State<GNav> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+      '${(_GNavState).toString()} - build with index ${widget.selectedIndex}',
+    );
     selectedIndex = widget.selectedIndex;
 
     return Container(
       color: widget.backgroundColor ?? Colors.transparent,
-      // padding: EdgeInsets.all(12),
-      // alignment: Alignment.center,
       child: Row(
         mainAxisAlignment: widget.mainAxisAlignment,
         children: widget.tabs
@@ -300,7 +301,6 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _expanded = widget.active;
-
     expandController =
         AnimationController(vsync: this, duration: widget.duration)
           ..addListener(() => setState(() {}));
@@ -309,7 +309,6 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
   @override
   void dispose() {
     expandController.dispose();
-
     super.dispose();
   }
 

@@ -37,7 +37,7 @@ class Gallery extends StatefulWidget {
   final bool smallerTodayFont;
   final String albumName;
 
-  Gallery({
+  const Gallery({
     @required this.asyncLoader,
     @required this.selectedFiles,
     @required this.tagPrefix,

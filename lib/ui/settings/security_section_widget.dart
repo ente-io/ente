@@ -19,7 +19,7 @@ import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
-  SecuritySectionWidget({Key key}) : super(key: key);
+  const SecuritySectionWidget({Key key}) : super(key: key);
 
   @override
   State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();
@@ -261,7 +261,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return SessionsPage();
+                return const SessionsPage();
               },
             ),
           );

@@ -54,7 +54,7 @@ class HugeListView<T> extends StatefulWidget {
 
   final bool isDraggableScrollbarEnabled;
 
-  HugeListView({
+  const HugeListView({
     Key key,
     this.controller,
     @required this.startIndex,

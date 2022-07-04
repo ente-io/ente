@@ -24,7 +24,7 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  PasswordEntryPage({this.mode = PasswordEntryMode.set, Key key})
+  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key key})
       : super(key: key);
 
   @override

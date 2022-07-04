@@ -19,7 +19,7 @@ class ZoomableImage extends StatefulWidget {
   final String tagPrefix;
   final Decoration backgroundDecoration;
 
-  ZoomableImage(
+  const ZoomableImage(
     this.photo, {
     Key key,
     this.shouldDisableScroll,

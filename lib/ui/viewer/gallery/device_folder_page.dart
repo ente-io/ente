@@ -75,7 +75,7 @@ class DeviceFolderPage extends StatelessWidget {
 class BackupConfigurationHeaderWidget extends StatefulWidget {
   final String path;
 
-  BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
+  const BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
 
   @override
   State<BackupConfigurationHeaderWidget> createState() =>

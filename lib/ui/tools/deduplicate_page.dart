@@ -18,7 +18,7 @@ import 'package:photos/utils/toast_util.dart';
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
 
-  DeduplicatePage(this.duplicates, {Key key}) : super(key: key);
+  const DeduplicatePage(this.duplicates, {Key key}) : super(key: key);
 
   @override
   State<DeduplicatePage> createState() => _DeduplicatePageState();

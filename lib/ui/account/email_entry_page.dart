@@ -17,7 +17,7 @@ import 'package:photos/utils/data_util.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class EmailEntryPage extends StatefulWidget {
-  EmailEntryPage({Key key}) : super(key: key);
+  const EmailEntryPage({Key key}) : super(key: key);
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();

@@ -20,7 +20,7 @@ class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
 
-  EnteApp(
+  const EnteApp(
     this.runBackgroundTask,
     this.killBackgroundTask, {
     Key key,

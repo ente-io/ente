@@ -145,15 +145,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   void _navigateToSignUpPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = EmailEntryPage();
+      page = const EmailEntryPage();
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = PasswordEntryPage();
+        page = const PasswordEntryPage();
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage();
+        page = const PasswordReentryPage();
       } else {
         // All is well, user just has not subscribed
         page = getSubscriptionPage(isOnBoarding: true);
@@ -171,15 +171,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   void _navigateToSignInPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = LoginPage();
+      page = const LoginPage();
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = PasswordEntryPage();
+        page = const PasswordEntryPage();
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage();
+        page = const PasswordReentryPage();
       } else {
         // All is well, user just has not subscribed
         page = getSubscriptionPage(isOnBoarding: true);

@@ -11,7 +11,7 @@ class GradientButton extends StatelessWidget {
   // padding between the text and icon
   final double paddingValue;
 
-  GradientButton({
+  const GradientButton({
     Key key,
     this.child,
     this.linearGradientColors = const [

@@ -20,7 +20,7 @@ class FadingBottomBar extends StatefulWidget {
   final Function(File) onEditRequested;
   final bool showOnlyInfoButton;
 
-  FadingBottomBar(
+  const FadingBottomBar(
     this.file,
     this.onEditRequested,
     this.showOnlyInfoButton, {

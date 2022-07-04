@@ -8,7 +8,7 @@ import 'package:photos/services/update_service.dart';
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo latestVersionInfo;
 
-  AppUpdateDialog(this.latestVersionInfo, {Key key}) : super(key: key);
+  const AppUpdateDialog(this.latestVersionInfo, {Key key}) : super(key: key);
 
   @override
   State<AppUpdateDialog> createState() => _AppUpdateDialogState();
@@ -95,7 +95,7 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
 class ApkDownloaderDialog extends StatefulWidget {
   final LatestVersionInfo versionInfo;
 
-  ApkDownloaderDialog(this.versionInfo, {Key key}) : super(key: key);
+  const ApkDownloaderDialog(this.versionInfo, {Key key}) : super(key: key);
 
   @override
   State<ApkDownloaderDialog> createState() => _ApkDownloaderDialogState();
