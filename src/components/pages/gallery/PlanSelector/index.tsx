@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { SetLoading } from 'types/gallery';
 import { AppContext } from 'pages/_app';
-import { Box, Dialog } from '@mui/material';
+import { Dialog } from '@mui/material';
 import PlanSelectorCard from './card';
 
 interface Props {
@@ -21,13 +21,17 @@ function PlanSelector(props: Props) {
             fullScreen={appContext.isMobile}
             open={props.modalView}
             onClose={props.closeModal}
-            PaperProps={{ sx: { width: '400px' } }}>
-            <Box p={1}>
-                <PlanSelectorCard
-                    closeModal={props.closeModal}
-                    setLoading={props.setLoading}
-                />
-            </Box>
+            PaperProps={{
+                sx: (theme) => ({
+                    width: '391px',
+                    p: 1,
+                    [theme.breakpoints.down(360)]: { p: 0 },
+                }),
+            }}>
+            <PlanSelectorCard
+                closeModal={props.closeModal}
+                setLoading={props.setLoading}
+            />
         </Dialog>
     );
 }
