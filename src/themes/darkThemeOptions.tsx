@@ -144,11 +144,15 @@ const darkThemeOptions = createTheme({
                 },
                 startIcon: {
                     marginRight: '12px',
-                    fontSize: '20px',
+                    '&& >svg': {
+                        fontSize: '20px',
+                    },
                 },
                 endIcon: {
                     marginLeft: '12px',
-                    fontSize: '20px',
+                    '&& >svg': {
+                        fontSize: '20px',
+                    },
                 },
                 sizeLarge: {
                     width: '100%',
@@ -297,7 +301,7 @@ const darkThemeOptions = createTheme({
         },
         button: {
             fontSize: '16px',
-            lineHeight: '20px',
+            lineHeight: '19px',
             fontWeight: 'bold',
             textTransform: 'none',
         },

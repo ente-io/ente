@@ -1,16 +1,14 @@
 import React, { FC } from 'react';
-import { Box, ButtonProps, Typography } from '@mui/material';
+import { Box, ButtonProps } from '@mui/material';
 import SidebarButton from './Button';
 import { DotSeparator } from './styledComponents';
 
-interface IProps {
-    hideArrow?: boolean;
-    icon: JSX.Element;
-    label: JSX.Element | string;
-    count: number;
-}
-const ShortcutButton: FC<ButtonProps<'button', IProps>> = ({
-    icon,
+type Iprops = ButtonProps<
+    'button',
+    { label: JSX.Element | string; count: number }
+>;
+
+const ShortcutButton: FC<ButtonProps<'button', Iprops>> = ({
     label,
     count,
     ...props
@@ -19,18 +17,15 @@ const ShortcutButton: FC<ButtonProps<'button', IProps>> = ({
         <SidebarButton
             variant="contained"
             color="secondary"
-            sx={{ px: 1.5 }}
+            sx={{ fontWeight: 'normal' }}
             {...props}>
-            <Typography variant="body2" display={'flex'} alignItems="center">
-                <Box mr={1.5}>{icon}</Box>
-                {label}
-                {count > 0 && (
-                    <Box sx={{ color: 'text.secondary' }}>
-                        <DotSeparator />
-                        {count}
-                    </Box>
-                )}
-            </Typography>
+            {label}
+            {count > 0 && (
+                <Box sx={{ color: 'text.secondary' }}>
+                    <DotSeparator />
+                    {count}
+                </Box>
+            )}
         </SidebarButton>
     );
 };
