@@ -536,6 +536,8 @@ export default function Gallery() {
         if (!newSearch?.collection && !newSearch?.file) {
             setIsInSearchMode(!!newSearch);
             setSetSearchResultSummary(summary);
+        } else {
+            setIsInSearchMode(false);
         }
     };
 
