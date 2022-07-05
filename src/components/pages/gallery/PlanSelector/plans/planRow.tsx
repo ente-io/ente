@@ -82,6 +82,8 @@ export function PlanRow({
                 <PlanButton
                     sx={{
                         justifyContent: 'flex-end',
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
                     }}
                     size="large"
                     onClick={handleClick}>
