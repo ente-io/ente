@@ -79,7 +79,12 @@ export function PlanRow({
                 </FlexWrapper>
             </TopAlignedFluidContainer>
             <Box width="136px">
-                <PlanButton size="large" onClick={handleClick}>
+                <PlanButton
+                    sx={{
+                        justifyContent: 'flex-end',
+                    }}
+                    size="large"
+                    onClick={handleClick}>
                     <Box>
                         <Typography fontWeight={'bold'} variant="h4">
                             {plan.price}{' '}
