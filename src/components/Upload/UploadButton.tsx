@@ -4,13 +4,12 @@ import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Button } from '@mui/material';
 import constants from 'utils/strings/constants';
 
-const Wrapper = styled('div')<{ isDisabled: boolean }>`
+const Wrapper = styled('div')`
     display: flex;
     align-items: center;
     justify-content: center;
     transition: opacity 1s ease;
     cursor: pointer;
-    opacity: ${(props) => (props.isDisabled ? 0 : 1)};
     & .mobile-button {
         display: none;
     }
@@ -25,12 +24,11 @@ const Wrapper = styled('div')<{ isDisabled: boolean }>`
 `;
 
 interface Iprops {
-    isFirstFetch: boolean;
     openUploader: () => void;
 }
-function UploadButton({ isFirstFetch, openUploader }: Iprops) {
+function UploadButton({ openUploader }: Iprops) {
     return (
-        <Wrapper onClick={openUploader} isDisabled={isFirstFetch}>
+        <Wrapper onClick={openUploader}>
             <Button
                 className="desktop-button"
                 color="secondary"
