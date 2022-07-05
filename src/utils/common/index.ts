@@ -81,6 +81,5 @@ export const preloadImage = (imgBasePath: string) => {
     for (let i = 1; i <= 3; i++) {
         srcSet.push(`${imgBasePath}/${i}x.png ${i}x`);
     }
-    console.log(srcSet.join(','));
     new Image().srcset = srcSet.join(',');
 };

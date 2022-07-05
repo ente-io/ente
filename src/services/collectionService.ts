@@ -755,11 +755,17 @@ export function sortCollectionSummaries(
 }
 
 function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
-    const sortedFiles = sortFiles([first, second]);
-    if (sortedFiles[0].id !== first.id) {
+    if (!first) {
         return 1;
-    } else {
+    } else if (!second) {
         return -1;
+    } else {
+        const sortedFiles = sortFiles([first, second]);
+        if (sortedFiles[0].id !== first.id) {
+            return 1;
+        } else {
+            return -1;
+        }
     }
 }
 

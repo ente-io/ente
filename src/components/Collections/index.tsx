@@ -63,6 +63,15 @@ export default function Collections(props: Iprops) {
             collectionsMap.current.get(activeCollectionID);
     }, [activeCollectionID, collections]);
 
+    const sortedCollectionSummaries = useMemo(
+        () =>
+            sortCollectionSummaries(
+                [...collectionSummaries.values()],
+                collectionSortBy
+            ),
+        [collectionSortBy, collectionSummaries]
+    );
+
     useEffect(
         () =>
             !shouldBeHidden &&
@@ -96,15 +105,6 @@ export default function Collections(props: Iprops) {
     const closeAllCollections = () => setAllCollectionView(false);
     const openAllCollections = () => setAllCollectionView(true);
     const closeCollectionShare = () => setCollectionShareModalView(false);
-
-    const sortedCollectionSummaries = useMemo(
-        () =>
-            sortCollectionSummaries(
-                [...collectionSummaries.values()],
-                collectionSortBy
-            ),
-        [collectionSortBy, collectionSummaries]
-    );
 
     return (
         <>
