@@ -750,7 +750,7 @@ const englishConstants = {
     FREE: 'free',
     OF: 'of',
     MONTH_SHORT: 'mo',
-    YEAR_SHORT: 'yr',
+    YEAR: 'year',
     FAMILY_PLAN: 'Family plan',
     DOWNLOAD_LOGS: 'Download logs',
     DOWNLOAD_LOGS_MESSAGE: () => (

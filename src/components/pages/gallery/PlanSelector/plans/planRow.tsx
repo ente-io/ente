@@ -95,7 +95,7 @@ export function PlanRow({
                             {`/ ${
                                 plan.period === PLAN_PERIOD.MONTH
                                     ? constants.MONTH_SHORT
-                                    : constants.YEAR_SHORT
+                                    : constants.YEAR
                             }`}
                         </Typography>
                     </Box>
