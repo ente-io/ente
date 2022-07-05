@@ -147,7 +147,7 @@ export default function Uploader(props: Props) {
                     content: constants.CANVAS_BLOCKED_MESSAGE(),
                     close: { text: constants.CLOSE },
                     proceed: {
-                        text: constants.DOWNLOAD_APP,
+                        text: constants.DOWNLOAD,
                         action: downloadApp,
                         variant: 'accent',
                     },
