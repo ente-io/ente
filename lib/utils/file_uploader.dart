@@ -344,6 +344,7 @@ class FileUploader {
         (_isBackground ? "_bg" : "") +
         ".encrypted";
     MediaUploadData mediaUploadData;
+    var uploadCompleted = false;
 
     try {
       _logger.info(
@@ -463,6 +464,7 @@ class FileUploader {
         Bus.instance.fire(LocalPhotosUpdatedEvent([remoteFile]));
       }
       _logger.info("File upload complete for " + remoteFile.toString());
+      uploadCompleted = true;
       return remoteFile;
     } catch (e, s) {
       if (!(e is NoActiveSubscriptionError ||
@@ -474,10 +476,14 @@ class FileUploader {
       }
       rethrow;
     } finally {
-      if (io.Platform.isIOS &&
-          mediaUploadData != null &&
-          mediaUploadData.sourceFile != null) {
-        await mediaUploadData.sourceFile.delete();
+      if (mediaUploadData != null && mediaUploadData.sourceFile != null) {
+        // delete the file from app's internal cache if it was copied to app
+        // for upload. Shared Media should only be cleared when the upload
+        // succeeds.
+        if (io.Platform.isIOS ||
+            (uploadCompleted && file.isSharedMediaToAppSandbox())) {
+          await mediaUploadData.sourceFile.delete();
+        }
       }
       if (io.File(encryptedFilePath).existsSync()) {
         await io.File(encryptedFilePath).delete();

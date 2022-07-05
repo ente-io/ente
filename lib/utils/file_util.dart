@@ -86,9 +86,19 @@ Future<io.File> _getLocalDiskFile(
 }
 
 String getSharedMediaFilePath(ente.File file) {
-  return Configuration.instance.getSharedMediaCacheDirectory() +
-      "/" +
-      file.localID.replaceAll(kSharedMediaIdentifier, '');
+  return getSharedMediaPathFromLocalID(file.localID);
+}
+
+String getSharedMediaPathFromLocalID(String localID) {
+  if (localID.startsWith(kOldSharedMediaIdentifier)) {
+    return Configuration.instance.getOldSharedMediaCacheDirectory() +
+        "/" +
+        localID.replaceAll(kOldSharedMediaIdentifier, '');
+  } else {
+    return Configuration.instance.getSharedMediaDirectory() +
+        "/" +
+        localID.replaceAll(kSharedMediaIdentifier, '');
+  }
 }
 
 void preloadThumbnail(ente.File file) {

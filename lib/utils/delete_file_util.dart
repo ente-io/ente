@@ -7,7 +7,6 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -309,7 +308,8 @@ Future<bool> deleteLocalFiles(
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   for (String id in localIDs) {
-    if (id.startsWith(kSharedMediaIdentifier)) {
+    if (id.startsWith(kOldSharedMediaIdentifier) ||
+        id.startsWith(kSharedMediaIdentifier)) {
       localSharedMediaIDs.add(id);
     } else {
       localAssetIDs.add(id);
@@ -434,9 +434,7 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
   final List<String> actuallyDeletedIDs = [];
   try {
     return Future.forEach(localIDs, (id) async {
-      String localPath = Configuration.instance.getSharedMediaCacheDirectory() +
-          "/" +
-          id.replaceAll(kSharedMediaIdentifier, '');
+      String localPath = getSharedMediaPathFromLocalID(id);
       try {
         // verify the file exists as the OS may have already deleted it from cache
         if (io.File(localPath).existsSync()) {
