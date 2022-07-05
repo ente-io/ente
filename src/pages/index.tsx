@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
-import Button from 'react-bootstrap/Button';
-import { styled, Typography, TypographyProps } from '@mui/material';
+import { styled, Button, Typography, TypographyProps } from '@mui/material';
 import { AppContext } from './_app';
 import Login from 'components/Login';
 import { useRouter } from 'next/router';
@@ -56,9 +55,12 @@ const MobileBox = styled('div')`
     display: none;
 
     @media (max-width: 1024px) {
+        max-width: 375px;
+        width: 100%;
+        padding: 12px;
         display: flex;
         flex-direction: column;
-        padding: 40px 10px;
+        gap: 8px;
     }
 `;
 
@@ -151,6 +153,9 @@ export default function LandingPage() {
     const signUp = () => setShowLogin(false);
     const login = () => setShowLogin(true);
 
+    const redirectToSignupPage = () => router.push(PAGES.SIGNUP);
+    const redirectToLoginPage = () => router.push(PAGES.LOGIN);
+
     return (
         <Container>
             {loading ? (
@@ -203,19 +208,13 @@ export default function LandingPage() {
                     </SlideContainer>
                     <MobileBox>
                         <Button
-                            variant="outline-success"
-                            size="lg"
-                            style={{ padding: '10px 50px' }}
-                            onClick={() => router.push(PAGES.SIGNUP)}>
-                            {constants.SIGN_UP}
+                            color="accent"
+                            size="large"
+                            onClick={redirectToSignupPage}>
+                            {constants.NEW_USER}
                         </Button>
-                        <br />
-                        <Button
-                            variant="link"
-                            size="lg"
-                            style={{ color: '#fff', padding: '10px 50px' }}
-                            onClick={() => router.push(PAGES.LOGIN)}>
-                            {constants.LOGIN}
+                        <Button size="large" onClick={redirectToLoginPage}>
+                            {constants.EXISTING_USER}
                         </Button>
                     </MobileBox>
                     <DesktopBox>
