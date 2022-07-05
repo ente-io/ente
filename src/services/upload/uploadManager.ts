@@ -416,7 +416,7 @@ class UploadManager {
                 `failed to do post file upload action -> ${e.message}
                 ${(e as Error).stack}`
             );
-            return FileUploadResults.FAILED;
+            return UPLOAD_RESULT.FAILED;
         }
     }
 
