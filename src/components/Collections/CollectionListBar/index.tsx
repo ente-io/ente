@@ -11,7 +11,7 @@ import {
 import CollectionListBarCard from 'components/Collections/CollectionListBar/CollectionCard';
 import useComponentScroll, { SCROLL_DIRECTION } from 'hooks/useComponentScroll';
 import useWindowSize from 'hooks/useWindowSize';
-import { SpaceBetweenFlex } from 'components/Container';
+import { IconButtonWithBG, SpaceBetweenFlex } from 'components/Container';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { AppContext } from 'pages/_app';
 import { CollectionSummary } from 'types/collection';
@@ -114,13 +114,9 @@ export default function CollectionListBar(props: IProps) {
                             setCollectionSortBy={props.setCollectionSortBy}
                             activeSortBy={props.collectionSortBy}
                         />
-                        <IconButton
-                            onClick={showAllCollections}
-                            sx={{
-                                background: (theme) => theme.palette.fill.dark,
-                            }}>
+                        <IconButtonWithBG onClick={showAllCollections}>
                             <ExpandMore />
-                        </IconButton>
+                        </IconButtonWithBG>
                     </Box>
                 )}
             </Box>

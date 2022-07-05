@@ -700,9 +700,9 @@ const englishConstants = {
     LOCK: 'Lock',
     DOWNLOAD_UPLOAD_LOGS: 'Debug logs',
     CHOOSE_UPLOAD_TYPE: 'Upload',
-    UPLOAD_FILES: 'File Upload',
-    UPLOAD_DIRS: 'Folder Upload',
-    UPLOAD_GOOGLE_TAKEOUT: 'Google Takeout',
+    UPLOAD_FILES: 'File',
+    UPLOAD_DIRS: 'Folder',
+    UPLOAD_GOOGLE_TAKEOUT: 'Google takeout',
     CANCEL_UPLOADS: 'Cancel uploads',
     DEDUPLICATE_FILES: 'Deduplicate files',
     NO_DUPLICATES_FOUND: "You've no duplicate files that can be cleared",
@@ -778,6 +778,7 @@ const englishConstants = {
     ),
     WEAK_DEVICE:
         "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
+    DRAG_AND_DROP_HINT: 'Or drag and drop into the ente window',
 };
 
 export default englishConstants;

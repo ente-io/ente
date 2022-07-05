@@ -21,7 +21,8 @@ const DialogTitleWithCloseButton = (props) => {
                     <IconButton
                         aria-label="close"
                         onClick={onClose}
-                        sx={{ float: 'right' }}>
+                        sx={{ float: 'right' }}
+                        color="secondary">
                         <CloseIcon />
                     </IconButton>
                 )}

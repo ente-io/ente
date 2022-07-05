@@ -1,6 +1,10 @@
 import React from 'react';
-import { Box, DialogTitle, IconButton, Stack, Typography } from '@mui/material';
-import { FlexWrapper, FluidContainer } from 'components/Container';
+import { Box, DialogTitle, Stack, Typography } from '@mui/material';
+import {
+    FlexWrapper,
+    FluidContainer,
+    IconButtonWithBG,
+} from 'components/Container';
 import CollectionSort from 'components/Collections/AllCollections/CollectionSort';
 import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
@@ -29,13 +33,9 @@ export default function AllCollectionsHeader({
                         activeSortBy={collectionSortBy}
                         setCollectionSortBy={setCollectionSortBy}
                     />
-                    <IconButton
-                        onClick={onClose}
-                        sx={{
-                            background: (theme) => theme.palette.fill.dark,
-                        }}>
+                    <IconButtonWithBG onClick={onClose}>
                         <Close />
-                    </IconButton>
+                    </IconButtonWithBG>
                 </Stack>
             </FlexWrapper>
         </DialogTitle>
