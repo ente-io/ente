@@ -151,7 +151,8 @@ class SuperLogging {
     appVersion ??= await getAppVersion();
 
     final enable = config.enableInDebugMode || kReleaseMode;
-    sentryIsEnabled = enable && config.sentryDsn != null;
+    final isFDroidClient = await isFDroidBuild();
+    sentryIsEnabled = enable && config.sentryDsn != null && !isFDroidClient;
     fileIsEnabled = enable && config.logDirPath != null;
 
     if (fileIsEnabled) {
@@ -350,5 +351,14 @@ class SuperLogging {
   static Future<String> getAppVersion() async {
     var pkgInfo = await PackageInfo.fromPlatform();
     return "${pkgInfo.version}+${pkgInfo.buildNumber}";
+  }
+
+  // disable sentry on f-droid. We need to make it opt-in preference
+  static Future<bool> isFDroidBuild() async {
+    if (!Platform.isAndroid) {
+      return false;
+    }
+    var pkgName = (await PackageInfo.fromPlatform()).packageName;
+    return pkgName == "io.ente.photos.froid";
   }
 }
