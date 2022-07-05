@@ -1,4 +1,4 @@
-import { Box } from '@mui/material';
+import { Box, IconButton } from '@mui/material';
 import { styled } from '@mui/material';
 
 const VerticallyCentered = styled(Box)`
@@ -69,3 +69,7 @@ export const Overlay = styled(Box)`
     top: 0;
     left: 0;
 `;
+
+export const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
+    backgroundColor: theme.palette.fill.dark,
+}));
