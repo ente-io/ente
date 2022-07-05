@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import constants from 'utils/strings/constants';
-import CloseIcon from './icons/CloseIcon';
+import CloseIcon from '@mui/icons-material/Close';
 
-const CloseButtonWrapper = styled.div`
+const CloseButtonWrapper = styled('div')`
     position: absolute;
     top: 10px;
     right: 10px;
     cursor: pointer;
 `;
-const DropDiv = styled.div`
+const DropDiv = styled('div')`
     flex: 1;
     display: flex;
     flex-direction: column;
 `;
-const Overlay = styled.div`
+const Overlay = styled('div')`
     border-width: 8px;
     left: 0;
     top: 0;
@@ -37,8 +37,7 @@ const Overlay = styled.div`
 `;
 
 type Props = React.PropsWithChildren<{
-    getRootProps: any;
-    getInputProps: any;
+    getDragAndDropRootProps: any;
 }>;
 
 export default function FullScreenDropZone(props: Props) {
@@ -55,10 +54,9 @@ export default function FullScreenDropZone(props: Props) {
     }, []);
     return (
         <DropDiv
-            {...props.getRootProps({
+            {...props.getDragAndDropRootProps({
                 onDragEnter,
             })}>
-            <input {...props.getInputProps()} />
             {isDragActive && (
                 <Overlay onDrop={onDragLeave} onDragLeave={onDragLeave}>
                     <CloseButtonWrapper onClick={onDragLeave}>

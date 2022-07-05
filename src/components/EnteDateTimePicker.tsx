@@ -1,50 +1,76 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
 import {
     MIN_EDITED_CREATION_TIME,
     MAX_EDITED_CREATION_TIME,
-    ALL_TIME,
 } from 'constants/file';
-
-const isSameDay = (first, second) =>
-    first.getFullYear() === second.getFullYear() &&
-    first.getMonth() === second.getMonth() &&
-    first.getDate() === second.getDate();
+import { TextField } from '@mui/material';
+import {
+    LocalizationProvider,
+    MobileDateTimePicker,
+} from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 
 interface Props {
-    loading?: boolean;
-    isInEditMode: boolean;
-    pickedTime: Date;
-    handleChange: (date: Date) => void;
+    initialValue?: Date;
+    disabled?: boolean;
+    label?: string;
+    onSubmit: (date: Date) => void;
+    onClose?: () => void;
 }
 
 const EnteDateTimePicker = ({
-    loading,
-    isInEditMode,
-    pickedTime,
-    handleChange,
-}: Props) => (
-    <DatePicker
-        disabled={loading}
-        open={isInEditMode}
-        selected={pickedTime}
-        onChange={handleChange}
-        timeInputLabel="Time:"
-        dateFormat="dd/MM/yyyy h:mm aa"
-        showTimeSelect
-        autoFocus
-        minDate={MIN_EDITED_CREATION_TIME}
-        maxDate={MAX_EDITED_CREATION_TIME}
-        maxTime={
-            isSameDay(pickedTime, new Date())
-                ? MAX_EDITED_CREATION_TIME
-                : ALL_TIME
-        }
-        minTime={MIN_EDITED_CREATION_TIME}
-        fixedHeight
-        withPortal></DatePicker>
-);
+    initialValue,
+    disabled,
+    onSubmit,
+    onClose,
+}: Props) => {
+    const [open, setOpen] = useState(true);
+    const [value, setValue] = useState(initialValue ?? new Date());
+
+    const handleClose = () => {
+        setOpen(false);
+        onClose?.();
+    };
+    return (
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <MobileDateTimePicker
+                value={value}
+                onChange={setValue}
+                open={open}
+                onClose={handleClose}
+                onOpen={() => setOpen(true)}
+                maxDateTime={MAX_EDITED_CREATION_TIME}
+                minDateTime={MIN_EDITED_CREATION_TIME}
+                disabled={disabled}
+                onAccept={onSubmit}
+                DialogProps={{
+                    sx: {
+                        zIndex: '1502',
+                        '.MuiPickersToolbar-penIconButton': {
+                            display: 'none',
+                        },
+                        '.MuiDialog-paper': { width: '320px' },
+                        '.MuiClockPicker-root': {
+                            position: 'relative',
+                            minHeight: '292px',
+                        },
+                        '.PrivatePickersSlideTransition-root': {
+                            minHeight: '200px',
+                        },
+                    },
+                }}
+                renderInput={(params) => (
+                    <TextField
+                        {...params}
+                        hiddenLabel
+                        margin="none"
+                        variant="standard"
+                    />
+                )}
+            />
+        </LocalizationProvider>
+    );
+};
 
 export default EnteDateTimePicker;

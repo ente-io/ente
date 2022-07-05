@@ -1,6 +1,6 @@
 import { User } from 'types/user';
 import { EnteFile } from 'types/file';
-import { CollectionType } from 'constants/collection';
+import { CollectionSummaryType, CollectionType } from 'constants/collection';
 import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 
 export interface Collection {
@@ -73,10 +73,7 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export interface CollectionAndItsLatestFile {
-    collection: Collection;
-    file: EnteFile;
-}
+export type CollectionLatestFiles = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;
@@ -91,3 +88,14 @@ export interface CollectionMagicMetadata
     extends Omit<MagicMetadataCore, 'data'> {
     data: CollectionMagicMetadataProps;
 }
+export interface CollectionSummary {
+    id: number;
+    name: string;
+    type: CollectionSummaryType;
+    latestFile: EnteFile;
+    fileCount: number;
+    updationTime: number;
+}
+
+export type CollectionSummaries = Map<number, CollectionSummary>;
+export type CollectionFilesCount = Map<number, number>;

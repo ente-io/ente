@@ -13,7 +13,13 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@date-io/date-fns": "^2.14.0",
     "@ente-io/next-with-workbox": "^1.0.3",
+    "@mui/icons-material": "^5.6.2",
+    "@mui/material": "^5.6.2",
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
+    "@mui/styled-engine-sc": "^5.6.1",
+    "@mui/x-date-pickers": "^5.0.0-alpha.6",
     "@sentry/nextjs": "^6.7.1",
     "@stripe/stripe-js": "^1.13.2",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
@@ -40,12 +46,11 @@
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
     "next": "^12.1.0",
+    "next-transpile-modules": "^9.0.0",
     "photoswipe": "file:./thirdparty/photoswipe",
     "piexifjs": "^1.0.6",
     "react": "^17.0.2",
     "react-bootstrap": "^1.3.0",
-    "react-burger-menu": "^3.0.4",
-    "react-datepicker": "^4.3.0",
     "react-dom": "^17.0.2",
     "react-dropzone": "^11.2.4",
     "react-otp-input": "^2.3.1",
@@ -55,7 +60,7 @@
     "react-window": "^1.8.6",
     "react-window-infinite-loader": "^1.0.5",
     "scrypt-js": "^3.0.1",
-    "styled-components": "^5.2.0",
+    "styled-components": "^5.3.5",
     "workbox-precaching": "^6.1.5",
     "workbox-recipes": "^6.1.5",
     "workbox-routing": "^6.1.5",
@@ -76,7 +81,7 @@
     "@types/react-select": "^4.0.15",
     "@types/react-window": "^1.8.2",
     "@types/react-window-infinite-loader": "^1.0.3",
-    "@types/styled-components": "^5.1.3",
+    "@types/styled-components": "^5.1.25",
     "@types/yup": "^0.29.7",
     "babel-plugin-styled-components": "^1.11.1",
     "eslint": "^7.27.0",
@@ -97,5 +102,8 @@
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ]
+  },
+  "resolutions": {
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   }
 }

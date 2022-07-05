@@ -27,12 +27,11 @@ import {
     MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
-    ProgressUpdater,
 } from 'types/upload';
 import {
-    UPLOAD_STAGES,
-    FileUploadResults,
+    UPLOAD_RESULT,
     MAX_FILE_SIZE_SUPPORTED,
+    UPLOAD_STAGES,
 } from 'constants/upload';
 import { ComlinkWorker } from 'utils/comlink';
 import { FILE_TYPE } from 'constants/file';
@@ -40,6 +39,7 @@ import uiService from './uiService';
 import { logUploadInfo } from 'utils/upload';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
+import { ProgressUpdater } from 'types/upload/ui';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -359,7 +359,7 @@ class UploadManager {
     }
 
     async postUploadTask(
-        fileUploadResult: FileUploadResults,
+        fileUploadResult: UPLOAD_RESULT,
         uploadedFile: EnteFile,
         skipDecryption: boolean,
         fileWithCollection: FileWithCollection
@@ -368,9 +368,9 @@ class UploadManager {
             logUploadInfo(`uploadedFile ${JSON.stringify(uploadedFile)}`);
 
             if (
-                (fileUploadResult === FileUploadResults.UPLOADED ||
+                (fileUploadResult === UPLOAD_RESULT.UPLOADED ||
                     fileUploadResult ===
-                        FileUploadResults.UPLOADED_WITH_STATIC_THUMBNAIL) &&
+                        UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL) &&
                 !skipDecryption
             ) {
                 const decryptedFile = await decryptFile(
@@ -396,8 +396,8 @@ class UploadManager {
                     .push(decryptedFile);
             }
             if (
-                fileUploadResult === FileUploadResults.FAILED ||
-                fileUploadResult === FileUploadResults.BLOCKED
+                fileUploadResult === UPLOAD_RESULT.FAILED ||
+                fileUploadResult === UPLOAD_RESULT.BLOCKED
             ) {
                 this.failedFiles.push(fileWithCollection);
             }
@@ -416,7 +416,7 @@ class UploadManager {
                 `failed to do post file upload action -> ${e.message}
                 ${(e as Error).stack}`
             );
-            return FileUploadResults.FAILED;
+            return UPLOAD_RESULT.FAILED;
         }
     }
 

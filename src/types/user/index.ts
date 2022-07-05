@@ -41,6 +41,9 @@ export interface User {
     encryptedToken: string;
     isTwoFactorEnabled: boolean;
     twoFactorSessionID: string;
+    usage: number;
+    fileCount: number;
+    sharedCollectionCount: number;
 }
 export interface EmailVerificationResponse {
     id: number;

@@ -5,18 +5,27 @@ import {
     restoreToCollection,
     updateCollectionMagicMetadata,
 } from 'services/collectionService';
-import { downloadFiles, getSelectedFiles } from 'utils/file';
+import { downloadFiles } from 'utils/file';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError, ServerErrorCodes } from 'utils/error';
-import { SelectedState } from 'types/gallery';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { SetDialogMessage } from 'components/MessageDialog';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
-import { Collection, CollectionMagicMetadataProps } from 'types/collection';
-import { CollectionType } from 'constants/collection';
+import {
+    Collection,
+    CollectionMagicMetadataProps,
+    CollectionSummaries,
+} from 'types/collection';
+import {
+    CollectionSummaryType,
+    CollectionType,
+    HIDE_FROM_COLLECTION_BAR_TYPES,
+    OPTIONS_NOT_HAVING_COLLECTION_TYPES,
+    SYSTEM_COLLECTION_TYPES,
+    UPLOAD_NOT_ALLOWED_COLLECTION_TYPES,
+} from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import {
@@ -33,24 +42,15 @@ export enum COLLECTION_OPS_TYPE {
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
-    setCollectionSelectorView: (value: boolean) => void,
-    selected: SelectedState,
-    files: EnteFile[],
-    setActiveCollection: (id: number) => void,
-    collection: Collection
+    collection: Collection,
+    selectedFiles: EnteFile[]
 ) {
-    setCollectionSelectorView(false);
-    const selectedFiles = getSelectedFiles(selected, files);
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
             await addToCollection(collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.MOVE:
-            await moveToCollection(
-                selected.collectionID,
-                collection,
-                selectedFiles
-            );
+            await moveToCollection(collection.id, collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
             await removeFromCollection(collection, selectedFiles);
@@ -61,7 +61,6 @@ export async function handleCollectionOps(
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);
     }
-    setActiveCollection(collection.id);
 }
 
 export function getSelectedCollection(
@@ -96,10 +95,7 @@ export function isFavoriteCollection(
     }
 }
 
-export async function downloadCollection(
-    collectionID: number,
-    setDialogMessage: SetDialogMessage
-) {
+export async function downloadAllCollectionFiles(collectionID: number) {
     try {
         const allFiles = await getLocalFiles();
         const collectionFiles = allFiles.filter(
@@ -108,15 +104,10 @@ export async function downloadCollection(
         await downloadFiles(collectionFiles);
     } catch (e) {
         logError(e, 'download collection failed ');
-        setDialogMessage({
-            title: constants.ERROR,
-            content: constants.DELETE_COLLECTION_FAILED,
-            close: { variant: 'danger' },
-        });
     }
 }
 
-export async function appendCollectionKeyToShareURL(
+export function appendCollectionKeyToShareURL(
     url: string,
     collectionKey: string
 ) {
@@ -138,10 +129,8 @@ const _intSelectOption = (i: number) => {
     return { label: i.toString(), value: i };
 };
 
-export function selectIntOptions(upperLimit: number) {
-    return [...Array(upperLimit).reverse().keys()].map((i) =>
-        _intSelectOption(i + 1)
-    );
+export function getDeviceLimitOptions() {
+    return [2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
 }
 
 export const shareExpiryOptions = [
@@ -168,19 +157,13 @@ export const shareExpiryOptions = [
     },
 ];
 
-export const changeCollectionVisibilityHelper = async (
+export const changeCollectionVisibility = async (
     collection: Collection,
-    startLoading: () => void,
-    finishLoading: () => void,
-    setDialogMessage: SetDialogMessage,
-    syncWithRemote: () => Promise<void>
+    visibility: VISIBILITY_STATE
 ) => {
-    startLoading();
     try {
         const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
-            visibility: collection.magicMetadata?.data.visibility
-                ? VISIBILITY_STATE.VISIBLE
-                : VISIBILITY_STATE.ARCHIVED,
+            visibility,
         };
 
         const updatedCollection = {
@@ -197,26 +180,36 @@ export const changeCollectionVisibilityHelper = async (
         logError(e, 'change file visibility failed');
         switch (e.status?.toString()) {
             case ServerErrorCodes.FORBIDDEN:
-                setDialogMessage({
-                    title: constants.ERROR,
-                    staticBackdrop: true,
-                    close: { variant: 'danger' },
-                    content: constants.NOT_FILE_OWNER,
-                });
-                return;
+                throw Error(constants.NOT_FILE_OWNER);
         }
-        setDialogMessage({
-            title: constants.ERROR,
-            staticBackdrop: true,
-            close: { variant: 'danger' },
-            content: constants.UNKNOWN_ERROR,
-        });
-    } finally {
-        await syncWithRemote();
-        finishLoading();
+        throw e;
     }
 };
 
 export const getArchivedCollections = (collections: Collection[]) => {
-    return collections.filter(IsArchived).map((collection) => collection.id);
+    return new Set<number>(
+        collections.filter(IsArchived).map((collection) => collection.id)
+    );
+};
+
+export const hasNonEmptyCollections = (
+    collectionSummaries: CollectionSummaries
+) => {
+    return collectionSummaries?.size <= 3;
+};
+
+export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
+    return !UPLOAD_NOT_ALLOWED_COLLECTION_TYPES.has(type);
+};
+
+export const isSystemCollection = (type: CollectionSummaryType) => {
+    return SYSTEM_COLLECTION_TYPES.has(type);
+};
+
+export const shouldShowOptions = (type: CollectionSummaryType) => {
+    return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
+};
+
+export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
+    return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };

@@ -12,13 +12,17 @@ import CryptoWorker, {
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
-import SingleInputForm from 'components/SingleInputForm';
-import Container from 'components/Container';
-import { Button, Card } from 'react-bootstrap';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import { AppContext } from 'pages/_app';
-import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { KeyAttributes } from 'types/user';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import LinkButton from 'components/pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
 
 export default function Credentials() {
@@ -44,10 +48,13 @@ export default function Credentials() {
         } else {
             setKeyAttributes(keyAttributes);
         }
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
-    const verifyPassphrase = async (passphrase, setFieldError) => {
+    const verifyPassphrase: SingleInputFormProps['callback'] = async (
+        passphrase,
+        setFieldError
+    ) => {
         try {
             const cryptoWorker = await new CryptoWorker();
             let kek: string = null;
@@ -88,53 +95,39 @@ export default function Credentials() {
         } catch (e) {
             switch (e.message) {
                 case CustomError.WEAK_DEVICE:
-                    setFieldError('passphrase', constants.WEAK_DEVICE);
+                    setFieldError(constants.WEAK_DEVICE);
                     break;
                 case CustomError.INCORRECT_PASSWORD:
-                    setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                    setFieldError(constants.INCORRECT_PASSPHRASE);
                     break;
                 default:
-                    setFieldError(
-                        'passphrase',
-                        `${constants.UNKNOWN_ERROR} ${e.message}`
-                    );
+                    setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
             }
         }
     };
 
+    const redirectToRecoverPage = () => router.push(PAGES.RECOVER);
+
     return (
-        <>
-            <Container>
-                <Card style={{ maxWidth: '333px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <Card.Title style={{ marginBottom: '32px' }}>
-                            <LogoImg src="/icon.svg" />
-                            {constants.PASSWORD}
-                        </Card.Title>
-                        <SingleInputForm
-                            callback={verifyPassphrase}
-                            placeholder={constants.RETURN_PASSPHRASE_HINT}
-                            buttonText={constants.VERIFY_PASSPHRASE}
-                            fieldType="password"
-                        />
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                marginTop: '12px',
-                            }}>
-                            <Button
-                                variant="link"
-                                onClick={() => router.push(PAGES.RECOVER)}>
-                                {constants.FORGOT_PASSWORD}
-                            </Button>
-                            <Button variant="link" onClick={logoutUser}>
-                                {constants.GO_BACK}
-                            </Button>
-                        </div>
-                    </Card.Body>
-                </Card>
-            </Container>
-        </>
+        <FormContainer>
+            <FormPaper style={{ minWidth: '320px' }}>
+                <FormPaperTitle>{constants.PASSWORD}</FormPaperTitle>
+                <SingleInputForm
+                    callback={verifyPassphrase}
+                    placeholder={constants.RETURN_PASSPHRASE_HINT}
+                    buttonText={constants.VERIFY_PASSPHRASE}
+                    fieldType="password"
+                />
+
+                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                    <LinkButton onClick={redirectToRecoverPage}>
+                        {constants.FORGOT_PASSWORD}
+                    </LinkButton>
+                    <LinkButton onClick={logoutUser}>
+                        {constants.CHANGE_EMAIL}
+                    </LinkButton>
+                </FormPaperFooter>
+            </FormPaper>
+        </FormContainer>
     );
 }

@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useRouter } from 'next/router';
-import Card from 'react-bootstrap/Card';
 import { AppContext } from 'pages/_app';
-import Container from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import SignUp from 'components/SignUp';
 import { PAGES } from 'constants/pages';
+import FormPaper from 'components/Form/FormPaper';
+import FormContainer from 'components/Form/FormContainer';
 
 export default function SignUpPage() {
     const router = useRouter();
@@ -21,7 +21,7 @@ export default function SignUpPage() {
             router.push(PAGES.VERIFY);
         }
         setLoading(false);
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
     const login = () => {
@@ -29,16 +29,14 @@ export default function SignUpPage() {
     };
 
     return (
-        <Container>
+        <FormContainer>
             {loading ? (
                 <EnteSpinner />
             ) : (
-                <Card style={{ minWidth: '320px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <SignUp login={login} />
-                    </Card.Body>
-                </Card>
+                <FormPaper>
+                    <SignUp login={login} />
+                </FormPaper>
             )}
-        </Container>
+        </FormContainer>
     );
 }

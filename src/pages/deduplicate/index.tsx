@@ -18,17 +18,17 @@ import {
     DefaultDeduplicateContext,
 } from 'types/deduplicate';
 import Router from 'next/router';
-import DeduplicateOptions from 'components/pages/gallery/SelectedFileOptions/DeduplicateOptions';
+import DeduplicateOptions from 'components/pages/dedupe/SelectedFileOptions';
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { syncCollections } from 'services/collectionService';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
 );
-export const Info = styled.div`
+export const Info = styled('div')`
     padding: 24px;
     font-size: 18px;
 `;
@@ -79,11 +79,9 @@ export default function Deduplicate() {
         setCollectionNameMap(collectionNameMap);
         const files = await syncFiles(collections, () => null);
         let duplicates = await getDuplicateFiles(files, collectionNameMap);
-
         if (clubSameTimeFilesOnly) {
             duplicates = clubDuplicatesByTime(duplicates);
         }
-
         const currFileSizeMap = new Map<number, number>();
         let allDuplicateFiles: EnteFile[] = [];
         let toSelectFileIDs: number[] = [];
@@ -123,14 +121,14 @@ export default function Deduplicate() {
                 case ServerErrorCodes.FORBIDDEN:
                     setDialogMessage({
                         title: constants.ERROR,
-                        staticBackdrop: true,
+
                         close: { variant: 'danger' },
                         content: constants.NOT_FILE_OWNER,
                     });
             }
             setDialogMessage({
                 title: constants.ERROR,
-                staticBackdrop: true,
+
                 close: { variant: 'danger' },
                 content: constants.UNKNOWN_ERROR,
             });
@@ -175,7 +173,6 @@ export default function Deduplicate() {
                 isDeduplicating
             />
             <DeduplicateOptions
-                setDialogMessage={setDialogMessage}
                 deleteFileHelper={deleteFileHelper}
                 count={selected.count}
                 close={closeDeduplication}

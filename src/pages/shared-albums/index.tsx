@@ -17,14 +17,13 @@ import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
-import { CollectionInfo } from 'components/pages/sharedAlbum/CollectionInfo';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
 import {
     defaultPublicCollectionGalleryContext,
     PublicCollectionGalleryContext,
 } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import Container from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
 import CryptoWorker from 'utils/crypto';
@@ -33,13 +32,17 @@ import { useRouter } from 'next/router';
 import SingleInputForm from 'components/SingleInputForm';
 import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
+import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
+import { CollectionInfo } from 'components/Collections/CollectionInfo';
+import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
+import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
 const Loader = () => (
-    <Container>
+    <VerticallyCentered>
         <EnteSpinner>
             <span className="sr-only">Loading...</span>
         </EnteSpinner>
-    </Container>
+    </VerticallyCentered>
 );
 const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
@@ -59,9 +62,10 @@ export default function PublicCollectionGallery() {
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
 
     useEffect(() => {
-        appContext.showNavBar(true);
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
             router.replace(
@@ -118,6 +122,25 @@ export default function PublicCollectionGallery() {
         };
         main();
     }, []);
+
+    useEffect(
+        () =>
+            publicCollection &&
+            publicFiles &&
+            setPhotoListHeader({
+                item: (
+                    <CollectionInfoBarWrapper>
+                        <CollectionInfo
+                            name={publicCollection.name}
+                            fileCount={publicFiles.length}
+                        />
+                    </CollectionInfoBarWrapper>
+                ),
+                itemType: ITEM_TYPE.OTHER,
+                height: 68,
+            }),
+        [publicCollection, publicFiles]
+    );
 
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
@@ -241,15 +264,14 @@ export default function PublicCollectionGallery() {
         }
     } else {
         if (errorMessage) {
-            return <Container>{errorMessage}</Container>;
+            return <VerticallyCentered>{errorMessage}</VerticallyCentered>;
         }
         if (isPasswordProtected && !passwordJWTToken.current) {
             return (
-                <Container>
+                <VerticallyCentered>
                     <Card style={{ maxWidth: '332px' }} className="text-center">
                         <Card.Body style={{ padding: '40px 30px' }}>
                             <Card.Subtitle style={{ marginBottom: '2rem' }}>
-                                {/* <LogoImg src="/icon.svg" /> */}
                                 {constants.LINK_PASSWORD}
                             </Card.Subtitle>
                             <SingleInputForm
@@ -260,11 +282,13 @@ export default function PublicCollectionGallery() {
                             />
                         </Card.Body>
                     </Card>
-                </Container>
+                </VerticallyCentered>
             );
         }
         if (!publicFiles) {
-            return <Container>{constants.NOT_FOUND}</Container>;
+            return (
+                <VerticallyCentered>{constants.NOT_FOUND}</VerticallyCentered>
+            );
         }
     }
 
@@ -276,8 +300,9 @@ export default function PublicCollectionGallery() {
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 openReportForm,
+                photoListHeader,
             }}>
-            <CollectionInfo collection={publicCollection} />
+            <SharedAlbumNavbar />
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}
@@ -289,7 +314,6 @@ export default function PublicCollectionGallery() {
                 openUploader={() => null}
                 isInSearchMode={false}
                 search={{}}
-                setSearchStats={() => null}
                 deleted={[]}
                 activeCollection={ALL_SECTION}
                 isSharedCollection

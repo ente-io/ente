@@ -26,7 +26,7 @@ export enum CustomError {
     FILE_TOO_LARGE = 'file too large',
     SUBSCRIPTION_EXPIRED = 'subscription expired',
     STORAGE_QUOTA_EXCEEDED = 'storage quota exceeded',
-    SESSION_EXPIRED_MESSAGE = 'session expired',
+    SESSION_EXPIRED = 'session expired',
     TYPE_DETECTION_FAILED = 'type detection failed',
     SIGNUP_FAILED = 'signup failed',
     FAV_COLLECTION_MISSING = 'favorite collection missing',
@@ -59,7 +59,7 @@ function parseUploadErrorCodes(error) {
                 parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
                 break;
             case ServerErrorCodes.SESSION_EXPIRED:
-                parsedMessage = CustomError.SESSION_EXPIRED_MESSAGE;
+                parsedMessage = CustomError.SESSION_EXPIRED;
                 break;
             case ServerErrorCodes.FILE_TOO_LARGE:
                 parsedMessage = CustomError.FILE_TOO_LARGE;
@@ -80,26 +80,10 @@ export function handleUploadError(error): Error {
     switch (parsedError.message) {
         case CustomError.SUBSCRIPTION_EXPIRED:
         case CustomError.STORAGE_QUOTA_EXCEEDED:
-        case CustomError.SESSION_EXPIRED_MESSAGE:
+        case CustomError.SESSION_EXPIRED:
             throw parsedError;
     }
     return parsedError;
-}
-
-export function getUserFacingErrorMessage(
-    err: CustomError,
-    action: () => void
-) {
-    switch (err) {
-        case CustomError.SESSION_EXPIRED_MESSAGE:
-            return constants.SESSION_EXPIRED_MESSAGE;
-        case CustomError.SUBSCRIPTION_EXPIRED:
-            return constants.SUBSCRIPTION_EXPIRED(action);
-        case CustomError.STORAGE_QUOTA_EXCEEDED:
-            return constants.STORAGE_QUOTA_EXCEEDED(action);
-        default:
-            return constants.UNKNOWN_ERROR;
-    }
 }
 
 export function errorWithContext(originalError: Error, context: string) {

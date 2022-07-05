@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import FormControl from 'react-bootstrap/FormControl';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import { getOtt } from 'services/userService';
-import Card from 'react-bootstrap/Card';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import SubmitButton from 'components/SubmitButton';
-import { Button } from 'react-bootstrap';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
     SaveKeyInSessionStore,
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
-import LogoImg from './LogoImg';
 import { logError } from 'utils/sentry';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
+import {
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    TextField,
+} from '@mui/material';
+import FormPaperTitle from './Form/FormPaper/Title';
+import LinkButton from './pages/gallery/LinkButton';
+import FormPaperFooter from './Form/FormPaper/Footer';
+import VerticallyCentered from './Container';
 
 interface FormValues {
     email: string;
@@ -87,10 +92,7 @@ export default function SignUp(props: SignUpProps) {
 
     return (
         <>
-            <Card.Title style={{ marginBottom: '32px' }}>
-                <LogoImg src="/icon.svg" />
-                {constants.SIGN_UP}
-            </Card.Title>
+            <FormPaperTitle> {constants.SIGN_UP}</FormPaperTitle>
             <Formik<FormValues>
                 initialValues={{
                     email: '',
@@ -110,85 +112,81 @@ export default function SignUp(props: SignUpProps) {
                 {({
                     values,
                     errors,
-                    touched,
                     handleChange,
                     handleSubmit,
                 }): JSX.Element => (
-                    <Form noValidate onSubmit={handleSubmit}>
-                        <Form.Group controlId="registrationForm.email">
-                            <Form.Control
+                    <form noValidate onSubmit={handleSubmit}>
+                        <VerticallyCentered sx={{ mb: 1 }}>
+                            <TextField
+                                fullWidth
                                 type="email"
-                                placeholder={constants.ENTER_EMAIL}
+                                label={constants.ENTER_EMAIL}
                                 value={values.email}
                                 onChange={handleChange('email')}
-                                isInvalid={Boolean(
-                                    touched.email && errors.email
-                                )}
+                                error={Boolean(errors.email)}
+                                helperText={errors.email}
                                 autoFocus
                                 disabled={loading}
                             />
-                            <FormControl.Feedback type="invalid">
-                                {errors.email}
-                            </FormControl.Feedback>
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Control
+
+                            <TextField
+                                fullWidth
                                 type="password"
-                                placeholder={constants.PASSPHRASE_HINT}
+                                label={constants.PASSPHRASE_HINT}
                                 value={values.passphrase}
                                 onChange={handleChange('passphrase')}
-                                isInvalid={Boolean(
-                                    touched.passphrase && errors.passphrase
-                                )}
+                                error={Boolean(errors.passphrase)}
+                                helperText={errors.passphrase}
                                 disabled={loading}
                             />
-                            <Form.Control.Feedback type="invalid">
-                                {errors.passphrase}
-                            </Form.Control.Feedback>
-                        </Form.Group>
-                        <Form.Group>
-                            <Form.Control
+
+                            <TextField
+                                fullWidth
                                 type="password"
-                                placeholder={constants.RE_ENTER_PASSPHRASE}
+                                label={constants.CONFIRM_PASSPHRASE}
                                 value={values.confirm}
                                 onChange={handleChange('confirm')}
-                                isInvalid={Boolean(
-                                    touched.confirm && errors.confirm
-                                )}
+                                error={Boolean(errors.confirm)}
+                                helperText={errors.confirm}
                                 disabled={loading}
                             />
-                            <Form.Control.Feedback type="invalid">
-                                {errors.confirm}
-                            </Form.Control.Feedback>
-                        </Form.Group>
-                        <Form.Group
-                            style={{
-                                marginBottom: '0',
-                                textAlign: 'left',
-                            }}
-                            controlId="formBasicCheckbox-1">
-                            <Form.Check
-                                checked={acceptTerms}
-                                onChange={(e) =>
-                                    setAcceptTerms(e.target.checked)
-                                }
-                                type="checkbox"
-                                label={constants.TERMS_AND_CONDITIONS()}
-                            />
-                        </Form.Group>
-                        <br />
+                            <FormGroup sx={{ width: '100%' }}>
+                                <FormControlLabel
+                                    sx={{
+                                        color: 'text.secondary',
+                                        ml: 0,
+                                        mt: 2,
+                                    }}
+                                    control={
+                                        <Checkbox
+                                            size="small"
+                                            disabled={loading}
+                                            checked={acceptTerms}
+                                            onChange={(e) =>
+                                                setAcceptTerms(e.target.checked)
+                                            }
+                                            color="accent"
+                                        />
+                                    }
+                                    label={constants.TERMS_AND_CONDITIONS()}
+                                />
+                            </FormGroup>
+                        </VerticallyCentered>
                         <SubmitButton
-                            buttonText={constants.SUBMIT}
+                            sx={{ my: 4 }}
+                            buttonText={constants.CREATE_ACCOUNT}
                             loading={loading}
                             disabled={!acceptTerms}
                         />
-                        <br />
-                        <Button block variant="link" onClick={props.login}>
-                            {constants.ACCOUNT_EXISTS}
-                        </Button>
-                    </Form>
+                    </form>
                 )}
             </Formik>
+
+            <FormPaperFooter>
+                <LinkButton onClick={props.login}>
+                    {constants.ACCOUNT_EXISTS}
+                </LinkButton>
+            </FormPaperFooter>
         </>
     );
 }

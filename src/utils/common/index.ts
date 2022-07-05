@@ -48,6 +48,12 @@ export function reverseString(title: string) {
         .reduce((reversedString, currWord) => `${currWord} ${reversedString}`);
 }
 
+export function initiateEmail(email: string) {
+    const a = document.createElement('a');
+    a.href = 'mailto:' + email;
+    a.rel = 'noreferrer noopener';
+    a.click();
+}
 export const promiseWithTimeout = async (
     request: Promise<any>,
     timeout: number
@@ -70,6 +76,13 @@ export const promiseWithTimeout = async (
     ]);
 };
 
+export const preloadImage = (imgBasePath: string) => {
+    const srcSet = [];
+    for (let i = 1; i <= 3; i++) {
+        srcSet.push(`${imgBasePath}/${i}x.png ${i}x`);
+    }
+    new Image().srcset = srcSet.join(',');
+};
 export function openLink(href: string, newTab?: boolean) {
     const a = document.createElement('a');
     a.href = href;

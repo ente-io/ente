@@ -1,17 +1,19 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
-import styled from 'styled-components';
-import PlayCircleOutline from 'components/icons/PlayCircleOutline';
+import { styled } from '@mui/material';
+import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
 import DownloadManager from 'services/downloadManager';
 import useLongPress from 'utils/common/useLongPress';
 import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
-import { isLivePhoto } from 'utils/file';
+import LivePhotoIcon from '@mui/icons-material/LightMode';
+import { formatDateRelative, isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from 'utils/sentry';
+import { Overlay } from 'components/Container';
+import { TRASH_SECTION } from 'constants/collection';
 
 interface IProps {
     file: EnteFile;
@@ -26,9 +28,10 @@ interface IProps {
     isRangeSelectActive?: boolean;
     selectOnClick?: boolean;
     isInsSelectRange?: boolean;
+    activeCollection?: number;
 }
 
-const Check = styled.input<{ active: boolean }>`
+const Check = styled('input')<{ active: boolean }>`
     appearance: none;
     position: absolute;
     z-index: 10;
@@ -87,7 +90,7 @@ const Check = styled.input<{ active: boolean }>`
     }
 `;
 
-export const HoverOverlay = styled.div<{ checked: boolean }>`
+export const HoverOverlay = styled('div')<{ checked: boolean }>`
     opacity: 0;
     left: 0;
     top: 0;
@@ -100,8 +103,8 @@ export const HoverOverlay = styled.div<{ checked: boolean }>`
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
 `;
 
-export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
-    opacity: ${(props) => (!props.active ? 0 : 1)});
+export const InSelectRangeOverLay = styled('div')<{ active: boolean }>`
+    opacity: ${(props) => (!props.active ? 0 : 1)};
     left: 0;
     top: 0;
     outline: none;
@@ -111,7 +114,8 @@ export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
     ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
-export const FileAndCollectionNameOverlay = styled.div`
+export const FileAndCollectionNameOverlay = styled('div')`
+    width: 100%;
     bottom: 0;
     left: 0;
     max-height: 40%;
@@ -134,7 +138,7 @@ export const FileAndCollectionNameOverlay = styled.div`
     position: absolute;
 `;
 
-export const SelectedOverlay = styled.div<{ selected: boolean }>`
+export const SelectedOverlay = styled('div')<{ selected: boolean }>`
     z-index: 5;
     position: absolute;
     left: 0;
@@ -142,9 +146,16 @@ export const SelectedOverlay = styled.div<{ selected: boolean }>`
     height: 100%;
     width: 100%;
     ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
+    border-radius: 4px;
 `;
 
-const Cont = styled.div<{ disabled: boolean }>`
+export const LivePhotoIndicatorOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
+`;
+
+const Cont = styled('div')<{ disabled: boolean }>`
     background: #222;
     display: flex;
     width: fit-content;
@@ -181,6 +192,7 @@ const Cont = styled.div<{ disabled: boolean }>`
     &:hover ${HoverOverlay} {
         opacity: 1;
     }
+    border-radius: 4px;
 `;
 
 export default function PreviewCard(props: IProps) {
@@ -302,13 +314,13 @@ export default function PreviewCard(props: IProps) {
                 />
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
-            {file?.metadata.fileType === 1 && <PlayCircleOutline />}
+            {file?.metadata.fileType === 1 && <PlayCircleOutlineOutlinedIcon />}
             <SelectedOverlay selected={selected} />
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 active={isRangeSelectActive && isInsSelectRange}
             />
-            {isLivePhoto(file) && <LivePhotoIndicatorOverlay />}
+            {isLivePhoto(file) && <LivePhotoIndicator />}
             {deduplicateContext.isOnDeduplicatePage && (
                 <FileAndCollectionNameOverlay>
                     <p>{file.metadata.title}</p>
@@ -319,6 +331,19 @@ export default function PreviewCard(props: IProps) {
                     </p>
                 </FileAndCollectionNameOverlay>
             )}
+            {props?.activeCollection === TRASH_SECTION && file.isTrashed && (
+                <FileAndCollectionNameOverlay>
+                    <p>{formatDateRelative(file.deleteBy / 1000)}</p>
+                </FileAndCollectionNameOverlay>
+            )}
         </Cont>
+    );
+}
+
+function LivePhotoIndicator() {
+    return (
+        <LivePhotoIndicatorOverlay>
+            <LivePhotoIcon />
+        </LivePhotoIndicatorOverlay>
     );
 }

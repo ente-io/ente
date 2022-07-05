@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import Button from 'react-bootstrap/Button';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { AppContext } from './_app';
 import Login from 'components/Login';
 import { useRouter } from 'next/router';
@@ -10,11 +10,10 @@ import EnteSpinner from 'components/EnteSpinner';
 import SignUp from 'components/SignUp';
 import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
-import IncognitoWarning from 'components/IncognitoWarning';
 import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
 
-const Container = styled.div`
+const Container = styled('div')`
     display: flex;
     flex: 1;
     align-items: center;
@@ -26,7 +25,7 @@ const Container = styled.div`
     }
 `;
 
-const SlideContainer = styled.div`
+const SlideContainer = styled('div')`
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -39,7 +38,7 @@ const SlideContainer = styled.div`
     }
 `;
 
-const DesktopBox = styled.div`
+const DesktopBox = styled('div')`
     flex: 1;
     height: 100%;
     padding: 10px;
@@ -53,7 +52,7 @@ const DesktopBox = styled.div`
     }
 `;
 
-const MobileBox = styled.div`
+const MobileBox = styled('div')`
     display: none;
 
     @media (max-width: 1024px) {
@@ -63,13 +62,13 @@ const MobileBox = styled.div`
     }
 `;
 
-const SideBox = styled.div`
+const SideBox = styled('div')`
     display: flex;
     flex-direction: column;
     min-width: 320px;
 `;
 
-const TextContainer = styled.div`
+const TextContainer = styled('div')`
     padding: 20px;
     max-width: 300px;
     margin: 0 auto;
@@ -81,14 +80,14 @@ const UpperText = styled(TextContainer)`
     margin-bottom: 20px;
 `;
 
-const FeatureText = styled.div`
+const FeatureText = styled('div')`
     color: #51cd7c;
     font-weight: bold;
     padding-top: 20px;
     font-size: 24px;
 `;
 
-const Img = styled.img`
+const Img = styled('img')`
     height: 250px;
     object-fit: contain;
 
@@ -102,7 +101,7 @@ export default function LandingPage() {
     const appContext = useContext(AppContext);
     const [loading, setLoading] = useState(true);
     const [showLogin, setShowLogin] = useState(true);
-    const [blockUsage, setBlockUsage] = useState(false);
+
     useEffect(() => {
         appContext.showNavBar(false);
         const currentURL = new URL(window.location.href);
@@ -143,7 +142,12 @@ export default function LandingPage() {
             await localForage.ready();
         } catch (e) {
             logError(e, 'usage in incognito mode tried');
-            setBlockUsage(true);
+            appContext.setDialogMessage({
+                title: constants.LOCAL_STORAGE_NOT_ACCESSIBLE,
+
+                nonClosable: true,
+                content: constants.LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE,
+            });
         } finally {
             setLoading(false);
         }
@@ -162,7 +166,11 @@ export default function LandingPage() {
                         <UpperText>{constants.HERO_HEADER()}</UpperText>
                         <Carousel controls={false}>
                             <Carousel.Item>
-                                <Img src="/images/slide-1.png" />
+                                <Img
+                                    src="/images/onboarding-safe/1x.png"
+                                    srcSet="/images/onboarding-safe/2x.png 2x,
+                                        /images/onboarding-safe/3x.png 3x"
+                                />
                                 <FeatureText>
                                     {constants.HERO_SLIDE_1_TITLE}
                                 </FeatureText>
@@ -171,7 +179,11 @@ export default function LandingPage() {
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
-                                <Img src="/images/slide-2.png" />
+                                <Img
+                                    src="/images/onboarding-sync/1x.png"
+                                    srcSet="/images/onboarding-sync/2x.png 2x,
+                                        /images/onboarding-sync/3x.png 3x"
+                                />
                                 <FeatureText>
                                     {constants.HERO_SLIDE_2_TITLE}
                                 </FeatureText>
@@ -180,7 +192,11 @@ export default function LandingPage() {
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
-                                <Img src="/images/slide-3.png" />
+                                <Img
+                                    src="/images/onboarding-lock/1x.png"
+                                    srcSet="/images/onboarding-lock/2x.png 2x,
+                                        /images/onboarding-lock/3x.png 3x"
+                                />
                                 <FeatureText>
                                     {constants.HERO_SLIDE_3_TITLE}
                                 </FeatureText>
@@ -216,7 +232,6 @@ export default function LandingPage() {
                             )}
                         </SideBox>
                     </DesktopBox>
-                    {blockUsage && <IncognitoWarning />}
                 </>
             )}
         </Container>

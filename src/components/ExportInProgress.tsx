@@ -1,20 +1,23 @@
 import React from 'react';
-import { Button, ProgressBar } from 'react-bootstrap';
 import { ExportProgress } from 'types/export';
-import styled from 'styled-components';
+import {
+    Box,
+    Button,
+    DialogActions,
+    DialogContent,
+    styled,
+} from '@mui/material';
 import constants from 'utils/strings/constants';
 import { ExportStage } from 'constants/export';
+import VerticallyCentered, { FlexWrapper } from './Container';
+import { ProgressBar } from 'react-bootstrap';
 
-export const ComfySpan = styled.span`
+export const ComfySpan = styled('span')`
     word-spacing: 1rem;
     color: #ddd;
 `;
 
 interface Props {
-    show: boolean;
-    onHide: () => void;
-    exportFolder: string;
-    exportSize: string;
     exportStage: ExportStage;
     exportProgress: ExportProgress;
     resumeExport: () => void;
@@ -25,66 +28,59 @@ interface Props {
 export default function ExportInProgress(props: Props) {
     return (
         <>
-            <div
-                style={{
-                    marginBottom: '30px',
-                    padding: '0 5%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    flexDirection: 'column',
-                }}>
-                <div style={{ marginBottom: '10px' }}>
-                    <ComfySpan>
-                        {' '}
-                        {props.exportProgress.current} /{' '}
-                        {props.exportProgress.total}{' '}
-                    </ComfySpan>{' '}
-                    <span style={{ marginLeft: '10px' }}>
-                        {' '}
-                        files exported{' '}
-                        {props.exportStage === ExportStage.PAUSED && `(paused)`}
-                    </span>
-                </div>
-                <div style={{ width: '100%', marginBottom: '30px' }}>
-                    <ProgressBar
-                        now={Math.round(
-                            (props.exportProgress.current * 100) /
-                                props.exportProgress.total
-                        )}
-                        animated={!(props.exportStage === ExportStage.PAUSED)}
-                        variant="upload-progress-bar"
-                    />
-                </div>
-                <div
-                    style={{
-                        width: '100%',
-                        display: 'flex',
-                        justifyContent: 'space-around',
-                    }}>
-                    {props.exportStage === ExportStage.PAUSED ? (
-                        <Button
-                            block
-                            variant={'outline-secondary'}
-                            onClick={props.resumeExport}>
-                            {constants.RESUME}
-                        </Button>
-                    ) : (
-                        <Button
-                            block
-                            variant={'outline-secondary'}
-                            onClick={props.pauseExport}>
-                            {constants.PAUSE}
-                        </Button>
-                    )}
-                    <div style={{ width: '30px' }} />
+            <DialogContent>
+                <VerticallyCentered>
+                    <Box mb={1.5}>
+                        <ComfySpan>
+                            {' '}
+                            {props.exportProgress.current} /{' '}
+                            {props.exportProgress.total}{' '}
+                        </ComfySpan>{' '}
+                        <span>
+                            {' '}
+                            files exported{' '}
+                            {props.exportStage === ExportStage.PAUSED &&
+                                `(paused)`}
+                        </span>
+                    </Box>
+                    <FlexWrapper px={1}>
+                        <ProgressBar
+                            style={{ width: '100%' }}
+                            now={Math.round(
+                                (props.exportProgress.current * 100) /
+                                    props.exportProgress.total
+                            )}
+                            animated={
+                                !(props.exportStage === ExportStage.PAUSED)
+                            }
+                            variant="upload-progress-bar"
+                        />
+                    </FlexWrapper>
+                </VerticallyCentered>
+            </DialogContent>
+            <DialogActions>
+                {props.exportStage === ExportStage.PAUSED ? (
                     <Button
-                        block
-                        variant={'outline-danger'}
-                        onClick={props.cancelExport}>
-                        {constants.CANCEL}
+                        size="large"
+                        onClick={props.resumeExport}
+                        color="accent">
+                        {constants.RESUME}
                     </Button>
-                </div>
-            </div>
+                ) : (
+                    <Button
+                        size="large"
+                        onClick={props.pauseExport}
+                        color="primary">
+                        {constants.PAUSE}
+                    </Button>
+                )}
+                <Button
+                    size="large"
+                    onClick={props.cancelExport}
+                    color="secondary">
+                    {constants.CANCEL}
+                </Button>
+            </DialogActions>
         </>
     );
 }

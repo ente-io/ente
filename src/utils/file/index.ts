@@ -24,7 +24,8 @@ import PublicCollectionDownloadManager from 'services/publicCollectionDownloadMa
 import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
-import { updateMagicMetadataProps } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -138,12 +139,22 @@ export function isFileHEIC(mimeType: string) {
 }
 
 export function sortFilesIntoCollections(files: EnteFile[]) {
-    const collectionWiseFiles = new Map<number, EnteFile[]>();
+    const collectionWiseFiles = new Map<number, EnteFile[]>([
+        [ARCHIVE_SECTION, []],
+        [TRASH_SECTION, []],
+    ]);
     for (const file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {
             collectionWiseFiles.set(file.collectionID, []);
         }
-        collectionWiseFiles.get(file.collectionID).push(file);
+        if (file.isTrashed) {
+            collectionWiseFiles.get(TRASH_SECTION).push(file);
+        } else {
+            collectionWiseFiles.get(file.collectionID).push(file);
+            if (IsArchived(file)) {
+                collectionWiseFiles.get(ARCHIVE_SECTION).push(file);
+            }
+        }
     }
     return collectionWiseFiles;
 }
@@ -191,7 +202,7 @@ export function formatDateTime(date: number | Date) {
         day: 'numeric',
     });
     const timeFormat = new Intl.DateTimeFormat('en-IN', {
-        timeStyle: 'medium',
+        timeStyle: 'short',
     });
     return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
 }
@@ -513,6 +524,10 @@ export const isLivePhoto = (file: EnteFile) =>
 
 export const isImageOrVideo = (fileType: FILE_TYPE) =>
     [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
+
+export const getArchivedFiles = (files: EnteFile[]) => {
+    return files.filter(IsArchived).map((file) => file.id);
+};
 
 export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
     const type = await getFileType(new File([blob], fileName));

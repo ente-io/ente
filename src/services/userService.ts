@@ -17,7 +17,7 @@ import {
     TwoFactorRecoveryResponse,
     UserDetails,
 } from 'types/user';
-import { getFamilyData, isPartOfFamily } from 'utils/billing';
+import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
@@ -293,7 +293,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
         const token = getToken();
 
         const resp = await HTTPService.get(
-            `${ENDPOINT}/users/details/v2?memoryCount=false`,
+            `${ENDPOINT}/users/details/v2`,
             null,
             {
                 'X-Auth-Token': token,
@@ -309,7 +309,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
 export const getFamilyPortalRedirectURL = async () => {
     try {
         const jwtToken = await getFamiliesToken();
-        const isFamilyCreated = isPartOfFamily(getFamilyData());
+        const isFamilyCreated = isPartOfFamily(getLocalFamilyData());
         return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
             window.location.origin
         }/gallery`;
