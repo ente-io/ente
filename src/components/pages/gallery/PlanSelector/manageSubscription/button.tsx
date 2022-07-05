@@ -4,7 +4,7 @@ import { FluidContainer } from 'components/Container';
 import React from 'react';
 
 const ManageSubscriptionButton = ({ children, ...props }: ButtonProps) => (
-    <Button {...props} endIcon={<ChevronRight />}>
+    <Button size="large" endIcon={<ChevronRight />} {...props}>
         <FluidContainer>{children}</FluidContainer>
     </Button>
 );
