@@ -122,8 +122,8 @@ export default function Collections(props: Iprops) {
             <AllCollections
                 open={allCollectionView}
                 onClose={closeAllCollections}
-                collectionSummaries={sortedCollectionSummaries.filter((x) =>
-                    isSystemCollection(x.type)
+                collectionSummaries={sortedCollectionSummaries.filter(
+                    (x) => !isSystemCollection(x.type)
                 )}
                 setActiveCollection={setActiveCollectionID}
                 setCollectionSortBy={setCollectionSortBy}
