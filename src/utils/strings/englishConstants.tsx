@@ -27,14 +27,27 @@ const englishConstants = {
             your <strong>memories</strong> are
         </div>
     ),
-    HERO_SLIDE_1_TITLE: 'protected',
-    HERO_SLIDE_1:
-        'end-to-end encrypted with your password, visible only to you',
-    HERO_SLIDE_2_TITLE: 'synced',
-    HERO_SLIDE_2: 'available across all your devices, web, android and ios',
-    HERO_SLIDE_3_TITLE: 'preserved',
-    HERO_SLIDE_3:
-        'reliably replicated to a fallout shelter, designed to outlive',
+    HERO_SLIDE_1_TITLE: () => (
+        <>
+            <div>Private backups</div>
+            <div> for your memories</div>
+        </>
+    ),
+    HERO_SLIDE_1: 'End-to-end encrypted by default',
+    HERO_SLIDE_2_TITLE: () => (
+        <>
+            <div>Safely stored </div>
+            <div>at a fallout shelter</div>
+        </>
+    ),
+    HERO_SLIDE_2: 'Designed to outlive',
+    HERO_SLIDE_3_TITLE: () => (
+        <>
+            <div>Available</div>
+            <div> everywhere</div>
+        </>
+    ),
+    HERO_SLIDE_3: 'Android, iOS, web, Desktop',
     COMPANY_NAME: 'ente',
     LOGIN: 'Login',
     SIGN_UP: 'Signup',
@@ -75,7 +88,7 @@ const englishConstants = {
     VERIFY_PASSPHRASE: 'Sign in',
     INCORRECT_PASSPHRASE: 'Incorrect password',
     ENTER_ENC_PASSPHRASE:
-        'please enter a password that we can use to encrypt your data',
+        'Please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
         <>
             We don't store your password, so if you forget it,{' '}
