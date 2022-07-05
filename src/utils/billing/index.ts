@@ -9,6 +9,7 @@ import { logError } from '../sentry';
 import { SetDialogBoxAttributes } from 'types/dialogBox';
 import { getFamilyPortalRedirectURL } from 'services/userService';
 import { FamilyData, FamilyMember, User, UserDetails } from 'types/user';
+import { openLink } from 'utils/common';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -294,15 +295,16 @@ export async function manageFamilyMethod(
     try {
         setLoading(true);
         const url = await getFamilyPortalRedirectURL();
-        window.location.href = url;
+        openLink(url, true);
     } catch (error) {
         logError(error, 'failed to redirect to family portal');
-        setLoading(false);
         setDialogMessage({
             title: constants.ERROR,
             content: constants.UNKNOWN_ERROR,
             close: { variant: 'danger' },
         });
+    } finally {
+        setLoading(false);
     }
 }
 

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { SetCollectionSelectorAttributes } from 'types/gallery';
 import { FluidContainer } from 'components/Container';
 import constants from 'utils/strings/constants';
@@ -9,9 +9,6 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { Collection } from 'types/collection';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
-import { User } from 'types/user';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import { AppContext } from 'pages/_app';
 import { Box, IconButton, Stack, Tooltip } from '@mui/material';
@@ -63,13 +60,6 @@ const SelectedFileOptions = ({
     isFavoriteCollection,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
-    const [showFixCreationTime, setShowFixCreationTime] = useState(false);
-    useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
-        const showFixCreationTime =
-            FIX_CREATION_TIME_VISIBLE_TO_USER_IDS.includes(user?.id);
-        setShowFixCreationTime(showFixCreationTime);
-    }, []);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: addToCollectionHelper,
@@ -150,13 +140,11 @@ const SelectedFileOptions = ({
                     </>
                 ) : (
                     <>
-                        {showFixCreationTime && (
-                            <Tooltip title={constants.FIX_CREATION_TIME}>
-                                <IconButton onClick={fixTimeHelper}>
-                                    <ClockIcon />
-                                </IconButton>
-                            </Tooltip>
-                        )}
+                        <Tooltip title={constants.FIX_CREATION_TIME}>
+                            <IconButton onClick={fixTimeHelper}>
+                                <ClockIcon />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title={constants.DOWNLOAD}>
                             <IconButton onClick={downloadHelper}>
                                 <DownloadIcon />
@@ -181,7 +169,6 @@ const SelectedFileOptions = ({
                                 </IconButton>
                             </Tooltip>
                         )}
-
                         {activeCollection !== ALL_SECTION &&
                             activeCollection !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (

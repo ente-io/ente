@@ -761,6 +761,8 @@ const englishConstants = {
             Current usage is <strong>{usage}</strong>
         </>
     ),
+    WEAK_DEVICE:
+        "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
 };
 
 export default englishConstants;

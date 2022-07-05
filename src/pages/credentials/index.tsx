@@ -23,6 +23,7 @@ import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
+import { CustomError } from 'utils/error';
 
 export default function Credentials() {
     const router = useRouter();
@@ -66,7 +67,7 @@ export default function Credentials() {
                 );
             } catch (e) {
                 logError(e, 'failed to derive key');
-                throw e;
+                throw Error(CustomError.WEAK_DEVICE);
             }
             try {
                 const key: string = await cryptoWorker.decryptB64(
@@ -89,10 +90,19 @@ export default function Credentials() {
                 router.push(redirectURL ?? PAGES.GALLERY);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
-                setFieldError(constants.INCORRECT_PASSPHRASE);
+                throw Error(CustomError.INCORRECT_PASSWORD);
             }
         } catch (e) {
-            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
+            switch (e.message) {
+                case CustomError.WEAK_DEVICE:
+                    setFieldError(constants.WEAK_DEVICE);
+                    break;
+                case CustomError.INCORRECT_PASSWORD:
+                    setFieldError(constants.INCORRECT_PASSPHRASE);
+                    break;
+                default:
+                    setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
+            }
         }
     };
 
