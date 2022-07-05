@@ -5,7 +5,7 @@ import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlin
 import GoogleIcon from '@mui/icons-material/Google';
 import { UploadTypeOption } from './option';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
-import { Dialog, DialogContent, Stack } from '@mui/material';
+import { Box, Dialog, Stack, Typography } from '@mui/material';
 
 export default function UploadTypeSelector({
     onHide,
@@ -17,13 +17,19 @@ export default function UploadTypeSelector({
     return (
         <Dialog
             open={show}
-            PaperProps={{ sx: { maxWidth: '375px' } }}
+            PaperProps={{
+                sx: (theme) => ({
+                    maxWidth: '375px',
+                    p: 1,
+                    [theme.breakpoints.down(360)]: { p: 0 },
+                }),
+            }}
             onClose={onHide}>
             <DialogTitleWithCloseButton onClose={onHide}>
                 {constants.UPLOAD}
             </DialogTitleWithCloseButton>
-            <DialogContent sx={{ '&&&&': { pt: 0 } }}>
-                <Stack spacing={1}>
+            <Box p={1.5} pt={0.5}>
+                <Stack spacing={0.5}>
                     <UploadTypeOption
                         uploadFunc={uploadFiles}
                         Icon={FileUploadIcon}
@@ -40,7 +46,10 @@ export default function UploadTypeSelector({
                         uploadName={constants.UPLOAD_GOOGLE_TAKEOUT}
                     />
                 </Stack>
-            </DialogContent>
+                <Typography p={1.5} pt={4} color="text.secondary">
+                    {constants.DRAG_AND_DROP_HINT}
+                </Typography>
+            </Box>
         </Dialog>
     );
 }

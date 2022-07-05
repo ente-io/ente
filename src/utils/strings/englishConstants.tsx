@@ -778,6 +778,7 @@ const englishConstants = {
     ),
     WEAK_DEVICE:
         "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
+    DRAG_AND_DROP_HINT: 'Or drag and drop into the ente window',
 };
 
 export default englishConstants;
