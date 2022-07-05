@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
 import Button from 'react-bootstrap/Button';
-import { styled } from '@mui/material';
+import { styled, Typography, TypographyProps } from '@mui/material';
 import { AppContext } from './_app';
 import Login from 'components/Login';
 import { useRouter } from 'next/router';
@@ -68,11 +68,9 @@ const SideBox = styled('div')`
     min-width: 320px;
 `;
 
-const TextContainer = styled('div')`
-    padding: 20px;
-    max-width: 300px;
-    margin: 0 auto;
-`;
+const TextContainer = (props: TypographyProps) => (
+    <Typography color={'text.secondary'} mt={2} mb={3} {...props} />
+);
 
 const UpperText = styled(TextContainer)`
     font-size: 24px;
@@ -80,12 +78,9 @@ const UpperText = styled(TextContainer)`
     margin-bottom: 20px;
 `;
 
-const FeatureText = styled('div')`
-    color: #51cd7c;
-    font-weight: bold;
-    padding-top: 20px;
-    font-size: 24px;
-`;
+const FeatureText = (props: TypographyProps) => (
+    <Typography variant="h3" mt={2} {...props} />
+);
 
 const Img = styled('img')`
     height: 250px;
@@ -167,15 +162,28 @@ export default function LandingPage() {
                         <Carousel controls={false}>
                             <Carousel.Item>
                                 <Img
+                                    src="/images/onboarding-lock/1x.png"
+                                    srcSet="/images/onboarding-lock/2x.png 2x,
+                                        /images/onboarding-lock/3x.png 3x"
+                                />
+                                <FeatureText>
+                                    {constants.HERO_SLIDE_1_TITLE()}
+                                </FeatureText>
+                                <TextContainer>
+                                    {constants.HERO_SLIDE_1}
+                                </TextContainer>
+                            </Carousel.Item>
+                            <Carousel.Item>
+                                <Img
                                     src="/images/onboarding-safe/1x.png"
                                     srcSet="/images/onboarding-safe/2x.png 2x,
                                         /images/onboarding-safe/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_1_TITLE}
+                                    {constants.HERO_SLIDE_2_TITLE()}
                                 </FeatureText>
                                 <TextContainer>
-                                    {constants.HERO_SLIDE_1}
+                                    {constants.HERO_SLIDE_2}
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
@@ -185,20 +193,7 @@ export default function LandingPage() {
                                         /images/onboarding-sync/3x.png 3x"
                                 />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_2_TITLE}
-                                </FeatureText>
-                                <TextContainer>
-                                    {constants.HERO_SLIDE_2}
-                                </TextContainer>
-                            </Carousel.Item>
-                            <Carousel.Item>
-                                <Img
-                                    src="/images/onboarding-lock/1x.png"
-                                    srcSet="/images/onboarding-lock/2x.png 2x,
-                                        /images/onboarding-lock/3x.png 3x"
-                                />
-                                <FeatureText>
-                                    {constants.HERO_SLIDE_3_TITLE}
+                                    {constants.HERO_SLIDE_3_TITLE()}
                                 </FeatureText>
                                 <TextContainer>
                                     {constants.HERO_SLIDE_3}
