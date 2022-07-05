@@ -51,6 +51,8 @@ const englishConstants = {
     COMPANY_NAME: 'ente',
     LOGIN: 'Login',
     SIGN_UP: 'Signup',
+    NEW_USER: 'New to ente',
+    EXISTING_USER: 'Existing user',
     NAME: 'Name',
     ENTER_NAME: 'Your name',
     EMAIL: 'Email',
