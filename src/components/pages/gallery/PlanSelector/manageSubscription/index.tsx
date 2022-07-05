@@ -7,7 +7,6 @@ import {
     cancelSubscription,
     updatePaymentMethod,
     manageFamilyMethod,
-    hasPaidSubscription,
     hasStripeSubscription,
     isSubscriptionCancelled,
 } from 'utils/billing';
@@ -24,15 +23,24 @@ export function ManageSubscription({
     closeModal,
     setLoading,
 }: Iprops) {
+    const appContext = useContext(AppContext);
+    const openFamilyPortal = () =>
+        manageFamilyMethod(appContext.setDialogMessage, setLoading);
+
     return (
         <Stack spacing={1}>
-            {hasPaidSubscription(subscription) && (
-                <PaidSubscriptionOptions
+            {hasStripeSubscription(subscription) && (
+                <StripeSubscriptionOptions
                     subscription={subscription}
-                    setLoading={setLoading}
                     closeModal={closeModal}
+                    setLoading={setLoading}
                 />
             )}
+            <ManageSubscriptionButton
+                color="secondary"
+                onClick={openFamilyPortal}>
+                {constants.MANAGE_FAMILY_PORTAL}
+            </ManageSubscriptionButton>
         </Stack>
     );
 }
@@ -106,33 +114,6 @@ function StripeSubscriptionOptions({
                 color="secondary"
                 onClick={openManagementPortal}>
                 {constants.MANAGEMENT_PORTAL}
-            </ManageSubscriptionButton>
-        </>
-    );
-}
-
-function PaidSubscriptionOptions({
-    subscription,
-    setLoading,
-    closeModal,
-}: Iprops) {
-    const appContext = useContext(AppContext);
-    const openFamilyPortal = () =>
-        manageFamilyMethod(appContext.setDialogMessage, setLoading);
-
-    return (
-        <>
-            {hasStripeSubscription(subscription) && (
-                <StripeSubscriptionOptions
-                    subscription={subscription}
-                    closeModal={closeModal}
-                    setLoading={setLoading}
-                />
-            )}
-            <ManageSubscriptionButton
-                color="secondary"
-                onClick={openFamilyPortal}>
-                {constants.MANAGE_FAMILY_PORTAL}
             </ManageSubscriptionButton>
         </>
     );
