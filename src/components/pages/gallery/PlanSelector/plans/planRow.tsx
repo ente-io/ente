@@ -87,7 +87,7 @@ export function PlanRow({
                     }}
                     size="large"
                     onClick={handleClick}>
-                    <Box>
+                    <Box textAlign={'right'}>
                         <Typography fontWeight={'bold'} variant="h4">
                             {plan.price}{' '}
                         </Typography>{' '}
