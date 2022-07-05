@@ -8,6 +8,7 @@ const CustomToggleButton = styled(ToggleButton)(({ theme }) => ({
     padding: '12px 16px',
     borderRadius: '4px',
     backgroundColor: theme.palette.fill.dark,
+    border: `1px solid transparent`,
     color: theme.palette.text.disabled,
     '&.Mui-selected': {
         backgroundColor: theme.palette.accent.main,

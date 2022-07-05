@@ -279,7 +279,7 @@ const englishConstants = {
     FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
 
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>Renew on {dateString(expiryTime)}</>
+        <>Renews on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -750,7 +750,7 @@ const englishConstants = {
     FREE: 'free',
     OF: 'of',
     MONTH_SHORT: 'mo',
-    YEAR_SHORT: 'yr',
+    YEAR: 'year',
     FAMILY_PLAN: 'Family plan',
     DOWNLOAD_LOGS: 'Download logs',
     DOWNLOAD_LOGS_MESSAGE: () => (

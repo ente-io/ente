@@ -79,16 +79,24 @@ export function PlanRow({
                 </FlexWrapper>
             </TopAlignedFluidContainer>
             <Box width="136px">
-                <PlanButton size="large" onClick={handleClick}>
-                    <Box>
+                <PlanButton
+                    sx={{
+                        justifyContent: 'flex-end',
+                        borderTopLeftRadius: 0,
+                        borderBottomLeftRadius: 0,
+                    }}
+                    size="large"
+                    onClick={handleClick}>
+                    <Box textAlign={'right'}>
                         <Typography fontWeight={'bold'} variant="h4">
                             {plan.price}{' '}
                         </Typography>{' '}
                         <Typography color="text.secondary" variant="body2">
-                            / $
-                            {plan.period === PLAN_PERIOD.MONTH
-                                ? constants.MONTH_SHORT
-                                : constants.YEAR_SHORT}
+                            {`/ ${
+                                plan.period === PLAN_PERIOD.MONTH
+                                    ? constants.MONTH_SHORT
+                                    : constants.YEAR
+                            }`}
                         </Typography>
                     </Box>
                 </PlanButton>
