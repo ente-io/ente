@@ -75,7 +75,7 @@ const englishConstants = {
     VERIFY_PASSPHRASE: 'Sign in',
     INCORRECT_PASSPHRASE: 'Incorrect password',
     ENTER_ENC_PASSPHRASE:
-        'please enter a password that we can use to encrypt your data',
+        'Please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
         <>
             We don't store your password, so if you forget it,{' '}
