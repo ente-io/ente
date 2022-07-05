@@ -229,7 +229,7 @@ export default function Gallery() {
         });
 
     useEffect(() => {
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {
             appContext.setRedirectURL(router.asPath);

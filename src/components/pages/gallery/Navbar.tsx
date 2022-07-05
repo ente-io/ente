@@ -33,7 +33,7 @@ export function GalleryNavbar({
     setIsInSearchMode,
 }: Iprops) {
     return (
-        <NavbarBase>
+        <NavbarBase sx={{ background: 'transparent', position: 'absolute' }}>
             {!isInSearchMode && <SidebarToggler openSidebar={openSidebar} />}
 
             {isFirstFetch ? (
