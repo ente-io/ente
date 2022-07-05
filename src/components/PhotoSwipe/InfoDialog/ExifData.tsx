@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
-import { FormCheck } from 'react-bootstrap';
 
 import { RenderInfoItem } from './RenderInfoItem';
 import { LegendContainer } from '../styledComponents/LegendContainer';
 import { Pre } from '../styledComponents/Pre';
-import { Typography } from '@mui/material';
+import {
+    Checkbox,
+    FormControlLabel,
+    FormGroup,
+    Typography,
+} from '@mui/material';
 
 export function ExifData(props: { exif: any }) {
     const { exif } = props;
@@ -50,12 +54,18 @@ export function ExifData(props: { exif: any }) {
                 <Typography variant="subtitle" mb={1}>
                     {constants.EXIF}
                 </Typography>
-                <FormCheck>
-                    <FormCheck.Label>
-                        <FormCheck.Input onChange={changeHandler} />
-                        {constants.SHOW_ALL}
-                    </FormCheck.Label>
-                </FormCheck>
+                <FormGroup>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                size="small"
+                                onChange={changeHandler}
+                                color="accent"
+                            />
+                        }
+                        label={constants.SHOW_ALL}
+                    />
+                </FormGroup>
             </LegendContainer>
             {showAll ? renderAllValues() : renderSelectedValues()}
         </>
