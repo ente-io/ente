@@ -15,7 +15,6 @@ import {
     hasPaidSubscription,
     convertBytesToGBs,
     getTotalFamilyUsage,
-    makeHumanReadableStorage,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
 import { GalleryContext } from 'pages/gallery';
@@ -158,7 +157,7 @@ function PlanSelectorCard(props: Props) {
     return (
         <>
             <Stack spacing={3} p={1.5}>
-                <Box py={0.5} px={1.5}>
+                <Box px={hasPaidSubscription(subscription) && 1.5}>
                     {hasPaidSubscription(subscription) ? (
                         <SpaceBetweenFlex>
                             <Box>
@@ -188,7 +187,9 @@ function PlanSelectorCard(props: Props) {
                             color={'text.secondary'}
                             fontWeight={'bold'}>
                             {constants.CURRENT_USAGE(
-                                makeHumanReadableStorage(totalFamilyUsage)
+                                `${convertBytesToGBs(totalFamilyUsage, 2)} ${
+                                    constants.GB
+                                }`
                             )}
                         </Typography>
                     </Box>
@@ -200,7 +201,7 @@ function PlanSelectorCard(props: Props) {
                             hasPaidSubscription(subscription) &&
                             `1px solid ${theme.palette.divider}`
                         }
-                        p={1.5}
+                        p={hasPaidSubscription(subscription) && 1.5}
                         borderRadius={(theme) =>
                             `${theme.shape.borderRadius}px`
                         }>
@@ -209,7 +210,10 @@ function PlanSelectorCard(props: Props) {
                                 planPeriod={planPeriod}
                                 togglePeriod={togglePeriod}
                             />
-                            <Typography mt={0.5} color="text.secondary">
+                            <Typography
+                                variant="body2"
+                                mt={0.5}
+                                color="text.secondary">
                                 {constants.TWO_MONTHS_FREE}
                             </Typography>
                         </Box>
