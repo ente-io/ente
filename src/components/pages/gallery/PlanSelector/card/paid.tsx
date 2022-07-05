@@ -22,7 +22,7 @@ export default function PaidSubscriptionPlanSelectorCard({
 }) {
     return (
         <>
-            <Box px={1.5} py={0.5}>
+            <Box pl={1.5} py={0.5}>
                 <SpaceBetweenFlex>
                     <Box>
                         <Typography variant="h3" fontWeight={'bold'}>
