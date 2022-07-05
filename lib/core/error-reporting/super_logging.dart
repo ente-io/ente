@@ -149,9 +149,13 @@ class SuperLogging {
     WidgetsFlutterBinding.ensureInitialized();
 
     appVersion ??= await getAppVersion();
+    final isFDroidClient = await isFDroidBuild();
+    if (isFDroidClient) {
+      config.sentryDsn = null;
+      config.tunnel = null;
+    }
 
     final enable = config.enableInDebugMode || kReleaseMode;
-    final isFDroidClient = await isFDroidBuild();
     sentryIsEnabled = enable && config.sentryDsn != null && !isFDroidClient;
     fileIsEnabled = enable && config.logDirPath != null;
 
@@ -164,6 +168,14 @@ class SuperLogging {
 
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen(onLogRecord);
+
+    if (isFDroidClient) {
+      assert(
+        sentryIsEnabled == false,
+        "sentry dsn should be disabled for "
+        "f-droid config  ${config.sentryDsn} & ${config.tunnel}",
+      );
+    }
 
     if (!enable) {
       $.info("detected debug mode; sentry & file logging disabled.");
@@ -194,9 +206,11 @@ class SuperLogging {
     }
   }
 
-  static void setUserID(String userID) {
-    Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
-    $.info("setting sentry user ID to: $userID");
+  static void setUserID(String userID) async {
+    if (config.sentryDsn != null) {
+      Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
+      $.info("setting sentry user ID to: $userID");
+    }
   }
 
   static Future<void> _sendErrorToSentry(Object error, StackTrace stack) async {
@@ -359,6 +373,6 @@ class SuperLogging {
       return false;
     }
     var pkgName = (await PackageInfo.fromPlatform()).packageName;
-    return pkgName == "io.ente.photos.froid";
+    return pkgName.startsWith("io.ente.photos.fdroid");
   }
 }
