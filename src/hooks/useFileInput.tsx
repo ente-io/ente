@@ -29,6 +29,7 @@ export default function useFileInput({ directory }: { directory?: boolean }) {
     const getInputProps = useCallback(
         () => ({
             type: 'file',
+            multiple: true,
             style: { display: 'none' },
             ...(directory ? { directory: '', webkitdirectory: '' } : {}),
             ref: inputRef,
