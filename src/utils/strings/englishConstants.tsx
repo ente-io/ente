@@ -702,7 +702,7 @@ const englishConstants = {
     CHOOSE_UPLOAD_TYPE: 'Upload',
     UPLOAD_FILES: 'File',
     UPLOAD_DIRS: 'Folder',
-    UPLOAD_GOOGLE_TAKEOUT: 'Google Takeout',
+    UPLOAD_GOOGLE_TAKEOUT: 'Google takeout',
     CANCEL_UPLOADS: 'Cancel uploads',
     DEDUPLICATE_FILES: 'Deduplicate files',
     NO_DUPLICATES_FOUND: "You've no duplicate files that can be cleared",
