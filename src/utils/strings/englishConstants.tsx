@@ -47,7 +47,7 @@ const englishConstants = {
             <div> everywhere</div>
         </>
     ),
-    HERO_SLIDE_3: 'Android, iOS, web, Desktop',
+    HERO_SLIDE_3: 'Android, iOS, Web, Desktop',
     COMPANY_NAME: 'ente',
     LOGIN: 'Login',
     SIGN_UP: 'Signup',
