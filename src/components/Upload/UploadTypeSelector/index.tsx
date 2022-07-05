@@ -31,20 +31,20 @@ export default function UploadTypeSelector({
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>
                     <UploadTypeOption
-                        uploadFunc={uploadFiles}
-                        Icon={FileUploadIcon}
-                        uploadName={constants.UPLOAD_FILES}
-                    />
+                        onClick={uploadFiles}
+                        startIcon={<FileUploadIcon />}>
+                        {constants.UPLOAD_FILES}
+                    </UploadTypeOption>
                     <UploadTypeOption
-                        uploadFunc={uploadFolders}
-                        Icon={FolderUploadIcon}
-                        uploadName={constants.UPLOAD_DIRS}
-                    />
+                        onClick={uploadFolders}
+                        startIcon={<FolderUploadIcon />}>
+                        {constants.UPLOAD_DIRS}
+                    </UploadTypeOption>
                     <UploadTypeOption
-                        uploadFunc={uploadGoogleTakeoutZips}
-                        Icon={GoogleIcon}
-                        uploadName={constants.UPLOAD_GOOGLE_TAKEOUT}
-                    />
+                        onClick={uploadGoogleTakeoutZips}
+                        startIcon={<GoogleIcon />}>
+                        {constants.UPLOAD_GOOGLE_TAKEOUT}
+                    </UploadTypeOption>
                 </Stack>
                 <Typography p={1.5} pt={4} color="text.secondary">
                     {constants.DRAG_AND_DROP_HINT}
