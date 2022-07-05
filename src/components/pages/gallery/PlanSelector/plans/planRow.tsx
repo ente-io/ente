@@ -92,10 +92,11 @@ export function PlanRow({
                             {plan.price}{' '}
                         </Typography>{' '}
                         <Typography color="text.secondary" variant="body2">
-                            /
-                            {plan.period === PLAN_PERIOD.MONTH
-                                ? constants.MONTH_SHORT
-                                : constants.YEAR_SHORT}
+                            {`/ ${
+                                plan.period === PLAN_PERIOD.MONTH
+                                    ? constants.MONTH_SHORT
+                                    : constants.YEAR_SHORT
+                            }`}
                         </Typography>
                     </Box>
                 </PlanButton>
