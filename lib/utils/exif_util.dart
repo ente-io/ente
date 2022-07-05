@@ -28,20 +28,20 @@ Future<Map<String, IfdTag>> getExif(File file) async {
 }
 
 Future<DateTime> getCreationTimeFromEXIF(io.File file) async {
-  final exif = await readExifFromFile(file);
-  if (exif != null) {
-    final exifTime = exif.containsKey(kDateTimeOriginal)
-        ? exif[kDateTimeOriginal].printable
-        : exif.containsKey(kImageDateTime)
-            ? exif[kImageDateTime].printable
-            : null;
-    if (exifTime != null && exifTime != kEmptyExifDateTime) {
-      try {
+  try {
+    final exif = await readExifFromFile(file);
+    if (exif != null) {
+      final exifTime = exif.containsKey(kDateTimeOriginal)
+          ? exif[kDateTimeOriginal].printable
+          : exif.containsKey(kImageDateTime)
+              ? exif[kImageDateTime].printable
+              : null;
+      if (exifTime != null && exifTime != kEmptyExifDateTime) {
         return DateFormat(kExifDateTimePattern).parse(exifTime);
-      } catch (e) {
-        return null;
       }
     }
+  } catch (e) {
+    _logger.severe("failed to getCreationTimeFromEXIF", e);
   }
   return null;
 }
