@@ -33,7 +33,7 @@ export default function PaidSubscriptionPlanSelectorCard({
                             {constants.GB}
                         </Typography>
                     </Box>
-                    <IconButton onClick={closeModal}>
+                    <IconButton onClick={closeModal} color="secondary">
                         <Close />
                     </IconButton>
                 </SpaceBetweenFlex>
