@@ -28,6 +28,7 @@ export default function AllCollectionsHeader({
                     <CollectionSort
                         activeSortBy={collectionSortBy}
                         setCollectionSortBy={setCollectionSortBy}
+                        nestedInDialog
                     />
                     <IconButton
                         onClick={onClose}

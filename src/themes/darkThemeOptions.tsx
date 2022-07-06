@@ -6,6 +6,9 @@ import {
 } from '@mui/material/styles';
 
 declare module '@mui/material/styles' {
+    interface TypeBackground {
+        overPaper?: string;
+    }
     interface Palette {
         accent: PaletteColor;
         fill: PaletteColor;
@@ -280,7 +283,11 @@ const darkThemeOptions = createTheme({
             secondary: 'rgba(256,256,256,0.24)',
             disabled: 'rgba(256,256,256,0.16)',
         },
-        background: { default: '#000000', paper: '#141414' },
+        background: {
+            default: '#000000',
+            paper: '#141414',
+            overPaper: '#1b1b1b',
+        },
         grey: {
             A100: '#ccc',
             A200: 'rgba(256, 256, 256, 0.24)',
