@@ -23,32 +23,32 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/file_load_result.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/app_update_dialog.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
-import 'package:photos/ui/common/gradientButton.dart';
+import 'package:photos/ui/common/bottom_shadow.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
-import 'package:photos/ui/gallery.dart';
-import 'package:photos/ui/gallery_app_bar_widget.dart';
-import 'package:photos/ui/gallery_footer_widget.dart';
-import 'package:photos/ui/gallery_overlay_widget.dart';
 import 'package:photos/ui/grant_permissions_widget.dart';
 import 'package:photos/ui/landing_page_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/memories_widget.dart';
 import 'package:photos/ui/nav_bar.dart';
+import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:photos/ui/status_bar_widget.dart';
+import 'package:photos/ui/viewer/gallery/gallery.dart';
+import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import 'package:photos/ui/viewer/gallery/gallery_footer_widget.dart';
+import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -78,6 +78,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget _headerWidgetWithSettingsButton;
 
   // for receiving media files
+  // ignore: unused_field
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
 
@@ -103,11 +104,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.page_view) {
+      if (event.source != TabChangedEventSource.pageView) {
         _selectedTabIndex = event.selectedIndex;
         _pageController.animateToPage(
           event.selectedIndex,
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           curve: Curves.easeIn,
         );
       }
@@ -123,8 +124,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
       AlertDialog alert = AlertDialog(
-        title: Text("Session expired"),
-        content: Text("Please login again"),
+        title: const Text("Session expired"),
+        content: const Text("Please login again"),
         actions: [
           TextButton(
             child: Text(
@@ -166,14 +167,13 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
-      if (mounted &&
-          event.status == SyncStatus.completed_first_gallery_import) {
-        Duration delayInRefresh = Duration(milliseconds: 0);
+      if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
+        Duration delayInRefresh = const Duration(milliseconds: 0);
         // Loading page will redirect to BackupFolderSelectionPage.
         // To avoid showing folder hook in middle during routing,
         // delay state refresh for home page
         if (!LocalSyncService.instance.hasGrantedLimitedPermissions()) {
-          delayInRefresh = Duration(milliseconds: 250);
+          delayInRefresh = const Duration(milliseconds: 250);
         }
         Future.delayed(
           delayInRefresh,
@@ -225,6 +225,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     _firstImportEvent.cancel();
     _backupFoldersUpdatedEvent.cancel();
     _accountConfiguredEvent.cancel();
+    _intentDataStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -255,7 +256,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return WillPopScope(
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(0),
+          preferredSize: const Size.fromHeight(0),
           child: Container(),
         ),
         body: _getBody(),
@@ -270,7 +271,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           }
         } else {
           Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.back_button));
+              .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
           return false;
         }
       },
@@ -279,13 +280,13 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   Widget _getBody() {
     if (!Configuration.instance.hasConfiguredAccount()) {
-      return LandingPageWidget();
+      return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
-      return GrantPermissionsWidget();
+      return const GrantPermissionsWidget();
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
-      return LoadingPhotosWidget();
+      return const LoadingPhotosWidget();
     }
     if (_sharedFiles != null && _sharedFiles.isNotEmpty) {
       ReceiveSharingIntent.reset();
@@ -299,6 +300,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Stack(
       children: [
         ExtentsPageView(
+          onPageChanged: (page) {
+            Bus.instance.fire(
+              TabChangedEvent(
+                page,
+                TabChangedEventSource.pageView,
+              ),
+            );
+          },
+          controller: _pageController,
           children: [
             showBackupFolderHook
                 ? _getBackupFolderSelectionHook()
@@ -307,21 +317,15 @@ class _HomeWidgetState extends State<HomeWidget> {
             _sharedCollectionGallery,
             _settingsPage,
           ],
-          onPageChanged: (page) {
-            Bus.instance.fire(
-              TabChangedEvent(
-                page,
-                TabChangedEventSource.page_view,
-              ),
-            );
-          },
-          controller: _pageController,
         ),
-        Align(alignment: Alignment.bottomCenter, child: BottomShadowWidget()),
+        const Align(
+          alignment: Alignment.bottomCenter,
+          child: BottomShadowWidget(),
+        ),
         Align(
           alignment: Alignment.bottomCenter,
           child: SafeArea(
-            minimum: EdgeInsets.only(bottom: 8),
+            minimum: const EdgeInsets.only(bottom: 8),
             child: HomeBottomNavigationBar(
               _selectedFiles,
               selectedTabIndex: _selectedTabIndex,
@@ -443,7 +447,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
       header: header,
-      footer: GalleryFooterWidget(),
+      footer: const GalleryFooterWidget(),
     );
     return Stack(
       children: [
@@ -484,14 +488,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                 height: 64,
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                 child: GradientButton(
-                  child: Text(
-                    'Start backup',
-                    style: gradientButtonTextTheme(),
-                  ),
-                  linearGradientColors: const [
-                    Color(0xFF2CD267),
-                    Color(0xFF1DB954),
-                  ],
                   onTap: () async {
                     if (LocalSyncService.instance
                         .hasGrantedLimitedPermissions()) {
@@ -499,18 +495,19 @@ class _HomeWidgetState extends State<HomeWidget> {
                     } else {
                       routeToPage(
                         context,
-                        BackupFolderSelectionPage(
+                        const BackupFolderSelectionPage(
                           buttonText: "Start backup",
                         ),
                       );
                     }
                   },
+                  text: "Start backup",
                 ),
               ),
             ),
           ),
         ),
-        Padding(padding: EdgeInsets.all(50)),
+        const Padding(padding: EdgeInsets.all(50)),
       ],
     );
   }
@@ -525,7 +522,7 @@ class HomePageAppBar extends StatefulWidget {
   final SelectedFiles selectedFiles;
 
   @override
-  _HomePageAppBarState createState() => _HomePageAppBarState();
+  State<HomePageAppBar> createState() => _HomePageAppBarState();
 }
 
 class _HomePageAppBarState extends State<HomePageAppBar> {
@@ -566,13 +563,12 @@ class HomeBottomNavigationBar extends StatefulWidget {
   final int selectedTabIndex;
 
   @override
-  _HomeBottomNavigationBarState createState() =>
+  State<HomeBottomNavigationBar> createState() =>
       _HomeBottomNavigationBarState();
 }
 
 class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
-  final _logger = Logger((_HomeBottomNavigationBarState).toString());
   int currentTabIndex = 0;
 
   @override
@@ -584,7 +580,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     });
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.tab_bar) {
+      if (event.source != TabChangedEventSource.tabBar) {
         debugPrint('index changed to ${event.selectedIndex}');
         if (mounted) {
           setState(() {
@@ -605,7 +601,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     Bus.instance.fire(
       TabChangedEvent(
         index,
-        TabChangedEventSource.tab_bar,
+        TabChangedEventSource.tabBar,
       ),
     );
   }
@@ -614,11 +610,11 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   Widget build(BuildContext context) {
     bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
       height: filesAreSelected ? 0 : 52,
       child: AnimatedOpacity(
-        duration: Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 100),
         opacity: filesAreSelected ? 0.0 : 1.0,
         curve: Curves.easeIn,
         child: IgnorePointer(
@@ -649,8 +645,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 .colorScheme
                                 .gNavBarActiveColor,
                             iconSize: 24,
-                            padding: EdgeInsets.fromLTRB(16, 8, 16, 8),
-                            duration: Duration(milliseconds: 200),
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            duration: const Duration(milliseconds: 200),
                             gap: 0,
                             tabBorderRadius: 24,
                             tabBackgroundColor: Theme.of(context)
@@ -659,7 +655,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                             haptic: false,
                             tabs: [
                               GButton(
-                                margin: EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(6, 6, 0, 6),
                                 icon: Icons.home,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -674,7 +670,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
                                 icon: Icons.photo_library,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -689,7 +685,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
                                 icon: Icons.folder_shared,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -704,7 +700,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: EdgeInsets.fromLTRB(0, 6, 6, 6),
+                                margin: const EdgeInsets.fromLTRB(0, 6, 6, 6),
                                 icon: Icons.person,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -752,8 +748,8 @@ class HeaderWidget extends StatelessWidget {
       _memoriesWidget,
     ];
     return Column(
-      children: list,
       crossAxisAlignment: CrossAxisAlignment.start,
+      children: list,
     );
   }
 }

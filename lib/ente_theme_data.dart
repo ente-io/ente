@@ -7,14 +7,15 @@ final lightThemeData = ThemeData(
   hintColor: Colors.grey,
   primaryColor: Colors.deepOrangeAccent,
   primaryColorLight: Colors.black54,
-  iconTheme: IconThemeData(color: Colors.black),
-  primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
-  colorScheme: ColorScheme.light(
+  iconTheme: const IconThemeData(color: Colors.black),
+  primaryIconTheme:
+      const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  colorScheme: const ColorScheme.light(
     primary: Colors.black,
     secondary: Color.fromARGB(255, 163, 163, 163),
   ),
-  accentColor: Color.fromRGBO(0, 0, 0, 0.6),
-  buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  accentColor: const Color.fromRGBO(0, 0, 0, 0.6),
+  buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: Colors.grey.shade500,
     bgEnabled: Colors.black,
@@ -28,27 +29,27 @@ final lightThemeData = ThemeData(
   toggleableActiveColor: Colors.green[400],
   scaffoldBackgroundColor: Colors.white,
   backgroundColor: Colors.white,
-  appBarTheme: AppBarTheme().copyWith(
+  appBarTheme: const AppBarTheme().copyWith(
     backgroundColor: Colors.white,
     foregroundColor: Colors.black,
-    iconTheme: IconThemeData(color: Colors.black),
+    iconTheme: const IconThemeData(color: Colors.black),
     elevation: 0,
   ),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
   textTheme: _buildTextTheme(Colors.black),
-  primaryTextTheme: TextTheme().copyWith(
-    bodyText2: TextStyle(color: Colors.yellow),
-    bodyText1: TextStyle(color: Colors.orange),
+  primaryTextTheme: const TextTheme().copyWith(
+    bodyText2: const TextStyle(color: Colors.yellow),
+    bodyText1: const TextStyle(color: Colors.orange),
   ),
-  cardColor: Color.fromRGBO(250, 250, 250, 1.0),
-  dialogTheme: DialogTheme().copyWith(
-    backgroundColor: Color.fromRGBO(250, 250, 250, 1.0), //
-    titleTextStyle: TextStyle(
+  cardColor: const Color.fromRGBO(250, 250, 250, 1.0),
+  dialogTheme: const DialogTheme().copyWith(
+    backgroundColor: const Color.fromRGBO(250, 250, 250, 1.0), //
+    titleTextStyle: const TextStyle(
       color: Colors.black,
       fontSize: 24,
       fontWeight: FontWeight.w600,
     ),
-    contentTextStyle: TextStyle(
+    contentTextStyle: const TextStyle(
       fontFamily: 'Inter-Medium',
       color: Colors.black,
       fontSize: 16,
@@ -56,15 +57,15 @@ final lightThemeData = ThemeData(
     ),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   ),
-  inputDecorationTheme: InputDecorationTheme().copyWith(
-    focusedBorder: UnderlineInputBorder(
+  inputDecorationTheme: const InputDecorationTheme().copyWith(
+    focusedBorder: const UnderlineInputBorder(
       borderSide: BorderSide(
         color: Color.fromRGBO(45, 194, 98, 1.0),
       ),
     ),
   ),
   checkboxTheme: CheckboxThemeData(
-    side: BorderSide(
+    side: const BorderSide(
       color: Colors.black,
       width: 2,
     ),
@@ -85,14 +86,15 @@ final darkThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.dark,
   primaryColorLight: Colors.white70,
-  iconTheme: IconThemeData(color: Colors.white),
-  primaryIconTheme: IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
+  iconTheme: const IconThemeData(color: Colors.white),
+  primaryIconTheme:
+      const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: Colors.grey,
-  colorScheme: ColorScheme.dark(primary: Colors.white),
-  accentColor: Color.fromRGBO(45, 194, 98, 0.2),
-  buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
-  buttonTheme: ButtonThemeData().copyWith(
-    buttonColor: Color.fromRGBO(45, 194, 98, 1.0),
+  colorScheme: const ColorScheme.dark(primary: Colors.white),
+  accentColor: const Color.fromRGBO(45, 194, 98, 0.2),
+  buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
+  buttonTheme: const ButtonThemeData().copyWith(
+    buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   ),
   textTheme: _buildTextTheme(Colors.white),
   toggleableActiveColor: Colors.green[400],
@@ -108,19 +110,19 @@ final darkThemeData = ThemeData(
   ),
   scaffoldBackgroundColor: Colors.black,
   backgroundColor: Colors.black,
-  appBarTheme: AppBarTheme().copyWith(
+  appBarTheme: const AppBarTheme().copyWith(
     color: Colors.black,
     elevation: 0,
   ),
-  cardColor: Color.fromRGBO(10, 15, 15, 1.0),
-  dialogTheme: DialogTheme().copyWith(
-    backgroundColor: Color.fromRGBO(15, 15, 15, 1.0),
-    titleTextStyle: TextStyle(
+  cardColor: const Color.fromRGBO(10, 15, 15, 1.0),
+  dialogTheme: const DialogTheme().copyWith(
+    backgroundColor: const Color.fromRGBO(15, 15, 15, 1.0),
+    titleTextStyle: const TextStyle(
       color: Colors.white,
       fontSize: 24,
       fontWeight: FontWeight.w600,
     ),
-    contentTextStyle: TextStyle(
+    contentTextStyle: const TextStyle(
       fontFamily: 'Inter-Medium',
       color: Colors.white,
       fontSize: 16,
@@ -128,15 +130,15 @@ final darkThemeData = ThemeData(
     ),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
   ),
-  inputDecorationTheme: InputDecorationTheme().copyWith(
-    focusedBorder: UnderlineInputBorder(
+  inputDecorationTheme: const InputDecorationTheme().copyWith(
+    focusedBorder: const UnderlineInputBorder(
       borderSide: BorderSide(
         color: Color.fromRGBO(45, 194, 98, 1.0),
       ),
     ),
   ),
   checkboxTheme: CheckboxThemeData(
-    side: BorderSide(
+    side: const BorderSide(
       color: Colors.grey,
       width: 2,
     ),
@@ -158,7 +160,7 @@ final darkThemeData = ThemeData(
 );
 
 TextTheme _buildTextTheme(Color textColor) {
-  return TextTheme().copyWith(
+  return const TextTheme().copyWith(
     headline4: TextStyle(
       color: textColor,
       fontSize: 32,
@@ -233,12 +235,12 @@ extension CustomColorScheme on ColorScheme {
       brightness == Brightness.light ? Colors.black : Colors.white;
 
   Color get boxSelectColor => brightness == Brightness.light
-      ? Color.fromRGBO(67, 186, 108, 1)
-      : Color.fromRGBO(16, 32, 32, 1);
+      ? const Color.fromRGBO(67, 186, 108, 1)
+      : const Color.fromRGBO(16, 32, 32, 1);
 
   Color get boxUnSelectColor => brightness == Brightness.light
-      ? Color.fromRGBO(240, 240, 240, 1)
-      : Color.fromRGBO(8, 18, 18, 0.4);
+      ? const Color.fromRGBO(240, 240, 240, 1)
+      : const Color.fromRGBO(8, 18, 18, 0.4);
 
   Color get dynamicFABBackgroundColor =>
       brightness == Brightness.light ? Colors.black : Colors.grey[850];
@@ -247,18 +249,18 @@ extension CustomColorScheme on ColorScheme {
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
   ButtonStyle get optionalActionButtonStyle => buildElevatedButtonThemeData(
-        onPrimary: Color(0xFF777777),
-        primary: Color(0xFFF0F0F0),
+        onPrimary: const Color(0xFF777777),
+        primary: const Color(0xFFF0F0F0),
         elevation: 0,
       ).style;
 
   Color get recoveryKeyBoxColor => brightness == Brightness.light
-      ? Color.fromRGBO(49, 155, 86, 0.2)
-      : Color(0xFF1DB954);
+      ? const Color.fromRGBO(49, 155, 86, 0.2)
+      : const Color(0xFF1DB954);
 
   Color get frostyBlurBackdropFilterColor => brightness == Brightness.light
-      ? Color.fromRGBO(238, 238, 238, 0.5)
-      : Color.fromRGBO(48, 48, 48, 0.5);
+      ? const Color.fromRGBO(238, 238, 238, 0.5)
+      : const Color.fromRGBO(48, 48, 48, 0.5);
 
   Color get iconColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.75)
@@ -266,57 +268,57 @@ extension CustomColorScheme on ColorScheme {
 
   Color get bgColorForQuestions => brightness == Brightness.light
       ? Colors.white
-      : Color.fromRGBO(10, 15, 15, 1.0);
+      : const Color.fromRGBO(10, 15, 15, 1.0);
 
-  Color get greenText => Color.fromARGB(255, 40, 190, 113);
+  Color get greenText => const Color.fromARGB(255, 40, 190, 113);
 
   Color get cupertinoPickerTopColor => brightness == Brightness.light
-      ? Color.fromARGB(255, 238, 238, 238)
+      ? const Color.fromARGB(255, 238, 238, 238)
       : Colors.white.withOpacity(0.1);
 
   DatePickerTheme get dateTimePickertheme => brightness == Brightness.light
-      ? DatePickerTheme(
+      ? const DatePickerTheme(
           backgroundColor: Colors.white,
           itemStyle: TextStyle(color: Colors.black),
           cancelStyle: TextStyle(color: Colors.black),
         )
-      : DatePickerTheme(
+      : const DatePickerTheme(
           backgroundColor: Colors.black,
           itemStyle: TextStyle(color: Colors.white),
           cancelStyle: TextStyle(color: Colors.white),
         );
 
   Color get stepProgressUnselectedColor => brightness == Brightness.light
-      ? Color.fromRGBO(196, 196, 196, 0.6)
-      : Color.fromRGBO(255, 255, 255, 0.7);
+      ? const Color.fromRGBO(196, 196, 196, 0.6)
+      : const Color.fromRGBO(255, 255, 255, 0.7);
 
   Color get gNavBackgroundColor => brightness == Brightness.light
-      ? Color.fromRGBO(196, 196, 196, 0.6)
-      : Color.fromRGBO(40, 40, 40, 0.6);
+      ? const Color.fromRGBO(196, 196, 196, 0.6)
+      : const Color.fromRGBO(40, 40, 40, 0.6);
 
   Color get gNavBarActiveColor => brightness == Brightness.light
-      ? Color.fromRGBO(255, 255, 255, 0.6)
-      : Color.fromRGBO(255, 255, 255, 0.9);
+      ? const Color.fromRGBO(255, 255, 255, 0.6)
+      : const Color.fromRGBO(255, 255, 255, 0.9);
 
   Color get gNavIconColor => brightness == Brightness.light
-      ? Color.fromRGBO(0, 0, 0, 0.8)
-      : Color.fromRGBO(255, 255, 255, 0.8);
+      ? const Color.fromRGBO(0, 0, 0, 0.8)
+      : const Color.fromRGBO(255, 255, 255, 0.8);
 
   Color get gNavActiveIconColor => brightness == Brightness.light
-      ? Color.fromRGBO(0, 0, 0, 0.8)
-      : Color.fromRGBO(0, 0, 0, 0.8);
+      ? const Color.fromRGBO(0, 0, 0, 0.8)
+      : const Color.fromRGBO(0, 0, 0, 0.8);
 
   Color get galleryThumbBackgroundColor => brightness == Brightness.light
-      ? Color.fromRGBO(240, 240, 240, 1)
-      : Color.fromRGBO(20, 20, 20, 1);
+      ? const Color.fromRGBO(240, 240, 240, 1)
+      : const Color.fromRGBO(20, 20, 20, 1);
 
   Color get galleryThumbDrawColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.8)
       : Colors.white.withOpacity(0.5);
 
   Color get backupEnabledBgColor => brightness == Brightness.light
-      ? Color.fromRGBO(230, 230, 230, 0.95)
-      : Color.fromRGBO(10, 40, 40, 0.3);
+      ? const Color.fromRGBO(230, 230, 230, 0.95)
+      : const Color.fromRGBO(10, 40, 40, 0.3);
 
   Color get dotsIndicatorActiveColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.5)
@@ -330,12 +332,12 @@ extension CustomColorScheme on ColorScheme {
       brightness == Brightness.light ? Colors.white : Colors.black;
 
   Color get toastBackgroundColor => brightness == Brightness.light
-      ? Color.fromRGBO(24, 24, 24, 0.95)
-      : Color.fromRGBO(255, 255, 255, 0.95);
+      ? const Color.fromRGBO(24, 24, 24, 0.95)
+      : const Color.fromRGBO(255, 255, 255, 0.95);
 
   Color get subTextColor => brightness == Brightness.light
-      ? Color.fromRGBO(180, 180, 180, 1)
-      : Color.fromRGBO(100, 100, 100, 1);
+      ? const Color.fromRGBO(180, 180, 180, 1)
+      : const Color.fromRGBO(100, 100, 100, 1);
 
   Color get themeSwitchIndicatorColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.75)
@@ -361,8 +363,8 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
-      padding: EdgeInsets.fromLTRB(50, 16, 50, 16),
-      textStyle: TextStyle(
+      padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
+      textStyle: const TextStyle(
         fontWeight: FontWeight.w600,
         fontFamily: 'Inter-SemiBold',
         fontSize: 18,
@@ -400,24 +402,15 @@ ElevatedButtonThemeData buildElevatedButtonThemeData({
       onPrimary: onPrimary,
       primary: primary,
       alignment: Alignment.center,
-      textStyle: TextStyle(
+      textStyle: const TextStyle(
         fontWeight: FontWeight.w600,
         fontFamily: 'Inter-SemiBold',
         fontSize: 18,
       ),
-      padding: EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 18),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(8)),
       ),
     ),
-  );
-}
-
-TextStyle gradientButtonTextTheme() {
-  return TextStyle(
-    color: Colors.white,
-    fontWeight: FontWeight.w600,
-    fontFamily: 'Inter-SemiBold',
-    fontSize: 18,
   );
 }

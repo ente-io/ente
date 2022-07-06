@@ -20,49 +20,49 @@ class FilesDB {
   duplicate entries for un-uploaded files that were created due to a collision
   in background and foreground syncs.
   */
-  static final _databaseName = "ente.files.db";
+  static const _databaseName = "ente.files.db";
 
   static final Logger _logger = Logger("FilesDB");
 
-  static final table = 'files';
-  static final tempTable = 'temp_files';
+  static const table = 'files';
+  static const tempTable = 'temp_files';
 
-  static final columnGeneratedID = '_id';
-  static final columnUploadedFileID = 'uploaded_file_id';
-  static final columnOwnerID = 'owner_id';
-  static final columnCollectionID = 'collection_id';
-  static final columnLocalID = 'local_id';
-  static final columnTitle = 'title';
-  static final columnDeviceFolder = 'device_folder';
-  static final columnLatitude = 'latitude';
-  static final columnLongitude = 'longitude';
-  static final columnFileType = 'file_type';
-  static final columnFileSubType = 'file_sub_type';
-  static final columnDuration = 'duration';
-  static final columnExif = 'exif';
-  static final columnHash = 'hash';
-  static final columnMetadataVersion = 'metadata_version';
-  static final columnIsDeleted = 'is_deleted';
-  static final columnCreationTime = 'creation_time';
-  static final columnModificationTime = 'modification_time';
-  static final columnUpdationTime = 'updation_time';
-  static final columnEncryptedKey = 'encrypted_key';
-  static final columnKeyDecryptionNonce = 'key_decryption_nonce';
-  static final columnFileDecryptionHeader = 'file_decryption_header';
-  static final columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
-  static final columnMetadataDecryptionHeader = 'metadata_decryption_header';
+  static const columnGeneratedID = '_id';
+  static const columnUploadedFileID = 'uploaded_file_id';
+  static const columnOwnerID = 'owner_id';
+  static const columnCollectionID = 'collection_id';
+  static const columnLocalID = 'local_id';
+  static const columnTitle = 'title';
+  static const columnDeviceFolder = 'device_folder';
+  static const columnLatitude = 'latitude';
+  static const columnLongitude = 'longitude';
+  static const columnFileType = 'file_type';
+  static const columnFileSubType = 'file_sub_type';
+  static const columnDuration = 'duration';
+  static const columnExif = 'exif';
+  static const columnHash = 'hash';
+  static const columnMetadataVersion = 'metadata_version';
+  static const columnIsDeleted = 'is_deleted';
+  static const columnCreationTime = 'creation_time';
+  static const columnModificationTime = 'modification_time';
+  static const columnUpdationTime = 'updation_time';
+  static const columnEncryptedKey = 'encrypted_key';
+  static const columnKeyDecryptionNonce = 'key_decryption_nonce';
+  static const columnFileDecryptionHeader = 'file_decryption_header';
+  static const columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
+  static const columnMetadataDecryptionHeader = 'metadata_decryption_header';
 
   // MMD -> Magic Metadata
-  static final columnMMdEncodedJson = 'mmd_encoded_json';
-  static final columnMMdVersion = 'mmd_ver';
+  static const columnMMdEncodedJson = 'mmd_encoded_json';
+  static const columnMMdVersion = 'mmd_ver';
 
-  static final columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
-  static final columnPubMMdVersion = 'pub_mmd_ver';
+  static const columnPubMMdEncodedJson = 'pub_mmd_encoded_json';
+  static const columnPubMMdVersion = 'pub_mmd_ver';
 
   // part of magic metadata
   // Only parse & store selected fields from JSON in separate columns if
   // we need to write query based on that field
-  static final columnMMdVisibility = 'mmd_visibility';
+  static const columnMMdVisibility = 'mmd_visibility';
 
   static final initializationScript = [...createTable(table)];
   static final migrationScripts = [

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/subscription.dart';
-import 'package:photos/ui/billing_questions_widget.dart';
+import 'package:photos/ui/payment/billing_questions_widget.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 
@@ -107,6 +107,8 @@ class ValidityWidget extends StatelessWidget {
 }
 
 class SubFaqWidget extends StatelessWidget {
+  const SubFaqWidget({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Align(
@@ -119,12 +121,12 @@ class SubFaqWidget extends StatelessWidget {
             barrierColor: Colors.black87,
             context: context,
             builder: (context) {
-              return BillingQuestionsWidget();
+              return const BillingQuestionsWidget();
             },
           );
         },
         child: Container(
-          padding: EdgeInsets.all(40),
+          padding: const EdgeInsets.all(40),
           child: RichText(
             text: TextSpan(
               text: "Questions?",

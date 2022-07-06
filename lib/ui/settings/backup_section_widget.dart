@@ -9,11 +9,11 @@ import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/deduplicate_page.dart';
-import 'package:photos/ui/free_space_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
+import 'package:photos/ui/tools/deduplicate_page.dart';
+import 'package:photos/ui/tools/free_space_page.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -21,7 +21,7 @@ import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BackupSectionWidget extends StatefulWidget {
-  BackupSectionWidget({Key key}) : super(key: key);
+  const BackupSectionWidget({Key key}) : super(key: key);
 
   @override
   BackupSectionWidgetState createState() => BackupSectionWidgetState();
@@ -31,7 +31,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Backup"),
+      header: const SettingsSectionTitle("Backup"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -45,12 +45,12 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         onTap: () async {
           routeToPage(
             context,
-            BackupFolderSelectionPage(
+            const BackupFolderSelectionPage(
               buttonText: "Backup",
             ),
           );
         },
-        child: SettingsTextItem(
+        child: const SettingsTextItem(
           text: "Backed up folders",
           icon: Icons.navigate_next,
         ),
@@ -143,7 +143,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             BackupStatus status;
             try {
               status = await SyncService.instance.getBackupStatus();
-            } catch (e, s) {
+            } catch (e) {
               await dialog.hide();
               showGenericErrorDialog(context);
               return;
@@ -163,7 +163,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               }
             }
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Free up space",
             icon: Icons.navigate_next,
           ),
@@ -199,7 +199,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               }
             }
           },
-          child: SettingsTextItem(
+          child: const SettingsTextItem(
             text: "Deduplicate files",
             icon: Icons.navigate_next,
           ),
@@ -213,7 +213,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
   void _showSpaceFreedDialog(BackupStatus status) {
     AlertDialog alert = AlertDialog(
-      title: Text("Success"),
+      title: const Text("Success"),
       content: Text(
         "You have successfully freed up " + formatBytes(status.size) + "!",
       ),
@@ -238,7 +238,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           },
         ),
         TextButton(
-          child: Text(
+          child: const Text(
             "Ok",
           ),
           onPressed: () {
@@ -269,7 +269,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         " duplicate file" +
         (result.count == 1 ? "" : "s");
     AlertDialog alert = AlertDialog(
-      title: Text("✨ Success"),
+      title: const Text("✨ Success"),
       content: Text(
         "You have cleaned up " +
             countText +
@@ -298,7 +298,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           },
         ),
         TextButton(
-          child: Text(
+          child: const Text(
             "Ok",
           ),
           onPressed: () {

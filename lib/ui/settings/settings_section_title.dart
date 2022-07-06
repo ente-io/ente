@@ -14,7 +14,7 @@ class SettingsSectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(padding: EdgeInsets.all(4)),
+        const Padding(padding: EdgeInsets.all(4)),
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
@@ -27,7 +27,7 @@ class SettingsSectionTitle extends StatelessWidget {
                 : Theme.of(context).textTheme.headline6,
           ),
         ),
-        Padding(padding: EdgeInsets.all(4)),
+        const Padding(padding: EdgeInsets.all(4)),
       ],
     );
   }

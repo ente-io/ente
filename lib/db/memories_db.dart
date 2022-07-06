@@ -7,13 +7,13 @@ import 'package:photos/models/memory.dart';
 import 'package:sqflite/sqflite.dart';
 
 class MemoriesDB {
-  static final _databaseName = "ente.memories.db";
-  static final _databaseVersion = 1;
+  static const _databaseName = "ente.memories.db";
+  static const _databaseVersion = 1;
 
-  static final table = 'memories';
+  static const table = 'memories';
 
-  static final columnFileID = 'file_id';
-  static final columnSeenTime = 'seen_time';
+  static const columnFileID = 'file_id';
+  static const columnSeenTime = 'seen_time';
 
   MemoriesDB._privateConstructor();
   static final MemoriesDB instance = MemoriesDB._privateConstructor();

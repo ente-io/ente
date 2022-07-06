@@ -7,7 +7,7 @@ Future<bool> requestAuthentication(String reason) async {
   await LocalAuthentication().stopAuthentication();
   return await LocalAuthentication().authenticate(
     localizedReason: reason,
-    androidAuthStrings: AndroidAuthMessages(
+    androidAuthStrings: const AndroidAuthMessages(
       biometricHint: "Verify identity",
       biometricNotRecognized: "Not recognized, try again",
       biometricRequiredTitle: "Biometric required",

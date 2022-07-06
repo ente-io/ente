@@ -68,7 +68,7 @@ class FileMigrationService {
       await _importLocalFilesForMigration();
       final sTime = DateTime.now().microsecondsSinceEpoch;
       bool hasData = true;
-      final int limitInBatch = 100;
+      const int limitInBatch = 100;
       while (hasData) {
         var localIDsToProcess = await _filesMigrationDB
             .getLocalIDsForPotentialReUpload(limitInBatch);

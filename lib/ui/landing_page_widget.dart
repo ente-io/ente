@@ -4,18 +4,18 @@ import 'package:dots_indicator/dots_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/ui/common/gradientButton.dart';
-import 'package:photos/ui/email_entry_page.dart';
-import 'package:photos/ui/login_page.dart';
-import 'package:photos/ui/password_entry_page.dart';
-import 'package:photos/ui/password_reentry_page.dart';
+import 'package:photos/ui/account/email_entry_page.dart';
+import 'package:photos/ui/account/login_page.dart';
+import 'package:photos/ui/account/password_entry_page.dart';
+import 'package:photos/ui/account/password_reentry_page.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/payment/subscription.dart';
 
 class LandingPageWidget extends StatefulWidget {
   const LandingPageWidget({Key key}) : super(key: key);
 
   @override
-  _LandingPageWidgetState createState() => _LandingPageWidgetState();
+  State<LandingPageWidget> createState() => _LandingPageWidgetState();
 }
 
 class _LandingPageWidgetState extends State<LandingPageWidget> {
@@ -31,8 +31,8 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       child: SingleChildScrollView(
         child: Column(
           children: [
-            Padding(padding: const EdgeInsets.all(12)),
-            Text(
+            const Padding(padding: EdgeInsets.all(12)),
+            const Text(
               "ente",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -40,11 +40,11 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                 fontSize: 42,
               ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(28),
             ),
             _getFeatureSlider(),
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(12),
             ),
             DotsIndicator(
@@ -60,34 +60,34 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(3),
                 ),
-                size: Size(100, 5),
-                activeSize: Size(100, 5),
-                spacing: EdgeInsets.all(3),
+                size: const Size(100, 5),
+                activeSize: const Size(100, 5),
+                spacing: const EdgeInsets.all(3),
               ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(28),
             ),
             _getSignUpButton(context),
             Container(
               width: double.infinity,
-              padding: EdgeInsets.fromLTRB(20, 12, 20, 28),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
               child: Hero(
                 tag: "log_in",
                 child: ElevatedButton(
                   style:
                       Theme.of(context).colorScheme.optionalActionButtonStyle,
-                  child: Text(
+                  onPressed: _navigateToSignInPage,
+                  child: const Text(
                     "Existing user",
                     style: TextStyle(
                       color: Colors.black, // same for both themes
                     ),
                   ),
-                  onPressed: _navigateToSignInPage,
                 ),
               ),
             ),
-            Padding(
+            const Padding(
               padding: EdgeInsets.all(20),
             ),
           ],
@@ -99,33 +99,26 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   Widget _getSignUpButton(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GradientButton(
-        child: Text(
-          "New to ente",
-          style: gradientButtonTextTheme(),
-        ),
-        linearGradientColors: const [
-          Color(0xFF2CD267),
-          Color(0xFF1DB954),
-        ],
         onTap: _navigateToSignUpPage,
+        text: "New to ente",
       ),
     );
   }
 
   Widget _getFeatureSlider() {
     return ConstrainedBox(
-      constraints: BoxConstraints(maxHeight: 320),
+      constraints: const BoxConstraints(maxHeight: 320),
       child: PageView(
         children: [
-          FeatureItemWidget(
+          const FeatureItemWidget(
             "assets/onboarding_lock.png",
             "Private backups",
             "for your memories",
             "End-to-end encrypted by default",
           ),
-          FeatureItemWidget(
+          const FeatureItemWidget(
             "assets/onboarding_safe.png",
             "Safely stored",
             "at a fallout shelter",
@@ -152,15 +145,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   void _navigateToSignUpPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = EmailEntryPage();
+      page = const EmailEntryPage();
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = PasswordEntryPage();
+        page = const PasswordEntryPage();
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage();
+        page = const PasswordReentryPage();
       } else {
         // All is well, user just has not subscribed
         page = getSubscriptionPage(isOnBoarding: true);
@@ -178,15 +171,15 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   void _navigateToSignInPage() {
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
-      page = LoginPage();
+      page = const LoginPage();
     } else {
       // No key
       if (Configuration.instance.getKeyAttributes() == null) {
         // Never had a key
-        page = PasswordEntryPage();
+        page = const PasswordEntryPage();
       } else if (Configuration.instance.getKey() == null) {
         // Yet to decrypt the key
-        page = PasswordReentryPage();
+        page = const PasswordReentryPage();
       } else {
         // All is well, user just has not subscribed
         page = getSubscriptionPage(isOnBoarding: true);
@@ -225,7 +218,7 @@ class FeatureItemWidget extends StatelessWidget {
           assetPath,
           height: 160,
         ),
-        Padding(padding: EdgeInsets.all(16)),
+        const Padding(padding: EdgeInsets.all(16)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -234,12 +227,12 @@ class FeatureItemWidget extends StatelessWidget {
               featureTitleFirstLine,
               style: Theme.of(context).textTheme.headline5,
             ),
-            Padding(padding: EdgeInsets.all(2)),
+            const Padding(padding: EdgeInsets.all(2)),
             Text(
               featureTitleSecondLine,
               style: Theme.of(context).textTheme.headline5,
             ),
-            Padding(padding: EdgeInsets.all(12)),
+            const Padding(padding: EdgeInsets.all(12)),
             Text(
               subText,
               textAlign: TextAlign.center,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:http/http.dart';
 import 'package:sentry/sentry.dart';
 
@@ -47,7 +48,7 @@ class TunneledTransport implements Transport {
           'body = ${response.body}',
         );
       }
-      return SentryId.empty();
+      return const SentryId.empty();
     } else {
       _options.logger(
         SentryLevel.debug,

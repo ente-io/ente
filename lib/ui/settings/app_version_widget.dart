@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -34,7 +33,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
                 createProgressDialog(context, "Starting network inspector...");
             await dialog.show();
             await Future.delayed(
-              Duration(milliseconds: kDummyDelayDurationInMilliseconds),
+              const Duration(milliseconds: kDummyDelayDurationInMilliseconds),
             );
             await dialog.hide();
             Network.instance.getAlice().showInspector();

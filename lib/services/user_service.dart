@@ -17,13 +17,13 @@ import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
-import 'package:photos/ui/login_page.dart';
-import 'package:photos/ui/ott_verification_page.dart';
-import 'package:photos/ui/password_entry_page.dart';
-import 'package:photos/ui/password_reentry_page.dart';
-import 'package:photos/ui/two_factor_authentication_page.dart';
-import 'package:photos/ui/two_factor_recovery_page.dart';
-import 'package:photos/ui/two_factor_setup_page.dart';
+import 'package:photos/ui/account/login_page.dart';
+import 'package:photos/ui/account/ott_verification_page.dart';
+import 'package:photos/ui/account/password_entry_page.dart';
+import 'package:photos/ui/account/password_reentry_page.dart';
+import 'package:photos/ui/account/two_factor_authentication_page.dart';
+import 'package:photos/ui/account/two_factor_recovery_page.dart';
+import 'package:photos/ui/account/two_factor_setup_page.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -230,9 +230,9 @@ class UserService {
         } else {
           await _saveConfiguration(response);
           if (Configuration.instance.getEncryptedToken() != null) {
-            page = PasswordReentryPage();
+            page = const PasswordReentryPage();
           } else {
-            page = PasswordEntryPage();
+            page = const PasswordEntryPage();
           }
         }
         Navigator.of(context).pushAndRemoveUntil(
@@ -418,7 +418,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage();
+              return const PasswordReentryPage();
             },
           ),
           (route) => route.isFirst,
@@ -432,7 +432,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return LoginPage();
+              return const LoginPage();
             },
           ),
           (route) => route.isFirst,
@@ -486,7 +486,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return LoginPage();
+              return const LoginPage();
             },
           ),
           (route) => route.isFirst,
@@ -551,7 +551,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return PasswordReentryPage();
+              return const PasswordReentryPage();
             },
           ),
           (route) => route.isFirst,
@@ -564,7 +564,7 @@ class UserService {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return LoginPage();
+              return const LoginPage();
             },
           ),
           (route) => route.isFirst,
@@ -740,7 +740,7 @@ class UserService {
   Future<String> getPaymentToken() async {
     try {
       var response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/payment-token",
+        "${_config.getHttpEndpoint()}/users/payment-token",
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
@@ -761,7 +761,7 @@ class UserService {
   Future<String> getFamiliesToken() async {
     try {
       var response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/families-token",
+        "${_config.getHttpEndpoint()}/users/families-token",
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),

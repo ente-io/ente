@@ -2,13 +2,13 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/progress_dialog.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 
 ProgressDialog createProgressDialog(BuildContext context, String message) {
   final dialog = ProgressDialog(
     context,
-    type: ProgressDialogType.Normal,
+    type: ProgressDialogType.normal,
     isDismissible: false,
     barrierColor: Colors.black12,
   );
@@ -16,7 +16,7 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
     message: message,
     messageTextStyle: Theme.of(context).textTheme.caption,
     backgroundColor: Theme.of(context).dialogTheme.backgroundColor,
-    progressWidget: loadWidget,
+    progressWidget: const EnteLoadingWidget(),
     borderRadius: 10,
     elevation: 10.0,
     insetAnimCurve: Curves.easeInOut,

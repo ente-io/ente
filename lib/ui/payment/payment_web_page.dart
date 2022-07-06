@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -8,8 +7,8 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/progress_dialog.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PaymentWebPage extends StatefulWidget {
@@ -49,7 +48,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   Widget build(BuildContext context) {
     _dialog = createProgressDialog(context, "Please wait...");
     if (initPaymentUrl == null) {
-      return loadWidget;
+      return const EnteLoadingWidget();
     }
     return WillPopScope(
       onWillPop: () async => _buildPageExitWidget(context),
@@ -143,10 +142,10 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     return showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Are you sure you want to exit?'),
+        title: const Text('Are you sure you want to exit?'),
         actions: <Widget>[
           TextButton(
-            child: Text(
+            child: const Text(
               'Yes',
               style: TextStyle(
                 color: Colors.redAccent,
@@ -193,11 +192,11 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text('Payment failed'),
+        title: const Text('Payment failed'),
         content: Text("Unfortunately your payment failed due to $reason"),
         actions: <Widget>[
           TextButton(
-            child: Text('Ok'),
+            child: const Text('Ok'),
             onPressed: () {
               Navigator.of(context).pop('dialog');
             },

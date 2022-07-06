@@ -28,23 +28,24 @@ class ChildSubscriptionWidget extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: RichText(
               textAlign: TextAlign.center,
               text: TextSpan(
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text: "Please contact ",
                   ),
                   TextSpan(
                     text: familyAdmin,
-                    style: TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
+                    style:
+                        const TextStyle(color: Color.fromRGBO(29, 185, 84, 1)),
                   ),
-                  TextSpan(
+                  const TextSpan(
                     text: " to manage your subscription",
                   ),
                 ],
@@ -52,15 +53,15 @@ class ChildSubscriptionWidget extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
           ),
           Image.asset(
             "assets/family_plan_leave.png",
             height: 256,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 0),
           ),
           InkWell(
             child: OutlinedButton(
@@ -68,10 +69,11 @@ class ChildSubscriptionWidget extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: EdgeInsets.symmetric(vertical: 18, horizontal: 100),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 18, horizontal: 100),
                 backgroundColor: Colors.red[500],
               ),
-              child: Text(
+              child: const Text(
                 "Leave Family",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -96,10 +98,9 @@ class ChildSubscriptionWidget extends StatelessWidget {
                     ),
                     TextSpan(
                       text: "support@ente.io",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyText2
-                          .copyWith(color: Color.fromRGBO(29, 185, 84, 1)),
+                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                            color: const Color.fromRGBO(29, 185, 84, 1),
+                          ),
                     ),
                     TextSpan(
                       text: " for help",

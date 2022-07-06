@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -30,8 +29,8 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/app_lock.dart';
-import 'package:photos/ui/lock_screen.dart';
+import 'package:photos/ui/tools/app_lock.dart';
+import 'package:photos/ui/tools/lock_screen.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/local_settings.dart';
@@ -40,7 +39,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 final _logger = Logger("main");
 
 bool _isProcessRunning = false;
-AdaptiveThemeMode _savedThemeMode;
 const kLastBGTaskHeartBeatTime = "bg_task_hb_time";
 const kLastFGTaskHeartBeatTime = "fg_task_hb_time";
 const kHeartBeatFrequency = Duration(seconds: 1);
@@ -62,8 +60,8 @@ Future<void> _runInForeground() async {
     _scheduleFGSync('appStart in FG');
     runApp(
       AppLock(
-        builder: (args) => EnteApp(_runBackgroundTask, _killBGTask),
-        lockScreen: LockScreen(),
+        builder: (args) => const EnteApp(_runBackgroundTask, _killBGTask),
+        lockScreen: const LockScreen(),
         enabled: Configuration.instance.shouldShowLockScreen(),
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
@@ -89,7 +87,7 @@ Future<void> _runBackgroundTask(String taskId) async {
 }
 
 Future<void> _runInBackground(String taskId) async {
-  await Future.delayed(Duration(seconds: 3));
+  await Future.delayed(const Duration(seconds: 3));
   if (await _isRunningInForeground()) {
     _logger.info("FG task running, skipping BG taskID: $taskId");
     BackgroundFetch.finish(taskId);
@@ -120,7 +118,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   _isProcessRunning = true;
   _logger.info("Initializing...  inBG =$isBackground via: $via");
   await _logFGHeartBeatInfo();
-  _savedThemeMode = await AdaptiveTheme.getThemeMode();
   _scheduleHeartBeat(isBackground);
   if (isBackground) {
     AppLifecycleService.instance.onAppInBackground('init via: $via');

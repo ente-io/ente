@@ -7,15 +7,15 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
-  DetailsSectionWidget({Key key}) : super(key: key);
+  const DetailsSectionWidget({Key key}) : super(key: key);
 
   @override
-  _DetailsSectionWidgetState createState() => _DetailsSectionWidgetState();
+  State<DetailsSectionWidget> createState() => _DetailsSectionWidgetState();
 }
 
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
@@ -38,7 +38,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         _fetchUserDetails();
       }
     });
-    _background = Image(
+    _background = const Image(
       image: AssetImage("assets/storage_card_background.png"),
       fit: BoxFit.fill,
     );
@@ -102,10 +102,14 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             ),
           ),
           _userDetails == null
-              ? loadWidget
+              ? const EnteLoadingWidget()
               : Padding(
-                  padding:
-                      EdgeInsets.only(top: 20, bottom: 20, left: 16, right: 16),
+                  padding: const EdgeInsets.only(
+                    top: 20,
+                    bottom: 20,
+                    left: 16,
+                    right: 16,
+                  ),
                   child: Container(
                     color: Colors.transparent,
                     child: Column(
@@ -123,7 +127,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                     .textTheme
                                     .subtitle2
                                     .copyWith(
-                                        color: Colors.white.withOpacity(0.7)),
+                                      color: Colors.white.withOpacity(0.7),
+                                    ),
                               ),
                               Text(
                                 "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
@@ -164,7 +169,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 ),
                               ],
                             ),
-                            Padding(padding: EdgeInsets.symmetric(vertical: 8)),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 8),
+                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -174,26 +181,27 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                           Container(
                                             width: 8.71,
                                             height: 8.99,
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: Colors.white,
                                             ),
                                           ),
-                                          Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 4)),
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                          ),
                                           Text(
                                             "You",
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyText1
                                                 .copyWith(
-                                                    color: Colors.white,
-                                                    fontSize: 12),
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                ),
                                           ),
-                                          Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 12)),
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 12),
+                                          ),
                                           Container(
                                             width: 8.71,
                                             height: 8.99,
@@ -203,17 +211,18 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                                   .withOpacity(0.75),
                                             ),
                                           ),
-                                          Padding(
-                                              padding:
-                                                  EdgeInsets.only(right: 4)),
+                                          const Padding(
+                                            padding: EdgeInsets.only(right: 4),
+                                          ),
                                           Text(
                                             "Family",
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyText1
                                                 .copyWith(
-                                                    color: Colors.white,
-                                                    fontSize: 12),
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                ),
                                           ),
                                         ],
                                       )
@@ -223,8 +232,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                             .textTheme
                                             .bodyText1
                                             .copyWith(
-                                                color: Colors.white,
-                                                fontSize: 12),
+                                              color: Colors.white,
+                                              fontSize: 12,
+                                            ),
                                       ),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 16.0),
@@ -234,7 +244,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                         .textTheme
                                         .bodyText1
                                         .copyWith(
-                                            color: Colors.white, fontSize: 12),
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
                                   ),
                                 )
                               ],
@@ -245,7 +257,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                     ),
                   ),
                 ),
-          Align(
+          const Align(
             alignment: Alignment.centerRight,
             child: Icon(
               Icons.chevron_right,

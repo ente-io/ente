@@ -98,7 +98,7 @@ class RemoteSyncService {
           // session are not processed now
           sync();
         } else {
-          Bus.instance.fire(SyncStatusUpdate(SyncStatus.completed_backup));
+          Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
         }
       } else {
         _existingSync.complete();
@@ -145,7 +145,7 @@ class RemoteSyncService {
         await _collectionsService.getCollectionsToBeSynced();
 
     if (updatedCollections.isNotEmpty && !silently) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applying_remote_diff));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
     for (final c in updatedCollections) {
       await _syncCollectionDiff(
@@ -269,7 +269,7 @@ class RemoteSyncService {
         filesToBeUploaded.length + updatedFileIDs.length + editedFiles.length;
 
     if (toBeUploaded > 0) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparing_for_upload));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
       // verify if files upload is allowed based on their subscription plan and
       // storage limit. To avoid creating new endpoint, we are using
       // fetchUploadUrls as alternative method.
@@ -360,7 +360,7 @@ class RemoteSyncService {
     }
     Bus.instance.fire(
       SyncStatusUpdate(
-        SyncStatus.in_progress,
+        SyncStatus.inProgress,
         completed: _completedUploads,
         total: toBeUploadedInThisSession,
       ),

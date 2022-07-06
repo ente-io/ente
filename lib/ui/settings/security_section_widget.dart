@@ -9,20 +9,20 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/app_lock.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/sessions_page.dart';
+import 'package:photos/ui/account/sessions_page.dart';
+import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
+import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
-  SecuritySectionWidget({Key key}) : super(key: key);
+  const SecuritySectionWidget({Key key}) : super(key: key);
 
   @override
-  _SecuritySectionWidgetState createState() => _SecuritySectionWidgetState();
+  State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
@@ -53,7 +53,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: SettingsSectionTitle("Security"),
+      header: const SettingsSectionTitle("Security"),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
@@ -65,7 +65,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
-          Padding(padding: EdgeInsets.all(2)),
+          const Padding(padding: EdgeInsets.all(2)),
           SizedBox(
             height: 48,
             child: Row(
@@ -106,7 +106,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         color: Colors.white.withOpacity(0.8),
                       );
                     }
-                    return loadWidget;
+                    return const EnteLoadingWidget();
                   },
                 ),
               ],
@@ -165,7 +165,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   onChanged: (value) async {
                     if (value) {
                       AlertDialog alert = AlertDialog(
-                        title: Text("Hide from recents?"),
+                        title: const Text("Hide from recents?"),
                         content: SingleChildScrollView(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
@@ -261,12 +261,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
-                return SessionsPage();
+                return const SessionsPage();
               },
             ),
           );
         },
-        child: SettingsTextItem(
+        child: const SettingsTextItem(
           text: "Active sessions",
           icon: Icons.navigate_next,
         ),
@@ -279,9 +279,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   void _disableTwoFactor() {
     AlertDialog alert = AlertDialog(
-      title: Text("Disable two-factor"),
-      content:
-          Text("Are you sure you want to disable two-factor authentication?"),
+      title: const Text("Disable two-factor"),
+      content: const Text(
+        "Are you sure you want to disable two-factor authentication?",
+      ),
       actions: [
         TextButton(
           child: Text(
@@ -295,7 +296,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           },
         ),
         TextButton(
-          child: Text(
+          child: const Text(
             "Yes",
             style: TextStyle(
               color: Colors.red,

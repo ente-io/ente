@@ -13,13 +13,13 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/galleryType.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/collection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
-import 'package:photos/ui/common/gradientButton.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -28,7 +28,7 @@ class SharedCollectionGallery extends StatefulWidget {
   const SharedCollectionGallery({Key key}) : super(key: key);
 
   @override
-  _SharedCollectionGalleryState createState() =>
+  State<SharedCollectionGallery> createState() =>
       _SharedCollectionGalleryState();
 }
 
@@ -103,7 +103,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           _logger.shout(snapshot.error);
           return Center(child: Text(snapshot.error.toString()));
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );
@@ -124,14 +124,14 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            SectionTitle("Shared with me"),
+            const SectionTitle("Shared with me"),
             const SizedBox(height: 12),
             collections.incoming.isNotEmpty
                 ? Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: GridView.builder(
                       shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       itemBuilder: (context, index) {
                         return IncomingCollectionItem(
                           collections.incoming[index],
@@ -148,13 +148,13 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
-            SectionTitle("Shared by me"),
+            const SectionTitle("Shared by me"),
             const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
                 ? ListView.builder(
                     shrinkWrap: true,
-                    padding: EdgeInsets.only(bottom: 12),
-                    physics: NeverScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(bottom: 12),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemBuilder: (context, index) {
                       return OutgoingCollectionItem(
                         collections.outgoing[index],
@@ -180,33 +180,17 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             "Ask your loved ones to share",
             style: Theme.of(context).textTheme.caption,
           ),
-          Padding(padding: EdgeInsets.only(top: 14)),
+          const Padding(padding: EdgeInsets.only(top: 14)),
           SizedBox(
             width: 200,
             height: 50,
             child: GradientButton(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.outgoing_mail,
-                    color: Colors.white,
-                  ),
-                  Padding(padding: EdgeInsets.all(2)),
-                  Text(
-                    "Invite",
-                    style: gradientButtonTextTheme().copyWith(fontSize: 16),
-                  ),
-                ],
-              ),
-              linearGradientColors: const [
-                Color(0xFF2CD267),
-                Color(0xFF1DB954),
-              ],
               onTap: () async {
                 shareText("Check out https://ente.io");
               },
+              iconData: Icons.outgoing_mail,
+              paddingValue: 2,
+              text: "Invite",
             ),
           ),
           const SizedBox(height: 60),
@@ -225,31 +209,11 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
             "Share your first album",
             style: Theme.of(context).textTheme.caption,
           ),
-          Padding(padding: EdgeInsets.only(top: 14)),
+          const Padding(padding: EdgeInsets.only(top: 14)),
           SizedBox(
             width: 200,
             height: 50,
             child: GradientButton(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.person_add,
-                    color: Colors.white,
-                  ),
-                  Padding(padding: EdgeInsets.all(2)),
-                  Text(
-                    "Share",
-                    style: gradientButtonTextTheme().copyWith(fontSize: 16),
-                  ),
-                ],
-              ),
-              linearGradientColors: const [
-                Color(0xFF2CD267),
-                Color(0xFF1DB954),
-              ],
               onTap: () async {
                 await showToast(
                   context,
@@ -257,9 +221,12 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                   toastLength: Toast.LENGTH_LONG,
                 );
                 Bus.instance.fire(
-                  TabChangedEvent(1, TabChangedEventSource.collections_page),
+                  TabChangedEvent(1, TabChangedEventSource.collectionsPage),
                 );
               },
+              iconData: Icons.person_add,
+              paddingValue: 2,
+              text: "Share",
             ),
           ),
           const SizedBox(height: 60),
@@ -316,12 +283,14 @@ class OutgoingCollectionItem extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
-        margin: EdgeInsets.fromLTRB(16, 12, 16, 12),
+        margin: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: Row(
           children: <Widget>[
             ClipRRect(
               borderRadius: BorderRadius.circular(3),
               child: SizedBox(
+                height: 60,
+                width: 60,
                 child: Hero(
                   tag: "outgoing_collection" + c.thumbnail.tag(),
                   child: ThumbnailWidget(
@@ -329,11 +298,9 @@ class OutgoingCollectionItem extends StatelessWidget {
                     key: Key("outgoing_collection" + c.thumbnail.tag()),
                   ),
                 ),
-                height: 60,
-                width: 60,
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -342,20 +309,20 @@ class OutgoingCollectionItem extends StatelessWidget {
                     children: [
                       Text(
                         c.collection.name,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                         ),
                       ),
-                      Padding(padding: EdgeInsets.all(2)),
+                      const Padding(padding: EdgeInsets.all(2)),
                       c.collection.publicURLs.isEmpty
                           ? Container()
-                          : Icon(Icons.link),
+                          : const Icon(Icons.link),
                     ],
                   ),
                   sharees.isEmpty
                       ? Container()
                       : Padding(
-                          padding: EdgeInsets.fromLTRB(0, 4, 0, 0),
+                          padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                           child: Text(
                             "Shared with " + sharees.join(", "),
                             style: TextStyle(
@@ -375,7 +342,7 @@ class OutgoingCollectionItem extends StatelessWidget {
       onTap: () {
         final page = CollectionPage(
           c,
-          appBarType: GalleryType.owned_collection,
+          appBarType: GalleryType.ownedCollection,
           tagPrefix: "outgoing_collection",
         );
         routeToPage(context, page);
@@ -411,6 +378,8 @@ class IncomingCollectionItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: SizedBox(
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
               child: Stack(
                 children: [
                   Hero(
@@ -423,6 +392,14 @@ class IncomingCollectionItem extends StatelessWidget {
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
+                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.fromLTRB(0, 0, 4, 0),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .defaultBackgroundColor,
+                      ),
                       child: Text(
                         c.collection.owner.name == null ||
                                 c.collection.owner.name.isEmpty
@@ -430,23 +407,13 @@ class IncomingCollectionItem extends StatelessWidget {
                             : c.collection.owner.name.substring(0, 1),
                         textAlign: TextAlign.center,
                       ),
-                      padding: EdgeInsets.all(8),
-                      margin: EdgeInsets.fromLTRB(0, 0, 4, 0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .defaultBackgroundColor,
-                      ),
                     ),
                   ),
                 ],
               ),
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Row(
             children: [
               Container(
@@ -467,7 +434,7 @@ class IncomingCollectionItem extends StatelessWidget {
                           color: albumTitleTextStyle.color.withOpacity(0.5),
                         ),
                         children: [
-                          TextSpan(text: "  \u2022  "),
+                          const TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
                         ],
                       ),
@@ -486,7 +453,7 @@ class IncomingCollectionItem extends StatelessWidget {
           context,
           CollectionPage(
             c,
-            appBarType: GalleryType.shared_collection,
+            appBarType: GalleryType.sharedCollection,
             tagPrefix: "shared_collection",
           ),
         );

@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
@@ -13,13 +11,13 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/loading_widget.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
-import 'package:photos/ui/progress_dialog.dart';
-import 'package:photos/ui/web_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -132,7 +130,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     _dialog = createProgressDialog(context, "Please wait...");
     final appBar = AppBar(
-      title: widget.isOnboarding ? null : Text("Subscription"),
+      title: widget.isOnboarding ? null : const Text("Subscription"),
     );
     return Scaffold(
       appBar: appBar,
@@ -171,7 +169,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         return _buildPlans();
       }
     }
-    return loadWidget;
+    return const EnteLoadingWidget();
   }
 
   Widget _buildPlans() {
@@ -190,7 +188,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             ? _getStripePlanWidgets()
             : _getMobilePlanWidgets(),
       ),
-      Padding(padding: EdgeInsets.all(8)),
+      const Padding(padding: EdgeInsets.all(8)),
     ]);
 
     if (_hasActiveSubscription) {
@@ -201,7 +199,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
-      widgets.add(SubFaqWidget());
+      widgets.add(const SubFaqWidget());
     }
 
     if (_hasActiveSubscription &&
@@ -225,7 +223,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 80, 40, 20),
+              padding: const EdgeInsets.fromLTRB(40, 80, 40, 20),
               child: Column(
                 children: [
                   RichText(
@@ -260,7 +258,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               _launchFamilyPortal();
             },
             child: Container(
-              padding: EdgeInsets.fromLTRB(40, 0, 40, 80),
+              padding: const EdgeInsets.fromLTRB(40, 0, 40, 80),
               child: Column(
                 children: [
                   RichText(

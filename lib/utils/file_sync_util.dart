@@ -6,8 +6,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
 
 final _logger = Logger("FileSyncUtil");
-final ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
-final assetFetchPageSize = 2000;
+const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
+const assetFetchPageSize = 2000;
 Future<List<File>> getDeviceFiles(
   int fromTime,
   int toTime,
@@ -36,11 +36,11 @@ Future<List<LocalAsset>> getAllLocalAssets() async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
     AssetType.image,
-    FilterOption(sizeConstraint: ignoreSizeConstraint),
+    const FilterOption(sizeConstraint: ignoreSizeConstraint),
   );
   filterOptionGroup.setOption(
     AssetType.video,
-    FilterOption(sizeConstraint: ignoreSizeConstraint),
+    const FilterOption(sizeConstraint: ignoreSizeConstraint),
   );
   filterOptionGroup.createTimeCond = DateTimeCond.def().copyWith(ignore: true);
   final assetPaths = await PhotoManager.getAssetPathList(
@@ -63,7 +63,7 @@ Future<List<File>> getUnsyncedFiles(
   Set<String> invalidIDs,
   Computer computer,
 ) async {
-  final args = Map<String, dynamic>();
+  final Map<String, dynamic> args = <String, dynamic>{};
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
@@ -128,11 +128,11 @@ Future<List<AssetPathEntity>> _getGalleryList(
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
     AssetType.image,
-    FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
+    const FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
   );
   filterOptionGroup.setOption(
     AssetType.video,
-    FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
+    const FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
   );
 
   filterOptionGroup.updateTimeCond = DateTimeCond(
@@ -158,7 +158,7 @@ Future<List<File>> _computeFiles(
   List<File> files,
   Computer computer,
 ) async {
-  final args = Map<String, dynamic>();
+  final Map<String, dynamic> args = <String, dynamic>{};
   args["pathEntity"] = pathEntity;
   args["assetList"] = await _getAllAssetLists(pathEntity);
   args["fromTime"] = fromTime;

@@ -27,10 +27,10 @@ class LocalSyncService {
   static const kPermissionStateKey = "permission_state";
   static const kEditedFileIDsKey = "edited_file_ids";
   static const kDownloadedFileIDsKey = "downloaded_file_ids";
+
   // Adding `_2` as a suffic to pull files that were earlier ignored due to permission errors
   // See https://github.com/CaiJingLong/flutter_photo_manager/issues/589
   static const kInvalidFileIDsKey = "invalid_file_ids_2";
-
   LocalSyncService._privateConstructor();
 
   static final LocalSyncService instance =
@@ -86,8 +86,7 @@ class LocalSyncService {
       );
     } else {
       // Load from 0 - 01.01.2010
-      Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.started_first_gallery_import));
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.startedFirstGalleryImport));
       var startTime = 0;
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
@@ -116,7 +115,7 @@ class LocalSyncService {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
       _logger.fine("first gallery import finished");
       Bus.instance
-          .fire(SyncStatusUpdate(SyncStatus.completed_first_gallery_import));
+          .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
     }
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);

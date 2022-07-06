@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,10 +9,10 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
-import 'package:photos/ui/detail_page.dart';
-import 'package:photos/ui/gallery.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
-import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/file/detail_page.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -43,7 +42,7 @@ class LazyLoadingGallery extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  _LazyLoadingGalleryState createState() => _LazyLoadingGalleryState();
+  State<LazyLoadingGallery> createState() => _LazyLoadingGalleryState();
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
@@ -170,7 +169,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         LazyLoadingGridView(
           widget.tag,
           _files.sublist(
-              index, min(index + kSubGalleryItemLimit, _files.length)),
+            index,
+            min(index + kSubGalleryItemLimit, _files.length),
+          ),
           widget.asyncLoader,
           widget.selectedFiles,
           index == 0,
@@ -204,7 +205,7 @@ class LazyLoadingGridView extends StatefulWidget {
   }) : super(key: key ?? UniqueKey());
 
   @override
-  _LazyLoadingGridViewState createState() => _LazyLoadingGridViewState();
+  State<LazyLoadingGridView> createState() => _LazyLoadingGridViewState();
 }
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
@@ -283,15 +284,15 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     return GridView.builder(
       shrinkWrap: true,
       physics:
-          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+          const NeverScrollableScrollPhysics(), // to disable GridView's scrolling
       itemBuilder: (context, index) {
         return _buildFile(context, widget.files[index]);
       },
       itemCount: widget.files.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 4,
       ),
-      padding: EdgeInsets.all(0),
+      padding: const EdgeInsets.all(0),
     );
   }
 
@@ -337,7 +338,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
               ),
               Visibility(
                 visible: widget.selectedFiles.isFileSelected(file),
-                child: Positioned(
+                child: const Positioned(
                   right: 4,
                   top: 4,
                   child: Icon(

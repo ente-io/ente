@@ -7,14 +7,14 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
-import 'package:photos/ui/common/bottomShadow.dart';
+import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
   const LoadingPhotosWidget({Key key}) : super(key: key);
 
   @override
-  _LoadingPhotosWidgetState createState() => _LoadingPhotosWidgetState();
+  State<LoadingPhotosWidget> createState() => _LoadingPhotosWidgetState();
 }
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
@@ -39,14 +39,13 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     super.initState();
     _firstImportEvent =
         Bus.instance.on<SyncStatusUpdate>().listen((event) async {
-      if (mounted &&
-          event.status == SyncStatus.completed_first_gallery_import) {
+      if (mounted && event.status == SyncStatus.completedFirstGalleryImport) {
         if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
           // Do nothing, let HomeWidget refresh
         } else {
           routeToPage(
             context,
-            BackupFolderSelectionPage(
+            const BackupFolderSelectionPage(
               isOnboarding: true,
               buttonText: "Start backup",
             ),
@@ -54,7 +53,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         }
       }
     });
-    Timer.periodic(Duration(seconds: 5), (Timer timer) {
+    Timer.periodic(const Duration(seconds: 5), (Timer timer) {
       if (!mounted) {
         return;
       }
@@ -66,7 +65,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
 
       _pageController.animateToPage(
         _currentPage,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeIn,
       );
     });
@@ -150,9 +149,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                               return _getMessage(_messages[index]);
                             },
                             itemCount: _messages.length,
-                            physics: NeverScrollableScrollPhysics(),
+                            physics: const NeverScrollableScrollPhysics(),
                           ),
-                          Positioned(
+                          const Positioned(
                             bottom: 0,
                             left: 0,
                             right: 0,

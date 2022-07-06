@@ -18,13 +18,13 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/archive_page.dart';
-import 'package:photos/ui/collection_page.dart';
-import 'package:photos/ui/common_elements.dart';
-import 'package:photos/ui/device_folder_page.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/thumbnail_widget.dart';
-import 'package:photos/ui/trash_page.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/gallery/archive_page.dart';
+import 'package:photos/ui/viewer/gallery/collection_page.dart';
+import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
+import 'package:photos/ui/viewer/gallery/empte_state.dart';
+import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -33,7 +33,7 @@ class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
 
   @override
-  _CollectionsGalleryWidgetState createState() =>
+  State<CollectionsGalleryWidget> createState() =>
       _CollectionsGalleryWidgetState();
 }
 
@@ -84,7 +84,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         } else if (snapshot.hasError) {
           return Text(snapshot.error.toString());
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );
@@ -150,14 +150,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            SectionTitle("On device"),
+            const SectionTitle("On device"),
             const SizedBox(height: 12),
             items.folders.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(22),
-                    child: nothingToSeeHere(
-                      textColor: Theme.of(context).colorScheme.defaultTextColor,
-                    ),
+                ? const Padding(
+                    padding: EdgeInsets.all(22),
+                    child: EmptyState(),
                   )
                 : Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -166,16 +164,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: items.folders.isEmpty
-                            ? nothingToSeeHere(
-                                textColor: Theme.of(context)
-                                    .colorScheme
-                                    .defaultTextColor,
-                              )
+                            ? const EmptyState()
                             : ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
-                                padding: EdgeInsets.fromLTRB(6, 0, 6, 0),
-                                physics: ScrollPhysics(),
+                                padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
+                                physics: const ScrollPhysics(),
                                 // to disable GridView's scrolling
                                 itemBuilder: (context, index) {
                                   return DeviceFolderIcon(items.folders[index]);
@@ -191,7 +185,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                EnteSectionTitle(),
+                const EnteSectionTitle(),
                 _sortMenu(),
               ],
             ),
@@ -201,7 +195,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: GridView.builder(
                       shrinkWrap: true,
-                      physics: ScrollPhysics(),
+                      physics: const ScrollPhysics(),
                       // to disable GridView's scrolling
                       itemBuilder: (context, index) {
                         return _buildCollection(
@@ -221,9 +215,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       ), //24 is height of album title
                     ),
                   )
-                : nothingToSeeHere(
-                    textColor: Theme.of(context).colorScheme.defaultTextColor,
-                  ),
+                : const EmptyState(),
             const SizedBox(height: 10),
             const Divider(),
             const SizedBox(height: 16),
@@ -237,7 +229,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: EdgeInsets.all(0),
+                      padding: const EdgeInsets.all(0),
                       side: BorderSide(
                         width: 0.5,
                         color:
@@ -258,7 +250,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   Icons.delete,
                                   color: Theme.of(context).iconTheme.color,
                                 ),
-                                Padding(padding: EdgeInsets.all(6)),
+                                const Padding(padding: EdgeInsets.all(6)),
                                 FutureBuilder<int>(
                                   future: TrashDB.instance.count(),
                                   builder: (context, snapshot) {
@@ -273,7 +265,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                   .textTheme
                                                   .subtitle1,
                                             ),
-                                            TextSpan(text: "  \u2022  "),
+                                            const TextSpan(text: "  \u2022  "),
                                             TextSpan(
                                               text: snapshot.data.toString(),
                                             ),
@@ -316,21 +308,21 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                       );
                     },
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   OutlinedButton(
                     style: OutlinedButton.styleFrom(
                       backgroundColor: Theme.of(context).backgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      padding: EdgeInsets.all(0),
+                      padding: const EdgeInsets.all(0),
                       side: BorderSide(
                         width: 0.5,
                         color:
                             Theme.of(context).iconTheme.color.withOpacity(0.24),
                       ),
                     ),
-                    child: Container(
+                    child: SizedBox(
                       height: 48,
                       width: double.infinity,
                       child: Padding(
@@ -344,7 +336,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                   Icons.visibility_off,
                                   color: Theme.of(context).iconTheme.color,
                                 ),
-                                Padding(padding: EdgeInsets.all(6)),
+                                const Padding(padding: EdgeInsets.all(6)),
                                 FutureBuilder<int>(
                                   future:
                                       FilesDB.instance.fileCountWithVisibility(
@@ -363,7 +355,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                                                   .textTheme
                                                   .subtitle1,
                                             ),
-                                            TextSpan(text: "  \u2022  "),
+                                            const TextSpan(text: "  \u2022  "),
                                             TextSpan(
                                               text: snapshot.data.toString(),
                                             ),
@@ -409,7 +401,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 ],
               ),
             ),
-            Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 36)),
+            const Padding(padding: EdgeInsets.fromLTRB(12, 12, 12, 36)),
           ],
         ),
       ),
@@ -441,14 +433,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     return Padding(
       padding: const EdgeInsets.only(right: 24),
       child: PopupMenuButton(
-        offset: Offset(10, 50),
+        offset: const Offset(10, 50),
         initialValue: sortKey?.index ?? 0,
         child: Align(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
+              const Padding(
                 padding: EdgeInsets.only(left: 5.0),
               ),
               Container(
@@ -495,14 +487,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     } else {
       return InkWell(
         child: Container(
-          margin: EdgeInsets.fromLTRB(30, 30, 30, 54),
+          margin: const EdgeInsets.fromLTRB(30, 30, 30, 54),
           decoration: BoxDecoration(
             color: Theme.of(context).backgroundColor,
             boxShadow: [
               BoxShadow(
                 blurRadius: 2,
                 spreadRadius: 0,
-                offset: Offset(0, 0),
+                offset: const Offset(0, 0),
                 color: Theme.of(context).iconTheme.color.withOpacity(0.3),
               )
             ],
@@ -520,7 +512,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             toastLength: Toast.LENGTH_LONG,
           );
           Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.collections_page));
+              .fire(TabChangedEvent(0, TabChangedEventSource.collectionsPage));
         },
       );
     }
@@ -579,7 +571,7 @@ class DeviceFolderIcon extends StatelessWidget {
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: Container(
+        child: SizedBox(
           height: 140,
           width: 120,
           // padding: const EdgeInsets.all(8.0),
@@ -588,6 +580,8 @@ class DeviceFolderIcon extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
                 child: SizedBox(
+                  height: 120,
+                  width: 120,
                   child: Hero(
                     tag:
                         "device_folder:" + folder.path + folder.thumbnail.tag(),
@@ -606,8 +600,6 @@ class DeviceFolderIcon extends StatelessWidget {
                       ],
                     ),
                   ),
-                  height: 120,
-                  width: 120,
                 ),
               ),
               Padding(
@@ -659,6 +651,8 @@ class CollectionItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: SizedBox(
+              height: sideOfThumbnail,
+              width: sideOfThumbnail,
               child: Hero(
                 tag: "collection" + c.thumbnail.tag(),
                 child: ThumbnailWidget(
@@ -669,11 +663,9 @@ class CollectionItem extends StatelessWidget {
                   ),
                 ),
               ),
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
             ),
           ),
-          SizedBox(height: 4),
+          const SizedBox(height: 4),
           Row(
             children: [
               Container(
@@ -694,7 +686,7 @@ class CollectionItem extends StatelessWidget {
                           color: albumTitleTextStyle.color.withOpacity(0.5),
                         ),
                         children: [
-                          TextSpan(text: "  \u2022  "),
+                          const TextSpan(text: "  \u2022  "),
                           TextSpan(text: snapshot.data.toString()),
                         ],
                       ),
@@ -730,7 +722,7 @@ class SectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 12, 0, 0),
+      margin: const EdgeInsets.fromLTRB(16, 12, 0, 0),
       child: Column(
         children: [
           Align(
@@ -758,7 +750,7 @@ class EnteSectionTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 12, 0, 0),
+      margin: const EdgeInsets.fromLTRB(16, 12, 0, 0),
       child: Column(
         children: [
           Align(

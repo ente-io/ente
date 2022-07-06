@@ -149,9 +149,14 @@ class SuperLogging {
     WidgetsFlutterBinding.ensureInitialized();
 
     appVersion ??= await getAppVersion();
+    final isFDroidClient = await isFDroidBuild();
+    if (isFDroidClient) {
+      config.sentryDsn = null;
+      config.tunnel = null;
+    }
 
     final enable = config.enableInDebugMode || kReleaseMode;
-    sentryIsEnabled = enable && config.sentryDsn != null;
+    sentryIsEnabled = enable && config.sentryDsn != null && !isFDroidClient;
     fileIsEnabled = enable && config.logDirPath != null;
 
     if (fileIsEnabled) {
@@ -163,6 +168,14 @@ class SuperLogging {
 
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen(onLogRecord);
+
+    if (isFDroidClient) {
+      assert(
+        sentryIsEnabled == false,
+        "sentry dsn should be disabled for "
+        "f-droid config  ${config.sentryDsn} & ${config.tunnel}",
+      );
+    }
 
     if (!enable) {
       $.info("detected debug mode; sentry & file logging disabled.");
@@ -193,9 +206,11 @@ class SuperLogging {
     }
   }
 
-  static void setUserID(String userID) {
-    Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
-    $.info("setting sentry user ID to: $userID");
+  static void setUserID(String userID) async {
+    if (config.sentryDsn != null) {
+      Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
+      $.info("setting sentry user ID to: $userID");
+    }
   }
 
   static Future<void> _sendErrorToSentry(Object error, StackTrace stack) async {
@@ -350,5 +365,14 @@ class SuperLogging {
   static Future<String> getAppVersion() async {
     var pkgInfo = await PackageInfo.fromPlatform();
     return "${pkgInfo.version}+${pkgInfo.buildNumber}";
+  }
+
+  // disable sentry on f-droid. We need to make it opt-in preference
+  static Future<bool> isFDroidBuild() async {
+    if (!Platform.isAndroid) {
+      return false;
+    }
+    var pkgName = (await PackageInfo.fromPlatform()).packageName;
+    return pkgName.startsWith("io.ente.photos.fdroid");
   }
 }

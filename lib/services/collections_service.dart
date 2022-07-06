@@ -29,8 +29,8 @@ import 'package:photos/utils/file_download_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CollectionsService {
-  static final _collectionSyncTimeKeyPrefix = "collection_sync_time_";
-  static final _collectionsSyncTimeKey = "collections_sync_time_x";
+  static const _collectionSyncTimeKeyPrefix = "collection_sync_time_";
+  static const _collectionsSyncTimeKey = "collections_sync_time_x";
 
   static const int kMaximumWriteAttempts = 5;
 

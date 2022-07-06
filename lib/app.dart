@@ -20,14 +20,14 @@ class EnteApp extends StatefulWidget {
   final Future<void> Function(String) runBackgroundTask;
   final Future<void> Function(String) killBackgroundTask;
 
-  EnteApp(
+  const EnteApp(
     this.runBackgroundTask,
     this.killBackgroundTask, {
     Key key,
   }) : super(key: key);
 
   @override
-  _EnteAppState createState() => _EnteAppState();
+  State<EnteApp> createState() => _EnteAppState();
 }
 
 class _EnteAppState extends State<EnteApp> with WidgetsBindingObserver {

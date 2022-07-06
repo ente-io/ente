@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 class ScrollBarThumb extends StatelessWidget {
-  final backgroundColor;
-  final drawColor;
-  final height;
-  final title;
-  final labelAnimation;
-  final thumbAnimation;
+  final Color backgroundColor;
+  final Color drawColor;
+  final double height;
+  final String title;
+  final Animation labelAnimation;
+  final Animation thumbAnimation;
   final Function(DragStartDetails details) onDragStart;
   final Function(DragUpdateDetails details) onDragUpdate;
   final Function(DragEndDetails details) onDragEnd;
@@ -32,7 +32,7 @@ class ScrollBarThumb extends StatelessWidget {
         FadeTransition(
           opacity: labelAnimation,
           child: Container(
-            padding: EdgeInsets.fromLTRB(20, 12, 20, 12),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: backgroundColor,
@@ -48,7 +48,7 @@ class ScrollBarThumb extends StatelessWidget {
             ),
           ),
         ),
-        Padding(
+        const Padding(
           padding: EdgeInsets.all(12),
         ),
         GestureDetector(
@@ -61,15 +61,15 @@ class ScrollBarThumb extends StatelessWidget {
               foregroundPainter: _ArrowCustomPainter(drawColor),
               child: Material(
                 elevation: 4.0,
-                child: Container(
-                  constraints: BoxConstraints.tight(Size(height * 0.6, height)),
-                ),
                 color: backgroundColor,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(height),
                   bottomLeft: Radius.circular(height),
-                  topRight: Radius.circular(4.0),
-                  bottomRight: Radius.circular(4.0),
+                  topRight: const Radius.circular(4.0),
+                  bottomRight: const Radius.circular(4.0),
+                ),
+                child: Container(
+                  constraints: BoxConstraints.tight(Size(height * 0.6, height)),
                 ),
               ),
             ),
@@ -143,8 +143,8 @@ class SlideFadeTransition extends StatelessWidget {
       builder: (context, child) => animation.value == 0.0 ? Container() : child,
       child: SlideTransition(
         position: Tween(
-          begin: Offset(0.3, 0.0),
-          end: Offset(0.0, 0.0),
+          begin: const Offset(0.3, 0.0),
+          end: const Offset(0.0, 0.0),
         ).animate(animation),
         child: FadeTransition(
           opacity: animation,

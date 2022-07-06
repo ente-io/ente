@@ -10,19 +10,16 @@ import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/file_uploader.dart';
 
 class FavoritesService {
   Configuration _config;
   CollectionsService _collectionsService;
-  FileUploader _fileUploader;
   FilesDB _filesDB;
   int _cachedFavoritesCollectionID;
 
   FavoritesService._privateConstructor() {
     _config = Configuration.instance;
     _collectionsService = CollectionsService.instance;
-    _fileUploader = FileUploader.instance;
     _filesDB = FilesDB.instance;
   }
   static FavoritesService instance = FavoritesService._privateConstructor();

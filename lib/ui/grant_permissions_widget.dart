@@ -31,7 +31,8 @@ class GrantPermissionsWidget extends StatelessWidget {
                                 colorBlendMode: BlendMode.modulate,
                               )
                             : Image.asset(
-                                'assets/loading_photos_background_dark.png'),
+                                'assets/loading_photos_background_dark.png',
+                              ),
                         Center(
                           child: Column(
                             children: [
@@ -56,7 +57,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                           .headline5
                           .copyWith(fontWeight: FontWeight.w700),
                       children: [
-                        TextSpan(text: 'ente '),
+                        const TextSpan(text: 'ente '),
                         TextSpan(
                           text: "needs permission to ",
                           style: Theme.of(context)
@@ -64,7 +65,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                               .headline5
                               .copyWith(fontWeight: FontWeight.w400),
                         ),
-                        TextSpan(text: 'preserve your photos'),
+                        const TextSpan(text: 'preserve your photos'),
                       ],
                     ),
                   ),
@@ -81,7 +82,7 @@ class GrantPermissionsWidget extends StatelessWidget {
               color: Theme.of(context).backgroundColor,
               spreadRadius: 190,
               blurRadius: 30,
-              offset: Offset(0, 170),
+              offset: const Offset(0, 170),
             )
           ],
         ),
@@ -92,7 +93,7 @@ class GrantPermissionsWidget extends StatelessWidget {
           bottom: Platform.isIOS ? 40 : 16,
         ),
         child: OutlinedButton(
-          child: Text("Grant permission"),
+          child: const Text("Grant permission"),
           onPressed: () async {
             final state = await PhotoManager.requestPermissionExtend();
             if (state == PermissionState.authorized ||
@@ -100,8 +101,8 @@ class GrantPermissionsWidget extends StatelessWidget {
               await SyncService.instance.onPermissionGranted(state);
             } else if (state == PermissionState.denied) {
               AlertDialog alert = AlertDialog(
-                title: Text("Please grant permissions"),
-                content: Text(
+                title: const Text("Please grant permissions"),
+                content: const Text(
                   "ente can encrypt and preserve files only if you grant access to them",
                 ),
                 actions: [

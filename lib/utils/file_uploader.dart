@@ -42,10 +42,10 @@ class FileUploader {
 
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
-  final _queue = LinkedHashMap<String, FileUploadItem>();
+  final LinkedHashMap _queue = LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
-  final kSafeBufferForLockExpiry = Duration(days: 1).inMicroseconds;
-  final kBGTaskDeathTimeout = Duration(seconds: 5).inMicroseconds;
+  final kSafeBufferForLockExpiry = const Duration(days: 1).inMicroseconds;
+  final kBGTaskDeathTimeout = const Duration(seconds: 5).inMicroseconds;
   final _uploadURLs = Queue<UploadURL>();
 
   // Maintains the count of files in the current upload session.
@@ -151,15 +151,15 @@ class FileUploader {
         file,
         collectionID,
         completer,
-        status: UploadStatus.in_progress,
+        status: UploadStatus.inProgress,
       );
       _encryptAndUploadFileToCollection(file, collectionID, forcedUpload: true);
       return completer.future;
     }
     var item = _queue[file.localID];
     // If the file is being uploaded right now, wait and proceed
-    if (item.status == UploadStatus.in_progress ||
-        item.status == UploadStatus.in_background) {
+    if (item.status == UploadStatus.inProgress ||
+        item.status == UploadStatus.inBackground) {
       _totalCountInUploadSession--;
       final uploadedFile = await item.completer.future;
       if (uploadedFile.collectionID == collectionID) {
@@ -175,7 +175,7 @@ class FileUploader {
       // 2. Force upload the file
       // 3. Add to the relevant collection
       item = _queue[file.localID];
-      item.status = UploadStatus.in_progress;
+      item.status = UploadStatus.inProgress;
       final uploadedFile = await _encryptAndUploadFileToCollection(
         file,
         collectionID,
@@ -198,7 +198,7 @@ class FileUploader {
   void clearQueue(final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
-        .where((entry) => entry.value.status == UploadStatus.not_started)
+        .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
       uploadsToBeRemoved.add(pendingUpload.key);
     });
@@ -211,7 +211,7 @@ class FileUploader {
   void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
     List<String> uploadsToBeRemoved = [];
     _queue.entries
-        .where((entry) => entry.value.status == UploadStatus.not_started)
+        .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
       if (fn(pendingUpload.value.file)) {
         uploadsToBeRemoved.add(pendingUpload.key);
@@ -235,7 +235,7 @@ class FileUploader {
     if (_uploadCounter < kMaximumConcurrentUploads) {
       var pendingEntry = _queue.entries
           .firstWhere(
-            (entry) => entry.value.status == UploadStatus.not_started,
+            (entry) => entry.value.status == UploadStatus.notStarted,
             orElse: () => null,
           )
           ?.value;
@@ -247,14 +247,14 @@ class FileUploader {
         pendingEntry = _queue.entries
             .firstWhere(
               (entry) =>
-                  entry.value.status == UploadStatus.not_started &&
+                  entry.value.status == UploadStatus.notStarted &&
                   entry.value.file.fileType != FileType.video,
               orElse: () => null,
             )
             ?.value;
       }
       if (pendingEntry != null) {
-        pendingEntry.status = UploadStatus.in_progress;
+        pendingEntry.status = UploadStatus.inProgress;
         _encryptAndUploadFileToCollection(
           pendingEntry.file,
           pendingEntry.collectionID,
@@ -287,7 +287,7 @@ class FileUploader {
       return uploadedFile;
     } catch (e) {
       if (e is LockAlreadyAcquiredError) {
-        _queue[localID].status = UploadStatus.in_background;
+        _queue[localID].status = UploadStatus.inBackground;
         return _queue[localID].completer.future;
       } else {
         _queue.remove(localID).completer.completeError(e);
@@ -561,7 +561,7 @@ class FileUploader {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Upload file failed, will retry in 3 seconds");
-        await Future.delayed(Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 3));
         return _uploadFile(
           file,
           collectionID,
@@ -632,7 +632,7 @@ class FileUploader {
         _onStorageLimitExceeded();
       } else if (attempt < kMaximumUploadAttempts) {
         _logger.info("Update file failed, will retry in 3 seconds");
-        await Future.delayed(Duration(seconds: 3));
+        await Future.delayed(const Duration(seconds: 3));
         return _updateFile(
           file,
           fileObjectKey,
@@ -656,7 +656,7 @@ class FileUploader {
     }
     try {
       return _uploadURLs.removeFirst();
-    } catch (e, s) {
+    } catch (e) {
       if (e is StateError && e.message == 'No element' && _queue.isNotEmpty) {
         _logger.warning("Oops, uploadUrls has no element now, fetching again");
         return _getUploadURL();
@@ -774,7 +774,7 @@ class FileUploader {
 
   Future<void> _pollBackgroundUploadStatus() async {
     final blockedUploads = _queue.entries
-        .where((e) => e.value.status == UploadStatus.in_background)
+        .where((e) => e.value.status == UploadStatus.inBackground)
         .toList();
     for (final upload in blockedUploads) {
       final file = upload.value.file;
@@ -811,14 +811,14 @@ class FileUploadItem {
     this.file,
     this.collectionID,
     this.completer, {
-    this.status = UploadStatus.not_started,
+    this.status = UploadStatus.notStarted,
   });
 }
 
 enum UploadStatus {
-  not_started,
-  in_progress,
-  in_background,
+  notStarted,
+  inProgress,
+  inBackground,
   completed,
 }
 

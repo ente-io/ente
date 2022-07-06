@@ -12,7 +12,7 @@ ExpandableThemeData getExpandableTheme(BuildContext context) {
   return ExpandableThemeData(
     expandIcon: CupertinoIcons.chevron_down,
     collapseIcon: CupertinoIcons.chevron_up,
-    iconPadding: EdgeInsets.all(4),
+    iconPadding: const EdgeInsets.all(4),
     iconColor: Theme.of(context).colorScheme.onSurface,
     iconSize: 20.0,
     iconRotationAngle: -3.14 / 2,

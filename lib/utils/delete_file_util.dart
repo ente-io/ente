@@ -20,7 +20,7 @@ import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/linear_progress_dialog.dart';
+import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -345,6 +345,7 @@ Future<List<String>> _deleteLocalFilesInOneShot(
   BuildContext context,
   List<String> localIDs,
 ) async {
+  _logger.info('starting _deleteLocalFilesInOneShot for ${localIDs.length}');
   final List<String> deletedIDs = [];
   final dialog = createProgressDialog(
     context,
@@ -356,6 +357,10 @@ Future<List<String>> _deleteLocalFilesInOneShot(
   } catch (e, s) {
     _logger.severe("Could not delete files ", e, s);
   }
+  _logger.info(
+    '_deleteLocalFilesInOneShot deleted ${deletedIDs.length} out '
+    'of ${localIDs.length}',
+  );
   await dialog.hide();
   return deletedIDs;
 }

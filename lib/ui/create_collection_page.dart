@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
-import 'package:photos/ui/collection_page.dart';
-import 'package:photos/ui/common/gradientButton.dart';
-import 'package:photos/ui/loading_widget.dart';
-import 'package:photos/ui/thumbnail_widget.dart';
+import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -51,7 +50,7 @@ class CreateCollectionPage extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _CreateCollectionPageState createState() => _CreateCollectionPageState();
+  State<CreateCollectionPage> createState() => _CreateCollectionPageState();
 }
 
 class _CreateCollectionPageState extends State<CreateCollectionPage> {
@@ -87,43 +86,25 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                     right: 40,
                   ),
                   child: GradientButton(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      //mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.create_new_folder_outlined,
-                          color: Colors.white,
-                        ),
-                        Padding(padding: EdgeInsets.all(6)),
-                        Text(
-                          "To a new album",
-                          style: gradientButtonTextTheme(),
-                        ),
-                      ],
-                    ),
-                    linearGradientColors: const [
-                      Color(0xFF2CD267),
-                      Color(0xFF1DB954),
-                    ],
                     onTap: () async {
                       _showNameAlbumDialog();
                     },
+                    iconData: Icons.create_new_folder_outlined,
+                    paddingValue: 6,
+                    text: "To a new album",
                   ),
                 ),
               ),
             ],
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(40, 24, 40, 20),
+          const Padding(
+            padding: EdgeInsets.fromLTRB(40, 24, 40, 20),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "To an existing album",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  // color: Theme.of(context).primaryColorLight.withOpacity(0.8),
                 ),
               ),
             ),
@@ -150,10 +131,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             },
             itemCount: snapshot.data.length,
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
           );
         } else {
-          return loadWidget;
+          return const EnteLoadingWidget();
         }
       },
     );
@@ -161,7 +142,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Widget _buildCollectionItem(CollectionWithThumbnail item) {
     return Container(
-      padding: EdgeInsets.only(left: 24, bottom: 16),
+      padding: const EdgeInsets.only(left: 24, bottom: 16),
       child: GestureDetector(
         behavior: HitTestBehavior.translucent,
         child: Row(
@@ -169,17 +150,17 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             ClipRRect(
               borderRadius: BorderRadius.circular(2.0),
               child: SizedBox(
-                child: ThumbnailWidget(item.thumbnail),
                 height: 64,
                 width: 64,
                 key: Key("collection_item:" + item.thumbnail.tag()),
+                child: ThumbnailWidget(item.thumbnail),
               ),
             ),
-            Padding(padding: EdgeInsets.all(8)),
+            const Padding(padding: EdgeInsets.all(8)),
             Expanded(
               child: Text(
                 item.collection.name,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 16,
                 ),
               ),
@@ -221,9 +202,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   void _showNameAlbumDialog() async {
     AlertDialog alert = AlertDialog(
-      title: Text("Album title"),
+      title: const Text("Album title"),
       content: TextFormField(
-        decoration: InputDecoration(
+        decoration: const InputDecoration(
           hintText: "Christmas 2020 / Dinner at Alice's",
           contentPadding: EdgeInsets.all(8),
         ),
@@ -313,7 +294,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       widget.selectedFiles?.clearAll();
 
       return true;
-    } on AssertionError catch (e, s) {
+    } on AssertionError catch (e) {
       await dialog.hide();
       showErrorDialog(context, "Oops", e.message);
       return false;
@@ -335,7 +316,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       widget.selectedFiles?.clearAll();
       await dialog.hide();
       return true;
-    } on AssertionError catch (e, s) {
+    } on AssertionError catch (e) {
       await dialog.hide();
       showErrorDialog(context, "Oops", e.message);
       return false;

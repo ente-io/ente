@@ -8,15 +8,15 @@ class PlaceHolderWidget extends StatelessWidget {
 
   final int count;
 
-  static final _gridViewCache = Map<int, GridView>();
+  static final _gridViewCache = <int, GridView>{};
 
   @override
   Widget build(BuildContext context) {
     if (!_gridViewCache.containsKey(count)) {
       _gridViewCache[count] = GridView.builder(
-        padding: EdgeInsets.all(0),
+        padding: const EdgeInsets.all(0),
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           return Container(
             margin: const EdgeInsets.all(2.0),
@@ -24,7 +24,7 @@ class PlaceHolderWidget extends StatelessWidget {
           );
         },
         itemCount: count,
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
         ),
       );

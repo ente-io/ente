@@ -8,30 +8,30 @@ import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
 class CollectionsDB {
-  static final _databaseName = "ente.collections.db";
-  static final table = 'collections';
-  static final tempTable = 'temp_collections';
-  static final _sqlBoolTrue = 1;
-  static final _sqlBoolFalse = 0;
+  static const _databaseName = "ente.collections.db";
+  static const table = 'collections';
+  static const tempTable = 'temp_collections';
+  static const _sqlBoolTrue = 1;
+  static const _sqlBoolFalse = 0;
 
-  static final columnID = 'collection_id';
-  static final columnOwner = 'owner';
-  static final columnEncryptedKey = 'encrypted_key';
-  static final columnKeyDecryptionNonce = 'key_decryption_nonce';
-  static final columnName = 'name';
-  static final columnEncryptedName = 'encrypted_name';
-  static final columnNameDecryptionNonce = 'name_decryption_nonce';
-  static final columnType = 'type';
-  static final columnEncryptedPath = 'encrypted_path';
-  static final columnPathDecryptionNonce = 'path_decryption_nonce';
-  static final columnVersion = 'version';
-  static final columnSharees = 'sharees';
-  static final columnPublicURLs = 'public_urls';
+  static const columnID = 'collection_id';
+  static const columnOwner = 'owner';
+  static const columnEncryptedKey = 'encrypted_key';
+  static const columnKeyDecryptionNonce = 'key_decryption_nonce';
+  static const columnName = 'name';
+  static const columnEncryptedName = 'encrypted_name';
+  static const columnNameDecryptionNonce = 'name_decryption_nonce';
+  static const columnType = 'type';
+  static const columnEncryptedPath = 'encrypted_path';
+  static const columnPathDecryptionNonce = 'path_decryption_nonce';
+  static const columnVersion = 'version';
+  static const columnSharees = 'sharees';
+  static const columnPublicURLs = 'public_urls';
   // MMD -> Magic Metadata
-  static final columnMMdEncodedJson = 'mmd_encoded_json';
-  static final columnMMdVersion = 'mmd_ver';
-  static final columnUpdationTime = 'updation_time';
-  static final columnIsDeleted = 'is_deleted';
+  static const columnMMdEncodedJson = 'mmd_encoded_json';
+  static const columnMMdVersion = 'mmd_ver';
+  static const columnUpdationTime = 'updation_time';
+  static const columnIsDeleted = 'is_deleted';
 
   static final intitialScript = [...createTable(table)];
   static final migrationScripts = [
