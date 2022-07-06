@@ -133,11 +133,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       Row(
         children: [
           Icon(Icons.calendar_today_outlined, color: infoColor),
-<<<<<<< HEAD:lib/ui/file_info_dialog.dart
           const SizedBox(height: 8),
-=======
-          const Padding(padding: EdgeInsets.all(4)),
->>>>>>> master:lib/ui/viewer/file/file_info_dialog.dart
           Text(
             getFormattedTime(
               DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
@@ -146,11 +142,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
         ],
       ),
-<<<<<<< HEAD:lib/ui/file_info_dialog.dart
       const SizedBox(height: 12),
-=======
-      const Padding(padding: EdgeInsets.all(6)),
->>>>>>> master:lib/ui/viewer/file/file_info_dialog.dart
       Row(
         children: [
           Icon(Icons.folder_outlined, color: infoColor),
@@ -164,11 +156,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
         ],
       ),
-<<<<<<< HEAD:lib/ui/file_info_dialog.dart
       const SizedBox(height: 12),
-=======
-      const Padding(padding: EdgeInsets.all(6)),
->>>>>>> master:lib/ui/viewer/file/file_info_dialog.dart
     ];
     items.addAll(
       [
@@ -179,11 +167,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             _getFileSize(),
           ],
         ),
-<<<<<<< HEAD:lib/ui/file_info_dialog.dart
         const SizedBox(height: 12),
-=======
-        const Padding(padding: EdgeInsets.all(6)),
->>>>>>> master:lib/ui/viewer/file/file_info_dialog.dart
       ],
     );
     if (file.localID != null && !_isImage) {
@@ -215,11 +199,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             ],
           ),
-<<<<<<< HEAD:lib/ui/file_info_dialog.dart
           const SizedBox(height: 12),
-=======
-          const Padding(padding: EdgeInsets.all(6)),
->>>>>>> master:lib/ui/viewer/file/file_info_dialog.dart
         ],
       );
     }
@@ -245,11 +225,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
     items.add(
-<<<<<<< HEAD:lib/ui/file_info_dialog.dart
       const SizedBox(height: 12),
-=======
-      const Padding(padding: EdgeInsets.all(12)),
->>>>>>> master:lib/ui/viewer/file/file_info_dialog.dart
     );
     items.add(
       Row(
@@ -274,11 +250,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 style: Theme.of(context).textTheme.headline5,
               ),
             ),
-<<<<<<< HEAD:lib/ui/file_info_dialog.dart
             const SizedBox(width: 16),
-=======
-            const Padding(padding: EdgeInsets.all(8)),
->>>>>>> master:lib/ui/viewer/file/file_info_dialog.dart
             Icon(Icons.edit, color: infoColor),
           ],
         ),
