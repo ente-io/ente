@@ -22,6 +22,7 @@ export interface SingleInputFormProps {
     submitButtonProps?: any;
     initialValue?: string;
     secondaryButtonAction?: () => void;
+    disableAutoFocus?: boolean;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -90,7 +91,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         error={Boolean(errors.inputValue)}
                         helperText={errors.inputValue}
                         disabled={loading}
-                        autoFocus
+                        autoFocus={!props.disableAutoFocus}
                         InputProps={{
                             endAdornment: props.fieldType === 'password' && (
                                 <ShowHidePassword

@@ -41,6 +41,7 @@ export default function EmailShare({ collection }) {
                     size: 'medium',
                     sx: { mt: 1, mb: 2 },
                 }}
+                disableAutoFocus
             />
             <CollectionShareSharees collection={collection} />
         </>
