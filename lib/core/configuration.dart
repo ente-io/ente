@@ -76,7 +76,12 @@ class Configuration {
   FlutterSecureStorage _secureStorage;
   String _tempDirectory;
   String _thumbnailCacheDirectory;
-  String _sharedMediaDirectory;
+  // 6th July 22: Remove this after 3 months. Hopefully, active users
+  // will migrate to newer version of the app, where shared media is stored
+  // on appSupport directory which OS won't clean up automatically
+  String _sharedTempMediaDirectory;
+
+  String _sharedDocumentsMediaDirectory;
   String _volatilePassword;
 
   final _secureStorageOptionsIOS =
@@ -106,8 +111,10 @@ class Configuration {
     var tempDirectoryPath = (await getTemporaryDirectory()).path;
     _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
     io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
-    _sharedMediaDirectory = tempDirectoryPath + "/ente-shared-media";
-    io.Directory(_sharedMediaDirectory).createSync(recursive: true);
+    _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";
+    io.Directory(_sharedTempMediaDirectory).createSync(recursive: true);
+    _sharedDocumentsMediaDirectory = _documentsDirectory + "/ente-shared-media";
+    io.Directory(_sharedDocumentsMediaDirectory).createSync(recursive: true);
     if (!_preferences.containsKey(tokenKey)) {
       await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
     } else {
@@ -470,8 +477,12 @@ class Configuration {
     return _thumbnailCacheDirectory;
   }
 
-  String getSharedMediaCacheDirectory() {
-    return _sharedMediaDirectory;
+  String getOldSharedMediaCacheDirectory() {
+    return _sharedTempMediaDirectory;
+  }
+
+  String getSharedMediaDirectory() {
+    return _sharedDocumentsMediaDirectory;
   }
 
   bool hasConfiguredAccount() {

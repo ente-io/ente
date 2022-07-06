@@ -222,7 +222,9 @@ class File {
   }
 
   bool isSharedMediaToAppSandbox() {
-    return localID != null && localID.startsWith(kSharedMediaIdentifier);
+    return localID != null &&
+        (localID.startsWith(kOldSharedMediaIdentifier) ||
+            localID.startsWith(kSharedMediaIdentifier));
   }
 
   bool hasLocation() {

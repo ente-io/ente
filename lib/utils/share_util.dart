@@ -79,9 +79,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     enteFile.title = basename(media.path);
     var ioFile = dartio.File(media.path);
     ioFile = ioFile.renameSync(
-      Configuration.instance.getSharedMediaCacheDirectory() +
-          "/" +
-          enteFile.title,
+      Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title,
     );
     enteFile.localID = kSharedMediaIdentifier + enteFile.title;
     enteFile.collectionID = collectionID;

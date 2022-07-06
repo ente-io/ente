@@ -15,7 +15,9 @@ const int kGalleryLoadStartTime = -8000000000000000; // Wednesday, March 6, 1748
 const int kGalleryLoadEndTime = 9223372036854775807; // 2^63 -1
 
 // used to identify which ente file are available in app cache
-const String kSharedMediaIdentifier = 'ente-shared://';
+// todo: 6Jun22: delete old media identifier after 3 months
+const String kOldSharedMediaIdentifier = 'ente-shared://';
+const String kSharedMediaIdentifier = 'ente-shared-media://';
 
 const int kMaxLivePhotoToastCount = 2;
 const String kLivePhotoToastCounterKey = "show_live_photo_toast";
