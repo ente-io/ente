@@ -12,7 +12,9 @@ import CryptoWorker, {
     decryptAndStoreToken,
     SaveKeyInSessionStore,
 } from 'utils/crypto';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import VerticallyCentered from 'components/Container';
 import { Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
@@ -52,7 +54,10 @@ export default function Recover() {
         appContext.showNavBar(true);
     }, []);
 
-    const recover = async (recoveryKey: string, setFieldError) => {
+    const recover: SingleInputFormProps['callback'] = async (
+        recoveryKey: string,
+        setFieldError
+    ) => {
         try {
             // check if user is entering mnemonic recovery key
             if (recoveryKey.trim().indexOf(' ') > 0) {
@@ -74,7 +79,7 @@ export default function Recover() {
             router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             logError(e, 'password recovery failed');
-            setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
+            setFieldError(constants.INCORRECT_RECOVERY_KEY);
         }
     };
 

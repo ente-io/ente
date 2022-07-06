@@ -1,6 +1,8 @@
 import { DialogContent, DialogTitle, styled } from '@mui/material';
 import DialogBoxBase from 'components/DialogBox/base';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import React from 'react';
 import CryptoWorker from 'utils/crypto';
 import constants from 'utils/strings/constants';
@@ -22,13 +24,16 @@ export function PublicLinkSetPassword({
     updatePublicShareURLHelper,
     setChangePasswordView,
 }) {
-    const savePassword = async (passphrase, setFieldError) => {
+    const savePassword: SingleInputFormProps['callback'] = async (
+        passphrase,
+        setFieldError
+    ) => {
         if (passphrase && passphrase.trim().length >= 1) {
             await enablePublicUrlPassword(passphrase);
             setChangePasswordView(false);
             publicShareProp.passwordEnabled = true;
         } else {
-            setFieldError('linkPassword', 'can not be empty');
+            setFieldError('can not be empty');
         }
     };
 

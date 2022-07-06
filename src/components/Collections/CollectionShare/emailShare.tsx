@@ -1,4 +1,6 @@
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext } from 'react';
 import { shareCollection } from 'services/collectionService';
@@ -8,18 +10,22 @@ import { handleSharingErrors } from 'utils/error';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { CollectionShareSharees } from './sharees';
+
 export default function EmailShare({ collection }) {
     const galleryContext = useContext(GalleryContext);
 
-    const collectionShare = async (email, setFieldError) => {
+    const collectionShare: SingleInputFormProps['callback'] = async (
+        email,
+        setFieldError
+    ) => {
         try {
             const user: User = getData(LS_KEYS.USER);
             if (email === user.email) {
-                setFieldError('email', constants.SHARE_WITH_SELF);
+                setFieldError(constants.SHARE_WITH_SELF);
             } else if (
                 collection?.sharees?.find((value) => value.email === email)
             ) {
-                setFieldError('email', constants.ALREADY_SHARED(email));
+                setFieldError(constants.ALREADY_SHARED(email));
             } else {
                 await shareCollection(collection, email);
                 await sleep(2000);
@@ -27,7 +33,7 @@ export default function EmailShare({ collection }) {
             }
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
-            setFieldError('email', errorMessage);
+            setFieldError(errorMessage);
         }
     };
     return (
