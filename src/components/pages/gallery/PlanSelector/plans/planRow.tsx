@@ -46,7 +46,7 @@ const ActivePlanButton = styled((props: ButtonProps) => (
         transition: 'transform .2s ease-in-out',
     },
     '&:hover .MuiButton-endIcon': {
-        transform: 'translateX(10px)',
+        transform: 'translateX(4px)',
     },
 }));
 
