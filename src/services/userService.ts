@@ -24,8 +24,8 @@ const ENDPOINT = getEndpoint();
 
 const HAS_SET_KEYS = 'hasSetKeys';
 
-export const getOtt = (email: string) =>
-    HTTPService.get(`${ENDPOINT}/users/ott`, {
+export const sendOtt = (email: string) =>
+    HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
         client: 'web',
     });
@@ -260,11 +260,11 @@ export const _logout = async () => {
     }
 };
 
-export const getOTTForEmailChange = async (email: string) => {
+export const sendOTTForEmailChange = async (email: string) => {
     if (!getToken()) {
         return null;
     }
-    await HTTPService.get(`${ENDPOINT}/users/ott`, {
+    await HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
         client: 'web',
         purpose: 'change',

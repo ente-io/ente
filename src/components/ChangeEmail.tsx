@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import router from 'next/router';
-import { changeEmail, getOTTForEmailChange } from 'services/userService';
+import { changeEmail, sendOTTForEmailChange } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import { Alert, TextField } from '@mui/material';
@@ -32,7 +32,7 @@ function ChangeEmailForm() {
     ) => {
         try {
             setLoading(true);
-            await getOTTForEmailChange(email);
+            await sendOTTForEmailChange(email);
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);
