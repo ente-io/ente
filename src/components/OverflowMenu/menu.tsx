@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Menu from '@mui/material/Menu';
-import { IconButton, styled } from '@mui/material';
+import { IconButton, PaperProps, styled } from '@mui/material';
 import { OverflowMenuContext } from 'contexts/overflowMenu';
 
 export interface Iprops {
@@ -8,6 +8,7 @@ export interface Iprops {
     triggerButtonProps?: any;
     children?: React.ReactNode;
     ariaControls: string;
+    menuPaperProps?: Partial<PaperProps>;
 }
 
 const StyledMenu = styled(Menu)`
@@ -27,6 +28,7 @@ export default function OverflowMenu({
     ariaControls,
     triggerButtonIcon,
     triggerButtonProps,
+    menuPaperProps,
 }: Iprops) {
     const [sortByEl, setSortByEl] = useState(null);
     const handleClose = () => setSortByEl(null);
@@ -49,6 +51,7 @@ export default function OverflowMenu({
                     disablePadding: true,
                     'aria-labelledby': ariaControls,
                 }}
+                PaperProps={menuPaperProps}
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'right',

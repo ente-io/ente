@@ -29,7 +29,9 @@ import EnteSpinner from 'components/EnteSpinner';
 import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
@@ -211,7 +213,10 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    const verifyLinkPassword = async (password, setFieldError) => {
+    const verifyLinkPassword: SingleInputFormProps['callback'] = async (
+        password,
+        setFieldError
+    ) => {
         try {
             const cryptoWorker = await new CryptoWorker();
             let hashedPassword: string = null;
@@ -225,10 +230,7 @@ export default function PublicCollectionGallery() {
                 );
             } catch (e) {
                 logError(e, 'failed to derive key for verifyLinkPassword');
-                setFieldError(
-                    'passphrase',
-                    `${constants.UNKNOWN_ERROR} ${e.message}`
-                );
+                setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
                 return;
             }
             const collectionUID = getPublicCollectionUID(token.current);
@@ -242,7 +244,7 @@ export default function PublicCollectionGallery() {
             } catch (e) {
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                    setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                    setFieldError(constants.INCORRECT_PASSPHRASE);
                     return;
                 }
                 throw e;
@@ -251,10 +253,7 @@ export default function PublicCollectionGallery() {
             appContext.finishLoading();
         } catch (e) {
             logError(e, 'failed to verifyLinkPassword');
-            setFieldError(
-                'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
-            );
+            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
         }
     };
 
