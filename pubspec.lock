@@ -7,7 +7,7 @@ packages:
       name: adaptive_theme
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.3.1"
+    version: "3.1.0"
   alice:
     dependency: "direct main"
     description:
@@ -1081,7 +1081,7 @@ packages:
       name: share_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.4"
+    version: "4.0.10"
   share_plus_linux:
     dependency: transitive
     description:
