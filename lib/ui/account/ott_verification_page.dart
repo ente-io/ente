@@ -175,7 +175,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      UserService.instance.getOtt(
+                      UserService.instance.sendOtt(
                         context,
                         widget.email,
                         isCreateAccountScreen: widget.isCreateAccountScreen,

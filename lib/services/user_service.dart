@@ -43,7 +43,7 @@ class UserService {
         ValueNotifier<String>(Configuration.instance.getEmail());
   }
 
-  Future<void> getOtt(
+  Future<void> sendOtt(
     BuildContext context,
     String email, {
     bool isChangeEmail = false,
@@ -52,12 +52,9 @@ class UserService {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      final response = await _dio.get(
+      final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/ott",
-        queryParameters: {
-          "email": email,
-          "purpose": isChangeEmail ? "change" : ""
-        },
+        data: {"email": email, "purpose": isChangeEmail ? "change" : ""},
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
