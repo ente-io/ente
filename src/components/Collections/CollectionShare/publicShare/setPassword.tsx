@@ -1,20 +1,10 @@
-import { DialogContent, DialogTitle, styled } from '@mui/material';
-import DialogBoxBase from 'components/DialogBox/base';
+import { Dialog, Stack, Typography } from '@mui/material';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import React from 'react';
 import CryptoWorker from 'utils/crypto';
 import constants from 'utils/strings/constants';
-
-const SetPublicLinkSetPasswordDialog = styled(DialogBoxBase)(({ theme }) => ({
-    '& .MuiDialog-container': {
-        justifyContent: 'flex-end',
-    },
-    '& .MuiDialog-paper': {
-        marginRight: theme.spacing(9),
-    },
-}));
 
 export function PublicLinkSetPassword({
     open,
@@ -51,9 +41,17 @@ export function PublicLinkSetPassword({
         });
     };
     return (
-        <SetPublicLinkSetPasswordDialog open={open} onClose={onClose}>
-            <DialogTitle>{constants.PASSWORD_LOCK}</DialogTitle>
-            <DialogContent>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            disablePortal
+            BackdropProps={{ sx: { position: 'absolute' } }}
+            sx={{ position: 'absolute' }}
+            PaperProps={{ sx: { p: 1 } }}>
+            <Stack spacing={3} p={1.5}>
+                <Typography variant="h3" px={1} py={0.5} fontWeight={'bold'}>
+                    {constants.PASSWORD_LOCK}
+                </Typography>
                 <SingleInputForm
                     callback={savePassword}
                     placeholder={constants.RETURN_PASSPHRASE_HINT}
@@ -62,7 +60,7 @@ export function PublicLinkSetPassword({
                     secondaryButtonAction={onClose}
                     submitButtonProps={{ sx: { mt: 1, mb: 2 } }}
                 />
-            </DialogContent>
-        </SetPublicLinkSetPasswordDialog>
+            </Stack>
+        </Dialog>
     );
 }
