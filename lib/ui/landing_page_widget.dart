@@ -125,7 +125,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
             "Designed to outlive",
           ),
           FeatureItemWidget(
-            "assets/onboarding_lock.png",
+            "assets/onboarding_sync.png",
             "Available",
             "everywhere",
             Platform.isAndroid

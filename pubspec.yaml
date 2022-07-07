@@ -17,7 +17,7 @@ environment:
   sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
-  adaptive_theme: ^2.3.0
+  adaptive_theme: ^3.1.0
   alice:
     git: "https://github.com/jhomlala/alice.git"
   animate_do: ^2.0.0
@@ -98,7 +98,7 @@ dependencies:
     path: thirdparty/sentry-dart/dart
   sentry_flutter:
     path: thirdparty/sentry-dart/flutter
-  share_plus: ^4.0.4
+  share_plus: ^4.0.10
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3
   sqflite_migration: ^0.3.0

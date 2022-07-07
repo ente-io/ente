@@ -71,7 +71,7 @@ Future<void> _runInForeground() async {
 }
 
 Future<void> _runBackgroundTask(String taskId) async {
-  if (Platform.isIOS && _isProcessRunning) {
+  if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
     BackgroundFetch.finish(taskId);
