@@ -46,8 +46,11 @@ function PlanSelectorCard(props: Props) {
 
     const usage = useMemo(() => {
         const userDetails = getLocalUserDetails();
-        return isPartOfFamily(userDetails?.familyData)
-            ? getTotalFamilyUsage(userDetails?.familyData)
+        if (!userDetails) {
+            return 0;
+        }
+        return isPartOfFamily(userDetails.familyData)
+            ? getTotalFamilyUsage(userDetails.familyData)
             : userDetails.usage;
     }, []);
 
