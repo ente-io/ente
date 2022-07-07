@@ -108,12 +108,10 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         title: Text(
           file.getDisplayName(),
         ),
-        subtitle: Text(
-          getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: Theme.of(context)
-              .textTheme
-              .bodyText2
-              .copyWith(color: Colors.black.withOpacity(0.5)),
+        subtitle: Row(
+          children: [
+            _getFileSize(),
+          ],
         ),
         trailing: file.uploadedFileID == null ||
                 file.ownerID != Configuration.instance.getUserID()
@@ -544,7 +542,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         if (snapshot.hasData) {
           return Text(
             (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB",
-            style: TextStyle(color: infoColor),
           );
         } else {
           return Center(
