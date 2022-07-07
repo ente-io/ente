@@ -7,11 +7,6 @@ const LogoImage = styled('img')`
 
 export function EnteLogo(props) {
     return (
-        <LogoImage
-            height={'18px'}
-            alt="logo"
-            src="/images/ente.svg"
-            {...props}
-        />
+        <LogoImage height={18} alt="logo" src="/images/ente.svg" {...props} />
     );
 }

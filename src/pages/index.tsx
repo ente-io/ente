@@ -158,7 +158,7 @@ export default function LandingPage() {
             ) : (
                 <>
                     <SlideContainer>
-                        <EnteLogo height="30" sx={{ mb: 4 }} />
+                        <EnteLogo height={24} sx={{ mb: 4 }} />
                         <Carousel controls={false}>
                             <Carousel.Item>
                                 <Img
