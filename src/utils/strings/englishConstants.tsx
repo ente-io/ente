@@ -98,6 +98,7 @@ const englishConstants = {
             recover your data without a recovery key.
         </>
     ),
+    KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Generating encryption keys...',
     PASSPHRASE_HINT: 'Password',
     CONFIRM_PASSPHRASE: 'Confirm password',
     PASSPHRASE_MATCH_ERROR: "Passwords don't match",

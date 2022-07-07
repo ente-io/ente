@@ -16,10 +16,12 @@ import { logError } from 'utils/sentry';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
 import {
+    Box,
     Checkbox,
     FormControlLabel,
     FormGroup,
     TextField,
+    Typography,
 } from '@mui/material';
 import FormPaperTitle from './Form/FormPaper/Title';
 import LinkButton from './pages/gallery/LinkButton';
@@ -172,12 +174,25 @@ export default function SignUp(props: SignUpProps) {
                                 />
                             </FormGroup>
                         </VerticallyCentered>
-                        <SubmitButton
-                            sx={{ my: 4 }}
-                            buttonText={constants.CREATE_ACCOUNT}
-                            loading={loading}
-                            disabled={!acceptTerms}
-                        />
+                        <Box my={4}>
+                            <SubmitButton
+                                sx={{ my: 0 }}
+                                buttonText={constants.CREATE_ACCOUNT}
+                                loading={loading}
+                                disabled={!acceptTerms}
+                            />
+                            {loading && (
+                                <Typography
+                                    mt={1}
+                                    textAlign={'center'}
+                                    color="text.secondary"
+                                    variant="body2">
+                                    {
+                                        constants.KEY_GENERATION_IN_PROGRESS_MESSAGE
+                                    }
+                                </Typography>
+                            )}
+                        </Box>
                     </form>
                 )}
             </Formik>
