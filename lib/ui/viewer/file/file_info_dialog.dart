@@ -53,8 +53,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     infoColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.85);
     var listTiles = <Widget>[
       ListTile(
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8, left: 6),
+        leading: const Padding(
+          padding: EdgeInsets.only(top: 8, left: 6),
           child: Icon(Icons.calendar_today_rounded),
         ),
         title: Text(
@@ -85,22 +85,22 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                               : CupertinoIcons.time,
                           color: Theme.of(context).iconTheme.color,
                         ),
-                        Padding(
+                        const Padding(
                           padding: EdgeInsets.all(8),
                         ),
-                        Text("Edit time"),
+                        const Text("Edit time"),
                       ],
                     ),
                   );
                 },
-                icon: Icon(Icons.edit),
+                icon: const Icon(Icons.edit),
               )
             : const SizedBox.shrink(),
       ),
-      DividerWithPadding(),
+      const DividerWithPadding(),
       ListTile(
-        leading: Padding(
-          padding: const EdgeInsets.only(top: 8, left: 6),
+        leading: const Padding(
+          padding: EdgeInsets.only(top: 8, left: 6),
           child: Icon(
             Icons.image,
           ),
@@ -123,10 +123,22 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   await editFilename(context, file);
                   setState(() {});
                 },
-                icon: Icon(Icons.edit),
+                icon: const Icon(Icons.edit),
               ),
       ),
-      DividerWithPadding(),
+      const DividerWithPadding(),
+      ListTile(
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 6),
+          child: Icon(Icons.folder_outlined),
+        ),
+        title: Text(
+          file.deviceFolder ??
+              CollectionsService.instance
+                  .getCollectionByID(file.collectionID)
+                  .name,
+        ),
+      )
     ];
 
     var items = <Widget>[
@@ -280,7 +292,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 onPressed: () {
                   Navigator.pop(context);
                 },
-                icon: Icon(
+                icon: const Icon(
                   Icons.close,
                 ),
               ),
