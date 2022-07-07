@@ -76,7 +76,7 @@ const TextContainer = (props: TypographyProps) => (
 );
 
 const FeatureText = (props: TypographyProps) => (
-    <Typography variant="h3" mt={2} {...props} />
+    <Typography variant="h3" mt={4} {...props} />
 );
 
 const Img = styled('img')`
@@ -158,7 +158,7 @@ export default function LandingPage() {
             ) : (
                 <>
                     <SlideContainer>
-                        <EnteLogo height={24} sx={{ mb: 4 }} />
+                        <EnteLogo height={24} sx={{ mb: 8 }} />
                         <Carousel controls={false}>
                             <Carousel.Item>
                                 <Img
