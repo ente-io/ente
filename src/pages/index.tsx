@@ -11,6 +11,7 @@ import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
+import { EnteLogo } from 'components/EnteLogo';
 
 const Container = styled('div')`
     display: flex;
@@ -73,12 +74,6 @@ const SideBox = styled('div')`
 const TextContainer = (props: TypographyProps) => (
     <Typography color={'text.secondary'} mt={2} mb={3} {...props} />
 );
-
-const UpperText = styled(TextContainer)`
-    font-size: 24px;
-    max-width: 100%;
-    margin-bottom: 20px;
-`;
 
 const FeatureText = (props: TypographyProps) => (
     <Typography variant="h3" mt={2} {...props} />
@@ -163,7 +158,7 @@ export default function LandingPage() {
             ) : (
                 <>
                     <SlideContainer>
-                        <UpperText>{constants.HERO_HEADER()}</UpperText>
+                        <EnteLogo height="30" sx={{ mb: 4 }} />
                         <Carousel controls={false}>
                             <Carousel.Item>
                                 <Img
