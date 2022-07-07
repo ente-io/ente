@@ -46,11 +46,12 @@ function PlanSelectorCard(props: Props) {
 
     const usage = useMemo(() => {
         const userDetails = getLocalUserDetails();
-        return userDetails
-            ? isPartOfFamily(userDetails?.familyData)
-                ? getTotalFamilyUsage(userDetails?.familyData)
-                : userDetails?.usage
-            : 0;
+        if (!userDetails) {
+            return 0;
+        }
+        return isPartOfFamily(userDetails.familyData)
+            ? getTotalFamilyUsage(userDetails.familyData)
+            : userDetails.usage;
     }, []);
 
     const togglePeriod = () => {
