@@ -4,7 +4,6 @@ import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
-import { EnteLogo } from 'components/EnteLogo';
 
 /**
  * Global English constants.
@@ -19,14 +18,6 @@ const dateString = function (date) {
 };
 
 const englishConstants = {
-    ENTE: 'ente',
-    HERO_HEADER: () => (
-        <div>
-            with <EnteLogo />
-            <br />
-            your <strong>memories</strong> are
-        </div>
-    ),
     HERO_SLIDE_1_TITLE: () => (
         <>
             <div>Private backups</div>
