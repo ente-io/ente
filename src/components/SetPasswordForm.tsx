@@ -3,7 +3,7 @@ import constants from 'utils/strings/constants';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
-import { TextField, Typography } from '@mui/material';
+import { Box, TextField, Typography } from '@mui/material';
 
 export interface SetPasswordFormProps {
     callback: (
@@ -93,10 +93,22 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         {constants.PASSPHRASE_DISCLAIMER()}
                     </Typography>
 
-                    <SubmitButton
-                        loading={loading}
-                        buttonText={props.buttonText}
-                    />
+                    <Box my={4}>
+                        <SubmitButton
+                            sx={{ my: 0 }}
+                            loading={loading}
+                            buttonText={props.buttonText}
+                        />
+                        {loading && (
+                            <Typography
+                                textAlign="center"
+                                mt={1}
+                                color="text.secondary"
+                                variant="body2">
+                                {constants.KEY_GENERATION_IN_PROGRESS_MESSAGE}
+                            </Typography>
+                        )}
+                    </Box>
                 </form>
             )}
         </Formik>
