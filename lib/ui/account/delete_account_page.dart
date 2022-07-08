@@ -105,7 +105,7 @@ class DeleteAccountPage extends StatelessWidget {
                       backgroundColor: Colors.white,
                     ),
                     label: const Text(
-                      "No, delete account :(",
+                      "No, delete account",
                       style: TextStyle(
                         color: Colors.redAccent, // same for both themes
                       ),
