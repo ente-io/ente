@@ -1,19 +1,19 @@
-import 'dart:io';
+import "dart:io";
 
-import 'package:exif/exif.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/file_type.dart';
-import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/viewer/file/exif_info_dialog.dart';
-import 'package:photos/utils/date_time_util.dart';
-import 'package:photos/utils/exif_util.dart';
-import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/magic_util.dart';
-import 'package:photos/utils/toast_util.dart';
+import "package:exif/exif.dart";
+import "package:flutter/cupertino.dart";
+import "package:flutter/material.dart";
+import "package:photos/core/configuration.dart";
+import "package:photos/ente_theme_data.dart";
+import "package:photos/models/file.dart";
+import "package:photos/models/file_type.dart";
+import "package:photos/services/collections_service.dart";
+import "package:photos/ui/viewer/file/exif_info_dialog.dart";
+import "package:photos/utils/date_time_util.dart";
+import "package:photos/utils/exif_util.dart";
+import "package:photos/utils/file_util.dart";
+import "package:photos/utils/magic_util.dart";
+import "package:photos/utils/toast_util.dart";
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -29,6 +29,16 @@ class FileInfoWidget extends StatefulWidget {
 
 class _FileInfoWidgetState extends State<FileInfoWidget> {
   Map<String, IfdTag> _exif;
+  final Map<String, dynamic> _exifData = {
+    "focalLength": null,
+    "fNumber": null,
+    "resolution": null,
+    "takenOnDevice": null,
+    "exposureTime": null,
+    "ISO": null,
+    "megaPixels": null
+  };
+
   bool _isImage = false;
   Color infoColor;
 
@@ -214,7 +224,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
     if (_isImage && _exif != null) {
-      items.add(_getExifWidgets(_exif));
+      // items.add(_getExifWidgets(_exif));
+      _generateExifDataforUI(_exif);
     }
     if (file.uploadedFileID != null && file.updationTime != null) {
       items.addAll(
@@ -298,7 +309,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 2),
                 child: Text(
-                  'Details',
+                  "Details",
                   style: Theme.of(context).textTheme.bodyText1,
                 ),
               ),
@@ -411,22 +422,79 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ),
         ),
         onPressed: () {
-          Navigator.of(context, rootNavigator: true).pop('dialog');
+          Navigator.of(context, rootNavigator: true).pop("dialog");
         },
       ),
     );
     return actions;
   }
 
+  _generateExifDataforUI(Map<String, IfdTag> exif) {
+    print(_exifData);
+    // _exifData["focalLength"] = (exif["EXIF FocalLength"] != null
+    //     ? (exif["EXIF FocalLength"].values.toList()[0] as Ratio).numerator /
+    //         (exif["EXIF FocalLength"].values.toList()[0] as Ratio).denominator
+    //     : null);
+    // _exifData["fNumber"] = (exif["EXIF FNumber"] != null
+    //     ? (exif["EXIF FNumber"].values.toList()[0] as Ratio).numerator /
+    //         (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator
+    //     : null);
+
+    if (exif["EXIF FocalLength"] != null) {
+      _exifData["focalLength"] =
+          (exif["EXIF FocalLength"].values.toList()[0] as Ratio).numerator /
+              (exif["EXIF FocalLength"].values.toList()[0] as Ratio)
+                  .denominator;
+    }
+
+    if (exif["EXIF FNumber"] != null) {
+      _exifData["fNumber"] =
+          (exif["EXIF FNumber"].values.toList()[0] as Ratio).numerator /
+              (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator;
+    }
+
+    if (exif["EXIF ExifImageWidth"] != null &&
+        exif["EXIF ExifImageLength"] != null) {
+      _exifData["resolution"] = exif["EXIF ExifImageWidth"].toString() +
+          " x " +
+          exif["EXIF ExifImageLength"].toString();
+
+      _exifData['megaPixels'] = ((exif["Image ImageWidth"].values.firstAsInt() *
+                  exif["Image ImageLength"].values.firstAsInt()) /
+              1000000)
+          .toStringAsFixed(1);
+    } else if (exif["Image ImageWidth"] != null &&
+        exif["Image ImageLength"] != null) {
+      _exifData["resolution"] = exif["Image ImageWidth"].toString() +
+          " x " +
+          exif["Image ImageLength"].toString();
+    }
+    if (exif["Image Make"] != null && exif["Image Model"] != null) {
+      _exifData["takenOnDevice"] =
+          exif["Image Make"].toString() + " " + exif["Image Model"].toString();
+    }
+
+    if (exif["EXIF ExposureTime"] != null) {
+      _exifData["exposureTime"] = exif["EXIF ExposureTime"].toString();
+    }
+    if (exif["EXIF ISOSpeedRatings"] != null) {
+      _exifData['ISO'] = exif["EXIF ISOSpeedRatings"].toString();
+    }
+    print(_exifData);
+  }
+
   Widget _getExifWidgets(Map<String, IfdTag> exif) {
     final focalLength = exif["EXIF FocalLength"] != null
         ? (exif["EXIF FocalLength"].values.toList()[0] as Ratio).numerator /
-            (exif["EXIF FocalLength"].values.toList()[0] as Ratio).denominator
+            (exif["EXIF FocalLength"].values.toList()[0] as Ratio)
+                .denominator //to remove
         : null;
     final fNumber = exif["EXIF FNumber"] != null
         ? (exif["EXIF FNumber"].values.toList()[0] as Ratio).numerator /
-            (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator
+            (exif["EXIF FNumber"].values.toList()[0] as Ratio)
+                .denominator //to remove
         : null;
+
     final List<Widget> children = [];
     if (exif["EXIF ExifImageWidth"] != null &&
         exif["EXIF ExifImageLength"] != null) {
