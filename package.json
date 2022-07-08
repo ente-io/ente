@@ -1,7 +1,7 @@
 {
   "name": "ente",
   "productName": "ente",
-  "version": "1.4.2-alpha.1",
+  "version": "1.4.2-alpha.2",
   "private": true,
   "description": "Desktop client for ente.io",
   "main": "app/main.js",
@@ -11,14 +11,9 @@
     "linux": {
       "target": [
         "AppImage",
-        "flatpak",
-        "snap",
         "deb",
         "rpm",
-        "freebsd",
         "pacman",
-        "p5p",
-        "apk",
         "tar.gz"
       ],
       "icon": "./build/icon.icns",
