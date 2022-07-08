@@ -407,7 +407,12 @@ export default function Gallery() {
             try {
                 setCollectionSelectorView(false);
                 const selectedFiles = getSelectedFiles(selected, files);
-                await handleCollectionOps(ops, collection, selectedFiles);
+                await handleCollectionOps(
+                    ops,
+                    collection,
+                    selectedFiles,
+                    selected.collectionID
+                );
                 clearSelection();
                 await syncWithRemote(false, true);
                 setActiveCollection(collection.id);
