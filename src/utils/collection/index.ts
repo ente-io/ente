@@ -43,7 +43,8 @@ export enum COLLECTION_OPS_TYPE {
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
     collection: Collection,
-    selectedFiles: EnteFile[]
+    selectedFiles: EnteFile[],
+    selectedCollectionID: number
 ) {
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
@@ -52,7 +53,7 @@ export async function handleCollectionOps(
         case COLLECTION_OPS_TYPE.MOVE:
             await moveToCollection(
                 collection,
-                selectedFiles[0].collectionID,
+                selectedCollectionID,
                 selectedFiles
             );
             break;
