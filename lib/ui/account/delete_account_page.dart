@@ -8,7 +8,10 @@ import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/tools/app_lock.dart';
+import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DeleteAccountPage extends StatelessWidget {
@@ -129,6 +132,16 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<void> _initiateDelete(BuildContext context) async {
+    AppLock.of(context).setEnabled(false);
+    String reason = "Please authenticate to initiate account deletion";
+    final result = await requestAuthentication(reason);
+    AppLock.of(context).setEnabled(
+      Configuration.instance.shouldShowLockScreen(),
+    );
+    if (!result) {
+      showToast(context, reason);
+      return;
+    }
     final deleteChallengeResponse =
         await UserService.instance.getDeleteChallenge(context);
     if (deleteChallengeResponse == null) {
