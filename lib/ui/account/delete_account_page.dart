@@ -36,9 +36,11 @@ class DeleteAccountPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset(
-                "assets/family_plan_leave.png",
-                height: 256,
+              const Text(
+                "💔",
+                style: TextStyle(
+                  fontSize: 100,
+                ),
               ),
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
