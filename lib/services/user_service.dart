@@ -266,8 +266,8 @@ class UserService {
         await dialog.hide();
         showToast(
           context,
-          " We have deleted your account and scheduled your uploaded data "
-          "for deletion",
+          "We have deleted your account and scheduled your uploaded data "
+          "for deletion.",
         );
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
