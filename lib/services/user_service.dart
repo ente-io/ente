@@ -10,6 +10,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
+import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/public_key.dart';
@@ -209,12 +210,50 @@ class UserService {
     }
   }
 
-  Future<void> delete(BuildContext context) async {
+  Future<DeleteChallengeResponse> getDeleteChallenge(
+    BuildContext context,
+  ) async {
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/users/delete-challenge",
+        options: Options(
+          headers: {
+            "X-Auth-Token": _config.getToken(),
+          },
+        ),
+      );
+      if (response != null && response.statusCode == 200) {
+        // clear data
+        await dialog.hide();
+        return DeleteChallengeResponse(
+          allowDelete: response.data["allowDelete"] as bool,
+          encryptedChallenge: response.data["encryptedChallenge"],
+        );
+      } else {
+        throw Exception("delete action failed");
+      }
+    } catch (e) {
+      _logger.severe(e);
+      await dialog.hide();
+      await showGenericErrorDialog(context);
+      return null;
+    }
+  }
+
+  Future<void> deleteAccount(
+    BuildContext context,
+    String challengeResponse,
+  ) async {
     final dialog = createProgressDialog(context, "Deleting account...");
     await dialog.show();
     try {
       final response = await _dio.delete(
         _config.getHttpEndpoint() + "/users/delete",
+        data: {
+          "challenge": challengeResponse,
+        },
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
@@ -225,6 +264,11 @@ class UserService {
         // clear data
         await Configuration.instance.logout();
         await dialog.hide();
+        showToast(
+          context,
+          " We have deleted your account and scheduled your uploaded data "
+          "for deletion",
+        );
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         throw Exception("delete action failed");
