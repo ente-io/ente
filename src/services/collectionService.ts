@@ -419,8 +419,8 @@ export const restoreToCollection = async (
     }
 };
 export const moveToCollection = async (
-    fromCollectionID: number,
     toCollection: Collection,
+    fromCollectionID: number,
     files: EnteFile[]
 ) => {
     try {

@@ -50,7 +50,11 @@ export async function handleCollectionOps(
             await addToCollection(collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.MOVE:
-            await moveToCollection(collection.id, collection, selectedFiles);
+            await moveToCollection(
+                collection,
+                selectedFiles[0].collectionID,
+                selectedFiles
+            );
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
             await removeFromCollection(collection, selectedFiles);
