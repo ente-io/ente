@@ -11,8 +11,14 @@
     "linux": {
       "target": [
         "AppImage",
+        "flatpak",
+        "snap",
         "deb",
         "rpm",
+        "freebsd",
+        "pacman",
+        "p5p",
+        "apk",
         "tar.gz"
       ],
       "icon": "./build/icon.icns",
