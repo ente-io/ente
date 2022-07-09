@@ -90,6 +90,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         fullWidth
                         type={showPassword ? 'text' : props.fieldType}
                         id={props.fieldType}
+                        name={props.fieldType}
                         label={props.placeholder}
                         value={values.inputValue}
                         onChange={handleChange('inputValue')}
