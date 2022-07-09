@@ -121,10 +121,11 @@ export default function Credentials() {
                     hiddenPreInput={
                         <Input
                             id="email"
+                            name="email"
+                            autoComplete="username"
                             type="email"
                             hidden
                             value={user?.email}
-                            autoComplete="username"
                         />
                     }
                     autoComplete={'current-password'}
