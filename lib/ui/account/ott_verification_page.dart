@@ -159,7 +159,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 controller: _verificationCodeController,
                 autofocus: false,
                 autocorrect: false,
-                keyboardType: TextInputType.visiblePassword,
+                keyboardType: TextInputType.number,
                 onChanged: (_) {
                   setState(() {});
                 },
