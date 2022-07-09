@@ -556,6 +556,27 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
+  Future<FileLoadResult> getLocalDeviceFiles(
+    int startTime,
+    int endTime, {
+    int limit,
+    bool asc,
+  }) async {
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final results = await db.query(
+      table,
+      where:
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnLocalID IS NOT NULL',
+      whereArgs: [startTime, endTime],
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = _convertToFiles(results);
+    return FileLoadResult(files, files.length == limit);
+  }
+
   Future<List<File>> getAllVideos() async {
     final db = await instance.database;
     final results = await db.query(

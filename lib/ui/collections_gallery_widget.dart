@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -22,6 +23,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/archive_page.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
+import 'package:photos/ui/viewer/gallery/device_all_page.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 import 'package:photos/ui/viewer/gallery/empte_state.dart';
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
@@ -150,7 +152,22 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            const SectionTitle("On device"),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                const SectionTitle("On device"),
+                Platform.isAndroid
+                    ? const SizedBox.shrink()
+                    : GestureDetector(
+                        child: const Padding(
+                          padding: EdgeInsets.only(right: 12.0),
+                          child: Text("View all"),
+                        ),
+                        onTap: () => routeToPage(context, DeviceAllPage()),
+                      ),
+              ],
+            ),
             const SizedBox(height: 12),
             items.folders.isEmpty
                 ? const Padding(

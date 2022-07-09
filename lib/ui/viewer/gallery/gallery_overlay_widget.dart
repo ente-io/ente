@@ -265,7 +265,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       String msg = "Add";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
-      if (widget.type == GalleryType.localFolder) {
+      if (widget.type == GalleryType.localFolder ||
+          widget.type == GalleryType.localAll) {
         msg = "Upload";
         iconData = Platform.isAndroid
             ? Icons.cloud_upload
@@ -319,7 +320,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     );
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive ||
-        widget.type == GalleryType.localFolder) {
+        widget.type == GalleryType.localFolder ||
+        widget.type == GalleryType.localAll) {
       actions.add(
         Tooltip(
           message: "Delete",
