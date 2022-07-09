@@ -50,15 +50,7 @@ export default function Login(props: LoginProps) {
                 placeholder={constants.ENTER_EMAIL}
                 buttonText={constants.LOGIN}
                 autoComplete="username"
-                hiddenPostInput={
-                    <Input
-                        hidden
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                    />
-                }
+                hiddenPostInput={<Input hidden type="password" value="" />}
             />
 
             <FormPaperFooter>
