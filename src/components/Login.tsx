@@ -8,7 +8,6 @@ import FormPaperTitle from './Form/FormPaper/Title';
 import FormPaperFooter from './Form/FormPaper/Footer';
 import LinkButton from './pages/gallery/LinkButton';
 import SingleInputForm, { SingleInputFormProps } from './SingleInputForm';
-import { Input } from '@mui/material';
 
 interface LoginProps {
     signUp: () => void;
@@ -50,13 +49,6 @@ export default function Login(props: LoginProps) {
                 placeholder={constants.ENTER_EMAIL}
                 buttonText={constants.LOGIN}
                 autoComplete="username"
-                hiddenPostInput={
-                    <Input
-                        hidden
-                        type="password"
-                        autoComplete="current-password"
-                    />
-                }
             />
 
             <FormPaperFooter>
