@@ -9,16 +9,13 @@ class DesktopService {
     }
 
     async getEncryptionKey() {
-        console.log(this.allElectronAPIsExist, this.ElectronAPIs);
         if (this.allElectronAPIsExist) {
             return (await this.ElectronAPIs.getEncryptionKey()) as string;
         }
     }
 
     async setEncryptionKey(encryptionKey: string) {
-        console.log(this.allElectronAPIsExist, this.ElectronAPIs);
         if (this.allElectronAPIsExist) {
-            console.log(encryptionKey);
             return await this.ElectronAPIs.setEncryptionKey(encryptionKey);
         }
     }
