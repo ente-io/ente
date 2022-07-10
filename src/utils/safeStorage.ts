@@ -2,6 +2,7 @@ import { safeStorage } from 'electron';
 import { safeStorageStore } from '../services/store';
 
 export function setEncryptionKey(encryptionKey: string) {
+    console.log(encryptionKey);
     const buffer = safeStorage.encryptString(encryptionKey);
     safeStorageStore.set('encryptionKey', buffer.toString('base64'));
 }
