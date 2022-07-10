@@ -45,13 +45,11 @@ export const safeStorageSchema: Schema<SafeStorageStoreType> = {
         type: 'object',
         properties: {
             encryptedData: { type: 'string' },
-            key: { type: 'string' },
-            nonce: { type: 'string' },
         },
     },
 };
 
-export const safeStorage = new Store({
+export const safeStorageStore = new Store({
     name: 'safeStorage',
     schema: safeStorageSchema,
 });
