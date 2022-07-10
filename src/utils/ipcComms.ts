@@ -1,4 +1,11 @@
-import { BrowserWindow, dialog, ipcMain, Tray, Notification } from 'electron';
+import {
+    BrowserWindow,
+    dialog,
+    ipcMain,
+    Tray,
+    Notification,
+    safeStorage,
+} from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menuUtil';
 import { logErrorSentry } from './sentry';
@@ -66,5 +73,13 @@ export default function setupIpcComs(
 
     ipcMain.handle('log-error', (_, err, msg, info?) => {
         logErrorSentry(err, msg, info);
+    });
+
+    ipcMain.handle('safeStorage-encrypt', (_, message) => {
+        return safeStorage.encryptString(message);
+    });
+
+    ipcMain.handle('safeStorage-decrypt', (_, message) => {
+        return safeStorage.decryptString(message);
     });
 }
