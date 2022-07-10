@@ -10,7 +10,6 @@ import {
 } from './utils/upload';
 import { logError } from './utils/logging';
 import { ElectronFile } from './types';
-import { getAppVersion } from './utils/common';
 import { getEncryptionKey, setEncryptionKey } from './utils/safeStorage';
 
 const { ipcRenderer } = electron;
@@ -174,7 +173,6 @@ windowObject['ElectronAPIs'] = {
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
-    getAppVersion,
     getEncryptionKey,
     setEncryptionKey,
 };
