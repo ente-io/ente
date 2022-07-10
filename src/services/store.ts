@@ -42,10 +42,7 @@ export const keysStore = new Store({
 
 export const safeStorageSchema: Schema<SafeStorageStoreType> = {
     encryptionKey: {
-        type: 'object',
-        properties: {
-            encryptedData: { type: 'string' },
-        },
+        type: 'string',
     },
 };
 
