@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:logging/logging.dart';
+import 'package:open_mail_app/open_mail_app.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
@@ -13,7 +15,9 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/tools/debug/log_file_viewer.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 final Logger _logger = Logger('email_util');
 
@@ -172,5 +176,93 @@ Future<void> shareLogs(
   await Share.shareFiles(
     [zipFilePath],
     sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+  );
+}
+
+Future<void> sendEmail(
+  BuildContext context, {
+  @required String to,
+  String subject,
+  String body,
+}) async {
+  try {
+    String clientDebugInfo = await clientInfo();
+    EmailContent email = EmailContent(
+      to: [
+        to,
+      ],
+      subject: subject ?? '[Support]',
+      body: (body ?? '') + clientDebugInfo,
+    );
+    if (Platform.isAndroid) {
+      // Special handling due to issue in proton mail android client
+      // https://github.com/ente-io/frame/pull/253
+      final Uri params = Uri(
+        scheme: 'mailto',
+        path: to,
+        query: 'subject=${email.subject}&body=${email.body}',
+      );
+      if (await canLaunchUrl(params)) {
+        await launchUrl(params);
+      } else {
+        // this will trigger _showNoMailAppsDialog
+        throw Exception('Could not launch ${params.toString()}');
+      }
+    } else {
+      OpenMailAppResult result = await OpenMailApp.composeNewEmailInMailApp(
+        nativePickerTitle: 'Select email app',
+        emailContent: email,
+      );
+      if (!result.didOpen && !result.canOpen) {
+        _showNoMailAppsDialog(context, to);
+      } else if (!result.didOpen && result.canOpen) {
+        showDialog(
+          context: context,
+          builder: (_) => MailAppPickerDialog(
+            mailApps: result.options,
+            emailContent: email,
+          ),
+        );
+      }
+    }
+  } catch (e) {
+    _logger.severe("Failed to send email to $to", e);
+    _showNoMailAppsDialog(context, to);
+  }
+}
+
+Future<String> clientInfo() async {
+  final packageInfo = await PackageInfo.fromPlatform();
+  String debugInfo = '\n\n\n\n ------------------- \nFollowing information can '
+      'help us in debugging if you are facing any issue '
+      '\nRegistered email: ${Configuration.instance.getEmail()}'
+      '\nClient: ${packageInfo.packageName}'
+      '\nVersion : ${packageInfo.version}';
+  return debugInfo;
+}
+
+void _showNoMailAppsDialog(BuildContext context, String toEmail) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text('Please email us at $toEmail'),
+        actions: <Widget>[
+          TextButton(
+            child: const Text("Copy email"),
+            onPressed: () async {
+              await Clipboard.setData(ClipboardData(text: toEmail));
+              showShortToast(context, 'Copied');
+            },
+          ),
+          TextButton(
+            child: const Text("OK"),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          )
+        ],
+      );
+    },
   );
 }
