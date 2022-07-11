@@ -13,5 +13,6 @@ export const clearElectronStore = () => {
         safeStorageStore.clear();
     } catch (e) {
         logError(e, 'error while clearing electron store');
+        throw e;
     }
 };
