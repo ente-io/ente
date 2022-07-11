@@ -44,6 +44,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   @override
   void initState() {
+    debugPrint('file_info_dialog initState' + _exifData.toString());
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
@@ -60,7 +61,20 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   Widget build(BuildContext context) {
     final file = widget.file;
     final dateTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
-    infoColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.85);
+    final dateTimeForUpdationTime =
+        DateTime.fromMicrosecondsSinceEpoch(file.updationTime);
+    infoColor =
+        Theme.of(context).colorScheme.onSurface.withOpacity(0.85); //remove
+
+    if (_isImage && _exif != null) {
+      // items.add(_getExifWidgets(_exif));
+      _generateExifForDetails(_exif);
+    }
+    final bool showExifListTile = _exifData["focalLength"] != null ||
+        _exifData["fNumber"] != null ||
+        _exifData["takenOnDevice"] != null ||
+        _exifData["exposureTime"] != null ||
+        _exifData["ISO"] != null;
     var listTiles = <Widget>[
       ListTile(
         leading: const Padding(
@@ -148,6 +162,45 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
       ),
       const DividerWithPadding(),
+      showExifListTile
+          ? ListTile(
+              leading: const Padding(
+                padding: EdgeInsets.only(left: 6),
+                child: Icon(Icons.camera_rounded),
+              ),
+              title: Text(_exifData["takenOnDevice"] ?? "--"),
+              subtitle: Row(
+                children: [
+                  _exifData["fNumber"] != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Text('ƒ/' + _exifData["fNumber"].toString()),
+                        )
+                      : const SizedBox.shrink(),
+                  _exifData["exposureTime"] != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Text(_exifData["exposureTime"]),
+                        )
+                      : const SizedBox.shrink(),
+                  _exifData["focalLength"] != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child:
+                              Text(_exifData["focalLength"].toString() + "mm"),
+                        )
+                      : const SizedBox.shrink(),
+                  _exifData["ISO"] != null
+                      ? Padding(
+                          padding: const EdgeInsets.only(right: 10),
+                          child: Text("ISO" + _exifData["ISO"].toString()),
+                        )
+                      : const SizedBox.shrink(),
+                ],
+              ),
+            )
+          : const SizedBox.shrink(),
+      showExifListTile ? const DividerWithPadding() : const SizedBox.shrink(),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
               leading: const Padding(
@@ -160,7 +213,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ),
               ),
               subtitle: Text(
-                getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+                getTimeIn12hrFormat(dateTimeForUpdationTime) +
+                    "  " +
+                    dateTimeForUpdationTime.timeZoneName,
                 style: Theme.of(context)
                     .textTheme
                     .bodyText2
@@ -245,6 +300,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
     if (_isImage && _exif != null) {
+      //remove
       // items.add(_getExifWidgets(_exif));
       _generateExifForDetails(_exif);
     }
@@ -312,6 +368,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     //   ),
     // );
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Padding(
           padding: const EdgeInsets.all(10),
