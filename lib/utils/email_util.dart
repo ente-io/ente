@@ -186,7 +186,7 @@ Future<void> sendEmail(
   String body,
 }) async {
   try {
-    String clientDebugInfo = await clientInfo();
+    String clientDebugInfo = await _clientInfo();
     EmailContent email = EmailContent(
       to: [
         to,
@@ -231,7 +231,7 @@ Future<void> sendEmail(
   }
 }
 
-Future<String> clientInfo() async {
+Future<String> _clientInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
   String debugInfo = '\n\n\n\n ------------------- \nFollowing information can '
       'help us in debugging if you are facing any issue '
