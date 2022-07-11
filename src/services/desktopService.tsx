@@ -6,7 +6,7 @@ class DesktopService {
     private allElectronAPIsExist: boolean = false;
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs.getEncryptionKey;
+        this.allElectronAPIsExist = !!this.ElectronAPIs?.getEncryptionKey;
     }
 
     async getEncryptionKey() {
