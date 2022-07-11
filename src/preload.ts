@@ -11,6 +11,7 @@ import {
 import { logError } from './utils/logging';
 import { ElectronFile } from './types';
 import { getEncryptionKey, setEncryptionKey } from './utils/safeStorage';
+import { clearElectronStore } from './utils/electronStore';
 
 const { ipcRenderer } = electron;
 
@@ -175,4 +176,5 @@ windowObject['ElectronAPIs'] = {
     setToUploadCollection,
     getEncryptionKey,
     setEncryptionKey,
+    clearElectronStore,
 };
