@@ -20,7 +20,7 @@ import 'package:photos/ui/payment/subscription_common_widgets.dart';
 import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class SubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
@@ -213,13 +213,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 return;
               }
               if (Platform.isAndroid) {
-                launch(
+                launchUrlString(
                   "https://play.google.com/store/account/subscriptions?sku=" +
                       _currentSubscription.productID +
                       "&package=io.ente.photos",
                 );
               } else {
-                launch("https://apps.apple.com/account/billing");
+                launchUrlString("https://apps.apple.com/account/billing");
               }
             },
             child: Container(
