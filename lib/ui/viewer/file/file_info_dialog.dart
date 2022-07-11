@@ -146,7 +146,28 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   .getCollectionByID(file.collectionID)
                   .name,
         ),
-      )
+      ),
+      const DividerWithPadding(),
+      (file.uploadedFileID != null && file.updationTime != null)
+          ? ListTile(
+              leading: const Padding(
+                padding: EdgeInsets.only(top: 8, left: 6),
+                child: Icon(Icons.cloud_upload_outlined),
+              ),
+              title: Text(
+                getFullDate(
+                  DateTime.fromMicrosecondsSinceEpoch(file.updationTime),
+                ),
+              ),
+              subtitle: Text(
+                getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText2
+                    .copyWith(color: Colors.black.withOpacity(0.5)),
+              ),
+            )
+          : const SizedBox.shrink(),
     ];
 
     var items = <Widget>[
@@ -225,7 +246,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     }
     if (_isImage && _exif != null) {
       // items.add(_getExifWidgets(_exif));
-      _generateExifDataforUI(_exif);
+      _generateExifForDetails(_exif);
     }
     if (file.uploadedFileID != null && file.updationTime != null) {
       items.addAll(
@@ -429,17 +450,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     return actions;
   }
 
-  _generateExifDataforUI(Map<String, IfdTag> exif) {
-    print(_exifData);
-    // _exifData["focalLength"] = (exif["EXIF FocalLength"] != null
-    //     ? (exif["EXIF FocalLength"].values.toList()[0] as Ratio).numerator /
-    //         (exif["EXIF FocalLength"].values.toList()[0] as Ratio).denominator
-    //     : null);
-    // _exifData["fNumber"] = (exif["EXIF FNumber"] != null
-    //     ? (exif["EXIF FNumber"].values.toList()[0] as Ratio).numerator /
-    //         (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator
-    //     : null);
-
+  _generateExifForDetails(Map<String, IfdTag> exif) {
     if (exif["EXIF FocalLength"] != null) {
       _exifData["focalLength"] =
           (exif["EXIF FocalLength"].values.toList()[0] as Ratio).numerator /
@@ -480,7 +491,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     if (exif["EXIF ISOSpeedRatings"] != null) {
       _exifData['ISO'] = exif["EXIF ISOSpeedRatings"].toString();
     }
-    print(_exifData);
   }
 
   Widget _getExifWidgets(Map<String, IfdTag> exif) {
@@ -631,8 +641,8 @@ class DividerWithPadding extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(70, 0, 20, 0),
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(70, 0, 20, 0),
       child: Divider(
         thickness: 0.5,
       ),
