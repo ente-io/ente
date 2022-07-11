@@ -489,6 +489,20 @@ class FilesDB {
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
+  List<File> _deduplicateByLocalID(List<File> files) {
+    final localIDs = <String>{};
+    final List<File> deduplicatedFiles = [];
+    for (final file in files) {
+      final id = file.localID;
+      if (id != null && localIDs.contains(id)) {
+        continue;
+      }
+      localIDs.add(id);
+      deduplicatedFiles.add(file);
+    }
+    return deduplicatedFiles;
+  }
+
   List<File> _deduplicatedAndFilterIgnoredFiles(
     List<File> files,
     Set<int> ignoredCollectionIDs,
@@ -574,7 +588,8 @@ class FilesDB {
       limit: limit,
     );
     final files = _convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
+    final result = _deduplicateByLocalID(files);
+    return FileLoadResult(result, files.length == limit);
   }
 
   Future<List<File>> getAllVideos() async {
