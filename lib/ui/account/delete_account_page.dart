@@ -39,7 +39,7 @@ class DeleteAccountPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text(
-                "💔",
+                "☹️",
                 style: TextStyle(
                   fontSize: 100,
                 ),
@@ -50,11 +50,11 @@ class DeleteAccountPage extends StatelessWidget {
               Center(
                 child: Text(
                   "We'll be sorry to see you go. Are you facing some issue?",
-                  style: Theme.of(context).textTheme.subtitle2,
+                  style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
               const SizedBox(
-                height: 8,
+                height: 12,
               ),
               RichText(
                 // textAlign: TextAlign.center,
@@ -69,11 +69,11 @@ class DeleteAccountPage extends StatelessWidget {
                       text: ", maybe there is a way we can help.",
                     ),
                   ],
-                  style: Theme.of(context).textTheme.subtitle2,
+                  style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+              const SizedBox(
+                height: 24,
               ),
               GradientButton(
                 text: "Yes, send feedback",
