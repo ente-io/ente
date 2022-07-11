@@ -32,12 +32,6 @@ export const FILE_PATH_KEYS: {
     [FILE_PATH_TYPE.FILES]: 'filePaths',
 };
 
-export interface KeyAttributes {
-    encryptedData: string;
-    key: string;
-    nonce: string;
-}
-
 export interface SafeStorageStoreType {
     encryptionKey: string;
 }
