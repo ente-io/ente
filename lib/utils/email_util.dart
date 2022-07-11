@@ -167,7 +167,7 @@ Future<void> shareLogs(
     "Email logs",
     "Please send the logs to $toEmail",
     firstAction: "Copy email",
-    secondAction: "Send",
+    secondAction: "Export logs",
   );
   if (result != null && result == DialogUserChoice.firstChoice) {
     await Clipboard.setData(ClipboardData(text: toEmail));
