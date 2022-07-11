@@ -8,7 +8,7 @@ import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
@@ -43,7 +43,7 @@ export default function Credentials() {
             if (!key && isElectron()) {
                 key = await desktopService.getEncryptionKey();
                 if (key) {
-                    await SaveKeyInSessionStore(
+                    await saveKeyInSessionStore(
                         SESSION_KEYS.ENCRYPTION_KEY,
                         key,
                         true
@@ -100,7 +100,7 @@ export default function Credentials() {
                         key
                     );
                 }
-                await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+                await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
                 const redirectURL = appContext.redirectURL;
                 appContext.setRedirectURL(null);

@@ -94,7 +94,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
     return intermediateKeyAttributes;
 }
 
-export const SaveKeyInSessionStore = async (
+export const saveKeyInSessionStore = async (
     keyType: SESSION_KEYS,
     key: string,
     fromDesktop?: boolean

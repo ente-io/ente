@@ -9,7 +9,7 @@ import SubmitButton from 'components/SubmitButton';
 import {
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
 } from 'utils/crypto';
 import { setJustSignedUp } from 'utils/storage';
 import { logError } from 'utils/sentry';
@@ -70,7 +70,7 @@ export default function SignUp(props: SignUpProps) {
                         masterKey
                     );
 
-                    await SaveKeyInSessionStore(
+                    await saveKeyInSessionStore(
                         SESSION_KEYS.ENCRYPTION_KEY,
                         masterKey
                     );

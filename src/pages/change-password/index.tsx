@@ -3,7 +3,7 @@ import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import CryptoWorker, {
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
     B64EncryptionResult,
 } from 'utils/crypto';
@@ -68,7 +68,7 @@ export default function ChangePassword() {
             key
         );
 
-        await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+        await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
         redirectToGallery();
     };
 
