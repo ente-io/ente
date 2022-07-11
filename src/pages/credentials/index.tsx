@@ -42,11 +42,13 @@ export default function Credentials() {
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             if (!key && isElectron()) {
                 key = await desktopService.getEncryptionKey();
-                await SaveKeyInSessionStore(
-                    SESSION_KEYS.ENCRYPTION_KEY,
-                    key,
-                    true
-                );
+                if (key) {
+                    await SaveKeyInSessionStore(
+                        SESSION_KEYS.ENCRYPTION_KEY,
+                        key,
+                        true
+                    );
+                }
             }
             if (
                 (!user?.token && !user?.encryptedToken) ||
