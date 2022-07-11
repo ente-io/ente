@@ -8,7 +8,7 @@ import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
 import CryptoWorker, {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
@@ -24,6 +24,10 @@ import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
+import isElectron from 'is-electron';
+import desktopService from 'services/desktopService';
+import VerticallyCentered from 'components/Container';
+import EnteSpinner from 'components/EnteSpinner';
 import { Input } from '@mui/material';
 
 export default function Credentials() {
@@ -33,23 +37,36 @@ export default function Credentials() {
     const [user, setUser] = useState<User>();
     useEffect(() => {
         router.prefetch(PAGES.GALLERY);
-        const user = getData(LS_KEYS.USER);
-        setUser(user);
-        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
-        if (
-            (!user?.token && !user?.encryptedToken) ||
-            (keyAttributes && !keyAttributes.memLimit)
-        ) {
-            clearData();
-            router.push(PAGES.ROOT);
-        } else if (!keyAttributes) {
-            router.push(PAGES.GENERATE);
-        } else if (key) {
-            router.push(PAGES.GALLERY);
-        } else {
-            setKeyAttributes(keyAttributes);
-        }
+        const main = async () => {
+            const user = getData(LS_KEYS.USER);
+            setUser(user);
+            const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+            let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+            if (!key && isElectron()) {
+                key = await desktopService.getEncryptionKey();
+                if (key) {
+                    await saveKeyInSessionStore(
+                        SESSION_KEYS.ENCRYPTION_KEY,
+                        key,
+                        true
+                    );
+                }
+            }
+            if (
+                (!user?.token && !user?.encryptedToken) ||
+                (keyAttributes && !keyAttributes.memLimit)
+            ) {
+                clearData();
+                router.push(PAGES.ROOT);
+            } else if (!keyAttributes) {
+                router.push(PAGES.GENERATE);
+            } else if (key) {
+                router.push(PAGES.GALLERY);
+            } else {
+                setKeyAttributes(keyAttributes);
+            }
+        };
+        main();
         appContext.showNavBar(true);
     }, []);
 
@@ -85,7 +102,7 @@ export default function Credentials() {
                         key
                     );
                 }
-                await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+                await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
                 await decryptAndStoreToken(key);
                 const redirectURL = appContext.redirectURL;
                 appContext.setRedirectURL(null);
@@ -109,6 +126,14 @@ export default function Credentials() {
     };
 
     const redirectToRecoverPage = () => router.push(PAGES.RECOVER);
+
+    if (!keyAttributes) {
+        return (
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
+        );
+    }
 
     return (
         <FormContainer>

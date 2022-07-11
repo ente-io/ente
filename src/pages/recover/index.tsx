@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 import { PAGES } from 'constants/pages';
 import CryptoWorker, {
     decryptAndStoreToken,
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
 } from 'utils/crypto';
 import SingleInputForm, {
     SingleInputFormProps,
@@ -72,7 +72,7 @@ export default function Recover() {
                 keyAttributes.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey)
             );
-            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
             await decryptAndStoreToken(masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });

@@ -7,6 +7,8 @@ import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
 import { ComlinkWorker } from 'utils/comlink';
+import isElectron from 'is-electron';
+import desktopService from 'services/desktopService';
 
 export interface B64EncryptionResult {
     encryptedData: string;
@@ -92,13 +94,17 @@ export async function generateAndSaveIntermediateKeyAttributes(
     return intermediateKeyAttributes;
 }
 
-export const SaveKeyInSessionStore = async (
+export const saveKeyInSessionStore = async (
     keyType: SESSION_KEYS,
-    key: string
+    key: string,
+    fromDesktop?: boolean
 ) => {
     const cryptoWorker = await new CryptoWorker();
     const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
+    if (isElectron() && !fromDesktop) {
+        desktopService.setEncryptionKey(key);
+    }
 };
 
 export const getRecoveryKey = async () => {
