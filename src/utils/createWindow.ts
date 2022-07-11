@@ -19,11 +19,10 @@ export function createWindow(): BrowserWindow {
             contextIsolation: false,
         },
         icon: appIcon,
-        show: false, // don't show the main window
+        show: false, // don't show the main window on load
     });
     mainWindow.maximize();
     const splash = new BrowserWindow({
-        alwaysOnTop: true,
         height: 600,
         width: 800,
         transparent: true,
