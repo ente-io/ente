@@ -14,9 +14,9 @@ class DesktopService {
         }
     }
 
-    async setEncryptionKey(encryptionKey: string) {
+    async clearElectronStore() {
         if (this.allElectronAPIsExist) {
-            return await this.ElectronAPIs.setEncryptionKey(encryptionKey);
+            return await this.ElectronAPIs.clearElectronStore();
         }
     }
 }

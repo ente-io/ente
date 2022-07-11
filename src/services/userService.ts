@@ -19,6 +19,8 @@ import {
 } from 'types/user';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
+import isElectron from 'is-electron';
+import desktopService from './desktopService';
 
 const ENDPOINT = getEndpoint();
 
@@ -121,6 +123,9 @@ export const logoutUser = async () => {
             // ignore
         }
         await clearFiles();
+        if (isElectron()) {
+            desktopService.clearElectronStore();
+        }
         router.push(PAGES.ROOT);
     } catch (e) {
         logError(e, 'logoutUser failed');
