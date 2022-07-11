@@ -57,7 +57,7 @@ class _LoginPageState extends State<LoginPage> {
         onPressedFunction: () {
           UserService.instance.setEmail(_email);
           UserService.instance
-              .getOtt(context, _email, isCreateAccountScreen: false);
+              .sendOtt(context, _email, isCreateAccountScreen: false);
           FocusScope.of(context).unfocus();
         },
       ),

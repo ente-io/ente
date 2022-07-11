@@ -110,7 +110,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email);
           UserService.instance
-              .getOtt(context, _email, isCreateAccountScreen: true);
+              .sendOtt(context, _email, isCreateAccountScreen: true);
           FocusScope.of(context).unfocus();
         },
       ),
