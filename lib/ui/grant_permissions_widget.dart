@@ -12,67 +12,61 @@ class GrantPermissionsWidget extends StatelessWidget {
         MediaQuery.of(context).platformBrightness == Brightness.light;
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 100, 0, 50),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        isLightMode
-                            ? Image.asset(
-                                'assets/loading_photos_background.png',
-                                color: Colors.white.withOpacity(0.4),
-                                colorBlendMode: BlendMode.modulate,
-                              )
-                            : Image.asset(
-                                'assets/loading_photos_background_dark.png',
-                              ),
-                        Center(
-                          child: Column(
-                            children: [
-                              const SizedBox(height: 42),
-                              Image.asset(
-                                "assets/gallery_locked.png",
-                                height: 160,
-                              ),
-                            ],
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20, bottom: 120),
+          child: Column(
+            children: [
+              Center(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    isLightMode
+                        ? Image.asset(
+                            'assets/loading_photos_background.png',
+                            color: Colors.white.withOpacity(0.4),
+                            colorBlendMode: BlendMode.modulate,
+                          )
+                        : Image.asset(
+                            'assets/loading_photos_background_dark.png',
                           ),
-                        ),
-                      ],
+                    Center(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 42),
+                          Image.asset(
+                            "assets/gallery_locked.png",
+                            height: 160,
+                          ),
+                        ],
+                      ),
                     ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
+                child: RichText(
+                  text: TextSpan(
+                    style: Theme.of(context)
+                        .textTheme
+                        .headline5
+                        .copyWith(fontWeight: FontWeight.w700),
+                    children: [
+                      const TextSpan(text: 'ente '),
+                      TextSpan(
+                        text: "needs permission to ",
+                        style: Theme.of(context)
+                            .textTheme
+                            .headline5
+                            .copyWith(fontWeight: FontWeight.w400),
+                      ),
+                      const TextSpan(text: 'preserve your photos'),
+                    ],
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(40, 0, 40, 105),
-                  child: RichText(
-                    text: TextSpan(
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline5
-                          .copyWith(fontWeight: FontWeight.w700),
-                      children: [
-                        const TextSpan(text: 'ente '),
-                        TextSpan(
-                          text: "needs permission to ",
-                          style: Theme.of(context)
-                              .textTheme
-                              .headline5
-                              .copyWith(fontWeight: FontWeight.w400),
-                        ),
-                        const TextSpan(text: 'preserve your photos'),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
       floatingActionButton: Container(
@@ -87,10 +81,10 @@ class GrantPermissionsWidget extends StatelessWidget {
           ],
         ),
         width: double.infinity,
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           left: 20,
           right: 20,
-          bottom: Platform.isIOS ? 40 : 16,
+          bottom: 16,
         ),
         child: OutlinedButton(
           child: const Text("Grant permission"),
