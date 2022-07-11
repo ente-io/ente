@@ -489,6 +489,20 @@ class FilesDB {
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
+  List<File> _deduplicateByLocalID(List<File> files) {
+    final localIDs = <String>{};
+    final List<File> deduplicatedFiles = [];
+    for (final file in files) {
+      final id = file.localID;
+      if (id != null && localIDs.contains(id)) {
+        continue;
+      }
+      localIDs.add(id);
+      deduplicatedFiles.add(file);
+    }
+    return deduplicatedFiles;
+  }
+
   List<File> _deduplicatedAndFilterIgnoredFiles(
     List<File> files,
     Set<int> ignoredCollectionIDs,
@@ -554,6 +568,28 @@ class FilesDB {
     );
     final files = _convertToFiles(results);
     return FileLoadResult(files, files.length == limit);
+  }
+
+  Future<FileLoadResult> getLocalDeviceFiles(
+    int startTime,
+    int endTime, {
+    int limit,
+    bool asc,
+  }) async {
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final results = await db.query(
+      table,
+      where:
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnLocalID IS NOT NULL',
+      whereArgs: [startTime, endTime],
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = _convertToFiles(results);
+    final result = _deduplicateByLocalID(files);
+    return FileLoadResult(result, files.length == limit);
   }
 
   Future<List<File>> getAllVideos() async {
