@@ -482,7 +482,7 @@ packages:
     description:
       name: flutter_lints
       url: "https://pub.dartlang.org"
-    source: hostedgit 
+    source: hosted
     version: "2.0.1"
   flutter_local_notifications:
     dependency: "direct main"
