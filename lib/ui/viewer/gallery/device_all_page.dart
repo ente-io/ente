@@ -41,7 +41,7 @@ class DeviceAllPage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           GalleryType.localAll,
-          "All photos",
+          "On device",
           _selectedFiles,
         ),
       ),
