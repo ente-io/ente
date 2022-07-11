@@ -31,3 +31,7 @@ export const FILE_PATH_KEYS: {
     [FILE_PATH_TYPE.ZIPS]: 'zipPaths',
     [FILE_PATH_TYPE.FILES]: 'filePaths',
 };
+
+export interface SafeStorageStoreType {
+    encryptionKey: string;
+}

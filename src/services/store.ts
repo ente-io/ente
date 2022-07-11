@@ -1,5 +1,5 @@
 import Store, { Schema } from 'electron-store';
-import { KeysStoreType, UploadStoreType } from '../types';
+import { KeysStoreType, SafeStorageStoreType, UploadStoreType } from '../types';
 
 export const uploadStoreSchema: Schema<UploadStoreType> = {
     filePaths: {
@@ -38,4 +38,15 @@ export const keysStoreSchema: Schema<KeysStoreType> = {
 export const keysStore = new Store({
     name: 'keys',
     schema: keysStoreSchema,
+});
+
+export const safeStorageSchema: Schema<SafeStorageStoreType> = {
+    encryptionKey: {
+        type: 'string',
+    },
+};
+
+export const safeStorageStore = new Store({
+    name: 'safeStorage',
+    schema: safeStorageSchema,
 });
