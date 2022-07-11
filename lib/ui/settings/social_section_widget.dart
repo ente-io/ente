@@ -6,7 +6,7 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class SocialSectionWidget extends StatelessWidget {
   const SocialSectionWidget({Key key}) : super(key: key);
@@ -26,7 +26,7 @@ class SocialSectionWidget extends StatelessWidget {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          launch("https://twitter.com/enteio");
+          launchUrlString("https://twitter.com/enteio");
         },
         child:
             const SettingsTextItem(text: "Twitter", icon: Icons.navigate_next),
@@ -35,7 +35,7 @@ class SocialSectionWidget extends StatelessWidget {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          launch("https://ente.io/discord");
+          launchUrlString("https://ente.io/discord");
         },
         child:
             const SettingsTextItem(text: "Discord", icon: Icons.navigate_next),
@@ -44,7 +44,7 @@ class SocialSectionWidget extends StatelessWidget {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
-          launch("https://reddit.com/r/enteio");
+          launchUrlString("https://reddit.com/r/enteio");
         },
         child:
             const SettingsTextItem(text: "Reddit", icon: Icons.navigate_next),
@@ -58,11 +58,11 @@ class SocialSectionWidget extends StatelessWidget {
             behavior: HitTestBehavior.translucent,
             onTap: () {
               if (Platform.isAndroid) {
-                launch(
+                launchUrlString(
                   "https://play.google.com/store/apps/details?id=io.ente.photos",
                 );
               } else {
-                launch(
+                launchUrlString(
                   "https://apps.apple.com/in/app/ente-photos/id1542026904",
                 );
               }

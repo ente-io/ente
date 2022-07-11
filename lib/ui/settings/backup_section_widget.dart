@@ -18,7 +18,7 @@ import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class BackupSectionWidget extends StatefulWidget {
   const BackupSectionWidget({Key key}) : super(key: key);
@@ -229,11 +229,13 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
-              launch(
+              launchUrlString(
                 "https://play.google.com/store/apps/details?id=io.ente.photos",
               );
             } else {
-              launch("https://apps.apple.com/in/app/ente-photos/id1542026904");
+              launchUrlString(
+                "https://apps.apple.com/in/app/ente-photos/id1542026904",
+              );
             }
           },
         ),
@@ -289,11 +291,13 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
-              launch(
+              launchUrlString(
                 "https://play.google.com/store/apps/details?id=io.ente.photos",
               );
             } else {
-              launch("https://apps.apple.com/in/app/ente-photos/id1542026904");
+              launchUrlString(
+                "https://apps.apple.com/in/app/ente-photos/id1542026904",
+              );
             }
           },
         ),
