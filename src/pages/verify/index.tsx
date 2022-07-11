@@ -134,6 +134,7 @@ export default function Verify() {
                 </Typography>
                 <SingleInputForm
                     fieldType="text"
+                    autoComplete="one-time-code"
                     placeholder={constants.ENTER_OTT}
                     buttonText={constants.VERIFY}
                     callback={onSubmit}

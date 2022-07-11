@@ -23,6 +23,9 @@ export interface SingleInputFormProps {
     initialValue?: string;
     secondaryButtonAction?: () => void;
     disableAutoFocus?: boolean;
+    hiddenPreInput?: any;
+    hiddenPostInput?: any;
+    autoComplete?: string;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -81,10 +84,13 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             validateOnBlur={false}>
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
+                    {props.hiddenPreInput}
                     <TextField
                         variant="filled"
                         fullWidth
                         type={showPassword ? 'text' : props.fieldType}
+                        id={props.fieldType}
+                        name={props.fieldType}
                         label={props.placeholder}
                         value={values.inputValue}
                         onChange={handleChange('inputValue')}
@@ -92,6 +98,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         helperText={errors.inputValue}
                         disabled={loading}
                         autoFocus={!props.disableAutoFocus}
+                        autoComplete={props.autoComplete}
                         InputProps={{
                             endAdornment: props.fieldType === 'password' && (
                                 <ShowHidePassword
@@ -106,6 +113,7 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             ),
                         }}
                     />
+                    {props.hiddenPostInput}
                     <FlexWrapper justifyContent={'flex-end'}>
                         {props.secondaryButtonAction && (
                             <Button

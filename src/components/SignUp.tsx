@@ -121,6 +121,9 @@ export default function SignUp(props: SignUpProps) {
                         <VerticallyCentered sx={{ mb: 1 }}>
                             <TextField
                                 fullWidth
+                                id="email"
+                                name="email"
+                                autoComplete="username"
                                 type="email"
                                 label={constants.ENTER_EMAIL}
                                 value={values.email}
@@ -133,6 +136,9 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
+                                id="password"
+                                name="password"
+                                autoComplete="new-password"
                                 type="password"
                                 label={constants.PASSPHRASE_HINT}
                                 value={values.passphrase}
@@ -144,6 +150,9 @@ export default function SignUp(props: SignUpProps) {
 
                             <TextField
                                 fullWidth
+                                id="confirm-password"
+                                name="confirm-password"
+                                autoComplete="new-password"
                                 type="password"
                                 label={constants.CONFIRM_PASSPHRASE}
                                 value={values.confirm}
