@@ -15,14 +15,14 @@ export async function setEncryptionKey(encryptionKey: string) {
     }
 }
 
-export function getEncryptionKey() {
+export async function getEncryptionKey() {
     try {
         const b64EncryptedKey = safeStorageStore.get('encryptionKey');
-        const keyBuffer = new Uint8Array(
-            Buffer.from(b64EncryptedKey, 'base64')
-        );
-        if (keyBuffer) {
-            return ipcRenderer.invoke('safeStorage-decrypt', keyBuffer);
+        if (b64EncryptedKey) {
+            const keyBuffer = new Uint8Array(
+                Buffer.from(b64EncryptedKey, 'base64')
+            );
+            return await ipcRenderer.invoke('safeStorage-decrypt', keyBuffer);
         }
     } catch (e) {
         console.log(e);
