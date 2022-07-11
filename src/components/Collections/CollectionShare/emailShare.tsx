@@ -5,7 +5,6 @@ import { GalleryContext } from 'pages/gallery';
 import React, { useContext } from 'react';
 import { shareCollection } from 'services/collectionService';
 import { User } from 'types/user';
-import { sleep } from 'utils/common';
 import { handleSharingErrors } from 'utils/error';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
@@ -28,7 +27,6 @@ export default function EmailShare({ collection }) {
                 setFieldError(constants.ALREADY_SHARED(email));
             } else {
                 await shareCollection(collection, email);
-                await sleep(2000);
                 await galleryContext.syncWithRemote(false, true);
             }
         } catch (e) {
