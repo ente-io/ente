@@ -17,7 +17,7 @@ import SingleInputForm, {
 } from 'components/SingleInputForm';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
-import { KeyAttributes } from 'types/user';
+import { KeyAttributes, User } from 'types/user';
 import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
@@ -28,16 +28,18 @@ import isElectron from 'is-electron';
 import desktopService from 'services/desktopService';
 import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
+import { Input } from '@mui/material';
 
 export default function Credentials() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const appContext = useContext(AppContext);
-
+    const [user, setUser] = useState<User>();
     useEffect(() => {
         router.prefetch(PAGES.GALLERY);
         const main = async () => {
             const user = getData(LS_KEYS.USER);
+            setUser(user);
             const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             if (!key && isElectron()) {
@@ -141,6 +143,17 @@ export default function Credentials() {
                     callback={verifyPassphrase}
                     placeholder={constants.RETURN_PASSPHRASE_HINT}
                     buttonText={constants.VERIFY_PASSPHRASE}
+                    hiddenPreInput={
+                        <Input
+                            id="email"
+                            name="email"
+                            autoComplete="username"
+                            type="email"
+                            hidden
+                            value={user?.email}
+                        />
+                    }
+                    autoComplete={'current-password'}
                     fieldType="password"
                 />
 

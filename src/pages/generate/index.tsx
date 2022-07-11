@@ -24,6 +24,7 @@ import FormTitle from 'components/Form/FormPaper/Title';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
+    const [user, setUser] = useState<User>();
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -37,6 +38,7 @@ export default function Generate() {
             router.prefetch(PAGES.GALLERY);
             router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
+            setUser(user);
             if (!user?.token) {
                 router.push(PAGES.ROOT);
             } else if (key) {
@@ -100,6 +102,7 @@ export default function Generate() {
                     <FormPaper>
                         <FormTitle>{constants.SET_PASSPHRASE}</FormTitle>
                         <SetPasswordForm
+                            userEmail={user?.email}
                             callback={onSubmit}
                             buttonText={constants.SET_PASSPHRASE}
                             back={logoutUser}
