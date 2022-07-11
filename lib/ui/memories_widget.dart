@@ -95,6 +95,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
         await routeToPage(
           context,
           FullScreenMemory(title, widget.memories, index),
+          forceCustomPageRoute: true,
         );
         setState(() {});
       },
