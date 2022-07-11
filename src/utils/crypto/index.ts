@@ -103,11 +103,7 @@ export const saveKeyInSessionStore = async (
     const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
     if (isElectron() && !fromDesktop) {
-        try {
-            desktopService.setEncryptionKey(key);
-        } catch (e) {
-            // ignore
-        }
+        desktopService.setEncryptionKey(key);
     }
 };
 
