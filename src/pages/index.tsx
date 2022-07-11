@@ -12,6 +12,10 @@ import localForage from 'utils/storage/localForage';
 import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import { EnteLogo } from 'components/EnteLogo';
+import isElectron from 'is-electron';
+import desktopService from 'services/desktopService';
+import { saveKeyInSessionStore } from 'utils/crypto';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 
 const Container = styled('div')`
     display: flex;
@@ -122,7 +126,20 @@ export default function LandingPage() {
 
     const handleNormalRedirect = async () => {
         const user = getData(LS_KEYS.USER);
-        if (user?.email) {
+        let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (!key && isElectron()) {
+            key = await desktopService.getEncryptionKey();
+            if (key) {
+                await saveKeyInSessionStore(
+                    SESSION_KEYS.ENCRYPTION_KEY,
+                    key,
+                    true
+                );
+            }
+        }
+        if (key) {
+            await router.push(PAGES.GALLERY);
+        } else if (user?.email) {
             await router.push(PAGES.VERIFY);
         }
         await initLocalForage();
