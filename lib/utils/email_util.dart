@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:archive/archive_io.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_email_sender/flutter_email_sender.dart';
@@ -216,11 +217,35 @@ Future<void> sendEmail(
       if (!result.didOpen && !result.canOpen) {
         _showNoMailAppsDialog(context, to);
       } else if (!result.didOpen && result.canOpen) {
-        showDialog(
+        showCupertinoModalPopup(
           context: context,
-          builder: (_) => MailAppPickerDialog(
-            mailApps: result.options,
-            emailContent: email,
+          builder: (_) => CupertinoActionSheet(
+            title: Text("Select mail app \n $to"),
+            actions: [
+              for (var app in result.options)
+                CupertinoActionSheetAction(
+                  child: Text(app.name),
+                  onPressed: () {
+                    final content = email;
+                    if (content != null) {
+                      OpenMailApp.composeNewEmailInSpecificMailApp(
+                        mailApp: app,
+                        emailContent: content,
+                      );
+                    } else {
+                      OpenMailApp.openSpecificMailApp(app);
+                    }
+
+                    Navigator.pop(context);
+                  },
+                ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
           ),
         );
       }
