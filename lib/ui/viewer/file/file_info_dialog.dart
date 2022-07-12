@@ -44,7 +44,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
   @override
   void initState() {
-    debugPrint('file_info_dialog initState' + _exifData.toString());
+    debugPrint('file_info_dialog initState');
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
@@ -68,6 +68,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
     if (_isImage && _exif != null) {
       // items.add(_getExifWidgets(_exif));
+      print("_isImage");
+      print(_isImage);
       _generateExifForDetails(_exif);
     }
     final bool showExifListTile = _exifData["focalLength"] != null ||
@@ -134,7 +136,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
         subtitle: Row(
           children: [
-            _getFileSize(),
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
+              child: _getFileSize(),
+            ),
+            file.localID != null && !_isImage
+                ? _getVideoDuration()
+                : const SizedBox.shrink(),
           ],
         ),
         trailing: file.uploadedFileID == null ||
@@ -267,6 +275,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       ],
     );
     if (file.localID != null && !_isImage) {
+      //remove
       items.addAll(
         [
           Row(
@@ -677,6 +686,28 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         if (snapshot.hasData) {
           return Text(
             (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB",
+          );
+        } else {
+          return Center(
+            child: SizedBox.fromSize(
+              size: const Size.square(24),
+              child: const CupertinoActivityIndicator(
+                radius: 8,
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _getVideoDuration() {
+    return FutureBuilder(
+      future: widget.file.getAsset(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Text(
+            snapshot.data.videoDuration.toString().split(".")[0],
           );
         } else {
           return Center(
