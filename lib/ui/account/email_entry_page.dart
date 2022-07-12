@@ -91,7 +91,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         child: StepProgressIndicator(
           totalSteps: 4,
           currentStep: 1,
-          selectedColor: Theme.of(context).buttonColor,
+          selectedColor: Theme.of(context).colorScheme.greenAlternative,
           roundedEdges: const Radius.circular(10),
           unselectedColor:
               Theme.of(context).colorScheme.stepProgressUnselectedColor,

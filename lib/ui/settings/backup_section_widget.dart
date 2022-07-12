@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
@@ -222,7 +223,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Text(
             "Rate us",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {
@@ -284,7 +285,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Text(
             "Rate us",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {

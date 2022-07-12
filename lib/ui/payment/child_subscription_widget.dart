@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
@@ -123,7 +124,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
       'Are you sure that you want to leave the family plan?',
       firstAction: 'No',
       secondAction: 'Yes',
-      firstActionColor: Theme.of(context).buttonColor,
+      firstActionColor: Theme.of(context).colorScheme.greenAlternative,
       secondActionColor: Theme.of(context).colorScheme.onSurface,
     );
     if (choice != DialogUserChoice.secondChoice) {

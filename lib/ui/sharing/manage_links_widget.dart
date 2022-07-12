@@ -346,7 +346,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     return showDialog<String>(
       context: context,
       builder: (context) {
-        bool _passwordVisible = false;
+        bool passwordVisible = false;
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
@@ -358,19 +358,17 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   contentPadding: const EdgeInsets.all(12),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _passwordVisible
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+                      passwordVisible ? Icons.visibility : Icons.visibility_off,
                       color: Colors.white.withOpacity(0.5),
                       size: 20,
                     ),
                     onPressed: () {
-                      _passwordVisible = !_passwordVisible;
+                      passwordVisible = !passwordVisible;
                       setState(() {});
                     },
                   ),
                 ),
-                obscureText: !_passwordVisible,
+                obscureText: !passwordVisible,
                 controller: _textFieldController,
                 autofocus: true,
                 autocorrect: false,

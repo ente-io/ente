@@ -132,7 +132,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
           widget.backgroundColor,
           widget.drawColor,
           widget.heightScrollThumb,
-          widget.labelTextBuilder.call(this.currentFirstIndex),
+          widget.labelTextBuilder.call(currentFirstIndex),
           _labelAnimation,
           _thumbAnimation,
           onDragStart,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/ui/extents_page_view.dart';
@@ -137,7 +138,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
         border: isSeen
             ? const Border()
             : Border.all(
-                color: Theme.of(context).buttonColor,
+                color: Theme.of(context).colorScheme.greenAlternative,
                 width: isSeen ? 0 : 2,
               ),
         borderRadius: BorderRadius.circular(40),

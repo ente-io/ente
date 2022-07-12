@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:expansion_tile_card/expansion_tile_card.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 
 class BillingQuestionsWidget extends StatelessWidget {
@@ -74,7 +75,7 @@ class FaqWidget extends StatelessWidget {
       child: ExpansionTileCard(
         elevation: 0,
         title: Text(faq.q),
-        expandedTextColor: Theme.of(context).buttonColor,
+        expandedTextColor: Theme.of(context).colorScheme.greenAlternative,
         baseColor: Theme.of(context).cardColor,
         children: [
           Padding(

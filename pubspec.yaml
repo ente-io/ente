@@ -28,6 +28,7 @@ dependencies:
   cached_network_image: ^3.0.0
   chewie:
     path: thirdparty/chewie
+  collection: # dart
   computer: ^2.0.0
   confetti: ^0.6.0
   connectivity: ^3.0.3
@@ -87,6 +88,7 @@ dependencies:
   package_info_plus: ^1.0.1
   page_transition: ^2.0.2
   password_strength: ^0.2.0
+  path: #dart
   path_provider: ^2.0.1
   pedantic: ^1.9.2
   photo_manager: ^2.0.8

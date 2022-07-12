@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 
 class LinearProgressDialog extends StatefulWidget {
   final String message;
@@ -38,8 +39,9 @@ class LinearProgressDialogState extends State<LinearProgressDialog> {
         ),
         content: LinearProgressIndicator(
           value: _progress,
-          valueColor:
-              AlwaysStoppedAnimation<Color>(Theme.of(context).buttonColor),
+          valueColor: AlwaysStoppedAnimation<Color>(
+            Theme.of(context).colorScheme.greenAlternative,
+          ),
         ),
       ),
     );
