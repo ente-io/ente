@@ -67,9 +67,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         Theme.of(context).colorScheme.onSurface.withOpacity(0.85); //remove
 
     if (_isImage && _exif != null) {
-      // items.add(_getExifWidgets(_exif));
-      print("_isImage");
-      print(_isImage);
       _generateExifForDetails(_exif);
     }
     final bool showExifListTile = _exifData["focalLength"] != null ||
@@ -140,9 +137,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               padding: const EdgeInsets.only(right: 10),
               child: _getFileSize(),
             ),
-            file.localID != null && !_isImage
-                ? _getVideoDuration()
-                : const SizedBox.shrink(),
+            !_isImage ? _getVideoDuration() : const SizedBox.shrink(),
           ],
         ),
         trailing: file.uploadedFileID == null ||
@@ -702,6 +697,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   }
 
   Widget _getVideoDuration() {
+    if (widget.file.duration != 0) {
+      return Text(
+        secondsToHHMMSS(widget.file.duration),
+      );
+    }
     return FutureBuilder(
       future: widget.file.getAsset(),
       builder: (context, snapshot) {
