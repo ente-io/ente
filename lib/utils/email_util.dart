@@ -217,7 +217,7 @@ Future<void> sendEmail(
       if (!result.didOpen && !result.canOpen) {
         _showNoMailAppsDialog(context, to);
       } else if (!result.didOpen && result.canOpen) {
-        showCupertinoModalPopup(
+        await showCupertinoModalPopup(
           context: context,
           builder: (_) => CupertinoActionSheet(
             title: Text("Select mail app \n $to"),
@@ -235,8 +235,7 @@ Future<void> sendEmail(
                     } else {
                       OpenMailApp.openSpecificMailApp(app);
                     }
-
-                    Navigator.pop(context);
+                    Navigator.of(context, rootNavigator: true).pop();
                   },
                 ),
             ],
