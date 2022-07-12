@@ -43,7 +43,7 @@ class DeleteAccountPage extends StatelessWidget {
                 width: 200,
               ),
               const SizedBox(
-                height: 12,
+                height: 24,
               ),
               Center(
                 child: Text(
