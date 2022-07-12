@@ -85,7 +85,10 @@ class _DetailPageState extends State<DetailPage> {
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
     super.dispose();
   }
 
@@ -189,9 +192,10 @@ class _DetailPageState extends State<DetailPage> {
       _bottomBarKey.currentState.show();
     }
     Future.delayed(Duration.zero, () {
-      SystemChrome.setEnabledSystemUIOverlays(
+      SystemChrome.setEnabledSystemUIMode(
         //to hide status bar?
-        _shouldHideAppBar ? [] : SystemUiOverlay.values,
+        SystemUiMode.manual,
+        overlays: _shouldHideAppBar ? [] : SystemUiOverlay.values,
       );
     });
   }
