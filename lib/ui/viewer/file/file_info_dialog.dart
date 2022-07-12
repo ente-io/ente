@@ -160,19 +160,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
       ),
       const DividerWithPadding(),
-      ListTile(
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 6),
-          child: Icon(Icons.folder_outlined),
-        ),
-        title: Text(
-          file.deviceFolder ??
-              CollectionsService.instance
-                  .getCollectionByID(file.collectionID)
-                  .name,
-        ),
-      ),
-      const DividerWithPadding(),
       showExifListTile
           ? ListTile(
               leading: const Padding(
@@ -212,6 +199,19 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             )
           : const SizedBox.shrink(),
       showExifListTile ? const DividerWithPadding() : const SizedBox.shrink(),
+      ListTile(
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 6),
+          child: Icon(Icons.folder_outlined),
+        ),
+        title: Text(
+          file.deviceFolder ??
+              CollectionsService.instance
+                  .getCollectionByID(file.collectionID)
+                  .name,
+        ),
+      ),
+      const DividerWithPadding(),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
               leading: const Padding(
@@ -234,9 +234,20 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             )
           : const SizedBox.shrink(),
+      _isImage
+          ? Padding(
+              padding: const EdgeInsets.fromLTRB(0, 24, 0, 16),
+              child: SafeArea(
+                child: RawExifButton(_exif),
+              ),
+            )
+          : const SizedBox(
+              height: 12,
+            )
     ];
 
     var items = <Widget>[
+      //remove
       Row(
         children: [
           Icon(Icons.calendar_today_outlined, color: infoColor),
@@ -317,6 +328,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       _generateExifForDetails(_exif);
     }
     if (file.uploadedFileID != null && file.updationTime != null) {
+      //remove
       items.addAll(
         [
           Row(
@@ -504,6 +516,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       }
     }
     actions.add(
+      //remove
       TextButton(
         child: Text(
           "Close",
@@ -742,6 +755,81 @@ class DividerWithPadding extends StatelessWidget {
       child: Divider(
         thickness: 0.5,
       ),
+    );
+  }
+}
+
+enum Status {
+  loading,
+  exifIsAvailable,
+  noExif,
+}
+
+class RawExifButton extends StatelessWidget {
+  final Map<String, IfdTag> exif;
+  const RawExifButton(this.exif, {Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Status exifStatus = Status.loading;
+    if (exif == null) {
+      exifStatus = Status.loading;
+    } else if (exif.isNotEmpty) {
+      exifStatus = Status.exifIsAvailable;
+    } else {
+      exifStatus = Status.noExif;
+    }
+    return GestureDetector(
+      child: Container(
+        height: 40,
+        width: 140,
+        decoration: BoxDecoration(
+          color: Theme.of(context)
+              .colorScheme
+              .inverseBackgroundColor
+              .withOpacity(0.12),
+          borderRadius: const BorderRadius.all(
+            Radius.circular(20),
+          ),
+        ),
+        child: Center(
+          child: exifStatus == Status.loading
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CupertinoActivityIndicator(
+                      radius: 8,
+                    ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Text('EXIF')
+                  ],
+                )
+              : exifStatus == Status.exifIsAvailable
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.feed_outlined),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text('Raw EXIF'),
+                      ],
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.feed_outlined),
+                        SizedBox(
+                          width: 8,
+                        ),
+                        Text('No EXIF'),
+                      ],
+                    ),
+        ),
+      ),
+      onTap: () {},
     );
   }
 }
