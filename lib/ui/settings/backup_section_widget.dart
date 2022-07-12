@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
@@ -18,7 +19,7 @@ import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class BackupSectionWidget extends StatefulWidget {
   const BackupSectionWidget({Key key}) : super(key: key);
@@ -222,18 +223,20 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Text(
             "Rate us",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
-              launch(
+              launchUrlString(
                 "https://play.google.com/store/apps/details?id=io.ente.photos",
               );
             } else {
-              launch("https://apps.apple.com/in/app/ente-photos/id1542026904");
+              launchUrlString(
+                "https://apps.apple.com/in/app/ente-photos/id1542026904",
+              );
             }
           },
         ),
@@ -282,18 +285,20 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           child: Text(
             "Rate us",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             // TODO: Replace with https://pub.dev/packages/in_app_review
             if (Platform.isAndroid) {
-              launch(
+              launchUrlString(
                 "https://play.google.com/store/apps/details?id=io.ente.photos",
               );
             } else {
-              launch("https://apps.apple.com/in/app/ente-photos/id1542026904");
+              launchUrlString(
+                "https://apps.apple.com/in/app/ente-photos/id1542026904",
+              );
             }
           },
         ),

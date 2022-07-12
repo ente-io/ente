@@ -188,7 +188,7 @@ class _SessionsPageState extends State<SessionsPage> {
             "Cancel",
             style: TextStyle(
               color: isLoggingOutFromThisDevice
-                  ? Theme.of(context).buttonColor
+                  ? Theme.of(context).colorScheme.greenAlternative
                   : Theme.of(context).colorScheme.defaultTextColor,
             ),
           ),
@@ -213,7 +213,7 @@ class _SessionsPageState extends State<SessionsPage> {
         "This device",
         style: TextStyle(
           fontWeight: FontWeight.bold,
-          color: Theme.of(context).buttonColor,
+          color: Theme.of(context).colorScheme.greenAlternative,
         ),
       );
     }

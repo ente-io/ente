@@ -21,7 +21,7 @@ import 'package:photos/ui/payment/subscription_plan_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class StripeSubscriptionPage extends StatefulWidget {
   final bool isOnboarding;
@@ -133,7 +133,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   child: StepProgressIndicator(
                     totalSteps: 4,
                     currentStep: 4,
-                    selectedColor: Theme.of(context).buttonColor,
+                    selectedColor:
+                        Theme.of(context).colorScheme.greenAlternative,
                     roundedEdges: const Radius.circular(10),
                     unselectedColor: Theme.of(context)
                         .colorScheme
@@ -224,14 +225,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   await _launchStripePortal();
                   break;
                 case kPlayStore:
-                  launch(
+                  launchUrlString(
                     "https://play.google.com/store/account/subscriptions?sku=" +
                         _currentSubscription.productID +
                         "&package=io.ente.photos",
                   );
                   break;
                 case kAppStore:
-                  launch("https://apps.apple.com/account/billing");
+                  launchUrlString("https://apps.apple.com/account/billing");
                   break;
                 default:
                   _logger.severe(

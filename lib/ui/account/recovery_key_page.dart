@@ -64,7 +64,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 child: StepProgressIndicator(
                   totalSteps: 4,
                   currentStep: 3,
-                  selectedColor: Theme.of(context).buttonColor,
+                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
                   roundedEdges: const Radius.circular(10),
                   unselectedColor:
                       Theme.of(context).colorScheme.stepProgressUnselectedColor,

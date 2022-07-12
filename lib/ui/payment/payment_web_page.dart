@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/subscription.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -157,7 +158,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
             child: Text(
               'No',
               style: TextStyle(
-                color: Theme.of(context).buttonColor,
+                color: Theme.of(context).colorScheme.greenAlternative,
               ),
             ),
             onPressed: () => Navigator.of(context).pop(false),
@@ -248,7 +249,9 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
           TextButton(
             child: Text(
               'Ok',
-              style: TextStyle(color: Theme.of(context).buttonColor),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.greenAlternative,
+              ),
             ),
             onPressed: () {
               Navigator.of(context).pop('dialog');

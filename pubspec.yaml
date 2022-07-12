@@ -11,7 +11,7 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.6.14+344
+version: 0.6.17+347
 
 environment:
   sdk: ">=2.10.0 <3.0.0"
@@ -28,6 +28,7 @@ dependencies:
   cached_network_image: ^3.0.0
   chewie:
     path: thirdparty/chewie
+  collection: # dart
   computer: ^2.0.0
   confetti: ^0.6.0
   connectivity: ^3.0.3
@@ -45,9 +46,8 @@ dependencies:
   fast_base58: ^0.2.1
   firebase_core: ^1.10.0
   firebase_messaging: ^11.1.0
+  fk_user_agent: ^2.0.1
   flutter:
-    sdk: flutter
-  flutter_localizations:
     sdk: flutter
   flutter_cache_manager: ^3.3.0
   flutter_datetime_picker: ^1.5.1
@@ -57,13 +57,13 @@ dependencies:
   flutter_inappwebview: ^5.3.2
   flutter_launcher_icons: ^0.9.3
   flutter_local_notifications: ^9.5.3+1
+  flutter_localizations:
+    sdk: flutter
   flutter_native_splash: ^2.2.0+1
   flutter_password_strength: ^0.1.6
-  password_strength: ^0.2.0
   flutter_secure_storage: ^4.2.0
   flutter_sodium: ^0.2.0
   flutter_typeahead: ^4.0.0
-  fk_user_agent: ^2.0.1
   flutter_windowmanager: ^0.2.0
   fluttercontactpicker: ^4.7.0
   fluttertoast: ^8.0.6
@@ -82,9 +82,13 @@ dependencies:
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
+
   open_file: ^3.2.1
+  open_mail_app: ^0.4.5
   package_info_plus: ^1.0.1
   page_transition: ^2.0.2
+  password_strength: ^0.2.0
+  path: #dart
   path_provider: ^2.0.1
   pedantic: ^1.9.2
   photo_manager: ^2.0.8
@@ -121,9 +125,9 @@ dependency_overrides:
   wakelock: ^0.6.1+2
 
 dev_dependencies:
+  flutter_lints: ^2.0.1
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
 
 flutter_icons:
   android: "launcher_icon"

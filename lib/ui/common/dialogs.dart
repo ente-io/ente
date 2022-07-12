@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 
 enum DialogUserChoice { firstChoice, secondChoice }
 
@@ -53,7 +54,8 @@ Future<DialogUserChoice> showChoiceDialog<T>(
         child: Text(
           secondAction,
           style: TextStyle(
-            color: secondActionColor ?? Theme.of(context).buttonColor,
+            color: secondActionColor ??
+                Theme.of(context).colorScheme.greenAlternative,
           ),
         ),
         onPressed: () {

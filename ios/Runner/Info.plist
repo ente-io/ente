@@ -22,6 +22,18 @@
 		<string>$(FLUTTER_BUILD_NAME)</string>
 		<key>CFBundleSignature</key>
 		<string>????</string>
+		<key>LSApplicationQueriesSchemes</key>
+        <array>
+            <string>googlegmail</string>
+            <string>x-dispatch</string>
+            <string>readdle-spark</string>
+            <string>airmail</string>
+            <string>ms-outlook</string>
+            <string>ymail</string>
+            <string>fastmail</string>
+            <string>superhuman</string>
+            <string>protonmail</string>
+        </array>
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>

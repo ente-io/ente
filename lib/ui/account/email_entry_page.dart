@@ -91,7 +91,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         child: StepProgressIndicator(
           totalSteps: 4,
           currentStep: 1,
-          selectedColor: Theme.of(context).buttonColor,
+          selectedColor: Theme.of(context).colorScheme.greenAlternative,
           roundedEdges: const Radius.circular(10),
           unselectedColor:
               Theme.of(context).colorScheme.stepProgressUnselectedColor,
@@ -110,7 +110,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
           _config.setVolatilePassword(_passwordController1.text);
           UserService.instance.setEmail(_email);
           UserService.instance
-              .getOtt(context, _email, isCreateAccountScreen: true);
+              .sendOtt(context, _email, isCreateAccountScreen: true);
           FocusScope.of(context).unfocus();
         },
       ),

@@ -3,6 +3,7 @@ enum GalleryType {
   archive,
   trash,
   localFolder,
+  localAll, // used for gallery view displaying all local photos on the device
   // indicator for gallery view of collections shared with the user
   sharedCollection,
   ownedCollection,

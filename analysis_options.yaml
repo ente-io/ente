@@ -46,6 +46,7 @@ analyzer:
     unused_field: warning
     use_key_in_widget_constructors: warning
     sort_child_properties_last: warning
+    sort_pub_dependencies: warning
     library_private_types_in_public_api: warning
     constant_identifier_names: warning
     prefer_const_constructors: warning

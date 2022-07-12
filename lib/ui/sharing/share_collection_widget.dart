@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/public_keys_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
@@ -230,7 +231,8 @@ class _SharingDialogState extends State<SharingDialog> {
         IconButton(
           icon: Icon(
             Icons.contact_mail_outlined,
-            color: Theme.of(context).buttonColor.withOpacity(0.8),
+            color:
+                Theme.of(context).colorScheme.greenAlternative.withOpacity(0.8),
           ),
           onPressed: () async {
             final emailContact = await FlutterContactPicker.pickEmailContact(
@@ -297,7 +299,7 @@ class _SharingDialogState extends State<SharingDialog> {
                 children: [
                   Icon(
                     Icons.adaptive.share,
-                    color: Theme.of(context).buttonColor,
+                    color: Theme.of(context).colorScheme.greenAlternative,
                   ),
                   const Padding(
                     padding: EdgeInsets.all(4),
@@ -305,7 +307,7 @@ class _SharingDialogState extends State<SharingDialog> {
                   Text(
                     "Share link",
                     style: TextStyle(
-                      color: Theme.of(context).buttonColor,
+                      color: Theme.of(context).colorScheme.greenAlternative,
                     ),
                   ),
                 ],
@@ -384,7 +386,7 @@ class _SharingDialogState extends State<SharingDialog> {
             child: Text(
               "Invite",
               style: TextStyle(
-                color: Theme.of(context).buttonColor,
+                color: Theme.of(context).colorScheme.greenAlternative,
               ),
             ),
             onPressed: () {
@@ -444,7 +446,7 @@ class _SharingDialogState extends State<SharingDialog> {
           child: Text(
             "Subscribe",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {

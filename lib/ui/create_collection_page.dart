@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -222,7 +223,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           child: Text(
             "Ok",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () async {

@@ -52,7 +52,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 child: StepProgressIndicator(
                   totalSteps: 4,
                   currentStep: 2,
-                  selectedColor: Theme.of(context).buttonColor,
+                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
                   roundedEdges: const Radius.circular(10),
                   unselectedColor:
                       Theme.of(context).colorScheme.stepProgressUnselectedColor,
@@ -119,7 +119,9 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                                 TextSpan(
                                   text: widget.email,
                                   style: TextStyle(
-                                    color: Theme.of(context).buttonColor,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .greenAlternative,
                                   ),
                                 )
                               ],
@@ -175,7 +177,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
                 children: [
                   TextButton(
                     onPressed: () {
-                      UserService.instance.getOtt(
+                      UserService.instance.sendOtt(
                         context,
                         widget.email,
                         isCreateAccountScreen: widget.isCreateAccountScreen,

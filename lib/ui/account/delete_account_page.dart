@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
@@ -11,8 +10,8 @@ import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
@@ -34,28 +33,26 @@ class DeleteAccountPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
         child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                "💔",
-                style: TextStyle(
-                  fontSize: 100,
-                ),
+              Image.asset(
+                'assets/broken_heart.png',
+                width: 200,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+              const SizedBox(
+                height: 24,
               ),
               Center(
                 child: Text(
                   "We'll be sorry to see you go. Are you facing some issue?",
-                  style: Theme.of(context).textTheme.subtitle2,
+                  style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
               const SizedBox(
-                height: 8,
+                height: 12,
               ),
               RichText(
                 // textAlign: TextAlign.center,
@@ -70,22 +67,21 @@ class DeleteAccountPage extends StatelessWidget {
                       text: ", maybe there is a way we can help.",
                     ),
                   ],
-                  style: Theme.of(context).textTheme.subtitle2,
+                  style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+              const SizedBox(
+                height: 24,
               ),
               GradientButton(
                 text: "Yes, send feedback",
                 paddingValue: 4,
                 iconData: Icons.check,
                 onTap: () async {
-                  await launchUrl(
-                    Uri(
-                      scheme: "mailto",
-                      path: 'feedback@ente.io',
-                    ),
+                  await sendEmail(
+                    context,
+                    to: 'feedback@ente.io',
+                    subject: '[Feedback]',
                   );
                 },
               ),
@@ -222,15 +218,11 @@ class DeleteAccountPage extends StatelessWidget {
           ),
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            try {
-              final Email email = Email(
-                recipients: ['account-deletion@ente.io'],
-                isHTML: false,
-              );
-              await FlutterEmailSender.send(email);
-            } catch (e) {
-              launch("mailto:account-deletion@ente.io");
-            }
+            await sendEmail(
+              context,
+              to: 'account-deletion@ente.io',
+              subject: '[Delete account]',
+            );
           },
         ),
         TextButton(

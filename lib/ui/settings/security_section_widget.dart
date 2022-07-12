@@ -288,7 +288,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           child: Text(
             "No",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {

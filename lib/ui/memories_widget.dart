@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/memory.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/ui/extents_page_view.dart';
@@ -95,6 +96,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
         await routeToPage(
           context,
           FullScreenMemory(title, widget.memories, index),
+          forceCustomPageRoute: true,
         );
         setState(() {});
       },
@@ -136,7 +138,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
         border: isSeen
             ? const Border()
             : Border.all(
-                color: Theme.of(context).buttonColor,
+                color: Theme.of(context).colorScheme.greenAlternative,
                 width: isSeen ? 0 : 2,
               ),
         borderRadius: BorderRadius.circular(40),
@@ -210,6 +212,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   // shows memory counter as index+1/totalFiles for large number of memories
   // when the top step indicator isn't visible.
   bool _showCounter = false;
+  bool _showStepIndicator = true;
   PageController _pageController;
   bool _shouldDisableScroll = false;
   final GlobalKey shareButtonKey = GlobalKey();
@@ -218,11 +221,12 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   void initState() {
     super.initState();
     _index = widget.index;
+    _showStepIndicator = widget.memories.length <= 60;
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         setState(() {
           _opacity = 0;
-          _showCounter = widget.memories.length > 60;
+          _showCounter = !_showStepIndicator;
         });
       }
     });
@@ -239,13 +243,15 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            StepProgressIndicator(
-              totalSteps: widget.memories.length,
-              currentStep: _index + 1,
-              size: 2,
-              selectedColor: Colors.white, //same for both themes
-              unselectedColor: Colors.white.withOpacity(0.4),
-            ),
+            _showStepIndicator
+                ? StepProgressIndicator(
+                    totalSteps: widget.memories.length,
+                    currentStep: _index + 1,
+                    size: 2,
+                    selectedColor: Colors.white, //same for both themes
+                    unselectedColor: Colors.white.withOpacity(0.4),
+                  )
+                : const SizedBox.shrink(),
             const SizedBox(
               height: 18,
             ),

@@ -193,26 +193,6 @@ class BillingService {
     }
   }
 
-  Future<int> fetchUsage() async {
-    try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/billing/usage",
-        queryParameters: {
-          "startTime": 0,
-          "endTime": DateTime.now().microsecondsSinceEpoch,
-        },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
-      return response.data["usage"];
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   void setIsOnSubscriptionPage(bool isOnSubscriptionPage) {
     _isOnSubscriptionPage = isOnSubscriptionPage;
   }
