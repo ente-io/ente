@@ -122,12 +122,20 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       ),
       const DividerWithPadding(),
       ListTile(
-        leading: const Padding(
-          padding: EdgeInsets.only(top: 8, left: 6),
-          child: Icon(
-            Icons.image,
-          ),
-        ),
+        leading: _isImage
+            ? const Padding(
+                padding: EdgeInsets.only(top: 8, left: 6),
+                child: Icon(
+                  Icons.image,
+                ),
+              )
+            : const Padding(
+                padding: EdgeInsets.only(top: 8, left: 6),
+                child: Icon(
+                  Icons.video_camera_back,
+                  size: 27,
+                ),
+              ),
         title: Text(
           file.getDisplayName(),
         ),
