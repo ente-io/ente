@@ -33,19 +33,17 @@ class DeleteAccountPage extends StatelessWidget {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
         child: Center(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const Text(
-                "☹️",
-                style: TextStyle(
-                  fontSize: 100,
-                ),
+              Image.asset(
+                'assets/broken_heart.png',
+                width: 200,
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
+              const SizedBox(
+                height: 12,
               ),
               Center(
                 child: Text(
