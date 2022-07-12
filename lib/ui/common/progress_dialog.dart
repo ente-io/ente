@@ -55,7 +55,7 @@ class ProgressDialog {
     _progressDialogType = type ?? ProgressDialogType.normal;
     _barrierDismissible = isDismissible ?? true;
     _showLogs = showLogs ?? false;
-    _customBody = customBody ?? null;
+    _customBody = customBody;
     _direction = textDirection ?? TextDirection.ltr;
     _barrierColor = barrierColor ?? barrierColor;
   }

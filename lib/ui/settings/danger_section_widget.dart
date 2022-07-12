@@ -1,5 +1,6 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/delete_account_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
@@ -77,7 +78,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
           child: Text(
             "No",
             style: TextStyle(
-              color: Theme.of(context).buttonColor,
+              color: Theme.of(context).colorScheme.greenAlternative,
             ),
           ),
           onPressed: () {

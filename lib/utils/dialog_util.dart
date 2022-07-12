@@ -77,9 +77,9 @@ Future<T> showConfettiDialog<T>({
   final pageBuilder = Builder(
     builder: builder,
   );
-  ConfettiController _confettiController =
+  ConfettiController confettiController =
       ConfettiController(duration: const Duration(seconds: 1));
-  _confettiController.play();
+  confettiController.play();
   return showDialog(
     context: context,
     builder: (BuildContext buildContext) {
@@ -89,7 +89,7 @@ Future<T> showConfettiDialog<T>({
           Align(
             alignment: confettiAlignment,
             child: ConfettiWidget(
-              confettiController: _confettiController,
+              confettiController: confettiController,
               blastDirection: pi / 2,
               emissionFrequency: 0,
               numberOfParticles: 100,

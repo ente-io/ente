@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/lifecycle_event_handler.dart';
@@ -87,7 +88,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
               child: Column(
                 children: [
                   TabBar(
-                    labelColor: Theme.of(context).buttonColor,
+                    labelColor: Theme.of(context).colorScheme.greenAlternative,
                     unselectedLabelColor: Colors.grey,
                     tabs: const [
                       Tab(

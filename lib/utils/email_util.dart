@@ -70,7 +70,7 @@ Future<void> sendLogs(
       child: Text(
         title,
         style: TextStyle(
-          color: Theme.of(context).buttonColor,
+          color: Theme.of(context).colorScheme.greenAlternative,
         ),
       ),
       onPressed: () async {

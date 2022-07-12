@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/header_error_widget.dart';
@@ -246,7 +247,7 @@ class SyncStatusCompletedWidget extends StatelessWidget {
               children: [
                 Icon(
                   Icons.cloud_done_outlined,
-                  color: Theme.of(context).buttonColor,
+                  color: Theme.of(context).colorScheme.greenAlternative,
                   size: 22,
                 ),
                 const Padding(

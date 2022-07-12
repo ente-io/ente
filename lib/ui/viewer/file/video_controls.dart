@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chewie/chewie.dart';
 import 'package:chewie/src/material/material_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:video_player/video_player.dart';
 
@@ -95,11 +96,11 @@ class _VideoControlsState extends State<VideoControls> {
 
   @override
   void didChangeDependencies() {
-    final _oldController = chewieController;
+    final oldController = chewieController;
     chewieController = ChewieController.of(context);
     controller = chewieController.videoPlayerController;
 
-    if (_oldController != chewieController) {
+    if (oldController != chewieController) {
       _dispose();
       _initialize();
     }
@@ -221,7 +222,7 @@ class _VideoControlsState extends State<VideoControls> {
     });
   }
 
-  Future<Null> _initialize() async {
+  Future<void> _initialize() async {
     controller.addListener(_updateState);
 
     _updateState();
@@ -301,7 +302,7 @@ class _VideoControlsState extends State<VideoControls> {
           },
           colors: chewieController.materialProgressColors ??
               ChewieProgressColors(
-                playedColor: Theme.of(context).buttonColor,
+                playedColor: Theme.of(context).colorScheme.greenAlternative,
                 handleColor: Colors.white,
                 bufferedColor: Colors.white,
                 backgroundColor: Theme.of(context).disabledColor,

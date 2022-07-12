@@ -131,7 +131,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             child: Text(
               "Ok",
               style: TextStyle(
-                color: Theme.of(context).buttonColor,
+                color: Theme.of(context).colorScheme.greenAlternative,
               ),
             ),
             onPressed: () async {

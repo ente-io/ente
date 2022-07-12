@@ -161,11 +161,11 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   void _showLivePhotoToast() async {
-    var _preferences = await SharedPreferences.getInstance();
-    int promptTillNow = _preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
+    var preferences = await SharedPreferences.getInstance();
+    int promptTillNow = preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
     if (promptTillNow < kMaxLivePhotoToastCount) {
       showToast(context, "Press and hold to play video");
-      _preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);
+      preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);
     }
   }
 }

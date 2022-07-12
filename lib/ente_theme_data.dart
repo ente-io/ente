@@ -15,7 +15,6 @@ final lightThemeData = ThemeData(
     secondary: Color.fromARGB(255, 163, 163, 163),
   ),
   accentColor: const Color.fromRGBO(0, 0, 0, 0.6),
-  buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: Colors.grey.shade500,
     bgEnabled: Colors.black,
@@ -92,7 +91,6 @@ final darkThemeData = ThemeData(
   hintColor: Colors.grey,
   colorScheme: const ColorScheme.dark(primary: Colors.white),
   accentColor: const Color.fromRGBO(45, 194, 98, 0.2),
-  buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   buttonTheme: const ButtonThemeData().copyWith(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   ),
@@ -241,6 +239,8 @@ extension CustomColorScheme on ColorScheme {
   Color get boxUnSelectColor => brightness == Brightness.light
       ? const Color.fromRGBO(240, 240, 240, 1)
       : const Color.fromRGBO(8, 18, 18, 0.4);
+
+  Color get greenAlternative => const Color.fromRGBO(45, 194, 98, 1.0);
 
   Color get dynamicFABBackgroundColor =>
       brightness == Brightness.light ? Colors.black : Colors.grey[850];
