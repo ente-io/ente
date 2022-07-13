@@ -4,7 +4,7 @@
   "version": "1.5.1",
   "private": true,
   "description": "Desktop client for ente.io",
-  "main": "app/main/index.js",
+  "main": "app/index.js",
   "build": {
     "appId": "io.ente.bhari-frame",
     "artifactName": "${productName}-${version}.${ext}",
@@ -42,9 +42,9 @@
     "watch": "tsc -w",
     "build-main": "tsc",
     "start-main":"yarn build-main && electron ./app/main.js",
-    "start-renderer":"cd src/renderer && yarn && yarn dev",
+    "start-renderer":"cd ui && yarn && yarn dev",
     "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
-    "build-renderer" : "cd src/renderer && yarn install && yarn build && cd ..",
+    "build-renderer" : "cd ui && yarn install && yarn build && cd ..",
     "prerelease":"yarn && yarn build-renderer && yarn build-main",
     "test-release": "yarn prerelease && electron-builder",
     "release": "yarn prerelease && electron-builder -mwl --publish always"
