@@ -1,8 +1,7 @@
-import "dart:io";
-
 import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
@@ -98,23 +97,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 widget.file.uploadedFileID != null
             ? IconButton(
                 onPressed: () {
-                  PopupMenuItem(
-                    value: 2,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Platform.isAndroid
-                              ? Icons.access_time_rounded
-                              : CupertinoIcons.time,
-                          color: Theme.of(context).iconTheme.color,
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.all(8),
-                        ),
-                        const Text("Edit time"),
-                      ],
-                    ),
-                  );
+                  _showDateTimePicker(widget.file);
                 },
                 icon: const Icon(Icons.edit),
               )
@@ -742,6 +725,37 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         }
       },
     );
+  }
+
+  void _showDateTimePicker(File file) async {
+    final dateResult = await DatePicker.showDatePicker(
+      context,
+      minTime: DateTime(1800, 1, 1),
+      maxTime: DateTime.now(),
+      currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+      locale: LocaleType.en,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
+    );
+    if (dateResult == null) {
+      return;
+    }
+    final dateWithTimeResult = await DatePicker.showTime12hPicker(
+      context,
+      showTitleActions: true,
+      currentTime: dateResult,
+      locale: LocaleType.en,
+      theme: Theme.of(context).colorScheme.dateTimePickertheme,
+    );
+    if (dateWithTimeResult != null) {
+      if (await editTime(
+        context,
+        List.of([widget.file]),
+        dateWithTimeResult.microsecondsSinceEpoch,
+      )) {
+        widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
+        setState(() {});
+      }
+    }
   }
 }
 

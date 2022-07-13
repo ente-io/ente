@@ -131,31 +131,9 @@ class FadingAppBarState extends State<FadingAppBar> {
           // options for files owned by the user
           if (widget.file.ownerID == null ||
               widget.file.ownerID == widget.userID) {
-            if (widget.file.uploadedFileID != null) {
-              items.add(
-                PopupMenuItem(
-                  value: 2,
-                  child: Row(
-                    children: [
-                      Icon(
-                        Platform.isAndroid
-                            ? Icons.access_time_rounded
-                            : CupertinoIcons.time,
-                        color: Theme.of(context).iconTheme.color,
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.all(8),
-                      ),
-                      const Text("Edit time"),
-                    ],
-                  ),
-                ),
-              );
-            }
-
             items.add(
               PopupMenuItem(
-                value: 3,
+                value: 2,
                 child: Row(
                   children: [
                     Icon(
@@ -179,8 +157,6 @@ class FadingAppBarState extends State<FadingAppBar> {
           if (value == 1) {
             _download(widget.file);
           } else if (value == 2) {
-            _showDateTimePicker(widget.file);
-          } else if (value == 3) {
             _showDeleteSheet(widget.file);
           }
         },
