@@ -45,9 +45,8 @@
     "start-renderer":"cd ui && yarn && yarn dev",
     "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
     "build-renderer" : "cd ui && yarn install && yarn build && cd ..",
-    "prerelease":"yarn && yarn build-renderer && yarn build-main",
-    "test-release": "yarn prerelease && electron-builder",
-    "release": "yarn prerelease && electron-builder -mwl --publish always"
+    "build":"yarn && yarn build-renderer && yarn build-main",
+    "test-release": "yarn build && electron-builder"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
