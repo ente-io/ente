@@ -3,7 +3,7 @@ import * as path from 'path';
 import { isDev } from './common';
 import { isAppQuitting } from '..';
 import { addAllowOriginHeader } from './cors';
-import { PROD_HOST_URL } from '../../config';
+import { PROD_HOST_URL } from '../config';
 
 export function createWindow(): BrowserWindow {
     const appImgPath = isDev

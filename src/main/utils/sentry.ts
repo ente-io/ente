@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/electron/dist/main';
 
-import { keysStore } from '../../services/store';
+import { keysStore } from '../services/store';
 import { isDev } from './common';
 
 const SENTRY_DSN = 'https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5';
