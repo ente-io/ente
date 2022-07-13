@@ -86,10 +86,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
         subtitle: Text(
           getTimeIn12hrFormat(dateTime) + "  " + dateTime.timeZoneName,
-          style: Theme.of(context)
-              .textTheme
-              .bodyText2
-              .copyWith(color: Colors.black.withOpacity(0.5)),
+          style: Theme.of(context).textTheme.bodyText2.copyWith(
+                color: Theme.of(context)
+                    .colorScheme
+                    .defaultTextColor
+                    .withOpacity(0.5),
+              ),
         ),
         trailing: (widget.file.ownerID == null ||
                     widget.file.ownerID ==
@@ -210,10 +212,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 getTimeIn12hrFormat(dateTimeForUpdationTime) +
                     "  " +
                     dateTimeForUpdationTime.timeZoneName,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyText2
-                    .copyWith(color: Colors.black.withOpacity(0.5)),
+                style: Theme.of(context).textTheme.bodyText2.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .defaultTextColor
+                        .withOpacity(0.5)),
               ),
             )
           : const SizedBox.shrink(),
