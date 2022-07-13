@@ -238,7 +238,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ? Padding(
               padding: const EdgeInsets.fromLTRB(0, 24, 0, 16),
               child: SafeArea(
-                child: RawExifButton(_exif),
+                child: RawExifButton(_exif, widget.file),
               ),
             )
           : const SizedBox(
@@ -766,8 +766,9 @@ enum Status {
 }
 
 class RawExifButton extends StatelessWidget {
+  final File file;
   final Map<String, IfdTag> exif;
-  const RawExifButton(this.exif, {Key key}) : super(key: key);
+  const RawExifButton(this.exif, this.file, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -829,7 +830,22 @@ class RawExifButton extends StatelessWidget {
                     ),
         ),
       ),
-      onTap: () {},
+      onTap:
+          exifStatus == Status.loading || exifStatus == Status.exifIsAvailable
+              ? () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return ExifInfoDialog(file);
+                    },
+                    barrierColor: Colors.black87,
+                  );
+                }
+              : exifStatus == Status.noExif
+                  ? () {
+                      showShortToast(context, "This image has no exif data");
+                    }
+                  : null,
     );
   }
 }
