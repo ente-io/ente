@@ -8,6 +8,7 @@ import initSentry from './utils/sentry';
 import electronReload from 'electron-reload';
 import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from './config';
 import { isDev } from './utils/common';
+import serveNextAt from 'next-electron-server';
 
 if (isDev) {
     electronReload(__dirname, {});
@@ -35,10 +36,10 @@ export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
-const serveNextAt = require('next-electron-server');
 serveNextAt(PROD_HOST_URL, {
     outputDir: RENDERER_OUTPUT_DIR,
 });
+
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
