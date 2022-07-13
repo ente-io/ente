@@ -1,4 +1,4 @@
-[submodule "src/renderer"]
-	path = src/renderer
+[submodule "ui"]
+	path = ui
 	url = https://github.com/ente-io/bada-frame
 	branch = release
