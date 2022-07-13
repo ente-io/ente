@@ -40,7 +40,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "lint": "eslint -c .eslintrc --ext .ts ./src",
-    "start": "yarn build && electron ./app/main.js",
+    "start": "concurrently \"yarn build && electron ./app/main.js\" \"cd bada-frame && yarn dev\"",
     "test-release": "yarn build && electron-builder",
     "prepare": "husky install"
   },
@@ -49,6 +49,7 @@
     "@sentry/cli": "^1.68.0",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
+    "concurrently": "^7.0.0",
     "electron": "^15.3.0",
     "electron-builder": "^23.0.3",
     "electron-builder-notarize": "^1.2.0",
@@ -70,6 +71,7 @@
     "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
     "node-stream-zip": "^1.15.0",
+    "next-electron-server": "^0.0.8",
     "promise-fs": "^2.1.1"
   },
   "standard": {

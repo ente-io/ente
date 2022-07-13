@@ -1,7 +1,6 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
 import * as path from 'path';
 import { isDev } from './common';
-import { PROD_HOST_URL } from '../config';
 import { isAppQuitting } from '../main';
 
 export function createWindow(): BrowserWindow {
@@ -31,14 +30,14 @@ export function createWindow(): BrowserWindow {
 
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL('http://localhost:3000');
+        mainWindow.loadURL('next://app');
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
             `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL(PROD_HOST_URL);
+        mainWindow.loadURL('next://app');
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();
