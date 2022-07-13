@@ -31,8 +31,15 @@
         "filter": [
           "**/*"
         ]
-      }
-    ]
+      }],
+      "files":[
+        "app/**/*",
+        {
+          "from": "ui",
+          "to": "ui",
+          "filter": ["!**/*", "out/**/*"]
+        }
+      ]
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
