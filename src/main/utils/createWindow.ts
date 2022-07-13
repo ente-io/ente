@@ -3,8 +3,9 @@ import * as path from 'path';
 import { isDev } from './common';
 import { isAppQuitting } from '../main';
 import { addAllowOriginHeader } from './cors';
+import { PROD_HOST_URL } from '../../config';
 
-export function createWindow(HOST_URL: string): BrowserWindow {
+export function createWindow(): BrowserWindow {
     const appImgPath = isDev
         ? 'build/window-icon.png'
         : path.join(process.resourcesPath, 'window-icon.png');
@@ -33,14 +34,14 @@ export function createWindow(HOST_URL: string): BrowserWindow {
 
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL(HOST_URL);
+        mainWindow.loadURL(PROD_HOST_URL);
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {
         splash.loadURL(
             `file://${path.join(process.resourcesPath, 'splash.html')}`
         );
-        mainWindow.loadURL(HOST_URL);
+        mainWindow.loadURL(PROD_HOST_URL);
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();

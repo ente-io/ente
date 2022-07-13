@@ -5,6 +5,7 @@ import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
+import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 import { isDev } from './utils/common';
 
 if (isDev) {
@@ -12,8 +13,6 @@ if (isDev) {
     const electronReload = require('electron-reload');
     electronReload(__dirname, {});
 }
-
-const HOST_URL: string = 'next://app';
 
 let tray: Tray;
 let mainWindow: BrowserWindow;
@@ -38,8 +37,8 @@ export const setIsUpdateAvailable = (value: boolean): void => {
 };
 
 const serveNextAt = require('next-electron-server');
-serveNextAt(HOST_URL, {
-    outputDir: './bada-frame/out',
+serveNextAt(PROD_HOST_URL, {
+    outputDir: RENDERER_OUTPUT_DIR,
 });
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -63,14 +62,13 @@ if (!gotTheLock) {
     app.on('ready', () => {
         initSentry();
         setIsUpdateAvailable(false);
-        mainWindow = createWindow(HOST_URL);
+        mainWindow = createWindow();
         Menu.setApplicationMenu(buildMenuBar());
 
         app.on('activate', function () {
             // On macOS it's common to re-create a window in the app when the
             // dock icon is clicked and there are no other windows open.
-            if (BrowserWindow.getAllWindows().length === 0)
-                createWindow(HOST_URL);
+            if (BrowserWindow.getAllWindows().length === 0) createWindow();
         });
 
         const trayImgPath = isDev
@@ -81,7 +79,7 @@ if (!gotTheLock) {
         tray.setToolTip('ente');
         tray.setContextMenu(buildContextMenu(mainWindow));
 
-        setupIpcComs(tray, mainWindow, HOST_URL);
+        setupIpcComs(tray, mainWindow);
         if (!isDev) {
             AppUpdater.checkForUpdate(tray, mainWindow);
         }
