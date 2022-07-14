@@ -1,59 +1,68 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
-import 'package:photos/utils/toast_util.dart';
 
-class ThemeSwitchWidget extends StatelessWidget {
+class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    var selectedTheme = 0;
-    if (Theme.of(context).brightness == Brightness.dark) {
-      selectedTheme = 1;
-    }
-    return GestureDetector(
-      onLongPress: () {
-        AdaptiveTheme.of(context).setSystem();
-        showShortToast(context, 'Following system theme');
+  State<ThemeSwitchWidget> createState() => _ThemeSwitchWidgetState();
+}
+
+class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
+  AdaptiveThemeMode themeMode;
+  @override
+  void initState() {
+    super.initState();
+    AdaptiveTheme.getThemeMode().then(
+      (value) {
+        themeMode = value ?? AdaptiveThemeMode.system;
+        debugPrint('theme value $value');
+        if (mounted) {
+          setState(() => {});
+        }
       },
-      child: AnimatedToggleSwitch<int>.rolling(
-        current: selectedTheme,
-        values: const [0, 1],
-        onChanged: (i) {
-          debugPrint("Changed to {i}, selectedTheme is {selectedTheme} ");
-          if (i == 0) {
-            AdaptiveTheme.of(context).setLight();
-          } else {
-            AdaptiveTheme.of(context).setDark();
-          }
-        },
-        iconBuilder: (i, size, foreground) {
-          final color = selectedTheme == i
-              ? Theme.of(context).colorScheme.themeSwitchActiveIconColor
-              : Theme.of(context).colorScheme.themeSwitchInactiveIconColor;
-          if (i == 0) {
-            return Icon(
-              Icons.light_mode,
-              color: color,
-            );
-          } else {
-            return Icon(
-              Icons.dark_mode,
-              color: color,
-            );
-          }
-        },
-        height: 36,
-        indicatorSize: const Size(36, 36),
-        indicatorColor: Theme.of(context).colorScheme.themeSwitchIndicatorColor,
-        borderColor: Theme.of(context)
-            .colorScheme
-            .themeSwitchInactiveIconColor
-            .withOpacity(0.1),
-        borderWidth: 1,
-      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        await showCupertinoModalPopup(
+          context: context,
+          builder: (_) => CupertinoActionSheet(
+            title: Text(
+              "Theme",
+              style: Theme.of(context)
+                  .textTheme
+                  .headline4
+                  .copyWith(color: Colors.white),
+            ),
+            actions: [
+              for (var mode in AdaptiveThemeMode.values)
+                CupertinoActionSheetAction(
+                  child: Text(mode.modeName),
+                  onPressed: () async {
+                    AdaptiveTheme.of(context).setThemeMode(mode);
+                    themeMode = mode;
+                    Navigator.of(context, rootNavigator: true).pop();
+                    if (mounted) {
+                      setState(() => {});
+                    }
+                  },
+                ),
+            ],
+            cancelButton: CupertinoActionSheetAction(
+              child: const Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context, rootNavigator: true).pop();
+              },
+            ),
+          ),
+        );
+      },
+      child: Text(themeMode?.modeName ?? ">"),
     );
   }
 }
