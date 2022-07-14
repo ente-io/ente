@@ -343,7 +343,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
           ),
         );
       } else {
-        final List<File> filesPendingUpload = [];
         for (final file in widget.selectedFiles.files) {
           final currentFile = await FilesDB.instance.getFile(file.generatedID);
           if (currentFile.uploadedFileID == null) {
@@ -353,7 +352,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             files.add(currentFile);
           }
         }
+      }
+      if (filesPendingUpload.isNotEmpty) {
         await FilesDB.instance.insertMultiple(filesPendingUpload);
+      }
+      if (files.isNotEmpty) {
         await CollectionsService.instance.addToCollection(collectionID, files);
       }
       RemoteSyncService.instance.sync(silently: true);
