@@ -23,8 +23,7 @@
       "target": {
         "target": "default",
         "arch": [
-          "x64",
-          "arm64"
+          "universal"
         ]
       },
       "category": "public.app-category.photography",
