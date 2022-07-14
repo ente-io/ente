@@ -7,13 +7,12 @@ import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/services/collections_service.dart";
+import 'package:photos/ui/common/DividerWithPadding.dart';
 import 'package:photos/ui/viewer/file/RawExifButton.dart';
-import "package:photos/ui/viewer/file/exif_info_dialog.dart";
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
-import "package:photos/utils/toast_util.dart";
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -109,7 +108,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               )
             : const SizedBox.shrink(),
       ),
-      const DividerWithPadding(),
+      const DividerWithPadding(left: 70, right: 20),
       ListTile(
         leading: _isImage
             ? const Padding(
@@ -151,7 +150,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 icon: const Icon(Icons.edit),
               ),
       ),
-      const DividerWithPadding(),
+      const DividerWithPadding(left: 70, right: 20),
       showExifListTile
           ? ListTile(
               leading: const Padding(
@@ -190,7 +189,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             )
           : const SizedBox.shrink(),
-      showExifListTile ? const DividerWithPadding() : const SizedBox.shrink(),
+      showExifListTile
+          ? const DividerWithPadding(left: 70, right: 20)
+          : const SizedBox.shrink(),
       ListTile(
         leading: const Padding(
           padding: EdgeInsets.only(left: 6),
@@ -203,7 +204,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   .name,
         ),
       ),
-      const DividerWithPadding(),
+      const DividerWithPadding(left: 70, right: 20),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
               leading: const Padding(
@@ -393,19 +394,5 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         setState(() {});
       }
     }
-  }
-}
-
-class DividerWithPadding extends StatelessWidget {
-  const DividerWithPadding({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(70, 0, 20, 0),
-      child: Divider(
-        thickness: 0.5,
-      ),
-    );
   }
 }
