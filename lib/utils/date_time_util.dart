@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 Map<int, String> _months = {
   1: "Jan",
@@ -40,10 +41,12 @@ Map<int, String> _days = {
   7: "Sun",
 };
 
+//Jun 2022
 String getMonthAndYear(DateTime dateTime) {
   return _months[dateTime.month] + " " + dateTime.year.toString();
 }
 
+//Thu, 30 Jun
 String getDayAndMonth(DateTime dateTime) {
   return _days[dateTime.weekday] +
       ", " +
@@ -52,6 +55,7 @@ String getDayAndMonth(DateTime dateTime) {
       _months[dateTime.month];
 }
 
+//30 Jun, 2022
 String getDateAndMonthAndYear(DateTime dateTime) {
   return dateTime.day.toString() +
       " " +
@@ -76,6 +80,7 @@ String getAbbreviationOfYear(DateTime dateTime) {
   return (dateTime.year % 100).toString();
 }
 
+//14:32
 String getTime(DateTime dateTime) {
   final hours = dateTime.hour > 9
       ? dateTime.hour.toString()
@@ -86,6 +91,12 @@ String getTime(DateTime dateTime) {
   return hours + ":" + minutes;
 }
 
+//11:22 AM
+String getTimeIn12hrFormat(DateTime dateTime) {
+  return DateFormat.jm().format(dateTime);
+}
+
+//Thu, Jun 30, 2022 - 14:32
 String getFormattedTime(DateTime dateTime) {
   return getDay(dateTime) +
       ", " +
@@ -98,12 +109,23 @@ String getFormattedTime(DateTime dateTime) {
       getTime(dateTime);
 }
 
+//30 Jun'22
 String getFormattedDate(DateTime dateTime) {
   return dateTime.day.toString() +
       " " +
       getMonth(dateTime) +
       "'" +
       getAbbreviationOfYear(dateTime);
+}
+
+String getFullDate(DateTime dateTime) {
+  return getDay(dateTime) +
+      ", " +
+      getMonth(dateTime) +
+      " " +
+      dateTime.day.toString() +
+      " " +
+      dateTime.year.toString();
 }
 
 String daysLeft(int futureTime) {
@@ -199,4 +221,22 @@ String getDayTitle(int timestamp) {
     title += " " + date.year.toString();
   }
   return title;
+}
+
+String secondsToHHMMSS(int value) {
+  int h, m, s;
+  h = value ~/ 3600;
+  m = ((value - h * 3600)) ~/ 60;
+  s = value - (h * 3600) - (m * 60);
+  String hourLeft = h.toString().length < 2 ? "0" + h.toString() : h.toString();
+
+  String minuteLeft =
+      m.toString().length < 2 ? "0" + m.toString() : m.toString();
+
+  String secondsLeft =
+      s.toString().length < 2 ? "0" + s.toString() : s.toString();
+
+  String result = "$hourLeft:$minuteLeft:$secondsLeft";
+
+  return result;
 }
