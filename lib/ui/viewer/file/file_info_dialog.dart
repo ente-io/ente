@@ -58,12 +58,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   @override
   Widget build(BuildContext context) {
     final file = widget.file;
-    print('file');
-    print(file);
-    print("file.localID");
-    print(file.localID);
-    print("file.duration");
-    print(file.duration);
     final dateTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
     final dateTimeForUpdationTime =
         DateTime.fromMicrosecondsSinceEpoch(file.updationTime);
