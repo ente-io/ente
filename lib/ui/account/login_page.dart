@@ -70,136 +70,138 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       children: [
         Expanded(
-          child: ListView(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: Text(
-                  'Welcome back!',
-                  style: Theme.of(context).textTheme.headline4,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                child: TextFormField(
-                  autofillHints: const [AutofillHints.email],
-                  decoration: InputDecoration(
-                    fillColor: _emailInputFieldColor,
-                    filled: true,
-                    hintText: 'Email',
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 15,
-                      vertical: 15,
-                    ),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    suffixIcon: _emailIsValid
-                        ? Icon(
-                            Icons.check,
-                            size: 20,
-                            color: Theme.of(context)
-                                .inputDecorationTheme
-                                .focusedBorder
-                                .borderSide
-                                .color,
-                          )
-                        : null,
+          child: AutofillGroup(
+            child: ListView(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  child: Text(
+                    'Welcome back!',
+                    style: Theme.of(context).textTheme.headline4,
                   ),
-                  onChanged: (value) {
-                    setState(() {
-                      _email = value.trim();
-                      _emailIsValid = EmailValidator.validate(_email);
-                      if (_emailIsValid) {
-                        _emailInputFieldColor =
-                            const Color.fromRGBO(45, 194, 98, 0.2);
-                      } else {
-                        _emailInputFieldColor = null;
-                      }
-                    });
-                  },
-                  autocorrect: false,
-                  keyboardType: TextInputType.emailAddress,
-                  //initialValue: _email,
-                  autofocus: true,
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 18),
-                child: Divider(
-                  thickness: 1,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      flex: 5,
-                      child: RichText(
-                        text: TextSpan(
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1
-                              .copyWith(fontSize: 12),
-                          children: [
-                            const TextSpan(
-                              text: "By clicking log in, I agree to the ",
-                            ),
-                            TextSpan(
-                              text: "terms of service",
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                        return const WebPage(
-                                          "terms",
-                                          "https://ente.io/terms",
-                                        );
-                                      },
-                                    ),
-                                  );
-                                },
-                            ),
-                            const TextSpan(text: " and "),
-                            TextSpan(
-                              text: "privacy policy",
-                              style: const TextStyle(
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                        return const WebPage(
-                                          "privacy",
-                                          "https://ente.io/privacy",
-                                        );
-                                      },
-                                    ),
-                                  );
-                                },
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.left,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  child: TextFormField(
+                    autofillHints: const [AutofillHints.email],
+                    decoration: InputDecoration(
+                      fillColor: _emailInputFieldColor,
+                      filled: true,
+                      hintText: 'Email',
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 15,
+                        vertical: 15,
                       ),
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      suffixIcon: _emailIsValid
+                          ? Icon(
+                              Icons.check,
+                              size: 20,
+                              color: Theme.of(context)
+                                  .inputDecorationTheme
+                                  .focusedBorder
+                                  .borderSide
+                                  .color,
+                            )
+                          : null,
                     ),
-                    Expanded(
-                      flex: 2,
-                      child: Container(),
-                    )
-                  ],
+                    onChanged: (value) {
+                      setState(() {
+                        _email = value.trim();
+                        _emailIsValid = EmailValidator.validate(_email);
+                        if (_emailIsValid) {
+                          _emailInputFieldColor =
+                              const Color.fromRGBO(45, 194, 98, 0.2);
+                        } else {
+                          _emailInputFieldColor = null;
+                        }
+                      });
+                    },
+                    autocorrect: false,
+                    keyboardType: TextInputType.emailAddress,
+                    //initialValue: _email,
+                    autofocus: true,
+                  ),
                 ),
-              ),
-            ],
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 18),
+                  child: Divider(
+                    thickness: 1,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: RichText(
+                          text: TextSpan(
+                            style: Theme.of(context)
+                                .textTheme
+                                .subtitle1
+                                .copyWith(fontSize: 12),
+                            children: [
+                              const TextSpan(
+                                text: "By clicking log in, I agree to the ",
+                              ),
+                              TextSpan(
+                                text: "terms of service",
+                                style: const TextStyle(
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                          return const WebPage(
+                                            "terms",
+                                            "https://ente.io/terms",
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                              ),
+                              const TextSpan(text: " and "),
+                              TextSpan(
+                                text: "privacy policy",
+                                style: const TextStyle(
+                                  decoration: TextDecoration.underline,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) {
+                                          return const WebPage(
+                                            "privacy",
+                                            "https://ente.io/privacy",
+                                          );
+                                        },
+                                      ),
+                                    );
+                                  },
+                              ),
+                            ],
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                      Expanded(
+                        flex: 2,
+                        child: Container(),
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         const Padding(padding: EdgeInsets.all(8)),
