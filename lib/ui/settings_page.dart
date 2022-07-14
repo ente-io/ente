@@ -78,7 +78,10 @@ class SettingsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: const [
             SettingsSectionTitle("Theme"),
-            ThemeSwitchWidget(),
+            Padding(
+              padding: EdgeInsets.only(right: 4),
+              child: ThemeSwitchWidget(),
+            ),
           ],
         ),
         sectionDivider,
