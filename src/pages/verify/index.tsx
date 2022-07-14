@@ -4,7 +4,7 @@ import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import {
     verifyOtt,
-    getOtt,
+    sendOtt,
     logoutUser,
     clearFiles,
     putAttributes,
@@ -116,7 +116,7 @@ export default function Verify() {
 
     const resendEmail = async () => {
         setResend(1);
-        await getOtt(email);
+        await sendOtt(email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };

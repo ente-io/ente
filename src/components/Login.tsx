@@ -1,7 +1,7 @@
 import constants from 'utils/strings/constants';
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { getOtt } from 'services/userService';
+import { sendOtt } from 'services/userService';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
 import FormPaperTitle from './Form/FormPaper/Title';
@@ -33,7 +33,7 @@ export default function Login(props: LoginProps) {
         setFieldError
     ) => {
         try {
-            await getOtt(email);
+            await sendOtt(email);
             setData(LS_KEYS.USER, { email });
             router.push(PAGES.VERIFY);
         } catch (e) {

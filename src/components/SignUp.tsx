@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Formik, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
-import { getOtt } from 'services/userService';
+import { sendOtt } from 'services/userService';
 import { setData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import SubmitButton from 'components/SubmitButton';
@@ -51,7 +51,7 @@ export default function SignUp(props: SignUpProps) {
         try {
             try {
                 setData(LS_KEYS.USER, { email });
-                await getOtt(email);
+                await sendOtt(email);
             } catch (e) {
                 setFieldError(
                     'confirm',
