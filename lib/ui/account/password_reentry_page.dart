@@ -18,12 +18,14 @@ class PasswordReentryPage extends StatefulWidget {
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
+  String email;
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
 
   @override
   void initState() {
     super.initState();
+    email = Configuration.instance.getEmail();
     _passwordFocusNode.addListener(() {
       setState(() {
         _passwordInFocus = _passwordFocusNode.hasFocus;
@@ -59,7 +61,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: 'Log in',
+        buttonText: 'Verify password',
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
           final dialog = createProgressDialog(context, "Please wait...");
@@ -96,116 +98,134 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
     return Column(
       children: [
         Expanded(
-          child: ListView(
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                child: Text(
-                  'Welcome back!',
-                  style: Theme.of(context).textTheme.headline4,
+          child: AutofillGroup(
+            child: ListView(
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                  child: Text(
+                    'Welcome back!',
+                    style: Theme.of(context).textTheme.headline4,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                child: TextFormField(
-                  autofillHints: const [AutofillHints.password],
-                  decoration: InputDecoration(
-                    hintText: "Enter your password",
-                    filled: true,
-                    contentPadding: const EdgeInsets.all(20),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(6),
+                Visibility(
+                  // hidden textForm for suggesting auto-fill service for saving
+                  // password
+                  visible: false,
+                  child: TextFormField(
+                    autofillHints: const [
+                      AutofillHints.email,
+                    ],
+                    autocorrect: false,
+                    keyboardType: TextInputType.emailAddress,
+                    initialValue: email,
+                    textInputAction: TextInputAction.next,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                  child: TextFormField(
+                    autofillHints: const [AutofillHints.password],
+                    decoration: InputDecoration(
+                      hintText: "Enter your password",
+                      filled: true,
+                      contentPadding: const EdgeInsets.all(20),
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      suffixIcon: _passwordInFocus
+                          ? IconButton(
+                              icon: Icon(
+                                _passwordVisible
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
+                                color: Theme.of(context).iconTheme.color,
+                                size: 20,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _passwordVisible = !_passwordVisible;
+                                });
+                              },
+                            )
+                          : null,
                     ),
-                    suffixIcon: _passwordInFocus
-                        ? IconButton(
-                            icon: Icon(
-                              _passwordVisible
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: Theme.of(context).iconTheme.color,
-                              size: 20,
+                    style: const TextStyle(
+                      fontSize: 14,
+                    ),
+                    controller: _passwordController,
+                    autofocus: true,
+                    autocorrect: false,
+                    obscureText: !_passwordVisible,
+                    keyboardType: TextInputType.visiblePassword,
+                    focusNode: _passwordFocusNode,
+                    onChanged: (_) {
+                      setState(() {});
+                    },
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 18),
+                  child: Divider(
+                    thickness: 1,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (BuildContext context) {
+                                return const RecoveryPage();
+                              },
                             ),
-                            onPressed: () {
-                              setState(() {
-                                _passwordVisible = !_passwordVisible;
-                              });
-                            },
-                          )
-                        : null,
-                  ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                  ),
-                  controller: _passwordController,
-                  autofocus: true,
-                  autocorrect: false,
-                  obscureText: !_passwordVisible,
-                  keyboardType: TextInputType.visiblePassword,
-                  focusNode: _passwordFocusNode,
-                  onChanged: (_) {
-                    setState(() {});
-                  },
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 18),
-                child: Divider(
-                  thickness: 1,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) {
-                              return const RecoveryPage();
-                            },
+                          );
+                        },
+                        child: Center(
+                          child: Text(
+                            "Forgot password",
+                            style:
+                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline,
+                                    ),
                           ),
-                        );
-                      },
-                      child: Center(
-                        child: Text(
-                          "Forgot password",
-                          style: Theme.of(context).textTheme.subtitle1.copyWith(
-                                fontSize: 14,
-                                decoration: TextDecoration.underline,
-                              ),
                         ),
                       ),
-                    ),
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () async {
-                        final dialog =
-                            createProgressDialog(context, "Please wait...");
-                        await dialog.show();
-                        await Configuration.instance.logout();
-                        await dialog.hide();
-                        Navigator.of(context)
-                            .popUntil((route) => route.isFirst);
-                      },
-                      child: Center(
-                        child: Text(
-                          "Change email",
-                          style: Theme.of(context).textTheme.subtitle1.copyWith(
-                                fontSize: 14,
-                                decoration: TextDecoration.underline,
-                              ),
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () async {
+                          final dialog =
+                              createProgressDialog(context, "Please wait...");
+                          await dialog.show();
+                          await Configuration.instance.logout();
+                          await dialog.hide();
+                          Navigator.of(context)
+                              .popUntil((route) => route.isFirst);
+                        },
+                        child: Center(
+                          child: Text(
+                            "Change email",
+                            style:
+                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              )
-            ],
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ],
