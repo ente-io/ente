@@ -61,7 +61,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: 'Log in',
+        buttonText: 'Verify password',
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
           final dialog = createProgressDialog(context, "Please wait...");
