@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as filePath;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -13,8 +14,10 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
@@ -372,10 +375,20 @@ class FadingAppBarState extends State<FadingAppBar> {
       if (liveVideo == null) {
         _logger.warning("Failed to find live video" + file.tag());
       } else {
-        final savedAsset = (await PhotoManager.editor.saveVideo(liveVideo));
-        // in case of livePhoto, file.localID only points the image asset.
-        // ignore the saved video asset for live photo from future downloads
-        await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
+        final videoTitle = filePath.basenameWithoutExtension(file.title) +
+            filePath.extension(liveVideo.path);
+        final savedAsset = (await PhotoManager.editor.saveVideo(
+          liveVideo,
+          title: videoTitle,
+        ));
+        final ignoreVideoFile = IgnoredFile(
+          savedAsset.id,
+          savedAsset.title ?? videoTitle,
+          savedAsset.relativePath ?? 'remoteDownload',
+          "remoteDownload",
+        );
+        debugPrint("IgnoreFile for auto-upload ${ignoreVideoFile.toString()}");
+        await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
       }
     }
 

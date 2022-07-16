@@ -29,4 +29,9 @@ class IgnoredFile {
       kIgnoreReasonTrash,
     );
   }
+
+  @override
+  String toString() {
+    return 'IgnoredFile{localID: $localID, title: $title, deviceFolder: $deviceFolder, reason: $reason}';
+  }
 }
