@@ -4,15 +4,19 @@ import "package:flutter/material.dart";
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/ente_theme_data.dart";
+import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection_items.dart';
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/common/DividerWithPadding.dart';
 import 'package:photos/ui/viewer/file/RawExifButton.dart';
+import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
+import 'package:photos/utils/navigation_util.dart';
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -195,20 +199,30 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ? const DividerWithPadding(left: 70, right: 20)
           : const SizedBox.shrink(),
       ListTile(
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 6),
-          child: Icon(Icons.folder_outlined),
-        ),
-        title: Text(
-          file.collectionID != null
-              ? CollectionsService.instance
-                  .getCollectionByID(file.collectionID)
-                  .name
-              : CollectionsService.instance
-                  .getCollectionByID(file.collectionID)
-                  .name,
-        ),
-      ),
+          leading: const Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: Icon(Icons.folder_outlined),
+          ),
+          title: GestureDetector(
+            onTap: () {
+              if (file.collectionID != null) {
+                Navigator.pop(context); // info dialog
+                Collection c = CollectionsService.instance
+                    .getCollectionByID(file.collectionID);
+                routeToPage(
+                  context,
+                  CollectionPage(CollectionWithThumbnail(c, null)),
+                );
+              }
+            },
+            child: Text(
+              file.collectionID != null
+                  ? CollectionsService.instance
+                      .getCollectionByID(file.collectionID)
+                      .name
+                  : file.deviceFolder,
+            ),
+          )),
       const DividerWithPadding(left: 70, right: 20),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
