@@ -286,11 +286,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       _exifData["resolution"] = exif["EXIF ExifImageWidth"].toString() +
           " x " +
           exif["EXIF ExifImageLength"].toString();
-
-      _exifData['megaPixels'] = ((exif["Image ImageWidth"].values.firstAsInt() *
-                  exif["Image ImageLength"].values.firstAsInt()) /
-              1000000)
-          .toStringAsFixed(1);
     } else if (exif["Image ImageWidth"] != null &&
         exif["Image ImageLength"] != null) {
       _exifData["resolution"] = exif["Image ImageWidth"].toString() +
