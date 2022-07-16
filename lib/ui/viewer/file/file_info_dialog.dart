@@ -192,8 +192,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           child: Icon(Icons.folder_outlined),
         ),
         title: Text(
-          file.deviceFolder ??
-              CollectionsService.instance
+          file.collectionID != null
+              ? CollectionsService.instance
+                  .getCollectionByID(file.collectionID)
+                  .name
+              : CollectionsService.instance
                   .getCollectionByID(file.collectionID)
                   .name,
         ),
