@@ -127,8 +127,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           children: [
             showDimension
                 ? Text(
-                    "${_exifData["megaPixels"]}MP  ${_exifData["resolution"]}"
-                    "  ")
+                    "${_exifData["megaPixels"]}MP  "
+                    "${_exifData["resolution"]}  ",
+                  )
                 : const SizedBox.shrink(),
             _getFileSize(),
             (file.fileType == FileType.video) &&
@@ -295,7 +296,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         exif["Image "
             "ImageLength"];
     if (imageWidth != null && imageLength != null) {
-      _exifData["resolution"] = '${imageWidth} x ${imageLength}';
+      _exifData["resolution"] = '$imageWidth x $imageLength';
       _exifData['megaPixels'] =
           ((imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
                   1000000)
@@ -322,7 +323,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(
-              (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB");
+            (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB",
+          );
         } else {
           return Center(
             child: SizedBox.fromSize(
