@@ -130,8 +130,11 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return null;
     });
 
+    // FixMe: Here, we are fetching video directly when getFile failed
+    // getFile with liveVideo as true can fail for file with localID when
+    // the live photo was downloaded from remote.
     if ((videoFile == null || !videoFile.existsSync()) &&
-        _file.isRemoteFile()) {
+        _file.uploadedFileID != null) {
       videoFile = await getFileFromServer(widget.file, liveVideo: true)
           .timeout(const Duration(seconds: 15))
           .onError((e, s) {
