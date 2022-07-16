@@ -4,15 +4,19 @@ import "package:flutter/material.dart";
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import "package:photos/core/configuration.dart";
 import "package:photos/ente_theme_data.dart";
+import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection_items.dart';
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/common/DividerWithPadding.dart';
 import 'package:photos/ui/viewer/file/RawExifButton.dart';
+import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
+import 'package:photos/utils/navigation_util.dart';
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -70,6 +74,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         _exifData["takenOnDevice"] != null ||
         _exifData["exposureTime"] != null ||
         _exifData["ISO"] != null;
+    final bool showDimension =
+        _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     var listTiles = <Widget>[
       ListTile(
         leading: const Padding(
@@ -123,13 +129,19 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
         subtitle: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: _getFileSize(),
-            ),
+            showDimension
+                ? Text(
+                    "${_exifData["megaPixels"]}MP  "
+                    "${_exifData["resolution"]}  ",
+                  )
+                : const SizedBox.shrink(),
+            _getFileSize(),
             (file.fileType == FileType.video) &&
                     (file.localID != null || file.duration != 0)
-                ? _getVideoDuration()
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: _getVideoDuration(),
+                  )
                 : const SizedBox.shrink(),
           ],
         ),
@@ -187,17 +199,30 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ? const DividerWithPadding(left: 70, right: 20)
           : const SizedBox.shrink(),
       ListTile(
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 6),
-          child: Icon(Icons.folder_outlined),
-        ),
-        title: Text(
-          file.deviceFolder ??
-              CollectionsService.instance
-                  .getCollectionByID(file.collectionID)
-                  .name,
-        ),
-      ),
+          leading: const Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: Icon(Icons.folder_outlined),
+          ),
+          title: GestureDetector(
+            onTap: () {
+              if (file.collectionID != null) {
+                Navigator.pop(context); // info dialog
+                Collection c = CollectionsService.instance
+                    .getCollectionByID(file.collectionID);
+                routeToPage(
+                  context,
+                  CollectionPage(CollectionWithThumbnail(c, null)),
+                );
+              }
+            },
+            child: Text(
+              file.collectionID != null
+                  ? CollectionsService.instance
+                      .getCollectionByID(file.collectionID)
+                      .name
+                  : file.deviceFolder,
+            ),
+          )),
       const DividerWithPadding(left: 70, right: 20),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
@@ -280,22 +305,18 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           (exif["EXIF FNumber"].values.toList()[0] as Ratio).numerator /
               (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator;
     }
-
-    if (exif["EXIF ExifImageWidth"] != null &&
-        exif["EXIF ExifImageLength"] != null) {
-      _exifData["resolution"] = exif["EXIF ExifImageWidth"].toString() +
-          " x " +
-          exif["EXIF ExifImageLength"].toString();
-
-      _exifData['megaPixels'] = ((exif["Image ImageWidth"].values.firstAsInt() *
-                  exif["Image ImageLength"].values.firstAsInt()) /
-              1000000)
-          .toStringAsFixed(1);
-    } else if (exif["Image ImageWidth"] != null &&
-        exif["Image ImageLength"] != null) {
-      _exifData["resolution"] = exif["Image ImageWidth"].toString() +
-          " x " +
-          exif["Image ImageLength"].toString();
+    final imageWidth = exif["EXIF ExifImageWidth"] ?? exif["Image ImageWidth"];
+    final imageLength = exif["EXIF ExifImageLength"] ??
+        exif["Image "
+            "ImageLength"];
+    if (imageWidth != null && imageLength != null) {
+      _exifData["resolution"] = '$imageWidth x $imageLength';
+      _exifData['megaPixels'] =
+          ((imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
+                  1000000)
+              .toStringAsFixed(1);
+    } else {
+      debugPrint("No image width/height");
     }
     if (exif["Image Make"] != null && exif["Image Model"] != null) {
       _exifData["takenOnDevice"] =
