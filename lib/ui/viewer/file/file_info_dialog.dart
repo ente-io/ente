@@ -70,6 +70,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         _exifData["takenOnDevice"] != null ||
         _exifData["exposureTime"] != null ||
         _exifData["ISO"] != null;
+    final bool showDimension =
+        _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     var listTiles = <Widget>[
       ListTile(
         leading: const Padding(
@@ -123,13 +125,18 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         ),
         subtitle: Row(
           children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: _getFileSize(),
-            ),
+            showDimension
+                ? Text(
+                    "${_exifData["megaPixels"]}MP  ${_exifData["resolution"]}"
+                    "  ")
+                : const SizedBox.shrink(),
+            _getFileSize(),
             (file.fileType == FileType.video) &&
                     (file.localID != null || file.duration != 0)
-                ? _getVideoDuration()
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: _getVideoDuration(),
+                  )
                 : const SizedBox.shrink(),
           ],
         ),
@@ -283,17 +290,18 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           (exif["EXIF FNumber"].values.toList()[0] as Ratio).numerator /
               (exif["EXIF FNumber"].values.toList()[0] as Ratio).denominator;
     }
-
-    if (exif["EXIF ExifImageWidth"] != null &&
-        exif["EXIF ExifImageLength"] != null) {
-      _exifData["resolution"] = exif["EXIF ExifImageWidth"].toString() +
-          " x " +
-          exif["EXIF ExifImageLength"].toString();
-    } else if (exif["Image ImageWidth"] != null &&
-        exif["Image ImageLength"] != null) {
-      _exifData["resolution"] = exif["Image ImageWidth"].toString() +
-          " x " +
-          exif["Image ImageLength"].toString();
+    final imageWidth = exif["EXIF ExifImageWidth"] ?? exif["Image ImageWidth"];
+    final imageLength = exif["EXIF ExifImageLength"] ??
+        exif["Image "
+            "ImageLength"];
+    if (imageWidth != null && imageLength != null) {
+      _exifData["resolution"] = '${imageWidth} x ${imageLength}';
+      _exifData['megaPixels'] =
+          ((imageWidth.values.firstAsInt() * imageLength.values.firstAsInt()) /
+                  1000000)
+              .toStringAsFixed(1);
+    } else {
+      debugPrint("No image width/height");
     }
     if (exif["Image Make"] != null && exif["Image Model"] != null) {
       _exifData["takenOnDevice"] =
@@ -314,8 +322,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(
-            (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB",
-          );
+              (snapshot.data / (1024 * 1024)).toStringAsFixed(2) + " MB");
         } else {
           return Center(
             child: SizedBox.fromSize(
