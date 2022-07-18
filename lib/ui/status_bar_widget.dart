@@ -6,6 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/header_error_widget.dart';
+import 'package:photos/ui/viewer/search/searchWidget.dart';
 
 const double kContainerHeight = 36;
 
@@ -209,21 +210,30 @@ class StatusBarBrandingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: kContainerHeight,
-      padding: const EdgeInsets.only(left: 12),
-      child: const Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          "ente",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Montserrat',
-            fontSize: 24,
-            height: 1,
+    return Stack(
+      children: [
+        Container(
+          height: kContainerHeight,
+          padding: const EdgeInsets.only(left: 12),
+          child: const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              "ente",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Montserrat',
+                fontSize: 24,
+                height: 1,
+              ),
+            ),
           ),
         ),
-      ),
+        SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Align(
+              alignment: Alignment.centerRight, child: SearchIconWidget()),
+        ),
+      ],
     );
   }
 }
