@@ -2,38 +2,38 @@ import 'dart:typed_data';
 
 import 'package:photos/core/cache/lru_map.dart';
 import 'package:photos/core/constants.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/ente_file.dart';
 
 class ThumbnailLruCache {
   static final LRUMap<String, Uint8List> _map = LRUMap(1000);
 
-  static Uint8List get(File photo, [int size]) {
+  static Uint8List get(EnteFile enteFile, [int size]) {
     return _map.get(
-      photo.generatedID.toString() +
+      enteFile.cacheKey() +
           "_" +
           (size != null ? size.toString() : kThumbnailLargeSize.toString()),
     );
   }
 
   static void put(
-    File photo,
+    EnteFile enteFile,
     Uint8List imageData, [
     int size,
   ]) {
     _map.put(
-      photo.generatedID.toString() +
+      enteFile.cacheKey() +
           "_" +
           (size != null ? size.toString() : kThumbnailLargeSize.toString()),
       imageData,
     );
   }
 
-  static void clearCache(File file) {
+  static void clearCache(EnteFile enteFile) {
     _map.remove(
-      file.generatedID.toString() + "_" + kThumbnailLargeSize.toString(),
+      enteFile.cacheKey() + "_" + kThumbnailLargeSize.toString(),
     );
     _map.remove(
-      file.generatedID.toString() + "_" + kThumbnailSmallSize.toString(),
+      enteFile.cacheKey() + "_" + kThumbnailSmallSize.toString(),
     );
   }
 }
