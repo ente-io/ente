@@ -7,33 +7,33 @@ import 'package:photos/models/ente_file.dart';
 class ThumbnailLruCache {
   static final LRUMap<String, Uint8List> _map = LRUMap(1000);
 
-  static Uint8List get(EnteFile photo, [int size]) {
+  static Uint8List get(EnteFile enteFile, [int size]) {
     return _map.get(
-      photo.cacheKey() +
+      enteFile.cacheKey() +
           "_" +
           (size != null ? size.toString() : kThumbnailLargeSize.toString()),
     );
   }
 
   static void put(
-    EnteFile photo,
+    EnteFile enteFile,
     Uint8List imageData, [
     int size,
   ]) {
     _map.put(
-      photo.cacheKey() +
+      enteFile.cacheKey() +
           "_" +
           (size != null ? size.toString() : kThumbnailLargeSize.toString()),
       imageData,
     );
   }
 
-  static void clearCache(EnteFile file) {
+  static void clearCache(EnteFile enteFile) {
     _map.remove(
-      file.cacheKey() + "_" + kThumbnailLargeSize.toString(),
+      enteFile.cacheKey() + "_" + kThumbnailLargeSize.toString(),
     );
     _map.remove(
-      file.cacheKey() + "_" + kThumbnailSmallSize.toString(),
+      enteFile.cacheKey() + "_" + kThumbnailSmallSize.toString(),
     );
   }
 }
