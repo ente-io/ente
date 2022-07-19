@@ -3,6 +3,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/viewer/search/SearchResultsSuggestions.dart';
 
 class SearchIconWidget extends StatefulWidget {
   bool openSearch;
@@ -32,6 +33,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 
 class Searchwidget extends StatefulWidget {
   bool openSearch;
+  String searchQuery = '';
   Searchwidget(this.openSearch, {Key key}) : super(key: key);
 
   @override
@@ -39,48 +41,58 @@ class Searchwidget extends StatefulWidget {
 }
 
 class _SearchwidgetState extends State<Searchwidget> {
-  TextEditingController searchController = TextEditingController();
-
   @override
   Widget build(BuildContext context) {
+    Map<String, Set> collectionIDs;
     return widget.openSearch
-        ? Row(
+        ? Column(
             children: [
-              const SizedBox(width: 12),
-              Flexible(
-                child: Container(
-                  color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                  child: TextFormField(
-                    style: Theme.of(context).textTheme.subtitle1,
-                    controller: searchController,
-                    decoration: InputDecoration(
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+              Row(
+                children: [
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Container(
+                      color:
+                          Theme.of(context).colorScheme.defaultBackgroundColor,
+                      child: TextFormField(
+                        style: Theme.of(context).textTheme.subtitle1,
+                        decoration: InputDecoration(
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.search),
+                        ),
+                        onChanged: (value) {
+                          collectionIDs = CollectionsService.instance
+                              .getSearchedCollectionsId(value);
+                          debugPrint(collectionIDs.toString());
+                          setState(() {
+                            widget.searchQuery = value;
+                          });
+                        },
                       ),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      prefixIcon: const Icon(Icons.search),
                     ),
-                    onChanged: (value) {
-                      Set ids = CollectionsService.instance
-                          .getSearchedCollectionsId(value);
-                      debugPrint(ids.toString());
-                    },
                   ),
-                ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        widget.openSearch = !widget.openSearch;
+                      });
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
               ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    widget.openSearch = !widget.openSearch;
-                  });
-                },
-                icon: const Icon(Icons.close),
-              ),
+              const SizedBox(height: 20),
+              widget.searchQuery != ''
+                  ? SearchResultsSuggestions()
+                  : const SizedBox.shrink(),
             ],
           )
         : SearchIconWidget();

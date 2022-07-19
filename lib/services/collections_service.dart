@@ -864,7 +864,7 @@ class CollectionsService {
     }
   }
 
-  Set<int> getSearchedCollectionsId(String query) {
+  Map<String, Set> getSearchedCollectionsId(String query) {
     Set stringStartsWithQuery = _collectionIDToCollections.values
         .toList()
         .where(
@@ -892,10 +892,13 @@ class CollectionsService {
         .map((e) => e.id)
         .toSet();
 
+    containesQuery = containesQuery
+        .difference({...stringStartsWithQuery, ...wordStartsWithQuery});
+
     return {
-      ...stringStartsWithQuery,
-      ...wordStartsWithQuery,
-      ...containesQuery
+      'p1': stringStartsWithQuery,
+      'p2': wordStartsWithQuery,
+      'p3': containesQuery,
     };
   }
 }
