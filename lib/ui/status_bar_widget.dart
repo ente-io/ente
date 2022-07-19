@@ -231,7 +231,9 @@ class StatusBarBrandingWidget extends StatelessWidget {
         SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Align(
-              alignment: Alignment.centerRight, child: SearchIconWidget()),
+            alignment: Alignment.centerRight,
+            child: SearchIconWidget(),
+          ),
         ),
       ],
     );

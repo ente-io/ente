@@ -863,6 +863,41 @@ class CollectionsService {
       }
     }
   }
+
+  Set<int> getSearchedCollectionsId(String query) {
+    Set stringStartsWithQuery = _collectionIDToCollections.values
+        .toList()
+        .where(
+          (element) =>
+              element.name.startsWith(RegExp(query, caseSensitive: false)),
+        )
+        .map((e) => e.id)
+        .toSet();
+
+    Set wordStartsWithQuery = _collectionIDToCollections.values
+        .toList()
+        .where(
+          (element) => //"<space>query" for words that come after the 1st word
+              element.name.contains(RegExp(" $query", caseSensitive: false)),
+        )
+        .map((e) => e.id)
+        .toSet();
+
+    Set containesQuery = _collectionIDToCollections.values
+        .toList()
+        .where(
+          (element) =>
+              element.name.contains(RegExp(query, caseSensitive: false)),
+        )
+        .map((e) => e.id)
+        .toSet();
+
+    return {
+      ...stringStartsWithQuery,
+      ...wordStartsWithQuery,
+      ...containesQuery
+    };
+  }
 }
 
 class AddFilesRequest {

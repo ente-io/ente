@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/services/collections_service.dart';
 
 class SearchIconWidget extends StatefulWidget {
   bool openSearch;
@@ -38,7 +39,7 @@ class Searchwidget extends StatefulWidget {
 }
 
 class _SearchwidgetState extends State<Searchwidget> {
-  TextEditingController searchQuery = TextEditingController();
+  TextEditingController searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +52,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                   color: Theme.of(context).colorScheme.defaultBackgroundColor,
                   child: TextFormField(
                     style: Theme.of(context).textTheme.subtitle1,
-                    controller: searchQuery,
+                    controller: searchController,
                     decoration: InputDecoration(
                       filled: true,
                       contentPadding: const EdgeInsets.symmetric(
@@ -62,7 +63,13 @@ class _SearchwidgetState extends State<Searchwidget> {
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      prefixIcon: const Icon(Icons.search),
                     ),
+                    onChanged: (value) {
+                      Set ids = CollectionsService.instance
+                          .getSearchedCollectionsId(value);
+                      debugPrint(ids.toString());
+                    },
                   ),
                 ),
               ),
