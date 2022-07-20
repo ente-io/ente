@@ -93,28 +93,17 @@ Future<List<File>> _convertToFiles(
   List<LocalAsset> assets,
   Computer computer,
 ) async {
-  final List<LocalAssetEntity> entities = [];
   final Map<String, AssetEntity> assetIDToEntityMap = {};
+  final List<File> files = [];
   for (final localAsset in assets) {
     if (!assetIDToEntityMap.containsKey(localAsset.id)) {
       assetIDToEntityMap[localAsset.id] =
           await AssetEntity.fromId(localAsset.id);
     }
-    entities.add(
-      LocalAssetEntity(
-        assetIDToEntityMap[localAsset.id],
-        localAsset.pathName,
-        localAsset.pathID,
-      ),
-    );
-  }
-
-  final List<File> files = [];
-  for (final localAssetEntity in entities) {
     files.add(
       File.fromAsset(
-        localAssetEntity.pathName,
-        localAssetEntity.entity,
+        localAsset.pathName,
+        assetIDToEntityMap[localAsset.id],
       ),
     );
   }
@@ -181,6 +170,8 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
   return result;
 }
 
+// review: do we need to run this inside compute, after making File.FromAsset
+// sync. If yes, update the method documentation with reason.
 Future<List<File>> _getFiles(Map<String, dynamic> args) async {
   final pathEntity = args["pathEntity"];
   final assetList = args["assetList"];
@@ -194,9 +185,6 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
         fromTime) {
       try {
         final file = File.fromAsset(pathEntity.name, entity);
-        if (!files.contains(file)) {
-          files.add(file);
-        }
       } catch (e) {
         _logger.severe(e);
       }
@@ -215,12 +203,4 @@ class LocalAsset {
     @required this.pathName,
     @required this.pathID,
   });
-}
-
-class LocalAssetEntity {
-  final AssetEntity entity;
-  final String pathName;
-  final String pathID;
-
-  LocalAssetEntity(this.entity, this.pathName, this.pathID);
 }
