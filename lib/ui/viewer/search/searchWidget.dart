@@ -41,7 +41,7 @@ class Searchwidget extends StatefulWidget {
 
 class _SearchwidgetState extends State<Searchwidget> {
   TextEditingController searchController = TextEditingController();
-
+  final ValueNotifier<String> _searchQ = ValueNotifier('');
   @override
   Widget build(BuildContext context) {
     Map<String, Set> collectionIDs;
@@ -74,9 +74,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                           collectionIDs = CollectionsService.instance
                               .getSearchedCollectionsId(value);
                           debugPrint(collectionIDs.toString());
-                          setState(() {
-                            widget.searchQuery = value;
-                          });
+                          _searchQ.value = value;
                         },
                       ),
                     ),
@@ -92,11 +90,21 @@ class _SearchwidgetState extends State<Searchwidget> {
                 ],
               ),
               const SizedBox(height: 20),
-              widget.searchQuery != ''
-                  ? SearchResultsSuggestions(
-                      collectionIDs: collectionIDs,
-                    )
-                  : const SizedBox.shrink(),
+              ValueListenableBuilder(
+                valueListenable: _searchQ,
+                builder: (
+                  BuildContext context,
+                  String newQuery,
+                  Widget child,
+                ) {
+                  debugPrint('listening to search value');
+                  return newQuery != ''
+                      ? SearchResultsSuggestions(
+                          collectionIDs: collectionIDs,
+                        )
+                      : const SizedBox.shrink();
+                },
+              ),
             ],
           )
         : SearchIconWidget();
