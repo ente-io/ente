@@ -3,8 +3,8 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/widgets.dart';
 
 class SearchResultsSuggestions extends StatefulWidget {
-  final Set collectionIds;
-  const SearchResultsSuggestions({Key key, this.collectionIds})
+  final Map<String, Set> collectionIDs;
+  const SearchResultsSuggestions({Key key, this.collectionIDs})
       : super(key: key);
 
   @override
@@ -15,6 +15,15 @@ class SearchResultsSuggestions extends StatefulWidget {
 class _SearchResultsSuggestionsState extends State<SearchResultsSuggestions> {
   @override
   Widget build(BuildContext context) {
-    return Text('Test');
+    return CollectionSuggestions();
+  }
+}
+
+class CollectionSuggestions extends StatelessWidget {
+  const CollectionSuggestions({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('test');
   }
 }

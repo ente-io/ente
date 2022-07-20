@@ -35,12 +35,13 @@ class Searchwidget extends StatefulWidget {
   bool openSearch;
   String searchQuery = '';
   Searchwidget(this.openSearch, {Key key}) : super(key: key);
-
   @override
   State<Searchwidget> createState() => _SearchwidgetState();
 }
 
 class _SearchwidgetState extends State<Searchwidget> {
+  TextEditingController searchController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     Map<String, Set> collectionIDs;
@@ -55,6 +56,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                       color:
                           Theme.of(context).colorScheme.defaultBackgroundColor,
                       child: TextFormField(
+                        controller: searchController,
                         style: Theme.of(context).textTheme.subtitle1,
                         decoration: InputDecoration(
                           filled: true,
@@ -91,7 +93,9 @@ class _SearchwidgetState extends State<Searchwidget> {
               ),
               const SizedBox(height: 20),
               widget.searchQuery != ''
-                  ? SearchResultsSuggestions()
+                  ? SearchResultsSuggestions(
+                      collectionIDs: collectionIDs,
+                    )
                   : const SizedBox.shrink(),
             ],
           )
