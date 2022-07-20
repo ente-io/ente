@@ -11,7 +11,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/utils/file_sync_util.dart';
+import 'package:photos/services/local/file_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalSyncService {

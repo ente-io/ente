@@ -344,7 +344,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         title: fileName,
       );
       final newFile =
-          await ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
+          ente.File.fromAsset(widget.originalFile.deviceFolder, newAsset);
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
