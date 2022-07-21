@@ -72,7 +72,8 @@ class FilesDB {
     ...addMetadataColumns(),
     ...addMagicMetadataColumns(),
     ...addUniqueConstraintOnCollectionFiles(),
-    ...addPubMagicMetadataColumns()
+    ...addPubMagicMetadataColumns(),
+    ...createOnDeviceFilesAndPathCollection(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -291,6 +292,29 @@ class FilesDB {
       '''
         ALTER TABLE $table ADD COLUMN $columnPubMMdVersion INTEGER DEFAULT 0;
       '''
+    ];
+  }
+
+  static List<String> createOnDeviceFilesAndPathCollection() {
+    return [
+      '''
+        CREATE TABLE device_files (
+          id TEXT NOT NULL,
+          path_id TEXT NOT NULL,
+          UNIQUE(id, path_id)
+       ); 
+      CREATE INDEX IF NOT EXISTS df_id_idx ON device_files (path_id);
+      CREATE INDEX IF NOT EXISTS df_path_id_idx ON device_files (id);
+      CREATE TABLE device_path_collections (
+        id TEXT PRIMARY NOT NULL,
+        name TEXT,
+        path TEXT,
+        modified_at INTEGER NOT NULL DEFAULT 0,
+        sync INTEGER NOT NULL DEFAULT 0,
+        count INTEGER NOT NULL DEFAULT 0,
+        collection_id INTEGER DEFAULT -1
+    );
+      ''',
     ];
   }
 

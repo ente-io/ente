@@ -185,6 +185,7 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
         fromTime) {
       try {
         final file = File.fromAsset(pathEntity.name, entity);
+        files.add(file);
       } catch (e) {
         _logger.severe(e);
       }
