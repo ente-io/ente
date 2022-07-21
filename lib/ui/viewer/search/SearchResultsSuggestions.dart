@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/models/collection.dart';
-import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/viewer/search/collectionSuggestions.dart';
 
 class SearchResultsSuggestions extends StatefulWidget {
   final Map<String, Set> collectionIDs;
@@ -31,48 +28,5 @@ class _SearchResultsSuggestionsState extends State<SearchResultsSuggestions> {
         },
       ),
     );
-  }
-}
-
-class CollectionSuggestions {
-  final Map<String, Set> collectionIDs;
-  const CollectionSuggestions(this.collectionIDs);
-
-  List<Widget> getSuggestions() {
-    List<int> p1IDs = collectionIDs['p1'].toList();
-    List<int> p2IDs = collectionIDs['p2'].toList();
-    List<int> p3IDs = collectionIDs['p3'].toList();
-    List<Widget> collectionsP1 = [];
-    List<Widget> collectionsP2 = [];
-    List<Widget> collectionsP3 = [];
-    Collection collection =
-        CollectionsService.instance.getCollectionByID(p1IDs[0]);
-    p1IDs.forEach(
-      (element) {
-        Collection collection =
-            CollectionsService.instance.getCollectionByID(element);
-        collectionsP1.add(
-          Row(
-            children: [
-              Column(
-                children: [
-                  const Text('Album'),
-                  Text(collection.name),
-                  Text('10 memories'),
-                ],
-              ),
-              Row(
-                children: [
-                  Icon(Icons.access_alarms),
-                  Icon(Icons.access_alarms),
-                  Icon(Icons.access_alarms),
-                ],
-              )
-            ],
-          ),
-        );
-      },
-    );
-    return collectionsP1;
   }
 }
