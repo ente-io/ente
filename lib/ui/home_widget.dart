@@ -260,6 +260,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           child: Container(),
         ),
         body: _getBody(),
+        resizeToAvoidBottomInset: false,
       ),
       onWillPop: () async {
         if (_selectedTabIndex == 0) {

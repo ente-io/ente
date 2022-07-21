@@ -63,9 +63,7 @@ class DynamicFAB extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: OutlinedButton(
-          onPressed: isFormValid //var here
-              ? onPressedFunction
-              : null,
+          onPressed: isFormValid ? onPressedFunction : null,
           child: Text(buttonText),
         ),
       );

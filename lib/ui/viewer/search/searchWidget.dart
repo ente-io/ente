@@ -40,7 +40,6 @@ class Searchwidget extends StatefulWidget {
 }
 
 class _SearchwidgetState extends State<Searchwidget> {
-  TextEditingController searchController = TextEditingController();
   final ValueNotifier<String> _searchQ = ValueNotifier('');
   @override
   Widget build(BuildContext context) {
@@ -56,7 +55,6 @@ class _SearchwidgetState extends State<Searchwidget> {
                       color:
                           Theme.of(context).colorScheme.defaultBackgroundColor,
                       child: TextFormField(
-                        controller: searchController,
                         style: Theme.of(context).textTheme.subtitle1,
                         decoration: InputDecoration(
                           filled: true,
@@ -76,6 +74,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                           debugPrint(collectionIDs.toString());
                           _searchQ.value = value;
                         },
+                        autofocus: true,
                       ),
                     ),
                   ),
