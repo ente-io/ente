@@ -41,6 +41,7 @@ const getFileStream = async (filePath: string) => {
             offset += bytesRead;
             if (bytesRead === 0) {
                 controller.close();
+                await fs.close(file);
             } else {
                 controller.enqueue(buff);
             }
