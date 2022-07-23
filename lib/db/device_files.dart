@@ -45,4 +45,20 @@ extension DeviceFiles on FilesDB {
       "Batch insert of  ${files.length} took ${duration.inMilliseconds} ms.",
     );
   }
+
+  Future<Map<String, int>> getDevicePathIDToImportedFileCount() async {
+    final db = await database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT count(*) as count, path_id
+      FROM device_path_collections
+      GROUP BY path_id
+    ''',
+    );
+    final result = <String, int>{};
+    for (final row in rows) {
+      result[row['path_id']] = row["count"];
+    }
+    return result;
+  }
 }
