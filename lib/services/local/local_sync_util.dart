@@ -104,6 +104,7 @@ Future<List<File>> _convertToFiles(
       File.fromAsset(
         localAsset.pathName,
         assetIDToEntityMap[localAsset.id],
+        devicePathID: localAsset.pathID,
       ),
     );
   }
@@ -173,7 +174,7 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
 Future<List<File>> _getFiles(Map<String, dynamic> args) async {
-  final pathEntity = args["pathEntity"];
+  final pathEntity = args["pathEntity"] as AssetPathEntity;
   final assetList = args["assetList"];
   final fromTime = args["fromTime"];
   final files = args["files"];
@@ -184,7 +185,11 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
         ) >
         fromTime) {
       try {
-        final file = File.fromAsset(pathEntity.name, entity);
+        final file = File.fromAsset(
+          pathEntity.name,
+          entity,
+          devicePathID: pathEntity.id,
+        );
         files.add(file);
       } catch (e) {
         _logger.severe(e);
