@@ -7,8 +7,8 @@ import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import constants from 'utils/strings/constants';
 import DialogBoxBase from 'components/DialogBox/base';
-import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
-import UploadStrategyChoiceModal from 'components/pages/gallery/UploadStrategyChoiceModal';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
 import { UPLOAD_STRATEGY } from 'constants/upload';
 
 interface Iprops {
