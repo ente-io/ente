@@ -33,7 +33,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 
 class Searchwidget extends StatefulWidget {
   bool openSearch;
-  String searchQuery = '';
+  final String searchQuery = '';
   Searchwidget(this.openSearch, {Key key}) : super(key: key);
   @override
   State<Searchwidget> createState() => _SearchwidgetState();

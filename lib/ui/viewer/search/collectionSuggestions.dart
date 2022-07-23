@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:photos/db/files_db.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
@@ -38,7 +40,33 @@ class CollectionSuggestions {
                 children: [
                   const Text('Album'),
                   Text(collection.name),
-                  Text('10 memories'),
+                  FutureBuilder<int>(
+                    future: FilesDB.instance.collectionFileCount(id),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data > 0) {
+                        int noOfMemories = snapshot.data;
+
+                        return RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .defaultTextColor,
+                            ),
+                            children: [
+                              TextSpan(text: noOfMemories.toString()),
+                              TextSpan(
+                                text:
+                                    noOfMemories != 1 ? ' memories' : ' memory',
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
                 ],
               ),
               Row(
