@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
@@ -87,6 +88,10 @@ class RemoteSyncService {
           .syncTrash()
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
       final filesToBeUploaded = await _getFilesToBeUploaded();
+      if (kDebugMode) {
+        debugPrint("Skip upload for testing");
+        filesToBeUploaded.clear();
+      }
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
         await _pullDiff(true);
