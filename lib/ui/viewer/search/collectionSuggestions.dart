@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/viewer/gallery/collection_page.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class CollectionSuggestions {
   final Map<String, Set> collectionIDs;
-  const CollectionSuggestions(this.collectionIDs);
+  final BuildContext context;
+  const CollectionSuggestions(this.collectionIDs, this.context);
 
   List<Widget> getSuggestions() {
     List<int> p1IDs = collectionIDs['p1'].toList();
@@ -25,24 +29,30 @@ class CollectionSuggestions {
   ) {
     for (int id in pIDs) {
       Collection collection = CollectionsService.instance.getCollectionByID(id);
+      CollectionWithThumbnail c = CollectionWithThumbnail(collection, null);
       pCollections.add(
-        Row(
-          children: [
-            Column(
-              children: [
-                const Text('Album'),
-                Text(collection.name),
-                Text('10 memories'),
-              ],
-            ),
-            Row(
-              children: [
-                Icon(Icons.access_alarms),
-                Icon(Icons.access_alarms),
-                Icon(Icons.access_alarms),
-              ],
-            )
-          ],
+        GestureDetector(
+          child: Row(
+            children: [
+              Column(
+                children: [
+                  const Text('Album'),
+                  Text(collection.name),
+                  Text('10 memories'),
+                ],
+              ),
+              Row(
+                children: [
+                  Icon(Icons.access_alarms),
+                  Icon(Icons.access_alarms),
+                  Icon(Icons.access_alarms),
+                ],
+              )
+            ],
+          ),
+          onTap: () {
+            routeToPage(context, CollectionPage(c));
+          },
         ),
       );
     }

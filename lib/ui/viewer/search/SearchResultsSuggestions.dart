@@ -16,8 +16,8 @@ class _SearchResultsSuggestionsState extends State<SearchResultsSuggestions> {
   @override
   Widget build(BuildContext context) {
     List<Widget> p1suggestions = [];
-    p1suggestions = CollectionSuggestions(widget.collectionIDs)
-        .getSuggestions(); //add other p1 suggestions to this
+    p1suggestions = CollectionSuggestions(widget.collectionIDs, context)
+        .getSuggestions(); //add other search type p1 suggestions to this
     return Container(
       constraints:
           BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
