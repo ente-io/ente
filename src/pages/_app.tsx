@@ -117,7 +117,7 @@ export default function App({ Component, err }) {
         HTTPService.getInterceptors().response.use(
             (resp) => resp,
             (error) => {
-                logError(error, 'Network Error');
+                logError(error, 'HTTP Service Error');
                 return Promise.reject(error);
             }
         );
