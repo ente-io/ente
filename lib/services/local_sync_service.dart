@@ -72,8 +72,8 @@ class LocalSyncService {
     _logger.info(
       existingLocalFileIDs.length.toString() + " localIDs were discovered",
     );
-    final editedFileIDs = getEditedFileIDs().toSet();
-    final downloadedFileIDs = getDownloadedFileIDs().toSet();
+    final editedFileIDs = _getEditedFileIDs().toSet();
+    final downloadedFileIDs = _getDownloadedFileIDs().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
     final startTime = DateTime.now().microsecondsSinceEpoch;
@@ -138,7 +138,7 @@ class LocalSyncService {
           "ms",
     );
     final existingIDs = await _db.getExistingLocalFileIDs();
-    final invalidIDs = getInvalidFileIDs().toSet();
+    final invalidIDs = _getInvalidFileIDs().toSet();
     final unsyncedFiles =
         await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
     if (unsyncedFiles.isNotEmpty) {
@@ -154,12 +154,12 @@ class LocalSyncService {
   }
 
   Future<void> trackEditedFile(File file) async {
-    final editedIDs = getEditedFileIDs();
+    final editedIDs = _getEditedFileIDs();
     editedIDs.add(file.localID);
     await _prefs.setStringList(kEditedFileIDsKey, editedIDs);
   }
 
-  List<String> getEditedFileIDs() {
+  List<String> _getEditedFileIDs() {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey);
     } else {
@@ -169,32 +169,30 @@ class LocalSyncService {
   }
 
   Future<void> trackDownloadedFile(String localID) async {
-    final downloadedIDs = getDownloadedFileIDs();
+    final downloadedIDs = _getDownloadedFileIDs();
     downloadedIDs.add(localID);
     await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
   }
 
-  List<String> getDownloadedFileIDs() {
+  List<String> _getDownloadedFileIDs() {
     if (_prefs.containsKey(kDownloadedFileIDsKey)) {
       return _prefs.getStringList(kDownloadedFileIDsKey);
     } else {
-      List<String> downloadedIDs = [];
-      return downloadedIDs;
+      return <String>[];
     }
   }
 
   Future<void> trackInvalidFile(File file) async {
-    final invalidIDs = getInvalidFileIDs();
+    final invalidIDs = _getInvalidFileIDs();
     invalidIDs.add(file.localID);
     await _prefs.setStringList(kInvalidFileIDsKey, invalidIDs);
   }
 
-  List<String> getInvalidFileIDs() {
+  List<String> _getInvalidFileIDs() {
     if (_prefs.containsKey(kInvalidFileIDsKey)) {
       return _prefs.getStringList(kInvalidFileIDsKey);
     } else {
-      List<String> invalidIDs = [];
-      return invalidIDs;
+      return <String>[];
     }
   }
 
