@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
-import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import router from 'next/router';
 import { disableTwoFactor } from 'services/userService';
@@ -8,13 +8,12 @@ import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import { Button, Grid } from '@mui/material';
 
 interface Iprops {
-    close: () => void;
+    closeDialog: () => void;
 }
 
 export default function TwoFactorModalManageSection(props: Iprops) {
-    const { close } = props;
-    const { setDialogMessage, setDisappearingFlashMessage } =
-        useContext(AppContext);
+    const { closeDialog } = props;
+    const { setDialogMessage } = useContext(AppContext);
 
     const warnTwoFactorDisable = async () => {
         setDialogMessage({
@@ -37,15 +36,11 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                 ...getData(LS_KEYS.USER),
                 isTwoFactorEnabled: false,
             });
-            close();
-            setDisappearingFlashMessage({
-                message: constants.TWO_FACTOR_DISABLE_SUCCESS,
-                type: FLASH_MESSAGE_TYPE.INFO,
-            });
+            closeDialog();
         } catch (e) {
-            setDisappearingFlashMessage({
-                message: constants.TWO_FACTOR_DISABLE_FAILED,
-                type: FLASH_MESSAGE_TYPE.DANGER,
+            setDialogMessage({
+                title: constants.TWO_FACTOR_DISABLE_FAILED,
+                close: {},
             });
         }
     };
@@ -65,18 +60,18 @@ export default function TwoFactorModalManageSection(props: Iprops) {
     };
 
     const reconfigureTwoFactor = async () => {
+        closeDialog();
         router.push(PAGES.TWO_FACTOR_SETUP);
     };
 
     return (
         <>
             <Grid
-                mb={2}
-                container
+                mb={1.5}
                 rowSpacing={1}
+                container
                 alignItems="center"
-                justifyContent="center"
-                textAlign={'center'}>
+                justifyContent="center">
                 <Grid item sm={9} xs={12}>
                     {constants.UPDATE_TWO_FACTOR_LABEL}
                 </Grid>
@@ -84,17 +79,16 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                     <Button
                         color={'accent'}
                         onClick={warnTwoFactorReconfigure}
-                        style={{ width: '100%' }}>
+                        size="large">
                         {constants.RECONFIGURE}
                     </Button>
                 </Grid>
             </Grid>
             <Grid
-                container
                 rowSpacing={1}
+                container
                 alignItems="center"
-                justifyContent="center"
-                textAlign={'center'}>
+                justifyContent="center">
                 <Grid item sm={9} xs={12}>
                     {constants.DISABLE_TWO_FACTOR_LABEL}{' '}
                 </Grid>
@@ -103,7 +97,7 @@ export default function TwoFactorModalManageSection(props: Iprops) {
                     <Button
                         color={'danger'}
                         onClick={warnTwoFactorDisable}
-                        style={{ width: '100%' }}>
+                        size="large">
                         {constants.DISABLE}
                     </Button>
                 </Grid>

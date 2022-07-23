@@ -1,4 +1,4 @@
-import { DESKTOP_UPLOAD_TYPE } from 'components/pages/gallery/Upload';
+import { UPLOAD_TYPE } from 'components/Upload/Uploader';
 import { Collection } from 'types/collection';
 import { ElectronAPIsInterface } from 'types/electron';
 import { ElectronFile, FileWithCollection } from 'types/upload';
@@ -8,7 +8,7 @@ import { logError } from 'utils/sentry';
 interface PendingUploads {
     files: ElectronFile[];
     collectionName: string;
-    type: DESKTOP_UPLOAD_TYPE;
+    type: UPLOAD_TYPE;
 }
 
 interface selectZipResult {
@@ -59,7 +59,11 @@ class ImportService {
                 return pendingUploads;
             }
         } catch (e) {
-            logError(e, 'failed to getPendingUploads ');
+            if (e?.message?.includes('ENOENT: no such file or directory')) {
+                // ignore
+            } else {
+                logError(e, 'failed to getPendingUploads ');
+            }
             return { files: [], collectionName: null, type: null };
         }
     }
@@ -84,7 +88,7 @@ class ImportService {
     }
 
     async setToUploadFiles(
-        type: DESKTOP_UPLOAD_TYPE.FILES | DESKTOP_UPLOAD_TYPE.ZIPS,
+        type: UPLOAD_TYPE.FILES | UPLOAD_TYPE.ZIPS,
         filePaths: string[]
     ) {
         if (this.allElectronAPIsExist) {
@@ -113,14 +117,14 @@ class ImportService {
                     );
                 }
             }
-            this.setToUploadFiles(DESKTOP_UPLOAD_TYPE.FILES, filePaths);
+            this.setToUploadFiles(UPLOAD_TYPE.FILES, filePaths);
         }
     }
     cancelRemainingUploads() {
         if (this.allElectronAPIsExist) {
             this.ElectronAPIs.setToUploadCollection(null);
-            this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.ZIPS, []);
-            this.ElectronAPIs.setToUploadFiles(DESKTOP_UPLOAD_TYPE.FILES, []);
+            this.ElectronAPIs.setToUploadFiles(UPLOAD_TYPE.ZIPS, []);
+            this.ElectronAPIs.setToUploadFiles(UPLOAD_TYPE.FILES, []);
         }
     }
 }

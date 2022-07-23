@@ -1,15 +1,12 @@
 import React from 'react';
 import { styled } from '@mui/material';
+
 const LogoImage = styled('img')`
-    height: 18px;
-    padding: 0 3px;
+    margin: 3px 0;
 `;
 
-interface Iprops {
-    height?: string;
-    width?: string;
-}
-
-export function EnteLogo({ height, width }: Iprops) {
-    return <LogoImage style={{ width, height }} alt="logo" src="/icon.svg" />;
+export function EnteLogo(props) {
+    return (
+        <LogoImage height={18} alt="logo" src="/images/ente.svg" {...props} />
+    );
 }

@@ -4,7 +4,6 @@ import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { unshareCollection } from 'services/collectionService';
 import { Collection } from 'types/collection';
-import { sleep } from 'utils/common';
 import constants from 'utils/strings/constants';
 import ShareeRow from './row';
 
@@ -20,7 +19,6 @@ export function CollectionShareSharees({ collection }: Iprops) {
         try {
             appContext.startLoading();
             await unshareCollection(collection, sharee.email);
-            await sleep(2000);
             await galleryContext.syncWithRemote(false, true);
         } finally {
             appContext.finishLoading();

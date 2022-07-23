@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { SetCollectionSelectorAttributes } from './CollectionSelector';
+import React, { useContext } from 'react';
+import { SetCollectionSelectorAttributes } from 'types/gallery';
 import { FluidContainer } from 'components/Container';
 import constants from 'utils/strings/constants';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
@@ -9,15 +9,12 @@ import {
     TRASH_SECTION,
 } from 'constants/collection';
 import { Collection } from 'types/collection';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
-import { User } from 'types/user';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import { AppContext } from 'pages/_app';
-import { IconButton, Stack, Tooltip } from '@mui/material';
+import { Box, IconButton, Stack, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import RestoreIcon from '@mui/icons-material/Restore';
-import AddIcon from 'components/icons/AddIcon';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ClockIcon from '@mui/icons-material/AccessTime';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -25,6 +22,7 @@ import UnArchiveIcon from '@mui/icons-material/Visibility';
 import ArchiveIcon from '@mui/icons-material/VisibilityOff';
 import MoveIcon from '@mui/icons-material/ArrowForward';
 import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
+import { getTrashFilesMessage } from 'utils/ui';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
@@ -62,13 +60,6 @@ const SelectedFileOptions = ({
     isFavoriteCollection,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
-    const [showFixCreationTime, setShowFixCreationTime] = useState(false);
-    useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
-        const showFixCreationTime =
-            FIX_CREATION_TIME_VISIBLE_TO_USER_IDS.includes(user?.id);
-        setShowFixCreationTime(showFixCreationTime);
-    }, []);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: addToCollectionHelper,
@@ -78,21 +69,12 @@ const SelectedFileOptions = ({
         });
 
     const trashHandler = () =>
-        setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.TRASH_MESSAGE,
-            proceed: {
-                action: deleteFileHelper,
-                text: constants.MOVE_TO_TRASH,
-                variant: 'danger',
-            },
-            close: { text: constants.CANCEL },
-        });
+        setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     const permanentlyDeleteHandler = () =>
         setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.DELETE_MESSAGE,
+            title: constants.DELETE_FILES_TITLE,
+            content: constants.DELETE_FILES_MESSAGE,
             proceed: {
                 action: () => deleteFileHelper(true),
                 text: constants.DELETE,
@@ -138,9 +120,9 @@ const SelectedFileOptions = ({
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <div>
+                <Box ml={1.5}>
                     {count} {constants.SELECTED}
-                </div>
+                </Box>
             </FluidContainer>
             <Stack spacing={2} direction="row" mr={2}>
                 {activeCollection === TRASH_SECTION ? (
@@ -158,13 +140,11 @@ const SelectedFileOptions = ({
                     </>
                 ) : (
                     <>
-                        {showFixCreationTime && (
-                            <Tooltip title={constants.FIX_CREATION_TIME}>
-                                <IconButton onClick={fixTimeHelper}>
-                                    <ClockIcon />
-                                </IconButton>
-                            </Tooltip>
-                        )}
+                        <Tooltip title={constants.FIX_CREATION_TIME}>
+                            <IconButton onClick={fixTimeHelper}>
+                                <ClockIcon />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title={constants.DOWNLOAD}>
                             <IconButton onClick={downloadHelper}>
                                 <DownloadIcon />
@@ -189,7 +169,6 @@ const SelectedFileOptions = ({
                                 </IconButton>
                             </Tooltip>
                         )}
-
                         {activeCollection !== ALL_SECTION &&
                             activeCollection !== ARCHIVE_SECTION &&
                             !isFavoriteCollection && (

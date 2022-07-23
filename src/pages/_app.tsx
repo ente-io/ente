@@ -18,8 +18,10 @@ import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
-import { CssBaseline } from '@mui/material';
-import { DialogBoxAttributes, SetDialogBoxAttributes } from 'types/dialogBox';
+import { CssBaseline, useMediaQuery } from '@mui/material';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as types from 'styled-components/cssprop'; // need to css prop on styled component
+import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
 import {
     getFamilyPortalRedirectURL,
     getRoadmapRedirectURL,
@@ -56,6 +58,7 @@ type AppContextType = {
     setWatchFolderView: (isOpen: boolean) => void;
     watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
+    isMobile: boolean;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -93,6 +96,7 @@ export default function App({ Component, err }) {
     const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
+    const isMobile = useMediaQuery('(max-width:428px)');
 
     useEffect(() => {
         if (
@@ -124,7 +128,7 @@ export default function App({ Component, err }) {
         HTTPService.getInterceptors().response.use(
             (resp) => resp,
             (error) => {
-                logError(error, 'Network Error');
+                logError(error, 'HTTP Service Error');
                 return Promise.reject(error);
             }
         );
@@ -264,6 +268,7 @@ export default function App({ Component, err }) {
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
+                    size="xs"
                     open={messageDialogView}
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
@@ -287,6 +292,7 @@ export default function App({ Component, err }) {
                         setWatchFolderView,
                         watchFolderFiles,
                         setWatchFolderFiles,
+                        isMobile,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

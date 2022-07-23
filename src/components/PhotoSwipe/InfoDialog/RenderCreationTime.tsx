@@ -7,11 +7,12 @@ import {
     formatDateTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import EditIcon from 'components/icons/EditIcon';
-import { IconButton, Label, Row, Value } from 'components/Container';
+import EditIcon from '@mui/icons-material/Edit';
+import { Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
+import { IconButton } from '@mui/material';
 
 export function RenderCreationTime({
     shouldDisableEdits,

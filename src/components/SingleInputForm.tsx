@@ -6,6 +6,7 @@ import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
 import ShowHidePassword from './Form/ShowHidePassword';
 import { FlexWrapper } from './Container';
+import { Button } from '@mui/material';
 
 interface formValues {
     inputValue: string;
@@ -18,11 +19,19 @@ export interface SingleInputFormProps {
     fieldType: 'text' | 'email' | 'password';
     placeholder: string;
     buttonText: string;
-    customSubmitButton?: any;
+    submitButtonProps?: any;
     initialValue?: string;
+    secondaryButtonAction?: () => void;
+    disableAutoFocus?: boolean;
+    hiddenPreInput?: any;
+    hiddenPostInput?: any;
+    autoComplete?: string;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
+    const { submitButtonProps } = props;
+    const { sx: buttonSx, ...restSubmitButtonProps } = submitButtonProps ?? {};
+
     const [loading, SetLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
@@ -75,17 +84,21 @@ export default function SingleInputForm(props: SingleInputFormProps) {
             validateOnBlur={false}>
             {({ values, errors, handleChange, handleSubmit }) => (
                 <form noValidate onSubmit={handleSubmit}>
+                    {props.hiddenPreInput}
                     <TextField
                         variant="filled"
                         fullWidth
                         type={showPassword ? 'text' : props.fieldType}
+                        id={props.fieldType}
+                        name={props.fieldType}
                         label={props.placeholder}
                         value={values.inputValue}
                         onChange={handleChange('inputValue')}
                         error={Boolean(errors.inputValue)}
                         helperText={errors.inputValue}
                         disabled={loading}
-                        autoFocus
+                        autoFocus={!props.disableAutoFocus}
+                        autoComplete={props.autoComplete}
                         InputProps={{
                             endAdornment: props.fieldType === 'password' && (
                                 <ShowHidePassword
@@ -100,19 +113,25 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             ),
                         }}
                     />
-                    <FlexWrapper></FlexWrapper>
-                    {props.customSubmitButton ? (
-                        <props.customSubmitButton
-                            buttonText={props.buttonText}
-                            loading={loading}
-                        />
-                    ) : (
+                    {props.hiddenPostInput}
+                    <FlexWrapper justifyContent={'flex-end'}>
+                        {props.secondaryButtonAction && (
+                            <Button
+                                onClick={props.secondaryButtonAction}
+                                size="large"
+                                color="secondary"
+                                sx={{ mt: 2, mb: 4, mr: 1, ...buttonSx }}
+                                {...restSubmitButtonProps}>
+                                {constants.CANCEL}
+                            </Button>
+                        )}
                         <SubmitButton
-                            sx={{ mt: 2 }}
+                            sx={{ mt: 2, ...buttonSx }}
                             buttonText={props.buttonText}
                             loading={loading}
+                            {...restSubmitButtonProps}
                         />
-                    )}
+                    </FlexWrapper>
                 </form>
             )}
         </Formik>

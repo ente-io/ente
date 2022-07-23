@@ -252,33 +252,30 @@ export async function hash(input: string) {
     );
 }
 
-export async function cryptoGenericHash(stream: ReadableStream) {
+export async function initChunkHashing() {
     await sodium.ready;
-
-    const state = sodium.crypto_generichash_init(
+    const hashState = sodium.crypto_generichash_init(
         null,
         sodium.crypto_generichash_BYTES_MAX
     );
+    return hashState;
+}
 
-    const reader = stream.getReader();
+export async function hashFileChunk(
+    hashState: sodium.StateAddress,
+    chunk: Uint8Array
+) {
+    await sodium.ready;
+    sodium.crypto_generichash_update(hashState, chunk);
+}
 
-    let isDone = false;
-    while (!isDone) {
-        const { done, value: chunk } = await reader.read();
-        if (done) {
-            isDone = true;
-            break;
-        }
-        const buffer = Uint8Array.from(chunk);
-        sodium.crypto_generichash_update(state, buffer);
-    }
-
+export async function completeChunkHashing(hashState: sodium.StateAddress) {
+    await sodium.ready;
     const hash = sodium.crypto_generichash_final(
-        state,
+        hashState,
         sodium.crypto_generichash_BYTES_MAX
     );
-    const hashString = sodium.to_base64(hash, sodium.base64_variants.ORIGINAL);
-
+    const hashString = toB64(hash);
     return hashString;
 }
 

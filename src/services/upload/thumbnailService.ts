@@ -1,7 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
-import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
+import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import FFmpegService from 'services/ffmpeg/ffmpegService';
 import { convertBytesToHumanReadable } from 'utils/billing';
 import { isFileHEIC } from 'utils/file';

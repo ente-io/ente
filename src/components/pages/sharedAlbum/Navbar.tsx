@@ -1,4 +1,4 @@
-import { FluidContainer } from 'components/Container';
+import { CenteredFlex, FluidContainer } from 'components/Container';
 import { EnteLogo } from 'components/EnteLogo';
 import NavbarBase from 'components/Navbar/base';
 import React from 'react';
@@ -8,7 +8,9 @@ export default function SharedAlbumNavbar() {
     return (
         <NavbarBase>
             <FluidContainer>
-                <EnteLogo />
+                <CenteredFlex>
+                    <EnteLogo />
+                </CenteredFlex>
             </FluidContainer>
             <GoToEnte />
         </NavbarBase>

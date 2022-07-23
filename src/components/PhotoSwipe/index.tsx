@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import Photoswipe from 'photoswipe';
 import PhotoswipeUIDefault from 'photoswipe/dist/photoswipe-ui-default';
 import classnames from 'classnames';
-import FavButton from 'components/FavButton';
 import {
     addToFavorites,
     removeFromFavorites,
@@ -21,9 +20,14 @@ import { sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
-import { InfoModal } from './InfoDialog';
+import { FileInfo } from './InfoDialog';
 import { defaultLivePhotoDefaultOptions } from 'constants/photoswipe';
 import { LivePhotoBtn } from './styledComponents/LivePhotoBtn';
+import DownloadIcon from '@mui/icons-material/Download';
+import InfoIcon from '@mui/icons-material/InfoOutlined';
+import FavoriteIcon from '@mui/icons-material/FavoriteRounded';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorderRounded';
+import ChevronRight from '@mui/icons-material/ChevronRight';
 
 interface Iprops {
     isOpen: boolean;
@@ -331,18 +335,15 @@ function PhotoSwipe(props: Iprops) {
                 ref={pswpElement}>
                 <div className="pswp__bg" />
                 <div className="pswp__scroll-wrap">
-                    <LivePhotoBtn
-                        onClick={livePhotoBtnOptions.click}
-                        onMouseEnter={livePhotoBtnOptions.show}
-                        onMouseLeave={livePhotoBtnOptions.hide}
-                        disabled={livePhotoBtnOptions.loading}
-                        style={{
-                            display: livePhotoBtnOptions.visible
-                                ? 'block'
-                                : 'none',
-                        }}>
-                        {livePhotoBtnHTML} {constants.LIVE}
-                    </LivePhotoBtn>
+                    {livePhotoBtnOptions.visible && (
+                        <LivePhotoBtn
+                            onClick={livePhotoBtnOptions.click}
+                            onMouseEnter={livePhotoBtnOptions.show}
+                            onMouseLeave={livePhotoBtnOptions.hide}
+                            disabled={livePhotoBtnOptions.loading}>
+                            {livePhotoBtnHTML} {constants.LIVE}
+                        </LivePhotoBtn>
+                    )}
                     <div className="pswp__container">
                         <div className="pswp__item" />
                         <div className="pswp__item" />
@@ -359,12 +360,13 @@ function PhotoSwipe(props: Iprops) {
 
                             {props.enableDownload && (
                                 <button
-                                    className="pswp-custom download-btn"
+                                    className="pswp__button pswp__button--custom"
                                     title={constants.DOWNLOAD}
                                     onClick={() =>
                                         downloadFileHelper(photoSwipe.currItem)
-                                    }
-                                />
+                                    }>
+                                    <DownloadIcon fontSize="small" />
+                                </button>
                             )}
                             <button
                                 className="pswp__button pswp__button--fs"
@@ -376,20 +378,25 @@ function PhotoSwipe(props: Iprops) {
                             />
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
-                                    <FavButton
-                                        size={44}
-                                        isClick={isFav}
+                                    <button
+                                        className="pswp__button pswp__button--custom"
                                         onClick={() => {
                                             onFavClick(photoSwipe?.currItem);
-                                        }}
-                                    />
+                                        }}>
+                                        {isFav ? (
+                                            <FavoriteIcon fontSize="small" />
+                                        ) : (
+                                            <FavoriteBorderIcon fontSize="small" />
+                                        )}
+                                    </button>
                                 )}
                             {!props.isSharedCollection && (
                                 <button
-                                    className="pswp-custom info-btn"
+                                    className="pswp__button pswp__button--custom"
                                     title={constants.INFO}
-                                    onClick={handleOpenInfo}
-                                />
+                                    onClick={handleOpenInfo}>
+                                    <InfoIcon fontSize="small" />
+                                </button>
                             )}
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
@@ -405,18 +412,24 @@ function PhotoSwipe(props: Iprops) {
                         <button
                             className="pswp__button pswp__button--arrow--left"
                             title={constants.PREVIOUS}
-                        />
+                            onClick={photoSwipe?.prev}>
+                            <ChevronRight
+                                sx={{ transform: 'rotate(180deg)' }}
+                            />
+                        </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
                             title={constants.NEXT}
-                        />
+                            onClick={photoSwipe?.next}>
+                            <ChevronRight />
+                        </button>
                         <div className="pswp__caption">
                             <div />
                         </div>
                     </div>
                 </div>
             </div>
-            <InfoModal
+            <FileInfo
                 shouldDisableEdits={props.isSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}

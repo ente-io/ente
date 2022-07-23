@@ -18,6 +18,12 @@ const ShareeRow = ({ sharee, collectionUnshare }: IProps) => {
         <SpaceBetweenFlex>
             {sharee.email}
             <OverflowMenu
+                menuPaperProps={{
+                    sx: {
+                        backgroundColor: (theme) =>
+                            theme.palette.background.overPaper,
+                    },
+                }}
                 ariaControls={`email-share-${sharee.email}`}
                 triggerButtonIcon={<MoreHorizIcon />}>
                 <OverflowMenuOption

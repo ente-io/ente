@@ -15,14 +15,12 @@ const SidebarButton: FC<Iprops> = ({
         <>
             <Button
                 variant="text"
-                fullWidth
+                size="large"
                 sx={(theme) =>
                     ({
                         ...theme.typography[typographyVariant],
                         fontWeight: 'bold',
-                        my: 0.5,
-                        px: 1,
-                        py: '10px',
+                        px: 1.5,
                         ...sx,
                     } as SystemStyleObject<Theme>)
                 }

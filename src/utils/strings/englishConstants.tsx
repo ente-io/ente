@@ -2,7 +2,6 @@ import { Box, Typography } from '@mui/material';
 import Link from '@mui/material/Link';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
-import { styled } from '@mui/material';
 import { SuggestionType } from 'types/search';
 import { formatNumberWithCommas } from '.';
 
@@ -18,36 +17,33 @@ const dateString = function (date) {
     });
 };
 
-const Strong = styled('strong')`
-    color: #ddd;
-`;
-
-const Logo = styled('img')`
-    height: 18px;
-    vertical-align: middle;
-    margin-top: -3px;
-`;
-
 const englishConstants = {
-    ENTE: 'ente',
-    HERO_HEADER: () => (
-        <div>
-            with <Logo src="/icon.svg" />
-            <br />
-            your <Strong>memories</Strong> are
-        </div>
+    HERO_SLIDE_1_TITLE: () => (
+        <>
+            <div>Private backups</div>
+            <div> for your memories</div>
+        </>
     ),
-    HERO_SLIDE_1_TITLE: 'protected',
-    HERO_SLIDE_1:
-        'end-to-end encrypted with your password, visible only to you',
-    HERO_SLIDE_2_TITLE: 'synced',
-    HERO_SLIDE_2: 'available across all your devices, web, android and ios',
-    HERO_SLIDE_3_TITLE: 'preserved',
-    HERO_SLIDE_3:
-        'reliably replicated to a fallout shelter, designed to outlive',
+    HERO_SLIDE_1: 'End-to-end encrypted by default',
+    HERO_SLIDE_2_TITLE: () => (
+        <>
+            <div>Safely stored </div>
+            <div>at a fallout shelter</div>
+        </>
+    ),
+    HERO_SLIDE_2: 'Designed to outlive',
+    HERO_SLIDE_3_TITLE: () => (
+        <>
+            <div>Available</div>
+            <div> everywhere</div>
+        </>
+    ),
+    HERO_SLIDE_3: 'Android, iOS, Web, Desktop',
     COMPANY_NAME: 'ente',
     LOGIN: 'Login',
     SIGN_UP: 'Signup',
+    NEW_USER: 'New to ente',
+    EXISTING_USER: 'Existing user',
     NAME: 'Name',
     ENTER_NAME: 'Your name',
     EMAIL: 'Email',
@@ -85,7 +81,7 @@ const englishConstants = {
     VERIFY_PASSPHRASE: 'Sign in',
     INCORRECT_PASSPHRASE: 'Incorrect password',
     ENTER_ENC_PASSPHRASE:
-        'please enter a password that we can use to encrypt your data',
+        'Please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
         <>
             We don't store your password, so if you forget it,{' '}
@@ -93,6 +89,7 @@ const englishConstants = {
             recover your data without a recovery key.
         </>
     ),
+    KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Generating encryption keys...',
     PASSPHRASE_HINT: 'Password',
     CONFIRM_PASSPHRASE: 'Confirm password',
     PASSPHRASE_MATCH_ERROR: "Passwords don't match",
@@ -151,6 +148,10 @@ const englishConstants = {
     WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
     CONFIRM_DELETE: 'Confirm deletion',
     DELETE_MESSAGE: `The selected files will be permanently deleted and can't be restored `,
+    TRASH_FILES_TITLE: 'Delete files?',
+    DELETE_FILES_TITLE: 'Delete immediately?',
+    DELETE_FILES_MESSAGE:
+        'Selected files will be permanently deleted from your ente account.',
     DELETE_FILE: 'Delete files',
     DELETE: 'Delete',
     MULTI_FOLDER_UPLOAD: 'Multiple folders detected',
@@ -198,7 +199,7 @@ const englishConstants = {
     SKIP_SUBSCRIPTION_PURCHASE: 'Continue with free plan',
     CANCEL: 'Cancel',
     LOGOUT: 'Logout',
-    DELETE_ACCOUNT: 'Delete Account',
+    DELETE_ACCOUNT: 'Delete account',
     DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
@@ -208,10 +209,10 @@ const englishConstants = {
                 </Link>{' '}
                 from your registered email address.{' '}
             </p>
-            Your request will be processed within 72 hours.
+            <p>Your request will be processed within 72 hours.</p>
         </>
     ),
-    LOGOUT_MESSAGE: 'Sure you want to logout?',
+    LOGOUT_MESSAGE: 'Are you sure you want to logout?',
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
     OK: 'Ok',
@@ -239,14 +240,8 @@ const englishConstants = {
             to automatically backup all your photos
         </>
     ),
-    DOWNLOAD_APP_MESSAGE: () => (
-        <>
-            <p>
-                Sorry, this feature is currently only supported on our desktop
-                app
-            </p>
-        </>
-    ),
+    DOWNLOAD_APP_MESSAGE:
+        'Sorry, this operation is currently only supported on our desktop app',
     DOWNLOAD_APP: 'Download desktop app',
     EXPORT: 'Export Data',
 
@@ -261,8 +256,9 @@ const englishConstants = {
     MANAGEMENT_PORTAL: 'Manage payment method',
     MANAGE_FAMILY_PORTAL: 'Manage family',
     LEAVE_FAMILY_PLAN: 'Leave family plan',
+    LEAVE: 'Leave',
     LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
-    CHOOSE_PLAN: 'Choose your subscription plan',
+    CHOOSE_PLAN: 'Choose your plan',
     MANAGE_PLAN: 'Manage your subscription',
     ACTIVE: 'Active',
 
@@ -278,30 +274,21 @@ const englishConstants = {
     FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
 
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>Your subscription will renew on {dateString(expiryTime)}</>
+        <>Renews on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
-    USAGE_INFO: (usage, quota) => (
-        <p>
-            You have used {usage} out of your {quota} quota
-        </p>
-    ),
-
-    FAMILY_USAGE_INFO: (usage, quota) => (
-        <p>
-            You have used {usage} out of your family's {quota} quota
-        </p>
-    ),
-
+    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: `You have exceeded your storage quota, please upgrade your plan.`,
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>We've received your payment</p>
-            your subscription is valid till{' '}
-            <strong>{dateString(expiryTime)}</strong>
+            <p>
+                your subscription is valid till{' '}
+                <strong>{dateString(expiryTime)}</strong>
+            </p>
         </>
     ),
     SUBSCRIPTION_PURCHASE_CANCELLED:
@@ -322,7 +309,6 @@ const englishConstants = {
     UPDATE_SUBSCRIPTION_MESSAGE: 'Are you sure you want to change your plan?',
     UPDATE_SUBSCRIPTION: 'Change plan',
 
-    CONFIRM_CANCEL_SUBSCRIPTION: 'cancel subscription',
     CANCEL_SUBSCRIPTION: 'Cancel subscription',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
@@ -356,31 +342,15 @@ const englishConstants = {
     PAYPAL_MANAGE_NOT_SUPPORTED: 'Manage paypal plan',
     RENAME: 'Rename',
     RENAME_COLLECTION: 'Rename album',
-    CONFIRM_DELETE_COLLECTION: 'Confirm album deletion',
+    DELETE_COLLECTION_TITLE: 'Delete album?',
     DELETE_COLLECTION: 'Delete album',
     DELETE_COLLECTION_FAILED: 'Album deletion failed, please try again',
-    DELETE_COLLECTION_MESSAGE: () => (
-        <>
-            <p>Are you sure you want to delete this album?</p>
-            <p>
-                All files that are unique to this album will be moved to trash
-            </p>
-        </>
-    ),
+    DELETE_COLLECTION_MESSAGE:
+        'Files that are unique to this album will be moved to trash, and this album would be deleted.',
     SHARE: 'Share',
     SHARE_COLLECTION: 'Share album',
     SHARE_WITH_PEOPLE: 'Share with your loved ones',
     SHAREES: 'Shared with',
-    ZERO_SHAREES: () => (
-        <>
-            <h6>Currently shared with no one 😔</h6>
-            <div style={{ marginTop: '16px' }}>
-                <em style={{ color: '#3c3c3c' }}>
-                    memories are fonder when shared
-                </em>
-            </div>
-        </>
-    ),
     PUBLIC_URL: 'Public link',
     SHARE_WITH_SELF: 'Oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
@@ -390,8 +360,8 @@ const englishConstants = {
     CONFIRM_DOWNLOAD_COLLECTION: 'Download album',
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
-            <div>Are you sure you want to download the complete album?</div>
-            <div>All files will be queued for download sequentially</div>
+            <p>Are you sure you want to download the complete album?</p>
+            <p>All files will be queued for download sequentially</p>
         </>
     ),
     ARCHIVED_ALBUM: 'Archived album',
@@ -399,7 +369,7 @@ const englishConstants = {
     CREATE_ALBUM_FAILED: 'Failed to create album , please try again',
 
     SEARCH_RESULTS: 'Search results',
-    SEARCH_HINT: () => <span>Search for location, dates, occasions ...</span>,
+    SEARCH_HINT: () => <span>Search for location, dates, albums ...</span>,
     SEARCH_TYPE: (type: SuggestionType) => {
         switch (type) {
             case SuggestionType.COLLECTION:
@@ -446,13 +416,6 @@ const englishConstants = {
             </a>{' '}
             with ente
         </p>
-    ),
-    SEARCH_STATS: ({ resultCount, timeTaken }) => (
-        <div>
-            found <span style={{ color: '#51cd7c' }}>{resultCount}</span>{' '}
-            memories ( <span style={{ color: '#51cd7c' }}> {timeTaken}</span>{' '}
-            seconds )
-        </div>
     ),
     NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'Add to album',
@@ -520,7 +483,7 @@ const englishConstants = {
     EXPORT_DATA: 'Export data',
     SELECT_FOLDER: 'Select folder',
     DESTINATION: 'Destination',
-    TOTAL_EXPORT_SIZE: 'Total export size',
+    EXPORT_SIZE: 'Export size',
     START: 'Start',
     EXPORT_IN_PROGRESS: 'Export in progress...',
     PAUSE: 'Pause',
@@ -585,7 +548,7 @@ const englishConstants = {
     UPLOAD_TO_COLLECTION: 'Upload to album',
     ARCHIVE: 'Hide',
     ARCHIVE_SECTION_NAME: 'Hidden',
-    ALL_SECTION_NAME: 'All memories',
+    ALL_SECTION_NAME: 'All',
     MOVE_TO_COLLECTION: 'Move to album',
     UNARCHIVE: 'Unhide',
     MOVE: 'Move',
@@ -595,19 +558,17 @@ const englishConstants = {
     CONFIRM_REMOVE: 'Confirm removal',
     TRASH: 'Trash',
     MOVE_TO_TRASH: 'Move to trash',
-    TRASH_MESSAGE:
-        'The selected files will be removed from all albums and moved to trash ',
+    TRASH_FILES_MESSAGE:
+        'Selected files will be removed from all albums and moved to trash.',
     DELETE_PERMANENTLY: 'Delete permanently',
     RESTORE: 'Restore',
     CONFIRM_RESTORE: 'Confirm restoration',
     RESTORE_MESSAGE: 'Restore selected files ?',
     RESTORE_TO_COLLECTION: 'Restore to album',
-    AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
-        `Permanently deleted ${relativeTime}`,
     EMPTY_TRASH: 'Empty trash',
-    CONFIRM_EMPTY_TRASH: 'Empty trash?',
+    EMPTY_TRASH_TITLE: 'Empty trash?',
     EMPTY_TRASH_MESSAGE:
-        'All files will be permanently removed from your ente account',
+        'These files will be permanently deleted from your ente account.',
 
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
@@ -684,8 +645,18 @@ const englishConstants = {
     LINK_EXPIRY: 'Link expiry',
     LINK_EXPIRY_NEVER: 'Never',
     DISABLE_FILE_DOWNLOAD: 'Disable download',
-    DISABLE_FILE_DOWNLOAD_MESSAGE:
-        'Are you sure that you want to disable the download button for files? \n viewers can still take screenshots or save a copy of your photos using external tools',
+    DISABLE_FILE_DOWNLOAD_MESSAGE: () => (
+        <>
+            <p>
+                Are you sure that you want to disable the download button for
+                files?{' '}
+            </p>{' '}
+            <p>
+                Viewers can still take screenshots or save a copy of your photos
+                using external tools'{' '}
+            </p>
+        </>
+    ),
     ABUSE_REPORT: 'Abuse report',
     ABUSE_REPORT_BUTTON_TEXT: 'Report abuse?',
     MALICIOUS_CONTENT: 'Contains malicious content',
@@ -724,9 +695,9 @@ const englishConstants = {
     LOCK: 'Lock',
     DOWNLOAD_UPLOAD_LOGS: 'Debug logs',
     CHOOSE_UPLOAD_TYPE: 'Upload',
-    UPLOAD_FILES: 'File Upload',
-    UPLOAD_DIRS: 'Folder Upload',
-    UPLOAD_GOOGLE_TAKEOUT: 'Google Takeout',
+    UPLOAD_FILES: 'File',
+    UPLOAD_DIRS: 'Folder',
+    UPLOAD_GOOGLE_TAKEOUT: 'Google takeout',
     CANCEL_UPLOADS: 'Cancel uploads',
     DEDUPLICATE_FILES: 'Deduplicate files',
     NO_DUPLICATES_FOUND: "You've no duplicate files that can be cleared",
@@ -787,8 +758,35 @@ const englishConstants = {
         'Your existing files will not be deleted, but ente will stop automatically updating the linked ente album on changes in this folder.',
     YES_STOP: 'Yes, stop',
     MONTH_SHORT: 'mo',
-    YEAR_SHORT: 'yr',
+    YEAR: 'year',
     FAMILY_PLAN: 'Family plan',
+    DOWNLOAD_LOGS: 'Download logs',
+    DOWNLOAD_LOGS_MESSAGE: () => (
+        <>
+            <p>
+                This will download debug logs, which you can email to us to help
+                debug your issue.
+            </p>
+            <p>
+                Please note that file names will be included to help track
+                issues with specific files.
+            </p>
+        </>
+    ),
+    CHANGE_FOLDER: 'Change Folder',
+    TWO_MONTHS_FREE: 'Get 2 months free on yearly plans',
+    GB: 'GB',
+    POPULAR: 'Popular',
+    FREE_PLAN_OPTION_LABEL: 'Continue with free trial',
+    FREE_PLAN_DESCRIPTION: '1 GB for 1 year',
+    CURRENT_USAGE: (usage) => (
+        <>
+            Current usage is <strong>{usage}</strong>
+        </>
+    ),
+    WEAK_DEVICE:
+        "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
+    DRAG_AND_DROP_HINT: 'Or drag and drop into the ente window',
 };
 
 export default englishConstants;

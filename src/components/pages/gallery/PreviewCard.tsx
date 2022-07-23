@@ -8,10 +8,12 @@ import { GalleryContext } from 'pages/gallery';
 import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import LivePhotoIndicatorOverlay from 'components/icons/LivePhotoIndicatorOverlay';
-import { isLivePhoto } from 'utils/file';
+import LivePhotoIcon from '@mui/icons-material/LightMode';
+import { formatDateRelative, isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from 'utils/sentry';
+import { Overlay } from 'components/Container';
+import { TRASH_SECTION } from 'constants/collection';
 
 interface IProps {
     file: EnteFile;
@@ -26,6 +28,7 @@ interface IProps {
     isRangeSelectActive?: boolean;
     selectOnClick?: boolean;
     isInsSelectRange?: boolean;
+    activeCollection?: number;
 }
 
 const Check = styled('input')<{ active: boolean }>`
@@ -144,6 +147,12 @@ export const SelectedOverlay = styled('div')<{ selected: boolean }>`
     width: 100%;
     ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
     border-radius: 4px;
+`;
+
+export const LivePhotoIndicatorOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
 `;
 
 const Cont = styled('div')<{ disabled: boolean }>`
@@ -311,7 +320,7 @@ export default function PreviewCard(props: IProps) {
             <InSelectRangeOverLay
                 active={isRangeSelectActive && isInsSelectRange}
             />
-            {isLivePhoto(file) && <LivePhotoIndicatorOverlay />}
+            {isLivePhoto(file) && <LivePhotoIndicator />}
             {deduplicateContext.isOnDeduplicatePage && (
                 <FileAndCollectionNameOverlay>
                     <p>{file.metadata.title}</p>
@@ -322,6 +331,19 @@ export default function PreviewCard(props: IProps) {
                     </p>
                 </FileAndCollectionNameOverlay>
             )}
+            {props?.activeCollection === TRASH_SECTION && file.isTrashed && (
+                <FileAndCollectionNameOverlay>
+                    <p>{formatDateRelative(file.deleteBy / 1000)}</p>
+                </FileAndCollectionNameOverlay>
+            )}
         </Cont>
+    );
+}
+
+function LivePhotoIndicator() {
+    return (
+        <LivePhotoIndicatorOverlay>
+            <LivePhotoIcon />
+        </LivePhotoIndicatorOverlay>
     );
 }

@@ -7,6 +7,7 @@ export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryConte
         passwordToken: null,
         accessedThroughSharedURL: false,
         openReportForm: () => null,
+        photoListHeader: null,
     };
 
 export const PublicCollectionGalleryContext =

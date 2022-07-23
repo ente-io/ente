@@ -1,18 +1,20 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { enableTwoFactor, setupTwoFactor } from 'services/userService';
 import constants from 'utils/strings/constants';
 import VerticallyCentered from 'components/Container';
 import { useRouter } from 'next/router';
-import VerifyTwoFactor from 'components/TwoFactor/VerifyForm';
+import VerifyTwoFactor, {
+    VerifyTwoFactorCallback,
+} from 'components/TwoFactor/VerifyForm';
 import { encryptWithRecoveryKey } from 'utils/crypto';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
-import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import { TwoFactorSecret } from 'types/user';
 import Card from '@mui/material/Card';
 import { Box, CardContent, Typography } from '@mui/material';
 import { TwoFactorSetup } from 'components/TwoFactor/Setup';
 import LinkButton from 'components/pages/gallery/LinkButton';
+import { logError } from 'utils/sentry';
 
 export enum SetupMode {
     QR_CODE,
@@ -24,7 +26,6 @@ export default function SetupTwoFactor() {
         useState<TwoFactorSecret>(null);
 
     const router = useRouter();
-    const appContext = useContext(AppContext);
     useEffect(() => {
         if (twoFactorSecret) {
             return;
@@ -34,28 +35,24 @@ export default function SetupTwoFactor() {
                 const twoFactorSecret = await setupTwoFactor();
                 setTwoFactorSecret(twoFactorSecret);
             } catch (e) {
-                appContext.setDisappearingFlashMessage({
-                    message: constants.TWO_FACTOR_SETUP_FAILED,
-                    type: FLASH_MESSAGE_TYPE.DANGER,
-                });
-                router.push(PAGES.GALLERY);
+                logError(e, 'failed to get two factor setup code');
             }
         };
         main();
     }, []);
 
-    const onSubmit = async (otp: string) => {
+    const onSubmit: VerifyTwoFactorCallback = async (
+        otp: string,
+        markSuccessful
+    ) => {
         const recoveryEncryptedTwoFactorSecret = await encryptWithRecoveryKey(
             twoFactorSecret.secretCode
         );
         await enableTwoFactor(otp, recoveryEncryptedTwoFactorSecret);
+        await markSuccessful();
         setData(LS_KEYS.USER, {
             ...getData(LS_KEYS.USER),
             isTwoFactorEnabled: true,
-        });
-        appContext.setDisappearingFlashMessage({
-            message: constants.TWO_FACTOR_SETUP_SUCCESS,
-            type: FLASH_MESSAGE_TYPE.SUCCESS,
         });
         router.push(PAGES.GALLERY);
     };

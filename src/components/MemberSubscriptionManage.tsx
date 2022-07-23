@@ -1,14 +1,19 @@
-import { Button, DialogContent, Typography } from '@mui/material';
-import VerticallyCentered from 'components/Container';
-import DialogBoxBase from 'components/DialogBox/base';
-import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
+import { Box, Button, Dialog, DialogContent, Typography } from '@mui/material';
+import VerticallyCentered, { FlexWrapper } from 'components/Container';
 import { AppContext } from 'pages/_app';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import billingService from 'services/billingService';
 import { getFamilyPlanAdmin } from 'utils/billing';
+import { preloadImage } from 'utils/common';
 import constants from 'utils/strings/constants';
+import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
+
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {
-    const { setDialogMessage } = useContext(AppContext);
+    const { setDialogMessage, isMobile } = useContext(AppContext);
+
+    useEffect(() => {
+        preloadImage('/images/family-plan');
+    }, []);
 
     async function onLeaveFamilyClick() {
         try {
@@ -26,7 +31,7 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
             title: `${constants.LEAVE_FAMILY_PLAN}`,
             content: constants.LEAVE_FAMILY_CONFIRM,
             proceed: {
-                text: constants.LEAVE_FAMILY_PLAN,
+                text: constants.LEAVE,
                 action: onLeaveFamilyClick,
                 variant: 'danger',
             },
@@ -40,35 +45,48 @@ export function MemberSubscriptionManage({ open, userDetails, onClose }) {
     }
 
     return (
-        <DialogBoxBase open={open} onClose={onClose} maxWidth="xs">
+        <Dialog
+            fullWidth
+            open={open}
+            onClose={onClose}
+            maxWidth="xs"
+            fullScreen={isMobile}>
             <DialogTitleWithCloseButton onClose={onClose}>
-                <Typography variant="h3">{constants.SUBSCRIPTION}</Typography>
+                <Typography variant="h3" fontWeight={'bold'}>
+                    {constants.SUBSCRIPTION}
+                </Typography>
                 <Typography color={'text.secondary'}>
                     {constants.FAMILY_PLAN}
                 </Typography>
             </DialogTitleWithCloseButton>
             <DialogContent>
                 <VerticallyCentered>
-                    <Typography color="text.secondary">
-                        {constants.FAMILY_SUBSCRIPTION_INFO}
-                    </Typography>
-                    <Typography>
-                        {getFamilyPlanAdmin(userDetails.familyData)?.email}
-                    </Typography>
+                    <Box mb={4}>
+                        <Typography color="text.secondary">
+                            {constants.FAMILY_SUBSCRIPTION_INFO}
+                        </Typography>
+                        <Typography>
+                            {getFamilyPlanAdmin(userDetails.familyData)?.email}
+                        </Typography>
+                    </Box>
+
                     <img
-                        height="267px"
-                        width="256px"
-                        src="/images/family_plan_leave@3x.png"
+                        height={256}
+                        src="/images/family-plan/1x.png"
+                        srcSet="/images/family-plan/2x.png 2x,
+                                /images/family-plan/3x.png 3x"
                     />
-                    <Button
-                        size="large"
-                        variant="outlined"
-                        color="danger"
-                        onClick={confirmLeaveFamily}>
-                        {constants.LEAVE_FAMILY_PLAN}
-                    </Button>
+                    <FlexWrapper px={2}>
+                        <Button
+                            size="large"
+                            variant="outlined"
+                            color="danger"
+                            onClick={confirmLeaveFamily}>
+                            {constants.LEAVE_FAMILY_PLAN}
+                        </Button>
+                    </FlexWrapper>
                 </VerticallyCentered>
             </DialogContent>
-        </DialogBoxBase>
+        </Dialog>
     );
 }

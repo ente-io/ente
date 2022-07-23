@@ -1,13 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
 import { getRecoveryKey } from 'utils/crypto';
 import constants from 'utils/strings/constants';
-import DialogBox from '../DialogBox';
 import CodeBlock from '../CodeBlock';
-import { ButtonProps, Typography } from '@mui/material';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    Typography,
+} from '@mui/material';
 import * as bip39 from 'bip39';
 import { DashedBorderWrapper } from './styledComponents';
-import { DialogBoxAttributes } from 'types/dialogBox';
+import { AppContext } from 'pages/_app';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -21,7 +27,9 @@ interface Props {
 }
 
 function RecoveryKey({ somethingWentWrong, ...props }: Props) {
+    const appContext = useContext(AppContext);
     const [recoveryKey, setRecoveryKey] = useState(null);
+
     useEffect(() => {
         if (!props.show) {
             return;
@@ -43,34 +51,35 @@ function RecoveryKey({ somethingWentWrong, ...props }: Props) {
         props.onHide();
     }
 
-    const recoveryKeyDialogAttributes: DialogBoxAttributes = {
-        title: constants.RECOVERY_KEY,
-        close: {
-            text: constants.SAVE_LATER,
-            variant: 'secondary' as ButtonProps['color'],
-        },
-        proceed: {
-            text: constants.SAVE,
-            action: onSaveClick,
-            disabled: !recoveryKey,
-            variant: 'accent' as ButtonProps['color'],
-        },
-    };
-
     return (
-        <DialogBox
+        <Dialog
+            fullScreen={appContext.isMobile}
             open={props.show}
             onClose={props.onHide}
-            size="sm"
-            attributes={recoveryKeyDialogAttributes}>
-            <Typography mb={3}>{constants.RECOVERY_KEY_DESCRIPTION}</Typography>
-            <DashedBorderWrapper>
-                <CodeBlock code={recoveryKey} />
-                <Typography m={2}>
-                    {constants.KEY_NOT_STORED_DISCLAIMER}
+            maxWidth="xs">
+            <DialogTitleWithCloseButton onClose={props.onHide}>
+                {constants.RECOVERY_KEY}
+            </DialogTitleWithCloseButton>
+            <DialogContent>
+                <Typography mb={3}>
+                    {constants.RECOVERY_KEY_DESCRIPTION}
                 </Typography>
-            </DashedBorderWrapper>
-        </DialogBox>
+                <DashedBorderWrapper>
+                    <CodeBlock code={recoveryKey} />
+                    <Typography m={2}>
+                        {constants.KEY_NOT_STORED_DISCLAIMER}
+                    </Typography>
+                </DashedBorderWrapper>
+            </DialogContent>
+            <DialogActions>
+                <Button color="secondary" size="large" onClick={props.onHide}>
+                    {constants.SAVE_LATER}
+                </Button>
+                <Button color="accent" size="large" onClick={onSaveClick}>
+                    {constants.SAVE}
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 }
 export default RecoveryKey;

@@ -11,7 +11,7 @@ export const CopyButtonWrapper = styled(IconButton)`
     position: absolute;
     top: 0px;
     right: 0px;
-    margin: ${({ theme }) => theme.spacing(1)};
+    margin-top: ${({ theme }) => theme.spacing(1)};
 `;
 
 export const CodeWrapper = styled('div')`

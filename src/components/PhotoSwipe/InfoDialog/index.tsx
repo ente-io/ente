@@ -1,15 +1,25 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { formatDateTime } from 'utils/file';
 import { RenderFileName } from './RenderFileName';
 import { ExifData } from './ExifData';
 import { RenderCreationTime } from './RenderCreationTime';
 import { RenderInfoItem } from './RenderInfoItem';
-import DialogBoxBase from 'components/DialogBox/base';
-import DialogTitleWithCloseButton from 'components/DialogBox/titleWithCloseButton';
-import { DialogContent, Link, Typography } from '@mui/material';
+import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import { Dialog, DialogContent, Link, styled, Typography } from '@mui/material';
+import { AppContext } from 'pages/_app';
 
-export function InfoModal({
+const FileInfoDialog = styled(Dialog)(({ theme }) => ({
+    zIndex: 1501,
+    '& .MuiDialog-container': {
+        alignItems: 'flex-start',
+    },
+    '& .MuiDialog-paper': {
+        padding: theme.spacing(2),
+    },
+}));
+
+export function FileInfo({
     shouldDisableEdits,
     showInfo,
     handleCloseInfo,
@@ -19,16 +29,12 @@ export function InfoModal({
     exif,
     scheduleUpdate,
 }) {
+    const appContext = useContext(AppContext);
     return (
-        <DialogBoxBase
-            sx={{
-                zIndex: '1501',
-                '& .MuiDialog-container': {
-                    alignItems: 'flex-start',
-                },
-            }}
+        <FileInfoDialog
             open={showInfo}
-            onClose={handleCloseInfo}>
+            onClose={handleCloseInfo}
+            fullScreen={appContext.isMobile}>
             <DialogTitleWithCloseButton onClose={handleCloseInfo}>
                 {constants.INFO}
             </DialogTitleWithCloseButton>
@@ -77,6 +83,6 @@ export function InfoModal({
                     </>
                 )}
             </DialogContent>
-        </DialogBoxBase>
+        </FileInfoDialog>
     );
 }

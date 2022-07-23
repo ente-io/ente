@@ -17,12 +17,11 @@ const ShowHidePassword = ({
 }: Iprops) => (
     <InputAdornment position="end">
         <IconButton
-            color="primary"
+            color="secondary"
             aria-label="toggle password visibility"
             onClick={handleClickShowPassword}
             onMouseDown={handleMouseDownPassword}
-            edge="end"
-            sx={{ color: 'stroke.secondary' }}>
+            edge="end">
             {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
         </IconButton>
     </InputAdornment>

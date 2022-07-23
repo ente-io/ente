@@ -1,51 +1,53 @@
 import React, { useEffect, useState } from 'react';
-import { PublicURL } from 'types/collection';
+import { Collection, PublicURL } from 'types/collection';
 import { appendCollectionKeyToShareURL } from 'utils/collection';
 import PublicShareControl from './control';
 import PublicShareLink from './link';
 import PublicShareManage from './manage';
 
-export default function PublicShare({ collection }) {
-    const [sharableLinkError, setSharableLinkError] = useState(null);
+export default function PublicShare({
+    collection,
+}: {
+    collection: Collection;
+}) {
     const [publicShareUrl, setPublicShareUrl] = useState<string>(null);
     const [publicShareProp, setPublicShareProp] = useState<PublicURL>(null);
 
     useEffect(() => {
-        const main = async () => {
-            if (collection?.publicURLs?.[0]?.url) {
-                const t = await appendCollectionKeyToShareURL(
-                    collection?.publicURLs?.[0]?.url,
-                    collection.key
-                );
-                setPublicShareUrl(t);
-                setPublicShareProp(collection?.publicURLs?.[0] as PublicURL);
-            } else {
-                setPublicShareUrl(null);
-                setPublicShareProp(null);
-            }
-        };
-        main();
+        if (collection.publicURLs?.length) {
+            setPublicShareProp(collection.publicURLs[0]);
+        }
     }, [collection]);
+
+    useEffect(() => {
+        if (publicShareProp) {
+            const url = appendCollectionKeyToShareURL(
+                publicShareProp.url,
+                collection.key
+            );
+            setPublicShareUrl(url);
+        } else {
+            setPublicShareUrl(null);
+        }
+    }, [publicShareProp]);
 
     return (
         <>
             <PublicShareControl
-                setPublicShareUrl={setPublicShareUrl}
+                setPublicShareProp={setPublicShareProp}
                 collection={collection}
-                publicShareUrl={publicShareUrl}
-                sharableLinkError={sharableLinkError}
-                setSharableLinkError={setSharableLinkError}
+                publicShareActive={!!publicShareProp}
             />
-            {publicShareUrl && (
-                <PublicShareLink publicShareUrl={publicShareUrl} />
-            )}
             {publicShareProp && (
-                <PublicShareManage
-                    publicShareProp={publicShareProp}
-                    collection={collection}
-                    setPublicShareProp={setPublicShareProp}
-                    setSharableLinkError={setSharableLinkError}
-                />
+                <>
+                    <PublicShareLink publicShareUrl={publicShareUrl} />
+
+                    <PublicShareManage
+                        publicShareProp={publicShareProp}
+                        collection={collection}
+                        setPublicShareProp={setPublicShareProp}
+                    />
+                </>
             )}
         </>
     );

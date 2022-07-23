@@ -4,7 +4,7 @@ import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import {
     verifyOtt,
-    getOtt,
+    sendOtt,
     logoutUser,
     clearFiles,
     putAttributes,
@@ -23,6 +23,8 @@ import FormContainer from 'components/Form/FormContainer';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
+import EnteSpinner from 'components/EnteSpinner';
+import VerticallyCentered from 'components/Container';
 
 export default function Verify() {
     const [email, setEmail] = useState('');
@@ -114,19 +116,23 @@ export default function Verify() {
 
     const resendEmail = async () => {
         setResend(1);
-        await getOtt(email);
+        await sendOtt(email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
 
     if (!email) {
-        return null;
+        return (
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
+        );
     }
 
     return (
         <FormContainer>
             <FormPaper>
-                <FormPaperTitle sx={{ mb: 14 }}>
+                <FormPaperTitle sx={{ mb: 14, wordBreak: 'break-word' }}>
                     {constants.EMAIL_SENT({ email })}
                 </FormPaperTitle>
                 <Typography color={'text.secondary'} mb={2} variant="body2">
@@ -134,6 +140,7 @@ export default function Verify() {
                 </Typography>
                 <SingleInputForm
                     fieldType="text"
+                    autoComplete="one-time-code"
                     placeholder={constants.ENTER_OTT}
                     buttonText={constants.VERIFY}
                     callback={onSubmit}

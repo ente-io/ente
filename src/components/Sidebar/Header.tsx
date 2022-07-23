@@ -10,12 +10,12 @@ interface IProps {
 
 export default function HeaderSection({ closeSidebar }: IProps) {
     return (
-        <SpaceBetweenFlex>
+        <SpaceBetweenFlex mt={0.5} mb={1} pl={1.5}>
             <EnteLogo />
             <IconButton
                 aria-label="close"
                 onClick={closeSidebar}
-                sx={{ color: 'stroke.secondary' }}>
+                color="secondary">
                 <CloseIcon fontSize="small" />
             </IconButton>
         </SpaceBetweenFlex>

@@ -17,18 +17,17 @@ import {
     TwoFactorRecoveryResponse,
     UserDetails,
 } from 'types/user';
-import { getFamilyData, isPartOfFamily } from 'utils/billing';
+import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
-import { runningInBrowser } from '../utils/common';
-import { ElectronAPIsInterface } from '../types/electron';
+import desktopService from './desktopService';
 
 const ENDPOINT = getEndpoint();
 
 const HAS_SET_KEYS = 'hasSetKeys';
 
-export const getOtt = (email: string) =>
-    HTTPService.get(`${ENDPOINT}/users/ott`, {
+export const sendOtt = (email: string) =>
+    HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
         client: 'web',
     });
@@ -124,13 +123,8 @@ export const logoutUser = async () => {
             // ignore
         }
         await clearFiles();
-
         if (isElectron()) {
-            const ElectronAPIs = (runningInBrowser() &&
-                window['ElectronAPIs']) as ElectronAPIsInterface;
-            if (ElectronAPIs && ElectronAPIs.clearElectronStore) {
-                ElectronAPIs.clearElectronStore();
-            }
+            desktopService.clearElectronStore();
         }
         router.push(PAGES.ROOT);
     } catch (e) {
@@ -271,11 +265,11 @@ export const _logout = async () => {
     }
 };
 
-export const getOTTForEmailChange = async (email: string) => {
+export const sendOTTForEmailChange = async (email: string) => {
     if (!getToken()) {
         return null;
     }
-    await HTTPService.get(`${ENDPOINT}/users/ott`, {
+    await HTTPService.post(`${ENDPOINT}/users/ott`, {
         email,
         client: 'web',
         purpose: 'change',
@@ -320,7 +314,7 @@ export const getUserDetailsV2 = async (): Promise<UserDetails> => {
 export const getFamilyPortalRedirectURL = async () => {
     try {
         const jwtToken = await getFamiliesToken();
-        const isFamilyCreated = isPartOfFamily(getFamilyData());
+        const isFamilyCreated = isPartOfFamily(getLocalFamilyData());
         return `${getFamilyPortalURL()}?token=${jwtToken}&isFamilyCreated=${isFamilyCreated}&redirectURL=${
             window.location.origin
         }/gallery`;

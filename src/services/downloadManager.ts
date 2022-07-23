@@ -5,6 +5,7 @@ import {
     generateStreamFromArrayBuffer,
     convertForPreview,
     needsConversionForPreview,
+    createTypedObjectURL,
 } from 'utils/file';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
@@ -96,11 +97,19 @@ class DownloadManager {
                         file,
                         fileBlob
                     );
-                    return convertedBlobs.map((blob) =>
-                        URL.createObjectURL(blob)
+                    return await Promise.all(
+                        convertedBlobs.map(
+                            async (blob) =>
+                                await createTypedObjectURL(
+                                    blob,
+                                    file.metadata.title
+                                )
+                        )
                     );
                 }
-                return [URL.createObjectURL(fileBlob)];
+                return [
+                    await createTypedObjectURL(fileBlob, file.metadata.title),
+                ];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
                 this.fileObjectURLPromise.set(

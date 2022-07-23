@@ -14,13 +14,29 @@ const PlanTile = styled('div')<{ current: boolean }>(({ theme, current }) => ({
         '&:hover': { backgroundColor: 'transparent' },
     }),
     width: ' 260px',
-    borderRadius: '8px 8px 0 0',
-    '&:not(:first-of-type)': {
-        borderTopLeftRadius: '0',
-    },
+    '@media (min-width: 1152px)': {
+        '&:first-of-type': {
+            borderTopLeftRadius: '8px',
+        },
 
-    '&:not(:last-of-type)': {
-        borderTopRightRadius: '0',
+        '&:last-of-type': {
+            borderTopRightRadius: '8px',
+        },
+    },
+    '@media (max-width: 1151px) and (min-width:551px)': {
+        '&:first-of-type': {
+            borderTopLeftRadius: '8px',
+        },
+
+        '&:nth-of-type(2)': {
+            borderTopRightRadius: '8px',
+        },
+    },
+    '@media (max-width: 551px)': {
+        '&:first-of-type': {
+            borderTopLeftRadius: '8px',
+            borderTopRightRadius: '8px',
+        },
     },
 }));
 

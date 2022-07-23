@@ -1,14 +1,15 @@
-import { FluidContainer, IconButton } from 'components/Container';
+import { FluidContainer } from 'components/Container';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import constants from 'utils/strings/constants';
-import DeleteIcon from 'components/icons/DeleteIcon';
 import React, { useContext } from 'react';
-import { styled } from '@mui/material';
+import { Box, IconButton, styled } from '@mui/material';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { IconWithMessage } from 'components/IconWithMessage';
 import { AppContext } from 'pages/_app';
 import CloseIcon from '@mui/icons-material/Close';
 import BackButton from '@mui/icons-material/ArrowBackOutlined';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { getTrashFilesMessage } from 'utils/ui';
 
 const VerticalLine = styled('div')`
     position: absolute;
@@ -41,16 +42,7 @@ export default function DeduplicateOptions({
     const { setDialogMessage } = useContext(AppContext);
 
     const trashHandler = () =>
-        setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.TRASH_MESSAGE,
-            proceed: {
-                action: deleteFileHelper,
-                text: constants.MOVE_TO_TRASH,
-                variant: 'danger',
-            },
-            close: { text: constants.CANCEL },
-        });
+        setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     return (
         <SelectionBar>
@@ -64,9 +56,9 @@ export default function DeduplicateOptions({
                         <BackButton />
                     </IconButton>
                 )}
-                <div>
+                <Box ml={1.5}>
                     {count} {constants.SELECTED}
-                </div>
+                </Box>
             </FluidContainer>
             <input
                 type="checkbox"

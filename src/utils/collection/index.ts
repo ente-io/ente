@@ -5,11 +5,10 @@ import {
     restoreToCollection,
     updateCollectionMagicMetadata,
 } from 'services/collectionService';
-import { downloadFiles, getSelectedFiles } from 'utils/file';
+import { downloadFiles } from 'utils/file';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { CustomError, ServerErrorCodes } from 'utils/error';
-import { SelectedState } from 'types/gallery';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
@@ -19,7 +18,14 @@ import {
     CollectionMagicMetadataProps,
     CollectionSummaries,
 } from 'types/collection';
-import { CollectionType, SYSTEM_COLLECTION_TYPES } from 'constants/collection';
+import {
+    CollectionSummaryType,
+    CollectionType,
+    HIDE_FROM_COLLECTION_BAR_TYPES,
+    OPTIONS_NOT_HAVING_COLLECTION_TYPES,
+    SYSTEM_COLLECTION_TYPES,
+    UPLOAD_NOT_ALLOWED_COLLECTION_TYPES,
+} from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import {
@@ -36,22 +42,18 @@ export enum COLLECTION_OPS_TYPE {
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
-    setCollectionSelectorView: (value: boolean) => void,
-    selected: SelectedState,
-    files: EnteFile[],
-    setActiveCollection: (id: number) => void,
-    collection: Collection
+    collection: Collection,
+    selectedFiles: EnteFile[],
+    selectedCollectionID: number
 ) {
-    setCollectionSelectorView(false);
-    const selectedFiles = getSelectedFiles(selected, files);
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
             await addToCollection(collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.MOVE:
             await moveToCollection(
-                selected.collectionID,
                 collection,
+                selectedCollectionID,
                 selectedFiles
             );
             break;
@@ -64,7 +66,6 @@ export async function handleCollectionOps(
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);
     }
-    setActiveCollection(collection.id);
 }
 
 export function getSelectedCollection(
@@ -111,7 +112,7 @@ export async function downloadAllCollectionFiles(collectionID: number) {
     }
 }
 
-export async function appendCollectionKeyToShareURL(
+export function appendCollectionKeyToShareURL(
     url: string,
     collectionKey: string
 ) {
@@ -202,6 +203,18 @@ export const hasNonEmptyCollections = (
     return collectionSummaries?.size <= 3;
 };
 
-export const isSystemCollection = (type: CollectionType) => {
+export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
+    return !UPLOAD_NOT_ALLOWED_COLLECTION_TYPES.has(type);
+};
+
+export const isSystemCollection = (type: CollectionSummaryType) => {
     return SYSTEM_COLLECTION_TYPES.has(type);
+};
+
+export const shouldShowOptions = (type: CollectionSummaryType) => {
+    return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
+};
+
+export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
+    return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };

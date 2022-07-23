@@ -43,6 +43,8 @@ export enum CustomError {
     TOO_LARGE_LIVE_PHOTO_ASSETS = 'too large live photo assets',
     NOT_A_DATE = 'not a date',
     FILE_ID_NOT_FOUND = 'file with id not found',
+    WEAK_DEVICE = 'password decryption failed on the device',
+    INCORRECT_PASSWORD = 'incorrect password',
 }
 
 function parseUploadErrorCodes(error) {

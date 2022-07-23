@@ -1,3 +1,4 @@
+import { Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { Subscription } from 'types/billing';
@@ -6,7 +7,6 @@ import {
     cancelSubscription,
     updatePaymentMethod,
     manageFamilyMethod,
-    hasPaidSubscription,
     hasStripeSubscription,
     isSubscriptionCancelled,
 } from 'utils/billing';
@@ -23,21 +23,25 @@ export function ManageSubscription({
     closeModal,
     setLoading,
 }: Iprops) {
+    const appContext = useContext(AppContext);
+    const openFamilyPortal = () =>
+        manageFamilyMethod(appContext.setDialogMessage, setLoading);
+
     return (
-        <>
-            {hasPaidSubscription(subscription) ? (
-                <PaidSubscriptionOptions
+        <Stack spacing={1}>
+            {hasStripeSubscription(subscription) && (
+                <StripeSubscriptionOptions
                     subscription={subscription}
+                    closeModal={closeModal}
                     setLoading={setLoading}
-                    closeModal={closeModal}
-                />
-            ) : (
-                <FreeSubscriptionOptions
-                    subscription={subscription}
-                    closeModal={closeModal}
                 />
             )}
-        </>
+            <ManageSubscriptionButton
+                color="secondary"
+                onClick={openFamilyPortal}>
+                {constants.MANAGE_FAMILY_PORTAL}
+            </ManageSubscriptionButton>
+        </Stack>
     );
 }
 
@@ -70,7 +74,7 @@ function StripeSubscriptionOptions({
         });
     const confirmCancel = () =>
         appContext.setDialogMessage({
-            title: constants.CONFIRM_CANCEL_SUBSCRIPTION,
+            title: constants.CANCEL_SUBSCRIPTION,
             content: constants.CANCEL_SUBSCRIPTION_MESSAGE(),
             proceed: {
                 text: constants.CANCEL_SUBSCRIPTION,
@@ -95,55 +99,22 @@ function StripeSubscriptionOptions({
         <>
             {isSubscriptionCancelled(subscription) ? (
                 <ManageSubscriptionButton
-                    color="accent"
+                    color="secondary"
                     onClick={confirmActivation}>
                     {constants.ACTIVATE_SUBSCRIPTION}
                 </ManageSubscriptionButton>
             ) : (
                 <ManageSubscriptionButton
-                    color="danger"
+                    color="secondary"
                     onClick={confirmCancel}>
                     {constants.CANCEL_SUBSCRIPTION}
                 </ManageSubscriptionButton>
             )}
             <ManageSubscriptionButton
-                color="accent"
+                color="secondary"
                 onClick={openManagementPortal}>
                 {constants.MANAGEMENT_PORTAL}
             </ManageSubscriptionButton>
         </>
-    );
-}
-
-function PaidSubscriptionOptions({
-    subscription,
-    setLoading,
-    closeModal,
-}: Iprops) {
-    const appContext = useContext(AppContext);
-    const openFamilyPortal = () =>
-        manageFamilyMethod(appContext.setDialogMessage, setLoading);
-
-    return (
-        <>
-            {hasStripeSubscription(subscription) && (
-                <StripeSubscriptionOptions
-                    subscription={subscription}
-                    closeModal={closeModal}
-                    setLoading={setLoading}
-                />
-            )}
-            <ManageSubscriptionButton color="accent" onClick={openFamilyPortal}>
-                {constants.MANAGE_FAMILY_PORTAL}
-            </ManageSubscriptionButton>
-        </>
-    );
-}
-
-function FreeSubscriptionOptions({ closeModal }: Omit<Iprops, 'setLoading'>) {
-    return (
-        <ManageSubscriptionButton color="accent" onClick={closeModal}>
-            {constants.SKIP_SUBSCRIPTION_PURCHASE}
-        </ManageSubscriptionButton>
     );
 }

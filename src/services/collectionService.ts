@@ -32,6 +32,7 @@ import {
     TRASH_SECTION,
     COLLECTION_SORT_ORDER,
     ALL_SECTION,
+    CollectionSummaryType,
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { EncryptionResult } from 'types/upload';
@@ -418,8 +419,8 @@ export const restoreToCollection = async (
     }
 };
 export const moveToCollection = async (
-    fromCollectionID: number,
     toCollection: Collection,
+    fromCollectionID: number,
     files: EnteFile[]
 ) => {
     try {
@@ -754,11 +755,17 @@ export function sortCollectionSummaries(
 }
 
 function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
-    const sortedFiles = sortFiles([first, second]);
-    if (sortedFiles[0].id !== first.id) {
+    if (!first) {
         return 1;
-    } else {
+    } else if (!second) {
         return -1;
+    } else {
+        const sortedFiles = sortFiles([first, second]);
+        if (sortedFiles[0].id !== first.id) {
+            return 1;
+        } else {
+            return -1;
+        }
     }
 }
 
@@ -777,17 +784,21 @@ export function getCollectionSummaries(
     const user: User = getData(LS_KEYS.USER);
 
     for (const collection of collections) {
-        collectionSummaries.set(collection.id, {
-            id: collection.id,
-            name: collection.name,
-            latestFile: collectionLatestFiles.get(collection.id),
-            fileCount: collectionFilesCount.get(collection.id) ?? 0,
-            updationTime: collection.updationTime,
-            type:
-                collection.owner.id !== user.id
-                    ? CollectionType.shared
-                    : collection.type,
-        });
+        if (collectionFilesCount.get(collection.id)) {
+            collectionSummaries.set(collection.id, {
+                id: collection.id,
+                name: collection.name,
+                latestFile: collectionLatestFiles.get(collection.id),
+                fileCount: collectionFilesCount.get(collection.id),
+                updationTime: collection.updationTime,
+                type:
+                    collection.owner.id !== user.id
+                        ? CollectionSummaryType.shared
+                        : IsArchived(collection)
+                        ? CollectionSummaryType.archived
+                        : CollectionSummaryType[collection.type],
+            });
+        }
     }
     collectionSummaries.set(
         ALL_SECTION,
@@ -813,7 +824,7 @@ export function getCollectionSummaries(
         )
     );
 
-    return filterOutEmptyCollectionSummary(collectionSummaries);
+    return collectionSummaries;
 }
 
 function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
@@ -851,7 +862,7 @@ function getAllCollectionSummaries(
     return {
         id: ALL_SECTION,
         name: constants.ALL_SECTION_NAME,
-        type: CollectionType.all,
+        type: CollectionSummaryType.all,
         latestFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: allSectionFileCount,
         updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
@@ -865,7 +876,7 @@ function getArchivedCollectionSummaries(
     return {
         id: ARCHIVE_SECTION,
         name: constants.ARCHIVE_SECTION_NAME,
-        type: CollectionType.archive,
+        type: CollectionSummaryType.archive,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
@@ -879,18 +890,9 @@ function getTrashedCollectionSummaries(
     return {
         id: TRASH_SECTION,
         name: constants.TRASH,
-        type: CollectionType.trash,
+        type: CollectionSummaryType.trash,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
     };
-}
-
-function filterOutEmptyCollectionSummary(
-    collectionSummaries: CollectionSummaries
-) {
-    return new Map(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        [...collectionSummaries.entries()].filter(([_, v]) => v.fileCount > 0)
-    ) as CollectionSummaries;
 }

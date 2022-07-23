@@ -1,18 +1,17 @@
 import { Formik, FormikHelpers } from 'formik';
-import React, { useContext, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import * as Yup from 'yup';
 import constants from 'utils/strings/constants';
 import SubmitButton from 'components/SubmitButton';
 import router from 'next/router';
-import { changeEmail, getOTTForEmailChange } from 'services/userService';
-import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { changeEmail, sendOTTForEmailChange } from 'services/userService';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { PAGES } from 'constants/pages';
-import { TextField } from '@mui/material';
+import { Alert, TextField } from '@mui/material';
 import Container from './Container';
 import LinkButton from './pages/gallery/LinkButton';
-import { Alert } from 'react-bootstrap';
 import FormPaperFooter from './Form/FormPaper/Footer';
+import { sleep } from 'utils/common';
 
 interface formValues {
     email: string;
@@ -23,9 +22,9 @@ function ChangeEmailForm() {
     const [loading, setLoading] = useState(false);
     const [ottInputVisible, setShowOttInputVisibility] = useState(false);
     const ottInputRef = useRef(null);
-    const appContext = useContext(AppContext);
     const [email, setEmail] = useState(null);
     const [showMessage, setShowMessage] = useState(false);
+    const [success, setSuccess] = useState(false);
 
     const requestOTT = async (
         { email }: formValues,
@@ -33,7 +32,7 @@ function ChangeEmailForm() {
     ) => {
         try {
             setLoading(true);
-            await getOTTForEmailChange(email);
+            await sendOTTForEmailChange(email);
             setEmail(email);
             setShowOttInputVisibility(true);
             setShowMessage(true);
@@ -54,15 +53,14 @@ function ChangeEmailForm() {
             setLoading(true);
             await changeEmail(email, ott);
             setData(LS_KEYS.USER, { ...getData(LS_KEYS.USER), email });
-            appContext.setDisappearingFlashMessage({
-                message: constants.EMAIL_UDPATE_SUCCESSFUL,
-                type: FLASH_MESSAGE_TYPE.SUCCESS,
-            });
+            setLoading(false);
+            setSuccess(true);
+            await sleep(1000);
             router.push(PAGES.GALLERY);
         } catch (e) {
+            setLoading(false);
             setFieldError('ott', `${constants.INCORRECT_CODE}`);
         }
-        setLoading(false);
     };
 
     const goToGallery = () => router.push(PAGES.GALLERY);
@@ -83,15 +81,13 @@ function ChangeEmailForm() {
             onSubmit={!ottInputVisible ? requestOTT : requestEmailChange}>
             {({ values, errors, handleChange, handleSubmit }) => (
                 <>
-                    <Alert
-                        variant="success"
-                        show={showMessage}
-                        style={{ paddingBottom: 0 }}
-                        transition
-                        dismissible
-                        onClose={() => setShowMessage(false)}>
-                        {constants.EMAIL_SENT({ email })}
-                    </Alert>
+                    {showMessage && (
+                        <Alert
+                            color="accent"
+                            onClose={() => setShowMessage(false)}>
+                            {constants.EMAIL_SENT({ email })}
+                        </Alert>
+                    )}
                     <form noValidate onSubmit={handleSubmit}>
                         <Container>
                             <TextField
@@ -121,6 +117,7 @@ function ChangeEmailForm() {
                                 />
                             )}
                             <SubmitButton
+                                success={success}
                                 sx={{ mt: 2 }}
                                 loading={loading}
                                 buttonText={

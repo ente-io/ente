@@ -3,13 +3,14 @@ import { VariableSizeList as List } from 'react-window';
 import { Box, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
-    IMAGE_CONTAINER_MAX_WIDTH,
     IMAGE_CONTAINER_MAX_HEIGHT,
     MIN_COLUMNS,
     DATE_CONTAINER_HEIGHT,
     GAP_BTW_TILES,
     SPACE_BTW_DATES,
     SIZE_AND_COUNT_CONTAINER_HEIGHT,
+    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO,
+    IMAGE_CONTAINER_MAX_WIDTH,
 } from 'constants/gallery';
 import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
@@ -30,7 +31,7 @@ export enum ITEM_TYPE {
     TIME = 'TIME',
     FILE = 'FILE',
     SIZE_AND_COUNT = 'SIZE_AND_COUNT',
-    STATIC = 'static',
+    OTHER = 'OTHER',
 }
 
 export interface TimeStampListItem {
@@ -55,28 +56,54 @@ const ListItem = styled('div')`
     justify-content: center;
 `;
 
-const getTemplateColumns = (columns: number, groups?: number[]): string => {
+const getTemplateColumns = (
+    columns: number,
+    shrinkRatio: number,
+    groups?: number[]
+): string => {
     if (groups) {
-        const sum = groups.reduce((acc, item) => acc + item, 0);
-        if (sum < columns) {
-            groups[groups.length - 1] += columns - sum;
-        }
+        // need to confirm why this was there
+        // const sum = groups.reduce((acc, item) => acc + item, 0);
+        // if (sum < columns) {
+        //     groups[groups.length - 1] += columns - sum;
+        // }
         return groups
-            .map((x) => `repeat(${x}, 1fr)`)
+            .map(
+                (x) =>
+                    `repeat(${x}, ${IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio}px)`
+            )
             .join(` ${SPACE_BTW_DATES}px `);
     } else {
-        return `repeat(${columns}, 1fr)`;
+        return `repeat(${columns},${
+            IMAGE_CONTAINER_MAX_WIDTH * shrinkRatio
+        }px)`;
     }
 };
 
+function getFractionFittableColumns(width: number): number {
+    return (
+        (width - 2 * getGapFromScreenEdge(width) + GAP_BTW_TILES) /
+        (IMAGE_CONTAINER_MAX_WIDTH + GAP_BTW_TILES)
+    );
+}
+
+function getGapFromScreenEdge(width: number) {
+    if (width > MIN_COLUMNS * IMAGE_CONTAINER_MAX_WIDTH) {
+        return 24;
+    } else {
+        return 4;
+    }
+}
+
 const ListContainer = styled(Box)<{
     columns: number;
+    shrinkRatio: number;
     groups?: number[];
 }>`
     user-select: none;
     display: grid;
-    grid-template-columns: ${({ columns, groups }) =>
-        getTemplateColumns(columns, groups)};
+    grid-template-columns: ${({ columns, shrinkRatio, groups }) =>
+        getTemplateColumns(columns, shrinkRatio, groups)};
     grid-column-gap: ${GAP_BTW_TILES}px;
     width: 100%;
     color: #fff;
@@ -141,6 +168,7 @@ export function PhotoList({
     resetFetching,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
+
     const timeStampListRef = useRef([]);
     const timeStampList = timeStampListRef?.current ?? [];
     const filteredDataCopyRef = useRef([]);
@@ -151,15 +179,17 @@ export function PhotoList({
     );
     const deduplicateContext = useContext(DeduplicateContext);
 
-    let columns = Math.floor(width / IMAGE_CONTAINER_MAX_WIDTH);
-    let listItemHeight = IMAGE_CONTAINER_MAX_HEIGHT;
+    const fittableColumns = getFractionFittableColumns(width);
+    let columns = Math.ceil(fittableColumns);
 
     let skipMerge = false;
     if (columns < MIN_COLUMNS) {
-        columns = MIN_COLUMNS;
-        listItemHeight = width / MIN_COLUMNS;
+        columns = MIN_COLUMNS - 1;
         skipMerge = true;
     }
+    const shrinkRatio = fittableColumns / columns;
+    const listItemHeight =
+        IMAGE_CONTAINER_MAX_HEIGHT * shrinkRatio + GAP_BTW_TILES;
 
     const refreshList = () => {
         listRef.current?.resetAfterIndex(0);
@@ -170,7 +200,15 @@ export function PhotoList({
         let timeStampList: TimeStampListItem[] = [];
 
         if (galleryContext.photoListHeader) {
-            timeStampList.push(getPhotoListHeader());
+            timeStampList.push(
+                getPhotoListHeader(galleryContext.photoListHeader)
+            );
+        } else if (publicCollectionGalleryContext.photoListHeader) {
+            timeStampList.push(
+                getPhotoListHeader(
+                    publicCollectionGalleryContext.photoListHeader
+                )
+            );
         }
         if (deduplicateContext.isOnDeduplicatePage) {
             skipMerge = true;
@@ -303,12 +341,12 @@ export function PhotoList({
         first.getMonth() === second.getMonth() &&
         first.getDate() === second.getDate();
 
-    const getPhotoListHeader = () => {
+    const getPhotoListHeader = (photoListHeader) => {
         return {
-            ...galleryContext.photoListHeader,
+            ...photoListHeader,
             item: (
                 <ListItemContainer span={columns}>
-                    {galleryContext.photoListHeader.item}
+                    {photoListHeader.item}
                 </ListItemContainer>
             ),
         };
@@ -316,7 +354,7 @@ export function PhotoList({
 
     const getEmptyListItem = () => {
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             item: (
                 <NothingContainer span={columns}>
                     <div>{constants.NOTHING_HERE}</div>
@@ -339,7 +377,7 @@ export function PhotoList({
             return sum;
         })();
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             item: <></>,
             height: Math.max(height - photoFrameHeight - FOOTER_HEIGHT, 0),
         };
@@ -347,7 +385,7 @@ export function PhotoList({
 
     const getAppDownloadFooter = () => {
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
@@ -359,7 +397,7 @@ export function PhotoList({
 
     const getAlbumsFooter = () => {
         return {
-            itemType: ITEM_TYPE.STATIC,
+            itemType: ITEM_TYPE.OTHER,
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
@@ -404,7 +442,11 @@ export function PhotoList({
                     // Check if items can be added to same list
                     if (
                         newList[newIndex + 1].items.length +
-                            items[index + 1].items.length <=
+                            items[index + 1].items.length +
+                            Math.ceil(
+                                newList[newIndex].dates.length *
+                                    SPACE_BTW_DATES_TO_IMAGE_CONTAINER_WIDTH_RATIO
+                            ) <=
                         columns
                     ) {
                         newList[newIndex].dates.push({
@@ -549,6 +591,7 @@ export function PhotoList({
                 <ListItem style={style}>
                     <ListContainer
                         columns={columns}
+                        shrinkRatio={shrinkRatio}
                         groups={timeStampList[index].groups}>
                         {renderListItem(timeStampList[index])}
                     </ListContainer>

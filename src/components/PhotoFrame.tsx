@@ -7,7 +7,6 @@ import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import PhotoSwipe from 'components/PhotoSwipe';
-import { formatDateRelative } from 'utils/file';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -36,7 +35,7 @@ const Container = styled('div')`
     width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
-    overflow-x: hidden;
+    overflow: hidden;
     .pswp-thumbnail {
         display: inline-block;
         cursor: pointer;
@@ -168,11 +167,6 @@ const PhotoFrame = ({
                 dataIndex: index,
                 w: window.innerWidth,
                 h: window.innerHeight,
-                ...(item.deleteBy && {
-                    title: constants.AUTOMATIC_BIN_DELETE_MESSAGE(
-                        formatDateRelative(item.deleteBy / 1000)
-                    ),
-                }),
             }))
             .filter((item) => {
                 if (deleted?.includes(item.id)) {
@@ -452,6 +446,7 @@ const PhotoFrame = ({
                     (index >= rangeStart && index <= currentHover) ||
                     (index >= currentHover && index <= rangeStart)
                 }
+                activeCollection={activeCollection}
             />
         ) : (
             <></>

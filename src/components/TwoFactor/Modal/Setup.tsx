@@ -7,13 +7,13 @@ import VerticallyCentered from 'components/Container';
 import { Button, Typography } from '@mui/material';
 
 interface Iprops {
-    close: () => void;
+    closeDialog: () => void;
 }
 
-export default function TwoFactorModalSetupSection({ close }: Iprops) {
+export default function TwoFactorModalSetupSection({ closeDialog }: Iprops) {
     const router = useRouter();
     const redirectToTwoFactorSetup = () => {
-        close();
+        closeDialog();
         router.push(PAGES.TWO_FACTOR_SETUP);
     };
 

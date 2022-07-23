@@ -29,12 +29,15 @@ import EnteSpinner from 'components/EnteSpinner';
 import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
+import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -61,6 +64,8 @@ export default function PublicCollectionGallery() {
     const router = useRouter();
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
+    const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -119,6 +124,25 @@ export default function PublicCollectionGallery() {
         };
         main();
     }, []);
+
+    useEffect(
+        () =>
+            publicCollection &&
+            publicFiles &&
+            setPhotoListHeader({
+                item: (
+                    <CollectionInfoBarWrapper>
+                        <CollectionInfo
+                            name={publicCollection.name}
+                            fileCount={publicFiles.length}
+                        />
+                    </CollectionInfoBarWrapper>
+                ),
+                itemType: ITEM_TYPE.OTHER,
+                height: 68,
+            }),
+        [publicCollection, publicFiles]
+    );
 
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
@@ -189,7 +213,10 @@ export default function PublicCollectionGallery() {
         }
     };
 
-    const verifyLinkPassword = async (password, setFieldError) => {
+    const verifyLinkPassword: SingleInputFormProps['callback'] = async (
+        password,
+        setFieldError
+    ) => {
         try {
             const cryptoWorker = await new CryptoWorker();
             let hashedPassword: string = null;
@@ -203,10 +230,7 @@ export default function PublicCollectionGallery() {
                 );
             } catch (e) {
                 logError(e, 'failed to derive key for verifyLinkPassword');
-                setFieldError(
-                    'passphrase',
-                    `${constants.UNKNOWN_ERROR} ${e.message}`
-                );
+                setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
                 return;
             }
             const collectionUID = getPublicCollectionUID(token.current);
@@ -220,7 +244,7 @@ export default function PublicCollectionGallery() {
             } catch (e) {
                 const parsedError = parseSharingErrorCodes(e);
                 if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                    setFieldError('passphrase', constants.INCORRECT_PASSPHRASE);
+                    setFieldError(constants.INCORRECT_PASSPHRASE);
                     return;
                 }
                 throw e;
@@ -229,10 +253,7 @@ export default function PublicCollectionGallery() {
             appContext.finishLoading();
         } catch (e) {
             logError(e, 'failed to verifyLinkPassword');
-            setFieldError(
-                'passphrase',
-                `${constants.UNKNOWN_ERROR} ${e.message}`
-            );
+            setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
         }
     };
 
@@ -278,14 +299,9 @@ export default function PublicCollectionGallery() {
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 openReportForm,
+                photoListHeader,
             }}>
             <SharedAlbumNavbar />
-            <CollectionInfoBarWrapper>
-                <CollectionInfo
-                    name={publicCollection.name}
-                    fileCount={publicFiles.length}
-                />
-            </CollectionInfoBarWrapper>
             <PhotoFrame
                 files={publicFiles}
                 setFiles={setPublicFiles}

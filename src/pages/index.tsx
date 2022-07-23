@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Carousel from 'react-bootstrap/Carousel';
-import Button from 'react-bootstrap/Button';
-import { styled } from '@mui/material';
+import { styled, Button, Typography, TypographyProps } from '@mui/material';
 import { AppContext } from './_app';
 import Login from 'components/Login';
 import { useRouter } from 'next/router';
@@ -12,6 +11,11 @@ import constants from 'utils/strings/constants';
 import localForage from 'utils/storage/localForage';
 import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
+import { EnteLogo } from 'components/EnteLogo';
+import isElectron from 'is-electron';
+import desktopService from 'services/desktopService';
+import { saveKeyInSessionStore } from 'utils/crypto';
+import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 
 const Container = styled('div')`
     display: flex;
@@ -56,9 +60,12 @@ const MobileBox = styled('div')`
     display: none;
 
     @media (max-width: 1024px) {
+        max-width: 375px;
+        width: 100%;
+        padding: 12px;
         display: flex;
         flex-direction: column;
-        padding: 40px 10px;
+        gap: 8px;
     }
 `;
 
@@ -68,24 +75,13 @@ const SideBox = styled('div')`
     min-width: 320px;
 `;
 
-const TextContainer = styled('div')`
-    padding: 20px;
-    max-width: 300px;
-    margin: 0 auto;
-`;
+const TextContainer = (props: TypographyProps) => (
+    <Typography color={'text.secondary'} mt={2} mb={3} {...props} />
+);
 
-const UpperText = styled(TextContainer)`
-    font-size: 24px;
-    max-width: 100%;
-    margin-bottom: 20px;
-`;
-
-const FeatureText = styled('div')`
-    color: #51cd7c;
-    font-weight: bold;
-    padding-top: 20px;
-    font-size: 24px;
-`;
+const FeatureText = (props: TypographyProps) => (
+    <Typography variant="h3" mt={4} {...props} />
+);
 
 const Img = styled('img')`
     height: 250px;
@@ -130,7 +126,20 @@ export default function LandingPage() {
 
     const handleNormalRedirect = async () => {
         const user = getData(LS_KEYS.USER);
-        if (user?.email) {
+        let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
+        if (!key && isElectron()) {
+            key = await desktopService.getEncryptionKey();
+            if (key) {
+                await saveKeyInSessionStore(
+                    SESSION_KEYS.ENCRYPTION_KEY,
+                    key,
+                    true
+                );
+            }
+        }
+        if (key) {
+            await router.push(PAGES.GALLERY);
+        } else if (user?.email) {
             await router.push(PAGES.VERIFY);
         }
         await initLocalForage();
@@ -156,6 +165,9 @@ export default function LandingPage() {
     const signUp = () => setShowLogin(false);
     const login = () => setShowLogin(true);
 
+    const redirectToSignupPage = () => router.push(PAGES.SIGNUP);
+    const redirectToLoginPage = () => router.push(PAGES.LOGIN);
+
     return (
         <Container>
             {loading ? (
@@ -163,30 +175,42 @@ export default function LandingPage() {
             ) : (
                 <>
                     <SlideContainer>
-                        <UpperText>{constants.HERO_HEADER()}</UpperText>
+                        <EnteLogo height={24} sx={{ mb: 8 }} />
                         <Carousel controls={false}>
                             <Carousel.Item>
-                                <Img src="/images/slide-1.png" />
+                                <Img
+                                    src="/images/onboarding-lock/1x.png"
+                                    srcSet="/images/onboarding-lock/2x.png 2x,
+                                        /images/onboarding-lock/3x.png 3x"
+                                />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_1_TITLE}
+                                    {constants.HERO_SLIDE_1_TITLE()}
                                 </FeatureText>
                                 <TextContainer>
                                     {constants.HERO_SLIDE_1}
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
-                                <Img src="/images/slide-2.png" />
+                                <Img
+                                    src="/images/onboarding-safe/1x.png"
+                                    srcSet="/images/onboarding-safe/2x.png 2x,
+                                        /images/onboarding-safe/3x.png 3x"
+                                />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_2_TITLE}
+                                    {constants.HERO_SLIDE_2_TITLE()}
                                 </FeatureText>
                                 <TextContainer>
                                     {constants.HERO_SLIDE_2}
                                 </TextContainer>
                             </Carousel.Item>
                             <Carousel.Item>
-                                <Img src="/images/slide-3.png" />
+                                <Img
+                                    src="/images/onboarding-sync/1x.png"
+                                    srcSet="/images/onboarding-sync/2x.png 2x,
+                                        /images/onboarding-sync/3x.png 3x"
+                                />
                                 <FeatureText>
-                                    {constants.HERO_SLIDE_3_TITLE}
+                                    {constants.HERO_SLIDE_3_TITLE()}
                                 </FeatureText>
                                 <TextContainer>
                                     {constants.HERO_SLIDE_3}
@@ -196,23 +220,17 @@ export default function LandingPage() {
                     </SlideContainer>
                     <MobileBox>
                         <Button
-                            variant="outline-success"
-                            size="lg"
-                            style={{ padding: '10px 50px' }}
-                            onClick={() => router.push(PAGES.SIGNUP)}>
-                            {constants.SIGN_UP}
+                            color="accent"
+                            size="large"
+                            onClick={redirectToSignupPage}>
+                            {constants.NEW_USER}
                         </Button>
-                        <br />
-                        <Button
-                            variant="link"
-                            size="lg"
-                            style={{ color: '#fff', padding: '10px 50px' }}
-                            onClick={() => router.push(PAGES.LOGIN)}>
-                            {constants.LOGIN}
+                        <Button size="large" onClick={redirectToLoginPage}>
+                            {constants.EXISTING_USER}
                         </Button>
                     </MobileBox>
                     <DesktopBox>
-                        <SideBox style={{ maxWidth: '320px' }}>
+                        <SideBox>
                             {showLogin ? (
                                 <Login signUp={signUp} />
                             ) : (

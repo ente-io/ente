@@ -1,37 +1,64 @@
-import { MenuItem, ListItemIcon, ButtonProps, Typography } from '@mui/material';
-import React from 'react';
+import { MenuItem, ButtonProps, Typography, Box } from '@mui/material';
+import { FluidContainer } from 'components/Container';
+import { OverflowMenuContext } from 'contexts/overflowMenu';
+import React, { useContext } from 'react';
 
 interface Iprops {
     onClick: () => void;
     color?: ButtonProps['color'];
     startIcon?: React.ReactNode;
+    endIcon?: React.ReactNode;
+    keepOpenAfterClick?: boolean;
     children?: any;
 }
 export function OverflowMenuOption({
     onClick,
     color = 'primary',
     startIcon,
+    endIcon,
+    keepOpenAfterClick,
     children,
 }: Iprops) {
+    const menuContext = useContext(OverflowMenuContext);
+
+    const handleClick = () => {
+        onClick();
+        if (!keepOpenAfterClick) {
+            menuContext.close();
+        }
+    };
     return (
         <MenuItem
-            onClick={onClick}
+            onClick={handleClick}
             sx={{
+                width: 180,
                 color: (theme) => theme.palette[color].main,
-                padding: '12px',
+                padding: 1.5,
+                '& .MuiSvgIcon-root': {
+                    fontSize: '20px',
+                },
             }}>
-            {startIcon && (
-                <ListItemIcon
+            <FluidContainer>
+                {startIcon && (
+                    <Box
+                        sx={{
+                            padding: 0,
+                            marginRight: 1.5,
+                        }}>
+                        {startIcon}
+                    </Box>
+                )}
+                <Typography variant="button">{children}</Typography>
+            </FluidContainer>
+            {endIcon && (
+                <Box
                     sx={{
-                        color: 'inherit',
-                        padding: '0',
-                        paddingRight: '12px',
-                        fontSize: '20px',
+                        padding: 0,
+                        marginLeft: 1,
                     }}>
-                    {startIcon}
-                </ListItemIcon>
+                    {endIcon}
+                </Box>
             )}
-            <Typography variant="button">{children}</Typography>
         </MenuItem>
     );
 }

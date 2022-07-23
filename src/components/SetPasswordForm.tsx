@@ -3,9 +3,10 @@ import constants from 'utils/strings/constants';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import SubmitButton from './SubmitButton';
-import { TextField, Typography } from '@mui/material';
+import { Box, Input, TextField, Typography } from '@mui/material';
 
 export interface SetPasswordFormProps {
+    userEmail: string;
     callback: (
         passphrase: string,
         setFieldError: (
@@ -65,9 +66,19 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         {constants.ENTER_ENC_PASSPHRASE}
                     </Typography>
 
+                    <Input
+                        hidden
+                        name="email"
+                        id="email"
+                        autoComplete="username"
+                        type="email"
+                        value={props.userEmail}
+                    />
                     <TextField
                         fullWidth
-                        variant="filled"
+                        name="password"
+                        id="password"
+                        autoComplete="new-password"
                         type="password"
                         label={constants.PASSPHRASE_HINT}
                         value={values.passphrase}
@@ -79,7 +90,9 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                     />
                     <TextField
                         fullWidth
-                        variant="filled"
+                        name="confirm-password"
+                        id="confirm-password"
+                        autoComplete="new-password"
                         type="password"
                         label={constants.CONFIRM_PASSPHRASE}
                         value={values.confirm}
@@ -93,10 +106,22 @@ function SetPasswordForm(props: SetPasswordFormProps) {
                         {constants.PASSPHRASE_DISCLAIMER()}
                     </Typography>
 
-                    <SubmitButton
-                        loading={loading}
-                        buttonText={props.buttonText}
-                    />
+                    <Box my={4}>
+                        <SubmitButton
+                            sx={{ my: 0 }}
+                            loading={loading}
+                            buttonText={props.buttonText}
+                        />
+                        {loading && (
+                            <Typography
+                                textAlign="center"
+                                mt={1}
+                                color="text.secondary"
+                                variant="body2">
+                                {constants.KEY_GENERATION_IN_PROGRESS_MESSAGE}
+                            </Typography>
+                        )}
+                    </Box>
                 </form>
             )}
         </Formik>

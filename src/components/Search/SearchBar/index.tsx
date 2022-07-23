@@ -1,5 +1,5 @@
-import { SearchButton } from './searchButton';
-import React, { useState } from 'react';
+import { SearchBarMobile } from './searchBarMobile';
+import React from 'react';
 import { Collection } from 'types/collection';
 
 import { EnteFile } from 'types/file';
@@ -8,23 +8,31 @@ import SearchInput from './searchInput';
 import { UpdateSearch } from 'types/search';
 
 interface Props {
-    isFirstFetch: boolean;
     updateSearch: UpdateSearch;
     collections: Collection[];
     setActiveCollection: (id: number) => void;
     files: EnteFile[];
+    isInSearchMode: boolean;
+    setIsInSearchMode: (v: boolean) => void;
 }
-export default function SearchBar({ isFirstFetch, ...props }: Props) {
-    const [isOpen, setIsOpen] = useState(false);
-    const showSearchInput = () => setIsOpen(true);
+
+export default function SearchBar({
+    setIsInSearchMode,
+    isInSearchMode,
+    ...props
+}: Props) {
+    const showSearchInput = () => setIsInSearchMode(true);
 
     return (
         <SearchBarWrapper>
-            <SearchInput {...props} isOpen={isOpen} setOpen={setIsOpen} />
-            <SearchButton
-                isFirstFetch={isFirstFetch}
-                show={!isOpen}
-                openSearchInput={showSearchInput}
+            <SearchInput
+                {...props}
+                isOpen={isInSearchMode}
+                setIsOpen={setIsInSearchMode}
+            />
+            <SearchBarMobile
+                show={!isInSearchMode}
+                showSearchInput={showSearchInput}
             />
         </SearchBarWrapper>
     );

@@ -3,12 +3,14 @@ import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import CryptoWorker, { B64EncryptionResult } from 'utils/crypto';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import VerticallyCentered from 'components/Container';
 import { Button } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
-import { AppContext, FLASH_MESSAGE_TYPE } from 'pages/_app';
+import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
@@ -45,7 +47,10 @@ export default function Recover() {
         main();
     }, []);
 
-    const recover = async (recoveryKey: string, setFieldError) => {
+    const recover: SingleInputFormProps['callback'] = async (
+        recoveryKey: string,
+        setFieldError
+    ) => {
         try {
             // check if user is entering mnemonic recovery key
             if (recoveryKey.trim().indexOf(' ') > 0) {
@@ -70,14 +75,10 @@ export default function Recover() {
                 isTwoFactorEnabled: false,
             });
             setData(LS_KEYS.KEY_ATTRIBUTES, keyAttributes);
-            appContext.setDisappearingFlashMessage({
-                message: constants.TWO_FACTOR_DISABLE_SUCCESS,
-                type: FLASH_MESSAGE_TYPE.INFO,
-            });
             router.push(PAGES.CREDENTIALS);
         } catch (e) {
             logError(e, 'two factor recovery failed');
-            setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
+            setFieldError(constants.INCORRECT_RECOVERY_KEY);
         }
     };
 

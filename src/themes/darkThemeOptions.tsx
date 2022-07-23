@@ -6,25 +6,34 @@ import {
 } from '@mui/material/styles';
 
 declare module '@mui/material/styles' {
+    interface TypeBackground {
+        overPaper?: string;
+    }
     interface Palette {
         accent: PaletteColor;
+        fill: PaletteColor;
+        glass: PaletteColor;
         danger: PaletteColor;
         stroke: TypeText;
     }
     interface PaletteOptions {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
+        fill?: PaletteColorOptions;
+        glass?: PaletteColorOptions;
         stroke?: Partial<TypeText>;
     }
 
     interface TypographyVariants {
         title: React.CSSProperties;
         subtitle: React.CSSProperties;
+        mini: React.CSSProperties;
     }
 
     interface TypographyVariantsOptions {
         title?: React.CSSProperties;
         subtitle?: React.CSSProperties;
+        mini?: React.CSSProperties;
     }
 }
 
@@ -53,12 +62,21 @@ declare module '@mui/material/Switch' {
     }
 }
 
+declare module '@mui/material/SvgIcon' {
+    interface SvgIconPropsColorOverrides {
+        accent: true;
+    }
+}
+
+declare module '@mui/material/Alert' {
+    export interface AlertPropsColorOverrides {
+        accent: true;
+    }
+}
+
 // Create a theme instance.
 const darkThemeOptions = createTheme({
     components: {
-        MuiPaper: {
-            styleOverrides: { root: { backgroundImage: 'none' } },
-        },
         MuiCssBaseline: {
             styleOverrides: {
                 body: {
@@ -67,6 +85,48 @@ const darkThemeOptions = createTheme({
                 },
                 strong: { fontWeight: 900 },
             },
+        },
+
+        MuiDrawer: {
+            styleOverrides: {
+                root: {
+                    '.MuiBackdrop-root': {
+                        backgroundColor: 'rgba(0,0,0,0.65)',
+                    },
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                root: {
+                    '.MuiBackdrop-root': {
+                        backgroundColor: 'rgba(0,0,0,0.65)',
+                    },
+                    '& .MuiDialog-paper': {
+                        boxShadow: '0px 0px 10px 0px rgba(0, 0, 0, 0.25)',
+                    },
+                    '& .MuiDialogTitle-root': {
+                        padding: '16px',
+                    },
+                    '& .MuiDialogContent-root': {
+                        padding: '16px',
+                        overflowY: 'overlay',
+                    },
+                    '& .MuiDialogActions-root': {
+                        padding: '16px',
+                    },
+                    '.MuiDialogTitle-root + .MuiDialogContent-root': {
+                        paddingTop: '16px',
+                    },
+                },
+            },
+            defaultProps: {
+                fullWidth: true,
+                maxWidth: 'sm',
+            },
+        },
+        MuiPaper: {
+            styleOverrides: { root: { backgroundImage: 'none' } },
         },
         MuiLink: {
             defaultProps: {
@@ -92,13 +152,31 @@ const darkThemeOptions = createTheme({
                 },
                 startIcon: {
                     marginRight: '12px',
+                    '&& >svg': {
+                        fontSize: '20px',
+                    },
+                },
+                endIcon: {
+                    marginLeft: '12px',
+                    '&& >svg': {
+                        fontSize: '20px',
+                    },
                 },
                 sizeLarge: {
                     width: '100%',
                 },
             },
         },
-
+        MuiInputBase: {
+            styleOverrides: {
+                formControl: {
+                    borderRadius: '8px',
+                    '::before': {
+                        borderBottom: 'none !important',
+                    },
+                },
+            },
+        },
         MuiFilledInput: {
             styleOverrides: {
                 input: {
@@ -121,21 +199,80 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiSvgIcon: {
+            styleOverrides: {
+                root: ({ ownerState }) => {
+                    switch (ownerState.color) {
+                        case 'primary':
+                            return {
+                                color: '#ffffff',
+                            };
+                        case 'secondary':
+                            return {
+                                color: 'rgba(256,256,256,0.24)',
+                            };
+                        case 'disabled':
+                            return {
+                                color: 'rgba(255, 255, 255, 0.16)',
+                            };
+                    }
+                },
+            },
+        },
+
+        MuiIconButton: {
+            styleOverrides: {
+                root: ({ ownerState }) => {
+                    switch (ownerState.color) {
+                        case 'primary':
+                            return {
+                                color: '#ffffff',
+                            };
+                        case 'secondary':
+                            return {
+                                color: 'rgba(256,256,256,0.24)',
+                            };
+                    }
+                    if (ownerState.disabled) {
+                        return {
+                            color: 'rgba(255, 255, 255, 0.16)',
+                        };
+                    }
+                },
+            },
+        },
     },
 
     palette: {
         mode: 'dark',
         primary: {
-            main: '#f0f0f0',
+            main: '#fff',
+            contrastText: '#000',
         },
         secondary: {
-            main: 'rgba(256, 256, 256, 0.1)',
+            main: 'rgba(256, 256, 256, 0.12)',
             contrastText: '#fff',
         },
         accent: {
-            main: '#1dba54',
-            dark: '#248546',
-            light: '#2cd366',
+            main: '#1DB954',
+            dark: '#2EB45D',
+            light: '#26CB5F',
+        },
+        fill: {
+            main: 'rgba(256, 256, 256, 0.16)',
+            dark: 'rgba(256, 256, 256, 0.12)',
+            light: 'rgba(256, 256, 256)',
+        },
+        glass: {
+            main: 'rgba(256, 256, 256, 0.7)',
+            dark: 'rgba(256, 256, 256, 0.9)',
+            light: 'rgba(256, 256, 256,0.3)',
+            contrastText: '#000',
+        },
+        text: {
+            primary: '#fff',
+            secondary: 'rgba(255, 255, 255, 0.7)',
+            disabled: 'rgba(255, 255, 255, 0.5)',
         },
 
         danger: {
@@ -144,16 +281,20 @@ const darkThemeOptions = createTheme({
         stroke: {
             primary: '#ffffff',
             secondary: 'rgba(256,256,256,0.24)',
-            disabled: 'rgba(256,256,256,0.12)',
+            disabled: 'rgba(256,256,256,0.16)',
         },
-        background: { default: '#000000', paper: '#1b1b1b' },
+        background: {
+            default: '#000000',
+            paper: '#141414',
+            overPaper: '#1b1b1b',
+        },
         grey: {
             A100: '#ccc',
             A200: 'rgba(256, 256, 256, 0.24)',
             A400: '#434343',
             500: 'rgba(256, 256, 256, 0.5)',
         },
-        divider: 'rgba(256, 256, 256, 0.12)',
+        divider: 'rgba(256, 256, 256, 0.16)',
     },
     shape: {
         borderRadius: 8,
@@ -161,15 +302,19 @@ const darkThemeOptions = createTheme({
     typography: {
         body1: {
             fontSize: '16px',
-            lineHeight: '20px',
+            lineHeight: '19px',
         },
         body2: {
             fontSize: '14px',
             lineHeight: '17px',
         },
+        mini: {
+            fontSize: '10px',
+            lineHeight: '12px',
+        },
         button: {
             fontSize: '16px',
-            lineHeight: '20px',
+            lineHeight: '19px',
             fontWeight: 'bold',
             textTransform: 'none',
         },
@@ -191,12 +336,12 @@ const darkThemeOptions = createTheme({
             lineHeight: '15px',
         },
         h1: {
-            fontSize: '36px',
-            lineHeight: '44px',
+            fontSize: '48px',
+            lineHeight: '58px',
         },
         h2: {
-            fontSize: '30px',
-            lineHeight: '36px',
+            fontSize: '36px',
+            lineHeight: '44px',
         },
         h3: {
             fontSize: '24px',

@@ -1,3 +1,5 @@
+import { PLAN_PERIOD } from 'constants/gallery';
+
 export interface Subscription {
     id: number;
     userID: number;
@@ -10,7 +12,7 @@ export interface Subscription {
         isCancelled: boolean;
     };
     price: string;
-    period: string;
+    period: PLAN_PERIOD;
 }
 export interface Plan {
     id: string;
@@ -18,6 +20,6 @@ export interface Plan {
     iosID: string;
     storage: number;
     price: string;
-    period: string;
+    period: PLAN_PERIOD;
     stripeID: string;
 }

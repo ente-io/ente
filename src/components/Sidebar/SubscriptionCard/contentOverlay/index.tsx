@@ -1,43 +1,28 @@
-import React, { useMemo } from 'react';
-import StorageSection from './storageSection';
-import { isPartOfFamily } from 'utils/billing';
+import { IndividualSubscriptionCardContent } from './individual';
+import { FamilySubscriptionCardContent } from './family';
+import React from 'react';
+import { hasNonAdminFamilyMembers } from 'utils/billing';
 import { Overlay, SpaceBetweenFlex } from 'components/Container';
-import { UsageSection } from './usageSection';
+import { UserDetails } from 'types/user';
 
-export function SubscriptionCardContentOverlay({
-    hasNonAdminFamilyMembers,
-    userDetails,
-}) {
-    const totalUsage = useMemo(() => {
-        if (isPartOfFamily(userDetails.familyData)) {
-            return userDetails.familyData.members.reduce(
-                (sum, currentMember) => sum + currentMember.usage,
-                0
-            );
-        } else {
-            return userDetails.usage;
-        }
-    }, [userDetails]);
+interface Iprops {
+    userDetails: UserDetails;
+}
 
-    const totalStorage = useMemo(() => {
-        if (isPartOfFamily(userDetails.familyData)) {
-            return userDetails.familyData.storage;
-        } else {
-            return userDetails.subscription.storage;
-        }
-    }, [userDetails]);
-
+export function SubscriptionCardContentOverlay({ userDetails }: Iprops) {
     return (
         <Overlay>
-            <SpaceBetweenFlex flexDirection={'column'} padding={'20px 16px'}>
-                <StorageSection
-                    totalStorage={totalStorage}
-                    totalUsage={totalUsage}
-                />
-                <UsageSection
-                    hasNonAdminFamilyMembers={hasNonAdminFamilyMembers}
-                    userDetails={userDetails}
-                />
+            <SpaceBetweenFlex
+                height={'100%'}
+                flexDirection={'column'}
+                padding={'20px 16px'}>
+                {hasNonAdminFamilyMembers(userDetails.familyData) ? (
+                    <FamilySubscriptionCardContent userDetails={userDetails} />
+                ) : (
+                    <IndividualSubscriptionCardContent
+                        userDetails={userDetails}
+                    />
+                )}
             </SpaceBetweenFlex>
         </Overlay>
     );

@@ -8,7 +8,8 @@ import { CustomError } from '../error';
 import { logError } from '../sentry';
 import { SetDialogBoxAttributes } from 'types/dialogBox';
 import { getFamilyPortalRedirectURL } from 'services/userService';
-import { FamilyData, FamilyMember, User } from 'types/user';
+import { FamilyData, FamilyMember, User, UserDetails } from 'types/user';
+import { openLink } from 'utils/common';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -31,10 +32,10 @@ enum RESPONSE_STATUS {
 
 const StorageUnits = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-const TEN_GB = 10 * 1024 * 1024 * 1024;
+const ONE_GB = 1024 * 1024 * 1024;
 
-export function convertBytesToGBs(bytes, precision?): string {
-    return (bytes / (1024 * 1024 * 1024)).toFixed(precision ?? 2) + ' GB';
+export function convertBytesToGBs(bytes: number, precision = 0): string {
+    return (bytes / (1024 * 1024 * 1024)).toFixed(precision);
 }
 
 export function convertBytesToHumanReadable(
@@ -52,9 +53,11 @@ export function convertBytesToHumanReadable(
 
 export function makeHumanReadableStorage(
     bytes: number,
-
     round: 'round-up' | 'round-down' = 'round-down'
 ): string {
+    if (bytes === 0) {
+        return '0 MB';
+    }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
 
     let quantity = bytes / Math.pow(1024, i);
@@ -67,7 +70,7 @@ export function makeHumanReadableStorage(
 
     quantity = Number(quantity.toFixed(1));
 
-    if (bytes >= TEN_GB) {
+    if (bytes >= 10 * ONE_GB) {
         if (round === 'round-up') {
             quantity = Math.round(quantity + 1);
         } else {
@@ -139,24 +142,21 @@ export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
     }
 }
 
-export function getStorage(familyData: FamilyData): number {
-    const subscription: Subscription = getUserSubscription();
-    return isPartOfFamily(familyData)
-        ? familyData.storage
-        : subscription.storage;
+export function getTotalFamilyUsage(familyData: FamilyData): number {
+    return familyData.members.reduce(
+        (sum, currentMember) => sum + currentMember.usage,
+        0
+    );
 }
 
-export function getUserSubscription(): Subscription {
+export function getLocalUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
 }
 
-export function getFamilyData(): FamilyData {
+export function getLocalFamilyData(): FamilyData {
     return getData(LS_KEYS.FAMILY_DATA);
 }
 
-export function getPlans(): Plan[] {
-    return getData(LS_KEYS.PLANS);
-}
 export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
     return (
         isSubscriptionActive(subscription) &&
@@ -188,6 +188,19 @@ export function hasPaypalSubscription(subscription: Subscription) {
         subscription.paymentProvider.length > 0 &&
         subscription.paymentProvider === PAYMENT_PROVIDER_PAYPAL
     );
+}
+
+export function hasExceededStorageQuota(userDetails: UserDetails) {
+    if (isPartOfFamily(userDetails.familyData)) {
+        const usage = getTotalFamilyUsage(userDetails.familyData);
+        return usage > userDetails.familyData.storage;
+    } else {
+        return userDetails.usage > userDetails.subscription.storage;
+    }
+}
+
+export function isPopularPlan(plan: Plan) {
+    return plan.storage === 100 * ONE_GB;
 }
 
 export async function updateSubscription(
@@ -285,15 +298,16 @@ export async function manageFamilyMethod(
     try {
         setLoading(true);
         const url = await getFamilyPortalRedirectURL();
-        window.location.href = url;
+        openLink(url, true);
     } catch (error) {
         logError(error, 'failed to redirect to family portal');
-        setLoading(false);
         setDialogMessage({
             title: constants.ERROR,
             content: constants.UNKNOWN_ERROR,
             close: { variant: 'danger' },
         });
+    } finally {
+        setLoading(false);
     }
 }
 
@@ -392,7 +406,7 @@ function handleFailureReason(
     }
 }
 
-export function planForSubscription(subscription: Subscription) {
+export function planForSubscription(subscription: Subscription): Plan {
     return {
         id: subscription.productID,
         storage: subscription.storage,

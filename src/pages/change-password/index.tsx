@@ -3,7 +3,7 @@ import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import CryptoWorker, {
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
     B64EncryptionResult,
 } from 'utils/crypto';
@@ -14,7 +14,7 @@ import SetPasswordForm, {
 } from 'components/SetPasswordForm';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
-import { KEK, UpdatedKey } from 'types/user';
+import { KEK, UpdatedKey, User } from 'types/user';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import VerticallyCentered from 'components/Container';
 import FormPaper from 'components/Form/FormPaper';
@@ -24,9 +24,11 @@ import FormPaperTitle from 'components/Form/FormPaper/Title';
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
+    const [user, setUser] = useState<User>();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
+        setUser(user);
         if (!user?.token) {
             router.push(PAGES.ROOT);
         } else {
@@ -68,7 +70,7 @@ export default function ChangePassword() {
             key
         );
 
-        await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+        await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
         redirectToGallery();
     };
 
@@ -82,6 +84,7 @@ export default function ChangePassword() {
             <FormPaper>
                 <FormPaperTitle>{constants.CHANGE_PASSWORD}</FormPaperTitle>
                 <SetPasswordForm
+                    userEmail={user?.email}
                     callback={onSubmit}
                     buttonText={constants.CHANGE_PASSWORD}
                     back={

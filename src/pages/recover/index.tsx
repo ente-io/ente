@@ -10,9 +10,11 @@ import { useRouter } from 'next/router';
 import { PAGES } from 'constants/pages';
 import CryptoWorker, {
     decryptAndStoreToken,
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
 } from 'utils/crypto';
-import SingleInputForm from 'components/SingleInputForm';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
 import VerticallyCentered from 'components/Container';
 import { Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
@@ -52,7 +54,10 @@ export default function Recover() {
         appContext.showNavBar(true);
     }, []);
 
-    const recover = async (recoveryKey: string, setFieldError) => {
+    const recover: SingleInputFormProps['callback'] = async (
+        recoveryKey: string,
+        setFieldError
+    ) => {
         try {
             // check if user is entering mnemonic recovery key
             if (recoveryKey.trim().indexOf(' ') > 0) {
@@ -67,14 +72,14 @@ export default function Recover() {
                 keyAttributes.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey)
             );
-            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
             await decryptAndStoreToken(masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             logError(e, 'password recovery failed');
-            setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
+            setFieldError(constants.INCORRECT_RECOVERY_KEY);
         }
     };
 

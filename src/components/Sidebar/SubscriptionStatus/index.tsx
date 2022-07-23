@@ -1,10 +1,11 @@
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useMemo } from 'react';
 import {
-    hasNonAdminFamilyMembers,
     hasPaidSubscription,
     isFamilyAdmin,
     isOnFreePlan,
+    isPartOfFamily,
+    hasExceededStorageQuota,
     isSubscriptionActive,
     isSubscriptionCancelled,
 } from 'utils/billing';
@@ -20,45 +21,51 @@ export default function SubscriptionStatus({
 }) {
     const { showPlanSelectorModal } = useContext(GalleryContext);
 
-    const hasAMessage = useMemo(
-        () =>
-            userDetails &&
-            (!isSubscriptionActive(userDetails.subscription) ||
-                isOnFreePlan(userDetails.subscription) ||
-                isSubscriptionCancelled(userDetails.subscription)),
-        [userDetails]
-    );
+    const hasAMessage = useMemo(() => {
+        if (!userDetails) {
+            return false;
+        }
+        if (
+            isPartOfFamily(userDetails.familyData) &&
+            !isFamilyAdmin(userDetails.familyData)
+        ) {
+            return false;
+        }
+        if (
+            hasPaidSubscription(userDetails.subscription) &&
+            isSubscriptionActive(userDetails.subscription)
+        ) {
+            return false;
+        }
+        return true;
+    }, [userDetails]);
 
     if (!hasAMessage) {
         return <></>;
     }
 
     return (
-        <Box px={1}>
-            {(!hasNonAdminFamilyMembers(userDetails.familyData) ||
-                isFamilyAdmin(userDetails.familyData) ||
-                hasPaidSubscription(userDetails.subscription)) && (
-                <Typography
-                    variant="body2"
-                    color={'text.secondary'}
-                    onClick={showPlanSelectorModal}
-                    sx={{ cursor: 'pointer' }}>
-                    {isSubscriptionActive(userDetails.subscription)
-                        ? isOnFreePlan(userDetails.subscription)
-                            ? constants.FREE_SUBSCRIPTION_INFO(
-                                  userDetails.subscription?.expiryTime
-                              )
-                            : isSubscriptionCancelled(
-                                  userDetails.subscription
-                              ) &&
-                              constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
-                                  userDetails.subscription?.expiryTime
-                              )
-                        : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
-                              showPlanSelectorModal
-                          )}
-                </Typography>
-            )}
+        <Box px={1} pt={0.5}>
+            <Typography
+                variant="body2"
+                color={'text.secondary'}
+                onClick={showPlanSelectorModal}
+                sx={{ cursor: 'pointer' }}>
+                {isSubscriptionActive(userDetails.subscription)
+                    ? isOnFreePlan(userDetails.subscription)
+                        ? constants.FREE_SUBSCRIPTION_INFO(
+                              userDetails.subscription?.expiryTime
+                          )
+                        : isSubscriptionCancelled(userDetails.subscription)
+                        ? constants.RENEWAL_CANCELLED_SUBSCRIPTION_INFO(
+                              userDetails.subscription?.expiryTime
+                          )
+                        : hasExceededStorageQuota(userDetails) &&
+                          constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO
+                    : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
+                          showPlanSelectorModal
+                      )}
+            </Typography>
         </Box>
     );
 }

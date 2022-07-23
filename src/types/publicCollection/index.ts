@@ -1,3 +1,4 @@
+import { TimeStampListItem } from 'components/PhotoList';
 import { REPORT_REASON } from 'constants/publicCollection';
 import { EnteFile } from 'types/file';
 
@@ -6,6 +7,7 @@ export interface PublicCollectionGalleryContextType {
     passwordToken: string;
     accessedThroughSharedURL: boolean;
     openReportForm: () => void;
+    photoListHeader: TimeStampListItem;
 }
 
 export interface LocalSavedPublicCollectionFiles {

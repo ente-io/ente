@@ -26,6 +26,7 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
+    ElectronFile,
     FileWithCollection,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
@@ -292,6 +293,36 @@ class UploadManager {
             logError(e, 'error extracting metadata');
             throw e;
         }
+    }
+
+    private async extractFileTypeAndMetadata(
+        file: File | ElectronFile,
+        collectionID: number
+    ) {
+        if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
+            logUploadInfo(
+                `${getFileNameSize(file)} rejected  because of large size`
+            );
+
+            return { fileTypeInfo: null, metadata: null };
+        }
+        const fileTypeInfo = await UploadService.getFileType(file);
+        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
+            logUploadInfo(
+                `${getFileNameSize(
+                    file
+                )} rejected  because of unknown file format`
+            );
+            return { fileTypeInfo, metadata: null };
+        }
+        logUploadInfo(` extracting ${getFileNameSize(file)} metadata`);
+        const metadata =
+            (await UploadService.extractFileMetadata(
+                file,
+                collectionID,
+                fileTypeInfo
+            )) || null;
+        return { fileTypeInfo, metadata };
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {

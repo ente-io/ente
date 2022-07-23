@@ -2,7 +2,7 @@ import { ManageLinkPassword } from './linkPassword';
 import { ManageDeviceLimit } from './deviceLimit';
 import { ManageLinkExpiry } from './linkExpiry';
 import { PublicLinkSetPassword } from '../setPassword';
-import { Stack } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState } from 'react';
 import { updateShareableURL } from 'services/collectionService';
@@ -14,17 +14,17 @@ import {
     ManageSectionLabel,
     ManageSectionOptions,
 } from '../../styledComponents';
-import { ManageDownloadAccess } from './downloadAcess';
+import { ManageDownloadAccess } from './downloadAccess';
 
 export default function PublicShareManage({
     publicShareProp,
     collection,
     setPublicShareProp,
-    setSharableLinkError,
 }) {
     const galleryContext = useContext(GalleryContext);
 
     const [changePasswordView, setChangePasswordView] = useState(false);
+    const [sharableLinkError, setSharableLinkError] = useState(null);
 
     const closeConfigurePassword = () => setChangePasswordView(false);
 
@@ -33,7 +33,6 @@ export default function PublicShareManage({
             galleryContext.setBlockingLoad(true);
             const response = await updateShareableURL(req);
             setPublicShareProp(response);
-            galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -59,7 +58,7 @@ export default function PublicShareManage({
                     {constants.MANAGE_LINK}
                 </ManageSectionLabel>
                 <ManageSectionOptions>
-                    <Stack spacing={1}>
+                    <Stack spacing={1.5}>
                         <ManageLinkExpiry
                             collection={collection}
                             publicShareProp={publicShareProp}
@@ -90,6 +89,17 @@ export default function PublicShareManage({
                             }
                         />
                     </Stack>
+                    {sharableLinkError && (
+                        <Typography
+                            textAlign={'center'}
+                            variant="body2"
+                            sx={{
+                                color: (theme) => theme.palette.danger.main,
+                                mt: 0.5,
+                            }}>
+                            {sharableLinkError}
+                        </Typography>
+                    )}
                 </ManageSectionOptions>
             </details>
             <PublicLinkSetPassword
