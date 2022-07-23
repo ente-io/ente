@@ -1,5 +1,6 @@
-import 'dart:io';
+import 'dart:io' as io;
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -97,7 +98,7 @@ class FilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    io.Directory documentsDirectory = await getApplicationDocumentsDirectory();
     String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
@@ -322,6 +323,16 @@ class FilesDB {
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(filesTable);
+  }
+
+  Future<void> deleteDB() async {
+    if (kDebugMode) {
+      debugPrint("Deleting files db");
+      io.Directory documentsDirectory =
+          await getApplicationDocumentsDirectory();
+      String path = join(documentsDirectory.path, _databaseName);
+      io.File(path).deleteSync(recursive: true);
+    }
   }
 
   Future<void> insertMultiple(List<File> files) async {
