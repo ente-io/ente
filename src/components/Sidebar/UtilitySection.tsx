@@ -36,7 +36,7 @@ export default function UtilitySection({ closeSidebar }) {
         } else {
             setDialogMessage({
                 title: constants.DOWNLOAD_APP,
-                content: constants.DOWNLOAD_APP_MESSAGE(),
+                content: constants.DOWNLOAD_APP_MESSAGE,
 
                 proceed: {
                     text: constants.DOWNLOAD,
