@@ -6,6 +6,9 @@ export const logError = (
     msg: string,
     info?: Record<string, unknown>
 ) => {
+    if (isErrorUnnecessaryForSentry(error)) {
+        return;
+    }
     const err = errorWithContext(error, msg);
     if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
         console.log(error, { msg, info });
@@ -30,4 +33,13 @@ function errorWithContext(originalError: Error, context: string) {
         '\n' +
         originalError.stack;
     return errorWithContext;
+}
+
+function isErrorUnnecessaryForSentry(error: any) {
+    if (error?.message?.includes('Network Error')) {
+        return true;
+    } else if (error?.status === 401) {
+        return true;
+    }
+    return false;
 }

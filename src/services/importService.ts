@@ -58,7 +58,11 @@ class ImportService {
                 return pendingUploads;
             }
         } catch (e) {
-            logError(e, 'failed to getPendingUploads ');
+            if (e?.message?.includes('ENOENT: no such file or directory')) {
+                // ignore
+            } else {
+                logError(e, 'failed to getPendingUploads ');
+            }
             return { files: [], collectionName: null, type: null };
         }
     }
