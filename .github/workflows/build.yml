@@ -1,8 +1,6 @@
 name: Build/release
 
 on:
-    # Enable manual run
-    workflow_dispatch:
     push:
         tags:
             - v*
