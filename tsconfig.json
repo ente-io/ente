@@ -6,10 +6,10 @@
         "noImplicitAny": true,
         "sourceMap": true,
         "outDir": "app",
-        "baseUrl": "./src",
+        "baseUrl": "./main",
         "paths": {
             "*": ["node_modules/*"]
         }
     },
-    "include": ["src/**/*"]
+    "include": ["main/**/*"]
 }

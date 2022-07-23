@@ -49,9 +49,9 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "prebuild": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "prebuild": "eslint \"main/**/*.{js,jsx,ts,tsx}\"",
     "prepare": "husky install",
-    "lint": "eslint -c .eslintrc --ext .ts ./src",
+    "lint": "eslint -c .eslintrc --ext .ts ./main",
     "watch": "tsc -w",
     "build-main": "yarn install && tsc",
     "start-main":"yarn build-main && electron app/index.js",
@@ -95,7 +95,7 @@
     "parser": "babel-eslint"
   },
   "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": [
+    "main/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ]
