@@ -5,12 +5,13 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/models/file.dart';
+import 'package:tuple/tuple.dart';
 
 final _logger = Logger("FileSyncUtil");
 const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
 const assetFetchPageSize = 2000;
 
-Future<List<File>> getDeviceFiles(
+Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
   int fromTime,
   int toTime,
   Computer computer,
@@ -24,7 +25,7 @@ Future<List<File>> getDeviceFiles(
   files.sort(
     (first, second) => first.creationTime.compareTo(second.creationTime),
   );
-  return files;
+  return Tuple2(pathEntities, files);
 }
 
 Future<List<LocalAsset>> getAllLocalAssets() async {

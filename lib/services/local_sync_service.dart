@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -243,7 +244,10 @@ class LocalSyncService {
           " to " +
           DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
     );
-    final files = await getDeviceFiles(fromTime, toTime, _computer);
+    final deviceFiles = await getDeviceFiles(fromTime, toTime, _computer);
+    final List<File> files = deviceFiles.item2;
+    unawaited(FilesDB.instance.insertDeviceFiles(files));
+    unawaited(FilesDB.instance.insertOrUpdatePathName(deviceFiles.item1));
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
       final updatedFiles = files

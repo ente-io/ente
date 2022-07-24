@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -60,5 +61,42 @@ extension DeviceFiles on FilesDB {
       result[row['path_id']] = row["count"];
     }
     return result;
+  }
+
+  Future<Set<String>> getDevicePathIDs() async {
+    final rows = await (await database).rawQuery(
+      '''
+      SELECT path_id FROM device_path_collections
+      ''',
+    );
+    final Set<String> result = <String>{};
+    for (final row in rows) {
+      result.add(row['path_id']);
+    }
+    return result;
+  }
+
+  Future<void> insertOrUpdatePathName(
+    List<AssetPathEntity> pathEntities,
+  ) async {
+    final Set<String> existingPathIds = await getDevicePathIDs();
+    final Database db = await database;
+    for (AssetPathEntity pathEntity in pathEntities) {
+      if (existingPathIds.contains(pathEntity.id)) {
+        await db.rawUpdate(
+          "UPDATE device_path_collections SET name = ? where id = "
+          "?",
+          [pathEntity.name, pathEntity.id],
+        );
+      } else {
+        await db.insert(
+          "device_path_collections",
+          {
+            "id": pathEntity.id,
+            "name": pathEntity.name,
+          },
+        );
+      }
+    }
   }
 }
