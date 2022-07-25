@@ -15,82 +15,96 @@ class CollectionSuggestions {
   const CollectionSuggestions(this.matchedCollections, this.context);
 
   List<Widget> getSuggestions() {
-    List<Widget> collectionsP1 = [];
-    collectionsP1 = generateSuggestionWidgets(collectionsP1);
-    return [...collectionsP1];
+    List<Widget> collectionSuggestionWidgets = [];
+    collectionSuggestionWidgets =
+        generateSuggestionWidgets(collectionSuggestionWidgets);
+    return collectionSuggestionWidgets;
   }
 
   List<Widget> generateSuggestionWidgets(
-    List<Widget> pCollections,
+    List<Widget> collectionSuggestionWidgets,
   ) {
     Future<List<File>> latestCollectionFiles =
         CollectionsService.instance.getLatestCollectionFiles();
     for (Collection collection in matchedCollections) {
       CollectionWithThumbnail c;
-      pCollections.add(
+      collectionSuggestionWidgets.add(
         GestureDetector(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              Column(
-                children: [
-                  const Text('Album'),
-                  Text(collection.name),
-                  FutureBuilder<int>(
-                    future: FilesDB.instance.collectionFileCount(collection.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data > 0) {
-                        int noOfMemories = snapshot.data;
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Album',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      collection.name,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    FutureBuilder<int>(
+                      future:
+                          FilesDB.instance.collectionFileCount(collection.id),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data > 0) {
+                          int noOfMemories = snapshot.data;
 
-                        return RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .defaultTextColor,
-                            ),
-                            children: [
-                              TextSpan(text: noOfMemories.toString()),
-                              TextSpan(
-                                text:
-                                    noOfMemories != 1 ? ' memories' : ' memory',
+                          return RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .defaultTextColor,
                               ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return const SizedBox.shrink();
+                              children: [
+                                TextSpan(text: noOfMemories.toString()),
+                                TextSpan(
+                                  text: noOfMemories != 1
+                                      ? ' memories'
+                                      : ' memory',
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
+                  ],
+                ),
+                FutureBuilder(
+                  future: latestCollectionFiles,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      for (File file in snapshot.data) {
+                        if (file.collectionID == collection.id) {
+                          c = CollectionWithThumbnail(collection, file);
+                          break;
+                        }
                       }
-                    },
-                  ),
-                ],
-              ),
-              FutureBuilder(
-                future: latestCollectionFiles,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    for (File file in snapshot.data) {
-                      if (file.collectionID == collection.id) {
-                        c = CollectionWithThumbnail(collection, file);
-                        break;
-                      }
-                    }
 
-                    return Row(
-                      children: [
-                        SizedBox(
-                          height: 50,
-                          width: 50,
-                          child: ThumbnailWidget(c.thumbnail),
-                        ),
-                      ],
-                    );
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                },
-              )
-            ],
+                      return Row(
+                        children: [
+                          SizedBox(
+                            height: 50,
+                            width: 50,
+                            child: ThumbnailWidget(c.thumbnail),
+                          ),
+                        ],
+                      );
+                    } else {
+                      return const SizedBox.shrink();
+                    }
+                  },
+                )
+              ],
+            ),
           ),
           onTap: () {
             routeToPage(context, CollectionPage(c));
@@ -98,6 +112,6 @@ class CollectionSuggestions {
         ),
       );
     }
-    return pCollections;
+    return collectionSuggestionWidgets;
   }
 }

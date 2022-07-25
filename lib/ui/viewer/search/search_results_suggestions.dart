@@ -15,16 +15,16 @@ class SearchResultsSuggestions extends StatefulWidget {
 class _SearchResultsSuggestionsState extends State<SearchResultsSuggestions> {
   @override
   Widget build(BuildContext context) {
-    List<Widget> p1suggestions = [];
-    p1suggestions = CollectionSuggestions(widget.collections, context)
-        .getSuggestions(); //add other search type p1 suggestions to this
+    List<Widget> suggestions = [];
+    suggestions =
+        CollectionSuggestions(widget.collections, context).getSuggestions();
     return Container(
       constraints:
           BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
       child: ListView.builder(
-        itemCount: p1suggestions.length,
+        itemCount: suggestions.length,
         itemBuilder: (context, index) {
-          return p1suggestions[index];
+          return suggestions[index];
         },
       ),
     );

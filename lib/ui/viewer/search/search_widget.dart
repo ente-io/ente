@@ -97,7 +97,6 @@ class _SearchwidgetState extends State<Searchwidget> {
                   String newQuery,
                   Widget child,
                 ) {
-                  debugPrint('listening to search value');
                   return newQuery != ''
                       ? SearchResultsSuggestions(
                           collections: matchedCollections,
