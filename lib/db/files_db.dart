@@ -309,7 +309,6 @@ class FilesDB {
        CREATE TABLE device_path_collections (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT,
-          path TEXT,
           modified_at INTEGER NOT NULL DEFAULT 0,
           sync INTEGER NOT NULL DEFAULT 0,
           count INTEGER NOT NULL DEFAULT 0,

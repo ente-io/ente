@@ -66,12 +66,12 @@ extension DeviceFiles on FilesDB {
   Future<Set<String>> getDevicePathIDs() async {
     final rows = await (await database).rawQuery(
       '''
-      SELECT path_id FROM device_path_collections
+      SELECT id FROM device_path_collections
       ''',
     );
     final Set<String> result = <String>{};
     for (final row in rows) {
-      result.add(row['path_id']);
+      result.add(row['id']);
     }
     return result;
   }
@@ -79,24 +79,28 @@ extension DeviceFiles on FilesDB {
   Future<void> insertOrUpdatePathName(
     List<AssetPathEntity> pathEntities,
   ) async {
-    final Set<String> existingPathIds = await getDevicePathIDs();
-    final Database db = await database;
-    for (AssetPathEntity pathEntity in pathEntities) {
-      if (existingPathIds.contains(pathEntity.id)) {
-        await db.rawUpdate(
-          "UPDATE device_path_collections SET name = ? where id = "
-          "?",
-          [pathEntity.name, pathEntity.id],
-        );
-      } else {
-        await db.insert(
-          "device_path_collections",
-          {
-            "id": pathEntity.id,
-            "name": pathEntity.name,
-          },
-        );
+    try {
+      final Set<String> existingPathIds = await getDevicePathIDs();
+      final Database db = await database;
+      for (AssetPathEntity pathEntity in pathEntities) {
+        if (existingPathIds.contains(pathEntity.id)) {
+          await db.rawUpdate(
+            "UPDATE device_path_collections SET name = ? where id = "
+            "?",
+            [pathEntity.name, pathEntity.id],
+          );
+        } else {
+          await db.insert(
+            "device_path_collections",
+            {
+              "id": pathEntity.id,
+              "name": pathEntity.name,
+            },
+          );
+        }
       }
+    } catch (e) {
+      _logger.severe("failed to save path names", e);
     }
   }
 }
