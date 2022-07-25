@@ -454,7 +454,6 @@ class IncomingCollectionItem extends StatelessWidget {
           CollectionPage(
             c,
             appBarType: GalleryType.sharedCollection,
-            overlayType: GalleryType.sharedCollection,
             tagPrefix: "shared_collection",
           ),
         );
