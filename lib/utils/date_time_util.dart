@@ -224,8 +224,6 @@ String getDayTitle(int timestamp) {
 }
 
 String secondsToHHMMSS(int value) {
-  print("value is  ----------------");
-  print(value);
   int h, m, s;
   h = value ~/ 3600;
   m = ((value - h * 3600)) ~/ 60;

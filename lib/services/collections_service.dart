@@ -843,7 +843,7 @@ class CollectionsService {
 
   bool hasSyncedCollections() {
     return _prefs.containsKey(_collectionsSyncTimeKey);
-  } /*  */
+  }
 
   Collection _getCollectionWithDecryptedName(Collection collection) {
     if (collection.encryptedName != null &&
