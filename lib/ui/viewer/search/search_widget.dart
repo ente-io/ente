@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
+// ignore: must_be_immutable
 class SearchIconWidget extends StatefulWidget {
   bool openSearch;
   SearchIconWidget({Key key, this.openSearch = false}) : super(key: key);
@@ -32,6 +31,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   }
 }
 
+// ignore: must_be_immutable
 class Searchwidget extends StatefulWidget {
   bool openSearch;
   final String searchQuery = '';
