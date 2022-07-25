@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/ui/viewer/search/collectionSuggestions.dart';
 
 class SearchResultsSuggestions extends StatefulWidget {
-  final Map<String, Set> collectionIDs;
-  const SearchResultsSuggestions({Key key, this.collectionIDs})
-      : super(key: key);
+  final List<Collection> collections;
+  const SearchResultsSuggestions({Key key, this.collections}) : super(key: key);
 
   @override
   State<SearchResultsSuggestions> createState() =>
@@ -16,7 +16,7 @@ class _SearchResultsSuggestionsState extends State<SearchResultsSuggestions> {
   @override
   Widget build(BuildContext context) {
     List<Widget> p1suggestions = [];
-    p1suggestions = CollectionSuggestions(widget.collectionIDs, context)
+    p1suggestions = CollectionSuggestions(widget.collections, context)
         .getSuggestions(); //add other search type p1 suggestions to this
     return Container(
       constraints:

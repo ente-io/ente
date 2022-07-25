@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/viewer/search/SearchResultsSuggestions.dart';
 
@@ -43,7 +44,7 @@ class _SearchwidgetState extends State<Searchwidget> {
   final ValueNotifier<String> _searchQ = ValueNotifier('');
   @override
   Widget build(BuildContext context) {
-    Map<String, Set> collectionIDs;
+    List<Collection> matchedCollections;
     return widget.openSearch
         ? Column(
             children: [
@@ -68,10 +69,10 @@ class _SearchwidgetState extends State<Searchwidget> {
                           ),
                           prefixIcon: const Icon(Icons.search),
                         ),
-                        onChanged: (value) {
-                          collectionIDs = CollectionsService.instance
-                              .getSearchedCollectionsId(value);
-                          debugPrint(collectionIDs.toString());
+                        onChanged: (value) async {
+                          matchedCollections = await CollectionsService.instance
+                              .getSearchedCollections(value);
+                          debugPrint(matchedCollections.toString());
                           _searchQ.value = value;
                         },
                         autofocus: true,
@@ -99,7 +100,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                   debugPrint('listening to search value');
                   return newQuery != ''
                       ? SearchResultsSuggestions(
-                          collectionIDs: collectionIDs,
+                          collections: matchedCollections,
                         )
                       : const SizedBox.shrink();
                 },

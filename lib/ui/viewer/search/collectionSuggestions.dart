@@ -12,32 +12,22 @@ import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class CollectionSuggestions {
-  final Map<String, Set> collectionIDs;
+  final List<Collection> matchedCollections;
   final BuildContext context;
-  const CollectionSuggestions(this.collectionIDs, this.context);
+  const CollectionSuggestions(this.matchedCollections, this.context);
 
   List<Widget> getSuggestions() {
-    List<int> p1IDs = collectionIDs['p1'].toList();
-    List<int> p2IDs = collectionIDs['p2'].toList();
-    List<int> p3IDs = collectionIDs['p3'].toList();
     List<Widget> collectionsP1 = [];
-    List<Widget> collectionsP2 = [];
-    List<Widget> collectionsP3 = [];
-    collectionsP1 = generateSuggestionWidgets(p1IDs, collectionsP1);
-    collectionsP2 = generateSuggestionWidgets(p2IDs, collectionsP2);
-    collectionsP3 = generateSuggestionWidgets(p3IDs, collectionsP3);
-    return [...collectionsP1, ...collectionsP2, ...collectionsP3];
+    collectionsP1 = generateSuggestionWidgets(collectionsP1);
+    return [...collectionsP1];
   }
 
   List<Widget> generateSuggestionWidgets(
-    List<int> pIDs,
     List<Widget> pCollections,
   ) {
     Future<List<File>> latestCollectionFiles =
         CollectionsService.instance.getLatestCollectionFiles();
-    for (int id in pIDs) {
-      Collection collection = CollectionsService.instance.getCollectionByID(id);
-      // CollectionWithThumbnail c = CollectionWithThumbnail(collection, null);
+    for (Collection collection in matchedCollections) {
       CollectionWithThumbnail c;
       pCollections.add(
         GestureDetector(
@@ -49,7 +39,7 @@ class CollectionSuggestions {
                   const Text('Album'),
                   Text(collection.name),
                   FutureBuilder<int>(
-                    future: FilesDB.instance.collectionFileCount(id),
+                    future: FilesDB.instance.collectionFileCount(collection.id),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data > 0) {
                         int noOfMemories = snapshot.data;
@@ -80,22 +70,26 @@ class CollectionSuggestions {
               FutureBuilder(
                 future: latestCollectionFiles,
                 builder: (context, snapshot) {
-                  log(snapshot.data.toString());
-                  for (File file in snapshot.data) {
-                    if (file.collectionID == id) {
-                      c = CollectionWithThumbnail(collection, file);
-                      break;
+                  if (snapshot.hasData) {
+                    for (File file in snapshot.data) {
+                      if (file.collectionID == collection.id) {
+                        c = CollectionWithThumbnail(collection, file);
+                        break;
+                      }
                     }
+
+                    return Row(
+                      children: [
+                        SizedBox(
+                          height: 50,
+                          width: 50,
+                          child: ThumbnailWidget(c.thumbnail),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const SizedBox.shrink();
                   }
-                  return Row(
-                    children: [
-                      SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: ThumbnailWidget(c.thumbnail),
-                      ),
-                    ],
-                  );
                 },
               )
             ],

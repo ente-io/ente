@@ -170,6 +170,24 @@ class CollectionsService {
         .toList();
   }
 
+// getCollectionsForSearch removes deleted or archived collections from search result //implement for files that have atleast one file
+
+  Future<List<Collection>> getCollectionsForSearch() async {
+    List<File> latestCollectionFiles = await getLatestCollectionFiles();
+    Set<int> collectionWithAtleastOneFile =
+        latestCollectionFiles.map((e) => e.collectionID).toSet();
+
+    return _collectionIDToCollections.values
+        .toList()
+        .where(
+          (element) =>
+              !element.isDeleted &&
+              !element.isArchived() &&
+              collectionWithAtleastOneFile.contains(element.id),
+        )
+        .toList();
+  }
+
   Future<List<User>> getSharees(int collectionID) {
     return _dio
         .get(
@@ -825,7 +843,7 @@ class CollectionsService {
 
   bool hasSyncedCollections() {
     return _prefs.containsKey(_collectionsSyncTimeKey);
-  }
+  } /*  */
 
   Collection _getCollectionWithDecryptedName(Collection collection) {
     if (collection.encryptedName != null &&
@@ -864,42 +882,14 @@ class CollectionsService {
     }
   }
 
-  Map<String, Set> getSearchedCollectionsId(String query) {
-    Set stringStartsWithQuery = _collectionIDToCollections.values
-        .toList()
-        .where(
-          (element) =>
-              element.name.startsWith(RegExp(query, caseSensitive: false)),
-        )
-        .map((e) => e.id)
-        .toSet();
-
-    Set wordStartsWithQuery = _collectionIDToCollections.values
-        .toList()
-        .where(
-          (element) => //"<space>query" for words that come after the 1st word
-              element.name.contains(RegExp(" $query", caseSensitive: false)),
-        )
-        .map((e) => e.id)
-        .toSet();
-
-    Set containesQuery = _collectionIDToCollections.values
-        .toList()
+  Future<List<Collection>> getSearchedCollections(String query) async {
+    List<Collection> collectionsToSearch = await getCollectionsForSearch();
+    return collectionsToSearch
         .where(
           (element) =>
               element.name.contains(RegExp(query, caseSensitive: false)),
         )
-        .map((e) => e.id)
-        .toSet();
-
-    containesQuery = containesQuery
-        .difference({...stringStartsWithQuery, ...wordStartsWithQuery});
-
-    return {
-      'p1': stringStartsWithQuery,
-      'p2': wordStartsWithQuery,
-      'p3': containesQuery,
-    };
+        .toList();
   }
 }
 
