@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/ui/viewer/search/collectionSuggestions.dart';
+import 'package:photos/ui/viewer/search/collection_suggestions.dart';
 
 class SearchResultsSuggestions extends StatefulWidget {
   final List<Collection> collections;

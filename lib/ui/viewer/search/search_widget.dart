@@ -4,7 +4,7 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/viewer/search/SearchResultsSuggestions.dart';
+import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
 class SearchIconWidget extends StatefulWidget {
   bool openSearch;
