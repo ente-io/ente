@@ -20,7 +20,7 @@ class _SearchResultsSuggestionsState extends State<SearchResultsSuggestions> {
         CollectionSuggestions(widget.collections, context).getSuggestions();
     return Container(
       constraints:
-          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
       child: ListView.builder(
         itemCount: suggestions.length,
         itemBuilder: (context, index) {
