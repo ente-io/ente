@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -80,6 +81,15 @@ class FeatureFlagService {
     } catch (e) {
       _logger.severe(e);
       return FFDefault.enableStripe;
+    }
+  }
+
+  bool enableSearchFeature() {
+    String email = Configuration.instance.getEmail();
+    if (email.endsWith("@ente.io") || email == 'ashilkn99+ente77@gmail.com') {
+      return true;
+    } else {
+      return false;
     }
   }
 
