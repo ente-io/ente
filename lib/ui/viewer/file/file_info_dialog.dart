@@ -199,30 +199,31 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           ? const DividerWithPadding(left: 70, right: 20)
           : const SizedBox.shrink(),
       ListTile(
-          leading: const Padding(
-            padding: EdgeInsets.only(left: 6),
-            child: Icon(Icons.folder_outlined),
+        leading: const Padding(
+          padding: EdgeInsets.only(left: 6),
+          child: Icon(Icons.folder_outlined),
+        ),
+        title: GestureDetector(
+          onTap: () {
+            if (file.collectionID != null) {
+              Navigator.pop(context); // info dialog
+              Collection c = CollectionsService.instance
+                  .getCollectionByID(file.collectionID);
+              routeToPage(
+                context,
+                CollectionPage(CollectionWithThumbnail(c, null)),
+              );
+            }
+          },
+          child: Text(
+            file.collectionID != null
+                ? CollectionsService.instance
+                    .getCollectionByID(file.collectionID)
+                    .name
+                : file.deviceFolder,
           ),
-          title: GestureDetector(
-            onTap: () {
-              if (file.collectionID != null) {
-                Navigator.pop(context); // info dialog
-                Collection c = CollectionsService.instance
-                    .getCollectionByID(file.collectionID);
-                routeToPage(
-                  context,
-                  CollectionPage(CollectionWithThumbnail(c, null)),
-                );
-              }
-            },
-            child: Text(
-              file.collectionID != null
-                  ? CollectionsService.instance
-                      .getCollectionByID(file.collectionID)
-                      .name
-                  : file.deviceFolder,
-            ),
-          )),
+        ),
+      ),
       const DividerWithPadding(left: 70, right: 20),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
