@@ -16,7 +16,10 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
   int toTime,
   Computer computer,
 ) async {
-  final pathEntities = await _getGalleryList(fromTime, toTime);
+  final pathEntities = await _getGalleryList(
+    updateFromTime: fromTime,
+    updateToTime: toTime,
+  );
   List<File> files = [];
   for (AssetPathEntity pathEntity in pathEntities) {
     files = await _computeFiles(pathEntity, fromTime, files, computer);
@@ -112,10 +115,11 @@ Future<List<File>> _convertToFiles(
   return files;
 }
 
-Future<List<AssetPathEntity>> _getGalleryList(
-  final int fromTime,
-  final int toTime,
-) async {
+Future<List<AssetPathEntity>> _getGalleryList({
+  final int updateFromTime,
+  final int updateToTime,
+  final bool containsModifiedPath = false,
+}) async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
     AssetType.image,
@@ -126,10 +130,13 @@ Future<List<AssetPathEntity>> _getGalleryList(
     const FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
   );
 
-  filterOptionGroup.updateTimeCond = DateTimeCond(
-    min: DateTime.fromMicrosecondsSinceEpoch(fromTime),
-    max: DateTime.fromMicrosecondsSinceEpoch(toTime),
-  );
+  if (updateFromTime != null && updateToTime != null) {
+    filterOptionGroup.updateTimeCond = DateTimeCond(
+      min: DateTime.fromMicrosecondsSinceEpoch(updateFromTime),
+      max: DateTime.fromMicrosecondsSinceEpoch(updateToTime),
+    );
+  }
+  filterOptionGroup.containsPathModified = containsModifiedPath;
   final galleryList = await PhotoManager.getAssetPathList(
     hasAll: true,
     type: RequestType.common,
