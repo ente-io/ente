@@ -1,9 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -29,12 +33,16 @@ class CollectionSuggestions {
     List<int> pIDs,
     List<Widget> pCollections,
   ) {
+    Future<List<File>> latestCollectionFiles =
+        CollectionsService.instance.getLatestCollectionFiles();
     for (int id in pIDs) {
       Collection collection = CollectionsService.instance.getCollectionByID(id);
-      CollectionWithThumbnail c = CollectionWithThumbnail(collection, null);
+      // CollectionWithThumbnail c = CollectionWithThumbnail(collection, null);
+      CollectionWithThumbnail c;
       pCollections.add(
         GestureDetector(
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               Column(
                 children: [
@@ -69,12 +77,26 @@ class CollectionSuggestions {
                   ),
                 ],
               ),
-              Row(
-                children: [
-                  Icon(Icons.access_alarms),
-                  Icon(Icons.access_alarms),
-                  Icon(Icons.access_alarms),
-                ],
+              FutureBuilder(
+                future: latestCollectionFiles,
+                builder: (context, snapshot) {
+                  log(snapshot.data.toString());
+                  for (File file in snapshot.data) {
+                    if (file.collectionID == id) {
+                      c = CollectionWithThumbnail(collection, file);
+                      break;
+                    }
+                  }
+                  return Row(
+                    children: [
+                      SizedBox(
+                        height: 50,
+                        width: 50,
+                        child: ThumbnailWidget(c.thumbnail),
+                      ),
+                    ],
+                  );
+                },
               )
             ],
           ),
