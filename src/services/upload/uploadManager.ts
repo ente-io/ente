@@ -247,7 +247,7 @@ class UploadManager {
                         )} `
                     );
                 } catch (e) {
-                    logError(e, 'metadata extraction failed for a file');
+                    logError(e, 'extractFileTypeAndMetadata failed');
                     logUploadInfo(
                         `metadata extraction failed ${getFileNameSize(
                             file
@@ -295,6 +295,7 @@ class UploadManager {
                 fileTypeInfo
             );
         } catch (e) {
+            logError(e, 'failed to extract file metadata');
             return { fileTypeInfo, metadata: null };
         }
         return { fileTypeInfo, metadata };
