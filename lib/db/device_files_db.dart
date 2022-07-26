@@ -53,15 +53,19 @@ extension DeviceFiles on FilesDB {
     final rows = await db.rawQuery(
       '''
       SELECT count(*) as count, path_id
-      FROM device_path_collections
+      FROM device_files
       GROUP BY path_id
     ''',
-    );
-    final result = <String, int>{};
-    for (final row in rows) {
-      result[row['path_id']] = row["count"];
+      );
+      final result = <String, int>{};
+      for (final row in rows) {
+        result[row['path_id']] = row["count"];
+      }
+      return result;
+    } catch (e) {
+      _logger.severe("failed to getDevicePathIDToImportedFileCount", e);
+      rethrow;
     }
-    return result;
   }
 
   Future<Set<String>> getDevicePathIDs() async {
