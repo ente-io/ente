@@ -23,6 +23,7 @@ import { EnteFile } from 'types/file';
 import {
     ElectronFile,
     FileWithCollection,
+    Metadata,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
@@ -286,12 +287,16 @@ class UploadManager {
             return { fileTypeInfo, metadata: null };
         }
         logUploadInfo(` extracting ${getFileNameSize(file)} metadata`);
-        const metadata =
-            (await UploadService.extractFileMetadata(
+        let metadata: Metadata;
+        try {
+            metadata = await UploadService.extractFileMetadata(
                 file,
                 collectionID,
                 fileTypeInfo
-            )) || null;
+            );
+        } catch (e) {
+            return { fileTypeInfo, metadata: null };
+        }
         return { fileTypeInfo, metadata };
     }
 
