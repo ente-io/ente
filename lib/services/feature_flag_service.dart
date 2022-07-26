@@ -86,11 +86,7 @@ class FeatureFlagService {
 
   bool enableSearchFeature() {
     String email = Configuration.instance.getEmail();
-    if (email.endsWith("@ente.io") || email == 'ashilkn99+ente77@gmail.com') {
-      return true;
-    } else {
-      return false;
-    }
+    return (email != null && email.endsWith("@ente.io")) || kDebugMode;
   }
 
   Future<void> fetchFeatureFlags() async {

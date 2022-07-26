@@ -9,21 +9,12 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class CollectionSuggestions {
+class CollectionSuggestionWidgets {
   final List<Collection> matchedCollections;
   final BuildContext context;
-  const CollectionSuggestions(this.matchedCollections, this.context);
-
-  List<Widget> getSuggestions() {
+  CollectionSuggestionWidgets(this.matchedCollections, this.context);
+  List<Widget> generateSuggestionWidgets() {
     List<Widget> collectionSuggestionWidgets = [];
-    collectionSuggestionWidgets =
-        generateSuggestionWidgets(collectionSuggestionWidgets);
-    return collectionSuggestionWidgets;
-  }
-
-  List<Widget> generateSuggestionWidgets(
-    List<Widget> collectionSuggestionWidgets,
-  ) {
     Future<List<File>> latestCollectionFiles =
         CollectionsService.instance.getLatestCollectionFiles();
     for (Collection collection in matchedCollections) {

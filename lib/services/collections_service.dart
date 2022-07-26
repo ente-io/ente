@@ -884,7 +884,7 @@ class CollectionsService {
 
   Future<List<Collection>> getSearchedCollections(String query) async {
     List<Collection> collectionsToSearch = await getCollectionsForSearch();
-    return collectionsToSearch
+    return collectionsToSearch //return collection with thumbnail here
         .where(
           (element) =>
               element.name.contains(RegExp(query, caseSensitive: false)),

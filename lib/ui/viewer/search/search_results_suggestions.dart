@@ -10,7 +10,10 @@ class SearchResultsSuggestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> suggestions = [];
-    suggestions = CollectionSuggestions(collections, context).getSuggestions();
+    // for(Collection c in collections) {
+    // }
+    suggestions = CollectionSuggestionWidgets(collections, context)
+        .generateSuggestionWidgets();
     return Container(
       constraints:
           BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),

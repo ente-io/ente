@@ -211,7 +211,6 @@ class StatusBarBrandingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    FeatureFlagService.instance.enableSearchFeature();
     return Stack(
       children: [
         Container(
