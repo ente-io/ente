@@ -302,6 +302,7 @@ class FilesDB {
         CREATE TABLE device_files (
           id TEXT NOT NULL,
           path_id TEXT NOT NULL,
+          synced INTEGER NOT NULL DEFAULT 0,
           UNIQUE(id, path_id)
        );
        ''',
@@ -317,10 +318,10 @@ class FilesDB {
       );
       ''',
       '''
-      CREATE INDEX IF NOT EXISTS df_id_idx ON device_files (path_id);
+      CREATE INDEX IF NOT EXISTS df_id_idx ON device_files (id);
       ''',
       '''
-      CREATE INDEX IF NOT EXISTS df_path_id_idx ON device_files (id);
+      CREATE INDEX IF NOT EXISTS df_path_id_idx ON device_files (path_id);
       ''',
     ];
   }
@@ -1048,6 +1049,7 @@ class FilesDB {
   }
 
   Future<List<File>> getLatestCollectionFiles() async {
+    debugPrint("Fetching latestCollectionFiles from db");
     final db = await instance.database;
     final rows = await db.rawQuery(
       '''

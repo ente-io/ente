@@ -15,6 +15,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tuple/tuple.dart';
 
 class LocalSyncService {
   final _logger = Logger("LocalSyncService");
@@ -64,6 +65,7 @@ class LocalSyncService {
         return;
       }
     }
+    refreshDeviceFolderCovers();
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
       return _existingSync.future;
@@ -115,6 +117,7 @@ class LocalSyncService {
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
+      await refreshDeviceFolderCovers();
       _logger.fine("first gallery import finished");
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
@@ -124,6 +127,15 @@ class LocalSyncService {
     _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
     _existingSync.complete();
     _existingSync = null;
+  }
+
+  Future<void> refreshDeviceFolderCovers() async {
+    List<Tuple2<AssetPathEntity, File>> result =
+        await getDeviceFolderWithCountAndLatestFile();
+    for (Tuple2<AssetPathEntity, File> tup in result) {
+      await FilesDB.instance
+          .updateDeviceCoverWithCount(tup.item1, tup.item2.localID);
+    }
   }
 
   Future<bool> syncAll() async {
@@ -138,6 +150,7 @@ class LocalSyncService {
           d.inMilliseconds.toString() +
           "ms",
     );
+    await refreshDeviceFolderCovers();
     final existingIDs = await _db.getExistingLocalFileIDs();
     final invalidIDs = _getInvalidFileIDs().toSet();
     final unsyncedFiles =

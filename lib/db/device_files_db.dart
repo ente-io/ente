@@ -101,6 +101,24 @@ extension DeviceFiles on FilesDB {
       }
     } catch (e) {
       _logger.severe("failed to save path names", e);
+      rethrow;
+    }
+  }
+
+  Future<int> updateDeviceCoverWithCount(
+    AssetPathEntity pathEntity,
+    String localID,
+  ) async {
+    try {
+      final Database db = await database;
+      return db.rawUpdate(
+        "UPDATE device_path_collections SET name = ?, cover_id = ?, count"
+        " = ? where id = ?",
+        [pathEntity.name, localID, pathEntity.assetCount, pathEntity.id],
+      );
+    } catch (e) {
+      _logger.severe("failed to save path names", e);
+      rethrow;
     }
   }
 }

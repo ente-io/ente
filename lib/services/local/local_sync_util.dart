@@ -31,6 +31,35 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
   return Tuple2(pathEntities, files);
 }
 
+// getDeviceFolderWithCountAndLatestFile returns a tuple of AssetPathEntity and
+// latest file in the assetPath, along with modifiedAt time and total counts
+// of assets in a Asset Path. We use this result to update the latest thumbnail
+// for any collection and also identify which AssetPath needs to be resynced
+// again.
+Future<List<Tuple2<AssetPathEntity, File>>>
+    getDeviceFolderWithCountAndLatestFile() async {
+  List<Tuple2<AssetPathEntity, File>> result = [];
+  final pathEntities = await _getGalleryList(
+    needsTitle: false,
+    containsModifiedPath: true,
+    orderOption:
+        const OrderOption(type: OrderOptionType.createDate, asc: false),
+  );
+  for (AssetPathEntity pathEntity in pathEntities) {
+    var latestEntity = await pathEntity.getAssetListPaged(
+      page: 0,
+      size: 1,
+    );
+    final file = File.fromAsset(
+      pathEntity.name,
+      latestEntity.first,
+      devicePathID: pathEntity.id,
+    );
+    result.add(Tuple2(pathEntity, file));
+  }
+  return result;
+}
+
 Future<List<LocalAsset>> getAllLocalAssets() async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
@@ -115,20 +144,25 @@ Future<List<File>> _convertToFiles(
   return files;
 }
 
-Future<List<AssetPathEntity>> _getGalleryList({
-  final int updateFromTime,
-  final int updateToTime,
-  final bool containsModifiedPath = false,
-}) async {
+Future<List<AssetPathEntity>> _getGalleryList(
+    {final int updateFromTime,
+    final int updateToTime,
+    final bool containsModifiedPath = false,
+    final bool needsTitle = true,
+    final OrderOption orderOption}) async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
     AssetType.image,
-    const FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
+    FilterOption(needTitle: needsTitle, sizeConstraint: ignoreSizeConstraint),
   );
   filterOptionGroup.setOption(
     AssetType.video,
-    const FilterOption(needTitle: true, sizeConstraint: ignoreSizeConstraint),
+    FilterOption(needTitle: needsTitle, sizeConstraint: ignoreSizeConstraint),
   );
+
+  if (orderOption != null) {
+    filterOptionGroup.addOrderOption(orderOption);
+  }
 
   if (updateFromTime != null && updateToTime != null) {
     filterOptionGroup.updateTimeCond = DateTimeCond(
@@ -146,7 +180,6 @@ Future<List<AssetPathEntity>> _getGalleryList({
   galleryList.sort((s1, s2) {
     return s2.assetCount.compareTo(s1.assetCount);
   });
-
   return galleryList;
 }
 
