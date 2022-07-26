@@ -774,6 +774,10 @@ export function getCollectionSummaries(
     files: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionSummaries {
+    const user: User = getData(LS_KEYS.USER);
+    if (!user) {
+        return;
+    }
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(
         files,
@@ -781,7 +785,6 @@ export function getCollectionSummaries(
     );
     const collectionFilesCount = getCollectionsFileCount(files);
     const uniqueFileCount = new Set(files.map((file) => file.id)).size;
-    const user: User = getData(LS_KEYS.USER);
 
     for (const collection of collections) {
         if (collectionFilesCount.get(collection.id)) {
