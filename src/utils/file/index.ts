@@ -330,8 +330,8 @@ export function splitFilenameAndExtension(filename: string): [string, string] {
         ];
 }
 
-export function getFileExtension(filename) {
-    return splitFilenameAndExtension(filename)[1];
+export function getFileExtension(filename: string) {
+    return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
 }
 
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
