@@ -134,6 +134,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 
 export default function Gallery() {
     const router = useRouter();
+    const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);
 
     const [files, setFiles] = useState<EnteFile[]>(null);
@@ -246,10 +247,12 @@ export default function Gallery() {
                 setPlanModalView(true);
             }
             setIsFirstLogin(false);
+            const user = getData(LS_KEYS.USER);
             const files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
             files.push(...getTrashedFiles(trash));
+            setUser(user);
             setFiles(sortFiles(files));
             setCollections(collections);
             await syncWithRemote(true);
@@ -262,7 +265,6 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
         if (!user || !files || !collections) {
             return;
         }
