@@ -1,6 +1,7 @@
 import constants from 'utils/strings/constants';
 import { CustomError } from 'utils/error';
 import GetDeviceOS, { OS } from './deviceDetection';
+import { Lock } from 'types/watchFolder';
 
 const DESKTOP_APP_GITHUB_DOWNLOAD_URL =
     'https://github.com/ente-io/bhari-frame/releases/latest';
@@ -91,4 +92,17 @@ export function openLink(href: string, newTab?: boolean) {
     }
     a.rel = 'noreferrer noopener';
     a.click();
+}
+
+export function newLock(): Lock {
+    let resolver: () => void = null;
+    const wait = new Promise<void>((resolve) => {
+        resolver = resolve;
+    });
+    return {
+        wait,
+        unlock: () => {
+            resolver();
+        },
+    };
 }

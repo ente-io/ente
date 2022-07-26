@@ -28,6 +28,7 @@ class watchFolderService {
     private isEventRunning: boolean = false;
     private uploadRunning: boolean = false;
     private pathToIDMap = new Map<string, number>();
+    private isPaused = false;
     private setElectronFiles: (files: ElectronFile[]) => void;
     private setCollectionName: (collectionName: string) => void;
     private syncWithRemote: () => void;
@@ -41,6 +42,10 @@ class watchFolderService {
 
     isUploadRunning() {
         return this.uploadRunning;
+    }
+
+    isServicePaused() {
+        return this.isPaused;
     }
 
     async init(
@@ -57,31 +62,43 @@ class watchFolderService {
                 this.setWatchFolderServiceIsRunning =
                     setWatchFolderServiceIsRunning;
 
-                let mappings = this.getWatchMappings();
-
-                console.log('mappings', mappings);
-
-                if (!mappings) {
-                    return;
-                }
-
-                mappings = await this.filterOutDeletedMappings(mappings);
-
-                for (const mapping of mappings) {
-                    const filesOnDisk: ElectronFile[] =
-                        await this.ElectronAPIs.getAllFilesFromDir(
-                            mapping.folderPath
-                        );
-
-                    this.uploadDiffOfFiles(mapping, filesOnDisk);
-                    this.trashDiffOfFiles(mapping, filesOnDisk);
-                }
-
-                this.setWatchFunctions();
-                await this.runNextEvent();
+                await this.getAndSyncDiffOfFiles(true);
             } catch (e) {
                 logError(e, 'error while initializing watch service');
             }
+        }
+    }
+
+    async getAndSyncDiffOfFiles(init = false) {
+        try {
+            let mappings = this.getWatchMappings();
+
+            console.log('mappings', mappings);
+
+            if (!mappings) {
+                return;
+            }
+
+            mappings = await this.filterOutDeletedMappings(mappings);
+
+            this.eventQueue = [];
+
+            for (const mapping of mappings) {
+                const filesOnDisk: ElectronFile[] =
+                    await this.ElectronAPIs.getAllFilesFromDir(
+                        mapping.folderPath
+                    );
+
+                this.uploadDiffOfFiles(mapping, filesOnDisk);
+                this.trashDiffOfFiles(mapping, filesOnDisk);
+            }
+
+            if (init) {
+                this.setWatchFunctions();
+            }
+            await this.runNextEvent();
+        } catch (e) {
+            logError(e, 'error while getting and syncing diff of files');
         }
     }
 
@@ -224,7 +241,11 @@ class watchFolderService {
     private async runNextEvent() {
         console.log('mappings', this.getWatchMappings());
 
-        if (this.eventQueue.length === 0 || this.isEventRunning) {
+        if (
+            this.eventQueue.length === 0 ||
+            this.isEventRunning ||
+            this.isPaused
+        ) {
             return;
         }
 
@@ -512,6 +533,15 @@ class watchFolderService {
         } catch (e) {
             logError(e, 'error while checking if folder exists');
         }
+    }
+
+    pauseService() {
+        this.isPaused = true;
+    }
+
+    resumeService() {
+        this.isPaused = false;
+        this.getAndSyncDiffOfFiles();
     }
 }
 

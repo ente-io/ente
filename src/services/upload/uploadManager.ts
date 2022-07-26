@@ -61,6 +61,7 @@ class UploadManager {
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
+    private isUploadPausing: boolean = false;
     public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
@@ -179,6 +180,9 @@ class UploadManager {
             );
             throw e;
         } finally {
+            if (this.isUploadPausing) {
+                this.isUploadPausing = false;
+            }
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.worker.terminate();
             }
@@ -193,6 +197,10 @@ class UploadManager {
 
             for (const { file, collectionID } of metadataFiles) {
                 try {
+                    if (this.isUploadPausing) {
+                        return;
+                    }
+
                     logUploadInfo(
                         `parsing metadata json file ${getFileNameSize(file)}`
                     );
@@ -234,6 +242,9 @@ class UploadManager {
             logUploadInfo(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
+                if (this.isUploadPausing) {
+                    return;
+                }
                 try {
                     const { fileTypeInfo, metadata, filePath } =
                         await (async () => {
@@ -361,6 +372,9 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any) {
         while (this.filesToBeUploaded.length > 0) {
+            if (this.isUploadPausing) {
+                return;
+            }
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const existingFilesInCollection =
@@ -456,6 +470,13 @@ class UploadManager {
                 fileWithCollection,
                 uploadedFile
             );
+        }
+    }
+
+    public pauseWatchService() {
+        if (isElectron()) {
+            watchFolderService.pauseService();
+            this.isUploadPausing = true;
         }
     }
 
