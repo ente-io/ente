@@ -1,14 +1,18 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
+import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -29,25 +33,25 @@ class BackupFolderSelectionPage extends StatefulWidget {
 }
 
 class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
+  final Logger _logger = Logger((_BackupFolderSelectionPageState).toString());
   final Set<String> _allFolders = <String>{};
   Set<String> _selectedFolders = <String>{};
-  List<File> _latestFiles;
-  Map<String, int> _itemCount;
+  List<DevicePathCollection> _latestFiles;
+  Map<String, int> _pathIDToItemCount;
 
   @override
   void initState() {
     _selectedFolders = Configuration.instance.getPathsToBackUp();
-    FilesDB.instance.getLatestLocalFiles().then((files) async {
-      _itemCount = await FilesDB.instance.getFileCountInDeviceFolders();
+    FilesDB.instance.getDevicePathCollections().then((files) async {
+      _pathIDToItemCount =
+          await FilesDB.instance.getDevicePathIDToImportedFileCount();
       setState(() {
         _latestFiles = files;
         _latestFiles.sort((first, second) {
-          return first.deviceFolder
-              .toLowerCase()
-              .compareTo(second.deviceFolder.toLowerCase());
+          return first.name.toLowerCase().compareTo(second.name.toLowerCase());
         });
         for (final file in _latestFiles) {
-          _allFolders.add(file.deviceFolder);
+          _allFolders.add(file.name);
         }
         if (widget.isOnboarding) {
           _selectedFolders.addAll(_allFolders);
@@ -128,9 +132,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       _selectedFolders.addAll(_allFolders);
                     }
                     _latestFiles.sort((first, second) {
-                      return first.deviceFolder
+                      return first.name
                           .toLowerCase()
-                          .compareTo(second.deviceFolder.toLowerCase());
+                          .compareTo(second.name.toLowerCase());
                     });
                     setState(() {});
                   },
@@ -212,11 +216,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         thumbVisibility: true,
         child: Padding(
           padding: const EdgeInsets.only(right: 4),
-          child: ImplicitlyAnimatedReorderableList<File>(
+          child: ImplicitlyAnimatedReorderableList<DevicePathCollection>(
             controller: scrollController,
             items: _latestFiles,
-            areItemsTheSame: (oldItem, newItem) =>
-                oldItem.deviceFolder == newItem.deviceFolder,
+            areItemsTheSame: (oldItem, newItem) => oldItem.id == newItem.id,
             onReorderFinished: (item, from, to, newItems) {
               setState(() {
                 _latestFiles
@@ -253,8 +256,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     );
   }
 
-  Widget _getFileItem(File file) {
-    final isSelected = _selectedFolders.contains(file.deviceFolder);
+  Widget _getFileItem(DevicePathCollection devicePathCollection) {
+    final isSelected = _selectedFolders.contains(devicePathCollection.name);
+    final importedCount = _pathIDToItemCount != null
+        ? _pathIDToItemCount[devicePathCollection.id] ?? 0
+        : -1;
     return Padding(
       padding: const EdgeInsets.only(bottom: 1, right: 1),
       child: Container(
@@ -292,9 +298,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     value: isSelected,
                     onChanged: (value) {
                       if (value) {
-                        _selectedFolders.add(file.deviceFolder);
+                        _selectedFolders.add(devicePathCollection.name);
                       } else {
-                        _selectedFolders.remove(file.deviceFolder);
+                        _selectedFolders.remove(devicePathCollection.name);
                       }
                       setState(() {});
                     },
@@ -305,7 +311,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       Container(
                         constraints: const BoxConstraints(maxWidth: 180),
                         child: Text(
-                          file.deviceFolder,
+                          devicePathCollection.name,
                           textAlign: TextAlign.left,
                           style: TextStyle(
                             fontFamily: 'Inter-Medium',
@@ -324,9 +330,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       ),
                       const Padding(padding: EdgeInsets.only(top: 2)),
                       Text(
-                        _itemCount[file.deviceFolder].toString() +
+                        (kDebugMode ? 'inApp: $importedCount : device ' : '') +
+                            (devicePathCollection.count ?? 0).toString() +
                             " item" +
-                            (_itemCount[file.deviceFolder] == 1 ? "" : "s"),
+                            ((devicePathCollection.count ?? 0) == 1 ? "" : "s"),
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 12,
@@ -339,15 +346,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                   ),
                 ],
               ),
-              _getThumbnail(file, isSelected),
+              _getThumbnail(devicePathCollection.thumbnail, isSelected),
             ],
           ),
           onTap: () {
-            final value = !_selectedFolders.contains(file.deviceFolder);
+            final value = !_selectedFolders.contains(devicePathCollection.name);
             if (value) {
-              _selectedFolders.add(file.deviceFolder);
+              _selectedFolders.add(devicePathCollection.name);
             } else {
-              _selectedFolders.remove(file.deviceFolder);
+              _selectedFolders.remove(devicePathCollection.name);
             }
             setState(() {});
           },
@@ -358,19 +365,15 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   void _sortFiles() {
     _latestFiles.sort((first, second) {
-      if (_selectedFolders.contains(first.deviceFolder) &&
-          _selectedFolders.contains(second.deviceFolder)) {
-        return first.deviceFolder
-            .toLowerCase()
-            .compareTo(second.deviceFolder.toLowerCase());
-      } else if (_selectedFolders.contains(first.deviceFolder)) {
+      if (_selectedFolders.contains(first.name) &&
+          _selectedFolders.contains(second.name)) {
+        return first.name.toLowerCase().compareTo(second.name.toLowerCase());
+      } else if (_selectedFolders.contains(first.name)) {
         return -1;
-      } else if (_selectedFolders.contains(second.deviceFolder)) {
+      } else if (_selectedFolders.contains(second.name)) {
         return 1;
       }
-      return first.deviceFolder
-          .toLowerCase()
-          .compareTo(second.deviceFolder.toLowerCase());
+      return first.name.toLowerCase().compareTo(second.name.toLowerCase());
     });
   }
 

@@ -49,9 +49,10 @@ extension DeviceFiles on FilesDB {
   }
 
   Future<Map<String, int>> getDevicePathIDToImportedFileCount() async {
-    final db = await database;
-    final rows = await db.rawQuery(
-      '''
+    try {
+      final db = await database;
+      final rows = await db.rawQuery(
+        '''
       SELECT count(*) as count, path_id
       FROM device_files
       GROUP BY path_id
@@ -129,32 +130,36 @@ extension DeviceFiles on FilesDB {
 
   Future<List<DevicePathCollection>> getDevicePathCollections() async {
     debugPrint("Fetching DevicePathCollections From DB");
-    final db = await database;
-    final fileRows = await db.rawQuery(
-      '''SELECT files.* FROM FILES where local_id in (select cover_id from "
-          "device_path_collections) group by local_id;
+    try {
+      final db = await database;
+      final fileRows = await db.rawQuery(
+        '''SELECT * FROM FILES where local_id in (select cover_id from device_path_collections) group by local_id;
           ''',
-    );
-    final files = convertToFiles(fileRows);
-    final devicePathRows = await db.rawQuery(
-      '''SELECT * from 
+      );
+      final files = convertToFiles(fileRows);
+      final devicePathRows = await db.rawQuery(
+        '''SELECT * from 
     device_path_collections''',
-    );
-    final List<DevicePathCollection> deviceCollections = [];
-    for (var row in devicePathRows) {
-      DevicePathCollection devicePathCollection = DevicePathCollection(
-        row["id"],
-        row['name'],
-        count: row['count'],
-        collectionID: row["collection_id"],
-        coverId: row["cover_id"],
       );
-      devicePathCollection.thumbnail = files.firstWhere(
-        (element) => element.localID == devicePathCollection.coverId,
-        orElse: () => null,
-      );
-      deviceCollections.add(devicePathCollection);
+      final List<DevicePathCollection> deviceCollections = [];
+      for (var row in devicePathRows) {
+        DevicePathCollection devicePathCollection = DevicePathCollection(
+          row["id"],
+          row['name'],
+          count: row['count'],
+          collectionID: row["collection_id"],
+          coverId: row["cover_id"],
+        );
+        devicePathCollection.thumbnail = files.firstWhere(
+          (element) => element.localID == devicePathCollection.coverId,
+          orElse: () => null,
+        );
+        deviceCollections.add(devicePathCollection);
+      }
+      return deviceCollections;
+    } catch (e) {
+      _logger.severe('Failed to getDevicePathCollections', e);
+      rethrow;
     }
-    return deviceCollections;
   }
 }
