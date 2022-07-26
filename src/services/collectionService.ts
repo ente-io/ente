@@ -770,6 +770,7 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
 }
 
 export function getCollectionSummaries(
+    user: User,
     collections: Collection[],
     files: EnteFile[],
     archivedCollections: Set<number>
@@ -781,7 +782,6 @@ export function getCollectionSummaries(
     );
     const collectionFilesCount = getCollectionsFileCount(files);
     const uniqueFileCount = new Set(files.map((file) => file.id)).size;
-    const user: User = getData(LS_KEYS.USER);
 
     for (const collection of collections) {
         if (collectionFilesCount.get(collection.id)) {

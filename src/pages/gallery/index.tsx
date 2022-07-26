@@ -99,6 +99,8 @@ import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -132,6 +134,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 
 export default function Gallery() {
     const router = useRouter();
+    const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);
 
     const [files, setFiles] = useState<EnteFile[]>(null);
@@ -244,10 +247,12 @@ export default function Gallery() {
                 setPlanModalView(true);
             }
             setIsFirstLogin(false);
+            const user = getData(LS_KEYS.USER);
             const files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
             files.push(...getTrashedFiles(trash));
+            setUser(user);
             setFiles(sortFiles(files));
             setCollections(collections);
             await syncWithRemote(true);
@@ -260,7 +265,10 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => {
-        setDerivativeState(collections, files);
+        if (!user || !files || !collections) {
+            return;
+        }
+        setDerivativeState(user, collections, files);
     }, [collections, files]);
 
     useEffect(
@@ -375,18 +383,17 @@ export default function Gallery() {
     };
 
     const setDerivativeState = async (
+        user: User,
         collections: Collection[],
         files: EnteFile[]
     ) => {
-        if (!collections || !files) {
-            return;
-        }
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
 
         const collectionSummaries = getCollectionSummaries(
+            user,
             collections,
             files,
             archivedCollections
