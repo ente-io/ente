@@ -11,3 +11,23 @@ class DeviceFolder {
     this.thumbnail,
   );
 }
+
+class DevicePathCollection {
+  final String id;
+  final String name;
+  final String path;
+  final String coverId;
+  final int count;
+  final int collectionID;
+  File thumbnail;
+
+  DevicePathCollection(
+    this.id,
+    this.name, {
+    this.path,
+    this.coverId,
+    this.count,
+    this.collectionID,
+    this.thumbnail,
+  });
+}

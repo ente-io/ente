@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
 import 'package:sqflite/sqlite_api.dart';
 
@@ -120,5 +121,36 @@ extension DeviceFiles on FilesDB {
       _logger.severe("failed to save path names", e);
       rethrow;
     }
+  }
+
+  Future<List<DevicePathCollection>> getDevicePathCollections() async {
+    debugPrint("Fetching DevicePathCollections From DB");
+    final db = await database;
+    final fileRows = await db.rawQuery(
+      '''SELECT files.* FROM FILES where local_id in (select cover_id from "
+          "device_path_collections) group by local_id;
+          ''',
+    );
+    final files = convertToFiles(fileRows);
+    final devicePathRows = await db.rawQuery(
+      '''SELECT * from 
+    device_path_collections''',
+    );
+    final List<DevicePathCollection> deviceCollections = [];
+    for (var row in devicePathRows) {
+      DevicePathCollection devicePathCollection = DevicePathCollection(
+        row["id"],
+        row['name'],
+        count: row['count'],
+        collectionID: row["collection_id"],
+        coverId: row["cover_id"],
+      );
+      devicePathCollection.thumbnail = files.firstWhere(
+        (element) => element.localID == devicePathCollection.coverId,
+        orElse: () => null,
+      );
+      deviceCollections.add(devicePathCollection);
+    }
+    return deviceCollections;
   }
 }

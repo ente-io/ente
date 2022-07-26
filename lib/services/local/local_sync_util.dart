@@ -144,12 +144,13 @@ Future<List<File>> _convertToFiles(
   return files;
 }
 
-Future<List<AssetPathEntity>> _getGalleryList(
-    {final int updateFromTime,
-    final int updateToTime,
-    final bool containsModifiedPath = false,
-    final bool needsTitle = true,
-    final OrderOption orderOption}) async {
+Future<List<AssetPathEntity>> _getGalleryList({
+  final int updateFromTime,
+  final int updateToTime,
+  final bool containsModifiedPath = false,
+  final bool needsTitle = true,
+  final OrderOption orderOption,
+}) async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
     AssetType.image,
