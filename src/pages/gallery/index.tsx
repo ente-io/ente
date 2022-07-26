@@ -99,6 +99,8 @@ import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -260,7 +262,11 @@ export default function Gallery() {
     }, []);
 
     useEffect(() => {
-        setDerivativeState(collections, files);
+        const user: User = getData(LS_KEYS.USER);
+        if (!user || !files || !collections) {
+            return;
+        }
+        setDerivativeState(user, collections, files);
     }, [collections, files]);
 
     useEffect(
@@ -375,18 +381,17 @@ export default function Gallery() {
     };
 
     const setDerivativeState = async (
+        user: User,
         collections: Collection[],
         files: EnteFile[]
     ) => {
-        if (!collections || !files) {
-            return;
-        }
         const favItemIds = await getFavItemIds(files);
         setFavItemIds(favItemIds);
         const archivedCollections = getArchivedCollections(collections);
         setArchivedCollections(archivedCollections);
 
         const collectionSummaries = getCollectionSummaries(
+            user,
             collections,
             files,
             archivedCollections

@@ -770,14 +770,11 @@ function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
 }
 
 export function getCollectionSummaries(
+    user: User,
     collections: Collection[],
     files: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionSummaries {
-    const user: User = getData(LS_KEYS.USER);
-    if (!user) {
-        return;
-    }
     const collectionSummaries: CollectionSummaries = new Map();
     const collectionLatestFiles = getCollectionLatestFiles(
         files,
