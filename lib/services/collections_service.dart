@@ -171,12 +171,13 @@ class CollectionsService {
         .toList();
   }
 
-// getCollectionsForSearch removes deleted or archived or collections which don't have a file from search result
+// getCollectionsWithThumbnailForSearch removes deleted or archived or collections which don't have a file from search result
 
-  Future<List<CollectionWithThumbnail>> getCollectionsForSearch() async {
+  Future<List<CollectionWithThumbnail>>
+      getCollectionsWithThumbnailForSearch() async {
     List<File> latestCollectionFiles = await getLatestCollectionFiles();
     Map<int, File> collectionIDtoFileForCollectionWithAtleastOneFile = {
-      for (var file in latestCollectionFiles) file.collectionID: file
+      for (File file in latestCollectionFiles) file.collectionID: file
     };
 
     var collectionIDToCollectionsForSearch = _collectionIDToCollections;
@@ -199,11 +200,11 @@ class CollectionsService {
     List<CollectionWithThumbnail> collectionWithThumbnailForSerach = [];
 
     for (int collectionID in collectionIDsForSearch) {
-      CollectionWithThumbnail obj = CollectionWithThumbnail(
+      CollectionWithThumbnail c = CollectionWithThumbnail(
         collectionIDToCollectionsForSearch[collectionID],
         collectionIDtoFileForCollectionWithAtleastOneFile[collectionID],
       );
-      collectionWithThumbnailForSerach.add(obj);
+      collectionWithThumbnailForSerach.add(c);
     }
 
     return collectionWithThumbnailForSerach;
@@ -907,7 +908,7 @@ class CollectionsService {
     String query,
   ) async {
     List<CollectionWithThumbnail> collectionsWithThumbnailToSearch =
-        await getCollectionsForSearch();
+        await getCollectionsWithThumbnailForSearch();
     return collectionsWithThumbnailToSearch
         .where(
           (element) => element.collection.name

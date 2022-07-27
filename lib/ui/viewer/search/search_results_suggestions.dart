@@ -11,7 +11,8 @@ class SearchResultsSuggestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<Widget> suggestions = [];
-    // for(Collection c in collections) {
+    // for (CollectionWithThumbnail c in collectionsWithThumbnail) {
+    //   suggestions.add{}
     // }
     suggestions = CollectionSuggestionWidgets(collectionsWithThumbnail, context)
         .generateSuggestionWidgets();

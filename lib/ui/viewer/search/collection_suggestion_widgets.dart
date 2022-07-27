@@ -13,8 +13,7 @@ class CollectionSuggestionWidgets {
   List<Widget> generateSuggestionWidgets() {
     List<Widget> collectionSuggestionWidgets = [];
 
-    for (CollectionWithThumbnail collectionWithThumbnail
-        in matchedCollections) {
+    for (CollectionWithThumbnail c in matchedCollections) {
       collectionSuggestionWidgets.add(
         GestureDetector(
           child: Padding(
@@ -31,12 +30,12 @@ class CollectionSuggestionWidgets {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      collectionWithThumbnail.collection.name,
+                      c.collection.name,
                       style: const TextStyle(fontSize: 18),
                     ),
                     FutureBuilder<int>(
                       future: FilesDB.instance.collectionFileCount(
-                        collectionWithThumbnail.collection.id,
+                        c.collection.id,
                       ),
                       builder: (context, snapshot) {
                         if (snapshot.hasData && snapshot.data > 0) {
@@ -71,7 +70,7 @@ class CollectionSuggestionWidgets {
                     SizedBox(
                       height: 50,
                       width: 50,
-                      child: ThumbnailWidget(collectionWithThumbnail.thumbnail),
+                      child: ThumbnailWidget(c.thumbnail),
                     ),
                   ],
                 )
@@ -79,7 +78,7 @@ class CollectionSuggestionWidgets {
             ),
           ),
           onTap: () {
-            routeToPage(context, CollectionPage(collectionWithThumbnail));
+            routeToPage(context, CollectionPage(c));
           },
         ),
       );
