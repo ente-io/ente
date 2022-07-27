@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
-import { getUserAnonymizedID } from 'utils/user';
+import { addLogLine } from 'utils/logging';
+import { getSentryUserID } from 'utils/user';
 
 export const logError = (
     error: any,
@@ -10,12 +11,17 @@ export const logError = (
         return;
     }
     const err = errorWithContext(error, msg);
+    addLogLine(
+        `error: ${error?.name} ${error?.message} ${
+            error?.stack
+        } msg: ${msg} info: ${JSON.stringify(info)}`
+    );
     if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
         console.log(error, { msg, info });
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,
-        user: { id: getUserAnonymizedID() },
+        user: { id: getSentryUserID() },
         contexts: {
             ...(info && {
                 info: info,

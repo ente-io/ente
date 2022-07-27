@@ -4,9 +4,9 @@ import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import {
     changeFileCreationTime,
-    formatDateTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
+import { formatDateTime } from 'utils/time';
 import EditIcon from '@mui/icons-material/Edit';
 import { Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
