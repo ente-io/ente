@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -14,11 +12,9 @@ class CollectionSuggestionWidgets {
   CollectionSuggestionWidgets(this.matchedCollections, this.context);
   List<Widget> generateSuggestionWidgets() {
     List<Widget> collectionSuggestionWidgets = [];
-    Future<List<File>> latestCollectionFiles =
-        CollectionsService.instance.getLatestCollectionFiles();
+
     for (CollectionWithThumbnail collectionWithThumbnail
         in matchedCollections) {
-      CollectionWithThumbnail c;
       collectionSuggestionWidgets.add(
         GestureDetector(
           child: Padding(
@@ -70,40 +66,20 @@ class CollectionSuggestionWidgets {
                     ),
                   ],
                 ),
-                FutureBuilder(
-                  future: latestCollectionFiles,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      for (File file in snapshot.data) {
-                        if (file.collectionID ==
-                            collectionWithThumbnail.collection.id) {
-                          c = CollectionWithThumbnail(
-                            collectionWithThumbnail.collection,
-                            file,
-                          );
-                          break;
-                        }
-                      }
-
-                      return Row(
-                        children: [
-                          SizedBox(
-                            height: 50,
-                            width: 50,
-                            child: ThumbnailWidget(c.thumbnail),
-                          ),
-                        ],
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  },
+                Row(
+                  children: [
+                    SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: ThumbnailWidget(collectionWithThumbnail.thumbnail),
+                    ),
+                  ],
                 )
               ],
             ),
           ),
           onTap: () {
-            routeToPage(context, CollectionPage(c));
+            routeToPage(context, CollectionPage(collectionWithThumbnail));
           },
         ),
       );
