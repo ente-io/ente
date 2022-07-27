@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -17,7 +16,8 @@ class CollectionSuggestionWidgets {
     List<Widget> collectionSuggestionWidgets = [];
     Future<List<File>> latestCollectionFiles =
         CollectionsService.instance.getLatestCollectionFiles();
-    for (Collection collection in matchedCollections) {
+    for (CollectionWithThumbnail collectionWithThumbnail
+        in matchedCollections) {
       CollectionWithThumbnail c;
       collectionSuggestionWidgets.add(
         GestureDetector(
@@ -35,12 +35,13 @@ class CollectionSuggestionWidgets {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      collection.name,
+                      collectionWithThumbnail.collection.name,
                       style: const TextStyle(fontSize: 18),
                     ),
                     FutureBuilder<int>(
-                      future:
-                          FilesDB.instance.collectionFileCount(collection.id),
+                      future: FilesDB.instance.collectionFileCount(
+                        collectionWithThumbnail.collection.id,
+                      ),
                       builder: (context, snapshot) {
                         if (snapshot.hasData && snapshot.data > 0) {
                           int noOfMemories = snapshot.data;
@@ -74,8 +75,12 @@ class CollectionSuggestionWidgets {
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       for (File file in snapshot.data) {
-                        if (file.collectionID == collection.id) {
-                          c = CollectionWithThumbnail(collection, file);
+                        if (file.collectionID ==
+                            collectionWithThumbnail.collection.id) {
+                          c = CollectionWithThumbnail(
+                            collectionWithThumbnail.collection,
+                            file,
+                          );
                           break;
                         }
                       }

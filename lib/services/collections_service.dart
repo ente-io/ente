@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer' as dartDeveloper;
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -172,7 +171,7 @@ class CollectionsService {
         .toList();
   }
 
-// getCollectionsForSearch removes deleted or archived collections from search result //implement for files that have atleast one file
+// getCollectionsForSearch removes deleted or archived or collections which don't have a file from search result
 
   Future<List<CollectionWithThumbnail>> getCollectionsForSearch() async {
     List<File> latestCollectionFiles = await getLatestCollectionFiles();
@@ -189,10 +188,6 @@ class CollectionsService {
           !collectionIDtoFileForCollectionWithAtleastOneFile
               .containsKey(value.id),
     );
-    // return {
-    //   'collectionIDToFile': collectionIDtoFileForCollectionWithAtleastOneFile,
-    //   'collectionIDtoCollection': collectionIDToCollectionsForSearch
-    // };
 
     List<int> collectionIDsForSearch = collectionIDToCollectionsForSearch.keys
         .toSet()
@@ -201,7 +196,7 @@ class CollectionsService {
         )
         .toList();
 
-    List<CollectionWithThumbnail> collectionWithThumbnailForSerach;
+    List<CollectionWithThumbnail> collectionWithThumbnailForSerach = [];
 
     for (int collectionID in collectionIDsForSearch) {
       CollectionWithThumbnail obj = CollectionWithThumbnail(
@@ -211,23 +206,7 @@ class CollectionsService {
       collectionWithThumbnailForSerach.add(obj);
     }
 
-    print('collectionWithThumbnailForSerach------------');
-    dartDeveloper.log(collectionWithThumbnailForSerach.toString());
-
     return collectionWithThumbnailForSerach;
-
-    // return _collectionIDToCollections.values
-    //     .toList()
-    //     .where(
-    //       (element) =>
-    //           !element.isDeleted &&
-    //           !element.isArchived() &&
-    //           collectionIDtoFileForCollectionWithAtleastOneFile
-    //               .containsKey(element.id),
-    //     )
-    //     .toList();
-
-    //return collcetionWithThumbnailhereAfter filtering
   }
 
   Future<List<User>> getSharees(int collectionID) {
