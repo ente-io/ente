@@ -2,7 +2,7 @@ import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { downloadAsFile } from 'utils/file';
 import constants from 'utils/strings/constants';
-import { logUploadInfo, getUploadLogs } from 'utils/upload';
+import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
 
 export default function DebugLogs() {
@@ -14,18 +14,18 @@ export default function DebugLogs() {
             proceed: {
                 text: constants.DOWNLOAD,
                 variant: 'accent',
-                action: downloadUploadLogs,
+                action: downloadDebugLogs,
             },
             close: {
                 text: constants.CANCEL,
             },
         });
 
-    const downloadUploadLogs = () => {
-        logUploadInfo('exporting logs');
-        const logs = getUploadLogs();
+    const downloadDebugLogs = () => {
+        addLogLine('exporting logs');
+        const logs = getDebugLogs();
         const logString = logs.join('\n');
-        downloadAsFile(`upload_logs_${Date.now()}.txt`, logString);
+        downloadAsFile(`debug_logs_${Date.now()}.txt`, logString);
     };
 
     return (

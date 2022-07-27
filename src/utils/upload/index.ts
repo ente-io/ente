@@ -1,8 +1,5 @@
-import { ElectronFile, FileWithCollection, Metadata } from 'types/upload';
+import { FileWithCollection, Metadata } from 'types/upload';
 import { EnteFile } from 'types/file';
-import { convertBytesToHumanReadable } from 'utils/billing';
-import { formatDateTime } from 'utils/file';
-import { getLogs, saveLogLine } from 'utils/storage';
 import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
 import { FILE_TYPE } from 'constants/file';
 
@@ -115,24 +112,6 @@ export function segregateMetadataAndMediaFiles(
         }
     });
     return { mediaFiles, metadataJSONFiles };
-}
-
-export function logUploadInfo(log: string) {
-    saveLogLine({
-        type: 'upload',
-        timestamp: Date.now(),
-        logLine: log,
-    });
-}
-
-export function getUploadLogs() {
-    return getLogs()
-        .filter((log) => log.type === 'upload')
-        .map((log) => `[${formatDateTime(log.timestamp)}] ${log.logLine}`);
-}
-
-export function getFileNameSize(file: File | ElectronFile) {
-    return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
 }
 
 export function areFileWithCollectionsSame(

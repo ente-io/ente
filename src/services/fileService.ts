@@ -17,7 +17,7 @@ import { EnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { logUploadInfo } from 'utils/upload';
+import { addLogLine } from 'utils/logging';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -37,9 +37,7 @@ export const setLocalFiles = async (files: EnteFile[]) => {
             logError(e1, 'failed to save files to indexedDB', {
                 storageEstimate,
             });
-            logUploadInfo(
-                `storage estimate ${JSON.stringify(storageEstimate)}`
-            );
+            addLogLine(`storage estimate ${JSON.stringify(storageEstimate)}`);
         } catch (e2) {
             logError(e1, 'failed to save files to indexedDB');
             logError(e2, 'failed to get storage stats');

@@ -13,7 +13,7 @@ import {
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
-import { getFileNameSize, logUploadInfo } from 'utils/upload';
+import { getFileNameSize, addLogLine } from 'utils/logging';
 import { encryptFiledata } from './encryptionService';
 import { extractMetadata, getMetadataJSONMapKey } from './metadataService';
 import {
@@ -41,7 +41,7 @@ export async function readFile(
         rawFile,
         fileTypeInfo
     );
-    logUploadInfo(`reading file data ${getFileNameSize(rawFile)} `);
+    addLogLine(`reading file data ${getFileNameSize(rawFile)} `);
     let filedata: Uint8Array | DataStream;
     if (!(rawFile instanceof File)) {
         if (rawFile.size > MULTIPART_PART_SIZE) {
@@ -58,7 +58,7 @@ export async function readFile(
         filedata = await getUint8ArrayView(rawFile);
     }
 
-    logUploadInfo(`read file data successfully ${getFileNameSize(rawFile)} `);
+    addLogLine(`read file data successfully ${getFileNameSize(rawFile)} `);
 
     return {
         filedata,

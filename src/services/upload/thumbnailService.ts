@@ -8,7 +8,7 @@ import { isFileHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
 import HEICConverter from 'services/heicConverter/heicConverterService';
-import { getFileNameSize, logUploadInfo } from 'utils/upload';
+import { getFileNameSize, addLogLine } from 'utils/logging';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -28,7 +28,7 @@ export async function generateThumbnail(
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
-        logUploadInfo(`generating thumbnail for ${getFileNameSize(file)}`);
+        addLogLine(`generating thumbnail for ${getFileNameSize(file)}`);
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
@@ -41,14 +41,14 @@ export async function generateThumbnail(
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 try {
-                    logUploadInfo(
+                    addLogLine(
                         `ffmpeg generateThumbnail called for ${getFileNameSize(
                             file
                         )}`
                     );
 
                     const thumb = await FFmpegService.generateThumbnail(file);
-                    logUploadInfo(
+                    addLogLine(
                         `ffmpeg thumbnail successfully generated ${getFileNameSize(
                             file
                         )}`
@@ -59,7 +59,7 @@ export async function generateThumbnail(
                         false
                     );
                 } catch (e) {
-                    logUploadInfo(
+                    addLogLine(
                         `ffmpeg thumbnail generated failed  ${getFileNameSize(
                             file
                         )} error: ${e.message}`
@@ -75,14 +75,14 @@ export async function generateThumbnail(
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
-            logUploadInfo(
+            addLogLine(
                 `thumbnail successfully generated ${getFileNameSize(file)}`
             );
         } catch (e) {
             logError(e, 'uploading static thumbnail', {
                 fileFormat: fileTypeInfo.exactType,
             });
-            logUploadInfo(
+            addLogLine(
                 `thumbnail generation failed ${getFileNameSize(file)} error: ${
                     e.message
                 }`
@@ -107,9 +107,9 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
     let timeout = null;
 
     if (isHEIC) {
-        logUploadInfo(`HEICConverter called for ${getFileNameSize(file)}`);
+        addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
         file = new File([await HEICConverter.convert(file)], file.name);
-        logUploadInfo(`${getFileNameSize(file)} successfully converted`);
+        addLogLine(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);
