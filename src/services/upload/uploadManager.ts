@@ -245,52 +245,25 @@ class UploadManager {
                 if (this.isUploadPausing) {
                     return;
                 }
+                let fileTypeInfo = null;
+                let metadata = null;
+                let filePath = null;
                 try {
-                    const { fileTypeInfo, metadata, filePath } =
-                        await (async () => {
-                            if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
-                                logUploadInfo(
-                                    `${getFileNameSize(
-                                        file
-                                    )} rejected  because of large size`
-                                );
-
-                                return { fileTypeInfo: null, metadata: null };
-                            }
-                            const fileTypeInfo =
-                                await UploadService.getFileType(file);
-                            if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-                                logUploadInfo(
-                                    `${getFileNameSize(
-                                        file
-                                    )} rejected  because of unknown file format`
-                                );
-                                return { fileTypeInfo, metadata: null };
-                            }
-                            logUploadInfo(
-                                ` extracting ${getFileNameSize(file)} metadata`
-                            );
-                            const metadata =
-                                (await UploadService.extractFileMetadata(
-                                    file,
-                                    collectionID,
-                                    fileTypeInfo
-                                )) || null;
-                            const filePath = (file as any).path as string;
-                            return { fileTypeInfo, metadata, filePath };
-                        })();
-
+                    logUploadInfo(
+                        `metadata extraction started ${getFileNameSize(file)} `
+                    );
+                    const result = await this.extractFileTypeAndMetadata(
+                        file,
+                        collectionID
+                    );
+                    fileTypeInfo = result.fileTypeInfo;
+                    metadata = result.metadata;
+                    filePath = result.filePath;
                     logUploadInfo(
                         `metadata extraction successful${getFileNameSize(
                             file
                         )} `
                     );
-                    this.metadataAndFileTypeInfoMap.set(localID, {
-                        fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
-                        metadata: metadata && { ...metadata },
-                        filePath: filePath,
-                    });
-                    UIService.increaseFileUploaded();
                 } catch (e) {
                     logError(e, 'metadata extraction failed for a file');
                     logUploadInfo(
@@ -299,6 +272,12 @@ class UploadManager {
                         )} error: ${e.message}`
                     );
                 }
+                this.metadataAndFileTypeInfoMap.set(localID, {
+                    fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
+                    metadata: metadata && { ...metadata },
+                    filePath: filePath,
+                });
+                UIService.increaseFileUploaded();
             }
         } catch (e) {
             logError(e, 'error extracting metadata');
@@ -333,7 +312,8 @@ class UploadManager {
                 collectionID,
                 fileTypeInfo
             )) || null;
-        return { fileTypeInfo, metadata };
+        const filePath = (file as any).path as string;
+        return { fileTypeInfo, metadata, filePath };
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
