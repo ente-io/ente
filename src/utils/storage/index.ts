@@ -1,7 +1,6 @@
 import { getData, LS_KEYS, setData } from './localStorage';
 
 export interface Log {
-    type: string;
     timestamp: number;
     logLine: string;
 }

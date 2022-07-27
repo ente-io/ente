@@ -13,7 +13,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
-import { logUploadInfo } from 'utils/upload';
+import { addLogLine } from 'utils/logging';
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
@@ -27,6 +27,7 @@ import {
     getRoadmapRedirectURL,
 } from 'services/userService';
 import { CustomError } from 'utils/error';
+import { getSentryUserID } from 'utils/user';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -198,10 +199,11 @@ export default function App({ Component, err }) {
     }, [redirectName]);
 
     useEffect(() => {
-        logUploadInfo(`app started`);
-        logUploadInfo(
+        addLogLine(`app started`);
+        addLogLine(
             `latest commit id :${process.env.NEXT_PUBLIC_LATEST_COMMIT_HASH}`
         );
+        addLogLine(`user sentry id ${getSentryUserID()}`);
     }, []);
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);

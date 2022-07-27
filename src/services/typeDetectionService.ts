@@ -64,22 +64,30 @@ export async function getFileType(
 }
 
 async function extractFileType(file: File) {
-    const fileChunkBlob = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
-    return getFileTypeFromBlob(fileChunkBlob);
+    const fileBlobChunk = file.slice(0, CHUNK_SIZE_FOR_TYPE_DETECTION);
+    const fileDataChunk = await getUint8ArrayView(fileBlobChunk);
+    return getFileTypeFromBuffer(fileDataChunk);
 }
 
 async function extractElectronFileType(file: ElectronFile) {
     const stream = await file.stream();
     const reader = stream.getReader();
-    const { value } = await reader.read();
-    const fileTypeResult = await FileType.fromBuffer(value);
-    return fileTypeResult;
+    const { value: fileDataChunk } = await reader.read();
+    return getFileTypeFromBuffer(fileDataChunk);
 }
 
-async function getFileTypeFromBlob(fileBlob: Blob) {
+async function getFileTypeFromBuffer(buffer: Uint8Array) {
     try {
-        const initialFiledata = await getUint8ArrayView(fileBlob);
-        return await FileType.fromBuffer(initialFiledata);
+        const result = await FileType.fromBuffer(buffer);
+        if (!result.mime) {
+            logError(
+                Error('mimetype missing from file type result'),
+                CustomError.TYPE_DETECTION_FAILED,
+                { result }
+            );
+            throw Error(CustomError.TYPE_DETECTION_FAILED);
+        }
+        return result;
     } catch (e) {
         throw Error(CustomError.TYPE_DETECTION_FAILED);
     }

@@ -29,7 +29,7 @@ import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import OverflowMenu from './OverflowMenu/menu';
 import { OverflowMenuOption } from './OverflowMenu/option';
-import { convertBytesToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 import { CustomError } from 'utils/error';
 import { getLocalUserDetails } from 'utils/user';
 
