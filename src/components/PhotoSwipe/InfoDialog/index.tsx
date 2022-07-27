@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
-import { formatDateTime } from 'utils/file';
+import { formatDateTime } from 'utils/time';
 import { RenderFileName } from './RenderFileName';
 import { ExifData } from './ExifData';
 import { RenderCreationTime } from './RenderCreationTime';
