@@ -9,11 +9,12 @@ import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import LivePhotoIcon from '@mui/icons-material/LightMode';
-import { formatDateRelative, isLivePhoto } from 'utils/file';
+import { isLivePhoto } from 'utils/file';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from 'utils/sentry';
 import { Overlay } from 'components/Container';
 import { TRASH_SECTION } from 'constants/collection';
+import { formatDateRelative } from 'utils/time';
 
 interface IProps {
     file: EnteFile;
