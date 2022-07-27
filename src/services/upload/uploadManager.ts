@@ -22,6 +22,7 @@ import { EnteFile } from 'types/file';
 import {
     ElectronFile,
     FileWithCollection,
+    Metadata,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
@@ -243,7 +244,7 @@ class UploadManager {
                         )} `
                     );
                 } catch (e) {
-                    logError(e, 'metadata extraction failed for a file');
+                    logError(e, 'extractFileTypeAndMetadata failed');
                     addLogLine(
                         `metadata extraction failed ${getFileNameSize(
                             file
@@ -283,12 +284,17 @@ class UploadManager {
             return { fileTypeInfo, metadata: null };
         }
         addLogLine(` extracting ${getFileNameSize(file)} metadata`);
-        const metadata =
-            (await UploadService.extractFileMetadata(
+        let metadata: Metadata;
+        try {
+            metadata = await UploadService.extractFileMetadata(
                 file,
                 collectionID,
                 fileTypeInfo
-            )) || null;
+            );
+        } catch (e) {
+            logError(e, 'failed to extract file metadata');
+            return { fileTypeInfo, metadata: null };
+        }
         return { fileTypeInfo, metadata };
     }
 
