@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/nextjs';
 import { getSentryTunnelURL } from 'utils/common/apiUtil';
-import { getUserAnonymizedID } from 'utils/user';
+import { getSentryUserID } from 'utils/user';
 import {
     getSentryDSN,
     getSentryENV,
@@ -13,7 +13,7 @@ const SENTRY_ENV = getSentryENV();
 const SENTRY_RELEASE = getSentryRelease();
 const IS_ENABLED = getIsSentryEnabled();
 
-Sentry.setUser({ id: getUserAnonymizedID() });
+Sentry.setUser({ id: getSentryUserID() });
 Sentry.init({
     dsn: SENTRY_DSN,
     enabled: IS_ENABLED,

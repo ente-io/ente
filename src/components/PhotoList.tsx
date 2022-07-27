@@ -16,7 +16,7 @@ import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
-import { convertBytesToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';

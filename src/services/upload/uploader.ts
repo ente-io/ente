@@ -12,8 +12,8 @@ import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
 import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
-import { logUploadInfo } from 'utils/upload';
-import { convertBytesToHumanReadable } from 'utils/billing';
+import { addLogLine } from 'utils/logging';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
 
@@ -33,7 +33,7 @@ export default async function uploader(
         fileWithCollection
     )}_${convertBytesToHumanReadable(UploadService.getAssetSize(uploadAsset))}`;
 
-    logUploadInfo(`uploader called for  ${fileNameSize}`);
+    addLogLine(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
     await sleep(0);
     const { fileTypeInfo, metadata } =
@@ -55,7 +55,7 @@ export default async function uploader(
             metadata
         );
         if (sameFileInSameCollection) {
-            logUploadInfo(`skipped upload for  ${fileNameSize}`);
+            addLogLine(`skipped upload for  ${fileNameSize}`);
             return {
                 fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
                 uploadedFile: sameFileInSameCollection,
@@ -68,7 +68,7 @@ export default async function uploader(
         );
 
         if (sameFileInOtherCollection) {
-            logUploadInfo(
+            addLogLine(
                 `same file in other collection found for  ${fileNameSize}`
             );
             const resultFile = Object.assign({}, sameFileInOtherCollection);
@@ -84,7 +84,7 @@ export default async function uploader(
         // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
         // as part of the albums
         if (shouldDedupeAcrossCollection(fileWithCollection.collection.name)) {
-            logUploadInfo(`deduped upload for  ${fileNameSize}`);
+            addLogLine(`deduped upload for  ${fileNameSize}`);
             const sameFileInOtherCollection = findSameFileInCollection(
                 existingFiles,
                 metadata
@@ -96,7 +96,7 @@ export default async function uploader(
                 };
             }
         }
-        logUploadInfo(`reading asset ${fileNameSize}`);
+        addLogLine(`reading asset ${fileNameSize}`);
 
         const file = await UploadService.readAsset(fileTypeInfo, uploadAsset);
 
@@ -110,14 +110,14 @@ export default async function uploader(
             metadata,
         };
 
-        logUploadInfo(`encryptAsset ${fileNameSize}`);
+        addLogLine(`encryptAsset ${fileNameSize}`);
         const encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
             collection.key
         );
 
-        logUploadInfo(`uploadToBucket ${fileNameSize}`);
+        addLogLine(`uploadToBucket ${fileNameSize}`);
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
             encryptedFile.file
@@ -128,12 +128,12 @@ export default async function uploader(
             backupedFile,
             encryptedFile.fileKey
         );
-        logUploadInfo(`uploadFile ${fileNameSize}`);
+        addLogLine(`uploadFile ${fileNameSize}`);
 
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
 
         UIService.increaseFileUploaded();
-        logUploadInfo(`${fileNameSize} successfully uploaded`);
+        addLogLine(`${fileNameSize} successfully uploaded`);
 
         return {
             fileUploadResult: metadata.hasStaticThumbnail
@@ -142,9 +142,7 @@ export default async function uploader(
             uploadedFile: uploadedFile,
         };
     } catch (e) {
-        logUploadInfo(
-            `upload failed for  ${fileNameSize} ,error: ${e.message}`
-        );
+        addLogLine(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
 
         logError(e, 'file upload failed', {
             fileFormat: fileTypeInfo?.exactType,

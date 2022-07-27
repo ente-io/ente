@@ -195,44 +195,6 @@ export function formatDate(date: number | Date) {
     return dateTimeFormat.format(date);
 }
 
-export function formatDateTime(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    const timeFormat = new Intl.DateTimeFormat('en-IN', {
-        timeStyle: 'short',
-    });
-    return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
-}
-
-export function formatDateRelative(date: number) {
-    const units = {
-        year: 24 * 60 * 60 * 1000 * 365,
-        month: (24 * 60 * 60 * 1000 * 365) / 12,
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        minute: 60 * 1000,
-        second: 1000,
-    };
-    const relativeDateFormat = new Intl.RelativeTimeFormat('en-IN', {
-        localeMatcher: 'best fit',
-        numeric: 'always',
-        style: 'long',
-    });
-    const elapsed = date - Date.now();
-
-    // "Math.abs" accounts for both "past" & "future" scenarios
-    for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === 'second')
-            return relativeDateFormat.format(
-                Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit
-            );
-}
-
 export function sortFiles(files: EnteFile[]) {
     // sort according to modification time first
     files = files.sort((a, b) => {
@@ -352,8 +314,8 @@ export function splitFilenameAndExtension(filename: string): [string, string] {
         ];
 }
 
-export function getFileExtension(filename) {
-    return splitFilenameAndExtension(filename)[1];
+export function getFileExtension(filename: string) {
+    return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
 }
 
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
