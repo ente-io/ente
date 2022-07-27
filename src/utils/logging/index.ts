@@ -1,5 +1,5 @@
 import { ElectronFile } from 'types/upload';
-import { convertBytesToHumanReadable } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/file';
 import { formatDateTime } from 'utils/file';
 import { saveLogLine, getLogs } from 'utils/storage';
 
