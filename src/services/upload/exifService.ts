@@ -131,7 +131,7 @@ export async function getRawExif(
     return exifData;
 }
 
-function getEXIFLocation(exifData): Location {
+export function getEXIFLocation(exifData): Location {
     if (!exifData.latitude || !exifData.longitude) {
         return NULL_LOCATION;
     }
