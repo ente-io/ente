@@ -111,7 +111,7 @@ const englishConstants = {
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'Backup complete',
-        5: 'Cancelling remaining uploads',
+        5: 'Pausing remaining uploads',
     },
     UPLOADING_FILES: 'File upload',
     FILE_NOT_UPLOADED_LIST: 'The following files were not uploaded',

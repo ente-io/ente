@@ -109,6 +109,10 @@ class UploadManager {
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
                 );
                 await this.parseMetadataJSONFiles(metadataJSONFiles);
+                if (this.isUploadPausing) {
+                    this.uploadPausingDone();
+                    return;
+                }
                 UploadService.setParsedMetadataJSONMap(
                     this.parsedMetadataJSONMap
                 );
@@ -116,6 +120,10 @@ class UploadManager {
             if (mediaFiles.length) {
                 UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
                 await this.extractMetadataFromFiles(mediaFiles);
+                if (this.isUploadPausing) {
+                    this.uploadPausingDone();
+                    return;
+                }
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
@@ -169,6 +177,10 @@ class UploadManager {
                 );
 
                 await this.uploadMediaFiles(allFiles);
+                if (this.isUploadPausing) {
+                    this.uploadPausingDone();
+                    return;
+                }
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
@@ -180,9 +192,6 @@ class UploadManager {
             );
             throw e;
         } finally {
-            if (this.isUploadPausing) {
-                this.isUploadPausing = false;
-            }
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.worker.terminate();
             }
@@ -457,7 +466,12 @@ class UploadManager {
         if (isElectron()) {
             watchFolderService.pauseService();
             this.isUploadPausing = true;
+            UIService.setUploadStage(UPLOAD_STAGES.PAUSING);
         }
+    }
+
+    private async uploadPausingDone() {
+        this.isUploadPausing = false;
     }
 
     private updateExistingCollections(decryptedFile: EnteFile) {

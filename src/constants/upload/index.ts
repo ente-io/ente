@@ -29,6 +29,7 @@ export enum UPLOAD_STAGES {
     EXTRACTING_METADATA,
     UPLOADING,
     FINISH,
+    PAUSING,
 }
 
 export enum UPLOAD_STRATEGY {
