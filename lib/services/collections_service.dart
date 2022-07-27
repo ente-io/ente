@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as dartDeveloper;
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -19,6 +20,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -172,20 +174,60 @@ class CollectionsService {
 
 // getCollectionsForSearch removes deleted or archived collections from search result //implement for files that have atleast one file
 
-  Future<List<Collection>> getCollectionsForSearch() async {
+  Future<List<CollectionWithThumbnail>> getCollectionsForSearch() async {
     List<File> latestCollectionFiles = await getLatestCollectionFiles();
-    Set<int> collectionWithAtleastOneFile =
-        latestCollectionFiles.map((e) => e.collectionID).toSet();
+    Map<int, File> collectionIDtoFileForCollectionWithAtleastOneFile = {
+      for (var file in latestCollectionFiles) file.collectionID: file
+    };
 
-    return _collectionIDToCollections.values
-        .toList()
-        .where(
-          (element) =>
-              !element.isDeleted &&
-              !element.isArchived() &&
-              collectionWithAtleastOneFile.contains(element.id),
+    var collectionIDToCollectionsForSearch = _collectionIDToCollections;
+
+    collectionIDToCollectionsForSearch.removeWhere(
+      (key, value) =>
+          value.isDeleted ||
+          value.isArchived() ||
+          !collectionIDtoFileForCollectionWithAtleastOneFile
+              .containsKey(value.id),
+    );
+    // return {
+    //   'collectionIDToFile': collectionIDtoFileForCollectionWithAtleastOneFile,
+    //   'collectionIDtoCollection': collectionIDToCollectionsForSearch
+    // };
+
+    List<int> collectionIDsForSearch = collectionIDToCollectionsForSearch.keys
+        .toSet()
+        .intersection(
+          collectionIDtoFileForCollectionWithAtleastOneFile.keys.toSet(),
         )
         .toList();
+
+    List<CollectionWithThumbnail> collectionWithThumbnailForSerach;
+
+    for (int collectionID in collectionIDsForSearch) {
+      CollectionWithThumbnail obj = CollectionWithThumbnail(
+        collectionIDToCollectionsForSearch[collectionID],
+        collectionIDtoFileForCollectionWithAtleastOneFile[collectionID],
+      );
+      collectionWithThumbnailForSerach.add(obj);
+    }
+
+    print('collectionWithThumbnailForSerach------------');
+    dartDeveloper.log(collectionWithThumbnailForSerach.toString());
+
+    return collectionWithThumbnailForSerach;
+
+    // return _collectionIDToCollections.values
+    //     .toList()
+    //     .where(
+    //       (element) =>
+    //           !element.isDeleted &&
+    //           !element.isArchived() &&
+    //           collectionIDtoFileForCollectionWithAtleastOneFile
+    //               .containsKey(element.id),
+    //     )
+    //     .toList();
+
+    //return collcetionWithThumbnailhereAfter filtering
   }
 
   Future<List<User>> getSharees(int collectionID) {
@@ -882,12 +924,15 @@ class CollectionsService {
     }
   }
 
-  Future<List<Collection>> getSearchedCollections(String query) async {
-    List<Collection> collectionsToSearch = await getCollectionsForSearch();
-    return collectionsToSearch //return collection with thumbnail here
+  Future<List<CollectionWithThumbnail>> getSearchedCollections(
+    String query,
+  ) async {
+    List<CollectionWithThumbnail> collectionsWithThumbnailToSearch =
+        await getCollectionsForSearch();
+    return collectionsWithThumbnailToSearch
         .where(
-          (element) =>
-              element.name.contains(RegExp(query, caseSensitive: false)),
+          (element) => element.collection.name
+              .contains(RegExp(query, caseSensitive: false)),
         )
         .toList();
   }

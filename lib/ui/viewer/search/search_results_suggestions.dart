@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/models/collection.dart';
-import 'package:photos/ui/viewer/search/collection_suggestions.dart';
+import 'package:photos/models/collection_items.dart';
+import 'package:photos/ui/viewer/search/collection_suggestion_widgets.dart';
 
 class SearchResultsSuggestions extends StatelessWidget {
-  final List<Collection> collections;
-  const SearchResultsSuggestions({Key key, this.collections}) : super(key: key);
+  final List<CollectionWithThumbnail> collectionsWithThumbnail;
+  const SearchResultsSuggestions({Key key, this.collectionsWithThumbnail})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     List<Widget> suggestions = [];
     // for(Collection c in collections) {
     // }
-    suggestions = CollectionSuggestionWidgets(collections, context)
+    suggestions = CollectionSuggestionWidgets(collectionsWithThumbnail, context)
         .generateSuggestionWidgets();
     return Container(
       constraints:

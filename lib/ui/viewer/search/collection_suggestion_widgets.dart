@@ -10,7 +10,7 @@ import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class CollectionSuggestionWidgets {
-  final List<Collection> matchedCollections;
+  final List<CollectionWithThumbnail> matchedCollections;
   final BuildContext context;
   CollectionSuggestionWidgets(this.matchedCollections, this.context);
   List<Widget> generateSuggestionWidgets() {

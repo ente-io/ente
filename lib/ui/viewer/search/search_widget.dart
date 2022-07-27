@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
@@ -44,7 +44,7 @@ class _SearchwidgetState extends State<Searchwidget> {
   final ValueNotifier<String> _searchQ = ValueNotifier('');
   @override
   Widget build(BuildContext context) {
-    List<Collection> matchedCollections;
+    List<CollectionWithThumbnail> matchedCollections;
     return widget.openSearch
         ? Column(
             children: [
@@ -98,7 +98,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                 ) {
                   return newQuery != ''
                       ? SearchResultsSuggestions(
-                          collections: matchedCollections,
+                          collectionsWithThumbnail: matchedCollections,
                         )
                       : const SizedBox.shrink();
                 },
