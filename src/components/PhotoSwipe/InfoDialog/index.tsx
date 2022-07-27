@@ -47,15 +47,13 @@ export function FileInfo({
     const [location, setLocation] = useState<Location>(null);
 
     useEffect(() => {
-        if (
-            !location &&
-            metadata &&
-            (metadata.longitude || metadata.longitude === 0)
-        ) {
-            setLocation({
-                latitude: metadata.latitude,
-                longitude: metadata.longitude,
-            });
+        if (!location && metadata) {
+            if (metadata.longitude || metadata.longitude === 0) {
+                setLocation({
+                    latitude: metadata.latitude,
+                    longitude: metadata.longitude,
+                });
+            }
         }
     }, [metadata]);
 
