@@ -140,7 +140,7 @@ const englishConstants = {
     TITLE: 'ente.io | encrypted photo storage',
     UPLOAD_FIRST_PHOTO_DESCRIPTION: () => (
         <>
-            preserve your first memory with <strong> ente </strong>
+            Preserve your first memory with <strong> ente </strong>
         </>
     ),
     UPLOAD_FIRST_PHOTO: 'Preserve',
