@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/nextjs';
+import { addLogLine } from 'utils/logging';
 import { getUserAnonymizedID } from 'utils/user';
 
 export const logError = (
@@ -10,6 +11,7 @@ export const logError = (
         return;
     }
     const err = errorWithContext(error, msg);
+    addLogLine(`error: ${error} msg: ${msg} info: ${info}`);
     if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
         console.log(error, { msg, info });
     }
