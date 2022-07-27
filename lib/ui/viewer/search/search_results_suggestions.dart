@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/ui/viewer/search/collection_suggestion_widget_generator.dart';
 
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> collectionsWithThumbnail;
-  const SearchResultsSuggestions({Key key, this.collectionsWithThumbnail})
-      : super(key: key);
+  final List<File> matchedFiles;
+  const SearchResultsSuggestions({
+    Key key,
+    this.collectionsWithThumbnail,
+    this.matchedFiles,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

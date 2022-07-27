@@ -1142,6 +1142,17 @@ class FilesDB {
     return result;
   }
 
+  Future<List<File>> getFilesOnFileNameSearch(String query) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnTitle LIKE ?',
+      whereArgs: ["%$query%"],
+    );
+    final files = _convertToFiles(results);
+    return files;
+  }
+
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
     final List<File> files = [];
     for (final result in results) {

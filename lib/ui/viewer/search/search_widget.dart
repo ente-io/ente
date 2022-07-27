@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
@@ -45,6 +47,7 @@ class _SearchwidgetState extends State<Searchwidget> {
   @override
   Widget build(BuildContext context) {
     List<CollectionWithThumbnail> matchedCollections;
+    List<File> matchedFiles;
     return widget.openSearch
         ? Column(
             children: [
@@ -72,6 +75,8 @@ class _SearchwidgetState extends State<Searchwidget> {
                         onChanged: (value) async {
                           matchedCollections = await CollectionsService.instance
                               .getSearchedCollections(value);
+                          matchedFiles = await FilesDB.instance
+                              .getFilesOnFileNameSearch(value);
                           _searchQ.value = value;
                         },
                         autofocus: true,
@@ -99,6 +104,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                   return newQuery != ''
                       ? SearchResultsSuggestions(
                           collectionsWithThumbnail: matchedCollections,
+                          matchedFiles: matchedFiles,
                         )
                       : const SizedBox.shrink();
                 },
