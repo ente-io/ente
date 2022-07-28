@@ -137,61 +137,6 @@ class FileUploader {
     });
   }
 
-  Future<File> forceUpload(File file, int collectionID) async {
-    _logger.info(
-      "Force uploading " +
-          file.toString() +
-          " into collection " +
-          collectionID.toString(),
-    );
-    _totalCountInUploadSession++;
-    // If the file hasn't been queued yet, ez.
-    if (!_queue.containsKey(file.localID)) {
-      final completer = Completer<File>();
-      _queue[file.localID] = FileUploadItem(
-        file,
-        collectionID,
-        completer,
-        status: UploadStatus.inProgress,
-      );
-      _encryptAndUploadFileToCollection(file, collectionID, forcedUpload: true);
-      return completer.future;
-    }
-    var item = _queue[file.localID];
-    // If the file is being uploaded right now, wait and proceed
-    if (item.status == UploadStatus.inProgress ||
-        item.status == UploadStatus.inBackground) {
-      _totalCountInUploadSession--;
-      final uploadedFile = await item.completer.future;
-      if (uploadedFile.collectionID == collectionID) {
-        // Do nothing
-      } else {
-        await CollectionsService.instance
-            .addToCollection(collectionID, [uploadedFile]);
-      }
-      return uploadedFile;
-    } else {
-      // If the file is yet to be processed,
-      // 1. Set the status to in_progress
-      // 2. Force upload the file
-      // 3. Add to the relevant collection
-      item = _queue[file.localID];
-      item.status = UploadStatus.inProgress;
-      final uploadedFile = await _encryptAndUploadFileToCollection(
-        file,
-        collectionID,
-        forcedUpload: true,
-      );
-      if (item.collectionID == collectionID) {
-        return uploadedFile;
-      } else {
-        await CollectionsService.instance
-            .addToCollection(item.collectionID, [uploadedFile]);
-        return uploadedFile;
-      }
-    }
-  }
-
   int getCurrentSessionUploadCount() {
     return _totalCountInUploadSession;
   }
