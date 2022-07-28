@@ -4,6 +4,7 @@ import { createNewConvertWorker } from 'utils/heicConverter';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
+import { makeHumanReadableStorage } from 'utils/billing';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
@@ -47,11 +48,11 @@ class HEICConverter {
                                             format
                                         );
                                     addLogLine(
-                                        `originalFileSize:${
+                                        `originalFileSize:${makeHumanReadableStorage(
                                             fileBlob?.size
-                                        },convertedFileSize:${
+                                        )},convertedFileSize:${makeHumanReadableStorage(
                                             convertedHEIC?.size
-                                        },  heic conversion time: ${
+                                        )},  heic conversion time: ${
                                             Date.now() - startTime
                                         }ms `
                                     );
@@ -69,8 +70,12 @@ class HEICConverter {
                             Error(`converted heic fileSize is Zero`),
                             'converted heic fileSize is Zero',
                             {
-                                originalFileSize: fileBlob?.size ?? 0,
-                                convertedFileSize: convertedHEIC?.size ?? 0,
+                                originalFileSize: makeHumanReadableStorage(
+                                    fileBlob?.size ?? 0
+                                ),
+                                convertedFileSize: makeHumanReadableStorage(
+                                    convertedHEIC?.size ?? 0
+                                ),
                             }
                         );
                     }
