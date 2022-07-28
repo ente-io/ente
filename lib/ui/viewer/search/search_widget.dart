@@ -25,8 +25,8 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 
   @override
   Widget build(BuildContext context) {
-    List<CollectionWithThumbnail> matchedCollections;
-    List<File> matchedFiles;
+    List<CollectionWithThumbnail> matchedCollections = [];
+    List<File> matchedFiles = [];
     //when false - show the search icon, when true - show the textfield for search
     return showSearchWidget
         ? searchWidget(matchedCollections, matchedFiles)
