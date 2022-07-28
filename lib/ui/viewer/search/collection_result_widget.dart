@@ -6,10 +6,9 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class CollectionSuggestionWidgetGenerator extends StatelessWidget {
+class CollectionSearchResultWidget extends StatelessWidget {
   final CollectionWithThumbnail c;
-  const CollectionSuggestionWidgetGenerator(this.c, {Key key})
-      : super(key: key);
+  const CollectionSearchResultWidget(this.c, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
