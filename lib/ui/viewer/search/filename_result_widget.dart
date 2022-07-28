@@ -34,10 +34,13 @@ class FilenameResultWidget extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(
-              height: 50,
-              width: 50,
-              child: ThumbnailWidget(matchedFile),
+            Hero(
+              tag: "fileDetails" + matchedFile.tag(),
+              child: SizedBox(
+                height: 50,
+                width: 50,
+                child: ThumbnailWidget(matchedFile),
+              ),
             ),
           ],
         ),
@@ -54,7 +57,7 @@ class FilenameResultWidget extends StatelessWidget {
         List.unmodifiable([file]),
         null,
         0,
-        "file details",
+        "fileDetails",
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
