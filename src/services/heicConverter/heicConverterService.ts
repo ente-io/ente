@@ -40,11 +40,21 @@ class HEICConverter {
                                     const timeout = setTimeout(() => {
                                         reject(Error('wait time exceeded'));
                                     }, WAIT_TIME_IN_MICROSECONDS);
-                                    const convertedHEIC =
+                                    const startTime = Date.now();
+                                    const convertedHEIC: Blob =
                                         await comlink.convertHEIC(
                                             fileBlob,
                                             format
                                         );
+                                    addLogLine(
+                                        `originalFileSize:${
+                                            fileBlob?.size
+                                        },convertedFileSize:${
+                                            convertedHEIC?.size
+                                        },  heic conversion time: ${
+                                            Date.now() - startTime
+                                        }ms `
+                                    );
                                     clearTimeout(timeout);
                                     resolve(convertedHEIC);
                                 } catch (e) {
@@ -54,6 +64,16 @@ class HEICConverter {
                             main();
                         }
                     );
+                    if (!convertedHEIC || convertedHEIC?.size === 0) {
+                        logError(
+                            Error(`converted heic fileSize is Zero`),
+                            'converted heic fileSize is Zero',
+                            {
+                                originalFileSize: fileBlob?.size ?? 0,
+                                convertedFileSize: convertedHEIC?.size ?? 0,
+                            }
+                        );
+                    }
                     await new Promise((resolve) => {
                         setTimeout(
                             () => resolve(null),
