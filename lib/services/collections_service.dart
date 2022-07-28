@@ -171,43 +171,44 @@ class CollectionsService {
         .toList();
   }
 
-// getCollectionsWithThumbnailForSearch removes deleted or archived or collections which don't have a file from search result
+  // getFilteredCollectionsWithThumbnail removes deleted or archived or
+  // collections which don't have a file from search result
+  Future<List<CollectionWithThumbnail>> getFilteredCollectionsWithThumbnail(
+    String query,
+  ) async {
+    // identify collections which have at least one file as we don't display
+    // empty collection
 
-  Future<List<CollectionWithThumbnail>>
-      getCollectionsWithThumbnailForSearch() async {
     List<File> latestCollectionFiles = await getLatestCollectionFiles();
-    Map<int, File> collectionIDtoFileForCollectionWithAtleastOneFile = {
+    Map<int, File> collectionIDToLatestFileMap = {
       for (File file in latestCollectionFiles) file.collectionID: file
     };
 
-    var collectionIDToCollectionsForSearch = _collectionIDToCollections;
+    /* Identify collections whose name matches the search query
+      and is not archived
+      and is not deleted
+      and has at-least one file
+     */
 
-    collectionIDToCollectionsForSearch.removeWhere(
-      (key, value) =>
-          value.isDeleted ||
-          value.isArchived() ||
-          !collectionIDtoFileForCollectionWithAtleastOneFile
-              .containsKey(value.id),
-    );
-
-    List<int> collectionIDsForSearch = collectionIDToCollectionsForSearch.keys
-        .toSet()
-        .intersection(
-          collectionIDtoFileForCollectionWithAtleastOneFile.keys.toSet(),
+    List<Collection> matchedCollection = _collectionIDToCollections.values
+        .where(
+          (c) =>
+              !c.isDeleted && // not deleted
+              !c.isArchived() // not archived
+              &&
+              collectionIDToLatestFileMap.containsKey(c.id) && // the
+              // collection is not empty
+              c.name.contains(RegExp(query, caseSensitive: false)),
         )
         .toList();
-
-    List<CollectionWithThumbnail> collectionWithThumbnailForSerach = [];
-
-    for (int collectionID in collectionIDsForSearch) {
-      CollectionWithThumbnail c = CollectionWithThumbnail(
-        collectionIDToCollectionsForSearch[collectionID],
-        collectionIDtoFileForCollectionWithAtleastOneFile[collectionID],
-      );
-      collectionWithThumbnailForSerach.add(c);
+    List<CollectionWithThumbnail> result = [];
+    for (Collection collection in matchedCollection) {
+      result.add(CollectionWithThumbnail(
+        collection,
+        collectionIDToLatestFileMap[collection.id],
+      ));
     }
-
-    return collectionWithThumbnailForSerach;
+    return result;
   }
 
   Future<List<User>> getSharees(int collectionID) {
@@ -902,19 +903,6 @@ class CollectionsService {
         rethrow;
       }
     }
-  }
-
-  Future<List<CollectionWithThumbnail>> getSearchedCollections(
-    String query,
-  ) async {
-    List<CollectionWithThumbnail> collectionsWithThumbnailToSearch =
-        await getCollectionsWithThumbnailForSearch();
-    return collectionsWithThumbnailToSearch
-        .where(
-          (element) => element.collection.name
-              .contains(RegExp(query, caseSensitive: false)),
-        )
-        .toList();
   }
 }
 

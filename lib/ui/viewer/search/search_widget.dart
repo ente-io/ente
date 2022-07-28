@@ -71,7 +71,7 @@ class _SearchwidgetState extends State<Searchwidget> {
                         ),
                         onChanged: (value) async {
                           matchedCollections = await CollectionsService.instance
-                              .getSearchedCollections(value);
+                              .getFilteredCollectionsWithThumbnail(value);
                           _searchQ.value = value;
                         },
                         autofocus: true,
