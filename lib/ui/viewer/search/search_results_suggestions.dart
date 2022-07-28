@@ -6,10 +6,10 @@ import 'package:photos/ui/viewer/search/collection_result_widget.dart';
 import 'package:photos/ui/viewer/search/filename_result_widget.dart';
 
 class SearchResultsSuggestions extends StatelessWidget {
-  final List<CollectionWithThumbnail> collectionsWithThumbnail;
+  final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;
   final List<File> matchedFiles;
   const SearchResultsSuggestions(
-    this.collectionsWithThumbnail,
+    this.matchedCollectionsWithThumbnail,
     this.matchedFiles, {
     Key key,
   }) : super(key: key);
@@ -17,13 +17,12 @@ class SearchResultsSuggestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     List<dynamic> suggestions = [];
-    for (CollectionWithThumbnail c in collectionsWithThumbnail) {
+    for (CollectionWithThumbnail c in matchedCollectionsWithThumbnail) {
       suggestions.add(c);
     }
     for (File file in matchedFiles) {
       suggestions.add(file);
     }
-    suggestions.shuffle();
     return Container(
       constraints:
           BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),

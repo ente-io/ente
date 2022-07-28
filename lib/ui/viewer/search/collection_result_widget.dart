@@ -64,16 +64,26 @@ class CollectionResultWidget extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(
-              height: 50,
-              width: 50,
-              child: ThumbnailWidget(c.thumbnail),
+            Hero(
+              tag: "collectionSearch" + c.thumbnail.tag(),
+              child: SizedBox(
+                height: 50,
+                width: 50,
+                child: ThumbnailWidget(c.thumbnail),
+              ),
             )
           ],
         ),
       ),
       onTap: () {
-        routeToPage(context, CollectionPage(c), forceCustomPageRoute: true);
+        routeToPage(
+          context,
+          CollectionPage(
+            c,
+            tagPrefix: "collectionSearch",
+          ),
+          forceCustomPageRoute: true,
+        );
       },
     );
   }
