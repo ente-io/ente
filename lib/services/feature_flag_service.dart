@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -81,6 +82,11 @@ class FeatureFlagService {
       _logger.severe(e);
       return FFDefault.enableStripe;
     }
+  }
+
+  bool enableSearchFeature() {
+    String email = Configuration.instance.getEmail();
+    return (email != null && email.endsWith("@ente.io")) || kDebugMode;
   }
 
   Future<void> fetchFeatureFlags() async {
