@@ -128,7 +128,7 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
   }
 
   if (file.title == null || file.title.isEmpty) {
-    _logger.severe("Title was missing");
+    _logger.warning("Title was missing ${file.tag()}");
     file.title = await asset.titleAsync;
   }
 }

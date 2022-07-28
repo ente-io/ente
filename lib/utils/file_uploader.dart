@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
@@ -319,6 +320,7 @@ class FileUploader {
         fileOnDisk.updationTime != -1 &&
         fileOnDisk.collectionID == collectionID;
     if (wasAlreadyUploaded) {
+      debugPrint("File is already uploaded ${fileOnDisk.tag()}");
       return fileOnDisk;
     }
 
