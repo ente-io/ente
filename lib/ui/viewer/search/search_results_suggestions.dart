@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/viewer/search/collection_result_widget.dart';
+import 'package:photos/ui/viewer/search/filename_result_widget.dart';
 
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> collectionsWithThumbnail;
@@ -19,7 +20,10 @@ class SearchResultsSuggestions extends StatelessWidget {
     for (CollectionWithThumbnail c in collectionsWithThumbnail) {
       suggestions.add(CollectionResultWidget(c));
     }
-
+    for (File file in matchedFiles) {
+      suggestions.add(FileSuggestionsWigetGenerator(file));
+    }
+    suggestions.shuffle();
     return Container(
       constraints:
           BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),

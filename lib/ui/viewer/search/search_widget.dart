@@ -116,6 +116,6 @@ class _SearchwidgetState extends State<Searchwidget> {
               ),
             ],
           )
-        : SearchIconWidget();
+        : const SearchIconWidget();
   }
 }
