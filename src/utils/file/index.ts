@@ -26,6 +26,8 @@ import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
+import { addLogLine } from 'utils/logging';
+import { makeHumanReadableStorage } from 'utils/billing';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -314,7 +316,13 @@ export async function convertForPreview(
             await getFileType(new File([fileBlob], file.metadata.title))
         ).exactType;
         if (isFileHEIC(mimeType)) {
+            addLogLine(
+                `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
+                    fileBlob.size
+                )}`
+            );
             fileBlob = await HEICConverter.convert(fileBlob);
+            addLogLine(`${fileName} successfully converted`);
         }
         return fileBlob;
     };

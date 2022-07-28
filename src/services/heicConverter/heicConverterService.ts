@@ -4,6 +4,7 @@ import { createNewConvertWorker } from 'utils/heicConverter';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
+import { makeHumanReadableStorage } from 'utils/billing';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
@@ -40,11 +41,21 @@ class HEICConverter {
                                     const timeout = setTimeout(() => {
                                         reject(Error('wait time exceeded'));
                                     }, WAIT_TIME_IN_MICROSECONDS);
-                                    const convertedHEIC =
+                                    const startTime = Date.now();
+                                    const convertedHEIC: Blob =
                                         await comlink.convertHEIC(
                                             fileBlob,
                                             format
                                         );
+                                    addLogLine(
+                                        `originalFileSize:${makeHumanReadableStorage(
+                                            fileBlob?.size
+                                        )},convertedFileSize:${makeHumanReadableStorage(
+                                            convertedHEIC?.size
+                                        )},  heic conversion time: ${
+                                            Date.now() - startTime
+                                        }ms `
+                                    );
                                     clearTimeout(timeout);
                                     resolve(convertedHEIC);
                                 } catch (e) {
@@ -54,6 +65,20 @@ class HEICConverter {
                             main();
                         }
                     );
+                    if (!convertedHEIC || convertedHEIC?.size === 0) {
+                        logError(
+                            Error(`converted heic fileSize is Zero`),
+                            'converted heic fileSize is Zero',
+                            {
+                                originalFileSize: makeHumanReadableStorage(
+                                    fileBlob?.size ?? 0
+                                ),
+                                convertedFileSize: makeHumanReadableStorage(
+                                    convertedHEIC?.size ?? 0
+                                ),
+                            }
+                        );
+                    }
                     await new Promise((resolve) => {
                         setTimeout(
                             () => resolve(null),
