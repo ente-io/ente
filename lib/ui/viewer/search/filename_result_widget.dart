@@ -1,6 +1,8 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class FileSuggestionsWigetGenerator extends StatelessWidget {
   final File matchedFile;
@@ -41,6 +43,21 @@ class FileSuggestionsWigetGenerator extends StatelessWidget {
           ],
         ),
       ),
+      onTap: () {
+        _routeToDetailPage(matchedFile, context);
+      },
     );
+  }
+
+  void _routeToDetailPage(File file, BuildContext context) {
+    final page = DetailPage(
+      DetailPageConfiguration(
+        List.unmodifiable([file]),
+        null,
+        0,
+        "file details",
+      ),
+    );
+    routeToPage(context, page, forceCustomPageRoute: true);
   }
 }
