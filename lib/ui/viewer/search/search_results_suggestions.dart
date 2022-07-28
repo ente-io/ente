@@ -16,12 +16,12 @@ class SearchResultsSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> suggestions = [];
+    List<dynamic> suggestions = [];
     for (CollectionWithThumbnail c in collectionsWithThumbnail) {
-      suggestions.add(CollectionResultWidget(c));
+      suggestions.add(c);
     }
     for (File file in matchedFiles) {
-      suggestions.add(FilenameResultWidget(file));
+      suggestions.add(file);
     }
     suggestions.shuffle();
     return Container(
@@ -30,7 +30,14 @@ class SearchResultsSuggestions extends StatelessWidget {
       child: ListView.builder(
         itemCount: suggestions.length,
         itemBuilder: (context, index) {
-          return suggestions[index];
+          dynamic value = suggestions[index];
+          if (value is File) {
+            return FilenameResultWidget(value);
+          } else if (value is CollectionWithThumbnail) {
+            return CollectionResultWidget(value);
+          } else {
+            throw StateError("Invalid/Unsupported value");
+          }
         },
       ),
     );
