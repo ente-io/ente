@@ -6,10 +6,10 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class CollectionSuggestionWidgetGenerator extends StatelessWidget {
+class CollectionResultWidget extends StatelessWidget {
   final CollectionWithThumbnail c;
-  const CollectionSuggestionWidgetGenerator(this.c, {Key key})
-      : super(key: key);
+
+  const CollectionResultWidget(this.c, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,6 @@ class CollectionSuggestionWidgetGenerator extends StatelessWidget {
                   builder: (context, snapshot) {
                     if (snapshot.hasData && snapshot.data > 0) {
                       int noOfMemories = snapshot.data;
-
                       return RichText(
                         text: TextSpan(
                           style: TextStyle(
@@ -60,20 +59,16 @@ class CollectionSuggestionWidgetGenerator extends StatelessWidget {
                 ),
               ],
             ),
-            Row(
-              children: [
-                SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ThumbnailWidget(c.thumbnail),
-                ),
-              ],
+            SizedBox(
+              height: 50,
+              width: 50,
+              child: ThumbnailWidget(c.thumbnail),
             )
           ],
         ),
       ),
       onTap: () {
-        routeToPage(context, CollectionPage(c));
+        routeToPage(context, CollectionPage(c), forceCustomPageRoute: true);
       },
     );
   }

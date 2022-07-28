@@ -232,7 +232,7 @@ class StatusBarBrandingWidget extends StatelessWidget {
         FeatureFlagService.instance.enableSearchFeature()
             ? SizedBox(
                 width: MediaQuery.of(context).size.width,
-                child: Align(
+                child: const Align(
                   alignment: Alignment.centerRight,
                   child: SearchIconWidget(),
                 ),
