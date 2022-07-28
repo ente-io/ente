@@ -1036,22 +1036,6 @@ class FilesDB {
     return collectionMap.values.toList();
   }
 
-  Future<File> getLastModifiedFileInCollection(int collectionID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnCollectionID = ?',
-      whereArgs: [collectionID],
-      orderBy: '$columnUpdationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      return null;
-    }
-  }
-
   Future<Map<String, int>> getFileCountInDeviceFolders() async {
     final db = await instance.database;
     final rows = await db.rawQuery(
