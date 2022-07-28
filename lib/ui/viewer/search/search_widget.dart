@@ -4,25 +4,30 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
-// ignore: must_be_immutable
 class SearchIconWidget extends StatefulWidget {
-  bool openSearch;
-  SearchIconWidget({Key key, this.openSearch = false}) : super(key: key);
+  const SearchIconWidget({Key key}) : super(key: key);
 
   @override
   State<SearchIconWidget> createState() => _SearchIconWidgetState();
 }
 
 class _SearchIconWidgetState extends State<SearchIconWidget> {
+  bool showSearchWidget;
+  @override
+  void initState() {
+    super.initState();
+    showSearchWidget = false;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return widget.openSearch
-        ? Searchwidget(widget.openSearch)
+    return showSearchWidget
+        ? Searchwidget(showSearchWidget)
         : IconButton(
             onPressed: () {
               setState(
                 () {
-                  widget.openSearch = !widget.openSearch;
+                  showSearchWidget = !showSearchWidget;
                 },
               );
             },

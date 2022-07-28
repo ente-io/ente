@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/ui/viewer/search/collection_suggestion_widget_generator.dart';
+import 'package:photos/ui/viewer/search/collection_result_widget.dart';
 
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> collectionsWithThumbnail;
@@ -12,7 +12,7 @@ class SearchResultsSuggestions extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> suggestions = [];
     for (CollectionWithThumbnail c in collectionsWithThumbnail) {
-      suggestions.add(CollectionSuggestionWidgetGenerator(c));
+      suggestions.add(CollectionResultWidget(c));
     }
 
     return Container(
