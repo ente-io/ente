@@ -99,8 +99,8 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
           ) {
             return newQuery != ''
                 ? SearchResultsSuggestions(
-                    collectionsWithThumbnail: matchedCollections,
-                    matchedFiles: matchedFiles,
+                    matchedCollections,
+                    matchedFiles,
                   )
                 : const SizedBox.shrink();
           },

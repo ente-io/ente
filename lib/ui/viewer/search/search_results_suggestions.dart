@@ -8,10 +8,10 @@ import 'package:photos/ui/viewer/search/filename_result_widget.dart';
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> collectionsWithThumbnail;
   final List<File> matchedFiles;
-  const SearchResultsSuggestions({
-    Key key,
+  const SearchResultsSuggestions(
     this.collectionsWithThumbnail,
-    this.matchedFiles,
+    this.matchedFiles, {
+    Key key,
   }) : super(key: key);
 
   @override
@@ -21,7 +21,7 @@ class SearchResultsSuggestions extends StatelessWidget {
       suggestions.add(CollectionResultWidget(c));
     }
     for (File file in matchedFiles) {
-      suggestions.add(FileSuggestionsWigetGenerator(file));
+      suggestions.add(FilenameResultWidget(file));
     }
     suggestions.shuffle();
     return Container(

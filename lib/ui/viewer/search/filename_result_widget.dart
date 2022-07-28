@@ -4,10 +4,9 @@ import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class FileSuggestionsWigetGenerator extends StatelessWidget {
+class FilenameResultWidget extends StatelessWidget {
   final File matchedFile;
-  const FileSuggestionsWigetGenerator(this.matchedFile, {Key key})
-      : super(key: key);
+  const FilenameResultWidget(this.matchedFile, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
