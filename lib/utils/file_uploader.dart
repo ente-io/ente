@@ -346,8 +346,7 @@ class FileUploader {
       final fileUploadURL = await _getUploadURL();
       String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
-      final metadata =
-          await file.getMetadataForUpload(mediaUploadData.sourceFile);
+      final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
         utf8.encode(jsonEncode(metadata)),
         fileAttributes.key,
