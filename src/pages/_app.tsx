@@ -27,7 +27,6 @@ import {
     getRoadmapRedirectURL,
 } from 'services/userService';
 import { CustomError } from 'utils/error';
-import { getSentryUserID } from 'utils/user';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -200,10 +199,6 @@ export default function App({ Component, err }) {
 
     useEffect(() => {
         addLogLine(`app started`);
-        addLogLine(
-            `latest commit id :${process.env.NEXT_PUBLIC_LATEST_COMMIT_HASH}`
-        );
-        addLogLine(`user sentry id ${getSentryUserID()}`);
     }, []);
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
