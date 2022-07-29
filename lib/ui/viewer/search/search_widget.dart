@@ -102,6 +102,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                 ? SearchResultsSuggestions(
                     matchedCollections,
                     matchedFiles,
+                    matchedLocations,
                   )
                 : const SizedBox.shrink();
           },

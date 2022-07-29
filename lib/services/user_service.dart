@@ -860,7 +860,7 @@ class UserService {
     }
   }
 
-  Future<dynamic> getLocationSerachData(String query) async {
+  Future<List<dynamic>> getLocationSerachData(String query) async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",

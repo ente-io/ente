@@ -8,9 +8,11 @@ import 'package:photos/ui/viewer/search/filename_result_widget.dart';
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;
   final List<File> matchedFiles;
+  final List<dynamic> matchedLocations;
   const SearchResultsSuggestions(
     this.matchedCollectionsWithThumbnail,
-    this.matchedFiles, {
+    this.matchedFiles,
+    this.matchedLocations, {
     Key key,
   }) : super(key: key);
 
