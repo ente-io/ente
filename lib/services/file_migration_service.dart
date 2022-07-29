@@ -8,6 +8,8 @@ import 'package:photos/db/file_migration_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// LocalFileUpdateService tracks all the potential local file IDs which have
+// changed/modified on the device and needed to be uploaded again.
 class FileMigrationService {
   FilesDB _filesDB;
   FilesMigrationDB _filesMigrationDB;
@@ -44,10 +46,12 @@ class FileMigrationService {
       _logger.info("migration is already in progress, skipping");
       return _existingMigration.future;
     }
-    _logger.info("start migration");
     _existingMigration = Completer<void>();
     try {
-      await _runMigrationForFilesWithMissingLocation();
+      if (!isLocationMigrationCompleted() && Platform.isAndroid) {
+        _logger.info("start migration for missing location");
+        await _runMigrationForFilesWithMissingLocation();
+      }
       _existingMigration.complete();
       _existingMigration = null;
     } catch (e, s) {

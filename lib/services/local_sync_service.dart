@@ -31,6 +31,7 @@ class LocalSyncService {
   // Adding `_2` as a suffic to pull files that were earlier ignored due to permission errors
   // See https://github.com/CaiJingLong/flutter_photo_manager/issues/589
   static const kInvalidFileIDsKey = "invalid_file_ids_2";
+
   LocalSyncService._privateConstructor();
 
   static final LocalSyncService instance =

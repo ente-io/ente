@@ -134,8 +134,7 @@ class RemoteSyncService {
     if (!_hasReSynced()) {
       await _markReSyncAsDone();
     }
-    if (FeatureFlagService.instance.enableMissingLocationMigration() &&
-        !_fileMigrationService.isLocationMigrationCompleted()) {
+    if (FeatureFlagService.instance.enableMissingLocationMigration()) {
       _fileMigrationService.runMigration();
     }
   }
