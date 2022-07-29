@@ -858,4 +858,15 @@ class UserService {
       await Configuration.instance.setToken(response.data["token"]);
     }
   }
+
+  Future<dynamic> getLocationSerachData(String query) async {
+    final response = await _dio.get(
+      _config.getHttpEndpoint() + "/search/location",
+      queryParameters: {"query": query, "limit": 4},
+      options: Options(
+        headers: {"X-Auth-Token": _config.getToken()},
+      ),
+    );
+    return response;
+  }
 }

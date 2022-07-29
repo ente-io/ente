@@ -4,6 +4,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
 class SearchIconWidget extends StatefulWidget {
@@ -73,6 +74,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         .getFilteredCollectionsWithThumbnail(value);
                     matchedFiles =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
+                    UserService.instance.getLocationSerachData(value);
                     _searchQuery.value = value;
                   },
                   autofocus: true,
