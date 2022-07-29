@@ -26,11 +26,9 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 
   @override
   Widget build(BuildContext context) {
-    List<CollectionWithThumbnail> matchedCollections = [];
-    List<File> matchedFiles = [];
     //when false - show the search icon, when true - show the textfield for search
     return showSearchWidget
-        ? searchWidget(matchedCollections, matchedFiles)
+        ? searchWidget()
         : IconButton(
             onPressed: () {
               setState(
@@ -43,10 +41,10 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
           );
   }
 
-  Widget searchWidget(
-    List<CollectionWithThumbnail> matchedCollections,
-    List<File> matchedFiles,
-  ) {
+  Widget searchWidget() {
+    List<CollectionWithThumbnail> matchedCollections = [];
+    List<File> matchedFiles = [];
+    List<dynamic> matchedLocations = [];
     return Column(
       children: [
         Row(
@@ -74,7 +72,8 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         .getFilteredCollectionsWithThumbnail(value);
                     matchedFiles =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    UserService.instance.getLocationSerachData(value);
+                    matchedLocations =
+                        await UserService.instance.getLocationSerachData(value);
                     _searchQuery.value = value;
                   },
                   autofocus: true,

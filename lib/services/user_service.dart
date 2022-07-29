@@ -13,6 +13,7 @@ import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
+import 'package:photos/models/location.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
@@ -860,13 +861,33 @@ class UserService {
   }
 
   Future<dynamic> getLocationSerachData(String query) async {
-    final response = await _dio.get(
-      _config.getHttpEndpoint() + "/search/location",
-      queryParameters: {"query": query, "limit": 4},
-      options: Options(
-        headers: {"X-Auth-Token": _config.getToken()},
-      ),
-    );
-    return response;
+    try {
+      final response = await _dio.get(
+        _config.getHttpEndpoint() + "/search/location",
+        queryParameters: {"query": query, "limit": 4},
+        options: Options(
+          headers: {"X-Auth-Token": _config.getToken()},
+        ),
+      );
+
+      List<dynamic> finalResult = response.data['results'] ?? [];
+
+      for (dynamic result in finalResult) {
+        result.update(
+          'bbox',
+          (value) => {
+            /*bbox in response is of order (0-lng,1-lat,2-lng,3-lat) and southwest
+           coordinate is (0,1)(lng,lat) and northeast is (2,3)(lng,lat)
+           for location(), the order is location(lat,lng) */
+            "southWestCoordinates": Location(value[1], value[0]),
+            "northEastCoordinates": Location(value[3], value[2])
+          },
+        );
+      }
+      return finalResult;
+    } on DioError catch (e) {
+      _logger.info(e);
+      rethrow;
+    }
   }
 }
