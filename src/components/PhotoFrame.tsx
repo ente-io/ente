@@ -205,20 +205,20 @@ const PhotoFrame = ({
                 }
 
                 if (
-                    search.person &&
+                    search?.person &&
                     search.person.files.indexOf(item.id) === -1
                 ) {
                     return false;
                 }
 
                 if (
-                    search.thing &&
+                    search?.thing &&
                     search.thing.files.indexOf(item.id) === -1
                 ) {
                     return false;
                 }
 
-                if (search.text && search.text.files.indexOf(item.id) === -1) {
+                if (search?.text && search.text.files.indexOf(item.id) === -1) {
                     return false;
                 }
 
