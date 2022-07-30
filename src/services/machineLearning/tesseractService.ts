@@ -8,7 +8,7 @@ import Tesseract, { createWorker } from 'tesseract.js';
 import QueueProcessor from 'services/queueProcessor';
 import { CustomError } from 'utils/error';
 import { imageBitmapToBlob, resizeToSquare } from 'utils/image';
-import { getFileType } from 'services/upload/readFileService';
+import { getFileType } from 'services/typeDetectionService';
 import { FILE_TYPE } from 'constants/file';
 import { makeID } from 'utils/user';
 import {
@@ -129,7 +129,7 @@ class TesseractService implements TextDetectionService {
             [await imageBitmapToBlob(imageBitmap)],
             'text-detection-dummy-image'
         );
-        const fileTypeInfo = await getFileType(new FileReader(), file);
+        const fileTypeInfo = await getFileType(file);
 
         if (
             fileTypeInfo.fileType !== FILE_TYPE.IMAGE &&

@@ -21,8 +21,7 @@ class ReaderService {
             }
             fileContext.imageBitmap = await getLocalFileImageBitmap(
                 fileContext.enteFile,
-                fileContext.localFile,
-                () => syncContext.getEnteWorker(fileContext.enteFile.id)
+                fileContext.localFile
             );
         } else if (
             syncContext.config.imageSource === 'Original' &&

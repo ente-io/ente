@@ -355,7 +355,7 @@ async function getOriginalConvertedFile(
 ) {
     let fileBlob = await getOriginalImageFile(file, token, enteWorker, queue);
     if (needsConversionForPreview(file)) {
-        fileBlob = await convertForPreview(file, fileBlob, enteWorker);
+        fileBlob = await convertForPreview(file, fileBlob)[0];
     }
 
     return fileBlob;
@@ -402,13 +402,11 @@ export async function getThumbnailImageBitmap(file: EnteFile, token: string) {
 
 export async function getLocalFileImageBitmap(
     enteFile: EnteFile,
-    localFile: globalThis.File,
-    enteWorkerProvider?: () => Promise<any>
+    localFile: globalThis.File
 ) {
     let fileBlob = localFile as Blob;
     if (needsConversionForPreview(enteFile)) {
-        const enteWorker = await enteWorkerProvider();
-        fileBlob = await convertForPreview(enteFile, fileBlob, enteWorker);
+        fileBlob = await convertForPreview(enteFile, fileBlob)[0];
     }
     return getImageBlobBitmap(fileBlob);
 }

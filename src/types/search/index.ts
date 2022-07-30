@@ -1,4 +1,4 @@
-import { Person, Thing } from 'types/machineLearning';
+import { Person, Thing, ThingClass, WordGroup } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { EnteFile } from 'types/file';
 
@@ -39,6 +39,9 @@ export type Search = {
     location?: Bbox;
     collection?: number;
     file?: number;
+    person?: Person;
+    thing?: ThingClass;
+    text?: WordGroup;
 };
 
 export type SearchResultSummary = {

@@ -23,7 +23,8 @@ import {
     SceneDetectionMethod,
 } from 'types/machineLearning';
 import { CONCURRENCY } from 'utils/common/concurrency';
-import { ComlinkWorker, getDedicatedCryptoWorker } from 'utils/crypto';
+import { getDedicatedCryptoWorker } from 'utils/crypto';
+import { ComlinkWorker } from 'utils/comlink';
 import { logQueueStats } from 'utils/machineLearning';
 import arcfaceAlignmentService from './arcfaceAlignmentService';
 import arcfaceCropService from './arcfaceCropService';

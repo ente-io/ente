@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, ChangeEvent } from 'react';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { ComlinkWorker } from 'utils/crypto';
+import { ComlinkWorker } from 'utils/comlink';
 import { AppContext } from 'pages/_app';
 import { PAGES } from 'constants/pages';
 import * as Comlink from 'comlink';
