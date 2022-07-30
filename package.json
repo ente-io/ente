@@ -28,7 +28,6 @@
     "@tensorflow/tfjs-converter": "^3.11.0",
     "@tensorflow/tfjs-core": "^3.11.0",
     "@tensorflow/tfjs-tflite": "^0.0.1-alpha.7",
-    
     "@zip.js/zip.js": "^2.4.2",
     "axios": "^0.21.3",
     "bip39": "^3.0.4",
