@@ -73,7 +73,6 @@
     "react-top-loading-bar": "^2.0.1",
     "react-virtualized-auto-sizer": "^1.0.2",
     "react-window": "^1.8.6",
-    "scrypt-js": "^3.0.1",
     "similarity-transformation": "^0.0.1",
     "styled-components": "^5.3.5",
     "tesseract.js": "file:./thirdparty/tesseract",
