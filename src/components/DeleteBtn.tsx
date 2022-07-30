@@ -1,9 +1,9 @@
 import React from 'react';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import constants from 'utils/strings/constants';
-import { IconWithMessage } from './pages/gallery/SelectedFileOptions';
+import { IconWithMessage } from './IconWithMessage';
 
-const Wrapper = styled.button`
+const Wrapper = styled('button')`
     border: none;
     background-color: #ff6666;
     position: fixed;

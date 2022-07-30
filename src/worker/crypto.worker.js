@@ -1,6 +1,5 @@
 import * as Comlink from 'comlink';
 import * as libsodium from 'utils/crypto/libsodium';
-import { convertHEIC2JPEG } from 'utils/file/convertHEIC';
 
 export class Crypto {
     async decryptMetadata(encryptedMetadata, header, key) {
@@ -77,6 +76,18 @@ export class Crypto {
         return libsodium.verifyHash(hash, input);
     }
 
+    async initChunkHashing() {
+        return libsodium.initChunkHashing();
+    }
+
+    async hashFileChunk(hashState, chunk) {
+        return libsodium.hashFileChunk(hashState, chunk);
+    }
+
+    async completeChunkHashing(hashState) {
+        return libsodium.completeChunkHashing(hashState);
+    }
+
     async deriveKey(passphrase, salt, opsLimit, memLimit) {
         return libsodium.deriveKey(passphrase, salt, opsLimit, memLimit);
     }
@@ -85,8 +96,8 @@ export class Crypto {
         return libsodium.deriveSensitiveKey(passphrase, salt);
     }
 
-    async deriveIntermediateKey(passphrase, salt) {
-        return libsodium.deriveIntermediateKey(passphrase, salt);
+    async deriveInteractiveKey(passphrase, salt) {
+        return libsodium.deriveInteractiveKey(passphrase, salt);
     }
 
     async decryptB64(data, nonce, key) {
@@ -147,10 +158,6 @@ export class Crypto {
 
     async fromHex(string) {
         return libsodium.fromHex(string);
-    }
-
-    async convertHEIC2JPEG(file) {
-        return convertHEIC2JPEG(file);
     }
 }
 

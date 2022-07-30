@@ -1,5 +1,9 @@
+import { Box, Typography } from '@mui/material';
+import Link from '@mui/material/Link';
+import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
-import styled from 'styled-components';
+import { SuggestionType } from 'types/search';
+import { formatNumberWithCommas } from '.';
 
 /**
  * Global English constants.
@@ -13,177 +17,178 @@ const dateString = function (date) {
     });
 };
 
-const Strong = styled.strong`
-    color: #ddd;
-`;
-
-const Logo = styled.img`
-    height: 18px;
-    vertical-align: middle;
-    margin-top: -3px;
-`;
-
-const Trigger = styled.span`
-    :hover {
-        text-decoration: underline;
-        cursor: pointer;
-    }
-    color: #51cd7c;
-`;
-
 const englishConstants = {
-    HERO_HEADER: () => (
-        <div>
-            with <Logo src="/icon.svg" />
-            <br />
-            your <Strong>memories</Strong> are
-        </div>
+    HERO_SLIDE_1_TITLE: () => (
+        <>
+            <div>Private backups</div>
+            <div> for your memories</div>
+        </>
     ),
-    HERO_SLIDE_1_TITLE: 'protected',
-    HERO_SLIDE_1:
-        'end-to-end encrypted with your password, visible only to you',
-    HERO_SLIDE_2_TITLE: 'synced',
-    HERO_SLIDE_2: 'available across all your devices, web, android and ios',
-    HERO_SLIDE_3_TITLE: 'preserved',
-    HERO_SLIDE_3:
-        'reliably replicated to a fallout shelter, designed to outlive',
+    HERO_SLIDE_1: 'End-to-end encrypted by default',
+    HERO_SLIDE_2_TITLE: () => (
+        <>
+            <div>Safely stored </div>
+            <div>at a fallout shelter</div>
+        </>
+    ),
+    HERO_SLIDE_2: 'Designed to outlive',
+    HERO_SLIDE_3_TITLE: () => (
+        <>
+            <div>Available</div>
+            <div> everywhere</div>
+        </>
+    ),
+    HERO_SLIDE_3: 'Android, iOS, Web, Desktop',
     COMPANY_NAME: 'ente',
-    LOGIN: 'log in',
-    SIGN_UP: 'sign up',
-    NAME: 'name',
-    ENTER_NAME: 'your name',
-    EMAIL: 'email',
-    ENTER_EMAIL: 'email',
-    DATA_DISCLAIMER: "we'll never share your data with anyone else.",
-    SUBMIT: 'submit',
-    EMAIL_ERROR: 'enter a valid email',
-    REQUIRED: 'required',
-    VERIFY_EMAIL: 'verify email',
+    LOGIN: 'Login',
+    SIGN_UP: 'Signup',
+    NEW_USER: 'New to ente',
+    EXISTING_USER: 'Existing user',
+    NAME: 'Name',
+    ENTER_NAME: 'Your name',
+    EMAIL: 'Email',
+    ENTER_EMAIL: 'Enter email address',
+    DATA_DISCLAIMER: "We'll never share your data with anyone else.",
+    SUBMIT: 'Submit',
+    EMAIL_ERROR: 'Enter a valid email',
+    REQUIRED: 'Required',
+    VERIFY_EMAIL: 'Verify email',
     EMAIL_SENT: ({ email }) => (
-        <p>
-            we have sent a mail to <b>{email}</b>
-        </p>
+        <span>
+            Verification code sent to{' '}
+            <Typography
+                component={'span'}
+                fontSize="inherit"
+                color="text.secondary">
+                {email}
+            </Typography>
+        </span>
     ),
-    CHECK_INBOX: 'please check your inbox (and spam) to complete verification',
-    ENTER_OTT: 'verification code',
-    RESEND_MAIL: 'resend?',
-    VERIFY: 'verify',
-    UNKNOWN_ERROR: 'something went wrong, please try again',
-    INVALID_CODE: 'invalid verification code',
-    EXPIRED_CODE: 'your verification code has expired',
+    CHECK_INBOX: 'Please check your inbox (and spam) to complete verification',
+    ENTER_OTT: 'Verification code',
+    RESEND_MAIL: 'Resend code',
+    VERIFY: 'Verify',
+    UNKNOWN_ERROR: 'Something went wrong, please try again',
+    INVALID_CODE: 'Invalid verification code',
+    EXPIRED_CODE: 'Your verification code has expired',
     SENDING: 'sending...',
     SENT: 'sent!',
-    PASSWORD: 'password',
-    ENTER_PASSPHRASE: 'enter your password',
-    RETURN_PASSPHRASE_HINT: 'password',
-    SET_PASSPHRASE: 'set password',
-    VERIFY_PASSPHRASE: 'sign in',
-    INCORRECT_PASSPHRASE: 'incorrect password',
+    PASSWORD: 'Password',
+    LINK_PASSWORD: 'Enter password to unlock the album',
+    ENTER_PASSPHRASE: 'Enter your password',
+    RETURN_PASSPHRASE_HINT: 'Password',
+    SET_PASSPHRASE: 'Set password',
+    VERIFY_PASSPHRASE: 'Sign in',
+    INCORRECT_PASSPHRASE: 'Incorrect password',
     ENTER_ENC_PASSPHRASE:
-        'please enter a password that we can use to encrypt your data',
+        'Please enter a password that we can use to encrypt your data',
     PASSPHRASE_DISCLAIMER: () => (
-        <p>
-            we don't store your password, so if you forget,
-            <strong> we will not be able to help you</strong> recover your data.
-        </p>
+        <>
+            We don't store your password, so if you forget it,{' '}
+            <strong>we will not be able to help you </strong>
+            recover your data without a recovery key.
+        </>
     ),
-    PASSPHRASE_HINT: 'password',
-    RE_ENTER_PASSPHRASE: 'password again',
-    CONFIRM_PASSPHRASE: 'confirm your password',
-    PASSPHRASE_MATCH_ERROR: "passwords don't match",
+    KEY_GENERATION_IN_PROGRESS_MESSAGE: 'Generating encryption keys...',
+    PASSPHRASE_HINT: 'Password',
+    CONFIRM_PASSPHRASE: 'Confirm password',
+    PASSPHRASE_MATCH_ERROR: "Passwords don't match",
     CONSOLE_WARNING_STOP: 'STOP!',
     CONSOLE_WARNING_DESC:
         "This is a browser feature intended for developers. Please don't copy-paste unverified code here.",
-    SELECT_COLLECTION: 'select an album to upload to',
-    CREATE_COLLECTION: 'new album',
-    ENTER_ALBUM_NAME: 'album name',
-    CLOSE: 'close',
-    NO: 'no',
-    NOTHING_HERE: 'nothing to see here, yet',
-    UPLOAD: {
-        0: 'preparing to upload',
-        1: 'reading google metadata files',
-        2: (fileCounter) =>
+    SELECT_COLLECTION: 'Select an album to upload to',
+    CREATE_COLLECTION: 'New album',
+    ENTER_ALBUM_NAME: 'Album name',
+    CLOSE: 'Close',
+    NO: 'No',
+    NOTHING_HERE: 'Nothing to see here yet 👀',
+    UPLOAD: 'Upload',
+    FILE_UPLOAD: 'File Upload',
+    UPLOAD_STAGE_MESSAGE: {
+        0: 'Preparing to upload',
+        1: 'Reading google metadata files',
+        2: 'Reading file metadata',
+        3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
-        3: 'backup complete',
+        4: 'Backup complete',
+        5: 'Cancelling remaining uploads',
     },
-    UPLOADING_FILES: 'file upload',
-    FILE_NOT_UPLOADED_LIST: 'the following files were not uploaded',
-    SUBSCRIPTION_EXPIRED: (action) => (
+    UPLOADING_FILES: 'File upload',
+    FILE_NOT_UPLOADED_LIST: 'The following files were not uploaded',
+    SUBSCRIPTION_EXPIRED: 'Subscription expired',
+    SUBSCRIPTION_EXPIRED_MESSAGE: (onClick) => (
         <>
-            your subscription has expired, please a{' '}
-            <Trigger onClick={action}>renew</Trigger>
+            Your subscription has expired, please{' '}
+            <LinkButton onClick={onClick}> renew </LinkButton>
         </>
     ),
-    STORAGE_QUOTA_EXCEEDED: (action) => (
-        <>
-            you have exceeded your storage quota, please{' '}
-            <Trigger onClick={action}>upgrade</Trigger> your plan
-        </>
-    ),
-    INITIAL_LOAD_DELAY_WARNING: 'the first load may take some time',
-    USER_DOES_NOT_EXIST: 'sorry, could not find a user with that email',
-    UPLOAD_BUTTON_TEXT: 'upload',
-    NO_ACCOUNT: "don't have an account?",
-    ACCOUNT_EXISTS: 'already have an account?',
-    ALBUM_NAME: 'album name',
-    CREATE: 'create',
-    DOWNLOAD: 'download',
-    TOGGLE_FULLSCREEN: 'toggle fullscreen',
-    ZOOM_IN_OUT: 'zoom in/out',
-    PREVIOUS: 'previous (arrow left)',
-    NEXT: 'next (arrow right)',
+    STORAGE_QUOTA_EXCEEDED: 'Storage limit exceeded',
+    INITIAL_LOAD_DELAY_WARNING: 'First load may take some time',
+    USER_DOES_NOT_EXIST: 'Sorry, could not find a user with that email',
+    UPLOAD_BUTTON_TEXT: 'Upload',
+    NO_ACCOUNT: "Don't have an account",
+    ACCOUNT_EXISTS: 'Already have an account',
+    ALBUM_NAME: 'Album name',
+    CREATE: 'Create',
+    DOWNLOAD: 'Download',
+    TOGGLE_FULLSCREEN: 'Toggle fullscreen',
+    ZOOM_IN_OUT: 'Zoom in/out',
+    PREVIOUS: 'Previous (arrow left)',
+    NEXT: 'Next (arrow right)',
     NO_INTERNET_CONNECTION:
-        'please check your internet connection and try again',
+        'Please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
-    UPLOAD_FIRST_PHOTO_DESCRIPTION: 'preserve your first memory with ente',
-    UPLOAD_FIRST_PHOTO: 'preserve',
-    UPLOAD_DROPZONE_MESSAGE: 'drop to backup your files',
-    CONFIRM_DELETE: 'confirm deletion',
-    DELETE_MESSAGE: `the selected files will be permanently deleted and can't be restored `,
-    DELETE_FILE: 'delete files',
-    DELETE: 'delete',
-    MULTI_FOLDER_UPLOAD: 'multiple folders detected',
-    UPLOAD_STRATEGY_CHOICE: 'would you like to upload them into',
-    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'a single album',
+    UPLOAD_FIRST_PHOTO_DESCRIPTION: () => (
+        <>
+            Preserve your first memory with <strong> ente </strong>
+        </>
+    ),
+    UPLOAD_FIRST_PHOTO: 'Preserve',
+    UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
+    TRASH_FILES_TITLE: 'Delete files?',
+    DELETE_FILES_TITLE: 'Delete immediately?',
+    DELETE_FILES_MESSAGE:
+        'Selected files will be permanently deleted from your ente account.',
+    DELETE_FILE: 'Delete files',
+    DELETE: 'Delete',
+    MULTI_FOLDER_UPLOAD: 'Multiple folders detected',
+    UPLOAD_STRATEGY_CHOICE: 'Would you like to upload them into',
+    UPLOAD_STRATEGY_SINGLE_COLLECTION: 'A single album',
     OR: 'or',
-    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'separate albums',
+    UPLOAD_STRATEGY_COLLECTION_PER_FOLDER: 'Separate albums',
     SESSION_EXPIRED_MESSAGE:
-        'your session has expired, please login again to continue',
-    SESSION_EXPIRED: 'session expired',
-    SYNC_FAILED: 'failed to sync with server, please refresh this page',
+        'Your session has expired, please login again to continue',
+    SESSION_EXPIRED: 'Session expired',
+    SYNC_FAILED: 'Failed to sync with server, please refresh this page',
     PASSWORD_GENERATION_FAILED:
-        "your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
-    CHANGE_PASSWORD: 'change password',
-    GO_BACK: 'go back',
-    DOWNLOAD_RECOVERY_KEY: 'recovery key',
-    SAVE_LATER: 'save later',
-    SAVE: 'save',
+        "Your browser was unable to generate a strong key that meets ente's encryption standards, please try using the mobile app or another browser",
+    CHANGE_PASSWORD: 'Change password',
+    GO_BACK: 'Go back',
+    RECOVERY_KEY: 'Recovery key',
+    SAVE_LATER: 'Do this later',
+    SAVE: 'Save Key',
     RECOVERY_KEY_DESCRIPTION:
-        'if you forget your password, the only way you can recover your data is with this key',
+        'If you forget your password, the only way you can recover your data is with this key.',
     RECOVER_KEY_GENERATION_FAILED:
-        'recovery code could not be generated, please try again',
+        'Recovery code could not be generated, please try again',
     KEY_NOT_STORED_DISCLAIMER:
-        "we don't store this key, so please save this in a safe place",
-    RECOVERY_KEY_FILENAME: 'ente-recovery-key.txt',
-    FORGOT_PASSWORD: 'forgot password?',
-    RECOVER_ACCOUNT: 'recover account',
-    RETURN_RECOVERY_KEY_HINT: 'recovery key',
-    RECOVER: 'recover',
-    NO_RECOVERY_KEY: 'no recovery key?',
-    INCORRECT_RECOVERY_KEY: 'incorrect recovery key',
-    SORRY: 'sorry',
+        "We don't store this key, so please save this in a safe place",
+    FORGOT_PASSWORD: 'Forgot password',
+    RECOVER_ACCOUNT: 'Recover account',
+    RECOVERY_KEY_HINT: 'Recovery key',
+    RECOVER: 'Recover',
+    NO_RECOVERY_KEY: 'No recovery key?',
+    INCORRECT_RECOVERY_KEY: 'Incorrect recovery key',
+    SORRY: 'Sorry',
     NO_RECOVERY_KEY_MESSAGE:
-        'due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
+        'Due to the nature of our end-to-end encryption protocol, your data cannot be decrypted without your password or recovery key',
     NO_TWO_FACTOR_RECOVERY_KEY_MESSAGE: () => (
         <>
-            please drop an email to{' '}
+            Please drop an email to{' '}
             <a href="mailto:support@ente.io">support@ente.io</a> from your
             registered email address
         </>
     ),
-    CONTACT_SUPPORT: 'contact support',
-    REQUEST_FEATURE: 'request feature',
     ENABLE_ML_SEARCH: 'enable ML Search beta',
     DISABLE_ML_SEARCH: 'disable ML Search beta',
     ENABLE_ML_SEARCH_MESSAGE:
@@ -197,40 +202,42 @@ const englishConstants = {
         'Can not enable on-device machine learning and people search. ' +
         'We only support latest chrome desktop and ente desktop for this Beta release.',
     ML_DEBUG: 'ML Debug',
-    SUPPORT: 'support',
-    CONFIRM: 'confirm',
-    SKIP: 'skip',
-    CANCEL: 'cancel',
-    LOGOUT: 'logout',
-    DELETE_ACCOUNT: 'delete account',
+    CONTACT_SUPPORT: 'Contact support',
+    REQUEST_FEATURE: 'Request Feature',
+    SUPPORT: 'Support',
+    CONFIRM: 'Confirm',
+    SKIP_SUBSCRIPTION_PURCHASE: 'Continue with free plan',
+    CANCEL: 'Cancel',
+    LOGOUT: 'Logout',
+    DELETE_ACCOUNT: 'Delete account',
     DELETE_ACCOUNT_MESSAGE: () => (
         <>
             <p>
-                please send an email to{' '}
-                <a href="mailto:account-deletion@ente.io">
+                Please send an email to{' '}
+                <Link href="mailto:account-deletion@ente.io">
                     account-deletion@ente.io
-                </a>{' '}
+                </Link>{' '}
                 from your registered email address.{' '}
             </p>
-            your request will be processed within 72 hours.
+            <p>Your request will be processed within 72 hours.</p>
         </>
     ),
-    LOGOUT_MESSAGE: 'sure you want to logout?',
-    CHANGE: 'change',
-    CHANGE_EMAIL: 'change email?',
-    OK: 'ok',
+    LOGOUT_MESSAGE: 'Are you sure you want to logout?',
+    CHANGE: 'Change',
+    CHANGE_EMAIL: 'Change email',
+    OK: 'Ok',
     SUCCESS: 'success',
-    ERROR: 'error',
-    MESSAGE: 'message',
+    ERROR: 'Error',
+    MESSAGE: 'Message',
     INSTALL_MOBILE_APP: () => (
         <>
-            install our{' '}
+            Install our{' '}
             <a
                 href="https://play.google.com/store/apps/details?id=io.ente.photos"
                 target="_blank"
                 style={{ color: '#51cd7c' }}
                 rel="noreferrer">
-                android
+                Android
             </a>{' '}
             or{' '}
             <a
@@ -238,167 +245,174 @@ const englishConstants = {
                 style={{ color: '#51cd7c' }}
                 target="_blank"
                 rel="noreferrer">
-                ios app{' '}
+                iOS app{' '}
             </a>
             to automatically backup all your photos
         </>
     ),
-    DOWNLOAD_APP_MESSAGE: () => (
-        <>
-            <p>
-                sorry, this operation is currently only supported on our desktop
-                app
-            </p>
-        </>
-    ),
-    DOWNLOAD_APP: 'download desktop app',
-    EXPORT: 'export data',
+    DOWNLOAD_APP_MESSAGE:
+        'Sorry, this operation is currently only supported on our desktop app',
+    DOWNLOAD_APP: 'Download desktop app',
+    EXPORT: 'Export Data',
 
     // ========================
     // Subscription
     // ========================
-    SUBSCRIBE: 'subscribe',
-    SUBSCRIPTION_PLAN: 'subscription plan',
-    USAGE_DETAILS: 'usage',
-    MANAGE: 'manage',
-    MANAGEMENT_PORTAL: 'manage payment method',
-    CHOOSE_PLAN: 'choose your subscription plan',
-    MANAGE_PLAN: 'manage your subscription',
-    CHOOSE_PLAN_BTN: 'choose plan',
+    SUBSCRIPTION: 'Subscription',
+    SUBSCRIBE: 'Subscribe',
+    SUBSCRIPTION_PLAN: 'Subscription plan',
+    USAGE_DETAILS: 'Usage',
+    MANAGE: 'Manage',
+    MANAGEMENT_PORTAL: 'Manage payment method',
+    MANAGE_FAMILY_PORTAL: 'Manage family',
+    LEAVE_FAMILY_PLAN: 'Leave family plan',
+    LEAVE: 'Leave',
+    LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
+    CHOOSE_PLAN: 'Choose your plan',
+    MANAGE_PLAN: 'Manage your subscription',
+    ACTIVE: 'Active',
 
-    OFFLINE_MSG: 'you are offline, cached memories are being shown',
+    OFFLINE_MSG: 'You are offline, cached memories are being shown',
 
     FREE_SUBSCRIPTION_INFO: (expiryTime) => (
         <>
-            <p>
-                you are on the <strong>free</strong> plan that expires on{' '}
-                {dateString(expiryTime)}
-            </p>
+            You are on the <strong>free</strong> plan that expires on{' '}
+            {dateString(expiryTime)}
         </>
     ),
+
+    FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
+
     RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
-        <p>your subscription will renew on {dateString(expiryTime)}</p>
+        <>Renews on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
-        <>
-            <p>
-                your subscription will be cancelled on {dateString(expiryTime)}
-            </p>
-        </>
+        <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
-    USAGE_INFO: (usage, quota) => (
-        <p>
-            you have used {usage} out of your {quota} quota
-        </p>
-    ),
-
+    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: `You have exceeded your storage quota, please upgrade your plan.`,
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
-            <p>we've received your payment</p>
-            your subscription is valid till{' '}
-            <strong>{dateString(expiryTime)}</strong>
+            <p>We've received your payment</p>
+            <p>
+                your subscription is valid till{' '}
+                <strong>{dateString(expiryTime)}</strong>
+            </p>
         </>
     ),
     SUBSCRIPTION_PURCHASE_CANCELLED:
-        'your purchase was canceled, please try again if you want to subscribe',
+        'Your purchase was canceled, please try again if you want to subscribe',
     SUBSCRIPTION_VERIFICATION_FAILED:
-        'we were not able to verify your purchase, verification can take few hours',
+        'We were not able to verify your purchase, verification can take few hours',
     SUBSCRIPTION_PURCHASE_FAILED:
-        'subscription purchase failed , please try again',
+        'Subscription purchase failed , please try again',
     SUBSCRIPTION_UPDATE_FAILED:
-        'subscription updated failed , please try again',
+        'Subscription updated failed , please try again',
     UPDATE_PAYMENT_METHOD_MESSAGE:
-        'we are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
+        'We are sorry, payment failed when we tried to charge your card, please update your payment method and try again',
     STRIPE_AUTHENTICATION_FAILED:
-        'we are unable to authenticate your payment method. please choose a different payment method and try again',
-    UPDATE_PAYMENT_METHOD: 'update payment method',
-    MONTHLY: 'monthly',
-    YEARLY: 'yearly',
-    UPDATE_SUBSCRIPTION_MESSAGE: 'are you sure you want to change your plan?',
-    UPDATE_SUBSCRIPTION: 'change plan',
+        'We are unable to authenticate your payment method. please choose a different payment method and try again',
+    UPDATE_PAYMENT_METHOD: 'Update payment method',
+    MONTHLY: 'Monthly',
+    YEARLY: 'Yearly',
+    UPDATE_SUBSCRIPTION_MESSAGE: 'Are you sure you want to change your plan?',
+    UPDATE_SUBSCRIPTION: 'Change plan',
 
-    CONFIRM_CANCEL_SUBSCRIPTION: 'confirm unsubscription',
-    CANCEL_SUBSCRIPTION: 'unsubscribe',
+    CANCEL_SUBSCRIPTION: 'Cancel subscription',
     CANCEL_SUBSCRIPTION_MESSAGE: () => (
         <>
             <p>
-                all of your data will be deleted from our servers at the end of
+                All of your data will be deleted from our servers at the end of
                 this billing period.
             </p>
-            <p>are you sure that you want to unsubscribe?</p>
+            <p>are you sure that you want to cancel your subscription?</p>
         </>
     ),
-    SUBSCRIPTION_CANCEL_FAILED: 'failed to cancel subscription',
-    SUBSCRIPTION_CANCEL_SUCCESS: 'subscription successfully canceled',
+    SUBSCRIPTION_CANCEL_FAILED: 'Failed to cancel subscription',
+    SUBSCRIPTION_CANCEL_SUCCESS: 'Subscription canceled successfully',
 
-    ACTIVATE_SUBSCRIPTION: 'reactivate subscription',
-    CONFIRM_ACTIVATE_SUBSCRIPTION: 'confirm subscription activation',
+    ACTIVATE_SUBSCRIPTION: 'Reactivate subscription',
+    CONFIRM_ACTIVATE_SUBSCRIPTION: 'Activate subscription ',
     ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
-        `once reactivated, you will be billed on ${dateString(expiryTime)}`,
-    SUBSCRIPTION_ACTIVATE_SUCCESS: 'subscription successfully activated',
-    SUBSCRIPTION_ACTIVATE_FAILED: 'failed to reactivate subscription renewals',
+        `Once reactivated, you will be billed on ${dateString(expiryTime)}`,
+    SUBSCRIPTION_ACTIVATE_SUCCESS: 'Subscription activated successfully ',
+    SUBSCRIPTION_ACTIVATE_FAILED: 'Failed to reactivate subscription renewals',
 
-    SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'thank you',
+    SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'Thank you',
     CANCEL_SUBSCRIPTION_ON_MOBILE:
-        'please cancel your subscription from the mobile app to activate a subscription here',
-    RENAME: 'rename',
-    RENAME_COLLECTION: 'rename album',
-    CONFIRM_DELETE_COLLECTION: 'confirm album deletion',
-    DELETE_COLLECTION: 'delete album',
-    DELETE_COLLECTION_FAILED: 'album deletion failed, please try again',
-    DELETE_COLLECTION_MESSAGE: () => (
+        'Please cancel your subscription from the mobile app to activate a subscription here',
+    PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE: () => (
         <>
-            <p>are you sure you want to delete this album?</p>
-            <p>
-                all files that are unique to this album will be moved to trash
-            </p>
+            Please contact us at{' '}
+            <a href="mailto:paypal@ente.io">paypal@ente.io</a> to manage your
+            subscription
         </>
     ),
-    SHARE: 'share',
-    SHARE_COLLECTION: 'share album',
-    SHARE_WITH_PEOPLE: 'share with your loved ones',
-    SHAREES: 'shared with',
-    ZERO_SHAREES: () => (
-        <>
-            <h6>currently shared with no one 😔</h6>
-            <div style={{ marginTop: '16px' }}>
-                <em style={{ color: '#3c3c3c' }}>
-                    memories are fonder when shared
-                </em>
-            </div>
-        </>
-    ),
-    PUBLIC_URL: 'public link',
-    SHARE_WITH_SELF: 'oops, you cannot share with yourself',
+    PAYPAL_MANAGE_NOT_SUPPORTED: 'Manage paypal plan',
+    RENAME: 'Rename',
+    RENAME_COLLECTION: 'Rename album',
+    DELETE_COLLECTION_TITLE: 'Delete album?',
+    DELETE_COLLECTION: 'Delete album',
+    DELETE_COLLECTION_FAILED: 'Album deletion failed, please try again',
+    DELETE_COLLECTION_MESSAGE:
+        'Files that are unique to this album will be moved to trash, and this album would be deleted.',
+    SHARE: 'Share',
+    SHARE_COLLECTION: 'Share album',
+    SHARE_WITH_PEOPLE: 'Share with your loved ones',
+    SHAREES: 'Shared with',
+    PUBLIC_URL: 'Public link',
+    SHARE_WITH_SELF: 'Oops, you cannot share with yourself',
     ALREADY_SHARED: (email) =>
-        `oops, you're already sharing this with ${email}`,
-    SHARING_BAD_REQUEST_ERROR: 'sharing album not allowed',
-    SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'sharing is disabled for free accounts',
-    CONFIRM_DOWNLOAD_COLLECTION: 'download album',
+        `Oops, you're already sharing this with ${email}`,
+    SHARING_BAD_REQUEST_ERROR: 'Sharing album not allowed',
+    SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'Sharing is disabled for free accounts',
+    CONFIRM_DOWNLOAD_COLLECTION: 'Download album',
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
-            <p>are you sure you want to download the complete album?</p>
-            <p>all files will be queued for download sequentially</p>
+            <p>Are you sure you want to download the complete album?</p>
+            <p>All files will be queued for download sequentially</p>
         </>
     ),
-    DOWNLOAD_COLLECTION_FAILED: 'album downloading failed, please try again',
-    CREATE_ALBUM_FAILED: 'failed to create album , please try again',
-    SEARCH_HINT: () => (
-        <span>try searching for New York, April 14, Christmas...</span>
-    ),
+    ARCHIVED_ALBUM: 'Archived album',
+    DOWNLOAD_COLLECTION_FAILED: 'Album downloading failed, please try again',
+    CREATE_ALBUM_FAILED: 'Failed to create album , please try again',
+
+    SEARCH_RESULTS: 'Search results',
+    SEARCH_HINT: () => <span>Search for location, dates, albums ...</span>,
+    SEARCH_TYPE: (type: SuggestionType) => {
+        switch (type) {
+            case SuggestionType.COLLECTION:
+                return 'Album';
+            case SuggestionType.LOCATION:
+                return 'Location';
+            case SuggestionType.DATE:
+                return 'Date';
+            case SuggestionType.IMAGE:
+            case SuggestionType.VIDEO:
+                return 'File';
+        }
+    },
+    PHOTO_COUNT: (count: number) =>
+        `${
+            count === 1
+                ? `1 memory`
+                : `${formatNumberWithCommas(count)} memories`
+        }`,
     TERMS_AND_CONDITIONS: () => (
-        <p>
+        <Typography variant="body2">
             I agree to the{' '}
-            <a href="https://ente.io/terms" target="_blank" rel="noreferrer">
+            <Link href="https://ente.io/terms" target="_blank" rel="noreferrer">
                 terms
-            </a>{' '}
+            </Link>{' '}
             and{' '}
-            <a href="https://ente.io/privacy" target="_blank" rel="noreferrer">
+            <Link
+                href="https://ente.io/privacy"
+                target="_blank"
+                rel="noreferrer">
                 privacy policy
-            </a>{' '}
-        </p>
+            </Link>{' '}
+        </Typography>
     ),
     CONFIRM_PASSWORD_NOT_SAVED: () => (
         <p>
@@ -413,22 +427,13 @@ const englishConstants = {
             with ente
         </p>
     ),
-    SEARCH_STATS: ({ resultCount, timeTaken }) => (
-        <span>
-            found <span style={{ color: '#51cd7c' }}>{resultCount}</span>{' '}
-            memories ( <span style={{ color: '#51cd7c' }}> {timeTaken}</span>{' '}
-            seconds )
-        </span>
-    ),
-    NOT_FILE_OWNER: 'you cannot delete files in a shared album',
-    ADD_TO_COLLECTION: 'add to album',
-    SELECTED: 'selected',
-    VIDEO_PLAYBACK_FAILED: 'video format not supported',
+    NOT_FILE_OWNER: 'You cannot delete files in a shared album',
+    ADD_TO_COLLECTION: 'Add to album',
+    SELECTED: 'Selected',
+    VIDEO_PLAYBACK_FAILED: 'Video format not supported',
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
-        'this video cannot be played on your browser',
-    METADATA: 'metadata',
-    INFO: 'information',
-    PEOPLE: 'people',
+        'This video cannot be played on your browser',
+    PEOPLE: 'People',
     INDEXING_SCHEDULED: 'indexing is scheduled...',
     ANALYZING_PHOTOS: (nSyncedFiles, nTotalFiles) =>
         `analyzing new photos (${nSyncedFiles} of ${nTotalFiles} done)...`,
@@ -438,19 +443,22 @@ const englishConstants = {
     UNIDENTIFIED_FACES: 'unidentified faces',
     OBJECTS: 'objects',
     TEXT: 'text',
-    FILE_ID: 'file id',
-    FILE_NAME: 'file name',
-    CREATION_TIME: 'creation time',
-    UPDATED_ON: 'updated on',
-    LOCATION: 'location',
+
+    METADATA: 'Metadata',
+    INFO: 'Info',
+    FILE_ID: 'File id',
+    FILE_NAME: 'File name',
+    CREATION_TIME: 'Creation time',
+    UPDATED_ON: 'Updated on',
+    LOCATION: 'Location',
     SHOW_MAP: 'show on map',
-    EXIF: 'exif',
-    DEVICE: 'device',
-    IMAGE_SIZE: 'image size',
-    FLASH: 'flash',
-    FOCAL_LENGTH: 'focal length',
-    APERTURE: 'aperture',
-    ISO: 'iso',
+    EXIF: 'Exif',
+    DEVICE: 'Device',
+    IMAGE_SIZE: 'Image size',
+    FLASH: 'Flash',
+    FOCAL_LENGTH: 'Focal length',
+    APERTURE: 'Aperture',
+    ISO: 'ISO',
     SHOW_ALL: 'show all',
     LOGIN_TO_UPLOAD_FILES: (count: number) =>
         count === 1
@@ -460,72 +468,69 @@ const englishConstants = {
         count === 1
             ? `1 file received. uploading in a jiffy`
             : `${count} files received. uploading in a jiffy`,
-    TWO_FACTOR: 'two-factor',
-    TWO_FACTOR_AUTHENTICATION: 'two-factor authentication',
+    TWO_FACTOR: 'Two-factor',
+    TWO_FACTOR_AUTHENTICATION: 'Two-factor authentication',
     TWO_FACTOR_QR_INSTRUCTION:
-        'scan the QR code below with your favorite authenticator app',
-    ENTER_CODE_MANUALLY: 'enter the code manually',
+        'Scan the QR code below with your favorite authenticator app',
+    ENTER_CODE_MANUALLY: 'Enter the code manually',
     TWO_FACTOR_MANUAL_CODE_INSTRUCTION:
-        'please enter this code in your favorite authenticator app',
-    SCAN_QR_CODE: 'scan QR code instead',
-    CONTINUE: 'continue',
-    BACK: 'back',
-    ENABLE_TWO_FACTOR: 'enable two-factor',
-    ENABLE: 'enable',
-    LOST_DEVICE: 'lost two-factor device?',
-    INCORRECT_CODE: 'incorrect code',
-    RECOVER_TWO_FACTOR: 'recover two-factor',
+        'Please enter this code in your favorite authenticator app',
+    SCAN_QR_CODE: 'Scan QR code instead',
+    CONTINUE: 'Continue',
+    BACK: 'Back',
+    ENABLE_TWO_FACTOR: 'Enable two-factor',
+    ENABLE: 'Enable',
+    LOST_DEVICE: 'Lost two-factor device',
+    INCORRECT_CODE: 'Incorrect code',
+    RECOVER_TWO_FACTOR: 'Recover two-factor',
     TWO_FACTOR_INFO:
-        'add an additional layer of security by requiring more than your email and password to log in to your account',
-    DISABLE_TWO_FACTOR_HINT: 'disable two-factor authentication',
-    UPDATE_TWO_FACTOR_HINT: 'update your authenticator device',
-    DISABLE: 'disable',
-    RECONFIGURE: 'reconfigure',
-    UPDATE_TWO_FACTOR: 'update two-factor',
+        'Add an additional layer of security by requiring more than your email and password to log in to your account',
+    DISABLE_TWO_FACTOR_LABEL: 'Disable two-factor authentication',
+    UPDATE_TWO_FACTOR_LABEL: 'Update your authenticator device',
+    DISABLE: 'Disable',
+    RECONFIGURE: 'Reconfigure',
+    UPDATE_TWO_FACTOR: 'Update two-factor',
     UPDATE_TWO_FACTOR_MESSAGE:
-        'continuing forward will void any previously configured authenticators',
-    UPDATE: 'update',
-    DISABLE_TWO_FACTOR: 'disable two-factor',
+        'Continuing forward will void any previously configured authenticators',
+    UPDATE: 'Update',
+    DISABLE_TWO_FACTOR: 'Disable two-factor',
     DISABLE_TWO_FACTOR_MESSAGE:
-        'are you sure you want to disable your two-factor authentication',
-    TWO_FACTOR_SETUP_FAILED: 'failed to setup two factor, please try again',
+        'Are you sure you want to disable your two-factor authentication',
+    TWO_FACTOR_SETUP_FAILED: 'Failed to setup two factor, please try again',
     TWO_FACTOR_SETUP_SUCCESS:
-        'two factor authentication successfully configured',
-    TWO_FACTOR_DISABLE_SUCCESS: 'two factor authentication disabled',
-    TWO_FACTOR_DISABLE_FAILED: 'failed to disable two factor, please try again',
-    EXPORT_DATA: 'export data',
-    SELECT_FOLDER: 'select folder',
-    DESTINATION: 'destination',
-    TOTAL_EXPORT_SIZE: 'total export size',
-    START: 'start',
-    EXPORT_IN_PROGRESS: 'export in progress...',
-    PAUSE: 'pause',
-    RESUME: 'resume',
-    MINIMIZE: 'minimize',
-    LAST_EXPORT_TIME: 'last export time',
-    SUCCESSFULLY_EXPORTED_FILES: 'successful exports',
-    FAILED_EXPORTED_FILES: 'failed exports',
-    EXPORT_AGAIN: 'resync',
-    RETRY_EXPORT_: 'retry failed exports',
-    LOCAL_STORAGE_NOT_ACCESSIBLE: 'local storage not accessible',
+        'Two factor authentication successfully configured',
+    TWO_FACTOR_DISABLE_SUCCESS: 'Two factor authentication disabled',
+    TWO_FACTOR_DISABLE_FAILED: 'Failed to disable two factor, please try again',
+    EXPORT_DATA: 'Export data',
+    SELECT_FOLDER: 'Select folder',
+    DESTINATION: 'Destination',
+    EXPORT_SIZE: 'Export size',
+    START: 'Start',
+    EXPORT_IN_PROGRESS: 'Export in progress...',
+    PAUSE: 'Pause',
+    RESUME: 'Resume',
+    MINIMIZE: 'Minimize',
+    LAST_EXPORT_TIME: 'Last export time',
+    SUCCESSFULLY_EXPORTED_FILES: 'Successful exports',
+    FAILED_EXPORTED_FILES: 'Failed exports',
+    EXPORT_AGAIN: 'Resync',
+    RETRY_EXPORT_: 'Tetry failed exports',
+    LOCAL_STORAGE_NOT_ACCESSIBLE: 'Local storage not accessible',
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
-        'your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
-    RETRY: 'retry',
-    UPDATE_EMAIL: 'change email',
-    SEND_OTT: 'send otp',
-    EMAIl_ALREADY_OWNED: 'email already taken',
-    EMAIL_UDPATE_SUCCESSFUL: 'your email has been udpated successfully',
-    UPLOAD_FAILED: 'upload failed',
+        'Your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
+    RETRY: 'Retry',
+    SEND_OTT: 'Send OTP',
+    EMAIl_ALREADY_OWNED: 'Email already taken',
+    EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
+    UPLOAD_FAILED: 'Upload failed',
     ETAGS_BLOCKED: (url: string) => (
         <>
-            <p>
-                {' '}
-                we were unable to upload the following files because of your
+            <Box mb={1}>
+                We were unable to upload the following files because of your
                 browser configuration.
-            </p>
-            <p>
-                {' '}
-                please disable any addons that might be preventing ente from
+            </Box>
+            <Box>
+                Please disable any addons that might be preventing ente from
                 using <code>eTags</code> to upload large files, or use our{' '}
                 <a
                     href={url}
@@ -535,135 +540,163 @@ const englishConstants = {
                     desktop app
                 </a>{' '}
                 for a more reliable import experience.
-            </p>
+            </Box>
         </>
     ),
 
-    RETRY_FAILED: 'retry failed uploads',
-    FAILED_UPLOADS: 'failed uploads ',
-    SKIPPED_FILES: 'ignored uploads',
-    UNSUPPORTED_FILES: 'unsupported files',
-    SUCCESSFUL_UPLOADS: 'successful uploads',
+    LIVE_PHOTOS_DETECTED:
+        'The photo and video files from your Live Photos have been merged into a single ELP file',
+
+    RETRY_FAILED: 'Retry failed uploads',
+    FAILED_UPLOADS: 'Failed uploads ',
+    SKIPPED_FILES: 'Ignored uploads',
+    THUMBNAIL_GENERATION_FAILED_UPLOADS: 'Thumbnail generation failed',
+    UNSUPPORTED_FILES: 'Unsupported files',
+    SUCCESSFUL_UPLOADS: 'Successful uploads',
     SKIPPED_INFO:
-        'skipped these as there are files with matching names in the same album',
+        'Skipped these as there are files with matching names in the same album',
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
-    BLOCKED_UPLOADS: 'blocked uploads',
-    INPROGRESS_UPLOADS: 'uploads in progress',
-    TOO_LARGE_UPLOADS: 'large files',
-    LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'insufficient storage',
+    BLOCKED_UPLOADS: 'Blocked uploads',
+    INPROGRESS_UPLOADS: 'Uploads in progress',
+    TOO_LARGE_UPLOADS: 'Large files',
+    LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'Insufficient storage',
     LARGER_THAN_AVAILABLE_STORAGE_INFO:
-        'these files were not uploaded as they exceed the maximum size limit for your storage plan',
+        'These files were not uploaded as they exceed the maximum size limit for your storage plan',
     TOO_LARGE_INFO:
-        'these files were not uploaded as they exceed our maximum file size limit',
-    UPLOAD_TO_COLLECTION: 'upload to album',
-    ARCHIVE: 'archive',
-    ALL: 'all',
-    MOVE_TO_COLLECTION: 'move to album',
-    UNARCHIVE: 'un-archive',
-    MOVE: 'move',
-    ADD: 'add',
-    SORT: 'sort',
-    REMOVE: 'remove',
-    CONFIRM_REMOVE: 'confirm removal',
-    TRASH: 'trash',
-    MOVE_TO_TRASH: 'move to trash',
-    TRASH_MESSAGE:
-        'the selected files will be removed from all albums and moved to trash ',
-    DELETE_PERMANENTLY: 'delete permanently',
-    RESTORE: 'restore',
-    CONFIRM_RESTORE: 'confirm restoration',
-    RESTORE_MESSAGE: 'restore selected files ?',
-    RESTORE_TO_COLLECTION: 'restore to album',
-    AUTOMATIC_BIN_DELETE_MESSAGE: (relativeTime: string) =>
-        `permanently deleted ${relativeTime}`,
-    EMPTY_TRASH: 'empty trash',
-    CONFIRM_EMPTY_TRASH: 'empty trash?',
+        'These files were not uploaded as they exceed our maximum file size limit',
+    THUMBNAIL_GENERATION_FAILED_INFO:
+        'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
+    UPLOAD_TO_COLLECTION: 'Upload to album',
+    ARCHIVE: 'Hide',
+    ARCHIVE_SECTION_NAME: 'Hidden',
+    ALL_SECTION_NAME: 'All',
+    MOVE_TO_COLLECTION: 'Move to album',
+    UNARCHIVE: 'Unhide',
+    MOVE: 'Move',
+    ADD: 'Add',
+    SORT: 'Sort',
+    REMOVE: 'Remove',
+    CONFIRM_REMOVE: 'Confirm removal',
+    TRASH: 'Trash',
+    MOVE_TO_TRASH: 'Move to trash',
+    TRASH_FILES_MESSAGE:
+        'Selected files will be removed from all albums and moved to trash.',
+    DELETE_PERMANENTLY: 'Delete permanently',
+    RESTORE: 'Restore',
+    CONFIRM_RESTORE: 'Confirm restoration',
+    RESTORE_MESSAGE: 'Restore selected files ?',
+    RESTORE_TO_COLLECTION: 'Restore to album',
+    EMPTY_TRASH: 'Empty trash',
+    EMPTY_TRASH_TITLE: 'Empty trash?',
     EMPTY_TRASH_MESSAGE:
-        'all files will be permanently removed from your ente account',
+        'These files will be permanently deleted from your ente account.',
 
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
-            <p>are you sure you want to remove these files from the album?</p>
+            <p>Are you sure you want to remove these files from the album?</p>
             <p>
-                all files that are unique to this album will be moved to trash
+                All files that are unique to this album will be moved to trash
             </p>
         </>
     ),
-    SORT_BY_LATEST_PHOTO: 'recent photo',
-    SORT_BY_MODIFICATION_TIME: 'last updated',
-    SORT_BY_COLLECTION_NAME: 'album name',
-    FIX_LARGE_THUMBNAILS: 'compress thumbnails',
-    THUMBNAIL_REPLACED: 'thumbnails compressed',
-    FIX_THUMBNAIL: 'compress',
-    FIX_THUMBNAIL_LATER: 'compress later',
+
+    SORT_BY_CREATION_TIME_ASCENDING: 'Oldest',
+    SORT_BY_CREATION_TIME_DESCENDING: 'Newest',
+    SORT_BY_UPDATION_TIME_DESCENDING: 'Last updated',
+    SORT_BY_NAME: 'Name',
+    COMPRESS_THUMBNAILS: 'Compress thumbnails',
+    THUMBNAIL_REPLACED: 'Thumbnails compressed',
+    FIX_THUMBNAIL: 'Compress',
+    FIX_THUMBNAIL_LATER: 'Compress later',
     REPLACE_THUMBNAIL_NOT_STARTED: () => (
         <>
-            some of your videos thumbnails can be compressed to save space.
+            Some of your videos thumbnails can be compressed to save space.
             would you like ente to compress them?
         </>
     ),
     REPLACE_THUMBNAIL_COMPLETED: () => (
-        <>successfully compressed all thumbnails</>
+        <>Successfully compressed all thumbnails</>
     ),
     REPLACE_THUMBNAIL_NOOP: () => (
-        <>you have no thumbnails that can be compressed further</>
+        <>You have no thumbnails that can be compressed further</>
     ),
     REPLACE_THUMBNAIL_COMPLETED_WITH_ERROR: () => (
-        <>could not compress some of your thumbnails, please retry</>
+        <>Could not compress some of your thumbnails, please retry</>
     ),
-    FIX_CREATION_TIME: 'fix time',
-    FIX_CREATION_TIME_IN_PROGRESS: 'fixing time',
-    CREATION_TIME_UPDATED: `file time updated`,
+    FIX_CREATION_TIME: 'Fix time',
+    FIX_CREATION_TIME_IN_PROGRESS: 'Fixing time',
+    CREATION_TIME_UPDATED: `File time updated`,
 
     UPDATE_CREATION_TIME_NOT_STARTED: () => (
-        <>select the option you want to use</>
+        <>Select the option you want to use</>
     ),
-    UPDATE_CREATION_TIME_COMPLETED: () => <>successfully updated all files</>,
+    UPDATE_CREATION_TIME_COMPLETED: () => <>Successfully updated all files</>,
 
     UPDATE_CREATION_TIME_COMPLETED_WITH_ERROR: () => (
-        <>file time updation failed for some files, please retry</>
+        <>File time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
 
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
-    CUSTOM_TIME: 'custom time',
-    REOPEN_PLAN_SELECTOR_MODAL: 're-open plans',
-    OPEN_PLAN_SELECTOR_MODAL_FAILED: 'failed to open plans',
-    COMMENT: 'comment',
+    CUSTOM_TIME: 'Custom time',
+    REOPEN_PLAN_SELECTOR_MODAL: 'Re-open plans',
+    OPEN_PLAN_SELECTOR_MODAL_FAILED: 'Failed to open plans',
+    COMMENT: 'Comment',
     ABUSE_REPORT_DESCRIPTION:
-        'Note: Submitting this report will notify the album owner.',
+        'Submitting this report will notify the album owner.',
     OTHER_REASON_REQUIRES_COMMENTS:
-        'reason = other, require  a mandatory comment ',
-    REPORT_SUBMIT_SUCCESS_CONTENT: 'your report has been submitted',
-    REPORT_SUBMIT_SUCCESS_TITLE: 'report sent',
-    REPORT_SUBMIT_FAILED: 'failed to sent report, try again',
-    INSTALL: 'install',
-    ALBUM_URL: 'album url',
-    PUBLIC_SHARING: 'link sharing',
+        'Reason = other, require  a mandatory comment ',
+    REPORT_SUBMIT_SUCCESS_CONTENT: 'Your report has been submitted',
+    REPORT_SUBMIT_SUCCESS_TITLE: 'Report sent',
+    REPORT_SUBMIT_FAILED: 'Failed to sent report, try again',
+    INSTALL: 'Install',
+    ALBUM_URL: 'Album url',
+    PUBLIC_SHARING: 'Public link',
     NOT_FOUND: '404 - not found',
-    DISABLE_PUBLIC_SHARING: "'disable public sharing",
+    LINK_EXPIRED: 'This link has either expired or been disabled!',
+    MANAGE_LINK: 'Manage link',
+    LINK_TOO_MANY_REQUESTS: 'This album is too popular for us to handle!',
+    DISABLE_PUBLIC_SHARING: "'Disable public sharing",
     DISABLE_PUBLIC_SHARING_MESSAGE:
-        'are you sure you want to disable public sharing?',
-    ABUSE_REPORT: 'abuse report',
-    ABUSE_REPORT_BUTTON_TEXT: 'report abuse?',
-    MALICIOUS_CONTENT: 'contains malicious content',
+        'Are you sure you want to disable public sharing?',
+    FILE_DOWNLOAD: 'Allow downloads',
+    LINK_PASSWORD_LOCK: 'Password lock',
+    LINK_DEVICE_LIMIT: 'Device limit',
+    LINK_EXPIRY: 'Link expiry',
+    LINK_EXPIRY_NEVER: 'Never',
+    DISABLE_FILE_DOWNLOAD: 'Disable download',
+    DISABLE_FILE_DOWNLOAD_MESSAGE: () => (
+        <>
+            <p>
+                Are you sure that you want to disable the download button for
+                files?{' '}
+            </p>{' '}
+            <p>
+                Viewers can still take screenshots or save a copy of your photos
+                using external tools'{' '}
+            </p>
+        </>
+    ),
+    ABUSE_REPORT: 'Abuse report',
+    ABUSE_REPORT_BUTTON_TEXT: 'Report abuse?',
+    MALICIOUS_CONTENT: 'Contains malicious content',
     COPYRIGHT:
-        'infringes on the copyright of someone I am authorized to represent',
-    ENTER_EMAIL_ADDRESS: 'email*',
-    SELECT_REASON: 'select a reason*',
-    ENTER_FULL_NAME: 'full name*',
+        'Infringes on the copyright of someone I am authorized to represent',
+    ENTER_EMAIL_ADDRESS: 'Email*',
+    SELECT_REASON: 'Select a reason*',
+    ENTER_FULL_NAME: 'Full name*',
     ENTER_DIGITAL_SIGNATURE:
-        'typing your full name in this box will act as your digital signature*',
+        'Typing your full name in this box will act as your digital signature*',
     ENTER_ON_BEHALF_OF: 'I am reporting on behalf of*',
-    ENTER_ADDRESS: 'address*',
-    ENTER_JOB_TITLE: 'job title*',
-    ENTER_CITY: 'city*',
-    ENTER_PHONE: 'phone number*',
+    ENTER_ADDRESS: 'Address*',
+    ENTER_JOB_TITLE: 'Job title*',
+    ENTER_CITY: 'City*',
+    ENTER_PHONE: 'Phone number*',
 
-    ENTER_STATE: 'state*',
-    ENTER_POSTAL_CODE: 'zip/postal code*',
-    ENTER_COUNTRY: 'country*',
+    ENTER_STATE: 'State*',
+    ENTER_POSTAL_CODE: 'Zip/postal code*',
+    ENTER_COUNTRY: 'Country*',
     JUDICIAL_DESCRIPTION: () => (
         <>
             By checking the following boxes, I state{' '}
@@ -673,6 +706,95 @@ const englishConstants = {
     TERM_1: 'I hereby state that I have a good faith belief that the sharing of copyrighted material at the location above is not authorized by the copyright owner, its agent, or the law (e.g., as a fair use). ',
     TERM_2: 'I hereby state that the information in this Notice is accurate and, under penalty of perjury, that I am the owner, or authorized to act on behalf of, the owner, of the copyright or of an exclusive right under the copyright that is allegedly infringed. ',
     TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
+    PRESERVED_BY: 'preserved by',
+    ENTE_IO: 'ente.io',
+    LIVE: 'LIVE',
+    DISABLE_PASSWORD: 'Disable password lock',
+    DISABLE_PASSWORD_MESSAGE:
+        'Are you sure that you want to disable the password lock?',
+    PASSWORD_LOCK: 'Password lock',
+    LOCK: 'Lock',
+    DOWNLOAD_UPLOAD_LOGS: 'Debug logs',
+    CHOOSE_UPLOAD_TYPE: 'Upload',
+    UPLOAD_FILES: 'File',
+    UPLOAD_DIRS: 'Folder',
+    UPLOAD_GOOGLE_TAKEOUT: 'Google takeout',
+    CANCEL_UPLOADS: 'Cancel uploads',
+    DEDUPLICATE_FILES: 'Deduplicate files',
+    NO_DUPLICATES_FOUND: "You've no duplicate files that can be cleared",
+    CLUB_BY_CAPTURE_TIME: 'Club by capture time',
+    FILES: 'Files',
+    EACH: 'Each',
+    DEDUPLICATION_LOGIC_MESSAGE: (captureTime: boolean) => (
+        <>
+            The following files were clubbed based on their sizes
+            {captureTime && ' and capture time'}, please review and delete items
+            you believe are duplicates{' '}
+        </>
+    ),
+    STOP_ALL_UPLOADS_MESSAGE:
+        'Are you sure that you want to stop all the uploads in progress?',
+    STOP_UPLOADS_HEADER: 'Stop uploads?',
+    YES_STOP_UPLOADS: 'Yes, stop uploads',
+    ALBUMS: 'Albums',
+    NEW: 'New',
+    VIEW_ALL_ALBUMS: 'View all Albums',
+    ALL_ALBUMS: 'All Albums',
+    ENDS: 'Ends',
+    ENTER_TWO_FACTOR_OTP: 'Enter the 6-digit code from your authenticator app.',
+    CREATE_ACCOUNT: 'Create account',
+    COPIED: 'Copied',
+    CANVAS_BLOCKED_TITLE: 'Unable to generate thumbnail',
+    CANVAS_BLOCKED_MESSAGE: () => (
+        <>
+            <p>
+                It looks like your browser has disabled access to canvas, which
+                is necessary to generate thumbnails for your photos
+            </p>
+            <p>
+                Please enable access to your browser's canvas, or check out our
+                desktop app
+            </p>
+        </>
+    ),
+    UPGRADE_NOW: 'Upgrade now',
+    RENEW_NOW: 'Renew now',
+    STORAGE: 'Storage',
+    USED: 'used',
+    YOU: 'You',
+    FAMILY: 'Family',
+    FREE: 'free',
+    OF: 'of',
+    MONTH_SHORT: 'mo',
+    YEAR: 'year',
+    FAMILY_PLAN: 'Family plan',
+    DOWNLOAD_LOGS: 'Download logs',
+    DOWNLOAD_LOGS_MESSAGE: () => (
+        <>
+            <p>
+                This will download debug logs, which you can email to us to help
+                debug your issue.
+            </p>
+            <p>
+                Please note that file names will be included to help track
+                issues with specific files.
+            </p>
+        </>
+    ),
+    CHANGE_FOLDER: 'Change Folder',
+    TWO_MONTHS_FREE: 'Get 2 months free on yearly plans',
+    GB: 'GB',
+    POPULAR: 'Popular',
+    FREE_PLAN_OPTION_LABEL: 'Continue with free trial',
+    FREE_PLAN_DESCRIPTION: '1 GB for 1 year',
+    CURRENT_USAGE: (usage) => (
+        <>
+            Current usage is <strong>{usage}</strong>
+        </>
+    ),
+    WEAK_DEVICE:
+        "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
+    DRAG_AND_DROP_HINT: 'Or drag and drop into the ente window',
 };
 
 export default englishConstants;

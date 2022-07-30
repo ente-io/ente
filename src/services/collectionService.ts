@@ -4,26 +4,41 @@ import localForage from 'utils/storage/localForage';
 
 import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
-import { SetDialogMessage } from 'components/MessageDialog';
-import constants from 'utils/strings/constants';
 import { getPublicKey } from './userService';
 import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import { sortFiles } from 'utils/file';
+import { sortFiles, sortFilesIntoCollections } from 'utils/file';
 import {
     Collection,
-    CollectionAndItsLatestFile,
+    CollectionLatestFiles,
     AddToCollectionRequest,
     MoveToCollectionRequest,
     EncryptedFileKey,
     RemoveFromCollectionRequest,
     CreatePublicAccessTokenRequest,
     PublicURL,
+    UpdatePublicURL,
+    CollectionSummaries,
+    CollectionSummary,
+    CollectionFilesCount,
 } from 'types/collection';
-import { COLLECTION_SORT_BY, CollectionType } from 'constants/collection';
+import {
+    COLLECTION_SORT_BY,
+    CollectionType,
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+    COLLECTION_SORT_ORDER,
+    ALL_SECTION,
+    CollectionSummaryType,
+} from 'constants/collection';
+import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
+import { EncryptionResult } from 'types/upload';
+import constants from 'utils/strings/constants';
+import { IsArchived } from 'utils/magicMetadata';
+import { User } from 'types/user';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -62,6 +77,14 @@ const getCollectionWithSecrets = async (
             collection.nameDecryptionNonce,
             decryptedKey
         ));
+
+    if (collection.magicMetadata?.data) {
+        collection.magicMetadata.data = await worker.decryptMetadata(
+            collection.magicMetadata.data,
+            collection.magicMetadata.header,
+            decryptedKey
+        );
+    }
     return {
         ...collection,
         key: decryptedKey,
@@ -145,7 +168,7 @@ export const syncCollections = async () => {
         }
     });
 
-    let collections: Collection[] = [];
+    const collections: Collection[] = [];
     let updationTime = await localForage.getItem<number>(
         COLLECTION_UPDATION_TIME
     );
@@ -156,11 +179,7 @@ export const syncCollections = async () => {
             updationTime = Math.max(updationTime, collection.updationTime);
         }
     }
-    collections = sortCollections(
-        collections,
-        [],
-        COLLECTION_SORT_BY.MODIFICATION_TIME
-    );
+
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
     return collections;
@@ -190,26 +209,32 @@ export const getCollection = async (
     }
 };
 
-export const getCollectionsAndTheirLatestFile = (
-    collections: Collection[],
-    files: EnteFile[]
-): CollectionAndItsLatestFile[] => {
-    const latestFile = new Map<number, EnteFile>();
+export const getCollectionLatestFiles = (
+    files: EnteFile[],
+    archivedCollections: Set<number>
+): CollectionLatestFiles => {
+    const latestFiles = new Map<number, EnteFile>();
 
     files.forEach((file) => {
-        if (!latestFile.has(file.collectionID)) {
-            latestFile.set(file.collectionID, file);
+        if (!latestFiles.has(file.collectionID) && !file.isTrashed) {
+            latestFiles.set(file.collectionID, file);
+        }
+        if (!latestFiles.has(ARCHIVE_SECTION) && IsArchived(file)) {
+            latestFiles.set(ARCHIVE_SECTION, file);
+        }
+        if (!latestFiles.has(TRASH_SECTION) && file.isTrashed) {
+            latestFiles.set(TRASH_SECTION, file);
+        }
+        if (
+            !latestFiles.has(ALL_SECTION) &&
+            !IsArchived(file) &&
+            !file.isTrashed &&
+            !archivedCollections.has(file.collectionID)
+        ) {
+            latestFiles.set(ALL_SECTION, file);
         }
     });
-    const collectionsAndTheirLatestFile: CollectionAndItsLatestFile[] = [];
-
-    for (const collection of collections) {
-        collectionsAndTheirLatestFile.push({
-            collection,
-            file: latestFile.get(collection.id),
-        });
-    }
-    return collectionsAndTheirLatestFile;
+    return latestFiles;
 };
 
 export const getFavItemIds = async (
@@ -274,6 +299,7 @@ export const createCollection = async (
             sharees: null,
             updationTime: null,
             isDeleted: false,
+            magicMetadata: null,
         };
         let createdCollection: Collection = await postCollection(
             newCollection,
@@ -393,8 +419,8 @@ export const restoreToCollection = async (
     }
 };
 export const moveToCollection = async (
-    fromCollectionID: number,
     toCollection: Collection,
+    fromCollectionID: number,
     files: EnteFile[]
 ) => {
     try {
@@ -466,12 +492,7 @@ export const removeFromCollection = async (
     }
 };
 
-export const deleteCollection = async (
-    collectionID: number,
-    syncWithRemote: () => Promise<void>,
-    redirectToAll: () => void,
-    setDialogMessage: SetDialogMessage
-) => {
+export const deleteCollection = async (collectionID: number) => {
     try {
         const token = getToken();
 
@@ -481,16 +502,52 @@ export const deleteCollection = async (
             null,
             { 'X-Auth-Token': token }
         );
-        await syncWithRemote();
-        redirectToAll();
     } catch (e) {
         logError(e, 'delete collection failed ');
-        setDialogMessage({
-            title: constants.ERROR,
-            content: constants.DELETE_COLLECTION_FAILED,
-            close: { variant: 'danger' },
-        });
+        throw e;
     }
+};
+
+export const updateCollectionMagicMetadata = async (collection: Collection) => {
+    const token = getToken();
+    if (!token) {
+        return;
+    }
+
+    const worker = await new CryptoWorker();
+
+    const { file: encryptedMagicMetadata }: EncryptionResult =
+        await worker.encryptMetadata(
+            collection.magicMetadata.data,
+            collection.key
+        );
+
+    const reqBody: UpdateMagicMetadataRequest = {
+        id: collection.id,
+        magicMetadata: {
+            version: collection.magicMetadata.version,
+            count: collection.magicMetadata.count,
+            data: encryptedMagicMetadata.encryptedData as unknown as string,
+            header: encryptedMagicMetadata.decryptionHeader,
+        },
+    };
+
+    await HTTPService.put(
+        `${ENDPOINT}/collections/magic-metadata`,
+        reqBody,
+        null,
+        {
+            'X-Auth-Token': token,
+        }
+    );
+    const updatedCollection: Collection = {
+        ...collection,
+        magicMetadata: {
+            ...collection.magicMetadata,
+            version: collection.magicMetadata.version + 1,
+        },
+    };
+    return updatedCollection;
 };
 
 export const renameCollection = async (
@@ -619,6 +676,29 @@ export const deleteShareableURL = async (collection: Collection) => {
     }
 };
 
+export const updateShareableURL = async (
+    request: UpdatePublicURL
+): Promise<PublicURL> => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return null;
+        }
+        const res = await HTTPService.put(
+            `${ENDPOINT}/collections/share-url`,
+            request,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return res.data.result as PublicURL;
+    } catch (e) {
+        logError(e, 'updateShareableURL failed ');
+        throw e;
+    }
+};
+
 export const getFavCollection = async () => {
     const collections = await getLocalCollections();
     for (const collection of collections) {
@@ -635,60 +715,53 @@ export const getNonEmptyCollections = (
 ) => {
     const nonEmptyCollectionsIds = new Set<number>();
     for (const file of files) {
-        nonEmptyCollectionsIds.add(file.collectionID);
+        if (!file.isTrashed) {
+            nonEmptyCollectionsIds.add(file.collectionID);
+        }
     }
     return collections.filter((collection) =>
         nonEmptyCollectionsIds.has(collection.id)
     );
 };
 
-export function sortCollections(
-    collections: Collection[],
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
+export function sortCollectionSummaries(
+    collectionSummaries: CollectionSummary[],
     sortBy: COLLECTION_SORT_BY
 ) {
-    return moveFavCollectionToFront(
-        collections.sort((collectionA, collectionB) => {
+    return collectionSummaries
+        .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.LATEST_FILE:
+                case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
                     return compareCollectionsLatestFile(
-                        collectionAndTheirLatestFile,
-                        collectionA,
-                        collectionB
+                        b.latestFile,
+                        a.latestFile
                     );
-                case COLLECTION_SORT_BY.MODIFICATION_TIME:
-                    return collectionB.updationTime - collectionA.updationTime;
+                case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
+                    return (
+                        -1 *
+                        compareCollectionsLatestFile(b.latestFile, a.latestFile)
+                    );
+                case COLLECTION_SORT_BY.UPDATION_TIME_DESCENDING:
+                    return b.updationTime - a.updationTime;
                 case COLLECTION_SORT_BY.NAME:
-                    return collectionA.name.localeCompare(collectionB.name);
+                    return a.name.localeCompare(b.name);
             }
         })
-    );
+        .sort(
+            (a, b) =>
+                COLLECTION_SORT_ORDER.get(a.type) -
+                COLLECTION_SORT_ORDER.get(b.type)
+        );
 }
 
-function compareCollectionsLatestFile(
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
-    collectionA: Collection,
-    collectionB: Collection
-) {
-    if (!collectionAndTheirLatestFile?.length) {
-        return 0;
-    }
-    const CollectionALatestFile = getCollectionLatestFile(
-        collectionAndTheirLatestFile,
-        collectionA
-    );
-    const CollectionBLatestFile = getCollectionLatestFile(
-        collectionAndTheirLatestFile,
-        collectionB
-    );
-    if (!CollectionALatestFile || !CollectionBLatestFile) {
-        return 0;
+function compareCollectionsLatestFile(first: EnteFile, second: EnteFile) {
+    if (!first) {
+        return 1;
+    } else if (!second) {
+        return -1;
     } else {
-        const sortedFiles = sortFiles([
-            CollectionALatestFile,
-            CollectionBLatestFile,
-        ]);
-        if (sortedFiles[0].id !== CollectionALatestFile.id) {
+        const sortedFiles = sortFiles([first, second]);
+        if (sortedFiles[0].id !== first.id) {
             return 1;
         } else {
             return -1;
@@ -696,25 +769,130 @@ function compareCollectionsLatestFile(
     }
 }
 
-function getCollectionLatestFile(
-    collectionAndTheirLatestFile: CollectionAndItsLatestFile[],
-    collection: Collection
-) {
-    const collectionAndItsLatestFile = collectionAndTheirLatestFile.filter(
-        (collectionAndItsLatestFile) =>
-            collectionAndItsLatestFile.collection.id === collection.id
+export function getCollectionSummaries(
+    user: User,
+    collections: Collection[],
+    files: EnteFile[],
+    archivedCollections: Set<number>
+): CollectionSummaries {
+    const collectionSummaries: CollectionSummaries = new Map();
+    const collectionLatestFiles = getCollectionLatestFiles(
+        files,
+        archivedCollections
     );
-    if (collectionAndItsLatestFile.length === 1) {
-        return collectionAndItsLatestFile[0].file;
+    const collectionFilesCount = getCollectionsFileCount(files);
+    const uniqueFileCount = new Set(files.map((file) => file.id)).size;
+
+    for (const collection of collections) {
+        if (collectionFilesCount.get(collection.id)) {
+            collectionSummaries.set(collection.id, {
+                id: collection.id,
+                name: collection.name,
+                latestFile: collectionLatestFiles.get(collection.id),
+                fileCount: collectionFilesCount.get(collection.id),
+                updationTime: collection.updationTime,
+                type:
+                    collection.owner.id !== user.id
+                        ? CollectionSummaryType.shared
+                        : IsArchived(collection)
+                        ? CollectionSummaryType.archived
+                        : CollectionSummaryType[collection.type],
+            });
+        }
     }
+    collectionSummaries.set(
+        ALL_SECTION,
+        getAllCollectionSummaries(
+            collectionFilesCount,
+            collectionLatestFiles,
+            uniqueFileCount,
+            archivedCollections
+        )
+    );
+    collectionSummaries.set(
+        ARCHIVE_SECTION,
+        getArchivedCollectionSummaries(
+            collectionFilesCount,
+            collectionLatestFiles
+        )
+    );
+    collectionSummaries.set(
+        TRASH_SECTION,
+        getTrashedCollectionSummaries(
+            collectionFilesCount,
+            collectionLatestFiles
+        )
+    );
+
+    return collectionSummaries;
 }
 
-function moveFavCollectionToFront(collections: Collection[]) {
-    return collections.sort((collectionA, collectionB) =>
-        collectionA.type === CollectionType.favorites
-            ? -1
-            : collectionB.type === CollectionType.favorites
-            ? 1
-            : 0
-    );
+function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
+    const collectionWiseFiles = sortFilesIntoCollections(files);
+    const collectionFilesCount = new Map<number, number>();
+    for (const [id, files] of collectionWiseFiles) {
+        collectionFilesCount.set(id, files.length);
+    }
+    return collectionFilesCount;
+}
+
+function getAllCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles,
+    uniqueFileCount: number,
+    archivedCollections: Set<number>
+): CollectionSummary {
+    const archivedSectionFileCount =
+        collectionFilesCount.get(ARCHIVE_SECTION) ?? 0;
+    const trashSectionFileCount = collectionFilesCount.get(TRASH_SECTION) ?? 0;
+
+    const archivedCollectionsFileCount = 0;
+    for (const [id, fileCount] of collectionFilesCount.entries()) {
+        if (archivedCollections.has(id)) {
+            archivedCollectionsFileCount + fileCount;
+        }
+    }
+
+    const allSectionFileCount =
+        uniqueFileCount -
+        (archivedSectionFileCount +
+            trashSectionFileCount +
+            archivedCollectionsFileCount);
+
+    return {
+        id: ALL_SECTION,
+        name: constants.ALL_SECTION_NAME,
+        type: CollectionSummaryType.all,
+        latestFile: collectionsLatestFile.get(ALL_SECTION),
+        fileCount: allSectionFileCount,
+        updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
+    };
+}
+
+function getArchivedCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles
+): CollectionSummary {
+    return {
+        id: ARCHIVE_SECTION,
+        name: constants.ARCHIVE_SECTION_NAME,
+        type: CollectionSummaryType.archive,
+        latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
+        fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
+        updationTime: collectionsLatestFile.get(ARCHIVE_SECTION)?.updationTime,
+    };
+}
+
+function getTrashedCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles
+): CollectionSummary {
+    return {
+        id: TRASH_SECTION,
+        name: constants.TRASH,
+        type: CollectionSummaryType.trash,
+        latestFile: collectionsLatestFile.get(TRASH_SECTION),
+        fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
+        updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
+    };
 }

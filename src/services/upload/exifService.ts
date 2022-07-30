@@ -1,9 +1,12 @@
-import { NULL_LOCATION } from 'constants/upload';
-import { Location } from 'types/upload';
+import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
+import { ElectronFile, Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
 import { FileTypeInfo } from 'types/upload';
 import { logError } from 'utils/sentry';
+import { ParsedExtractedMetadata } from 'types/upload';
+import { getUnixTimeInMicroSeconds } from 'utils/time';
+import { CustomError } from 'utils/error';
 
 const EXIF_TAGS_NEEDED = [
     'DateTimeOriginal',
@@ -23,37 +26,34 @@ interface Exif {
     GPSLatitudeRef?: number;
     GPSLongitudeRef?: number;
 }
-interface ParsedEXIFData {
-    location: Location;
-    creationTime: number;
-}
 
 export async function getExifData(
-    receivedFile: File,
+    receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
-): Promise<ParsedEXIFData> {
-    const nullExifData: ParsedEXIFData = {
-        location: NULL_LOCATION,
-        creationTime: null,
-    };
+): Promise<ParsedExtractedMetadata> {
+    let parsedEXIFData = NULL_EXTRACTED_METADATA;
     try {
+        if (!(receivedFile instanceof File)) {
+            receivedFile = new File(
+                [await receivedFile.blob()],
+                receivedFile.name,
+                {
+                    lastModified: receivedFile.lastModified,
+                }
+            );
+        }
         const exifData = await getRawExif(receivedFile, fileTypeInfo);
         if (!exifData) {
-            return nullExifData;
+            return parsedEXIFData;
         }
-        const parsedEXIFData = {
+        parsedEXIFData = {
             location: getEXIFLocation(exifData),
-            creationTime: getUNIXTime(
-                exifData.DateTimeOriginal ??
-                    exifData.CreateDate ??
-                    exifData.ModifyDate
-            ),
+            creationTime: getExifTime(exifData),
         };
-        return parsedEXIFData;
     } catch (e) {
         logError(e, 'getExifData failed');
-        return nullExifData;
     }
+    return parsedEXIFData;
 }
 
 export async function updateFileCreationDateInEXIF(
@@ -83,7 +83,7 @@ export async function updateFileCreationDateInEXIF(
     }
 }
 
-export async function convertImageToDataURL(reader: FileReader, url: string) {
+async function convertImageToDataURL(reader: FileReader, url: string) {
     const blob = await fetch(url).then((r) => r.blob());
     const dataURL = await new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
@@ -131,31 +131,41 @@ export async function getRawExif(
     return exifData;
 }
 
-export function getUNIXTime(dateTime: Date) {
-    try {
-        if (!dateTime) {
-            return null;
-        }
-        const unixTime = dateTime.getTime() * 1000;
-        if (unixTime <= 0) {
-            return null;
-        } else {
-            return unixTime;
-        }
-    } catch (e) {
-        logError(e, 'getUNIXTime failed', { dateTime });
-    }
-}
-
-function getEXIFLocation(exifData): Location {
+export function getEXIFLocation(exifData): Location {
     if (!exifData.latitude || !exifData.longitude) {
         return NULL_LOCATION;
     }
     return { latitude: exifData.latitude, longitude: exifData.longitude };
 }
 
+function getExifTime(exifData: Exif) {
+    let dateTime =
+        exifData.DateTimeOriginal ?? exifData.CreateDate ?? exifData.ModifyDate;
+    if (!dateTime) {
+        return null;
+    }
+    if (!(dateTime instanceof Date)) {
+        try {
+            dateTime = parseEXIFDate(dateTime);
+        } catch (e) {
+            logError(Error(CustomError.NOT_A_DATE), ' date revive failed', {
+                dateTime,
+            });
+            return null;
+        }
+    }
+    return getUnixTimeInMicroSeconds(dateTime);
+}
+
 function convertToExifDateFormat(date: Date) {
     return `${date.getFullYear()}:${
         date.getMonth() + 1
     }:${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+}
+
+function parseEXIFDate(dateTime: String) {
+    const [year, month, date, hour, minute, second] = dateTime
+        .match(/\d+/g)
+        .map((x) => parseInt(x));
+    return new Date(Date.UTC(year, month - 1, date, hour, minute, second));
 }

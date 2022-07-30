@@ -1,8 +1,10 @@
-import { SetDialogMessage } from 'components/MessageDialog';
+import { CollectionSelectorAttributes } from 'components/Collections/CollectionSelector';
+import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { Person, ThingClass, WordGroup } from 'types/machineLearning';
 import { DateValue, Bbox } from 'types/search';
+import { NotificationAttributes } from 'types/Notification';
 
 export type SelectedState = {
     [k: number]: boolean;
@@ -26,15 +28,17 @@ export interface SearchStats {
     resultCount: number;
     timeTaken: number;
 }
+export type SetCollectionSelectorAttributes = React.Dispatch<
+    React.SetStateAction<CollectionSelectorAttributes>
+>;
 
 export type GalleryContextType = {
     thumbs: Map<number, string>;
     files: Map<number, string>;
     showPlanSelectorModal: () => void;
-    closeMessageDialog: () => void;
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    setDialogMessage: SetDialogMessage;
-    startLoading: () => void;
-    finishLoading: () => void;
+    setNotificationAttributes: (attributes: NotificationAttributes) => void;
+    setBlockingLoad: (value: boolean) => void;
+    photoListHeader: TimeStampListItem;
 };

@@ -1,29 +1,28 @@
 import { sleep } from 'utils/common';
 
-const retrySleepTimeInMilliSeconds = [2000, 5000, 10000];
+const waitTimeBeforeNextAttemptInMilliSeconds = [2000, 5000, 10000];
 
-export async function retryAsyncFunction(
-    func: () => Promise<any>,
-    checkForBreakingError?: (error) => void
-) {
-    const retrier = async (
-        func: () => Promise<any>,
-        attemptNumber: number = 0
-    ) => {
+export async function retryAsyncFunction<T>(
+    request: (abort?: () => void) => Promise<T>,
+    waitTimeBeforeNextTry?: number[]
+): Promise<T> {
+    if (!waitTimeBeforeNextTry) {
+        waitTimeBeforeNextTry = waitTimeBeforeNextAttemptInMilliSeconds;
+    }
+
+    for (
+        let attemptNumber = 0;
+        attemptNumber <= waitTimeBeforeNextTry.length;
+        attemptNumber++
+    ) {
         try {
-            const resp = await func();
+            const resp = await request();
             return resp;
         } catch (e) {
-            if (checkForBreakingError) {
-                checkForBreakingError(e);
-            }
-            if (attemptNumber < retrySleepTimeInMilliSeconds.length) {
-                await sleep(retrySleepTimeInMilliSeconds[attemptNumber]);
-                return await retrier(func, attemptNumber + 1);
-            } else {
+            if (attemptNumber === waitTimeBeforeNextTry.length) {
                 throw e;
             }
+            await sleep(waitTimeBeforeNextTry[attemptNumber]);
         }
-    };
-    return await retrier(func);
+    }
 }

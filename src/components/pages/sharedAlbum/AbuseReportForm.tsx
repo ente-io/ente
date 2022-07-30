@@ -1,4 +1,4 @@
-import MessageDialog from 'components/MessageDialog';
+import DialogBox from 'components/DialogBox';
 import SubmitButton from 'components/SubmitButton';
 import { REPORT_REASON } from 'constants/publicCollection';
 import { Formik, FormikHelpers } from 'formik';
@@ -8,8 +8,9 @@ import { Col, Form, FormControl, Row } from 'react-bootstrap';
 import { reportAbuse } from 'services/publicCollectionService';
 import constants from 'utils/strings/constants';
 import * as Yup from 'yup';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import { AbuseReportDetails, AbuseReportRequest } from 'types/publicCollection';
+import { AppContext } from 'pages/_app';
 
 interface Iprops {
     url: string;
@@ -51,12 +52,13 @@ const defaultInitialValues: FormValues = {
     },
 };
 
-const Wrapper = styled.div`
+const Wrapper = styled('div')`
     padding: 5px 20px;
 `;
 
 export function AbuseReportForm({ show, close, url }: Iprops) {
     const [loading, setLoading] = useState(false);
+    const appContext = useContext(AppContext);
     const publicCollectionGalleryContent = useContext(
         PublicCollectionGalleryContext
     );
@@ -83,7 +85,7 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
                 details
             );
             close();
-            publicCollectionGalleryContent.setDialogMessage({
+            appContext.setDialogMessage({
                 title: constants.REPORT_SUBMIT_SUCCESS_TITLE,
                 content: constants.REPORT_SUBMIT_SUCCESS_CONTENT,
                 close: { text: constants.OK },
@@ -96,13 +98,12 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
     };
 
     return (
-        <MessageDialog
-            show={show}
+        <DialogBox
+            open={show}
             size="lg"
-            onHide={close}
+            onClose={close}
             attributes={{
                 title: constants.ABUSE_REPORT,
-                staticBackdrop: true,
             }}>
             <Wrapper>
                 <h6>{constants.ABUSE_REPORT_DESCRIPTION}</h6>
@@ -555,6 +556,6 @@ export function AbuseReportForm({ show, close, url }: Iprops) {
                     )}
                 </Formik>
             </Wrapper>
-        </MessageDialog>
+        </DialogBox>
     );
 }

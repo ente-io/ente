@@ -1,7 +1,6 @@
 import { getEndpoint, getPaymentsURL } from 'utils/common/apiUtil';
 import { getToken } from 'utils/common/key';
-import { setData, LS_KEYS } from 'utils/storage/localStorage';
-import { convertToHumanReadable } from 'utils/billing';
+import { setData, LS_KEYS, removeData } from 'utils/storage/localStorage';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
@@ -148,6 +147,21 @@ class billingService {
         }
     }
 
+    public async leaveFamily() {
+        if (!getToken()) {
+            return;
+        }
+        try {
+            await HTTPService.delete(`${ENDPOINT}/family/leave`, null, null, {
+                'X-Auth-Token': getToken(),
+            });
+            removeData(LS_KEYS.FAMILY_DATA);
+        } catch (e) {
+            logError(e, '/family/leave failed');
+            throw e;
+        }
+    }
+
     public async redirectToPayments(
         paymentToken: string,
         productID: string,
@@ -176,21 +190,6 @@ class billingService {
         } catch (e) {
             logError(e, 'unable to get customer portal url');
             throw e;
-        }
-    }
-
-    public async getUsage() {
-        try {
-            const response = await HTTPService.get(
-                `${ENDPOINT}/billing/usage`,
-                { startTime: 0, endTime: Date.now() * 1000 },
-                {
-                    'X-Auth-Token': getToken(),
-                }
-            );
-            return convertToHumanReadable(response.data.usage);
-        } catch (e) {
-            logError(e, 'error getting usage');
         }
     }
 }

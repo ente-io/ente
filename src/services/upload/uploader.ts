@@ -1,85 +1,111 @@
 import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
-import { decryptFile } from 'utils/file';
 import { logError } from 'utils/sentry';
-import { fileAlreadyInCollection } from 'utils/upload';
+import {
+    fileAlreadyInCollection,
+    findSameFileInOtherCollection,
+    shouldDedupeAcrossCollection,
+} from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
-import uploadService from './uploadService';
-import { getFileType } from './readFileService';
-import {
-    BackupedFile,
-    EncryptedFile,
-    FileInMemory,
-    FileTypeInfo,
-    FileWithCollection,
-    FileWithMetadata,
-    Metadata,
-    UploadFile,
-} from 'types/upload';
 import { FILE_TYPE } from 'constants/file';
-import { FileUploadResults } from 'constants/upload';
+import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
+import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
+import { addLogLine } from 'utils/logging';
+import { convertBytesToHumanReadable } from 'utils/file/size';
+import { sleep } from 'utils/common';
+import { addToCollection } from 'services/collectionService';
 
-const FIVE_GB_IN_BYTES = 5 * 1024 * 1024 * 1024;
 interface UploadResponse {
-    fileUploadResult: FileUploadResults;
-    file?: EnteFile;
+    fileUploadResult: UPLOAD_RESULT;
+    uploadedFile?: EnteFile;
+    skipDecryption?: boolean;
 }
 export default async function uploader(
     worker: any,
-    reader: FileReader,
     existingFilesInCollection: EnteFile[],
+    existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
-    const { file: rawFile, collection } = fileWithCollection;
+    const { collection, localID, ...uploadAsset } = fileWithCollection;
+    const fileNameSize = `${UploadService.getAssetName(
+        fileWithCollection
+    )}_${convertBytesToHumanReadable(UploadService.getAssetSize(uploadAsset))}`;
 
-    UIService.setFileProgress(rawFile.name, 0);
-
-    let file: FileInMemory = null;
-    let encryptedFile: EncryptedFile = null;
-    let metadata: Metadata = null;
-    let fileTypeInfo: FileTypeInfo = null;
-    let fileWithMetadata: FileWithMetadata = null;
-
+    addLogLine(`uploader called for  ${fileNameSize}`);
+    UIService.setFileProgress(localID, 0);
+    await sleep(0);
+    const { fileTypeInfo, metadata } =
+        UploadService.getFileMetadataAndFileTypeInfo(localID);
     try {
-        if (rawFile.size >= FIVE_GB_IN_BYTES) {
-            return { fileUploadResult: FileUploadResults.TOO_LARGE };
+        const fileSize = UploadService.getAssetSize(uploadAsset);
+        if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
+            return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
-        fileTypeInfo = await getFileType(reader, rawFile);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
-        metadata = await uploadService.getFileMetadata(
-            rawFile,
-            collection,
-            fileTypeInfo
-        );
-
-        if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-            return { fileUploadResult: FileUploadResults.ALREADY_UPLOADED };
+        if (!metadata) {
+            throw Error(CustomError.NO_METADATA);
         }
 
-        file = await UploadService.readFile(
-            worker,
-            reader,
-            rawFile,
-            fileTypeInfo
+        if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
+            addLogLine(`skipped upload for  ${fileNameSize}`);
+            return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
+        }
+
+        const sameFileInOtherCollection = findSameFileInOtherCollection(
+            existingFiles,
+            metadata
         );
+
+        if (sameFileInOtherCollection) {
+            addLogLine(
+                `same file in other collection found for  ${fileNameSize}`
+            );
+            const resultFile = Object.assign({}, sameFileInOtherCollection);
+            resultFile.collectionID = collection.id;
+            await addToCollection(collection, [resultFile]);
+            return {
+                fileUploadResult: UPLOAD_RESULT.UPLOADED,
+                uploadedFile: resultFile,
+                skipDecryption: true,
+            };
+        }
+
+        // iOS exports via album doesn't export files without collection and if user exports all photos, album info is not preserved.
+        // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
+        // as part of the albums
+        if (
+            shouldDedupeAcrossCollection(fileWithCollection.collection.name) &&
+            fileAlreadyInCollection(existingFiles, metadata)
+        ) {
+            addLogLine(`deduped upload for  ${fileNameSize}`);
+            return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
+        }
+        addLogLine(`reading asset ${fileNameSize}`);
+
+        const file = await UploadService.readAsset(fileTypeInfo, uploadAsset);
+
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
-        fileWithMetadata = {
+        const fileWithMetadata = {
+            localID,
             filedata: file.filedata,
             thumbnail: file.thumbnail,
             metadata,
         };
 
-        encryptedFile = await UploadService.encryptFile(
+        addLogLine(`encryptAsset ${fileNameSize}`);
+        const encryptedFile = await UploadService.encryptAsset(
             worker,
             fileWithMetadata,
             collection.key
         );
+
+        addLogLine(`uploadToBucket ${fileNameSize}`);
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
             encryptedFile.file
@@ -90,36 +116,38 @@ export default async function uploader(
             backupedFile,
             encryptedFile.fileKey
         );
+        addLogLine(`uploadFile ${fileNameSize}`);
 
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
-        const decryptedFile = await decryptFile(uploadedFile, collection.key);
 
         UIService.increaseFileUploaded();
+        addLogLine(`${fileNameSize} successfully uploaded`);
+
         return {
-            fileUploadResult: FileUploadResults.UPLOADED,
-            file: decryptedFile,
+            fileUploadResult: metadata.hasStaticThumbnail
+                ? UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
+                : UPLOAD_RESULT.UPLOADED,
+            uploadedFile: uploadedFile,
         };
     } catch (e) {
+        addLogLine(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
+
         logError(e, 'file upload failed', {
-            fileFormat: fileTypeInfo.exactType,
+            fileFormat: fileTypeInfo?.exactType,
         });
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.ETAG_MISSING:
-                return { fileUploadResult: FileUploadResults.BLOCKED };
+                return { fileUploadResult: UPLOAD_RESULT.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:
-                return { fileUploadResult: FileUploadResults.UNSUPPORTED };
+                return { fileUploadResult: UPLOAD_RESULT.UNSUPPORTED };
             case CustomError.FILE_TOO_LARGE:
                 return {
                     fileUploadResult:
-                        FileUploadResults.LARGER_THAN_AVAILABLE_STORAGE,
+                        UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE,
                 };
             default:
-                return { fileUploadResult: FileUploadResults.FAILED };
+                return { fileUploadResult: UPLOAD_RESULT.FAILED };
         }
-    } finally {
-        file = null;
-        fileWithMetadata = null;
-        encryptedFile = null;
     }
 }

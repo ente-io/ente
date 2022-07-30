@@ -14,6 +14,9 @@ export enum PAGES {
     ROOT = '/',
     SHARED_ALBUMS = '/shared-albums',
     ML_DEBUG = '/ml-debug',
+    DEDUPLICATE = '/deduplicate',
 }
 export const getAlbumSiteHost = () =>
-    process.env.NODE_ENV === 'production' ? 'albums.ente.io' : 'localhost:3002';
+    process.env.NODE_ENV === 'production'
+        ? 'albums.ente.io'
+        : `${window.location.hostname}:3002`;

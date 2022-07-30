@@ -1,3 +1,4 @@
+import { UserDetails } from 'types/user';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 
 export function makeID(length) {
@@ -13,11 +14,15 @@ export function makeID(length) {
     return result;
 }
 
-export function getUserAnonymizedID() {
-    let anonymizeUserID = getData(LS_KEYS.AnonymizeUserID)?.id;
+export function getSentryUserID() {
+    let anonymizeUserID = getData(LS_KEYS.AnonymizedUserID)?.id;
     if (!anonymizeUserID) {
         anonymizeUserID = makeID(6);
-        setData(LS_KEYS.AnonymizeUserID, { id: anonymizeUserID });
+        setData(LS_KEYS.AnonymizedUserID, { id: anonymizeUserID });
     }
     return anonymizeUserID;
+}
+
+export function getLocalUserDetails(): UserDetails {
+    return getData(LS_KEYS.USER_DETAILS)?.value;
 }

@@ -6,10 +6,19 @@ import { EncryptionResult } from 'types/upload';
 import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
-import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
+import {
+    decryptFile,
+    mergeMetadata,
+    preservePhotoswipeProps,
+    sortFiles,
+} from 'utils/file';
 import CryptoWorker from 'utils/crypto';
 import { eventBus, Events } from './events';
-import { EnteFile, TrashRequest, UpdateMagicMetadataRequest } from 'types/file';
+import { EnteFile, TrashRequest } from 'types/file';
+import { SetFiles } from 'types/gallery';
+import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
+import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
+import { addLogLine } from 'utils/logging';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -21,12 +30,25 @@ export const getLocalFiles = async () => {
 };
 
 export const setLocalFiles = async (files: EnteFile[]) => {
-    await localForage.setItem(FILES_TABLE, files);
-
     try {
-        eventBus.emit(Events.LOCAL_FILES_UPDATED);
-    } catch (e) {
-        logError(e, 'Error in localFileUpdated handlers');
+        await localForage.setItem(FILES_TABLE, files);
+        try {
+            eventBus.emit(Events.LOCAL_FILES_UPDATED);
+        } catch (e) {
+            logError(e, 'Error in localFileUpdated handlers');
+        }
+    } catch (e1) {
+        try {
+            const storageEstimate = await navigator.storage.estimate();
+            logError(e1, 'failed to save files to indexedDB', {
+                storageEstimate,
+            });
+            addLogLine(`storage estimate ${JSON.stringify(storageEstimate)}`);
+        } catch (e2) {
+            logError(e1, 'failed to save files to indexedDB');
+            logError(e2, 'failed to get storage stats');
+        }
+        throw e1;
     }
 };
 
@@ -35,13 +57,13 @@ const getCollectionLastSyncTime = async (collection: Collection) =>
 
 export const syncFiles = async (
     collections: Collection[],
-    setFiles: (files: EnteFile[]) => void
+    setFiles: SetFiles
 ) => {
     const localFiles = await getLocalFiles();
     let files = await removeDeletedCollectionFiles(collections, localFiles);
     if (files.length !== localFiles.length) {
         await setLocalFiles(files);
-        setFiles([...sortFiles(mergeMetadata(files))]);
+        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
     }
     for (const collection of collections) {
         if (!getToken()) {
@@ -77,7 +99,7 @@ export const syncFiles = async (
             `${collection.id}-time`,
             collection.updationTime
         );
-        setFiles([...sortFiles(mergeMetadata(files))]);
+        setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
     }
     return sortFiles(mergeMetadata(files));
 };
@@ -86,7 +108,7 @@ export const getFiles = async (
     collection: Collection,
     sinceTime: number,
     files: EnteFile[],
-    setFiles: (files: EnteFile[]) => void
+    setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
         const decryptedFiles: EnteFile[] = [];
@@ -123,10 +145,12 @@ export const getFiles = async (
                 time = resp.data.diff.slice(-1)[0].updationTime;
             }
             setFiles(
-                sortFiles(
-                    mergeMetadata(
-                        [...(files || []), ...decryptedFiles].filter(
-                            (item) => !item.isDeleted
+                preservePhotoswipeProps(
+                    sortFiles(
+                        mergeMetadata(
+                            [...(files || []), ...decryptedFiles].filter(
+                                (item) => !item.isDeleted
+                            )
                         )
                     )
                 )
@@ -156,15 +180,25 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
         if (!token) {
             return;
         }
-        const trashRequest: TrashRequest = {
-            items: filesToTrash.map((file) => ({
-                fileID: file.id,
-                collectionID: file.collectionID,
-            })),
+
+        const trashBatch: TrashRequest = {
+            items: [],
         };
-        await HTTPService.post(`${ENDPOINT}/files/trash`, trashRequest, null, {
-            'X-Auth-Token': token,
-        });
+
+        for (const file of filesToTrash) {
+            trashBatch.items.push({
+                collectionID: file.collectionID,
+                fileID: file.id,
+            });
+            if (trashBatch.items.length >= MAX_TRASH_BATCH_SIZE) {
+                await trashFilesFromServer(trashBatch, token);
+                trashBatch.items = [];
+            }
+        }
+
+        if (trashBatch.items.length > 0) {
+            await trashFilesFromServer(trashBatch, token);
+        }
     } catch (e) {
         logError(e, 'trash file failed');
         throw e;
@@ -191,12 +225,12 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
     }
 };
 
-export const updateMagicMetadata = async (files: EnteFile[]) => {
+export const updateFileMagicMetadata = async (files: EnteFile[]) => {
     const token = getToken();
     if (!token) {
         return;
     }
-    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
         const { file: encryptedMagicMetadata }: EncryptionResult =
@@ -225,12 +259,12 @@ export const updateMagicMetadata = async (files: EnteFile[]) => {
     );
 };
 
-export const updatePublicMagicMetadata = async (files: EnteFile[]) => {
+export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
     const token = getToken();
     if (!token) {
         return;
     }
-    const reqBody: UpdateMagicMetadataRequest = { metadataList: [] };
+    const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
         const { file: encryptedPubMagicMetadata }: EncryptionResult =
@@ -263,3 +297,14 @@ export const updatePublicMagicMetadata = async (files: EnteFile[]) => {
         })
     );
 };
+
+async function trashFilesFromServer(trashBatch: TrashRequest, token: any) {
+    try {
+        await HTTPService.post(`${ENDPOINT}/files/trash`, trashBatch, null, {
+            'X-Auth-Token': token,
+        });
+    } catch (e) {
+        logError(e, 'trash files from server failed');
+        throw e;
+    }
+}

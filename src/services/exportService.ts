@@ -69,8 +69,14 @@ class ExportService {
         this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
     }
     async selectExportDirectory() {
-        return await this.ElectronAPIs.selectRootDirectory();
+        try {
+            return await this.ElectronAPIs.selectRootDirectory();
+        } catch (e) {
+            logError(e, 'failed to selectExportDirectory ');
+            throw e;
+        }
     }
+
     stopRunningExport() {
         this.stopExport = true;
     }

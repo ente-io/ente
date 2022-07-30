@@ -3,21 +3,36 @@ import {
     moveToCollection,
     removeFromCollection,
     restoreToCollection,
+    updateCollectionMagicMetadata,
 } from 'services/collectionService';
-import { downloadFiles, getSelectedFiles } from 'utils/file';
+import { downloadFiles } from 'utils/file';
 import { getLocalFiles } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import { CustomError } from 'utils/error';
-import { SelectedState } from 'types/gallery';
+import { CustomError, ServerErrorCodes } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { SetDialogMessage } from 'components/MessageDialog';
 import { logError } from 'utils/sentry';
 import constants from 'utils/strings/constants';
-import { Collection } from 'types/collection';
-import { CollectionType } from 'constants/collection';
-import CryptoWorker from 'utils/crypto';
+import {
+    Collection,
+    CollectionMagicMetadataProps,
+    CollectionSummaries,
+} from 'types/collection';
+import {
+    CollectionSummaryType,
+    CollectionType,
+    HIDE_FROM_COLLECTION_BAR_TYPES,
+    OPTIONS_NOT_HAVING_COLLECTION_TYPES,
+    SYSTEM_COLLECTION_TYPES,
+    UPLOAD_NOT_ALLOWED_COLLECTION_TYPES,
+} from 'constants/collection';
 import { getAlbumSiteHost } from 'constants/pages';
+import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
+import {
+    NEW_COLLECTION_MAGIC_METADATA,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
+import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -27,22 +42,18 @@ export enum COLLECTION_OPS_TYPE {
 }
 export async function handleCollectionOps(
     type: COLLECTION_OPS_TYPE,
-    setCollectionSelectorView: (value: boolean) => void,
-    selected: SelectedState,
-    files: EnteFile[],
-    setActiveCollection: (id: number) => void,
-    collection: Collection
+    collection: Collection,
+    selectedFiles: EnteFile[],
+    selectedCollectionID: number
 ) {
-    setCollectionSelectorView(false);
-    const selectedFiles = getSelectedFiles(selected, files);
     switch (type) {
         case COLLECTION_OPS_TYPE.ADD:
             await addToCollection(collection, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.MOVE:
             await moveToCollection(
-                selected.collectionID,
                 collection,
+                selectedCollectionID,
                 selectedFiles
             );
             break;
@@ -55,7 +66,6 @@ export async function handleCollectionOps(
         default:
             throw Error(CustomError.INVALID_COLLECTION_OPERATION);
     }
-    setActiveCollection(collection.id);
 }
 
 export function getSelectedCollection(
@@ -90,10 +100,7 @@ export function isFavoriteCollection(
     }
 }
 
-export async function downloadCollection(
-    collectionID: number,
-    setDialogMessage: SetDialogMessage
-) {
+export async function downloadAllCollectionFiles(collectionID: number) {
     try {
         const allFiles = await getLocalFiles();
         const collectionFiles = allFiles.filter(
@@ -102,27 +109,112 @@ export async function downloadCollection(
         await downloadFiles(collectionFiles);
     } catch (e) {
         logError(e, 'download collection failed ');
-        setDialogMessage({
-            title: constants.ERROR,
-            content: constants.DELETE_COLLECTION_FAILED,
-            close: { variant: 'danger' },
-        });
     }
 }
 
-export async function appendCollectionKeyToShareURL(
+export function appendCollectionKeyToShareURL(
     url: string,
     collectionKey: string
 ) {
-    const worker = await new CryptoWorker();
     if (!url) {
         return null;
     }
+    const bs58 = require('bs58');
     const sharableURL = new URL(url);
     if (process.env.NODE_ENV === 'development') {
         sharableURL.host = getAlbumSiteHost();
         sharableURL.protocol = 'http';
     }
-    sharableURL.hash = await worker.toHex(collectionKey);
+    const bytes = Buffer.from(collectionKey, 'base64');
+    sharableURL.hash = bs58.encode(bytes);
     return sharableURL.href;
 }
+
+const _intSelectOption = (i: number) => {
+    return { label: i.toString(), value: i };
+};
+
+export function getDeviceLimitOptions() {
+    return [2, 5, 10, 25, 50].map((i) => _intSelectOption(i));
+}
+
+export const shareExpiryOptions = [
+    { label: 'never', value: () => 0 },
+    {
+        label: 'after 1 hour',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ hours: 1 }),
+    },
+    {
+        label: 'after 1 day',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 1 }),
+    },
+    {
+        label: 'after 1 week',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ days: 7 }),
+    },
+    {
+        label: 'after 1 month',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ months: 1 }),
+    },
+    {
+        label: 'after 1 year',
+        value: () => getUnixTimeInMicroSecondsWithDelta({ years: 1 }),
+    },
+];
+
+export const changeCollectionVisibility = async (
+    collection: Collection,
+    visibility: VISIBILITY_STATE
+) => {
+    try {
+        const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+            visibility,
+        };
+
+        const updatedCollection = {
+            ...collection,
+            magicMetadata: await updateMagicMetadataProps(
+                collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+                collection.key,
+                updatedMagicMetadataProps
+            ),
+        } as Collection;
+
+        await updateCollectionMagicMetadata(updatedCollection);
+    } catch (e) {
+        logError(e, 'change file visibility failed');
+        switch (e.status?.toString()) {
+            case ServerErrorCodes.FORBIDDEN:
+                throw Error(constants.NOT_FILE_OWNER);
+        }
+        throw e;
+    }
+};
+
+export const getArchivedCollections = (collections: Collection[]) => {
+    return new Set<number>(
+        collections.filter(IsArchived).map((collection) => collection.id)
+    );
+};
+
+export const hasNonEmptyCollections = (
+    collectionSummaries: CollectionSummaries
+) => {
+    return collectionSummaries?.size <= 3;
+};
+
+export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
+    return !UPLOAD_NOT_ALLOWED_COLLECTION_TYPES.has(type);
+};
+
+export const isSystemCollection = (type: CollectionSummaryType) => {
+    return SYSTEM_COLLECTION_TYPES.has(type);
+};
+
+export const shouldShowOptions = (type: CollectionSummaryType) => {
+    return !OPTIONS_NOT_HAVING_COLLECTION_TYPES.has(type);
+};
+
+export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
+    return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
+};

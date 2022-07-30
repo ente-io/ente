@@ -1,5 +1,8 @@
 {
     "compilerOptions": {
+        "paths": {
+            "@mui/styled-engine": ["./node_modules/@mui/styled-engine-sc"]
+        },
         "target": "es5",
         "lib": ["dom", "dom.iterable", "esnext", "webworker"],
         "allowJs": true,
@@ -14,7 +17,8 @@
         "isolatedModules": true,
         "jsx": "preserve",
         "baseUrl": "./src",
-        "downlevelIteration": true
+        "downlevelIteration": true,
+        "incremental": true
     },
     "include": [
         "next-env.d.ts",

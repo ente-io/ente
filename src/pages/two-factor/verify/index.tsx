@@ -1,14 +1,18 @@
-import Container from 'components/Container';
-import LogoImg from 'components/LogoImg';
-import VerifyTwoFactor from 'components/VerifyTwoFactor';
+import VerifyTwoFactor, {
+    VerifyTwoFactorCallback,
+} from 'components/TwoFactor/VerifyForm';
 import router from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { Button, Card } from 'react-bootstrap';
 import { logoutUser, verifyTwoFactor } from 'services/userService';
 import { PAGES } from 'constants/pages';
 import { User } from 'types/user';
 import { setData, LS_KEYS, getData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
+import LinkButton from 'components/pages/gallery/LinkButton';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
+import FormTitle from 'components/Form/FormPaper/Title';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
 
 export default function Home() {
     const [sessionID, setSessionID] = useState('');
@@ -17,13 +21,13 @@ export default function Home() {
         const main = async () => {
             router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
-            if (
+            if (!user?.email || !user.twoFactorSessionID) {
+                router.push(PAGES.ROOT);
+            } else if (
                 !user.isTwoFactorEnabled &&
                 (user.encryptedToken || user.token)
             ) {
                 router.push(PAGES.CREDENTIALS);
-            } else if (!user?.email || !user.twoFactorSessionID) {
-                router.push(PAGES.ROOT);
             } else {
                 setSessionID(user.twoFactorSessionID);
             }
@@ -31,7 +35,7 @@ export default function Home() {
         main();
     }, []);
 
-    const onSubmit = async (otp: string) => {
+    const onSubmit: VerifyTwoFactorCallback = async (otp) => {
         try {
             const resp = await verifyTwoFactor(otp, sessionID);
             const { keyAttributes, encryptedToken, token, id } = resp;
@@ -52,37 +56,21 @@ export default function Home() {
         }
     };
     return (
-        <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center">
-                <Card.Body style={{ padding: '40px 30px', minHeight: '400px' }}>
-                    <Card.Title style={{ marginBottom: '32px' }}>
-                        <LogoImg src="/icon.svg" />
-                        {constants.TWO_FACTOR}
-                    </Card.Title>
-                    <VerifyTwoFactor
-                        onSubmit={onSubmit}
-                        back={router.back}
-                        buttonText={constants.VERIFY}
-                    />
-                    <div
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            marginTop: '12px',
-                        }}>
-                        <Button
-                            variant="link"
-                            onClick={() =>
-                                router.push(PAGES.TWO_FACTOR_RECOVER)
-                            }>
-                            {constants.LOST_DEVICE}
-                        </Button>
-                        <Button variant="link" onClick={logoutUser}>
-                            {constants.GO_BACK}
-                        </Button>
-                    </div>
-                </Card.Body>
-            </Card>
-        </Container>
+        <FormContainer>
+            <FormPaper sx={{ maxWidth: '410px' }}>
+                <FormTitle>{constants.TWO_FACTOR}</FormTitle>
+                <VerifyTwoFactor
+                    onSubmit={onSubmit}
+                    buttonText={constants.VERIFY}
+                />
+
+                <FormPaperFooter>
+                    <LinkButton
+                        onClick={() => router.push(PAGES.TWO_FACTOR_RECOVER)}>
+                        {constants.LOST_DEVICE}
+                    </LinkButton>
+                </FormPaperFooter>
+            </FormPaper>
+        </FormContainer>
     );
 }

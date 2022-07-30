@@ -1,15 +1,12 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Button } from 'react-bootstrap';
 import { EnteFile } from 'types/file';
-import styled from 'styled-components';
+import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import PhotoSwipe from 'components/PhotoSwipe/PhotoSwipe';
-import { isInsideBox, isSameDay as isSameDayAnyYear } from 'utils/search';
-import { fileIsArchived, formatDateRelative } from 'utils/file';
+import PhotoSwipe from 'components/PhotoSwipe';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -18,85 +15,97 @@ import {
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { SetFiles, SelectedState, Search, setSearchStats } from 'types/gallery';
+import { SetFiles, SelectedState } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { useRouter } from 'next/router';
+import EmptyScreen from './EmptyScreen';
+import { AppContext } from 'pages/_app';
+import { DeduplicateContext } from 'pages/deduplicate';
+import { IsArchived } from 'utils/magicMetadata';
+import { isSameDayAnyYear, isInsideBox } from 'utils/search';
+import { Search } from 'types/search';
+import { logError } from 'utils/sentry';
+import { CustomError } from 'utils/error';
 
-const Container = styled.div`
+const Container = styled('div')`
     display: block;
     flex: 1;
     width: 100%;
     flex-wrap: wrap;
     margin: 0 auto;
-    overflow-x: hidden;
+    overflow: hidden;
     .pswp-thumbnail {
         display: inline-block;
         cursor: pointer;
     }
 `;
 
-const EmptyScreen = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    flex: 1;
-    color: #51cd7c;
-
-    & > svg {
-        filter: drop-shadow(3px 3px 5px rgba(45, 194, 98, 0.5));
-    }
-`;
+const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
     files: EnteFile[];
     setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
-    favItemIds: Set<number>;
+    favItemIds?: Set<number>;
+    archivedCollections?: Set<number>;
     setSelected: (
         selected: SelectedState | ((selected: SelectedState) => SelectedState)
     ) => void;
     selected: SelectedState;
-    isFirstLoad;
-    openFileUploader;
-    isInSearchMode: boolean;
-    search: Search;
-    setSearchStats: setSearchStats;
+    isFirstLoad?;
+    openUploader?;
+    isInSearchMode?: boolean;
+    search?: Search;
     deleted?: number[];
     activeCollection: number;
-    isSharedCollection: boolean;
+    isSharedCollection?: boolean;
+    enableDownload?: boolean;
+    isDeduplicating?: boolean;
+    resetSearch?: () => void;
 }
+
+type SourceURL = {
+    imageURL?: string;
+    videoURL?: string;
+};
 
 const PhotoFrame = ({
     files,
     setFiles,
     syncWithRemote,
     favItemIds,
+    archivedCollections,
     setSelected,
     selected,
     isFirstLoad,
-    openFileUploader,
+    openUploader,
     isInSearchMode,
     search,
-    setSearchStats,
+    resetSearch,
     deleted,
     activeCollection,
     isSharedCollection,
+    enableDownload,
+    isDeduplicating,
 }: Props) => {
     const [open, setOpen] = useState(false);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [fetching, setFetching] = useState<{ [k: number]: boolean }>({});
-    const startTime = Date.now();
     const galleryContext = useContext(GalleryContext);
+    const appContext = useContext(AppContext);
+    const deduplicateContext = useContext(DeduplicateContext);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
-    const filteredDataRef = useRef([]);
+    const filteredDataRef = useRef<EnteFile[]>([]);
     const filteredData = filteredDataRef?.current ?? [];
+    const router = useRouter();
+    const [isSourceLoaded, setIsSourceLoaded] = useState(false);
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Shift') {
@@ -110,6 +119,18 @@ const PhotoFrame = ({
         };
         document.addEventListener('keydown', handleKeyDown, false);
         document.addEventListener('keyup', handleKeyUp, false);
+        router.events.on('hashChangeComplete', (url: string) => {
+            const start = url.indexOf('#');
+            const hash = url.slice(start !== -1 ? start : url.length);
+            const shouldPhotoSwipeBeOpened = hash.endsWith(
+                PHOTOSWIPE_HASH_SUFFIX
+            );
+            if (shouldPhotoSwipeBeOpened) {
+                setOpen(true);
+            } else {
+                setOpen(false);
+            }
+        });
         return () => {
             document.addEventListener('keydown', handleKeyDown, false);
             document.addEventListener('keyup', handleKeyUp, false);
@@ -117,19 +138,14 @@ const PhotoFrame = ({
     }, []);
 
     useEffect(() => {
-        if (isInSearchMode) {
-            setSearchStats({
-                resultCount: filteredData.length,
-                timeTaken: (Date.now() - startTime) / 1000,
+        if (!isNaN(search?.file)) {
+            const filteredDataIdx = filteredData.findIndex((file) => {
+                return file.id === search.file;
             });
-        }
-        if (search.fileIndex || search.fileIndex === 0) {
-            const filteredDataIdx = filteredData.findIndex(
-                (data) => data.dataIndex === search.fileIndex
-            );
-            if (filteredDataIdx || filteredDataIdx === 0) {
+            if (!isNaN(filteredDataIdx)) {
                 onThumbnailClick(filteredDataIdx)();
             }
+            resetSearch();
         }
     }, [search, filteredData]);
 
@@ -151,18 +167,13 @@ const PhotoFrame = ({
                 dataIndex: index,
                 w: window.innerWidth,
                 h: window.innerHeight,
-                ...(item.deleteBy && {
-                    title: constants.AUTOMATIC_BIN_DELETE_MESSAGE(
-                        formatDateRelative(item.deleteBy / 1000)
-                    ),
-                }),
             }))
             .filter((item) => {
-                if (deleted.includes(item.id)) {
+                if (deleted?.includes(item.id)) {
                     return false;
                 }
                 if (
-                    search.date &&
+                    search?.date &&
                     !isSameDayAnyYear(search.date)(
                         new Date(item.metadata.creationTime / 1000)
                     )
@@ -170,18 +181,26 @@ const PhotoFrame = ({
                     return false;
                 }
                 if (
-                    search.location &&
-                    !isInsideBox(item.metadata, search.location)
+                    search?.location &&
+                    !isInsideBox(
+                        {
+                            latitude: item.metadata.latitude,
+                            longitude: item.metadata.longitude,
+                        },
+                        search.location
+                    )
                 ) {
-                    return false;
-                }
-                if (activeCollection === ALL_SECTION && fileIsArchived(item)) {
                     return false;
                 }
                 if (
-                    activeCollection === ARCHIVE_SECTION &&
-                    !fileIsArchived(item)
+                    !isDeduplicating &&
+                    activeCollection === ALL_SECTION &&
+                    (IsArchived(item) ||
+                        archivedCollections?.has(item.collectionID))
                 ) {
+                    return false;
+                }
+                if (activeCollection === ARCHIVE_SECTION && !IsArchived(item)) {
                     return false;
                 }
 
@@ -228,66 +247,138 @@ const PhotoFrame = ({
             });
     }, [files, deleted, search, activeCollection]);
 
-    const updateURL = (index: number) => (url: string) => {
-        files[index] = {
-            ...files[index],
-            msrc: url,
-            src: files[index].src ? files[index].src : url,
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
-        if (
-            files[index].metadata.fileType === FILE_TYPE.VIDEO &&
-            !files[index].html
-        ) {
-            files[index].html = `
-                <div class="video-loading">
-                    <img src="${url}" />
+    useEffect(() => {
+        const currentURL = new URL(window.location.href);
+        const end = currentURL.hash.lastIndexOf('&');
+        const hash = currentURL.hash.slice(1, end !== -1 ? end : undefined);
+        if (open) {
+            router.push({
+                hash: hash + PHOTOSWIPE_HASH_SUFFIX,
+            });
+        } else {
+            router.push({
+                hash: hash,
+            });
+        }
+    }, [open]);
+
+    const getFileIndexFromID = (files: EnteFile[], id: number) => {
+        const index = files.findIndex((file) => file.id === id);
+        if (index === -1) {
+            throw CustomError.FILE_ID_NOT_FOUND;
+        }
+        return index;
+    };
+
+    const updateURL = (id: number) => (url: string) => {
+        const updateFile = (file: EnteFile) => {
+            file = {
+                ...file,
+                msrc: url,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            };
+            if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
+                file.html = `
+                <div class="pswp-item-container">
+                    <img src="${url}" onContextMenu="return false;"/>
                     <div class="spinner-border text-light" role="status">
                         <span class="sr-only">Loading...</span>
                     </div>
                 </div>
             `;
-            delete files[index].src;
-        }
-        if (
-            files[index].metadata.fileType === FILE_TYPE.IMAGE &&
-            !files[index].src
-        ) {
-            files[index].src = url;
-        }
-        setFiles(files);
+            } else if (
+                file.metadata.fileType === FILE_TYPE.LIVE_PHOTO &&
+                !file.html
+            ) {
+                file.html = `
+                <div class="pswp-item-container">
+                    <img src="${url}" onContextMenu="return false;"/>
+                    <div class="spinner-border text-light" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            `;
+            } else if (
+                file.metadata.fileType === FILE_TYPE.IMAGE &&
+                !file.src
+            ) {
+                file.src = url;
+            }
+            return file;
+        };
+        setFiles((files) => {
+            const index = getFileIndexFromID(files, id);
+            files[index] = updateFile(files[index]);
+            return files;
+        });
+        const index = getFileIndexFromID(files, id);
+        return updateFile(files[index]);
     };
 
-    const updateSrcURL = async (index: number, url: string) => {
-        files[index] = {
-            ...files[index],
-            w: window.innerWidth,
-            h: window.innerHeight,
-        };
-        if (files[index].metadata.fileType === FILE_TYPE.VIDEO) {
-            if (await isPlaybackPossible(url)) {
-                files[index].html = `
-                <video controls>
-                    <source src="${url}" />
-                    Your browser does not support the video tag.
-                </video>
+    const updateSrcURL = async (id: number, srcURL: SourceURL) => {
+        const { videoURL, imageURL } = srcURL;
+        const isPlayable = videoURL && (await isPlaybackPossible(videoURL));
+        const updateFile = (file: EnteFile) => {
+            file = {
+                ...file,
+                w: window.innerWidth,
+                h: window.innerHeight,
+            };
+            if (file.metadata.fileType === FILE_TYPE.VIDEO) {
+                if (isPlayable) {
+                    file.html = `
+            <video controls onContextMenu="return false;">
+                <source src="${videoURL}" />
+                Your browser does not support the video tag.
+            </video>
+        `;
+                } else {
+                    file.html = `
+            <div class="pswp-item-container">
+                <img src="${file.msrc}" onContextMenu="return false;"/>
+                <div class="download-banner" >
+                    ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
+                    <a class="btn btn-outline-success" href=${videoURL} download="${file.metadata.title}"">Download</a>
+                </div>
+            </div>
             `;
-            } else {
-                files[index].html = `
-                <div class="video-loading">
-                    <img src="${files[index].msrc}" />
-                    <div class="download-message" >
+                }
+            } else if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                if (isPlayable) {
+                    file.html = `
+                <div class = 'pswp-item-container'>
+                    <img id = "live-photo-image-${file.id}" src="${imageURL}" onContextMenu="return false;"/>
+                    <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
+                        <source src="${videoURL}" />
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                `;
+                } else {
+                    file.html = `
+                <div class="pswp-item-container">
+                    <img src="${file.msrc}" onContextMenu="return false;"/>
+                    <div class="download-banner">
                         ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                        <a class="btn btn-outline-success" href=${url} download="${files[index].metadata.title}"">Download</button>
+                        <button class = "btn btn-outline-success" id = "download-btn-${file.id}">Download</button>
                     </div>
                 </div>
                 `;
+                }
+            } else {
+                file.src = imageURL;
             }
-        } else {
-            files[index].src = url;
-        }
-        setFiles(files);
+            return file;
+        };
+        setFiles((files) => {
+            const index = getFileIndexFromID(files, id);
+            files[index] = updateFile(files[index]);
+            return files;
+        });
+        setIsSourceLoaded(true);
+        const index = getFileIndexFromID(files, id);
+        return updateFile(files[index]);
     };
 
     const handleClose = (needUpdate) => {
@@ -357,7 +448,7 @@ const PhotoFrame = ({
                     selected[files[index].id] ?? false
                 }`}
                 file={files[index]}
-                updateURL={updateURL(files[index].dataIndex)}
+                updateURL={updateURL(files[index].id)}
                 onClick={onThumbnailClick(index)}
                 selectable={!isSharedCollection}
                 onSelect={handleSelect(files[index].id, index)}
@@ -373,6 +464,7 @@ const PhotoFrame = ({
                     (index >= rangeStart && index <= currentHover) ||
                     (index >= currentHover && index <= rangeStart)
                 }
+                activeCollection={activeCollection}
             />
         ) : (
             <></>
@@ -395,65 +487,98 @@ const PhotoFrame = ({
                         url =
                             await PublicCollectionDownloadManager.getThumbnail(
                                 item,
-                                publicCollectionGalleryContext.token
+                                publicCollectionGalleryContext.token,
+                                publicCollectionGalleryContext.passwordToken
                             );
                     } else {
                         url = await DownloadManager.getThumbnail(item);
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                updateURL(item.dataIndex)(url);
-                item.msrc = url;
-                if (!item.src) {
-                    item.src = url;
-                }
-                item.w = window.innerWidth;
-                item.h = window.innerHeight;
+                const newFile = updateURL(item.id)(url);
+                item.msrc = newFile.msrc;
+                item.html = newFile.html;
+                item.src = newFile.src;
+                item.w = newFile.w;
+                item.h = newFile.h;
+
                 try {
                     instance.invalidateCurrItems();
-                    instance.updateSize(true);
+                    if (instance.isOpen()) {
+                        instance.updateSize(true);
+                    }
                 } catch (e) {
+                    logError(
+                        e,
+                        'updating photoswipe after msrc url update failed'
+                    );
                     // ignore
                 }
             } catch (e) {
-                // no-op
+                logError(e, 'getSlideData failed get msrc url failed');
             }
         }
-        if (!fetching[item.dataIndex]) {
+        if (!fetching[item.id]) {
             try {
-                fetching[item.dataIndex] = true;
-                let url: string;
+                fetching[item.id] = true;
+                let urls: string[];
                 if (galleryContext.files.has(item.id)) {
-                    url = galleryContext.files.get(item.id);
+                    const mergedURL = galleryContext.files.get(item.id);
+                    urls = mergedURL.split(',');
                 } else {
+                    appContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
-                        url = await PublicCollectionDownloadManager.getFile(
+                        urls = await PublicCollectionDownloadManager.getFile(
                             item,
                             publicCollectionGalleryContext.token,
+                            publicCollectionGalleryContext.passwordToken,
                             true
                         );
                     } else {
-                        url = await DownloadManager.getFile(item, true);
+                        urls = await DownloadManager.getFile(item, true);
                     }
-                    galleryContext.files.set(item.id, url);
+                    appContext.finishLoading();
+                    const mergedURL = urls.join(',');
+                    galleryContext.files.set(item.id, mergedURL);
                 }
-                await updateSrcURL(item.dataIndex, url);
-                item.html = files[item.dataIndex].html;
-                item.src = files[item.dataIndex].src;
-                item.w = files[item.dataIndex].w;
-                item.h = files[item.dataIndex].h;
+                let imageURL;
+                let videoURL;
+                if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
+                    [imageURL, videoURL] = urls;
+                } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
+                    [videoURL] = urls;
+                } else {
+                    [imageURL] = urls;
+                }
+                setIsSourceLoaded(false);
+                const newFile = await updateSrcURL(item.id, {
+                    imageURL,
+                    videoURL,
+                });
+                item.msrc = newFile.msrc;
+                item.html = newFile.html;
+                item.src = newFile.src;
+                item.w = newFile.w;
+                item.h = newFile.h;
                 try {
                     instance.invalidateCurrItems();
-                    instance.updateSize(true);
+                    if (instance.isOpen()) {
+                        instance.updateSize(true);
+                    }
                 } catch (e) {
+                    logError(
+                        e,
+                        'updating photoswipe after src url update failed'
+                    );
                     // ignore
                 }
             } catch (e) {
+                logError(e, 'getSlideData failed get src url failed');
                 // no-op
             } finally {
-                fetching[item.dataIndex] = false;
+                fetching[item.id] = false;
             }
         }
     };
@@ -461,25 +586,7 @@ const PhotoFrame = ({
     return (
         <>
             {!isFirstLoad && files.length === 0 && !isInSearchMode ? (
-                <EmptyScreen>
-                    <img height={150} src="/images/gallery.png" />
-                    <div style={{ color: '#a6a6a6', marginTop: '16px' }}>
-                        {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION}
-                    </div>
-                    <Button
-                        variant="outline-success"
-                        onClick={openFileUploader}
-                        style={{
-                            marginTop: '32px',
-                            paddingLeft: '32px',
-                            paddingRight: '32px',
-                            paddingTop: '12px',
-                            paddingBottom: '12px',
-                            fontWeight: 900,
-                        }}>
-                        {constants.UPLOAD_FIRST_PHOTO}
-                    </Button>
-                </EmptyScreen>
+                <EmptyScreen openUploader={openUploader} />
             ) : (
                 <Container>
                     <AutoSizer>
@@ -491,7 +598,9 @@ const PhotoFrame = ({
                                 filteredData={filteredData}
                                 activeCollection={activeCollection}
                                 showAppDownloadBanner={
-                                    files.length < 30 && !isInSearchMode
+                                    files.length < 30 &&
+                                    !isInSearchMode &&
+                                    !deduplicateContext.isOnDeduplicatePage
                                 }
                                 resetFetching={resetFetching}
                             />
@@ -506,6 +615,8 @@ const PhotoFrame = ({
                         favItemIds={favItemIds}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
+                        enableDownload={enableDownload}
+                        isSourceLoaded={isSourceLoaded}
                     />
                 </Container>
             )}

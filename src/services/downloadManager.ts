@@ -5,14 +5,16 @@ import {
     generateStreamFromArrayBuffer,
     convertForPreview,
     needsConversionForPreview,
+    createTypedObjectURL,
 } from 'utils/file';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
+import { CustomError } from 'utils/error';
 
 class DownloadManager {
-    private fileObjectURLPromise = new Map<string, Promise<string>>();
+    private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
     public async getThumbnail(
@@ -76,6 +78,9 @@ class DownloadManager {
             { 'X-Auth-Token': token },
             { responseType: 'arraybuffer', timeout }
         );
+        if (typeof resp.data === 'undefined') {
+            throw Error(CustomError.REQUEST_FAILED);
+        }
         const worker = await new CryptoWorker();
         const decrypted: Uint8Array = await worker.decryptThumbnail(
             new Uint8Array(resp.data),
@@ -97,11 +102,25 @@ class DownloadManager {
         try {
             const getFilePromise = async (convert: boolean) => {
                 const fileStream = await this.downloadFile(file, tokenOverride);
-                let fileBlob = await new Response(fileStream).blob();
+                const fileBlob = await new Response(fileStream).blob();
                 if (convert) {
-                    fileBlob = await convertForPreview(file, fileBlob);
+                    const convertedBlobs = await convertForPreview(
+                        file,
+                        fileBlob
+                    );
+                    return await Promise.all(
+                        convertedBlobs.map(
+                            async (blob) =>
+                                await createTypedObjectURL(
+                                    blob,
+                                    file.metadata.title
+                                )
+                        )
+                    );
                 }
-                return URL.createObjectURL(fileBlob);
+                return [
+                    await createTypedObjectURL(fileBlob, file.metadata.title),
+                ];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
                 this.fileObjectURLPromise.set(
@@ -109,8 +128,8 @@ class DownloadManager {
                     getFilePromise(shouldBeConverted)
                 );
             }
-            const fileURL = await this.fileObjectURLPromise.get(fileKey);
-            return fileURL;
+            const fileURLs = await this.fileObjectURLPromise.get(fileKey);
+            return fileURLs;
         } catch (e) {
             this.fileObjectURLPromise.delete(fileKey);
             logError(e, 'Failed to get File');
@@ -143,6 +162,9 @@ class DownloadManager {
                 { 'X-Auth-Token': token },
                 { responseType: 'arraybuffer', timeout }
             );
+            if (typeof resp.data === 'undefined') {
+                throw Error(CustomError.REQUEST_FAILED);
+            }
             const decrypted: any = await worker.decryptFile(
                 new Uint8Array(resp.data),
                 await worker.fromB64(file.file.decryptionHeader),

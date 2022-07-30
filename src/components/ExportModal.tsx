@@ -1,42 +1,43 @@
 import isElectron from 'is-electron';
-import React, { useEffect, useState } from 'react';
-import { Button } from 'react-bootstrap';
+import React, { useEffect, useMemo, useState } from 'react';
 import exportService from 'services/exportService';
 import { ExportProgress, ExportStats } from 'types/export';
 import { getLocalFiles } from 'services/fileService';
 import { User } from 'types/user';
-import styled from 'styled-components';
+import {
+    Button,
+    Dialog,
+    DialogContent,
+    Divider,
+    Stack,
+    styled,
+    Tooltip,
+} from '@mui/material';
 import { sleep } from 'utils/common';
 import { getExportRecordFileUID } from 'utils/export';
 import { logError } from 'utils/sentry';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
-import { Label, Row, Value } from './Container';
+import { FlexWrapper, Label, Value } from './Container';
 import ExportFinished from './ExportFinished';
 import ExportInit from './ExportInit';
 import ExportInProgress from './ExportInProgress';
-import FolderIcon from './icons/FolderIcon';
-import InProgressIcon from './icons/InProgressIcon';
-import MessageDialog from './MessageDialog';
+import FolderIcon from '@mui/icons-material/Folder';
 import { ExportStage, ExportType } from 'constants/export';
+import EnteSpinner from './EnteSpinner';
+import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
+import MoreHoriz from '@mui/icons-material/MoreHoriz';
+import OverflowMenu from './OverflowMenu/menu';
+import { OverflowMenuOption } from './OverflowMenu/option';
+import { convertBytesToHumanReadable } from 'utils/file/size';
+import { CustomError } from 'utils/error';
+import { getLocalUserDetails } from 'utils/user';
 
-const FolderIconWrapper = styled.div`
-    width: 15%;
-    margin-left: 10px;
-    cursor: pointer;
-    padding: 3px;
-    border: 1px solid #444;
-    border-radius: 15%;
-    &:hover {
-        background-color: #444;
-    }
-`;
-
-const ExportFolderPathContainer = styled.span`
+const ExportFolderPathContainer = styled('span')`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 200px;
+    width: 100%;
 
     /* Beginning of string */
     direction: rtl;
@@ -46,9 +47,9 @@ const ExportFolderPathContainer = styled.span`
 interface Props {
     show: boolean;
     onHide: () => void;
-    usage: string;
 }
 export default function ExportModal(props: Props) {
+    const userDetails = useMemo(() => getLocalUserDetails(), []);
     const [exportStage, setExportStage] = useState(ExportStage.INIT);
     const [exportFolder, setExportFolder] = useState('');
     const [exportSize, setExportSize] = useState('');
@@ -146,8 +147,8 @@ export default function ExportModal(props: Props) {
     }, [props.show]);
 
     useEffect(() => {
-        setExportSize(props.usage);
-    }, [props.usage]);
+        setExportSize(convertBytesToHumanReadable(userDetails?.usage));
+    }, [userDetails]);
 
     // =============
     // STATE UPDATERS
@@ -179,11 +180,7 @@ export default function ExportModal(props: Props) {
     const preExportRun = async () => {
         const exportFolder = getData(LS_KEYS.EXPORT)?.folder;
         if (!exportFolder) {
-            const folderSelected = await selectExportDirectory();
-            if (!folderSelected) {
-                // no-op as select folder aborted
-                return;
-            }
+            await selectExportDirectory();
         }
         updateExportStage(ExportStage.INPROGRESS);
         await sleep(100);
@@ -193,98 +190,121 @@ export default function ExportModal(props: Props) {
             updateExportStage(ExportStage.FINISHED);
             await sleep(100);
             updateExportTime(Date.now());
-            syncExportStatsWithReport();
+            syncExportStatsWithRecord();
         }
-    };
-    const startExport = async () => {
-        await preExportRun();
-        updateExportProgress({ current: 0, total: 0 });
-        const exportResult = await exportService.exportFiles(
-            updateExportProgress,
-            ExportType.NEW
-        );
-        await postExportRun(exportResult);
-    };
-
-    const stopExport = async () => {
-        exportService.stopRunningExport();
-        postExportRun();
-    };
-
-    const pauseExport = () => {
-        updateExportStage(ExportStage.PAUSED);
-        exportService.pauseRunningExport();
-        postExportRun({ paused: true });
-    };
-
-    const resumeExport = async () => {
-        const exportRecord = await exportService.getExportRecord();
-        await preExportRun();
-
-        const pausedStageProgress = exportRecord.progress;
-        setExportProgress(pausedStageProgress);
-
-        const updateExportStatsWithOffset = (progress: ExportProgress) =>
-            updateExportProgress({
-                current: pausedStageProgress.current + progress.current,
-                total: pausedStageProgress.current + progress.total,
-            });
-        const exportResult = await exportService.exportFiles(
-            updateExportStatsWithOffset,
-            ExportType.PENDING
-        );
-
-        await postExportRun(exportResult);
-    };
-
-    const retryFailedExport = async () => {
-        await preExportRun();
-        updateExportProgress({ current: 0, total: exportStats.failed });
-
-        const exportResult = await exportService.exportFiles(
-            updateExportProgress,
-            ExportType.RETRY_FAILED
-        );
-        await postExportRun(exportResult);
-    };
-
-    const syncExportStatsWithReport = async () => {
-        const exportRecord = await exportService.getExportRecord();
-        const failed = exportRecord?.failedFiles?.length ?? 0;
-        const success = exportRecord?.exportedFiles?.length ?? 0;
-        setExportStats({ failed, success });
     };
 
     const selectExportDirectory = async () => {
         const newFolder = await exportService.selectExportDirectory();
         if (newFolder) {
             updateExportFolder(newFolder);
-            return true;
         } else {
-            return false;
+            throw Error(CustomError.REQUEST_CANCELLED);
         }
     };
 
-    const ExportDynamicState = () => {
+    const syncExportStatsWithRecord = async () => {
+        const exportRecord = await exportService.getExportRecord();
+        const failed = exportRecord?.failedFiles?.length ?? 0;
+        const success = exportRecord?.exportedFiles?.length ?? 0;
+        setExportStats({ failed, success });
+    };
+
+    // =============
+    // UI functions
+    // =============
+
+    const startExport = async () => {
+        try {
+            await preExportRun();
+            updateExportProgress({ current: 0, total: 0 });
+            const exportResult = await exportService.exportFiles(
+                updateExportProgress,
+                ExportType.NEW
+            );
+            await postExportRun(exportResult);
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'startExport failed');
+            }
+        }
+    };
+
+    const stopExport = async () => {
+        try {
+            exportService.stopRunningExport();
+            postExportRun();
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'stopExport failed');
+            }
+        }
+    };
+
+    const pauseExport = () => {
+        try {
+            updateExportStage(ExportStage.PAUSED);
+            exportService.pauseRunningExport();
+            postExportRun({ paused: true });
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'pauseExport failed');
+            }
+        }
+    };
+
+    const resumeExport = async () => {
+        try {
+            const exportRecord = await exportService.getExportRecord();
+            await preExportRun();
+
+            const pausedStageProgress = exportRecord.progress;
+            setExportProgress(pausedStageProgress);
+
+            const updateExportStatsWithOffset = (progress: ExportProgress) =>
+                updateExportProgress({
+                    current: pausedStageProgress.current + progress.current,
+                    total: pausedStageProgress.current + progress.total,
+                });
+            const exportResult = await exportService.exportFiles(
+                updateExportStatsWithOffset,
+                ExportType.PENDING
+            );
+
+            await postExportRun(exportResult);
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'resumeExport failed');
+            }
+        }
+    };
+
+    const retryFailedExport = async () => {
+        try {
+            await preExportRun();
+            updateExportProgress({ current: 0, total: exportStats.failed });
+
+            const exportResult = await exportService.exportFiles(
+                updateExportProgress,
+                ExportType.RETRY_FAILED
+            );
+            await postExportRun(exportResult);
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'retryFailedExport failed');
+            }
+        }
+    };
+
+    const ExportDynamicContent = () => {
         switch (exportStage) {
             case ExportStage.INIT:
-                return (
-                    <ExportInit
-                        {...props}
-                        exportFolder={exportFolder}
-                        exportSize={exportSize}
-                        updateExportFolder={updateExportFolder}
-                        startExport={startExport}
-                        selectExportDirectory={selectExportDirectory}
-                    />
-                );
+                return <ExportInit startExport={startExport} />;
+
             case ExportStage.INPROGRESS:
             case ExportStage.PAUSED:
                 return (
                     <ExportInProgress
-                        {...props}
-                        exportFolder={exportFolder}
-                        exportSize={exportSize}
                         exportStage={exportStage}
                         exportProgress={exportProgress}
                         resumeExport={resumeExport}
@@ -295,10 +315,7 @@ export default function ExportModal(props: Props) {
             case ExportStage.FINISHED:
                 return (
                     <ExportFinished
-                        {...props}
-                        exportFolder={exportFolder}
-                        exportSize={exportSize}
-                        updateExportFolder={updateExportFolder}
+                        onHide={props.onHide}
                         lastExportTime={lastExportTime}
                         exportStats={exportStats}
                         exportFiles={startExport}
@@ -312,53 +329,90 @@ export default function ExportModal(props: Props) {
     };
 
     return (
-        <MessageDialog
-            show={props.show}
-            onHide={props.onHide}
-            attributes={{
-                title: constants.EXPORT_DATA,
-            }}>
-            <div
-                style={{
-                    borderBottom: '1px solid #444',
-                    marginBottom: '20px',
-                    padding: '0 5%',
-                    width: '450px',
-                }}>
-                <Row>
-                    <Label width="40%">{constants.DESTINATION}</Label>
-                    <Value width="60%">
-                        {!exportFolder ? (
-                            <Button
-                                variant={'outline-success'}
-                                size={'sm'}
-                                onClick={selectExportDirectory}>
-                                {constants.SELECT_FOLDER}
-                            </Button>
-                        ) : (
-                            <>
-                                <ExportFolderPathContainer>
-                                    {exportFolder}
-                                </ExportFolderPathContainer>
-                                {(exportStage === ExportStage.FINISHED ||
-                                    exportStage === ExportStage.INIT) && (
-                                    <FolderIconWrapper
-                                        onClick={selectExportDirectory}>
-                                        <FolderIcon />
-                                    </FolderIconWrapper>
-                                )}
-                            </>
+        <Dialog open={props.show} onClose={props.onHide} maxWidth="xs">
+            <DialogTitleWithCloseButton onClose={props.onHide}>
+                {constants.EXPORT_DATA}
+            </DialogTitleWithCloseButton>
+            <DialogContent>
+                <Stack spacing={2}>
+                    <ExportDirectory
+                        exportFolder={exportFolder}
+                        selectExportDirectory={selectExportDirectory}
+                        exportStage={exportStage}
+                    />
+                    <ExportSize exportSize={exportSize} />
+                </Stack>
+            </DialogContent>
+            <Divider />
+            <ExportDynamicContent />
+        </Dialog>
+    );
+}
+
+function ExportDirectory({ exportFolder, selectExportDirectory, exportStage }) {
+    return (
+        <FlexWrapper>
+            <Label width="30%">{constants.DESTINATION}</Label>
+            <Value width="70%">
+                {!exportFolder ? (
+                    <Button color={'accent'} onClick={selectExportDirectory}>
+                        {constants.SELECT_FOLDER}
+                    </Button>
+                ) : (
+                    <>
+                        <Tooltip title={exportFolder}>
+                            <ExportFolderPathContainer>
+                                {exportFolder}
+                            </ExportFolderPathContainer>
+                        </Tooltip>
+                        {(exportStage === ExportStage.FINISHED ||
+                            exportStage === ExportStage.INIT) && (
+                            <ExportDirectoryOption
+                                selectExportDirectory={selectExportDirectory}
+                            />
                         )}
-                    </Value>
-                </Row>
-                <Row>
-                    <Label width="40%">{constants.TOTAL_EXPORT_SIZE} </Label>
-                    <Value width="60%">
-                        {exportSize ? `${exportSize}` : <InProgressIcon />}
-                    </Value>
-                </Row>
-            </div>
-            <ExportDynamicState />
-        </MessageDialog>
+                    </>
+                )}
+            </Value>
+        </FlexWrapper>
+    );
+}
+
+function ExportSize({ exportSize }) {
+    return (
+        <FlexWrapper>
+            <Label width="30%">{constants.EXPORT_SIZE} </Label>
+            <Value width="70%">
+                {exportSize ? `${exportSize}` : <EnteSpinner />}
+            </Value>
+        </FlexWrapper>
+    );
+}
+
+function ExportDirectoryOption({ selectExportDirectory }) {
+    const handleClick = () => {
+        try {
+            selectExportDirectory();
+        } catch (e) {
+            if (e.message !== CustomError.REQUEST_CANCELLED) {
+                logError(e, 'startExport failed');
+            }
+        }
+    };
+    return (
+        <OverflowMenu
+            triggerButtonProps={{
+                sx: {
+                    ml: 1,
+                },
+            }}
+            ariaControls={'export-option'}
+            triggerButtonIcon={<MoreHoriz />}>
+            <OverflowMenuOption
+                onClick={handleClick}
+                startIcon={<FolderIcon />}>
+                {constants.CHANGE_FOLDER}
+            </OverflowMenuOption>
+        </OverflowMenu>
     );
 }

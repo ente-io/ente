@@ -1,12 +1,14 @@
 import { FILE_TYPE } from 'constants/file';
 import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
-import { BLACK_THUMBNAIL_BASE64 } from '../../../public/images/black-thumbnail-b64';
-import FFmpegService from 'services/ffmpegService';
-import { convertToHumanReadable } from 'utils/billing';
+import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
+import FFmpegService from 'services/ffmpeg/ffmpegService';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 import { isFileHEIC } from 'utils/file';
-import { FileTypeInfo } from 'types/upload';
-import { getUint8ArrayView } from './readFileService';
+import { ElectronFile, FileTypeInfo } from 'types/upload';
+import { getUint8ArrayView } from '../readerService';
+import HEICConverter from 'services/heicConverter/heicConverterService';
+import { getFileNameSize, addLogLine } from 'utils/logging';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -14,7 +16,7 @@ const MAX_THUMBNAIL_SIZE = 100 * 1024;
 const MIN_QUALITY = 0.5;
 const MAX_QUALITY = 0.7;
 
-const WAIT_TIME_THUMBNAIL_GENERATION = 10 * 1000;
+const WAIT_TIME_THUMBNAIL_GENERATION = 30 * 1000;
 
 interface Dimension {
     width: number;
@@ -22,29 +24,46 @@ interface Dimension {
 }
 
 export async function generateThumbnail(
-    worker,
-    reader: FileReader,
-    file: File,
+    file: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ): Promise<{ thumbnail: Uint8Array; hasStaticThumbnail: boolean }> {
     try {
+        addLogLine(`generating thumbnail for ${getFileNameSize(file)}`);
         let hasStaticThumbnail = false;
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
         try {
+            if (!(file instanceof File)) {
+                file = new File([await file.blob()], file.name);
+            }
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
                 const isHEIC = isFileHEIC(fileTypeInfo.exactType);
-                canvas = await generateImageThumbnail(worker, file, isHEIC);
+                canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 try {
+                    addLogLine(
+                        `ffmpeg generateThumbnail called for ${getFileNameSize(
+                            file
+                        )}`
+                    );
+
                     const thumb = await FFmpegService.generateThumbnail(file);
+                    addLogLine(
+                        `ffmpeg thumbnail successfully generated ${getFileNameSize(
+                            file
+                        )}`
+                    );
                     const dummyImageFile = new File([thumb], file.name);
                     canvas = await generateImageThumbnail(
-                        worker,
                         dummyImageFile,
                         false
                     );
                 } catch (e) {
+                    addLogLine(
+                        `ffmpeg thumbnail generated failed  ${getFileNameSize(
+                            file
+                        )} error: ${e.message}`
+                    );
                     logError(e, 'failed to generate thumbnail using ffmpeg', {
                         fileFormat: fileTypeInfo.exactType,
                     });
@@ -52,14 +71,22 @@ export async function generateThumbnail(
                 }
             }
             const thumbnailBlob = await thumbnailCanvasToBlob(canvas);
-            thumbnail = await getUint8ArrayView(reader, thumbnailBlob);
+            thumbnail = await getUint8ArrayView(thumbnailBlob);
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
+            addLogLine(
+                `thumbnail successfully generated ${getFileNameSize(file)}`
+            );
         } catch (e) {
             logError(e, 'uploading static thumbnail', {
                 fileFormat: fileTypeInfo.exactType,
             });
+            addLogLine(
+                `thumbnail generation failed ${getFileNameSize(file)} error: ${
+                    e.message
+                }`
+            );
             thumbnail = Uint8Array.from(atob(BLACK_THUMBNAIL_BASE64), (c) =>
                 c.charCodeAt(0)
             );
@@ -72,11 +99,7 @@ export async function generateThumbnail(
     }
 }
 
-export async function generateImageThumbnail(
-    worker,
-    file: File,
-    isHEIC: boolean
-) {
+export async function generateImageThumbnail(file: File, isHEIC: boolean) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
@@ -84,7 +107,9 @@ export async function generateImageThumbnail(
     let timeout = null;
 
     if (isHEIC) {
-        file = new File([await worker.convertHEIC2JPEG(file)], null, null);
+        addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
+        file = new File([await HEICConverter.convert(file)], file.name);
+        addLogLine(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
     imageURL = URL.createObjectURL(file);
@@ -211,7 +236,7 @@ async function thumbnailCanvasToBlob(canvas: HTMLCanvasElement) {
         logError(
             Error('thumbnail_too_large'),
             'thumbnail greater than max limit',
-            { thumbnailSize: convertToHumanReadable(thumbnailBlob.size) }
+            { thumbnailSize: convertBytesToHumanReadable(thumbnailBlob.size) }
         );
     }
 

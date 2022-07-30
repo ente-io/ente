@@ -6,8 +6,17 @@ import {
     ParsedMetadataJSON,
     Location,
     FileTypeInfo,
+    ParsedExtractedMetadata,
+    ElectronFile,
 } from 'types/upload';
-import { NULL_LOCATION } from 'constants/upload';
+import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
+import { getVideoMetadata } from './videoMetadataService';
+import {
+    parseDateFromFusedDateString,
+    getUnixTimeInMicroSeconds,
+    tryToParseDateTime,
+} from 'utils/time';
+import { getFileHash } from './hashService';
 
 interface ParsedMetadataJSONWithTitle {
     title: string;
@@ -21,46 +30,47 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
 };
 
 export async function extractMetadata(
-    receivedFile: File,
+    receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ) {
-    let exifData = null;
+    let extractedMetadata: ParsedExtractedMetadata = NULL_EXTRACTED_METADATA;
     if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-        exifData = await getExifData(receivedFile, fileTypeInfo);
+        extractedMetadata = await getExifData(receivedFile, fileTypeInfo);
+    } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
+        extractedMetadata = await getVideoMetadata(receivedFile);
     }
+    const fileHash = await getFileHash(receivedFile);
 
-    const extractedMetadata: Metadata = {
+    const metadata: Metadata = {
         title: receivedFile.name,
         creationTime:
-            exifData?.creationTime ?? receivedFile.lastModified * 1000,
+            extractedMetadata.creationTime ??
+            extractDateFromFileName(receivedFile.name) ??
+            receivedFile.lastModified * 1000,
         modificationTime: receivedFile.lastModified * 1000,
-        latitude: exifData?.location?.latitude,
-        longitude: exifData?.location?.longitude,
+        latitude: extractedMetadata.location.latitude,
+        longitude: extractedMetadata.location.longitude,
         fileType: fileTypeInfo.fileType,
+        hash: fileHash,
     };
-    return extractedMetadata;
+    return metadata;
 }
 
-export const getMetadataMapKey = (collectionID: number, title: string) =>
-    `${collectionID}_${title}`;
+export const getMetadataJSONMapKey = (
+    collectionID: number,
 
-export async function parseMetadataJSON(
-    reader: FileReader,
-    receivedFile: File
-) {
+    title: string
+) => `${collectionID}-${title}`;
+
+export async function parseMetadataJSON(receivedFile: File | ElectronFile) {
     try {
-        const metadataJSON: object = await new Promise((resolve, reject) => {
-            reader.onabort = () => reject(Error('file reading was aborted'));
-            reader.onerror = () => reject(Error('file reading has failed'));
-            reader.onload = () => {
-                const result =
-                    typeof reader.result !== 'string'
-                        ? new TextDecoder().decode(reader.result)
-                        : reader.result;
-                resolve(JSON.parse(result));
-            };
-            reader.readAsText(receivedFile);
-        });
+        if (!(receivedFile instanceof File)) {
+            receivedFile = new File(
+                [await receivedFile.blob()],
+                receivedFile.name
+            );
+        }
+        const metadataJSON: object = JSON.parse(await receivedFile.text());
 
         const parsedMetadataJSON: ParsedMetadataJSON =
             NULL_PARSED_METADATA_JSON;
@@ -112,4 +122,40 @@ export async function parseMetadataJSON(
         logError(e, 'parseMetadataJSON failed');
         // ignore
     }
+}
+
+// tries to extract date from file name if available else returns null
+export function extractDateFromFileName(filename: string): number {
+    try {
+        filename = filename.trim();
+        let parsedDate: Date;
+        if (filename.startsWith('IMG-') || filename.startsWith('VID-')) {
+            // Whatsapp media files
+            // sample name IMG-20171218-WA0028.jpg
+            parsedDate = parseDateFromFusedDateString(filename.split('-')[1]);
+        } else if (filename.startsWith('Screenshot_')) {
+            // Screenshots on droid
+            // sample name Screenshot_20181227-152914.jpg
+            parsedDate = parseDateFromFusedDateString(
+                filename.replaceAll('Screenshot_', '')
+            );
+        } else if (filename.startsWith('signal-')) {
+            // signal images
+            // sample name :signal-2018-08-21-100217.jpg
+            const dateString = convertSignalNameToFusedDateString(filename);
+            parsedDate = parseDateFromFusedDateString(dateString);
+        }
+        if (!parsedDate) {
+            parsedDate = tryToParseDateTime(filename);
+        }
+        return getUnixTimeInMicroSeconds(parsedDate);
+    } catch (e) {
+        logError(e, 'failed to extract date From FileName ');
+        return null;
+    }
+}
+
+function convertSignalNameToFusedDateString(filename: string) {
+    const dateStringParts = filename.split('-');
+    return `${dateStringParts[1]}${dateStringParts[2]}${dateStringParts[3]}-${dateStringParts[4]}`;
 }

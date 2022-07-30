@@ -32,3 +32,16 @@ export const decodeMotionPhoto = async (
     }
     return motionPhoto;
 };
+
+export const encodeMotionPhoto = async (motionPhoto: MotionPhoto) => {
+    const zip = new JSZip();
+    zip.file(
+        'image' + fileExtensionWithDot(motionPhoto.imageNameTitle),
+        motionPhoto.image
+    );
+    zip.file(
+        'video' + fileExtensionWithDot(motionPhoto.videoNameTitle),
+        motionPhoto.video
+    );
+    return await zip.generateAsync({ type: 'uint8array' });
+};

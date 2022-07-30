@@ -5,3 +5,7 @@
 [submodule "thirdparty/tesseract"]
 	path = thirdparty/tesseract
 	url = git@github.com:abhinavkgrd/tesseract.js.git
+[submodule "ffmpeg-wasm"]
+	path = thirdparty/ffmpeg-wasm
+	url = https://github.com/abhinavkgrd/ffmpeg.wasm.git
+	branch = single-thread

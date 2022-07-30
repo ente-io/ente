@@ -41,6 +41,9 @@ export interface User {
     encryptedToken: string;
     isTwoFactorEnabled: boolean;
     twoFactorSessionID: string;
+    usage: number;
+    fileCount: number;
+    sharedCollectionCount: number;
 }
 export interface EmailVerificationResponse {
     id: number;
@@ -67,10 +70,24 @@ export interface TwoFactorRecoveryResponse {
     secretDecryptionNonce: string;
 }
 
+export interface FamilyMember {
+    email: string;
+    usage: number;
+    id: string;
+    isAdmin: boolean;
+}
+
+export interface FamilyData {
+    storage: number;
+    expiry: number;
+    members: FamilyMember[];
+}
+
 export interface UserDetails {
     email: string;
     usage: number;
     fileCount: number;
     sharedCollectionCount: number;
     subscription: Subscription;
+    familyData?: FamilyData;
 }

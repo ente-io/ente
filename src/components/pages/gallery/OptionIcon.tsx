@@ -1,7 +1,6 @@
 import React from 'react';
-import styled from 'styled-components';
-
-export const OptionIconWrapper = styled.div`
+import { styled } from '@mui/material';
+export const OptionIconWrapper = styled('div')`
     display: inline-block;
     opacity: 0;
     font-weight: bold;

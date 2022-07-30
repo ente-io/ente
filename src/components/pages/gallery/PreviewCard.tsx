@@ -1,33 +1,38 @@
 import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
-import styled from 'styled-components';
-import PlayCircleOutline from 'components/icons/PlayCircleOutline';
+import { styled } from '@mui/material';
+import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
 import DownloadManager from 'services/downloadManager';
-import useLongPress from 'utils/common/useLongPress';
+import useLongPress from 'hooks/useLongPress';
 import { GalleryContext } from 'pages/gallery';
-import { GAP_BTW_TILES } from 'constants/gallery';
-import {
-    defaultPublicCollectionGalleryContext,
-    PublicCollectionGalleryContext,
-} from 'utils/publicCollectionGallery';
+import { GAP_BTW_TILES, IMAGE_CONTAINER_MAX_WIDTH } from 'constants/gallery';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
+import LivePhotoIcon from '@mui/icons-material/LightMode';
+import { isLivePhoto } from 'utils/file';
+import { DeduplicateContext } from 'pages/deduplicate';
+import { logError } from 'utils/sentry';
+import { Overlay } from 'components/Container';
+import { TRASH_SECTION } from 'constants/collection';
+import { formatDateRelative } from 'utils/time';
 
 interface IProps {
     file: EnteFile;
-    updateURL: (url: string) => void;
+    updateURL?: (url: string) => EnteFile;
     onClick?: () => void;
     forcedEnable?: boolean;
     selectable?: boolean;
     selected?: boolean;
-    onSelect: (checked: boolean) => void;
+    onSelect?: (checked: boolean) => void;
     onHover?: () => void;
     onRangeSelect?: () => void;
     isRangeSelectActive?: boolean;
     selectOnClick?: boolean;
     isInsSelectRange?: boolean;
+    activeCollection?: number;
 }
 
-const Check = styled.input<{ active: boolean }>`
+const Check = styled('input')<{ active: boolean }>`
     appearance: none;
     position: absolute;
     z-index: 10;
@@ -86,41 +91,72 @@ const Check = styled.input<{ active: boolean }>`
     }
 `;
 
-export const HoverOverlay = styled.div<{ checked: boolean }>`
+export const HoverOverlay = styled('div')<{ checked: boolean }>`
     opacity: 0;
     left: 0;
     top: 0;
     outline: none;
     height: 40%;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-weight: 900;
     position: absolute;
     ${(props) =>
         !props.checked &&
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
 `;
 
-export const InSelectRangeOverLay = styled.div<{ active: boolean }>`
-    opacity: ${(props) => (!props.active ? 0 : 1)});
+export const InSelectRangeOverLay = styled('div')<{ active: boolean }>`
+    opacity: ${(props) => (!props.active ? 0 : 1)};
     left: 0;
     top: 0;
     outline: none;
     height: 100%;
     width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-weight: 900;
     position: absolute;
     ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
-const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
+export const FileAndCollectionNameOverlay = styled('div')`
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    max-height: 40%;
+    width: 100%;
+    background: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 2));
+    & > p {
+        max-width: calc(${IMAGE_CONTAINER_MAX_WIDTH}px - 10px);
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        margin: 2px;
+        text-align: center;
+    }
+    padding: 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #fff;
+    position: absolute;
+`;
+
+export const SelectedOverlay = styled('div')<{ selected: boolean }>`
+    z-index: 5;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
+    border-radius: 4px;
+`;
+
+export const LivePhotoIndicatorOverlay = styled(Overlay)`
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
+`;
+
+const Cont = styled('div')<{ disabled: boolean }>`
     background: #222;
     display: flex;
     width: fit-content;
@@ -136,7 +172,6 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
         max-width: 100%;
         min-height: 100%;
         flex: 1;
-        ${(props) => props.selected && 'border: 5px solid #51cd7c;'}
         pointer-events: none;
     }
 
@@ -158,11 +193,12 @@ const Cont = styled.div<{ disabled: boolean; selected: boolean }>`
     &:hover ${HoverOverlay} {
         opacity: 1;
     }
+    border-radius: 4px;
 `;
 
 export default function PreviewCard(props: IProps) {
     const [imgSrc, setImgSrc] = useState<string>();
-    const { thumbs, files } = useContext(GalleryContext);
+    const { thumbs } = useContext(GalleryContext);
     const {
         file,
         onClick,
@@ -178,9 +214,11 @@ export default function PreviewCard(props: IProps) {
         isInsSelectRange,
     } = props;
     const isMounted = useRef(true);
-    const publicCollectionGalleryContext =
-        useContext(PublicCollectionGalleryContext) ??
-        defaultPublicCollectionGalleryContext;
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+    const deduplicateContext = useContext(DeduplicateContext);
+
     useLayoutEffect(() => {
         if (file && !file.msrc) {
             const main = async () => {
@@ -192,7 +230,8 @@ export default function PreviewCard(props: IProps) {
                         url =
                             await PublicCollectionDownloadManager.getThumbnail(
                                 file,
-                                publicCollectionGalleryContext.token
+                                publicCollectionGalleryContext.token,
+                                publicCollectionGalleryContext.passwordToken
                             );
                     } else {
                         url = await DownloadManager.getThumbnail(file);
@@ -200,13 +239,17 @@ export default function PreviewCard(props: IProps) {
                     if (isMounted.current) {
                         setImgSrc(url);
                         thumbs.set(file.id, url);
-                        file.msrc = url;
-                        if (!file.src) {
-                            file.src = url;
+                        if (updateURL) {
+                            const newFile = updateURL(url);
+                            file.msrc = newFile.msrc;
+                            file.html = newFile.html;
+                            file.src = newFile.src;
+                            file.w = newFile.w;
+                            file.h = newFile.h;
                         }
-                        updateURL(url);
                     }
                 } catch (e) {
+                    logError(e, 'preview card useEffect failed');
                     // no-op
                 }
             };
@@ -215,17 +258,11 @@ export default function PreviewCard(props: IProps) {
                 const thumbImgSrc = thumbs.get(file.id);
                 setImgSrc(thumbImgSrc);
                 file.msrc = thumbImgSrc;
-                if (!file.src) {
-                    if (files.has(file.id)) {
-                        file.src = files.get(file.id);
-                    } else {
-                        file.src = thumbImgSrc;
-                    }
-                }
             } else {
                 main();
             }
         }
+
         return () => {
             // cool cool cool
             isMounted.current = false;
@@ -260,13 +297,13 @@ export default function PreviewCard(props: IProps) {
             onHover();
         }
     };
+
     return (
         <Cont
             id={`thumb-${file?.id}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
             disabled={!forcedEnable && !file?.msrc && !imgSrc}
-            selected={selected}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
             {selectable && (
                 <Check
@@ -278,11 +315,36 @@ export default function PreviewCard(props: IProps) {
                 />
             )}
             {(file?.msrc || imgSrc) && <img src={file?.msrc || imgSrc} />}
-            {file?.metadata.fileType === 1 && <PlayCircleOutline />}
+            {file?.metadata.fileType === 1 && <PlayCircleOutlineOutlinedIcon />}
+            <SelectedOverlay selected={selected} />
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
                 active={isRangeSelectActive && isInsSelectRange}
             />
+            {isLivePhoto(file) && <LivePhotoIndicator />}
+            {deduplicateContext.isOnDeduplicatePage && (
+                <FileAndCollectionNameOverlay>
+                    <p>{file.metadata.title}</p>
+                    <p>
+                        {deduplicateContext.collectionNameMap.get(
+                            file.collectionID
+                        )}
+                    </p>
+                </FileAndCollectionNameOverlay>
+            )}
+            {props?.activeCollection === TRASH_SECTION && file.isTrashed && (
+                <FileAndCollectionNameOverlay>
+                    <p>{formatDateRelative(file.deleteBy / 1000)}</p>
+                </FileAndCollectionNameOverlay>
+            )}
         </Cont>
+    );
+}
+
+function LivePhotoIndicator() {
+    return (
+        <LivePhotoIndicatorOverlay>
+            <LivePhotoIcon />
+        </LivePhotoIndicatorOverlay>
     );
 }

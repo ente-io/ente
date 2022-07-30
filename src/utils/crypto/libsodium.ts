@@ -1,5 +1,6 @@
 import sodium, { StateAddress } from 'libsodium-wrappers';
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
+import assert from 'assert';
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,
@@ -251,6 +252,33 @@ export async function hash(input: string) {
     );
 }
 
+export async function initChunkHashing() {
+    await sodium.ready;
+    const hashState = sodium.crypto_generichash_init(
+        null,
+        sodium.crypto_generichash_BYTES_MAX
+    );
+    return hashState;
+}
+
+export async function hashFileChunk(
+    hashState: sodium.StateAddress,
+    chunk: Uint8Array
+) {
+    await sodium.ready;
+    sodium.crypto_generichash_update(hashState, chunk);
+}
+
+export async function completeChunkHashing(hashState: sodium.StateAddress) {
+    await sodium.ready;
+    const hash = sodium.crypto_generichash_final(
+        hashState,
+        sodium.crypto_generichash_BYTES_MAX
+    );
+    const hashString = toB64(hash);
+    return hashString;
+}
+
 export async function deriveKey(
     passphrase: string,
     salt: string,
@@ -290,8 +318,15 @@ export async function deriveSensitiveKey(passphrase: string, salt: string) {
     }
 }
 
-export async function deriveIntermediateKey(passphrase: string, salt: string) {
+export async function deriveInteractiveKey(passphrase: string, salt: string) {
     await sodium.ready;
+    // default algo can change in future when we upgrade library.
+    // this assert act as a safegaurd for us to identify any such issue.
+    assert(
+        sodium.crypto_pwhash_ALG_DEFAULT ===
+            sodium.crypto_pwhash_ALG_ARGON2ID13,
+        'mismatch in expected password hashing algorithm'
+    );
     const key = await toB64(
         sodium.crypto_pwhash(
             sodium.crypto_secretbox_KEYBYTES,

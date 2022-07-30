@@ -1,5 +1,6 @@
 import { Person, Thing } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
+import { EnteFile } from 'types/file';
 
 export type Bbox = [number, number, number, number];
 
@@ -32,3 +33,25 @@ export interface Suggestion {
     value: Bbox | DateValue | number | Person | IndexStatus | Thing;
     hide?: boolean;
 }
+
+export type Search = {
+    date?: DateValue;
+    location?: Bbox;
+    collection?: number;
+    file?: number;
+};
+
+export type SearchResultSummary = {
+    optionName: string;
+    fileCount: number;
+};
+
+export interface SearchOption extends Suggestion {
+    fileCount: number;
+    previewFiles: EnteFile[];
+}
+
+export type UpdateSearch = (
+    search: Search,
+    summary: SearchResultSummary
+) => void;

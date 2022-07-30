@@ -1,15 +1,14 @@
-import React, { createContext, useEffect, useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
-import Navbar from 'components/Navbar';
+import React, { createContext, useEffect, useRef, useState } from 'react';
+import AppNavbar from 'components/Navbar/app';
 import constants from 'utils/strings/constants';
 import { useRouter } from 'next/router';
-import Container from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'photoswipe/dist/photoswipe.css';
+import 'styles/global.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { logError } from '../utils/sentry';
 // import { Workbox } from 'workbox-window';
-import { getEndpoint } from 'utils/common/apiUtil';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
@@ -20,493 +19,22 @@ import {
     getMLSearchConfig,
     updateMLSearchConfig,
 } from 'utils/machineLearning/config';
-import { getAlbumSiteHost } from 'constants/pages';
-import GoToEnte from 'components/pages/sharedAlbum/GoToEnte';
+import { addLogLine } from 'utils/logging';
+import LoadingBar from 'react-top-loading-bar';
+import DialogBox from 'components/DialogBox';
+import { styled, ThemeProvider } from '@mui/material/styles';
+import darkThemeOptions from 'themes/darkThemeOptions';
+import { CssBaseline, useMediaQuery } from '@mui/material';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as types from 'styled-components/cssprop'; // need to css prop on styled component
+import { SetDialogBoxAttributes, DialogBoxAttributes } from 'types/dialogBox';
+import {
+    getFamilyPortalRedirectURL,
+    getRoadmapRedirectURL,
+} from 'services/userService';
+import { CustomError } from 'utils/error';
 
-const GlobalStyles = createGlobalStyle`
-/* ubuntu-regular - latin */
-@font-face {
-  font-family: 'Ubuntu';
-  font-style: normal;
-  font-weight: 400;
-  src: local(''),
-       url('/fonts/ubuntu-v15-latin-regular.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/ubuntu-v15-latin-regular.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-
-/* ubuntu-700 - latin */
-@font-face {
-  font-family: 'Ubuntu';
-  font-style: normal;
-  font-weight: 700;
-  src: local(''),
-       url('/fonts/ubuntu-v15-latin-700.woff2') format('woff2'), /* Chrome 26+, Opera 23+, Firefox 39+ */
-       url('/fonts/ubuntu-v15-latin-700.woff') format('woff'); /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
-}
-    html, body {
-        padding: 0;
-        margin: 0;
-        font-family: Arial, Helvetica, sans-serif;
-        height: 100%;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        background-color: #191919;
-        color: #aaa;
-        font-family:Ubuntu, Arial, sans-serif !important;
-    }
-    :is(h1, h2, h3, h4, h5, h6) {
-        color: #d7d7d7;
-      }
-
-    #__next {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .material-icons {
-        vertical-align: middle;
-        margin: 8px;
-    }
-    
-    .pswp__item video {
-        width: 100%;
-        height: 100%;
-    }
-
-    .video-loading {
-        width: 100%;
-        height: 100%;
-        position: relative;
-    }
-
-    .video-loading > img {
-        object-fit: contain;
-        width: 100%;
-        height: 100%;
-    }
-
-    .video-loading > div.spinner-border {
-        position: relative;
-        top: -50vh;
-        left: 50vw;
-    }
-
-    
-
-    .video-loading > div.download-message {
-        position: relative;
-        top: -60vh;
-        left: 0;
-        height: 16vh;
-        padding:2vh 0;
-        background-color: #151414;
-        color:#ddd;
-        display: flex;
-        flex-direction:column;
-        align-items: center;
-        justify-content: space-around;
-        opacity: 0.8;
-        font-size:20px;
-    }
-    .download-message > a{
-        width: 130px;
-    }
-
-    :root {
-        --primary: #e26f99,
-    };
-
-    svg {
-        fill: currentColor;
-    }
-
-    .pswp__img {
-        object-fit: contain;
-    }
-    .pswp__caption{
-        font-size:20px;
-        height:10%;
-        padding-left:5%;
-        color:#eee;
-    }
-
-    .modal {
-        z-index: 2000;
-    }
-    .modal-dialog-centered {
-        min-height: -webkit-calc(80% - 3.5rem);
-        min-height: -moz-calc(80% - 3.5rem);
-        min-height: calc(80% - 3.5rem);
-    }
-    .modal .modal-header, .modal .modal-footer {
-        border-color: #444 !important;
-    }
-    .modal .modal-header .close {
-        color: #aaa;
-        text-shadow: none;
-    }
-    .modal-backdrop {
-        z-index:2000;
-        opacity:0.8 !important;
-    }
-    .modal .card , .table {
-        background-color: #202020;
-        border: none;
-    }
-    .modal .card > div {
-        border-radius: 30px;
-        overflow: hidden;
-        margin: 0 0 5px 0;
-    }
-    .modal-content {
-        border-radius:15px;
-        background-color:#202020 !important;
-    }
-    .modal-dialog{
-        margin:5vh auto;
-        width:90%;
-    }
-    .modal-body{
-        max-height:74vh;
-        overflow-y:auto;
-    }
-    .modal-xl{
-        max-width:90% !important;
-    }
-    .modal-lg {
-        max-width: 720px !important;
-      }
-    .plan-selector-modal-content {
-        width:auto;
-        margin:auto;
-    }
-    .pswp-custom {
-        opacity: 0.75;
-        transition: opacity .2s;
-        display: inline-block;
-        float: right;
-        cursor: pointer;
-        border: none;
-        height: 44px;
-        width: 44px;
-    }
-    .pswp-custom:hover {
-        opacity: 1;
-    }
-    .download-btn{
-        background: url('/download_icon.png') no-repeat;
-        background-size: 20px 20px;
-        background-position: center;
-    }
-    .info-btn{
-        background: url('/info_icon.png') no-repeat;
-        background-size: 20px 20px;
-        background-position: center;
-    }
-    .share-btn{
-        background: url('/share_icon.png') no-repeat;
-        background-size: 20px 20px;
-        background-position: center;
-    }
-    .btn.focus , .btn:focus{
-        box-shadow: none;
-    }
-    .btn-success {
-        background: #51cd7c;
-        color: #fff;
-        border-color: #51cd7c;
-    }
-    .btn-success:hover .btn-success:focus .btn-success:active {
-        background-color: #29a354;
-        border-color: #51cd7c;
-        color: #242424;
-    }
-    .btn-success:disabled {
-        background-color: #69b383;
-    }
-    .btn-outline-success {
-        background: #51cd7c;
-        color: #fff;
-        border-color: #51cd7c;
-    }
-    .btn-outline-success:hover:enabled {
-        background: #4db76c;
-        color: #fff;
-    }
-    .btn-outline-danger, .btn-outline-secondary, .btn-outline-primary{
-        border-width: 2px;
-    }
-
-    #go-to-ente{
-        background:none;
-        border-color: #3dbb69;
-        color:#51cd7c;
-    }
-    #go-to-ente:hover, #go-to-ente:focus, #go-to-ente:active {
-        color:#fff;
-        background-color: #44774d;
-    }
-    
-    a {
-        color: #fff;
-    }
-    a:hover {
-        color: #51cd7c;
-    }
-    .btn-link {
-        color: #fff;
-    }
-    .btn-link:hover {
-        color: #51cd7c;
-    }
-    .btn-link-danger {
-        color: #dc3545;
-    }
-    .btn-link-danger:hover {
-        color: #ff495a;
-    }
-    .card {
-        background-color: #242424;
-        color: #d1d1d1;
-        border-radius: 12px;
-    }
-    .jumbotron{
-        background-color: #191919;
-        color: #d1d1d1;
-        text-align: center;
-        margin-top: 50px;
-    }
-    .alert-primary {
-        background-color: rgb(235, 255, 243);
-        color: #000000;
-    }
-    .alert-success {
-        background-color: #c4ffd6;
-    }
-    .bm-burger-button {
-        position: fixed;
-        width: 24px;
-        height: 16px;
-        top:27px;
-        left: 32px;
-        z-index:100 !important;
-    }
-    .bm-burger-bars {
-        background: #bdbdbd;
-    }
-    .bm-menu-wrap {
-        top:0px;
-      }
-    .bm-menu {
-        background: #131313;
-        font-size: 1.15em;
-        color:#d1d1d1;
-        display: flex;
-    }
-    .bm-cross {
-        background: #d1d1d1;
-    }
-    .bm-cross-button {
-        top: 20px !important;
-    }
-    .bm-item-list {
-        display: flex !important;
-        flex-direction: column;
-        max-height: 100%;
-        flex: 1;
-    }
-    .bm-item {
-        padding: 20px;
-    }
-    .bm-overlay {
-        top: 0;
-        background: rgba(0, 0, 0, 0.8) !important;
-    }
-    .bg-upload-progress-bar {
-        background-color: #51cd7c;
-    }
-    .custom-switch.custom-switch-md .custom-control-label {
-        padding-left: 2rem;
-        padding-bottom: 1.5rem;
-    }
-    
-    .custom-switch.custom-switch-md .custom-control-label::before {
-        height: 1.5rem;
-        background-color: #303030;
-        border: none;
-        width: calc(2.5rem + 0.75rem);
-        border-radius: 3rem;
-    }
-    .custom-switch.custom-switch-md:active .custom-control-label::before {
-        background-color: #303030;
-    }
-    
-    .custom-switch.custom-switch-md .custom-control-label::after {
-        top:2px;
-        background:#c4c4c4;
-        width: calc(2.0rem - 4px);
-        height: calc(2.0rem - 4px);
-        border-radius: calc(2rem - (2.0rem / 2));
-        left: -38px;
-    }
-    
-    .custom-switch.custom-switch-md .custom-control-input:checked ~ .custom-control-label::after {
-        transform: translateX(calc(2.0rem - 0.25rem));
-        background:#c4c4c4;
-    }
-
-    .custom-control-input:checked ~ .custom-control-label::before {
-        background-color: #29a354;
-    }
-
-    .bold-text{
-        color: #ECECEC;
-        line-height: 24px;
-        font-size: 24px;
-    }
-    .dropdown-item:active{
-        color: #16181b;
-        text-decoration: none;
-        background-color: #e9ecef;
-    }
-    hr{
-        border-top: 1rem solid #444 !important;
-    }
-    .list-group-item:hover{
-        background-color:#343434 !important;
-    }
-    .list-group-item:active , list-group-item:focus{
-        background-color:#000 !important;
-    }
-    #button-tooltip > .arrow::before{
-        border-bottom-color:#282828 !important;
-    }
-    #button-tooltip > .arrow::after{
-        border-bottom-color:#282828 !important;
-        border-top-color:#282828 !important;
-
-    }
-    .arrow::before{
-        border-bottom-color:#282828 !important;
-        border-top-color:#282828 !important;
-    }
-    .arrow::after{
-        border-bottom-color:#282828 !important;
-        border-top-color:#282828 !important;
-    }
-    .carousel-inner {
-        padding-bottom: 50px !important;
-    }
-    .carousel-indicators li {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-right: 12px;
-    }
-    .carousel-indicators .active {
-        background-color: #51cd7c;
-    }
-    div.otp-input input {
-        width: 36px !important;
-        height: 36px;
-        margin: 0 10px;
-    }
-
-    div.otp-input input::placeholder {
-        opacity:0;
-    }
-
-    div.otp-input input:not(:placeholder-shown) , div.otp-input input:focus{
-        border: 2px solid #51cd7c;
-        border-radius:1px; 
-        -webkit-transition: 0.5s;
-        transition: 0.5s;
-         outline: none;
-    }
-    .flash-message{
-        padding:16px;
-        display:flex;
-        align-items:center;
-    }
-    @-webkit-keyframes rotation 
-    {
-        from {
-            -webkit-transform: rotate(0deg);
-        }
-        to {
-            -webkit-transform: rotate(359deg);
-        }
-    }
-    #button-tooltip{
-        color: #ddd;
-        border-radius: 5px;
-        font-size: 12px;
-        padding:0px
-    }
-    .tooltip-inner{
-        background-color: #282828;
-        margin:6px 0;
-    }
-    .react-datepicker__input-container > input {
-        width:100%;
-    }
-    .react-datepicker__navigation{
-        top:14px;
-    }
-    .react-datepicker, .react-datepicker__header,.react-datepicker__time-container .react-datepicker__time,.react-datepicker-time__header{
-        background-color: #202020;
-        color:#fff;
-        border-color: #444;
-    }
-    .react-datepicker__current-month,.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name{
-         color:#fff;
-     }
-    .react-datepicker__day--disabled{
-        color:#5b5656;
-    }
-    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover{
-        background-color:#686868
-    }
-    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled :hover{
-        background-color: #202020;
-    }
-
-    .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--disabled{
-        color:#5b5656;
-    }
-    .react-datepicker{
-        padding-bottom:10px;
-    }
-    .react-datepicker__day:hover {
-        background-color:#686868
-    }
-    .react-datepicker__day--disabled:hover {
-        background-color: #202020;
-    }
-    .ente-form-group{
-        margin:0;
-    }
-    .form-check-input:hover, .form-check-label :hover{
-        cursor:pointer;
-    }
-`;
-
-export const LogoImage = styled.img`
-    max-height: 28px;
-    margin-right: 5px;
-`;
-
-const FlexContainer = styled.div<{ shouldJustifyLeft?: boolean }>`
-    flex: 1;
-    text-align: center;
-    @media (max-width: 760px) {
-        text-align: ${(props) => (props.shouldJustifyLeft ? 'left' : 'center')};
-    }
-`;
-
-export const MessageContainer = styled.div`
+export const MessageContainer = styled('div')`
     background-color: #111;
     padding: 0;
     font-size: 14px;
@@ -528,6 +56,11 @@ type AppContextType = {
     setRedirectURL: (url: string) => void;
     mlSearchEnabled: boolean;
     updateMlSearchEnabled: (enabled: boolean) => void;
+    startLoading: () => void;
+    finishLoading: () => void;
+    closeMessageDialog: () => void;
+    setDialogMessage: SetDialogBoxAttributes;
+    isMobile: boolean;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -543,10 +76,10 @@ export interface FlashMessage {
 // TODO: AppContext is not cleared after logout
 export const AppContext = createContext<AppContextType>(null);
 
-const redirectMap = {
-    roadmap: (token: string) =>
-        `${getEndpoint()}/users/roadmap?token=${encodeURIComponent(token)}`,
-};
+const redirectMap = new Map([
+    ['roadmap', getRoadmapRedirectURL],
+    ['families', getFamilyPortalRedirectURL],
+]);
 
 export default function App({ Component, err }) {
     const router = useRouter();
@@ -559,8 +92,12 @@ export default function App({ Component, err }) {
     const [redirectName, setRedirectName] = useState<string>(null);
     const [flashMessage, setFlashMessage] = useState<FlashMessage>(null);
     const [redirectURL, setRedirectURL] = useState(null);
-    const [isAlbumsDomain, setIsAlbumsDomain] = useState(false);
     const [mlSearchEnabled, setMlSearchEnabled] = useState(false);
+    const isLoadingBarRunning = useRef(false);
+    const loadingBar = useRef(null);
+    const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
+    const [messageDialogView, setMessageDialogView] = useState(false);
+    const isMobile = useMediaQuery('(max-width:428px)');
 
     useEffect(() => {
         if (
@@ -592,7 +129,7 @@ export default function App({ Component, err }) {
         HTTPService.getInterceptors().response.use(
             (resp) => resp,
             (error) => {
-                logError(error, 'Network Error');
+                logError(error, 'HTTP Service Error');
                 return Promise.reject(error);
             }
         );
@@ -628,14 +165,30 @@ export default function App({ Component, err }) {
                 'font-size: 20px;'
             );
         }
+
+        const redirectTo = async (redirect) => {
+            if (
+                redirectMap.has(redirect) &&
+                typeof redirectMap.get(redirect) === 'function'
+            ) {
+                const redirectAction = redirectMap.get(redirect);
+                const url = await redirectAction();
+                window.location.href = url;
+            } else {
+                logError(CustomError.BAD_REQUEST, 'invalid redirection', {
+                    redirect,
+                });
+            }
+        };
+
         const query = new URLSearchParams(window.location.search);
-        const redirect = query.get('redirect');
-        if (redirect && redirectMap[redirect]) {
+        const redirectName = query.get('redirect');
+        if (redirectName) {
             const user = getData(LS_KEYS.USER);
             if (user?.token) {
-                window.location.href = redirectMap[redirect](user.token);
+                redirectTo(redirectName);
             } else {
-                setRedirectName(redirect);
+                setRedirectName(redirectName);
             }
         }
 
@@ -647,9 +200,11 @@ export default function App({ Component, err }) {
             if (redirectName) {
                 const user = getData(LS_KEYS.USER);
                 if (user?.token) {
-                    window.location.href = redirectMap[redirectName](
-                        user.token
-                    );
+                    redirectTo(redirectName);
+
+                    // https://github.com/vercel/next.js/issues/2476#issuecomment-573460710
+                    // eslint-disable-next-line no-throw-literal
+                    throw 'Aborting route change, redirection in process....';
                 }
             }
         });
@@ -668,11 +223,10 @@ export default function App({ Component, err }) {
     }, [redirectName]);
 
     useEffect(() => {
-        const currentURL = new URL(window.location.href);
-        if (currentURL.host === getAlbumSiteHost()) {
-            setIsAlbumsDomain(true);
-        }
+        addLogLine(`app started`);
     }, []);
+
+    useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
@@ -691,64 +245,87 @@ export default function App({ Component, err }) {
         }
     };
 
+    const startLoading = () => {
+        !isLoadingBarRunning.current && loadingBar.current?.continuousStart();
+        isLoadingBarRunning.current = true;
+    };
+    const finishLoading = () => {
+        isLoadingBarRunning.current && loadingBar.current?.complete();
+        isLoadingBarRunning.current = false;
+    };
+
+    const closeMessageDialog = () => setMessageDialogView(false);
+
     return (
         <>
             <Head>
                 <title>{constants.TITLE}</title>
-            </Head>
-            <GlobalStyles />
-            {showNavbar && (
-                <Navbar>
-                    <FlexContainer shouldJustifyLeft={isAlbumsDomain}>
-                        <LogoImage
-                            style={{ height: '24px', padding: '3px' }}
-                            alt="logo"
-                            src="/icon.svg"
-                        />
-                    </FlexContainer>
-                    {isAlbumsDomain && <GoToEnte />}
-                </Navbar>
-            )}
-            <MessageContainer>
-                {offline && constants.OFFLINE_MSG}
-            </MessageContainer>
-            {sharedFiles &&
-                (router.pathname === '/gallery' ? (
-                    <MessageContainer>
-                        {constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}
-                    </MessageContainer>
-                ) : (
-                    <MessageContainer>
-                        {constants.LOGIN_TO_UPLOAD_FILES(sharedFiles.length)}
-                    </MessageContainer>
-                ))}
-            {flashMessage && (
-                <FlashMessageBar
-                    flashMessage={flashMessage}
-                    onClose={() => setFlashMessage(null)}
+                <meta
+                    name="viewport"
+                    content="initial-scale=1, width=device-width"
                 />
-            )}
-            <AppContext.Provider
-                value={{
-                    showNavBar,
-                    sharedFiles,
-                    resetSharedFiles,
-                    setDisappearingFlashMessage,
-                    redirectURL,
-                    setRedirectURL,
-                    mlSearchEnabled,
-                    updateMlSearchEnabled,
-                }}>
-                {loading ? (
-                    <Container>
-                        <EnteSpinner>
-                            <span className="sr-only">Loading...</span>
-                        </EnteSpinner>
-                    </Container>
-                ) : (
-                    <Component err={err} setLoading={setLoading} />
+            </Head>
+
+            <ThemeProvider theme={darkThemeOptions}>
+                <CssBaseline />
+                {showNavbar && <AppNavbar />}
+                <MessageContainer>
+                    {offline && constants.OFFLINE_MSG}
+                </MessageContainer>
+                {sharedFiles &&
+                    (router.pathname === '/gallery' ? (
+                        <MessageContainer>
+                            {constants.FILES_TO_BE_UPLOADED(sharedFiles.length)}
+                        </MessageContainer>
+                    ) : (
+                        <MessageContainer>
+                            {constants.LOGIN_TO_UPLOAD_FILES(
+                                sharedFiles.length
+                            )}
+                        </MessageContainer>
+                    ))}
+                {flashMessage && (
+                    <FlashMessageBar
+                        flashMessage={flashMessage}
+                        onClose={() => setFlashMessage(null)}
+                    />
                 )}
-            </AppContext.Provider>
+                <LoadingBar color="#51cd7c" ref={loadingBar} />
+
+                <DialogBox
+                    size="xs"
+                    open={messageDialogView}
+                    onClose={closeMessageDialog}
+                    attributes={dialogMessage}
+                />
+
+                <AppContext.Provider
+                    value={{
+                        showNavBar,
+                        redirectURL,
+                        setRedirectURL,
+                        mlSearchEnabled,
+                        updateMlSearchEnabled,
+                        sharedFiles,
+                        resetSharedFiles,
+                        setDisappearingFlashMessage,
+                        startLoading,
+                        finishLoading,
+                        closeMessageDialog,
+                        setDialogMessage,
+                        isMobile,
+                    }}>
+                    {loading ? (
+                        <VerticallyCentered>
+                            <EnteSpinner>
+                                <span className="sr-only">Loading...</span>
+                            </EnteSpinner>
+                        </VerticallyCentered>
+                    ) : (
+                        <Component err={err} setLoading={setLoading} />
+                    )}
+                </AppContext.Provider>
+            </ThemeProvider>
         </>
     );
 }

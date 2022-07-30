@@ -10,17 +10,20 @@ import { useRouter } from 'next/router';
 import { PAGES } from 'constants/pages';
 import CryptoWorker, {
     decryptAndStoreToken,
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
 } from 'utils/crypto';
-import SingleInputForm from 'components/SingleInputForm';
-import MessageDialog from 'components/MessageDialog';
-import Container from 'components/Container';
-import { Card, Button } from 'react-bootstrap';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
+import VerticallyCentered from 'components/Container';
+import { Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
-import LogoImg from 'components/LogoImg';
 import { logError } from 'utils/sentry';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { KeyAttributes, User } from 'types/user';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -28,7 +31,6 @@ bip39.setDefaultWordlist('english');
 export default function Recover() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
-    const [messageDialogView, SetMessageDialogView] = useState(false);
     const appContext = useContext(AppContext);
 
     useEffect(() => {
@@ -49,10 +51,13 @@ export default function Recover() {
         } else {
             setKeyAttributes(keyAttributes);
         }
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
-    const recover = async (recoveryKey: string, setFieldError) => {
+    const recover: SingleInputFormProps['callback'] = async (
+        recoveryKey: string,
+        setFieldError
+    ) => {
         try {
             // check if user is entering mnemonic recovery key
             if (recoveryKey.trim().indexOf(' ') > 0) {
@@ -67,60 +72,44 @@ export default function Recover() {
                 keyAttributes.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey)
             );
-            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
             await decryptAndStoreToken(masterKey);
 
             setData(LS_KEYS.SHOW_BACK_BUTTON, { value: false });
             router.push(PAGES.CHANGE_PASSWORD);
         } catch (e) {
             logError(e, 'password recovery failed');
-            setFieldError('passphrase', constants.INCORRECT_RECOVERY_KEY);
+            setFieldError(constants.INCORRECT_RECOVERY_KEY);
         }
     };
 
+    const showNoRecoveryKeyMessage = () => {
+        appContext.setDialogMessage({
+            title: constants.SORRY,
+            close: {},
+            content: constants.NO_RECOVERY_KEY_MESSAGE,
+        });
+    };
+
     return (
-        <>
-            <Container>
-                <Card style={{ minWidth: '320px' }} className="text-center">
-                    <Card.Body style={{ padding: '40px 30px' }}>
-                        <Card.Title style={{ marginBottom: '32px' }}>
-                            <LogoImg src="/icon.svg" />
-                            {constants.RECOVER_ACCOUNT}
-                        </Card.Title>
-                        <SingleInputForm
-                            callback={recover}
-                            fieldType="text"
-                            placeholder={constants.RETURN_RECOVERY_KEY_HINT}
-                            buttonText={constants.RECOVER}
-                        />
-                        <div
-                            style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                marginTop: '12px',
-                            }}>
-                            <Button
-                                variant="link"
-                                onClick={() => SetMessageDialogView(true)}>
-                                {constants.NO_RECOVERY_KEY}
-                            </Button>
-                            <Button variant="link" onClick={router.back}>
-                                {constants.GO_BACK}
-                            </Button>
-                        </div>
-                    </Card.Body>
-                </Card>
-            </Container>
-            <MessageDialog
-                size="lg"
-                show={messageDialogView}
-                onHide={() => SetMessageDialogView(false)}
-                attributes={{
-                    title: constants.SORRY,
-                    close: {},
-                    content: constants.NO_RECOVERY_KEY_MESSAGE,
-                }}
-            />
-        </>
+        <VerticallyCentered>
+            <FormPaper>
+                <FormPaperTitle>{constants.RECOVER_ACCOUNT}</FormPaperTitle>
+                <SingleInputForm
+                    callback={recover}
+                    fieldType="text"
+                    placeholder={constants.RECOVERY_KEY_HINT}
+                    buttonText={constants.RECOVER}
+                />
+                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                    <Button variant="link" onClick={showNoRecoveryKeyMessage}>
+                        {constants.NO_RECOVERY_KEY}
+                    </Button>
+                    <Button variant="link" onClick={router.back}>
+                        {constants.GO_BACK}
+                    </Button>
+                </FormPaperFooter>
+            </FormPaper>
+        </VerticallyCentered>
     );
 }

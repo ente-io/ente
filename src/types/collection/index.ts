@@ -1,6 +1,7 @@
 import { User } from 'types/user';
 import { EnteFile } from 'types/file';
-import { CollectionType } from 'constants/collection';
+import { CollectionSummaryType, CollectionType } from 'constants/collection';
+import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 
 export interface Collection {
     id: number;
@@ -18,12 +19,30 @@ export interface Collection {
     isDeleted: boolean;
     isSharedCollection?: boolean;
     publicURLs?: PublicURL[];
+    magicMetadata?: CollectionMagicMetadata;
 }
 
 export interface PublicURL {
     url: string;
     deviceLimit: number;
     validTill: number;
+    enableDownload: boolean;
+    passwordEnabled: boolean;
+    nonce?: string;
+    opsLimit?: number;
+    memLimit?: number;
+}
+
+export interface UpdatePublicURL {
+    collectionID: number;
+    disablePassword?: boolean;
+    enableDownload?: boolean;
+    validTill?: number;
+    deviceLimit?: number;
+    passHash?: string;
+    nonce?: string;
+    opsLimit?: number;
+    memLimit?: number;
 }
 
 export interface CreatePublicAccessTokenRequest {
@@ -54,12 +73,29 @@ export interface collectionAttributes {
     pathDecryptionNonce?: string;
 }
 
-export interface CollectionAndItsLatestFile {
-    collection: Collection;
-    file: EnteFile;
-}
+export type CollectionLatestFiles = Map<number, EnteFile>;
 
 export interface RemoveFromCollectionRequest {
     collectionID: number;
     fileIDs: number[];
 }
+
+export interface CollectionMagicMetadataProps {
+    visibility?: VISIBILITY_STATE;
+}
+
+export interface CollectionMagicMetadata
+    extends Omit<MagicMetadataCore, 'data'> {
+    data: CollectionMagicMetadataProps;
+}
+export interface CollectionSummary {
+    id: number;
+    name: string;
+    type: CollectionSummaryType;
+    latestFile: EnteFile;
+    fileCount: number;
+    updationTime: number;
+}
+
+export type CollectionSummaries = Map<number, CollectionSummary>;
+export type CollectionFilesCount = Map<number, number>;

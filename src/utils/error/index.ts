@@ -27,7 +27,7 @@ export enum CustomError {
     FILE_TOO_LARGE = 'file too large',
     SUBSCRIPTION_EXPIRED = 'subscription expired',
     STORAGE_QUOTA_EXCEEDED = 'storage quota exceeded',
-    SESSION_EXPIRED_MESSAGE = 'session expired',
+    SESSION_EXPIRED = 'session expired',
     TYPE_DETECTION_FAILED = 'type detection failed',
     SIGNUP_FAILED = 'signup failed',
     FAV_COLLECTION_MISSING = 'favorite collection missing',
@@ -35,10 +35,18 @@ export enum CustomError {
     WAIT_TIME_EXCEEDED = 'wait time exceeded',
     REQUEST_CANCELLED = 'request canceled',
     NETWORK_ERROR = 'Network Error',
+    REQUEST_FAILED = 'request failed',
     TOKEN_EXPIRED = 'token expired',
+    TOO_MANY_REQUESTS = 'too many requests',
     BAD_REQUEST = 'bad request',
     SUBSCRIPTION_NEEDED = 'subscription not present',
     NOT_FOUND = 'not found ',
+    NO_METADATA = 'no metadata',
+    TOO_LARGE_LIVE_PHOTO_ASSETS = 'too large live photo assets',
+    NOT_A_DATE = 'not a date',
+    FILE_ID_NOT_FOUND = 'file with id not found',
+    WEAK_DEVICE = 'password decryption failed on the device',
+    INCORRECT_PASSWORD = 'incorrect password',
 }
 
 export function parseServerError(error: AxiosResponse): string {
@@ -52,7 +60,7 @@ export function parseServerError(error: AxiosResponse): string {
             parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
             break;
         case ServerErrorCodes.SESSION_EXPIRED:
-            parsedMessage = CustomError.SESSION_EXPIRED_MESSAGE;
+            parsedMessage = CustomError.SESSION_EXPIRED;
             break;
         case ServerErrorCodes.FILE_TOO_LARGE:
             parsedMessage = CustomError.FILE_TOO_LARGE;
@@ -76,7 +84,7 @@ function parseUploadErrorCodes(error) {
                 parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
                 break;
             case ServerErrorCodes.SESSION_EXPIRED:
-                parsedMessage = CustomError.SESSION_EXPIRED_MESSAGE;
+                parsedMessage = CustomError.SESSION_EXPIRED;
                 break;
             case ServerErrorCodes.FILE_TOO_LARGE:
                 parsedMessage = CustomError.FILE_TOO_LARGE;
@@ -97,26 +105,10 @@ export function handleUploadError(error): Error {
     switch (parsedError.message) {
         case CustomError.SUBSCRIPTION_EXPIRED:
         case CustomError.STORAGE_QUOTA_EXCEEDED:
-        case CustomError.SESSION_EXPIRED_MESSAGE:
+        case CustomError.SESSION_EXPIRED:
             throw parsedError;
     }
     return parsedError;
-}
-
-export function getUserFacingErrorMessage(
-    err: CustomError,
-    action: () => void
-) {
-    switch (err) {
-        case CustomError.SESSION_EXPIRED_MESSAGE:
-            return constants.SESSION_EXPIRED_MESSAGE;
-        case CustomError.SUBSCRIPTION_EXPIRED:
-            return constants.SUBSCRIPTION_EXPIRED(action);
-        case CustomError.STORAGE_QUOTA_EXCEEDED:
-            return constants.STORAGE_QUOTA_EXCEEDED(action);
-        default:
-            return constants.UNKNOWN_ERROR;
-    }
 }
 
 export function errorWithContext(originalError: Error, context: string) {
@@ -127,6 +119,7 @@ export function errorWithContext(originalError: Error, context: string) {
         originalError.stack;
     return errorWithContext;
 }
+
 export const parseSharingErrorCodes = (error) => {
     let parsedMessage = null;
     if (error?.status) {
@@ -143,8 +136,10 @@ export const parseSharingErrorCodes = (error) => {
                 break;
             case ServerErrorCodes.SESSION_EXPIRED:
             case ServerErrorCodes.TOKEN_EXPIRED:
-            case ServerErrorCodes.TOO_MANY_REQUEST:
                 parsedMessage = CustomError.TOKEN_EXPIRED;
+                break;
+            case ServerErrorCodes.TOO_MANY_REQUEST:
+                parsedMessage = CustomError.TOO_MANY_REQUESTS;
                 break;
             default:
                 parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;

@@ -1,34 +1,33 @@
 import React, { useState, useEffect, useContext } from 'react';
-import Container from 'components/Container';
-import Card from 'react-bootstrap/Card';
-import Form from 'react-bootstrap/Form';
 import constants from 'utils/strings/constants';
 import { LS_KEYS, getData, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import { Formik, FormikHelpers } from 'formik';
-import * as Yup from 'yup';
 import {
     verifyOtt,
-    getOtt,
+    sendOtt,
     logoutUser,
     clearFiles,
     putAttributes,
 } from 'services/userService';
 import { setIsFirstLogin } from 'utils/storage';
-import SubmitButton from 'components/SubmitButton';
 import { clearKeys } from 'utils/storage/sessionStorage';
 import { AppContext } from 'pages/_app';
-import LogoImg from 'components/LogoImg';
 import { PAGES } from 'constants/pages';
 import { KeyAttributes, EmailVerificationResponse, User } from 'types/user';
-
-interface formValues {
-    ott: string;
-}
+import { Typography } from '@mui/material';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import LinkButton from 'components/pages/gallery/LinkButton';
+import FormContainer from 'components/Form/FormContainer';
+import SingleInputForm, {
+    SingleInputFormProps,
+} from 'components/SingleInputForm';
+import EnteSpinner from 'components/EnteSpinner';
+import VerticallyCentered from 'components/Container';
 
 export default function Verify() {
     const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);
     const [resend, setResend] = useState(0);
     const router = useRouter();
     const appContext = useContext(AppContext);
@@ -54,15 +53,14 @@ export default function Verify() {
             }
         };
         main();
-        appContext.showNavBar(false);
+        appContext.showNavBar(true);
     }, []);
 
-    const onSubmit = async (
-        { ott }: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+    const onSubmit: SingleInputFormProps['callback'] = async (
+        ott,
+        setFieldError
     ) => {
         try {
-            setLoading(true);
             const resp = await verifyOtt(email, ott);
             const {
                 keyAttributes,
@@ -107,99 +105,60 @@ export default function Verify() {
             }
         } catch (e) {
             if (e?.status === 401) {
-                setFieldError('ott', constants.INVALID_CODE);
+                setFieldError(constants.INVALID_CODE);
             } else if (e?.status === 410) {
-                setFieldError('ott', constants.EXPIRED_CODE);
+                setFieldError(constants.EXPIRED_CODE);
             } else {
-                setFieldError('ott', `${constants.UNKNOWN_ERROR} ${e.message}`);
+                setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
             }
         }
-        setLoading(false);
     };
 
     const resendEmail = async () => {
         setResend(1);
-        await getOtt(email);
+        await sendOtt(email);
         setResend(2);
         setTimeout(() => setResend(0), 3000);
     };
 
     if (!email) {
-        return null;
+        return (
+            <VerticallyCentered>
+                <EnteSpinner />
+            </VerticallyCentered>
+        );
     }
 
     return (
-        <Container>
-            <Card style={{ minWidth: '300px' }} className="text-center">
-                <Card.Body style={{ padding: '40px 30px' }}>
-                    <Card.Title style={{ marginBottom: '32px' }}>
-                        <LogoImg src="/icon.svg" />
-                        {constants.VERIFY_EMAIL}
-                    </Card.Title>
+        <FormContainer>
+            <FormPaper>
+                <FormPaperTitle sx={{ mb: 14, wordBreak: 'break-word' }}>
                     {constants.EMAIL_SENT({ email })}
+                </FormPaperTitle>
+                <Typography color={'text.secondary'} mb={2} variant="body2">
                     {constants.CHECK_INBOX}
-                    <br />
-                    <br />
-                    <Formik<formValues>
-                        initialValues={{ ott: '' }}
-                        validationSchema={Yup.object().shape({
-                            ott: Yup.string().required(constants.REQUIRED),
-                        })}
-                        validateOnChange={false}
-                        validateOnBlur={false}
-                        onSubmit={onSubmit}>
-                        {({
-                            values,
-                            touched,
-                            errors,
-                            handleChange,
-                            handleSubmit,
-                        }) => (
-                            <Form noValidate onSubmit={handleSubmit}>
-                                <Form.Group>
-                                    <Form.Control
-                                        className="text-center"
-                                        type="text"
-                                        value={values.ott}
-                                        onChange={handleChange('ott')}
-                                        isInvalid={Boolean(
-                                            touched.ott && errors.ott
-                                        )}
-                                        placeholder={constants.ENTER_OTT}
-                                        disabled={loading}
-                                        autoFocus
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                        {errors.ott}
-                                    </Form.Control.Feedback>
-                                </Form.Group>
-                                <SubmitButton
-                                    buttonText={constants.VERIFY}
-                                    loading={loading}
-                                />
-                                <div style={{ marginTop: '24px' }}>
-                                    {resend === 0 && (
-                                        <a href="#" onClick={resendEmail}>
-                                            {constants.RESEND_MAIL}
-                                        </a>
-                                    )}
-                                    {resend === 1 && (
-                                        <span>{constants.SENDING}</span>
-                                    )}
-                                    {resend === 2 && (
-                                        <span>{constants.SENT}</span>
-                                    )}
-                                    <div style={{ marginTop: '8px' }}>
-                                        <a href="#" onClick={logoutUser}>
-                                            {constants.CHANGE_EMAIL}
-                                        </a>
-                                    </div>
-                                </div>
-                            </Form>
-                        )}
-                    </Formik>
-                </Card.Body>
-            </Card>
-        </Container>
+                </Typography>
+                <SingleInputForm
+                    fieldType="text"
+                    autoComplete="one-time-code"
+                    placeholder={constants.ENTER_OTT}
+                    buttonText={constants.VERIFY}
+                    callback={onSubmit}
+                />
+
+                <FormPaperFooter style={{ justifyContent: 'space-between' }}>
+                    {resend === 0 && (
+                        <LinkButton onClick={resendEmail}>
+                            {constants.RESEND_MAIL}
+                        </LinkButton>
+                    )}
+                    {resend === 1 && <span>{constants.SENDING}</span>}
+                    {resend === 2 && <span>{constants.SENT}</span>}
+                    <LinkButton onClick={logoutUser}>
+                        {constants.CHANGE_EMAIL}
+                    </LinkButton>
+                </FormPaperFooter>
+            </FormPaper>
+        </FormContainer>
     );
 }

@@ -1,36 +1,45 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import CryptoWorker, {
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
     B64EncryptionResult,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
 import { setKeys } from 'services/userService';
-import SetPasswordForm from 'components/SetPasswordForm';
-import { AppContext } from 'pages/_app';
+import SetPasswordForm, {
+    SetPasswordFormProps,
+} from 'components/SetPasswordForm';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
-import { KEK, UpdatedKey } from 'types/user';
+import { KEK, UpdatedKey, User } from 'types/user';
+import LinkButton from 'components/pages/gallery/LinkButton';
+import VerticallyCentered from 'components/Container';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
 
-export default function Generate() {
+export default function ChangePassword() {
     const [token, setToken] = useState<string>();
     const router = useRouter();
-    const appContext = useContext(AppContext);
+    const [user, setUser] = useState<User>();
 
     useEffect(() => {
         const user = getData(LS_KEYS.USER);
+        setUser(user);
         if (!user?.token) {
             router.push(PAGES.ROOT);
         } else {
             setToken(user.token);
         }
-        appContext.showNavBar(true);
     }, []);
 
-    const onSubmit = async (passphrase, setFieldError) => {
+    const onSubmit: SetPasswordFormProps['callback'] = async (
+        passphrase,
+        setFieldError
+    ) => {
         const cryptoWorker = await new CryptoWorker();
         const key: string = await getActualKey();
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
@@ -61,22 +70,36 @@ export default function Generate() {
             key
         );
 
-        await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+        await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
         redirectToGallery();
     };
+
     const redirectToGallery = () => {
         setData(LS_KEYS.SHOW_BACK_BUTTON, { value: true });
         router.push(PAGES.GALLERY);
     };
+
     return (
-        <SetPasswordForm
-            callback={onSubmit}
-            buttonText={constants.CHANGE_PASSWORD}
-            back={
-                getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
-                    ? redirectToGallery
-                    : null
-            }
-        />
+        <VerticallyCentered>
+            <FormPaper>
+                <FormPaperTitle>{constants.CHANGE_PASSWORD}</FormPaperTitle>
+                <SetPasswordForm
+                    userEmail={user?.email}
+                    callback={onSubmit}
+                    buttonText={constants.CHANGE_PASSWORD}
+                    back={
+                        getData(LS_KEYS.SHOW_BACK_BUTTON)?.value
+                            ? redirectToGallery
+                            : null
+                    }
+                />
+
+                <FormPaperFooter>
+                    <LinkButton onClick={router.back}>
+                        {constants.GO_BACK}
+                    </LinkButton>
+                </FormPaperFooter>
+            </FormPaper>
+        </VerticallyCentered>
     );
 }

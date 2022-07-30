@@ -1,7 +1,7 @@
+import { styled } from '@mui/material';
 import React from 'react';
-import styled from 'styled-components';
 
-const Wrapper = styled.button`
+const Wrapper = styled('button')`
     border: none;
     background-color: #51cd7c;
     position: fixed;

@@ -6,11 +6,9 @@ import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
-
-export interface ComlinkWorker {
-    comlink: any;
-    worker: Worker;
-}
+import { ComlinkWorker } from 'utils/comlink';
+import isElectron from 'is-electron';
+import desktopService from 'services/desktopService';
 
 export interface B64EncryptionResult {
     encryptedData: string;
@@ -22,7 +20,7 @@ export const getDedicatedCryptoWorker = (): ComlinkWorker => {
     if (runningInBrowser()) {
         const worker = new Worker(
             new URL('worker/crypto.worker.js', import.meta.url),
-            { name: 'ente-worker' }
+            { name: 'ente-crypto-worker' }
         );
         const comlink = Comlink.wrap(worker);
         return { comlink, worker };
@@ -78,7 +76,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
     const cryptoWorker = await new CryptoWorker();
     const intermediateKekSalt: string =
         await cryptoWorker.generateSaltToDeriveKey();
-    const intermediateKek: KEK = await cryptoWorker.deriveIntermediateKey(
+    const intermediateKek: KEK = await cryptoWorker.deriveInteractiveKey(
         passphrase,
         intermediateKekSalt
     );
@@ -96,13 +94,17 @@ export async function generateAndSaveIntermediateKeyAttributes(
     return intermediateKeyAttributes;
 }
 
-export const SaveKeyInSessionStore = async (
+export const saveKeyInSessionStore = async (
     keyType: SESSION_KEYS,
-    key: string
+    key: string,
+    fromDesktop?: boolean
 ) => {
     const cryptoWorker = await new CryptoWorker();
     const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
+    if (isElectron() && !fromDesktop) {
+        desktopService.setEncryptionKey(key);
+    }
 };
 
 export const getRecoveryKey = async () => {

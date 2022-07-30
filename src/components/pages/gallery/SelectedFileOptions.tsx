@@ -1,38 +1,34 @@
-import { SetDialogMessage } from 'components/MessageDialog';
-import React, { useEffect, useState } from 'react';
-import { SetCollectionSelectorAttributes } from './CollectionSelector';
-import styled from 'styled-components';
-import Navbar from 'components/Navbar';
-import DeleteIcon from 'components/icons/DeleteIcon';
-import CloseIcon from 'components/icons/CloseIcon';
-import AddIcon from 'components/icons/AddIcon';
-import { IconButton } from 'components/Container';
+import React, { useContext } from 'react';
+import { SetCollectionSelectorAttributes } from 'types/gallery';
+import { FluidContainer } from 'components/Container';
 import constants from 'utils/strings/constants';
-import Archive from 'components/icons/Archive';
-import MoveIcon from 'components/icons/MoveIcon';
 import { COLLECTION_OPS_TYPE } from 'utils/collection';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
     TRASH_SECTION,
 } from 'constants/collection';
-import UnArchive from 'components/icons/UnArchive';
-import { OverlayTrigger } from 'react-bootstrap';
 import { Collection } from 'types/collection';
-import RemoveIcon from 'components/icons/RemoveIcon';
-import RestoreIcon from 'components/icons/RestoreIcon';
-import ClockIcon from 'components/icons/ClockIcon';
-import { getData, LS_KEYS } from 'utils/storage/localStorage';
-import { FIX_CREATION_TIME_VISIBLE_TO_USER_IDS } from 'constants/user';
-import DownloadIcon from 'components/icons/DownloadIcon';
-import { User } from 'types/user';
+import { SelectionBar } from '../../Navbar/SelectionBar';
+import { AppContext } from 'pages/_app';
+import { Box, IconButton, Stack, Tooltip } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import RestoreIcon from '@mui/icons-material/Restore';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import ClockIcon from '@mui/icons-material/AccessTime';
+import DownloadIcon from '@mui/icons-material/Download';
+import UnArchiveIcon from '@mui/icons-material/Visibility';
+import ArchiveIcon from '@mui/icons-material/VisibilityOff';
+import MoveIcon from '@mui/icons-material/ArrowForward';
+import RemoveIcon from '@mui/icons-material/RemoveCircleOutline';
+import { getTrashFilesMessage } from 'utils/ui';
 
 interface Props {
     addToCollectionHelper: (collection: Collection) => void;
     moveToCollectionHelper: (collection: Collection) => void;
     restoreToCollectionHelper: (collection: Collection) => void;
     showCreateCollectionModal: (opsType: COLLECTION_OPS_TYPE) => () => void;
-    setDialogMessage: SetDialogMessage;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     deleteFileHelper: (permanent?: boolean) => void;
     removeFromCollectionHelper: () => void;
@@ -46,33 +42,6 @@ interface Props {
     isFavoriteCollection: boolean;
 }
 
-const SelectionBar = styled(Navbar)`
-    position: fixed;
-    top: 0;
-    color: #fff;
-    z-index: 1001;
-    width: 100%;
-    padding: 0 16px;
-`;
-
-const SelectionContainer = styled.div`
-    flex: 1;
-    align-items: center;
-    display: flex;
-`;
-
-interface IconWithMessageProps {
-    children?: any;
-    message: string;
-}
-export const IconWithMessage = (props: IconWithMessageProps) => (
-    <OverlayTrigger
-        placement="bottom"
-        overlay={<p style={{ zIndex: 1002 }}>{props.message}</p>}>
-        {props.children}
-    </OverlayTrigger>
-);
-
 const SelectedFileOptions = ({
     addToCollectionHelper,
     moveToCollectionHelper,
@@ -80,7 +49,6 @@ const SelectedFileOptions = ({
     showCreateCollectionModal,
     removeFromCollectionHelper,
     fixTimeHelper,
-    setDialogMessage,
     setCollectionSelectorAttributes,
     deleteFileHelper,
     downloadHelper,
@@ -91,13 +59,7 @@ const SelectedFileOptions = ({
     activeCollection,
     isFavoriteCollection,
 }: Props) => {
-    const [showFixCreationTime, setShowFixCreationTime] = useState(false);
-    useEffect(() => {
-        const user: User = getData(LS_KEYS.USER);
-        const showFixCreationTime =
-            FIX_CREATION_TIME_VISIBLE_TO_USER_IDS.includes(user?.id);
-        setShowFixCreationTime(showFixCreationTime);
-    }, []);
+    const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
         setCollectionSelectorAttributes({
             callback: addToCollectionHelper,
@@ -107,23 +69,12 @@ const SelectedFileOptions = ({
         });
 
     const trashHandler = () =>
-        setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.TRASH_MESSAGE,
-            staticBackdrop: true,
-            proceed: {
-                action: deleteFileHelper,
-                text: constants.MOVE_TO_TRASH,
-                variant: 'danger',
-            },
-            close: { text: constants.CANCEL },
-        });
+        setDialogMessage(getTrashFilesMessage(deleteFileHelper));
 
     const permanentlyDeleteHandler = () =>
         setDialogMessage({
-            title: constants.CONFIRM_DELETE,
-            content: constants.DELETE_MESSAGE,
-            staticBackdrop: true,
+            title: constants.DELETE_FILES_TITLE,
+            content: constants.DELETE_FILES_MESSAGE,
             proceed: {
                 action: () => deleteFileHelper(true),
                 text: constants.DELETE,
@@ -145,7 +96,7 @@ const SelectedFileOptions = ({
         setDialogMessage({
             title: constants.CONFIRM_REMOVE,
             content: constants.CONFIRM_REMOVE_MESSAGE(),
-            staticBackdrop: true,
+
             proceed: {
                 action: removeFromCollectionHelper,
                 text: constants.REMOVE,
@@ -165,86 +116,87 @@ const SelectedFileOptions = ({
 
     return (
         <SelectionBar>
-            <SelectionContainer>
+            <FluidContainer>
                 <IconButton onClick={clearSelection}>
                     <CloseIcon />
                 </IconButton>
-                <div>
+                <Box ml={1.5}>
                     {count} {constants.SELECTED}
-                </div>
-            </SelectionContainer>
-            {activeCollection === TRASH_SECTION ? (
-                <>
-                    <IconWithMessage message={constants.RESTORE}>
-                        <IconButton onClick={restoreHandler}>
-                            <RestoreIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    <IconWithMessage message={constants.DELETE_PERMANENTLY}>
-                        <IconButton onClick={permanentlyDeleteHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                </>
-            ) : (
-                <>
-                    {showFixCreationTime && (
-                        <IconWithMessage message={constants.FIX_CREATION_TIME}>
+                </Box>
+            </FluidContainer>
+            <Stack spacing={2} direction="row" mr={2}>
+                {activeCollection === TRASH_SECTION ? (
+                    <>
+                        <Tooltip title={constants.RESTORE}>
+                            <IconButton onClick={restoreHandler}>
+                                <RestoreIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={constants.DELETE_PERMANENTLY}>
+                            <IconButton onClick={permanentlyDeleteHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                ) : (
+                    <>
+                        <Tooltip title={constants.FIX_CREATION_TIME}>
                             <IconButton onClick={fixTimeHelper}>
                                 <ClockIcon />
                             </IconButton>
-                        </IconWithMessage>
-                    )}
-                    <IconWithMessage message={constants.DOWNLOAD}>
-                        <IconButton onClick={downloadHelper}>
-                            <DownloadIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    <IconWithMessage message={constants.ADD}>
-                        <IconButton onClick={addToCollection}>
-                            <AddIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                    {activeCollection === ARCHIVE_SECTION && (
-                        <IconWithMessage message={constants.UNARCHIVE}>
-                            <IconButton onClick={unArchiveFilesHelper}>
-                                <UnArchive />
+                        </Tooltip>
+                        <Tooltip title={constants.DOWNLOAD}>
+                            <IconButton onClick={downloadHelper}>
+                                <DownloadIcon />
                             </IconButton>
-                        </IconWithMessage>
-                    )}
-                    {activeCollection === ALL_SECTION && (
-                        <IconWithMessage message={constants.ARCHIVE}>
-                            <IconButton onClick={archiveFilesHelper}>
-                                <Archive />
+                        </Tooltip>
+                        <Tooltip title={constants.ADD}>
+                            <IconButton onClick={addToCollection}>
+                                <AddIcon />
                             </IconButton>
-                        </IconWithMessage>
-                    )}
-
-                    {activeCollection !== ALL_SECTION &&
-                        activeCollection !== ARCHIVE_SECTION &&
-                        !isFavoriteCollection && (
-                            <>
-                                <IconWithMessage message={constants.MOVE}>
-                                    <IconButton onClick={moveToCollection}>
-                                        <MoveIcon />
-                                    </IconButton>
-                                </IconWithMessage>
-
-                                <IconWithMessage message={constants.REMOVE}>
-                                    <IconButton
-                                        onClick={removeFromCollectionHandler}>
-                                        <RemoveIcon />
-                                    </IconButton>
-                                </IconWithMessage>
-                            </>
+                        </Tooltip>
+                        {activeCollection === ARCHIVE_SECTION && (
+                            <Tooltip title={constants.UNARCHIVE}>
+                                <IconButton onClick={unArchiveFilesHelper}>
+                                    <UnArchiveIcon />
+                                </IconButton>
+                            </Tooltip>
                         )}
-                    <IconWithMessage message={constants.DELETE}>
-                        <IconButton onClick={trashHandler}>
-                            <DeleteIcon />
-                        </IconButton>
-                    </IconWithMessage>
-                </>
-            )}
+                        {activeCollection === ALL_SECTION && (
+                            <Tooltip title={constants.ARCHIVE}>
+                                <IconButton onClick={archiveFilesHelper}>
+                                    <ArchiveIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
+                        {activeCollection !== ALL_SECTION &&
+                            activeCollection !== ARCHIVE_SECTION &&
+                            !isFavoriteCollection && (
+                                <>
+                                    <Tooltip title={constants.MOVE}>
+                                        <IconButton onClick={moveToCollection}>
+                                            <MoveIcon />
+                                        </IconButton>
+                                    </Tooltip>
+
+                                    <Tooltip title={constants.REMOVE}>
+                                        <IconButton
+                                            onClick={
+                                                removeFromCollectionHandler
+                                            }>
+                                            <RemoveIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </>
+                            )}
+                        <Tooltip title={constants.DELETE}>
+                            <IconButton onClick={trashHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                )}
+            </Stack>
         </SelectionBar>
     );
 };

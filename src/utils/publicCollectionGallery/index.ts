@@ -4,9 +4,10 @@ import { PublicCollectionGalleryContextType } from 'types/publicCollection';
 export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
     {
         token: null,
+        passwordToken: null,
         accessedThroughSharedURL: false,
-        setDialogMessage: () => null,
         openReportForm: () => null,
+        photoListHeader: null,
     };
 
 export const PublicCollectionGalleryContext =

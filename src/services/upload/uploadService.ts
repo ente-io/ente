@@ -1,124 +1,132 @@
 import { Collection } from 'types/collection';
 import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
-import { extractMetadata, getMetadataMapKey } from './metadataService';
-import { generateThumbnail } from './thumbnailService';
-import { getFileOriginalName, getFileData } from './readFileService';
-import { encryptFiledata } from './encryptionService';
-import { uploadStreamUsingMultipart } from './multiPartUploadService';
-import UIService from './uiService';
+import { extractFileMetadata, getFilename } from './fileService';
+import { getFileType } from '../typeDetectionService';
 import { handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,
     BackupedFile,
+    ElectronFile,
     EncryptedFile,
-    EncryptionResult,
-    FileInMemory,
     FileTypeInfo,
+    FileWithCollection,
     FileWithMetadata,
     isDataStream,
-    MetadataMap,
     Metadata,
+    MetadataAndFileTypeInfo,
+    MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
+    ParsedMetadataJSONMap,
     ProcessedFile,
+    UploadAsset,
     UploadFile,
     UploadURL,
 } from 'types/upload';
+import {
+    clusterLivePhotoFiles,
+    getLivePhotoName,
+    getLivePhotoSize,
+    readLivePhoto,
+} from './livePhotoService';
+import { encryptFile, getFileSize, readFile } from './fileService';
+import { uploadStreamUsingMultipart } from './multiPartUploadService';
+import UIService from './uiService';
+import { USE_CF_PROXY } from 'constants/upload';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
-    private metadataMap: Map<string, ParsedMetadataJSON>;
+    private parsedMetadataJSONMap: ParsedMetadataJSONMap = new Map<
+        string,
+        ParsedMetadataJSON
+    >();
+    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap = new Map<
+        number,
+        MetadataAndFileTypeInfo
+    >();
     private pendingUploadCount: number = 0;
 
-    async init(fileCount: number, metadataMap: MetadataMap) {
+    async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
-        this.metadataMap = metadataMap;
         await this.preFetchUploadURLs();
+    }
+
+    setParsedMetadataJSONMap(parsedMetadataJSONMap: ParsedMetadataJSONMap) {
+        this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+    }
+
+    setMetadataAndFileTypeInfoMap(
+        metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap
+    ) {
+        this.metadataAndFileTypeInfoMap = metadataAndFileTypeInfoMap;
     }
 
     reducePendingUploadCount() {
         this.pendingUploadCount--;
     }
 
-    async readFile(
-        worker: any,
-        reader: FileReader,
-        rawFile: File,
-        fileTypeInfo: FileTypeInfo
-    ): Promise<FileInMemory> {
-        const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
-            worker,
-            reader,
-            rawFile,
-            fileTypeInfo
-        );
-
-        const filedata = await getFileData(reader, rawFile);
-
-        return {
-            filedata,
-            thumbnail,
-            hasStaticThumbnail,
-        };
+    getAssetSize({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
+        return isLivePhoto
+            ? getLivePhotoSize(livePhotoAssets)
+            : getFileSize(file);
     }
 
-    async getFileMetadata(
-        rawFile: File,
-        collection: Collection,
+    getAssetName({ isLivePhoto, file, livePhotoAssets }: FileWithCollection) {
+        return isLivePhoto
+            ? getLivePhotoName(livePhotoAssets.image.name)
+            : getFilename(file);
+    }
+
+    async getFileType(file: File | ElectronFile) {
+        return getFileType(file);
+    }
+
+    async readAsset(
+        fileTypeInfo: FileTypeInfo,
+        { isLivePhoto, file, livePhotoAssets }: UploadAsset
+    ) {
+        return isLivePhoto
+            ? await readLivePhoto(fileTypeInfo, livePhotoAssets)
+            : await readFile(fileTypeInfo, file);
+    }
+
+    async extractFileMetadata(
+        file: File | ElectronFile,
+        collectionID: number,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
-        const originalName = getFileOriginalName(rawFile);
-        const googleMetadata =
-            this.metadataMap.get(
-                getMetadataMapKey(collection.id, originalName)
-            ) ?? {};
-        const extractedMetadata: Metadata = await extractMetadata(
-            rawFile,
+        return extractFileMetadata(
+            this.parsedMetadataJSONMap,
+            file,
+            collectionID,
             fileTypeInfo
         );
-
-        for (const [key, value] of Object.entries(googleMetadata)) {
-            if (!value) {
-                continue;
-            }
-            extractedMetadata[key] = value;
-        }
-        return extractedMetadata;
     }
 
-    async encryptFile(
+    getFileMetadataAndFileTypeInfo(localID: number) {
+        return this.metadataAndFileTypeInfoMap.get(localID);
+    }
+
+    setFileMetadataAndFileTypeInfo(
+        localID: number,
+        metadataAndFileTypeInfo: MetadataAndFileTypeInfo
+    ) {
+        return this.metadataAndFileTypeInfoMap.set(
+            localID,
+            metadataAndFileTypeInfo
+        );
+    }
+
+    clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
+        return clusterLivePhotoFiles(mediaFiles);
+    }
+
+    async encryptAsset(
         worker: any,
         file: FileWithMetadata,
         encryptionKey: string
     ): Promise<EncryptedFile> {
-        try {
-            const { key: fileKey, file: encryptedFiledata } =
-                await encryptFiledata(worker, file.filedata);
-
-            const { file: encryptedThumbnail }: EncryptionResult =
-                await worker.encryptThumbnail(file.thumbnail, fileKey);
-            const { file: encryptedMetadata }: EncryptionResult =
-                await worker.encryptMetadata(file.metadata, fileKey);
-
-            const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
-                fileKey,
-                encryptionKey
-            );
-
-            const result: EncryptedFile = {
-                file: {
-                    file: encryptedFiledata,
-                    thumbnail: encryptedThumbnail,
-                    metadata: encryptedMetadata,
-                    filename: file.metadata.title,
-                },
-                fileKey: encryptedKey,
-            };
-            return result;
-        } catch (e) {
-            logError(e, 'Error encrypting files');
-            throw e;
-        }
+        return encryptFile(worker, file, encryptionKey);
     }
 
     async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
@@ -126,26 +134,43 @@ class UploadService {
             let fileObjectKey: string = null;
             if (isDataStream(file.file.encryptedData)) {
                 fileObjectKey = await uploadStreamUsingMultipart(
-                    file.filename,
+                    file.localID,
                     file.file.encryptedData
                 );
             } else {
                 const progressTracker = UIService.trackUploadProgress(
-                    file.filename
+                    file.localID
                 );
                 const fileUploadURL = await this.getUploadURL();
-                fileObjectKey = await UploadHttpClient.putFile(
-                    fileUploadURL,
-                    file.file.encryptedData,
-                    progressTracker
-                );
+                if (USE_CF_PROXY) {
+                    fileObjectKey = await UploadHttpClient.putFileV2(
+                        fileUploadURL,
+                        file.file.encryptedData,
+                        progressTracker
+                    );
+                } else {
+                    fileObjectKey = await UploadHttpClient.putFile(
+                        fileUploadURL,
+                        file.file.encryptedData,
+                        progressTracker
+                    );
+                }
             }
             const thumbnailUploadURL = await this.getUploadURL();
-            const thumbnailObjectKey = await UploadHttpClient.putFile(
-                thumbnailUploadURL,
-                file.thumbnail.encryptedData as Uint8Array,
-                null
-            );
+            let thumbnailObjectKey: string = null;
+            if (USE_CF_PROXY) {
+                thumbnailObjectKey = await UploadHttpClient.putFileV2(
+                    thumbnailUploadURL,
+                    file.thumbnail.encryptedData as Uint8Array,
+                    null
+                );
+            } else {
+                thumbnailObjectKey = await UploadHttpClient.putFile(
+                    thumbnailUploadURL,
+                    file.thumbnail.encryptedData as Uint8Array,
+                    null
+                );
+            }
 
             const backupedFile: BackupedFile = {
                 file: {

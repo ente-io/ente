@@ -5,22 +5,26 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import {
-    SaveKeyInSessionStore,
+    saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
     generateKeyAttributes,
 } from 'utils/crypto';
 import SetPasswordForm from 'components/SetPasswordForm';
 import { justSignedUp, setJustSignedUp } from 'utils/storage';
-import RecoveryKeyModal from 'components/RecoveryKeyModal';
+import RecoveryKey from 'components/RecoveryKey';
 import { PAGES } from 'constants/pages';
-import Container from 'components/Container';
+import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
+import FormTitle from 'components/Form/FormPaper/Title';
 
 export default function Generate() {
     const [token, setToken] = useState<string>();
+    const [user, setUser] = useState<User>();
     const router = useRouter();
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -34,6 +38,7 @@ export default function Generate() {
             router.prefetch(PAGES.GALLERY);
             router.prefetch(PAGES.CREDENTIALS);
             const user: User = getData(LS_KEYS.USER);
+            setUser(user);
             if (!user?.token) {
                 router.push(PAGES.ROOT);
             } else if (key) {
@@ -66,7 +71,7 @@ export default function Generate() {
                 keyAttributes,
                 masterKey
             );
-            await SaveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
+            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, masterKey);
             setJustSignedUp(true);
             setRecoveryModalView(true);
         } catch (e) {
@@ -78,13 +83,13 @@ export default function Generate() {
     return (
         <>
             {loading ? (
-                <Container>
+                <VerticallyCentered>
                     <EnteSpinner>
                         <span className="sr-only">Loading...</span>
                     </EnteSpinner>
-                </Container>
+                </VerticallyCentered>
             ) : recoverModalView ? (
-                <RecoveryKeyModal
+                <RecoveryKey
                     show={recoverModalView}
                     onHide={() => {
                         setRecoveryModalView(false);
@@ -93,11 +98,17 @@ export default function Generate() {
                     somethingWentWrong={() => null}
                 />
             ) : (
-                <SetPasswordForm
-                    callback={onSubmit}
-                    buttonText={constants.SET_PASSPHRASE}
-                    back={logoutUser}
-                />
+                <FormContainer>
+                    <FormPaper>
+                        <FormTitle>{constants.SET_PASSPHRASE}</FormTitle>
+                        <SetPasswordForm
+                            userEmail={user?.email}
+                            callback={onSubmit}
+                            buttonText={constants.SET_PASSPHRASE}
+                            back={logoutUser}
+                        />
+                    </FormPaper>
+                </FormContainer>
             )}
         </>
     );

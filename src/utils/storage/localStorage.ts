@@ -6,13 +6,19 @@ export enum LS_KEYS {
     KEY_ATTRIBUTES = 'keyAttributes',
     ORIGINAL_KEY_ATTRIBUTES = 'originalKeyAttributes',
     SUBSCRIPTION = 'subscription',
+    FAMILY_DATA = 'familyData',
     PLANS = 'plans',
     IS_FIRST_LOGIN = 'isFirstLogin',
     JUST_SIGNED_UP = 'justSignedUp',
     SHOW_BACK_BUTTON = 'showBackButton',
     EXPORT = 'export',
-    AnonymizeUserID = 'anonymizedUserID',
+    AnonymizedUserID = 'anonymizedUserID',
     THUMBNAIL_FIX_STATE = 'thumbnailFixState',
+    LIVE_PHOTO_INFO_SHOWN_COUNT = 'livePhotoInfoShownCount',
+    LOGS = 'logs',
+    USER_DETAILS = 'userDetails',
+    COLLECTION_SORT_BY = 'collectionSortBy',
+    THEME = 'theme',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {
@@ -20,6 +26,13 @@ export const setData = (key: LS_KEYS, value: object) => {
         return null;
     }
     localStorage.setItem(key, JSON.stringify(value));
+};
+
+export const removeData = (key: LS_KEYS) => {
+    if (typeof localStorage === 'undefined') {
+        return null;
+    }
+    localStorage.removeItem(key);
 };
 
 export const getData = (key: LS_KEYS) => {
@@ -34,7 +47,7 @@ export const getData = (key: LS_KEYS) => {
         const data = localStorage.getItem(key);
         return data && JSON.parse(data);
     } catch (e) {
-        logError(e, 'Failed to Parse JSON');
+        logError(e, 'Failed to Parse JSON for key ' + key);
     }
 };
 

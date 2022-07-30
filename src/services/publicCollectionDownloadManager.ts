@@ -13,12 +13,17 @@ import { EnteFile } from 'types/file';
 
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
+import { CustomError } from 'utils/error';
 
 class PublicCollectionDownloadManager {
-    private fileObjectURLPromise = new Map<string, Promise<string>>();
+    private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
-    public async getThumbnail(file: EnteFile, token: string) {
+    public async getThumbnail(
+        file: EnteFile,
+        token: string,
+        passwordToken: string
+    ) {
         try {
             if (!token) {
                 return null;
@@ -37,10 +42,15 @@ class PublicCollectionDownloadManager {
                     const cacheResp: Response = await thumbnailCache?.match(
                         file.id.toString()
                     );
+
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    const thumb = await this.downloadThumb(token, file);
+                    const thumb = await this.downloadThumb(
+                        token,
+                        passwordToken,
+                        file
+                    );
                     const thumbBlob = new Blob([thumb]);
                     try {
                         await thumbnailCache?.put(
@@ -63,13 +73,25 @@ class PublicCollectionDownloadManager {
         }
     }
 
-    private downloadThumb = async (token: string, file: EnteFile) => {
+    private downloadThumb = async (
+        token: string,
+        passwordToken: string,
+        file: EnteFile
+    ) => {
         const resp = await HTTPService.get(
             getPublicCollectionThumbnailURL(file.id),
             null,
-            { 'X-Auth-Access-Token': token },
+            {
+                'X-Auth-Access-Token': token,
+                ...(passwordToken && {
+                    'X-Auth-Access-Token-JWT': passwordToken,
+                }),
+            },
             { responseType: 'arraybuffer' }
         );
+        if (typeof resp.data === 'undefined') {
+            throw Error(CustomError.REQUEST_FAILED);
+        }
         const worker = await new CryptoWorker();
         const decrypted: Uint8Array = await worker.decryptThumbnail(
             new Uint8Array(resp.data),
@@ -79,19 +101,34 @@ class PublicCollectionDownloadManager {
         return decrypted;
     };
 
-    getFile = async (file: EnteFile, token: string, forPreview = false) => {
+    getFile = async (
+        file: EnteFile,
+        token: string,
+        passwordToken: string,
+        forPreview = false
+    ) => {
         const shouldBeConverted = forPreview && needsConversionForPreview(file);
         const fileKey = shouldBeConverted
             ? `${file.id}_converted`
             : `${file.id}`;
         try {
             const getFilePromise = async (convert: boolean) => {
-                const fileStream = await this.downloadFile(token, file);
-                let fileBlob = await new Response(fileStream).blob();
+                const fileStream = await this.downloadFile(
+                    token,
+                    passwordToken,
+                    file
+                );
+                const fileBlob = await new Response(fileStream).blob();
                 if (convert) {
-                    fileBlob = await convertForPreview(file, fileBlob);
+                    const convertedBlobs = await convertForPreview(
+                        file,
+                        fileBlob
+                    );
+                    return convertedBlobs.map((blob) =>
+                        URL.createObjectURL(blob)
+                    );
                 }
-                return URL.createObjectURL(fileBlob);
+                return [URL.createObjectURL(fileBlob)];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
                 this.fileObjectURLPromise.set(
@@ -99,8 +136,8 @@ class PublicCollectionDownloadManager {
                     getFilePromise(shouldBeConverted)
                 );
             }
-            const fileURL = await this.fileObjectURLPromise.get(fileKey);
-            return fileURL;
+            const fileURLs = await this.fileObjectURLPromise.get(fileKey);
+            return fileURLs;
         } catch (e) {
             this.fileObjectURLPromise.delete(fileKey);
             logError(e, 'Failed to get File');
@@ -112,7 +149,7 @@ class PublicCollectionDownloadManager {
         return await this.fileObjectURLPromise.get(file.id.toString());
     }
 
-    async downloadFile(token: string, file: EnteFile) {
+    async downloadFile(token: string, passwordToken: string, file: EnteFile) {
         const worker = await new CryptoWorker();
         if (!token) {
             return null;
@@ -124,9 +161,17 @@ class PublicCollectionDownloadManager {
             const resp = await HTTPService.get(
                 getPublicCollectionFileURL(file.id),
                 null,
-                { 'X-Auth-Access-Token': token },
+                {
+                    'X-Auth-Access-Token': token,
+                    ...(passwordToken && {
+                        'X-Auth-Access-Token-JWT': passwordToken,
+                    }),
+                },
                 { responseType: 'arraybuffer' }
             );
+            if (typeof resp.data === 'undefined') {
+                throw Error(CustomError.REQUEST_FAILED);
+            }
             const decrypted: any = await worker.decryptFile(
                 new Uint8Array(resp.data),
                 await worker.fromB64(file.file.decryptionHeader),
@@ -136,7 +181,7 @@ class PublicCollectionDownloadManager {
         }
         const resp = await fetch(getPublicCollectionFileURL(file.id), {
             headers: {
-                'X-Auth-Token': token,
+                'X-Auth-Access-Token': token,
             },
         });
         const reader = resp.body.getReader();

@@ -368,7 +368,7 @@ class MachineLearningService {
             // don't persist these errors against file,
             // can include indexeddb/cache errors too
             switch (error.message) {
-                case CustomError.SESSION_EXPIRED_MESSAGE:
+                case CustomError.SESSION_EXPIRED:
                 case CustomError.NETWORK_ERROR:
                     throw error;
             }

@@ -43,7 +43,7 @@ export default class MyDocument extends Document {
                         type="image/png"
                     />
                     <link rel="manifest" href="manifest.json" />
-                    <link rel="apple-touch-icon" href="/images/ente-512.png" />
+                    <link rel="apple-touch-icon" href="/images/ente/512.png" />
                     <meta name="theme-color" content="#111" />
                     <link
                         rel="icon"

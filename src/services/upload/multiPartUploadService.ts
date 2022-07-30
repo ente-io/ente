@@ -1,6 +1,7 @@
 import {
     FILE_CHUNKS_COMBINED_FOR_A_UPLOAD_PART,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
+    USE_CF_PROXY,
 } from 'constants/upload';
 import UIService from './uiService';
 import UploadHttpClient from './uploadHttpClient';
@@ -20,7 +21,7 @@ function calculatePartCount(chunkCount: number) {
     return partCount;
 }
 export async function uploadStreamUsingMultipart(
-    filename: string,
+    fileLocalID: number,
     dataStream: DataStream
 ) {
     const uploadPartCount = calculatePartCount(dataStream.chunkCount);
@@ -30,7 +31,7 @@ export async function uploadStreamUsingMultipart(
     const fileObjectKey = await uploadStreamInParts(
         multipartUploadURLs,
         dataStream.stream,
-        filename,
+        fileLocalID,
         uploadPartCount
     );
     return fileObjectKey;
@@ -39,7 +40,7 @@ export async function uploadStreamUsingMultipart(
 export async function uploadStreamInParts(
     multipartUploadURLs: MultipartUploadURLs,
     dataStream: ReadableStream<Uint8Array>,
-    filename: string,
+    fileLocalID: number,
     uploadPartCount: number
 ) {
     const streamReader = dataStream.getReader();
@@ -52,16 +53,24 @@ export async function uploadStreamInParts(
     ] of multipartUploadURLs.partURLs.entries()) {
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
         const progressTracker = UIService.trackUploadProgress(
-            filename,
+            fileLocalID,
             percentPerPart,
             index
         );
-
-        const eTag = await UploadHttpClient.putFilePart(
-            fileUploadURL,
-            uploadChunk,
-            progressTracker
-        );
+        let eTag = null;
+        if (USE_CF_PROXY) {
+            eTag = await UploadHttpClient.putFilePartV2(
+                fileUploadURL,
+                uploadChunk,
+                progressTracker
+            );
+        } else {
+            eTag = await UploadHttpClient.putFilePart(
+                fileUploadURL,
+                uploadChunk,
+                progressTracker
+            );
+        }
         partEtags.push({ PartNumber: index + 1, ETag: eTag });
     }
     const { done } = await streamReader.read();
@@ -103,5 +112,9 @@ async function completeMultipartUpload(
         { CompleteMultipartUpload: { Part: partEtags } },
         options
     );
-    await UploadHttpClient.completeMultipartUpload(completeURL, body);
+    if (USE_CF_PROXY) {
+        await UploadHttpClient.completeMultipartUploadV2(completeURL, body);
+    } else {
+        await UploadHttpClient.completeMultipartUpload(completeURL, body);
+    }
 }

@@ -7,12 +7,13 @@ import {
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import downloadManager from './downloadManager';
-import { updatePublicMagicMetadata } from './fileService';
+import { updateFilePublicMagicMetadata } from './fileService';
 import { EnteFile } from 'types/file';
 
-import { getRawExif, getUNIXTime } from './upload/exifService';
-import { getFileType } from './upload/readFileService';
+import { getRawExif } from './upload/exifService';
+import { getFileType } from 'services/typeDetectionService';
 import { FILE_TYPE } from 'constants/file';
+import { getUnixTimeInMicroSeconds } from 'utils/time';
 
 export async function updateCreationTimeWithExif(
     filesToBeUpdated: EnteFile[],
@@ -33,19 +34,20 @@ export async function updateCreationTimeWithExif(
                 }
                 let correctCreationTime: number;
                 if (fixOption === FIX_OPTIONS.CUSTOM_TIME) {
-                    correctCreationTime = getUNIXTime(customTime);
+                    correctCreationTime = getUnixTimeInMicroSeconds(customTime);
                 } else {
-                    const fileURL = await downloadManager.getFile(file);
+                    const fileURL = await downloadManager.getFile(file)[0];
                     const fileObject = await getFileFromURL(fileURL);
-                    const reader = new FileReader();
-                    const fileTypeInfo = await getFileType(reader, fileObject);
+                    const fileTypeInfo = await getFileType(fileObject);
                     const exifData = await getRawExif(fileObject, fileTypeInfo);
                     if (fixOption === FIX_OPTIONS.DATE_TIME_ORIGINAL) {
-                        correctCreationTime = getUNIXTime(
+                        correctCreationTime = getUnixTimeInMicroSeconds(
                             exifData?.DateTimeOriginal
                         );
                     } else {
-                        correctCreationTime = getUNIXTime(exifData?.CreateDate);
+                        correctCreationTime = getUnixTimeInMicroSeconds(
+                            exifData?.CreateDate
+                        );
                     }
                 }
                 if (
@@ -57,7 +59,7 @@ export async function updateCreationTimeWithExif(
                         correctCreationTime
                     );
                     updatedFile = (
-                        await updatePublicMagicMetadata([updatedFile])
+                        await updateFilePublicMagicMetadata([updatedFile])
                     )[0];
                     updateExistingFilePubMetadata(file, updatedFile);
                 }
