@@ -18,6 +18,7 @@ class CollectionResultWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Flexible(
               child: Column(
