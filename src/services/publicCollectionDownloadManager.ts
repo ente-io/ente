@@ -3,11 +3,7 @@ import {
     getPublicCollectionThumbnailURL,
 } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
-import {
-    generateStreamFromArrayBuffer,
-    convertForPreview,
-    needsConversionForPreview,
-} from 'utils/file';
+import { generateStreamFromArrayBuffer, convertForPreview } from 'utils/file';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 
@@ -107,19 +103,16 @@ class PublicCollectionDownloadManager {
         passwordToken: string,
         forPreview = false
     ) => {
-        const shouldBeConverted = forPreview && needsConversionForPreview(file);
-        const fileKey = shouldBeConverted
-            ? `${file.id}_converted`
-            : `${file.id}`;
+        const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
         try {
-            const getFilePromise = async (convert: boolean) => {
+            const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(
                     token,
                     passwordToken,
                     file
                 );
                 const fileBlob = await new Response(fileStream).blob();
-                if (convert) {
+                if (forPreview) {
                     const convertedBlobs = await convertForPreview(
                         file,
                         fileBlob
@@ -131,10 +124,7 @@ class PublicCollectionDownloadManager {
                 return [URL.createObjectURL(fileBlob)];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
-                this.fileObjectURLPromise.set(
-                    fileKey,
-                    getFilePromise(shouldBeConverted)
-                );
+                this.fileObjectURLPromise.set(fileKey, getFilePromise());
             }
             const fileURLs = await this.fileObjectURLPromise.get(fileKey);
             return fileURLs;
