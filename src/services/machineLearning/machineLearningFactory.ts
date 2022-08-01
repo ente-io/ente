@@ -22,7 +22,7 @@ import {
     SceneDetectionService,
     SceneDetectionMethod,
 } from 'types/machineLearning';
-import { CONCURRENCY } from 'utils/common/concurrency';
+import { getConcurrency } from 'utils/common/concurrency';
 import { getDedicatedCryptoWorker } from 'utils/crypto';
 import { ComlinkWorker } from 'utils/comlink';
 import { logQueueStats } from 'utils/machineLearning';
@@ -201,7 +201,7 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.nSyncedFiles = 0;
         this.nSyncedFaces = 0;
 
-        this.concurrency = concurrency || CONCURRENCY;
+        this.concurrency = concurrency || getConcurrency();
 
         console.log('Using concurrency: ', this.concurrency);
         // timeout is added on downloads
