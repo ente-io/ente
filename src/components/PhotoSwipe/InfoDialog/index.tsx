@@ -11,6 +11,14 @@ import { AppContext } from 'pages/_app';
 import { Location, Metadata } from 'types/upload';
 import Photoswipe from 'photoswipe';
 import { getEXIFLocation } from 'services/upload/exifService';
+import {
+    PhotoPeopleList,
+    UnidentifiedFaces,
+} from 'components/MachineLearning/PeopleList';
+
+import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
+import { WordList } from 'components/MachineLearning/WordList';
+import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 
 const FileInfoDialog = styled(Dialog)(({ theme }) => ({
     zIndex: 1501,
@@ -21,6 +29,12 @@ const FileInfoDialog = styled(Dialog)(({ theme }) => ({
         padding: theme.spacing(2),
     },
 }));
+
+const Legend = styled('span')`
+    font-size: 20px;
+    color: #ddd;
+    display: inline;
+`;
 
 interface Iprops {
     shouldDisableEdits: boolean;
@@ -45,6 +59,7 @@ export function FileInfo({
 }: Iprops) {
     const appContext = useContext(AppContext);
     const [location, setLocation] = useState<Location>(null);
+    const [updateMLDataIndex, setUpdateMLDataIndex] = useState(0);
 
     useEffect(() => {
         if (!location && metadata) {
@@ -112,6 +127,43 @@ export function FileInfo({
                             {constants.SHOW_MAP}
                         </Link>
                     )}
+                {appContext.mlSearchEnabled && (
+                    <>
+                        <div>
+                            <Legend>{constants.PEOPLE}</Legend>
+                        </div>
+                        <PhotoPeopleList
+                            file={items[photoSwipe?.getCurrentIndex()]}
+                            updateMLDataIndex={updateMLDataIndex}
+                        />
+                        <div>
+                            <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
+                        </div>
+                        <UnidentifiedFaces
+                            file={items[photoSwipe?.getCurrentIndex()]}
+                            updateMLDataIndex={updateMLDataIndex}
+                        />
+                        <div>
+                            <Legend>{constants.OBJECTS}</Legend>
+                            <ObjectLabelList
+                                file={items[photoSwipe?.getCurrentIndex()]}
+                                updateMLDataIndex={updateMLDataIndex}
+                            />
+                        </div>
+                        <div>
+                            <Legend>{constants.TEXT}</Legend>
+                            <WordList
+                                file={items[photoSwipe?.getCurrentIndex()]}
+                                updateMLDataIndex={updateMLDataIndex}
+                            />
+                        </div>
+                        <MLServiceFileInfoButton
+                            file={items[photoSwipe?.getCurrentIndex()]}
+                            updateMLDataIndex={updateMLDataIndex}
+                            setUpdateMLDataIndex={setUpdateMLDataIndex}
+                        />
+                    </>
+                )}
                 {exif && (
                     <>
                         <ExifData exif={exif} />
