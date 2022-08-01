@@ -1,7 +1,7 @@
 import { IconButton } from '@mui/material';
 import debounce from 'debounce-promise';
 import { AppContext } from 'pages/_app';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { getAutoCompleteSuggestions } from 'services/searchService';
 import {
     Bbox,
@@ -20,6 +20,7 @@ import { EnteFile } from 'types/file';
 import { Collection } from 'types/collection';
 import { OptionWithInfo } from './optionWithInfo';
 import { SearchInputWrapper } from '../styledComponents';
+import MenuWithPeople from './MenuWithPeople';
 
 interface Iprops {
     isOpen: boolean;
@@ -31,6 +32,7 @@ interface Iprops {
 }
 
 export default function SearchInput(props: Iprops) {
+    const selectRef = useRef(null);
     const [value, setValue] = useState<SearchOption>(null);
     const appContext = useContext(AppContext);
     const handleChange = (value: SearchOption) => {
@@ -90,17 +92,39 @@ export default function SearchInput(props: Iprops) {
         });
     };
 
+    // TODO: HACK as AsyncSelect does not support default options reloading on focus/click
+    // unwanted side effect: placeholder is not shown on focus/click
+    // https://github.com/JedWatson/react-select/issues/1879
+    // for correct fix AsyncSelect can be extended to support default options reloading on focus/click
+    const handleOnFocus = () => {
+        if (appContext.mlSearchEnabled) {
+            const emptySearch = ' ';
+            selectRef.current.state.inputValue = emptySearch;
+            selectRef.current.select.state.inputValue = emptySearch;
+            selectRef.current.handleInputChange(emptySearch);
+        }
+    };
+
     return (
         <SearchInputWrapper isOpen={props.isOpen}>
             <AsyncSelect
+                ref={selectRef}
                 value={value}
                 components={{
                     Option: OptionWithInfo,
                     ValueContainer: ValueContainerWithIcon,
+                    Menu: (props) => (
+                        <MenuWithPeople
+                            {...props}
+                            setValue={setValue}
+                            selectRef={selectRef}
+                        />
+                    ),
                 }}
                 placeholder={constants.SEARCH_HINT()}
                 loadOptions={getOptions}
                 onChange={handleChange}
+                onFocus={handleOnFocus}
                 isClearable
                 escapeClearsValue
                 styles={SelectStyles}
