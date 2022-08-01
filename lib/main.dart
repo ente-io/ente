@@ -19,7 +19,7 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
-import 'package:photos/services/file_migration_service.dart';
+import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/notification_service.dart';
@@ -140,7 +140,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   await SyncService.instance.init();
   await MemoriesService.instance.init();
   await LocalSettings.instance.init();
-  await FileMigrationService.instance.init();
+  await LocalFileUpdateService.instance.init();
   if (Platform.isIOS) {
     PushService.instance.init().then((_) {
       FirebaseMessaging.onBackgroundMessage(

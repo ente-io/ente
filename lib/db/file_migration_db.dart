@@ -12,16 +12,18 @@ class FilesMigrationDB {
   static final Logger _logger = Logger((FilesMigrationDB).toString());
 
   static const tableName = 're_upload_tracker';
-  static const columnLocalID = 'local_id';
+  static const _columnLocalID = 'local_id';
   static const _columnReason = 'reason';
+  static const missingLocation = 'missing_location';
+  static const modificationTimeUpdated = 'modificationTimeUpdated';
 
   // SQL code to create the database table
   static List<String> _createTable() {
     return [
       ''' 
       CREATE TABLE $tableName (
-      $columnLocalID TEXT NOT NULL,
-      UNIQUE($columnLocalID)
+      $_columnLocalID TEXT NOT NULL,
+      UNIQUE($_columnLocalID)
       ); 
       ''',
     ];
@@ -71,7 +73,10 @@ class FilesMigrationDB {
     await db.delete(tableName);
   }
 
-  Future<void> insertMultiple(List<String> fileLocalIDs) async {
+  Future<void> insertMultiple(
+    List<String> fileLocalIDs, {
+    String reason,
+  }) async {
     final startTime = DateTime.now();
     final db = await instance.database;
     var batch = db.batch();
@@ -84,7 +89,7 @@ class FilesMigrationDB {
       }
       batch.insert(
         tableName,
-        _getRowForReUploadTable(localID),
+        _getRowForReUploadTable(localID, reason),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
       batchCounter++;
@@ -110,24 +115,36 @@ class FilesMigrationDB {
     final db = await instance.database;
     return await db.delete(
       tableName,
-      where: '$columnLocalID IN (${localIDs.join(', ')})',
+      where: '$_columnLocalID IN (${localIDs.join(', ')})',
     );
   }
 
-  Future<List<String>> getLocalIDsForPotentialReUpload(int limit) async {
+  Future<List<String>> getLocalIDsForPotentialReUpload(
+    int limit,
+    String reason,
+  ) async {
     final db = await instance.database;
-    final rows = await db.query(tableName, limit: limit);
+    String whereClause = '$_columnReason = $reason';
+    if (_columnReason == missingLocation) {
+      whereClause = '($_columnReason = $reason OR $_columnReason IS NULL';
+    }
+    final rows = await db.query(
+      tableName,
+      limit: limit,
+      where: whereClause,
+    );
     final result = <String>[];
     for (final row in rows) {
-      result.add(row[columnLocalID]);
+      result.add(row[_columnLocalID]);
     }
     return result;
   }
 
-  Map<String, dynamic> _getRowForReUploadTable(String localID) {
+  Map<String, dynamic> _getRowForReUploadTable(String localID, String reason) {
     assert(localID != null);
     final row = <String, dynamic>{};
-    row[columnLocalID] = localID;
+    row[_columnLocalID] = localID;
+    row[_columnReason] = reason;
     return row;
   }
 }

@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // LocalFileUpdateService tracks all the potential local file IDs which have
 // changed/modified on the device and needed to be uploaded again.
-class FileMigrationService {
+class LocalFileUpdateService {
   FilesDB _filesDB;
   FilesMigrationDB _filesMigrationDB;
   SharedPreferences _prefs;
@@ -19,8 +19,8 @@ class FileMigrationService {
   static const isLocalImportDone = "fm_IsLocalImportDone";
   Completer<void> _existingMigration;
 
-  FileMigrationService._privateConstructor() {
-    _logger = Logger((FileMigrationService).toString());
+  LocalFileUpdateService._privateConstructor() {
+    _logger = Logger((LocalFileUpdateService).toString());
     _filesDB = FilesDB.instance;
     _filesMigrationDB = FilesMigrationDB.instance;
   }
@@ -29,8 +29,8 @@ class FileMigrationService {
     _prefs = await SharedPreferences.getInstance();
   }
 
-  static FileMigrationService instance =
-      FileMigrationService._privateConstructor();
+  static LocalFileUpdateService instance =
+      LocalFileUpdateService._privateConstructor();
 
   Future<bool> _markLocationMigrationAsCompleted() async {
     _logger.info('marking migration as completed');
@@ -41,7 +41,7 @@ class FileMigrationService {
     return _prefs.get(isLocationMigrationComplete) ?? false;
   }
 
-  Future<void> runMigration() async {
+  Future<void> markUpdatedFilesForReUpload() async {
     if (_existingMigration != null) {
       _logger.info("migration is already in progress, skipping");
       return _existingMigration.future;
@@ -74,8 +74,11 @@ class FileMigrationService {
       bool hasData = true;
       const int limitInBatch = 100;
       while (hasData) {
-        var localIDsToProcess = await _filesMigrationDB
-            .getLocalIDsForPotentialReUpload(limitInBatch);
+        var localIDsToProcess =
+            await _filesMigrationDB.getLocalIDsForPotentialReUpload(
+          limitInBatch,
+          FilesMigrationDB.missingLocation,
+        );
         if (localIDsToProcess.isEmpty) {
           hasData = false;
         } else {
@@ -130,12 +133,15 @@ class FileMigrationService {
     final sTime = DateTime.now().microsecondsSinceEpoch;
     _logger.info('importing files without location info');
     var fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
-    await _filesMigrationDB.insertMultiple(fileLocalIDs);
+    await _filesMigrationDB.insertMultiple(
+      fileLocalIDs,
+      reason: FilesMigrationDB.missingLocation,
+    );
     final eTime = DateTime.now().microsecondsSinceEpoch;
     final d = Duration(microseconds: eTime - sTime);
     _logger.info(
       'importing completed, total files count ${fileLocalIDs.length} and took ${d.inSeconds.toString()} seconds',
     );
-    _prefs.setBool(isLocalImportDone, true);
+    await _prefs.setBool(isLocalImportDone, true);
   }
 }
