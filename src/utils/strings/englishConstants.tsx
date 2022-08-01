@@ -189,8 +189,8 @@ const englishConstants = {
             registered email address
         </>
     ),
-    ENABLE_ML_SEARCH: 'enable ML Search beta',
-    DISABLE_ML_SEARCH: 'disable ML Search beta',
+    ENABLE_ML_SEARCH: 'Enable ML Search beta',
+    DISABLE_ML_SEARCH: 'Disable ML Search beta',
     ENABLE_ML_SEARCH_MESSAGE:
         'This will enable on-device machine learning and people search. ' +
         'It will keep analyzing your uploaded photos locally and will store ' +

@@ -7,10 +7,17 @@ import TwoFactorModal from 'components/TwoFactor/Modal';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
+import { canEnableMlSearch } from 'utils/machineLearning/compatibility';
+import mlIDbStorage from 'utils/storage/mlIDbStorage';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
-    const { setDialogMessage, startLoading } = useContext(AppContext);
+    const {
+        setDialogMessage,
+        startLoading,
+        mlSearchEnabled,
+        updateMlSearchEnabled,
+    } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
     const [twoFactorModalView, setTwoFactorModalView] = useState(false);
@@ -43,6 +50,46 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
+    const redirectToMLDebug = () => {
+        router.push(PAGES.ML_DEBUG);
+    };
+
+    const enableMlSearch = async () => {
+        await updateMlSearchEnabled(true);
+    };
+    const disableMlSearch = async () => {
+        await updateMlSearchEnabled(false);
+    };
+
+    const clearMLDB = async () => {
+        await mlIDbStorage.clearMLDB();
+    };
+
+    const toggleMLSearch = () => {
+        if (!mlSearchEnabled) {
+            if (!canEnableMlSearch()) {
+                setDialogMessage({
+                    title: constants.ENABLE_ML_SEARCH,
+                    content: constants.ML_SEARCH_NOT_COMPATIBLE,
+                    close: { text: constants.OK },
+                });
+                return;
+            }
+            setDialogMessage({
+                title: constants.ENABLE_ML_SEARCH,
+                content: constants.ENABLE_ML_SEARCH_MESSAGE,
+                staticBackdrop: true,
+                proceed: {
+                    text: constants.ENABLE,
+                    action: enableMlSearch,
+                    variant: 'accent',
+                },
+                close: { text: constants.CANCEL },
+            });
+        } else {
+            disableMlSearch();
+        }
+    };
     return (
         <>
             <SidebarButton onClick={openRecoveryKeyModal}>
@@ -60,6 +107,46 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
+            <SidebarButton onClick={toggleMLSearch}>
+                {mlSearchEnabled
+                    ? constants.DISABLE_ML_SEARCH
+                    : constants.ENABLE_ML_SEARCH}
+            </SidebarButton>
+
+            <SidebarButton
+                onClick={() => {
+                    if (!mlSearchEnabled) {
+                        if (!canEnableMlSearch()) {
+                            setDialogMessage({
+                                title: constants.ENABLE_ML_SEARCH,
+                                content: constants.ML_SEARCH_NOT_COMPATIBLE,
+                                close: { text: constants.OK },
+                            });
+                            return;
+                        }
+                        setDialogMessage({
+                            title: 'clear mb db',
+                            content: 'clear mb db',
+                            staticBackdrop: true,
+                            proceed: {
+                                text: 'clear',
+                                action: clearMLDB,
+                                variant: 'accent',
+                            },
+                            close: { text: constants.CANCEL },
+                        });
+                    } else {
+                        disableMlSearch();
+                    }
+                }}>
+                {'Clear ML db'}
+            </SidebarButton>
+
+            {mlSearchEnabled && (
+                <SidebarButton onClick={redirectToMLDebug}>
+                    {constants.ML_DEBUG}
+                </SidebarButton>
+            )}
 
             {/* <SidebarButton onClick={openThumbnailCompressModal}>
                 {constants.COMPRESS_THUMBNAILS}
