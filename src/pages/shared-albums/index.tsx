@@ -32,12 +32,15 @@ import { useRouter } from 'next/router';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
-import { Card } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import SharedAlbumNavbar from 'components/pages/sharedAlbum/Navbar';
 import { CollectionInfo } from 'components/Collections/CollectionInfo';
 import { CollectionInfoBarWrapper } from 'components/Collections/styledComponents';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
+import FormContainer from 'components/Form/FormContainer';
+import FormPaper from 'components/Form/FormPaper';
+import FormPaperTitle from 'components/Form/FormPaper/Title';
+import Typography from '@mui/material/Typography';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -267,21 +270,23 @@ export default function PublicCollectionGallery() {
         }
         if (isPasswordProtected && !passwordJWTToken.current) {
             return (
-                <VerticallyCentered>
-                    <Card style={{ maxWidth: '332px' }} className="text-center">
-                        <Card.Body style={{ padding: '40px 30px' }}>
-                            <Card.Subtitle style={{ marginBottom: '2rem' }}>
-                                {constants.LINK_PASSWORD}
-                            </Card.Subtitle>
-                            <SingleInputForm
-                                callback={verifyLinkPassword}
-                                placeholder={constants.RETURN_PASSPHRASE_HINT}
-                                buttonText={'unlock'}
-                                fieldType="password"
-                            />
-                        </Card.Body>
-                    </Card>
-                </VerticallyCentered>
+                <FormContainer>
+                    <FormPaper>
+                        <FormPaperTitle>{constants.PASSWORD}</FormPaperTitle>
+                        <Typography
+                            color={'text.secondary'}
+                            mb={2}
+                            variant="body2">
+                            {constants.LINK_PASSWORD}
+                        </Typography>
+                        <SingleInputForm
+                            callback={verifyLinkPassword}
+                            placeholder={constants.RETURN_PASSPHRASE_HINT}
+                            buttonText={'unlock'}
+                            fieldType="password"
+                        />
+                    </FormPaper>
+                </FormContainer>
             );
         }
         if (!publicFiles) {
