@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -7,10 +8,13 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/db/public_keys_db.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/delete_account.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/location.dart';
@@ -35,6 +39,7 @@ class UserService {
   final _dio = Network.instance.getDio();
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
+  List<File> _cachedFiles;
   ValueNotifier<String> emailValueNotifier;
 
   UserService._privateConstructor();
@@ -43,6 +48,14 @@ class UserService {
   Future<void> init() async {
     emailValueNotifier =
         ValueNotifier<String>(Configuration.instance.getEmail());
+    _cachedFiles = await FilesDB.instance.getAllFilesFromDB();
+
+    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
+      _cachedFiles = null;
+      getAllFiles();
+    });
+
+    //need collectionUpdatedEvent listener?
   }
 
   Future<void> sendOtt(
@@ -860,6 +873,11 @@ class UserService {
     }
   }
 
+  Future<List<File>> getAllFiles() async {
+    _cachedFiles ??= await FilesDB.instance.getAllFilesFromDB();
+    return _cachedFiles;
+  }
+
   Future<List<dynamic>> getLocationSerachData(String query) async {
     try {
       final response = await _dio.get(
@@ -870,24 +888,61 @@ class UserService {
         ),
       );
 
-      List<dynamic> finalResult = response.data['results'] ?? [];
+      List<dynamic> matchedLocationNamesAndBboxs =
+          response.data['results'] ?? [];
 
-      for (dynamic result in finalResult) {
+      for (dynamic result in matchedLocationNamesAndBboxs) {
         result.update(
           'bbox',
           (value) => {
             /*bbox in response is of order (0-lng,1-lat,2-lng,3-lat) and southwest
-           coordinate is (0,1)(lng,lat) and northeast is (2,3)(lng,lat)
-           for location(), the order is location(lat,lng) */
+           coordinate is (0,1)(lng,lat) and northeast is (2,3)(lng,lat).
+           For location(), the order is location(lat,lng) */
             "southWestCoordinates": Location(value[1], value[0]),
             "northEastCoordinates": Location(value[3], value[2])
           },
         );
       }
-      return finalResult;
+
+      List<File> allFiles = await getAllFiles();
+//make a map with {'place': '', 'matchingFiles': [file, file, file...]}
+      List<Map<String, dynamic>> locationSearchResult = [];
+
+      for (var locationAndBbox in matchedLocationNamesAndBboxs) {
+        log(locationAndBbox.toString());
+        locationSearchResult
+            .add({'place': locationAndBbox['place'], "matchingFiles": []});
+        for (File file in allFiles) {
+          if (_isValidLocation(file.location)) {
+            if (file.location.latitude >
+                    locationAndBbox['bbox']['southWestCoordinates'].latitude &&
+                file.location.longitude >
+                    locationAndBbox['bbox']['southWestCoordinates'].longitude &&
+                file.location.latitude <
+                    locationAndBbox['bbox']['northEastCoordinates'].latitude &&
+                file.location.longitude <
+                    locationAndBbox['bbox']['northEastCoordinates'].longitude) {
+              locationSearchResult.last["matchingFiles"].add(file);
+            }
+          }
+        }
+        log('locationSearchResult-----');
+        log(locationSearchResult.length.toString());
+      }
+
+      log('out of loactionAndBBox loop');
+      return locationSearchResult;
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
     }
+  }
+
+  bool _isValidLocation(Location location) {
+    return location != null &&
+        location.latitude != null &&
+        location.latitude != 0 &&
+        location.longitude != null &&
+        location.longitude != 0;
   }
 }

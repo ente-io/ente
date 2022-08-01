@@ -79,7 +79,6 @@ class FilesDB {
     initializationScript: initializationScript,
     migrationScripts: migrationScripts,
   );
-
   // make this a singleton class
   FilesDB._privateConstructor();
 
@@ -1160,6 +1159,18 @@ class FilesDB {
     }
     return files;
   }
+
+  Future<List<File>> getAllFilesFromDB() async {
+    final db = await instance.database;
+    List<Map<String, Object>> result = await db.query(table);
+    return _convertToFiles(result);
+  }
+  // Future<List<File>> getFilesInsideBbox(
+  //     List<dynamic> matchedLocationNamesAndBboxs) async {
+  // for (var locationAndBbox in matchedLocationNamesAndBboxs) {
+  //   print('yo');
+  // }
+  // } //make a map with {'place': '', matchingFiles: [file, file, file...]}
 
   Map<String, dynamic> _getRowForFile(File file) {
     final row = <String, dynamic>{};
