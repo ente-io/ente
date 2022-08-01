@@ -4,7 +4,6 @@ import CryptoWorker from 'utils/crypto';
 import {
     generateStreamFromArrayBuffer,
     convertForPreview,
-    needsConversionForPreview,
     createTypedObjectURL,
 } from 'utils/file';
 import HTTPService from './HTTPService';
@@ -84,15 +83,12 @@ class DownloadManager {
     };
 
     getFile = async (file: EnteFile, forPreview = false) => {
-        const shouldBeConverted = forPreview && needsConversionForPreview(file);
-        const fileKey = shouldBeConverted
-            ? `${file.id}_converted`
-            : `${file.id}`;
+        const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
         try {
-            const getFilePromise = async (convert: boolean) => {
+            const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
-                if (convert) {
+                if (forPreview) {
                     const convertedBlobs = await convertForPreview(
                         file,
                         fileBlob
@@ -112,10 +108,7 @@ class DownloadManager {
                 ];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
-                this.fileObjectURLPromise.set(
-                    fileKey,
-                    getFilePromise(shouldBeConverted)
-                );
+                this.fileObjectURLPromise.set(fileKey, getFilePromise());
             }
             const fileURLs = await this.fileObjectURLPromise.get(fileKey);
             return fileURLs;
