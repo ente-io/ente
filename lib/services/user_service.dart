@@ -905,7 +905,6 @@ class UserService {
       }
 
       List<File> allFiles = await getAllFiles();
-//make a map with {'place': '', 'matchingFiles': [file, file, file...]}
       List<Map<String, dynamic>> locationSearchResult = [];
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {

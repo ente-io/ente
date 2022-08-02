@@ -46,8 +46,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   Widget searchWidget() {
     List<CollectionWithThumbnail> matchedCollections = [];
     List<File> matchedFiles = [];
-    List<dynamic> matchedLocationNamesAndBboxs = [];
-    List<dynamic> matchedLocationsResults = [];
+    List<dynamic> matchedFilesWithLocation = [];
     return Column(
       children: [
         Row(
@@ -75,14 +74,9 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         .getFilteredCollectionsWithThumbnail(value);
                     matchedFiles =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    matchedLocationNamesAndBboxs =
+                    matchedFilesWithLocation =
                         await UserService.instance.getLocationSearchData(value);
                     log("sss----------------------");
-                    // matchedLocationsResults = await FilesDB.instance
-                    //     .getFilesInsideBbox(matchedLocationNamesAndBboxs);
-                    // print('getFilesInsideBox finished');
-                    // print('Matched Locations');
-                    // print(matchedLocationNamesAndBboxs);
                     _searchQuery.value = value;
                   },
                   autofocus: true,
@@ -111,7 +105,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                 ? SearchResultsSuggestions(
                     matchedCollections,
                     matchedFiles,
-                    matchedLocationNamesAndBboxs,
+                    matchedFilesWithLocation,
                   )
                 : const SizedBox.shrink();
           },
