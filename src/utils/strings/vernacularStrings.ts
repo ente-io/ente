@@ -65,7 +65,7 @@ const globalConstants: VernacularConstants<typeof englishConstants> = {
  */
 export function getConstantValue<T>(localConstants?: VernacularConstants<T>) {
     const searchParam =
-        runningInBrowser() && !runningInWorker() ? window.location.search : '';
+        !runningInWorker() && runningInBrowser() ? window.location.search : '';
     const query = new URLSearchParams(searchParam);
     const currLocale = getLocale(query.get('lang'));
 
