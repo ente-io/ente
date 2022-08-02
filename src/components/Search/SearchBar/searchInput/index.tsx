@@ -47,12 +47,13 @@ export default function SearchInput(props: Iprops) {
     useEffect(() => search(value), [value]);
 
     useEffect(() => {
-        const main = async () => {
-            const defaultOptions = await getDefaultOptions(props.files)();
-            setDefaultOptions(defaultOptions);
-        };
-        main();
+        refreshDefaultOptions();
     }, []);
+
+    async function refreshDefaultOptions() {
+        const defaultOptions = await getDefaultOptions(props.files);
+        setDefaultOptions(defaultOptions);
+    }
 
     const resetSearch = () => {
         if (props.isOpen) {
@@ -119,12 +120,8 @@ export default function SearchInput(props: Iprops) {
     // for correct fix AsyncSelect can be extended to support default options reloading on focus/click
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleOnFocus = () => {
-        const emptySearch = ' ';
-        selectRef.current.state.inputValue = emptySearch;
-        selectRef.current.select.state.inputValue = emptySearch;
-        selectRef.current.handleInputChange(emptySearch);
+        refreshDefaultOptions();
     };
-
     return (
         <SearchInputWrapper isOpen={props.isOpen}>
             <AsyncSelect
@@ -144,7 +141,7 @@ export default function SearchInput(props: Iprops) {
                 placeholder={constants.SEARCH_HINT()}
                 loadOptions={getOptions}
                 onChange={handleChange}
-                // onFocus={handleOnFocus}
+                onFocus={handleOnFocus}
                 isClearable
                 escapeClearsValue
                 styles={SelectStyles}
