@@ -1,4 +1,4 @@
-import { Link, LinkProps } from '@mui/material';
+import Link, { LinkProps } from '@mui/material/Link';
 import React, { FC } from 'react';
 import { ButtonProps } from 'react-bootstrap';
 

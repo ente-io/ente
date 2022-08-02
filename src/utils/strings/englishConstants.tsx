@@ -1,4 +1,5 @@
-import { Box, Typography } from '@mui/material';
+import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import React from 'react';
@@ -395,7 +396,9 @@ const englishConstants = {
     },
     PHOTO_COUNT: (count: number) =>
         `${
-            count === 1
+            !count
+                ? 'No memory'
+                : count === 1
                 ? `1 memory`
                 : `${formatNumberWithCommas(count)} memories`
         }`,

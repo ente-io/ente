@@ -1,11 +1,10 @@
-import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 
 class DesktopService {
     private ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.ElectronAPIs = globalThis['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.ElectronAPIs?.getEncryptionKey;
     }
 
