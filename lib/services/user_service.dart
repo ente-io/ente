@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -908,9 +907,9 @@ class UserService {
       List<Map<String, dynamic>> locationSearchResult = [];
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {
-        log(locationAndBbox.toString());
         locationSearchResult
             .add({'place': locationAndBbox['place'], "matchingFiles": []});
+        bool foundFileInLocation = false;
         for (File file in allFiles) {
           if (_isValidLocation(file.location)) {
             if (file.location.latitude >
@@ -922,14 +921,16 @@ class UserService {
                 file.location.longitude <
                     locationAndBbox['bbox']['northEastCoordinates'].longitude) {
               locationSearchResult.last["matchingFiles"].add(file);
+              foundFileInLocation = true;
             }
           }
         }
-        log('locationSearchResult-----');
-        log(locationSearchResult.length.toString());
+        if (!foundFileInLocation) {
+          locationSearchResult.removeLast();
+        }
       }
 
-      log('out of loactionAndBBox loop');
+      //[{'place':'india', 'matchedFiles':[f1,f2,f3...]},{'place':....}, ..}]
       return locationSearchResult;
     } on DioError catch (e) {
       _logger.info(e);

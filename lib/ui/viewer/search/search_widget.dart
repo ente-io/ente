@@ -23,6 +23,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   @override
   void initState() {
     super.initState();
+    debugPrint('showSearchWidget-----------');
     showSearchWidget = false;
   }
 
@@ -76,7 +77,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
                     matchedFilesWithLocation =
                         await UserService.instance.getLocationSearchData(value);
-                    log("sss----------------------");
+                    log(matchedFilesWithLocation.toString());
                     _searchQuery.value = value;
                   },
                   autofocus: true,
