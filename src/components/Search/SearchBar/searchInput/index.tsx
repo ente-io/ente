@@ -24,6 +24,7 @@ import { Collection } from 'types/collection';
 import { OptionWithInfo } from './optionWithInfo';
 import { SearchInputWrapper } from '../styledComponents';
 import MenuWithPeople from './MenuWithPeople';
+import { Person, ThingClass, WordGroup } from 'types/machineLearning';
 
 interface Iprops {
     isOpen: boolean;
@@ -47,7 +48,7 @@ export default function SearchInput(props: Iprops) {
 
     useEffect(() => {
         const main = async () => {
-            const defaultOptions = await getDefaultOptions();
+            const defaultOptions = await getDefaultOptions(props.files)();
             setDefaultOptions(defaultOptions);
         };
         main();
@@ -97,6 +98,14 @@ export default function SearchInput(props: Iprops) {
                 search = { file: selectedOption.value as number };
                 setValue(null);
                 break;
+            case SuggestionType.PERSON:
+                search = { person: selectedOption.value as Person };
+                break;
+            case SuggestionType.THING:
+                search = { thing: selectedOption.value as ThingClass };
+                break;
+            case SuggestionType.TEXT:
+                search = { text: selectedOption.value as WordGroup };
         }
         props.updateSearch(search, {
             optionName: selectedOption.label,

@@ -23,16 +23,17 @@ import ObjectService from './machineLearning/objectService';
 import textService from './machineLearning/textService';
 import { FILE_TYPE } from 'constants/file';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
+import { Person } from 'types/machineLearning';
 
 const ENDPOINT = getEndpoint();
 
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
-export const getDefaultOptions = async () => {
-    return [
-        await getIndexStatusSuggestion(),
-        ...(await getAllPeopleSuggestion()),
-    ];
+export const getDefaultOptions = (files: EnteFile[]) => async () => {
+    return convertSuggestionsToOptions(
+        [await getIndexStatusSuggestion(), ...(await getAllPeopleSuggestion())],
+        files
+    );
 };
 
 export const getAutoCompleteSuggestions =
@@ -51,25 +52,32 @@ export const getAutoCompleteSuggestions =
             ...(await getLocationSuggestions(searchPhrase)),
         ];
 
-        const previewImageAppendedOptions: SearchOption[] = suggestions
-            .map((suggestion) => ({
-                suggestion,
-                searchQuery: convertSuggestionToSearchQuery(suggestion),
-            }))
-            .map(({ suggestion, searchQuery }) => {
-                const resultFiles = files.filter((file) =>
-                    isSearchedFile(file, searchQuery)
-                );
-                return {
-                    ...suggestion,
-                    fileCount: resultFiles.length,
-                    previewFiles: resultFiles.slice(0, 3),
-                };
-            })
-            .filter((option) => option.fileCount);
-
-        return previewImageAppendedOptions;
+        return convertSuggestionsToOptions(suggestions, files);
     };
+
+function convertSuggestionsToOptions(
+    suggestions: Suggestion[],
+    files: EnteFile[]
+) {
+    const previewImageAppendedOptions: SearchOption[] = suggestions
+        .map((suggestion) => ({
+            suggestion,
+            searchQuery: convertSuggestionToSearchQuery(suggestion),
+        }))
+        .map(({ suggestion, searchQuery }) => {
+            const resultFiles = files.filter((file) =>
+                isSearchedFile(file, searchQuery)
+            );
+            return {
+                ...suggestion,
+                fileCount: resultFiles.length,
+                previewFiles: resultFiles.slice(0, 3),
+            };
+        })
+        .filter((option) => option.fileCount);
+
+    return previewImageAppendedOptions;
+}
 
 function getHolidaySuggestion(searchPhrase: string): Suggestion[] {
     return [
@@ -314,6 +322,17 @@ export function isSearchedFile(file: EnteFile, search: Search) {
     if (search?.collection) {
         return search.collection === file.collectionID;
     }
+    if (search?.person) {
+        return search.person.files.indexOf(file.id) !== -1;
+    }
+
+    if (search?.thing) {
+        return search.thing.files.indexOf(file.id) !== -1;
+    }
+
+    if (search?.text) {
+        return search.text.files.indexOf(file.id) !== -1;
+    }
     return false;
 }
 
@@ -335,5 +354,8 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
         case SuggestionType.IMAGE:
         case SuggestionType.VIDEO:
             return { file: option.value as number };
+
+        case SuggestionType.PERSON:
+            return { person: option.value as Person };
     }
 }

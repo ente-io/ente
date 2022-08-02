@@ -193,6 +193,21 @@ const PhotoFrame = ({
                     return false;
                 }
                 if (
+                    search?.person &&
+                    search.person.files.indexOf(item.id) === -1
+                ) {
+                    return false;
+                }
+                if (
+                    search?.thing &&
+                    search.thing.files.indexOf(item.id) === -1
+                ) {
+                    return false;
+                }
+                if (search?.text && search.text.files.indexOf(item.id) === -1) {
+                    return false;
+                }
+                if (
                     !isDeduplicating &&
                     activeCollection === ALL_SECTION &&
                     (IsArchived(item) ||
@@ -203,25 +218,6 @@ const PhotoFrame = ({
                 if (activeCollection === ARCHIVE_SECTION && !IsArchived(item)) {
                     return false;
                 }
-
-                if (
-                    search?.person &&
-                    search.person.files.indexOf(item.id) === -1
-                ) {
-                    return false;
-                }
-
-                if (
-                    search?.thing &&
-                    search.thing.files.indexOf(item.id) === -1
-                ) {
-                    return false;
-                }
-
-                if (search?.text && search.text.files.indexOf(item.id) === -1) {
-                    return false;
-                }
-
                 if (isSharedFile(item) && !isSharedCollection) {
                     return false;
                 }
