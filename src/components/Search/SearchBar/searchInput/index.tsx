@@ -2,7 +2,10 @@ import { IconButton } from '@mui/material';
 import debounce from 'debounce-promise';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { getAutoCompleteSuggestions } from 'services/searchService';
+import {
+    getAutoCompleteSuggestions,
+    getDefaultOptions,
+} from 'services/searchService';
 import {
     Bbox,
     DateValue,
@@ -38,8 +41,17 @@ export default function SearchInput(props: Iprops) {
     const handleChange = (value: SearchOption) => {
         setValue(value);
     };
+    const [defaultOptions, setDefaultOptions] = useState([]);
 
     useEffect(() => search(value), [value]);
+
+    useEffect(() => {
+        const main = async () => {
+            const defaultOptions = await getDefaultOptions();
+            setDefaultOptions(defaultOptions);
+        };
+        main();
+    }, []);
 
     const resetSearch = () => {
         if (props.isOpen) {
@@ -96,6 +108,7 @@ export default function SearchInput(props: Iprops) {
     // unwanted side effect: placeholder is not shown on focus/click
     // https://github.com/JedWatson/react-select/issues/1879
     // for correct fix AsyncSelect can be extended to support default options reloading on focus/click
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleOnFocus = () => {
         const emptySearch = ' ';
         selectRef.current.state.inputValue = emptySearch;
@@ -122,10 +135,11 @@ export default function SearchInput(props: Iprops) {
                 placeholder={constants.SEARCH_HINT()}
                 loadOptions={getOptions}
                 onChange={handleChange}
-                onFocus={handleOnFocus}
+                // onFocus={handleOnFocus}
                 isClearable
                 escapeClearsValue
                 styles={SelectStyles}
+                defaultOptions={defaultOptions}
                 noOptionsMessage={() => null}
             />
 
