@@ -1,4 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 class LocationResultsWidget extends StatelessWidget {
   final dynamic locationAndFiles;
@@ -6,6 +8,7 @@ class LocationResultsWidget extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
+    int noOfMemories = locationAndFiles['matchingFiles'].length;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -28,15 +31,26 @@ class LocationResultsWidget extends StatelessWidget {
                     style: const TextStyle(fontSize: 18),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const Text('1 memory')
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.defaultTextColor,
+                      ),
+                      children: [
+                        TextSpan(text: noOfMemories.toString()),
+                        TextSpan(
+                          text: noOfMemories != 1 ? ' memories' : ' memory',
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
             SizedBox(
               height: 50,
               width: 50,
-              // child: ThumbnailWidget(),
-              child: const SizedBox.shrink(),
+              child: ThumbnailWidget(locationAndFiles['matchingFiles'][0]),
             ),
           ],
         ),
