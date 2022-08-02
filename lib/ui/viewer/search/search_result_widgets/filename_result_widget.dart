@@ -11,6 +11,7 @@ class FilenameResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
         child: Row(

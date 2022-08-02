@@ -32,10 +32,10 @@ class SearchResultsSuggestions extends StatelessWidget {
         itemCount: suggestions.length,
         itemBuilder: (context, index) {
           dynamic value = suggestions[index];
-          if (value is File) {
-            return FilenameResultWidget(value);
-          } else if (value is CollectionWithThumbnail) {
+          if (value is CollectionWithThumbnail) {
             return CollectionResultWidget(value);
+          } else if (value is File) {
+            return FilenameResultWidget(value);
           } else {
             throw StateError("Invalid/Unsupported value");
           }
