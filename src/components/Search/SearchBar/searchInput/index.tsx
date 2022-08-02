@@ -97,12 +97,10 @@ export default function SearchInput(props: Iprops) {
     // https://github.com/JedWatson/react-select/issues/1879
     // for correct fix AsyncSelect can be extended to support default options reloading on focus/click
     const handleOnFocus = () => {
-        if (appContext.mlSearchEnabled) {
-            const emptySearch = ' ';
-            selectRef.current.state.inputValue = emptySearch;
-            selectRef.current.select.state.inputValue = emptySearch;
-            selectRef.current.handleInputChange(emptySearch);
-        }
+        const emptySearch = ' ';
+        selectRef.current.state.inputValue = emptySearch;
+        selectRef.current.select.state.inputValue = emptySearch;
+        selectRef.current.handleInputChange(emptySearch);
     };
 
     return (

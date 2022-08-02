@@ -32,17 +32,22 @@ export const getAutoCompleteSuggestions =
     (files: EnteFile[], collections: Collection[]) =>
     async (searchPhrase: string) => {
         searchPhrase = searchPhrase.trim().toLowerCase();
+        const suggestions = [];
+        suggestions.push(await getIndexStatusSuggestion());
+        suggestions.push(...(await getAllPeopleSuggestion()));
         if (!searchPhrase?.length) {
-            return [];
+            return suggestions;
         }
-        const suggestions = [
-            ...getHolidaySuggestion(searchPhrase),
-            ...getYearSuggestion(searchPhrase),
-            ...getDateSuggestion(searchPhrase),
-            ...getCollectionSuggestion(searchPhrase, collections),
-            ...getFileSuggestion(searchPhrase, files),
-            ...(await getLocationSuggestions(searchPhrase)),
-        ];
+        suggestions.push(
+            ...[
+                ...getHolidaySuggestion(searchPhrase),
+                ...getYearSuggestion(searchPhrase),
+                ...getDateSuggestion(searchPhrase),
+                ...getCollectionSuggestion(searchPhrase, collections),
+                ...getFileSuggestion(searchPhrase, files),
+                ...(await getLocationSuggestions(searchPhrase)),
+            ]
+        );
 
         const previewImageAppendedOptions: SearchOption[] = suggestions
             .map((suggestion) => ({
@@ -58,8 +63,8 @@ export const getAutoCompleteSuggestions =
                     fileCount: resultFiles.length,
                     previewFiles: resultFiles.slice(0, 3),
                 };
-            })
-            .filter((option) => option.fileCount);
+            });
+        // .filter((option) => option.fileCount);
 
         return previewImageAppendedOptions;
     };

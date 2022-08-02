@@ -40,27 +40,33 @@ const MenuWithPeople = (props) => {
 
     return (
         <Menu {...props}>
-            {appContext.mlSearchEnabled && (
-                <Col>
+            <Col>
+                {appContext.mlSearchEnabled && indexStatus && (
                     <LegendRow>
-                        <Legend>{constants.PEOPLE}</Legend>
-                        {indexStatus && (
+                        <>
+                            <Legend>{constants.PEOPLE}</Legend>
                             <Caption>{indexStatusSuggestion.label}</Caption>
-                        )}
+                        </>
                     </LegendRow>
-                    {people && people.length > 0 && (
+                )}
+                {people && people.length > 0 && (
+                    <>
+                        <LegendRow>
+                            <Legend>{constants.PEOPLE}</Legend>
+                        </LegendRow>
                         <Row>
                             <PeopleList
                                 people={people}
                                 maxRows={2}
-                                onSelect={(person, index) => {
+                                onSelect={(_, index) => {
                                     props.selectRef.current.blur();
                                     props.setValue(peopleSuggestions[index]);
-                                }}></PeopleList>
+                                }}
+                            />
                         </Row>
-                    )}
-                </Col>
-            )}
+                    </>
+                )}
+            </Col>
             {props.children}
         </Menu>
     );
