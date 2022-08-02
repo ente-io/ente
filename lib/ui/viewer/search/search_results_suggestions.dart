@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/ui/viewer/search/serach_result_widgets/collection_result_widget.dart';
-import 'package:photos/ui/viewer/search/serach_result_widgets/filename_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/filename_result_widget.dart';
 
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;

@@ -76,7 +76,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                     matchedFiles =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
                     matchedLocationNamesAndBboxs =
-                        await UserService.instance.getLocationSerachData(value);
+                        await UserService.instance.getLocationSearchData(value);
                     log("sss----------------------");
                     // matchedLocationsResults = await FilesDB.instance
                     //     .getFilesInsideBbox(matchedLocationNamesAndBboxs);

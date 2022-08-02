@@ -878,7 +878,7 @@ class UserService {
     return _cachedFiles;
   }
 
-  Future<List<dynamic>> getLocationSerachData(String query) async {
+  Future<List<dynamic>> getLocationSearchData(String query) async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",
