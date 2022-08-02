@@ -37,34 +37,31 @@ const MenuWithPeople = (props) => {
     )[0] as Suggestion;
 
     const indexStatus = indexStatusSuggestion?.value as IndexStatus;
-
     return (
         <Menu {...props}>
             <Col>
+                {((appContext.mlSearchEnabled && indexStatus) ||
+                    (people && people.length > 0)) && (
+                    <LegendRow>
+                        <Legend>{constants.PEOPLE}</Legend>
+                    </LegendRow>
+                )}
                 {appContext.mlSearchEnabled && indexStatus && (
                     <LegendRow>
-                        <>
-                            <Legend>{constants.PEOPLE}</Legend>
-                            <Caption>{indexStatusSuggestion.label}</Caption>
-                        </>
+                        <Caption>{indexStatusSuggestion.label}</Caption>
                     </LegendRow>
                 )}
                 {people && people.length > 0 && (
-                    <>
-                        <LegendRow>
-                            <Legend>{constants.PEOPLE}</Legend>
-                        </LegendRow>
-                        <Row>
-                            <PeopleList
-                                people={people}
-                                maxRows={2}
-                                onSelect={(_, index) => {
-                                    props.selectRef.current.blur();
-                                    props.setValue(peopleSuggestions[index]);
-                                }}
-                            />
-                        </Row>
-                    </>
+                    <Row>
+                        <PeopleList
+                            people={people}
+                            maxRows={2}
+                            onSelect={(_, index) => {
+                                props.selectRef.current.blur();
+                                props.setValue(peopleSuggestions[index]);
+                            }}
+                        />
+                    </Row>
                 )}
             </Col>
             {props.children}

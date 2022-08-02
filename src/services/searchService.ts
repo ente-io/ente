@@ -30,10 +30,10 @@ const ENDPOINT = getEndpoint();
 const DIGITS = new Set(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
 export const getDefaultOptions = (files: EnteFile[]) => async () => {
-    return convertSuggestionsToOptions(
-        [await getIndexStatusSuggestion(), ...(await getAllPeopleSuggestion())],
-        files
-    );
+    return [
+        await getIndexStatusSuggestion(),
+        ...convertSuggestionsToOptions(await getAllPeopleSuggestion(), files),
+    ];
 };
 
 export const getAutoCompleteSuggestions =
