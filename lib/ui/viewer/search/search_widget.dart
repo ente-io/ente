@@ -47,7 +47,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   Widget searchWidget() {
     List<CollectionWithThumbnail> matchedCollections = [];
     List<File> matchedFiles = [];
-    List<dynamic> matchedFilesWithLocation = [];
+    List<Map<String, Object>> matchedFilesWithLocation = [];
     return Column(
       children: [
         Row(
@@ -77,7 +77,10 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
                     matchedFilesWithLocation =
                         await UserService.instance.getLocationSearchData(value);
-                    log(matchedFilesWithLocation.toString());
+                    log(
+                      'search_widget.dart --------- ' +
+                          matchedFilesWithLocation.toString(),
+                    );
                     _searchQuery.value = value;
                   },
                   autofocus: true,

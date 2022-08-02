@@ -1,16 +1,15 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/filename_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
 
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;
   final List<File> matchedFiles;
-  final List<dynamic> matchedLocationsAndFiles;
+  final List<Map<String, Object>> matchedLocationsAndFiles;
   const SearchResultsSuggestions(
     this.matchedCollectionsWithThumbnail,
     this.matchedFiles,
@@ -28,7 +27,8 @@ class SearchResultsSuggestions extends StatelessWidget {
       suggestions.add(file);
     }
     for (Map<String, Object> locationAndFiles in matchedLocationsAndFiles) {
-      log(locationAndFiles.toString());
+      // log(locationAndFiles.toString());
+      suggestions.add(locationAndFiles);
     }
     return Container(
       constraints:
@@ -41,6 +41,8 @@ class SearchResultsSuggestions extends StatelessWidget {
             return CollectionResultWidget(value);
           } else if (value is File) {
             return FilenameResultWidget(value);
+          } else if (value is Map<String, Object>) {
+            return LocationResultsWidget(value);
           } else {
             throw StateError("Invalid/Unsupported value");
           }
