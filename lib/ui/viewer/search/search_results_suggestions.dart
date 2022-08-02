@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection_items.dart';
@@ -8,11 +10,11 @@ import 'package:photos/ui/viewer/search/search_result_widgets/filename_result_wi
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;
   final List<File> matchedFiles;
-  final List<dynamic> matchedLocations;
+  final List<dynamic> matchedLocationsAndFiles;
   const SearchResultsSuggestions(
     this.matchedCollectionsWithThumbnail,
     this.matchedFiles,
-    this.matchedLocations, {
+    this.matchedLocationsAndFiles, {
     Key key,
   }) : super(key: key);
 
@@ -24,6 +26,9 @@ class SearchResultsSuggestions extends StatelessWidget {
     }
     for (File file in matchedFiles) {
       suggestions.add(file);
+    }
+    for (Map<String, Object> locationAndFiles in matchedLocationsAndFiles) {
+      log(locationAndFiles.toString());
     }
     return Container(
       constraints:
