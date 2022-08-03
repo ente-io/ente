@@ -877,7 +877,9 @@ class UserService {
     return _cachedFiles;
   }
 
-  Future<List<dynamic>> getLocationSearchData(String query) async {
+  Future<Map<String, List<File>>> getLocationsToMatchedFiles(
+    String query,
+  ) async {
     try {
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",
@@ -904,12 +906,12 @@ class UserService {
       }
 
       List<File> allFiles = await getAllFiles();
-      List<Map<String, dynamic>> locationSearchResult = [];
+      Map<String, List<File>> locationsToMatchedFiles = {};
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {
-        locationSearchResult
-            .add({'place': locationAndBbox['place'], "matchingFiles": []});
-        bool foundFileInLocation = false;
+        locationsToMatchedFiles.addAll({
+          locationAndBbox['place']: []
+        }); //{"Kochi": [f1,f2,...], "Chennai":[f1,f2,..],...}
         for (File file in allFiles) {
           if (_isValidLocation(file.location)) {
             if (file.location.latitude >
@@ -920,18 +922,21 @@ class UserService {
                     locationAndBbox['bbox']['northEastCoordinates'].latitude &&
                 file.location.longitude <
                     locationAndBbox['bbox']['northEastCoordinates'].longitude) {
-              locationSearchResult.last["matchingFiles"].add(file);
-              foundFileInLocation = true;
+              // locationSearchResult.last["matchingFiles"].add(file);
+              locationsToMatchedFiles.update(locationAndBbox['place'], (value) {
+                value.add(file);
+                return value;
+              });
             }
           }
         }
-        if (!foundFileInLocation) {
-          locationSearchResult.removeLast();
-        }
       }
+      locationsToMatchedFiles.removeWhere(
+        (key, value) => value == [],
+      ); //removes entries of locations with no files
 
       //[{'place':'india', 'matchedFiles':[f1,f2,f3...]},{'place':....}, ..}]
-      return locationSearchResult;
+      return locationsToMatchedFiles;
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;

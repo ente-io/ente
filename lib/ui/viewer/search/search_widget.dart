@@ -75,8 +75,8 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         .getFilteredCollectionsWithThumbnail(value);
                     matchedFiles =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    matchedFilesWithLocation =
-                        await UserService.instance.getLocationSearchData(value);
+                    matchedFilesWithLocation = await UserService.instance
+                        .getLocationsToMatchedFiles(value);
                     log(
                       'search_widget.dart --------- ' +
                           matchedFilesWithLocation.toString(),
