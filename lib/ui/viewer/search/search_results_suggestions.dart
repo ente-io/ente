@@ -50,4 +50,8 @@ class SearchResultsSuggestions extends StatelessWidget {
       ),
     );
   }
+
+  // AlbumSearchResultWidget
+  // LocationSearchResultWidget
+  // ...
 }

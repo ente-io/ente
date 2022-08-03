@@ -603,12 +603,16 @@ class FilesDB {
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
+    String inParam = "";
+    for (final fileID in fileIDs) {
+      inParam += "'" + fileID.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
     final results = await db.query(
       table,
       where:
-          '$columnUploadedFileID IN ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
-          ' AND $columnMMdVisibility = ?',
-      whereArgs: [fileIDs, startTime, endTime, ownerID, visibility],
+          '$columnUploadedFileID IN ($inParam) AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnOwnerID = ? AND $columnMMdVisibility = ?',
+      whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
