@@ -52,6 +52,7 @@ class SSDMobileNetV2 implements ObjectDetectionService {
             maxNumberBoxes,
             minScore
         );
+        tfImage.dispose();
         return detections;
     }
 
