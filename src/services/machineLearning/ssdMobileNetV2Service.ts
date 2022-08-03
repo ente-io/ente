@@ -25,11 +25,7 @@ class SSDMobileNetV2 implements ObjectDetectionService {
             base: 'mobilenet_v2',
             modelUrl: '/models/ssdmobilenet/model.json',
         });
-        console.log(
-            'loaded ssdMobileNetV2Model',
-            this.ssdMobileNetV2Model,
-            tf.getBackend()
-        );
+        console.log('loaded ssdMobileNetV2Model', tf.getBackend());
     }
 
     private async getSSDMobileNetV2Model() {
