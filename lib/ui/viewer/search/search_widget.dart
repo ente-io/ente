@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -47,7 +45,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   Widget searchWidget() {
     List<CollectionWithThumbnail> matchedCollections = [];
     List<File> matchedFiles = [];
-    List<Map<String, Object>> matchedFilesWithLocation = [];
+    Map<String, List<File>> locationsToMatchedFiles = {};
     return Column(
       children: [
         Row(
@@ -75,12 +73,8 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         .getFilteredCollectionsWithThumbnail(value);
                     matchedFiles =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    matchedFilesWithLocation = await UserService.instance
+                    locationsToMatchedFiles = await UserService.instance
                         .getLocationsToMatchedFiles(value);
-                    log(
-                      'search_widget.dart --------- ' +
-                          matchedFilesWithLocation.toString(),
-                    );
                     _searchQuery.value = value;
                   },
                   autofocus: true,
@@ -109,7 +103,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                 ? SearchResultsSuggestions(
                     matchedCollections,
                     matchedFiles,
-                    matchedFilesWithLocation,
+                    locationsToMatchedFiles,
                   )
                 : const SizedBox.shrink();
           },

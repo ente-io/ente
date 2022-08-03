@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/search/location_collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LocationResultsWidget extends StatelessWidget {
-  final Map<String, dynamic> locationAndFiles;
-  const LocationResultsWidget(this.locationAndFiles, {Key key})
+  final MapEntry<String, List<File>> locationToMatchedFiles;
+  const LocationResultsWidget(this.locationToMatchedFiles, {Key key})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    int noOfMemories = locationAndFiles['matchingFiles'].length;
+    int noOfMemories = locationToMatchedFiles.value.length;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -29,7 +30,7 @@ class LocationResultsWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    locationAndFiles['place'],
+                    locationToMatchedFiles.key,
                     style: const TextStyle(fontSize: 18),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -52,7 +53,7 @@ class LocationResultsWidget extends StatelessWidget {
             SizedBox(
               height: 50,
               width: 50,
-              child: ThumbnailWidget(locationAndFiles['matchingFiles'][0]),
+              child: ThumbnailWidget(locationToMatchedFiles.value[0]),
             ),
           ],
         ),
@@ -61,7 +62,7 @@ class LocationResultsWidget extends StatelessWidget {
         routeToPage(
           context,
           LocationCollectionPage(
-            files: locationAndFiles['matchingFiles'],
+            files: locationToMatchedFiles.value,
           ),
         );
       },

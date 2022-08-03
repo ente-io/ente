@@ -909,9 +909,7 @@ class UserService {
       Map<String, List<File>> locationsToMatchedFiles = {};
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {
-        locationsToMatchedFiles.addAll({
-          locationAndBbox['place']: []
-        }); //{"Kochi": [f1,f2,...], "Chennai":[f1,f2,..],...}
+        locationsToMatchedFiles.addAll({locationAndBbox['place']: []});
         for (File file in allFiles) {
           if (_isValidLocation(file.location)) {
             if (file.location.latitude >
@@ -932,10 +930,9 @@ class UserService {
         }
       }
       locationsToMatchedFiles.removeWhere(
-        (key, value) => value == [],
+        (key, value) => value.isEmpty,
       ); //removes entries of locations with no files
-
-      //[{'place':'india', 'matchedFiles':[f1,f2,f3...]},{'place':....}, ..}]
+      //{"Kochi": [f1,f2,...], "Chennai":[f1,f2,..],...}
       return locationsToMatchedFiles;
     } on DioError catch (e) {
       _logger.info(e);

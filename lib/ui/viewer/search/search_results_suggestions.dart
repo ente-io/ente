@@ -9,11 +9,11 @@ import 'package:photos/ui/viewer/search/search_result_widgets/location_result_wi
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;
   final List<File> matchedFiles;
-  final List<Map<String, Object>> matchedLocationsAndFiles;
+  final Map<String, List<File>> locationsToMatchedFiles;
   const SearchResultsSuggestions(
     this.matchedCollectionsWithThumbnail,
     this.matchedFiles,
-    this.matchedLocationsAndFiles, {
+    this.locationsToMatchedFiles, {
     Key key,
   }) : super(key: key);
 
@@ -26,8 +26,8 @@ class SearchResultsSuggestions extends StatelessWidget {
     for (File file in matchedFiles) {
       suggestions.add(file);
     }
-    for (Map<String, Object> locationAndFiles in matchedLocationsAndFiles) {
-      // log(locationAndFiles.toString());
+    for (MapEntry<String, List<File>> locationAndFiles
+        in locationsToMatchedFiles.entries) {
       suggestions.add(locationAndFiles);
     }
     return Container(
@@ -41,7 +41,7 @@ class SearchResultsSuggestions extends StatelessWidget {
             return CollectionResultWidget(value);
           } else if (value is File) {
             return FilenameResultWidget(value);
-          } else if (value is Map<String, Object>) {
+          } else if (value is MapEntry<String, List<File>>) {
             return LocationResultsWidget(value);
           } else {
             throw StateError("Invalid/Unsupported value");
