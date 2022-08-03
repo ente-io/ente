@@ -30,6 +30,7 @@ import FaceService from './faceService';
 import PeopleService from './peopleService';
 import ObjectService from './objectService';
 // import TextService from './textService';
+import ReaderService from './readerService';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -404,6 +405,8 @@ class MachineLearningService {
         } else if (fileContext.oldMlFile?.mlVersion) {
             newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
+
+        await ReaderService.getImageBitmap(syncContext, fileContext);
 
         const faceDetection = async () => {
             console.time(`face detection time taken ${enteFile.id}`);
