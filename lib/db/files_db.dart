@@ -591,6 +591,34 @@ class FilesDB {
     return FileLoadResult(result, files.length == limit);
   }
 
+  Future<FileLoadResult> getFilesByIdForLoactionSearch(
+    Set<int> fileIDs,
+    int startTime,
+    int endTime,
+    int ownerID, {
+    int limit,
+    bool asc,
+    int visibility = kVisibilityVisible,
+    Set<int> ignoredCollectionIDs,
+  }) async {
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final results = await db.query(
+      table,
+      where:
+          '$columnUploadedFileID IN ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          ' AND $columnMMdVisibility = ?',
+      whereArgs: [fileIDs, startTime, endTime, ownerID, visibility],
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = _convertToFiles(results);
+    List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
+    return FileLoadResult(deduplicatedFiles, files.length == limit);
+  }
+
   Future<List<File>> getAllVideos() async {
     final db = await instance.database;
     final results = await db.query(
@@ -1165,12 +1193,6 @@ class FilesDB {
     List<Map<String, Object>> result = await db.query(table);
     return _convertToFiles(result);
   }
-  // Future<List<File>> getFilesInsideBbox(
-  //     List<dynamic> matchedLocationNamesAndBboxs) async {
-  // for (var locationAndBbox in matchedLocationNamesAndBboxs) {
-  //   print('yo');
-  // }
-  // } //make a map with {'place': '', matchingFiles: [file, file, file...]}
 
   Map<String, dynamic> _getRowForFile(File file) {
     final row = <String, dynamic>{};

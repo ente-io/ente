@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/search/location_collection_page.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class LocationResultsWidget extends StatelessWidget {
-  final dynamic locationAndFiles;
+  final Map<String, dynamic> locationAndFiles;
   const LocationResultsWidget(this.locationAndFiles, {Key key})
       : super(key: key);
   @override
@@ -56,7 +58,12 @@ class LocationResultsWidget extends StatelessWidget {
         ),
       ),
       onTap: () {
-        // _routeToDetailPage(locationAndFiles, context);
+        routeToPage(
+          context,
+          LocationCollectionPage(
+            files: locationAndFiles['matchingFiles'],
+          ),
+        );
       },
     );
   }
