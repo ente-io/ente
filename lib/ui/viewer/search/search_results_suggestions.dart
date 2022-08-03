@@ -19,16 +19,16 @@ class SearchResultsSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> suggestions = [];
+    List<Widget> suggestions = [];
     for (CollectionWithThumbnail c in matchedCollectionsWithThumbnail) {
-      suggestions.add(c);
+      suggestions.add(CollectionResultWidget(c));
     }
     for (File file in matchedFiles) {
-      suggestions.add(file);
+      suggestions.add(FilenameResultWidget(file));
     }
     for (MapEntry<String, List<File>> locationAndFiles
         in locationsToMatchedFiles.entries) {
-      suggestions.add(locationAndFiles);
+      suggestions.add(LocationResultsWidget(locationAndFiles));
     }
     return Container(
       constraints:
@@ -36,22 +36,9 @@ class SearchResultsSuggestions extends StatelessWidget {
       child: ListView.builder(
         itemCount: suggestions.length,
         itemBuilder: (context, index) {
-          dynamic value = suggestions[index];
-          if (value is CollectionWithThumbnail) {
-            return CollectionResultWidget(value);
-          } else if (value is File) {
-            return FilenameResultWidget(value);
-          } else if (value is MapEntry<String, List<File>>) {
-            return LocationResultsWidget(value);
-          } else {
-            throw StateError("Invalid/Unsupported value");
-          }
+          return suggestions[index];
         },
       ),
     );
   }
-
-  // AlbumSearchResultWidget
-  // LocationSearchResultWidget
-  // ...
 }
