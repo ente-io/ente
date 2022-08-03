@@ -10,8 +10,9 @@ import { SCENE_DETECTION_IMAGE_SIZE } from 'constants/machineLearning/config';
 
 class ImageScene implements SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;
-    model: tfjsConverter.GraphModel;
-    sceneMap: { [key: string]: string };
+    private model: tfjsConverter.GraphModel;
+    private sceneMap: { [key: string]: string };
+    private ready: Promise<void>;
 
     public constructor() {
         this.method = {
@@ -43,12 +44,18 @@ class ImageScene implements SceneDetectionService {
         warmupResult.dispose();
     }
 
+    private async getImageSceneModel() {
+        if (!this.ready) {
+            this.ready = this.init();
+        }
+        await this.ready;
+        return this.model;
+    }
+
     async detectScenes(image: ImageBitmap, minScore: number) {
         await tf.ready();
 
-        if (!this.model) {
-            await this.init();
-        }
+        const model = await this.getImageSceneModel();
 
         const output = tf.tidy(() => {
             const tensor = tf.browser.fromPixels(image);
@@ -63,7 +70,7 @@ class ImageScene implements SceneDetectionService {
             resizedTensor = tf.expandDims(resizedTensor);
             resizedTensor = tf.cast(resizedTensor, 'float32');
 
-            const output = this.model.predict(resizedTensor) as tf.Tensor;
+            const output = model.predict(resizedTensor) as tf.Tensor;
 
             return output;
         });
