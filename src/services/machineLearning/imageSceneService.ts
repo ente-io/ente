@@ -7,7 +7,6 @@ import {
     Versioned,
 } from 'types/machineLearning';
 import { SCENE_DETECTION_IMAGE_SIZE } from 'constants/machineLearning/config';
-import { sleep } from 'utils/common';
 
 class ImageScene implements SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;
@@ -54,7 +53,6 @@ class ImageScene implements SceneDetectionService {
     }
 
     async detectScenes(image: ImageBitmap, minScore: number) {
-        await sleep(500);
         await tf.ready();
 
         const model = await this.getImageSceneModel();
@@ -73,6 +71,7 @@ class ImageScene implements SceneDetectionService {
             resizedTensor = tf.cast(resizedTensor, 'float32');
 
             const output = model.predict(resizedTensor) as tf.Tensor;
+
             return output;
         });
 

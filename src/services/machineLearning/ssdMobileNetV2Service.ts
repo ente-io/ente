@@ -7,7 +7,6 @@ import {
 } from 'types/machineLearning';
 
 import * as SSDMobileNet from '@tensorflow-models/coco-ssd';
-import { sleep } from 'utils/common';
 
 class SSDMobileNetV2 implements ObjectDetectionService {
     private ssdMobileNetV2Model: SSDMobileNet.ObjectDetection;
@@ -42,7 +41,6 @@ class SSDMobileNetV2 implements ObjectDetectionService {
         maxNumberBoxes: number,
         minScore: number
     ): Promise<ObjectDetection[]> {
-        await sleep(500);
         const ssdMobileNetV2Model = await this.getSSDMobileNetV2Model();
         const tfImage = tf.browser.fromPixels(image);
         const detections = await ssdMobileNetV2Model.detect(
