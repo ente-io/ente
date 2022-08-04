@@ -50,6 +50,8 @@ export const getAutoCompleteSuggestions =
             ...getCollectionSuggestion(searchPhrase, collections),
             ...getFileSuggestion(searchPhrase, files),
             ...(await getLocationSuggestions(searchPhrase)),
+            ...(await getThingSuggestion(searchPhrase)),
+            ...(await getWordSuggestion(searchPhrase)),
         ];
 
         return convertSuggestionsToOptions(suggestions, files);
@@ -182,26 +184,6 @@ function searchFiles(searchPhrase: string, files: EnteFile[]) {
         .slice(0, 4);
 }
 
-export async function searchThing(searchPhrase: string) {
-    const thingClasses = await ObjectService.getAllThingClasses();
-    return thingClasses
-        .filter((thingClass) =>
-            thingClass.className.toLocaleLowerCase().includes(searchPhrase)
-        )
-        .map(({ className, files }) => ({ className, files }));
-}
-
-export async function searchText(searchPhrase: string) {
-    const texts = await textService.clusterWords();
-    return texts
-        .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
-        .map(({ word, files }) => ({
-            word,
-            files,
-        }))
-        .slice(0, 4);
-}
-
 function getDateSuggestion(searchPhrase: string) {
     const searchedDates = parseHumanDate(searchPhrase);
 
@@ -255,6 +237,32 @@ async function getLocationSuggestions(searchPhrase: string) {
             } as Suggestion)
     );
 }
+
+async function getThingSuggestion(searchPhrase: string) {
+    const thingResults = await searchThing(searchPhrase);
+
+    return thingResults.map(
+        (searchResult) =>
+            ({
+                type: SuggestionType.LOCATION,
+                value: searchResult.files,
+                label: searchResult.className,
+            } as Suggestion)
+    );
+}
+
+async function getWordSuggestion(searchPhrase: string) {
+    const wordResults = await searchThing(searchPhrase);
+
+    return wordResults.map(
+        (searchResult) =>
+            ({
+                type: SuggestionType.LOCATION,
+                value: searchResult.files,
+                label: searchResult.className,
+            } as Suggestion)
+    );
+}
 function parseHumanDate(humanDate: string): DateValue[] {
     const date = chrono.parseDate(humanDate);
     const date1 = chrono.parseDate(`${humanDate} 1`);
@@ -299,6 +307,26 @@ async function searchLocation(
         logError(e, 'location search failed');
     }
     return [];
+}
+
+export async function searchThing(searchPhrase: string) {
+    const thingClasses = await ObjectService.getAllThingClasses();
+    return thingClasses
+        .filter((thingClass) =>
+            thingClass.className.toLocaleLowerCase().includes(searchPhrase)
+        )
+        .map(({ className, files }) => ({ className, files }));
+}
+
+export async function searchText(searchPhrase: string) {
+    const texts = await textService.clusterWords();
+    return texts
+        .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
+        .map(({ word, files }) => ({
+            word,
+            files,
+        }))
+        .slice(0, 4);
 }
 
 export function isSearchedFile(file: EnteFile, search: Search) {
