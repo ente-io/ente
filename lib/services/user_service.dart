@@ -15,6 +15,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/models/location_and_files.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
@@ -862,7 +863,7 @@ class UserService {
     }
   }
 
-  Future<Map<String, List<File>>> getLocationsToMatchedFiles(
+  Future<List<LocationAndFiles>> getLocationsToMatchedFiles(
     String query,
   ) async {
     try {
@@ -891,10 +892,12 @@ class UserService {
       }
 
       List<File> allFiles = await SearchService.instance.getAllFiles();
-      Map<String, List<File>> locationsToMatchedFiles = {};
+      List<LocationAndFiles> locationsAndMatchedFiles = [];
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {
-        locationsToMatchedFiles.addAll({locationAndBbox['place']: []});
+        // locationsToMatchedFiles.addAll({locationAndBbox['place']: []});
+        locationsAndMatchedFiles
+            .add(LocationAndFiles(locationAndBbox['place'], []));
         for (File file in allFiles) {
           if (_isValidLocation(file.location)) {
             if (file.location.latitude >
@@ -905,20 +908,13 @@ class UserService {
                     locationAndBbox['bbox']['northEastCoordinates'].latitude &&
                 file.location.longitude <
                     locationAndBbox['bbox']['northEastCoordinates'].longitude) {
-              // locationSearchResult.last["matchingFiles"].add(file);
-              locationsToMatchedFiles.update(locationAndBbox['place'], (value) {
-                value.add(file);
-                return value;
-              });
+              locationsAndMatchedFiles.last.files.add(file);
             }
           }
         }
       }
-      locationsToMatchedFiles.removeWhere(
-        (key, value) => value.isEmpty,
-      ); //removes entries of locations with no files
-      //{"Kochi": [f1,f2,...], "Chennai":[f1,f2,..],...}
-      return locationsToMatchedFiles;
+      locationsAndMatchedFiles.removeWhere((e) => e.files.isEmpty);
+      return locationsAndMatchedFiles;
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;

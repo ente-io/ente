@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
+import 'package:photos/models/location_and_files.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
 class LocationCollectionPage extends StatelessWidget {
-  final List<File> files;
+  final LocationAndFiles locationAndFiles;
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
   LocationCollectionPage({
-    this.files,
+    this.locationAndFiles,
     this.tagPrefix = "location_collection_page",
     this.appBarType = GalleryType.archive,
     this.overlayType = GalleryType.archive,
@@ -28,7 +28,7 @@ class LocationCollectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        final result = files
+        final result = locationAndFiles.files
             .where(
               (file) =>
                   file.creationTime >= creationStartTime &&
@@ -36,7 +36,7 @@ class LocationCollectionPage extends StatelessWidget {
             )
             .toList();
         return Future.value(
-          FileLoadResult(result, result.length < files.length),
+          FileLoadResult(result, result.length < locationAndFiles.files.length),
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
@@ -68,7 +68,7 @@ class LocationCollectionPage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "Hidden",
+          locationAndFiles.location,
           _selectedFiles,
         ),
       ),

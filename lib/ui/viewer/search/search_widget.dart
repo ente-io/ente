@@ -3,6 +3,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/location_and_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
@@ -45,7 +46,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   Widget searchWidget() {
     List<CollectionWithThumbnail> matchedCollections = [];
     List<File> matchedFiles = [];
-    Map<String, List<File>> locationsToMatchedFiles = {};
+    List<LocationAndFiles> locationsAndMatchedFiles = [];
     return Column(
       children: [
         Row(
@@ -73,7 +74,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                         .getFilteredCollectionsWithThumbnail(value);
                     matchedFiles =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    locationsToMatchedFiles = await UserService.instance
+                    locationsAndMatchedFiles = await UserService.instance
                         .getLocationsToMatchedFiles(value);
                     _searchQuery.value = value;
                   },
@@ -103,7 +104,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                 ? SearchResultsSuggestions(
                     matchedCollections,
                     matchedFiles,
-                    locationsToMatchedFiles,
+                    locationsAndMatchedFiles,
                   )
                 : const SizedBox.shrink();
           },

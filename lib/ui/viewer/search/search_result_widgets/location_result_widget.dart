@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/file.dart';
+import 'package:photos/models/location_and_files.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/search/location_collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LocationResultsWidget extends StatelessWidget {
-  final Map<String, List<File>> locationToMatchedFiles;
-  const LocationResultsWidget(this.locationToMatchedFiles, {Key key})
+  final LocationAndFiles locationAndMatchedFiles;
+  const LocationResultsWidget(this.locationAndMatchedFiles, {Key key})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    int noOfMemories = locationToMatchedFiles.values.first.length;
+    int noOfMemories = locationAndMatchedFiles.files.length;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Padding(
@@ -30,7 +30,7 @@ class LocationResultsWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    locationToMatchedFiles.keys.first,
+                    locationAndMatchedFiles.location,
                     style: const TextStyle(fontSize: 18),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -53,7 +53,7 @@ class LocationResultsWidget extends StatelessWidget {
             SizedBox(
               height: 50,
               width: 50,
-              child: ThumbnailWidget(locationToMatchedFiles.values.first[0]),
+              child: ThumbnailWidget(locationAndMatchedFiles.files[0]),
             ),
           ],
         ),
@@ -62,7 +62,7 @@ class LocationResultsWidget extends StatelessWidget {
         routeToPage(
           context,
           LocationCollectionPage(
-            files: locationToMatchedFiles.values.first,
+            locationAndFiles: locationAndMatchedFiles,
           ),
         );
       },

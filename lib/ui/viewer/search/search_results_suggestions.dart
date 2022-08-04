@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/location_and_files.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/filename_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
@@ -9,11 +10,11 @@ import 'package:photos/ui/viewer/search/search_result_widgets/location_result_wi
 class SearchResultsSuggestions extends StatelessWidget {
   final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;
   final List<File> matchedFiles;
-  final Map<String, List<File>> locationsToMatchedFiles;
+  final List<LocationAndFiles> locationsAndMatchedFiles;
   const SearchResultsSuggestions(
     this.matchedCollectionsWithThumbnail,
     this.matchedFiles,
-    this.locationsToMatchedFiles, {
+    this.locationsAndMatchedFiles, {
     Key key,
   }) : super(key: key);
 
@@ -26,12 +27,8 @@ class SearchResultsSuggestions extends StatelessWidget {
     for (File file in matchedFiles) {
       suggestions.add(FilenameResultWidget(file));
     }
-    for (MapEntry<String, List<File>> locationToFilesMapEntry
-        in locationsToMatchedFiles.entries) {
-      Map<String, List<File>> locationToFilesMap = {
-        locationToFilesMapEntry.key: locationToFilesMapEntry.value
-      };
-      suggestions.add(LocationResultsWidget(locationToFilesMap));
+    for (LocationAndFiles locationAndMatchedFiles in locationsAndMatchedFiles) {
+      suggestions.add(LocationResultsWidget(locationAndMatchedFiles));
     }
     return Container(
       constraints:
