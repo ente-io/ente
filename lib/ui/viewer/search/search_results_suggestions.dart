@@ -26,9 +26,12 @@ class SearchResultsSuggestions extends StatelessWidget {
     for (File file in matchedFiles) {
       suggestions.add(FilenameResultWidget(file));
     }
-    for (MapEntry<String, List<File>> locationAndFiles
+    for (MapEntry<String, List<File>> locationToFilesMapEntry
         in locationsToMatchedFiles.entries) {
-      suggestions.add(LocationResultsWidget(locationAndFiles));
+      Map<String, List<File>> locationToFilesMap = {
+        locationToFilesMapEntry.key: locationToFilesMapEntry.value
+      };
+      suggestions.add(LocationResultsWidget(locationToFilesMap));
     }
     return Container(
       constraints:
