@@ -202,7 +202,9 @@ class CollectionsService {
         )
         .toList();
     List<CollectionWithThumbnail> result = [];
-    for (Collection collection in matchedCollection) {
+    const int limit = 20;
+    for (int i = 0; i < limit; i++) {
+      Collection collection = matchedCollection[i];
       result.add(
         CollectionWithThumbnail(
           collection,

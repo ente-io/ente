@@ -1179,6 +1179,7 @@ class FilesDB {
       table,
       where: '$columnTitle LIKE ?',
       whereArgs: ["%$query%"],
+      limit: 20,
     );
     final files = _convertToFiles(results);
     return files;
