@@ -15,8 +15,8 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/location.dart';
-import 'package:photos/models/location_and_files.dart';
 import 'package:photos/models/public_key.dart';
+import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
@@ -863,7 +863,7 @@ class UserService {
     }
   }
 
-  Future<List<LocationAndFiles>> getLocationsToMatchedFiles(
+  Future<List<LocationSearchResult>> getLocationsToMatchedFiles(
     String query,
   ) async {
     try {
@@ -892,12 +892,12 @@ class UserService {
       }
 
       List<File> allFiles = await SearchService.instance.getAllFiles();
-      List<LocationAndFiles> locationsAndMatchedFiles = [];
+      List<LocationSearchResult> locationsAndMatchedFiles = [];
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {
         // locationsToMatchedFiles.addAll({locationAndBbox['place']: []});
         locationsAndMatchedFiles
-            .add(LocationAndFiles(locationAndBbox['place'], []));
+            .add(LocationSearchResult(locationAndBbox['place'], []));
         for (File file in allFiles) {
           if (_isValidLocation(file.location)) {
             if (file.location.latitude >

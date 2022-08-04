@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class CollectionResultWidget extends StatelessWidget {
-  final CollectionWithThumbnail c;
+  final AlbumSearchResult albumSearchResult;
 
-  const CollectionResultWidget(this.c, {Key key}) : super(key: key);
+  const CollectionResultWidget(this.albumSearchResult, {Key key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -31,13 +32,13 @@ class CollectionResultWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    c.collection.name,
+                    albumSearchResult.collectionWithThumbnail.collection.name,
                     style: const TextStyle(fontSize: 18),
                     overflow: TextOverflow.ellipsis,
                   ),
                   FutureBuilder<int>(
                     future: FilesDB.instance.collectionFileCount(
-                      c.collection.id,
+                      albumSearchResult.collectionWithThumbnail.collection.id,
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data > 0) {
@@ -67,11 +68,14 @@ class CollectionResultWidget extends StatelessWidget {
               ),
             ),
             Hero(
-              tag: "collectionSearch" + c.thumbnail.tag(),
+              tag: "collectionSearch" +
+                  albumSearchResult.collectionWithThumbnail.thumbnail.tag(),
               child: SizedBox(
                 height: 50,
                 width: 50,
-                child: ThumbnailWidget(c.thumbnail),
+                child: ThumbnailWidget(
+                  albumSearchResult.collectionWithThumbnail.thumbnail,
+                ),
               ),
             )
           ],
@@ -81,7 +85,7 @@ class CollectionResultWidget extends StatelessWidget {
         routeToPage(
           context,
           CollectionPage(
-            c,
+            albumSearchResult.collectionWithThumbnail,
             tagPrefix: "collectionSearch",
           ),
           forceCustomPageRoute: true,

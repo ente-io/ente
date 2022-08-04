@@ -1,42 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/location_and_files.dart';
+import 'package:photos/models/search/album_search_result.dart';
+import 'package:photos/models/search/file_search_result.dart';
+import 'package:photos/models/search/location_search_result.dart';
+import 'package:photos/models/search/search_results.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/filename_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
 
-class SearchResultsSuggestions extends StatelessWidget {
-  final List<CollectionWithThumbnail> matchedCollectionsWithThumbnail;
-  final List<File> matchedFiles;
-  final List<LocationAndFiles> locationsAndMatchedFiles;
-  const SearchResultsSuggestions(
-    this.matchedCollectionsWithThumbnail,
-    this.matchedFiles,
-    this.locationsAndMatchedFiles, {
+class SearchResultsSuggestionsWidget extends StatelessWidget {
+  final List<SearchResult> results;
+  const SearchResultsSuggestionsWidget(
+    this.results, {
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> suggestions = [];
-    for (CollectionWithThumbnail c in matchedCollectionsWithThumbnail) {
-      suggestions.add(CollectionResultWidget(c));
-    }
-    for (File file in matchedFiles) {
-      suggestions.add(FilenameResultWidget(file));
-    }
-    for (LocationAndFiles locationAndMatchedFiles in locationsAndMatchedFiles) {
-      suggestions.add(LocationResultsWidget(locationAndMatchedFiles));
-    }
     return Container(
       constraints:
           BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
       child: ListView.builder(
-        itemCount: suggestions.length,
+        itemCount: results.length,
         itemBuilder: (context, index) {
-          return suggestions[index];
+          final result = results[index];
+          if (result is AlbumSearchResult) {
+            return CollectionResultWidget(result);
+          } else if (result is FileSearchResult) {
+            return FilenameResultWidget(result);
+          } else if (result is LocationSearchResult) {
+            return LocationResultsWidget(result);
+          } else {
+            throw StateError("Invalid/Unsupported value");
+          }
         },
       ),
     );

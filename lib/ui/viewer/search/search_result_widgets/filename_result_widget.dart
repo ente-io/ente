@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class FilenameResultWidget extends StatelessWidget {
-  final File matchedFile;
+  final FileSearchResult matchedFile;
   const FilenameResultWidget(this.matchedFile, {Key key}) : super(key: key);
 
   @override
@@ -28,7 +29,7 @@ class FilenameResultWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    matchedFile.title,
+                    matchedFile.file.title,
                     style: const TextStyle(fontSize: 18),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -37,18 +38,18 @@ class FilenameResultWidget extends StatelessWidget {
               ),
             ),
             Hero(
-              tag: "fileDetails" + matchedFile.tag(),
+              tag: "fileDetails" + matchedFile.file.tag(),
               child: SizedBox(
                 height: 50,
                 width: 50,
-                child: ThumbnailWidget(matchedFile),
+                child: ThumbnailWidget(matchedFile.file),
               ),
             ),
           ],
         ),
       ),
       onTap: () {
-        _routeToDetailPage(matchedFile, context);
+        _routeToDetailPage(matchedFile.file, context);
       },
     );
   }

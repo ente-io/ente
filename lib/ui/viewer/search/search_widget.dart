@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
-import 'package:photos/models/location_and_files.dart';
+import 'package:photos/models/search/album_search_result.dart';
+import 'package:photos/models/search/file_search_result.dart';
+import 'package:photos/models/search/search_results.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
@@ -44,9 +44,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   }
 
   Widget searchWidget() {
-    List<CollectionWithThumbnail> matchedCollections = [];
-    List<File> matchedFiles = [];
-    List<LocationAndFiles> locationsAndMatchedFiles = [];
+    final List<SearchResult> results = [];
     return Column(
       children: [
         Row(
@@ -70,12 +68,17 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                     prefixIcon: const Icon(Icons.search),
                   ),
                   onChanged: (value) async {
-                    matchedCollections = await CollectionsService.instance
-                        .getFilteredCollectionsWithThumbnail(value);
-                    matchedFiles =
-                        await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    locationsAndMatchedFiles = await UserService.instance
+                    final locationResults = await UserService.instance
                         .getLocationsToMatchedFiles(value);
+                    for (final result in locationResults) {
+                      results.add(result);
+                    }
+                    final collectionResults = await CollectionsService.instance
+                        .getFilteredCollectionsWithThumbnail(value);
+                    results.add(AlbumSearchResult(collectionResults));
+                    final fileResults =
+                        await FilesDB.instance.getFilesOnFileNameSearch(value);
+                    results.add(FileSearchResult(fileResults));
                     _searchQuery.value = value;
                   },
                   autofocus: true,
@@ -101,11 +104,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
             Widget child,
           ) {
             return newQuery != ''
-                ? SearchResultsSuggestions(
-                    matchedCollections,
-                    matchedFiles,
-                    locationsAndMatchedFiles,
-                  )
+                ? SearchResultsSuggestionsWidget(results)
                 : const SizedBox.shrink();
           },
         ),

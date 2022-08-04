@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/location_and_files.dart';
+import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/search/location_collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LocationResultsWidget extends StatelessWidget {
-  final LocationAndFiles locationAndMatchedFiles;
+  final LocationSearchResult locationAndMatchedFiles;
   const LocationResultsWidget(this.locationAndMatchedFiles, {Key key})
       : super(key: key);
   @override
