@@ -7,9 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/db/public_keys_db.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/delete_account.dart';
@@ -22,6 +20,7 @@ import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
+import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/ott_verification_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
@@ -38,7 +37,6 @@ class UserService {
   final _dio = Network.instance.getDio();
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
-  List<File> _cachedFiles;
   ValueNotifier<String> emailValueNotifier;
 
   UserService._privateConstructor();
@@ -47,14 +45,6 @@ class UserService {
   Future<void> init() async {
     emailValueNotifier =
         ValueNotifier<String>(Configuration.instance.getEmail());
-    _cachedFiles = await FilesDB.instance.getAllFilesFromDB();
-
-    Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _cachedFiles = null;
-      getAllFiles();
-    });
-
-    //need collectionUpdatedEvent listener?
   }
 
   Future<void> sendOtt(
@@ -872,11 +862,6 @@ class UserService {
     }
   }
 
-  Future<List<File>> getAllFiles() async {
-    _cachedFiles ??= await FilesDB.instance.getAllFilesFromDB();
-    return _cachedFiles;
-  }
-
   Future<Map<String, List<File>>> getLocationsToMatchedFiles(
     String query,
   ) async {
@@ -905,7 +890,7 @@ class UserService {
         );
       }
 
-      List<File> allFiles = await getAllFiles();
+      List<File> allFiles = await SearchService.instance.getAllFiles();
       Map<String, List<File>> locationsToMatchedFiles = {};
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {
