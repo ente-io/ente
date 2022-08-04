@@ -55,8 +55,6 @@ class ImageScene implements SceneDetectionService {
 
     async detectScenes(image: ImageBitmap, minScore: number) {
         await tf.ready();
-        // scene detection model takes fixed-shaped (224x224) inputs
-        // https://tfhub.dev/sayannath/lite-model/image-scene/1
         const resized = resizeToSquare(image, SCENE_DETECTION_IMAGE_SIZE);
 
         const model = await this.getImageSceneModel();

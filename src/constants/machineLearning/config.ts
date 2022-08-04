@@ -90,4 +90,10 @@ export const TESSERACT_MIN_IMAGE_WIDTH = 44;
 export const TESSERACT_MIN_IMAGE_HEIGHT = 20;
 export const TESSERACT_MAX_IMAGE_DIMENSION = 720;
 
+// scene detection model takes fixed-shaped (224x224) inputs
+// https://tfhub.dev/sayannath/lite-model/image-scene/1
 export const SCENE_DETECTION_IMAGE_SIZE = 224;
+
+// SSD with Mobilenet v2 initialized from Imagenet classification checkpoint. Trained on COCO 2017 dataset (images scaled to 320x320 resolution).
+// https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2
+export const OBJECT_DETECTION_IMAGE_SIZE = 320;

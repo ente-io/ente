@@ -7,6 +7,8 @@ import {
 } from 'types/machineLearning';
 
 import * as SSDMobileNet from '@tensorflow-models/coco-ssd';
+import { resizeToSquare } from 'utils/image';
+import { OBJECT_DETECTION_IMAGE_SIZE } from 'constants/machineLearning/config';
 
 class SSDMobileNetV2 implements ObjectDetectionService {
     private ssdMobileNetV2Model: SSDMobileNet.ObjectDetection;
@@ -42,7 +44,8 @@ class SSDMobileNetV2 implements ObjectDetectionService {
         minScore: number
     ): Promise<ObjectDetection[]> {
         const ssdMobileNetV2Model = await this.getSSDMobileNetV2Model();
-        const tfImage = tf.browser.fromPixels(image);
+        const resized = resizeToSquare(image, OBJECT_DETECTION_IMAGE_SIZE);
+        const tfImage = tf.browser.fromPixels(resized.image);
         const detections = await ssdMobileNetV2Model.detect(
             tfImage,
             maxNumberBoxes,
