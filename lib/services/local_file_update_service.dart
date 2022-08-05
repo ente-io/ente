@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/file_migration_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // LocalFileUpdateService tracks all the potential local file IDs which have
@@ -52,6 +53,7 @@ class LocalFileUpdateService {
         _logger.info("start migration for missing location");
         await _runMigrationForFilesWithMissingLocation();
       }
+      await _markFilesWhichAreActuallyUpdated();
       _existingMigration.complete();
       _existingMigration = null;
     } catch (e, s) {
@@ -59,6 +61,82 @@ class LocalFileUpdateService {
       _existingMigration.complete();
       _existingMigration = null;
     }
+  }
+
+  // This method analyses all of local files for which the file
+  // modification/update time was changed. It checks if the existing fileHash
+  // is different from the hash of uploaded file. If fileHash are different,
+  // then it marks the file for file update.
+  Future<void> _markFilesWhichAreActuallyUpdated() async {
+    final sTime = DateTime.now().microsecondsSinceEpoch;
+    bool hasData = true;
+    const int limitInBatch = 100;
+    while (hasData) {
+      var localIDsToProcess =
+          await _filesMigrationDB.getLocalIDsForPotentialReUpload(
+        limitInBatch,
+        FilesMigrationDB.modificationTimeUpdated,
+      );
+      if (localIDsToProcess.isEmpty) {
+        hasData = false;
+      } else {
+        await _checkAndMarkFilesWithDifferentHashForFileUpdate(
+          localIDsToProcess,
+        );
+      }
+    }
+    final eTime = DateTime.now().microsecondsSinceEpoch;
+    final d = Duration(microseconds: eTime - sTime);
+    _logger.info(
+      '_markFilesWhichAreActuallyUpdated migration completed in ${d.inSeconds.toString()} seconds',
+    );
+  }
+
+  Future<void> _checkAndMarkFilesWithDifferentHashForFileUpdate(
+    List<String> localIDsToProcess,
+  ) async {
+    _logger.info("files to process ${localIDsToProcess.length}");
+    var localFiles = await FilesDB.instance.getLocalFiles(localIDsToProcess);
+    Set<String> processedIDs = {};
+    for (var file in localFiles) {
+      if (processedIDs.contains(file.localID)) {
+        continue;
+      }
+      MediaUploadData uploadData;
+      try {
+        uploadData = await getUploadDataFromEnteFile(file);
+        if (file.hash != null ||
+            (file.hash == uploadData.fileHash ||
+                file.hash == uploadData.zipHash)) {
+          _logger.info("Skip file update as hash matched ${file.tag()}");
+        } else {
+          _logger.info(
+            "Marking for file update as hash did not match ${file.tag()}",
+          );
+          await FilesDB.instance.updateUploadedFile(
+            file.localID,
+            file.title,
+            file.location,
+            file.creationTime,
+            file.modificationTime,
+            null,
+          );
+        }
+        processedIDs.add(file.localID);
+      } catch (e) {
+        _logger.severe("Failed to get file uploadData", e);
+      } finally {
+        // delete the file from app's internal cache if it was copied to app
+        // for upload. Shared Media should only be cleared when the upload
+        // succeeds.
+        if (Platform.isIOS &&
+            uploadData != null &&
+            uploadData.sourceFile != null) {
+          await uploadData.sourceFile.delete();
+        }
+      }
+    }
+    await _filesMigrationDB.deleteByLocalIDs(processedIDs.toList());
   }
 
   Future<void> _runMigrationForFilesWithMissingLocation() async {
@@ -82,7 +160,7 @@ class LocalFileUpdateService {
         if (localIDsToProcess.isEmpty) {
           hasData = false;
         } else {
-          await _checkAndMarkFilesForReUpload(localIDsToProcess);
+          await _checkAndMarkFilesWithLocationForReUpload(localIDsToProcess);
         }
       }
       final eTime = DateTime.now().microsecondsSinceEpoch;
@@ -94,7 +172,7 @@ class LocalFileUpdateService {
     await _markLocationMigrationAsCompleted();
   }
 
-  Future<void> _checkAndMarkFilesForReUpload(
+  Future<void> _checkAndMarkFilesWithLocationForReUpload(
     List<String> localIDsToProcess,
   ) async {
     _logger.info("files to process ${localIDsToProcess.length}");

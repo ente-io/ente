@@ -107,15 +107,20 @@ class FilesMigrationDB {
   }
 
   Future<int> deleteByLocalIDs(List<String> localIDs) async {
+    if (localIDs.isEmpty) {
+      return -1;
+    }
     String inParam = "";
     for (final localID in localIDs) {
       inParam += "'" + localID + "',";
     }
     inParam = inParam.substring(0, inParam.length - 1);
     final db = await instance.database;
-    return await db.delete(
-      tableName,
-      where: '$_columnLocalID IN (${localIDs.join(', ')})',
+    db.rawQuery(
+      '''
+      DELETE FROM $tableName
+      WHERE $_columnLocalID IN ($inParam);
+    ''',
     );
   }
 
@@ -124,9 +129,9 @@ class FilesMigrationDB {
     String reason,
   ) async {
     final db = await instance.database;
-    String whereClause = '$_columnReason = $reason';
-    if (_columnReason == missingLocation) {
-      whereClause = '($_columnReason = $reason OR $_columnReason IS NULL';
+    String whereClause = '$_columnReason = "$reason"';
+    if (reason == missingLocation) {
+      whereClause = '($_columnReason = "$reason" OR $_columnReason IS NULL)';
     }
     final rows = await db.query(
       tableName,
