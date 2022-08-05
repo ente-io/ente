@@ -97,3 +97,5 @@ export const SCENE_DETECTION_IMAGE_SIZE = 224;
 // SSD with Mobilenet v2 initialized from Imagenet classification checkpoint. Trained on COCO 2017 dataset (images scaled to 320x320 resolution).
 // https://tfhub.dev/tensorflow/ssd_mobilenet_v2/2
 export const OBJECT_DETECTION_IMAGE_SIZE = 320;
+
+export const BATCHES_BEFORE_SYNCING_INDEX = 5;
