@@ -349,6 +349,10 @@ extension CustomColorScheme on ColorScheme {
   Color get themeSwitchInactiveIconColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.5)
       : Colors.white.withOpacity(0.5);
+
+  Color get searchResultsColor => brightness == Brightness.light
+      ? const Color.fromRGBO(245, 245, 245, 1.0)
+      : const Color.fromRGBO(30, 30, 30, 1.0);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({

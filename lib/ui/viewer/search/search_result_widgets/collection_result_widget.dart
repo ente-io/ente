@@ -16,69 +16,75 @@ class CollectionResultWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Album',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    albumSearchResult.collectionWithThumbnail.collection.name,
-                    style: const TextStyle(fontSize: 18),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  FutureBuilder<int>(
-                    future: FilesDB.instance.collectionFileCount(
-                      albumSearchResult.collectionWithThumbnail.collection.id,
+      child: Container(
+        // color: Theme.of(context).colorScheme.defaultBackgroundColor,
+        color: Theme.of(context).colorScheme.searchResultsColor,
+
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Album',
+                      style: TextStyle(fontSize: 12),
                     ),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data > 0) {
-                        int noOfMemories = snapshot.data;
-                        return RichText(
-                          text: TextSpan(
-                            style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .defaultTextColor,
-                            ),
-                            children: [
-                              TextSpan(text: noOfMemories.toString()),
-                              TextSpan(
-                                text:
-                                    noOfMemories != 1 ? ' memories' : ' memory',
+                    const SizedBox(height: 8),
+                    Text(
+                      albumSearchResult.collectionWithThumbnail.collection.name,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    FutureBuilder<int>(
+                      future: FilesDB.instance.collectionFileCount(
+                        albumSearchResult.collectionWithThumbnail.collection.id,
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data > 0) {
+                          int noOfMemories = snapshot.data;
+                          return RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .defaultTextColor,
                               ),
-                            ],
-                          ),
-                        );
-                      } else {
-                        return const SizedBox.shrink();
-                      }
-                    },
-                  ),
-                ],
-              ),
-            ),
-            Hero(
-              tag: "collectionSearch" +
-                  albumSearchResult.collectionWithThumbnail.thumbnail.tag(),
-              child: SizedBox(
-                height: 50,
-                width: 50,
-                child: ThumbnailWidget(
-                  albumSearchResult.collectionWithThumbnail.thumbnail,
+                              children: [
+                                TextSpan(text: noOfMemories.toString()),
+                                TextSpan(
+                                  text: noOfMemories != 1
+                                      ? ' memories'
+                                      : ' memory',
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
-            )
-          ],
+              Hero(
+                tag: "collectionSearch" +
+                    albumSearchResult.collectionWithThumbnail.thumbnail.tag(),
+                child: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: ThumbnailWidget(
+                    albumSearchResult.collectionWithThumbnail.thumbnail,
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
       onTap: () {

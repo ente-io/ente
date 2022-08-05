@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
@@ -13,39 +14,44 @@ class FilenameResultWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'File',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    matchedFile.file.title,
-                    style: const TextStyle(fontSize: 18),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const Text('1 memory')
-                ],
+      child: Container(
+        // color: Theme.of(context).colorScheme.defaultBackgroundColor,
+        color: Theme.of(context).colorScheme.searchResultsColor,
+
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'File',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      matchedFile.file.title,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Text('1 memory')
+                  ],
+                ),
               ),
-            ),
-            Hero(
-              tag: "fileDetails" + matchedFile.file.tag(),
-              child: SizedBox(
-                height: 50,
-                width: 50,
-                child: ThumbnailWidget(matchedFile.file),
+              Hero(
+                tag: "fileDetails" + matchedFile.file.tag(),
+                child: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: ThumbnailWidget(matchedFile.file),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       onTap: () {

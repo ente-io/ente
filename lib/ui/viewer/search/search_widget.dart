@@ -63,13 +63,14 @@ class _SearchWidgetState extends State<SearchWidget> {
           const SizedBox(height: 8),
           Row(
             children: [
-              const SizedBox(width: 12),
+              //const SizedBox(width: 12),
               Flexible(
                 child: Container(
                   color: Theme.of(context).colorScheme.defaultBackgroundColor,
                   child: TextFormField(
                     style: Theme.of(context).textTheme.subtitle1,
                     decoration: InputDecoration(
+                      hintText: 'Search for albums, location, files...',
                       filled: true,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -79,9 +80,18 @@ class _SearchWidgetState extends State<SearchWidget> {
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(8),
                       ),
+                      focusedBorder: const UnderlineInputBorder(
+                        borderSide: BorderSide.none,
+                      ),
                       prefixIcon: const Hero(
                         tag: "search icon",
                         child: Icon(Icons.search),
+                      ),
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        icon: const Icon(Icons.close),
                       ),
                     ),
                     onChanged: (value) async {
@@ -114,19 +124,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                   ),
                 ),
               ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
-                },
-                icon: const Icon(Icons.close),
-              ),
             ],
-          ),
-          Container(
-            height: 14,
-            color: Theme.of(context).colorScheme.defaultBackgroundColor,
           ),
           results.isNotEmpty
               ? SearchResultsSuggestionsWidget(results)

@@ -14,48 +14,52 @@ class LocationResultsWidget extends StatelessWidget {
     int noOfMemories = locationAndMatchedFiles.files.length;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Location',
-                    style: TextStyle(fontSize: 12),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    locationAndMatchedFiles.location,
-                    style: const TextStyle(fontSize: 18),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.defaultTextColor,
-                      ),
-                      children: [
-                        TextSpan(text: noOfMemories.toString()),
-                        TextSpan(
-                          text: noOfMemories != 1 ? ' memories' : ' memory',
-                        ),
-                      ],
+      child: Container(
+        // color: Theme.of(context).colorScheme.defaultBackgroundColor,
+        color: Theme.of(context).colorScheme.searchResultsColor,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Location',
+                      style: TextStyle(fontSize: 12),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      locationAndMatchedFiles.location,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.defaultTextColor,
+                        ),
+                        children: [
+                          TextSpan(text: noOfMemories.toString()),
+                          TextSpan(
+                            text: noOfMemories != 1 ? ' memories' : ' memory',
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(
-              height: 50,
-              width: 50,
-              child: ThumbnailWidget(locationAndMatchedFiles.files[0]),
-            ),
-          ],
+              SizedBox(
+                height: 50,
+                width: 50,
+                child: ThumbnailWidget(locationAndMatchedFiles.files[0]),
+              ),
+            ],
+          ),
         ),
       ),
       onTap: () {
