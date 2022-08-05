@@ -142,11 +142,9 @@ export default function UtilitySection({ closeSidebar }) {
                 {'Clear ML db'}
             </SidebarButton>
 
-            {mlSearchEnabled && (
-                <SidebarButton onClick={redirectToMLDebug}>
-                    {constants.ML_DEBUG}
-                </SidebarButton>
-            )}
+            <SidebarButton onClick={redirectToMLDebug}>
+                {constants.ML_DEBUG}
+            </SidebarButton>
 
             {/* <SidebarButton onClick={openThumbnailCompressModal}>
                 {constants.COMPRESS_THUMBNAILS}
