@@ -106,6 +106,36 @@ class IgnoredFilesDB {
     return result;
   }
 
+  Future<void> removeIgnoredEntries(List<IgnoredFile> ignoredFiles) async {
+    final startTime = DateTime.now();
+    final db = await instance.database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (IgnoredFile file in ignoredFiles) {
+      if (batchCounter == 400) {
+        await batch.commit(noResult: true);
+        batch = db.batch();
+        batchCounter = 0;
+      }
+      batch.rawDelete(
+        "DELETE from $tableName WHERE "
+        "$columnLocalID = '${file.localID}' OR ( $columnDeviceFolder = '${file.deviceFolder}' AND $columnTitle = '${file.title}' ) "
+        " ) ",
+      );
+      batchCounter++;
+    }
+    await batch.commit(noResult: true);
+    final endTime = DateTime.now();
+    final duration = Duration(
+      microseconds:
+          endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
+    );
+    _logger.info(
+      "Batch delete for ${ignoredFiles.length} "
+      "took ${duration.inMilliseconds} ms.",
+    );
+  }
+
   IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {
     return IgnoredFile(
       row[columnLocalID],

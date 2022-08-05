@@ -47,6 +47,27 @@ class IgnoredFilesService {
     return false;
   }
 
+  Future<void> removeIgnoredMappings(List<File> files) async {
+    List<IgnoredFile> ignoredFiles = [];
+    Set<String> idsToRemoveFromCache = {};
+    for (var file in files) {
+      var ignoredFile = IgnoredFile.fromFile(file);
+      if (ignoredFile != null) {
+        ignoredFiles.add(ignoredFile);
+        var id = _idForIgnoredFile(ignoredFile);
+        if (id != null) {
+          idsToRemoveFromCache.add(id);
+        }
+      }
+    }
+    if (ignoredFiles.isNotEmpty) {
+      await _db.removeIgnoredEntries(ignoredFiles);
+      final existingIDs = await ignoredIDs;
+      existingIDs.removeAll(idsToRemoveFromCache);
+    }
+    return;
+  }
+
   Future<Set<String>> _loadExistingIDs() async {
     _logger.fine('loading existing IDs');
     final result = await _db.getAll();

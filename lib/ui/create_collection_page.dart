@@ -8,6 +8,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -354,6 +355,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         }
       }
       if (filesPendingUpload.isNotEmpty) {
+        await IgnoredFilesService.instance.removeIgnoredMappings(filesPendingUpload);
         await FilesDB.instance.insertMultiple(filesPendingUpload);
       }
       if (files.isNotEmpty) {
