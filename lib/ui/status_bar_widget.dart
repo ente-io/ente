@@ -60,7 +60,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               AnimatedOpacity(
                 opacity: _showStatus ? 0 : 1,
                 duration: const Duration(milliseconds: 1000),
-                child: const StatusBarBrandingWidget(),
+                child: const StatusBarBrandingAndSearchWidget(),
               ),
               AnimatedOpacity(
                 opacity: _showStatus ? 1 : 0,
@@ -206,8 +206,8 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 }
 
-class StatusBarBrandingWidget extends StatelessWidget {
-  const StatusBarBrandingWidget({Key key}) : super(key: key);
+class StatusBarBrandingAndSearchWidget extends StatelessWidget {
+  const StatusBarBrandingAndSearchWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

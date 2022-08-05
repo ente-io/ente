@@ -57,6 +57,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     return SafeArea(
       child: Column(
         children: [
+          const SizedBox(height: 8),
           Row(
             children: [
               const SizedBox(width: 12),
