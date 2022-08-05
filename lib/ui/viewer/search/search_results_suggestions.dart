@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
@@ -18,6 +18,7 @@ class SearchResultsSuggestionsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      color: Theme.of(context).colorScheme.defaultBackgroundColor,
       constraints:
           BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
       child: ListView.builder(

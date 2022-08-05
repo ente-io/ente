@@ -124,7 +124,10 @@ class _SearchWidgetState extends State<SearchWidget> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          Container(
+            height: 14,
+            color: Theme.of(context).colorScheme.defaultBackgroundColor,
+          ),
           results.isNotEmpty
               ? SearchResultsSuggestionsWidget(results)
               : const SizedBox.shrink(),
@@ -156,7 +159,7 @@ class TransparentRoute extends PageRoute<void> {
   bool get maintainState => true;
 
   @override
-  Duration get transitionDuration => Duration(milliseconds: 350);
+  Duration get transitionDuration => const Duration(milliseconds: 350);
 
   @override
   Widget buildPage(
