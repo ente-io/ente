@@ -35,7 +35,7 @@ class FilesMigrationDB {
         ALTER TABLE $tableName ADD COLUMN $_columnReason TEXT;
       ''',
       '''
-        UPDATE TABLE $tableName SET $_columnReason = $missingLocation;
+        UPDATE $tableName SET $_columnReason = $missingLocation;
       ''',
     ];
   }
