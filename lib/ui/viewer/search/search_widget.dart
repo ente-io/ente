@@ -19,12 +19,10 @@ class SearchIconWidget extends StatefulWidget {
 }
 
 class _SearchIconWidgetState extends State<SearchIconWidget> {
-  final ValueNotifier<String> _searchQuery = ValueNotifier('');
   bool showSearchWidget;
   @override
   void initState() {
     super.initState();
-    debugPrint('showSearchWidget-----------');
     showSearchWidget = false;
   }
 
@@ -32,7 +30,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   Widget build(BuildContext context) {
     //when false - show the search icon, when true - show the textfield for search
     return showSearchWidget
-        ? searchWidget()
+        ? SearchWidget(showSearchWidget)
         : IconButton(
             onPressed: () {
               setState(
@@ -44,78 +42,90 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
             icon: const Icon(Icons.search),
           );
   }
+}
 
-  Widget searchWidget() {
-    final List<SearchResult> results = [];
-    return Column(
-      children: [
-        Row(
-          children: [
-            const SizedBox(width: 12),
-            Flexible(
-              child: Container(
-                color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                child: TextFormField(
-                  style: Theme.of(context).textTheme.subtitle1,
-                  decoration: InputDecoration(
-                    filled: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+class SearchWidget extends StatefulWidget {
+  bool openSearch;
+  final String searchQuery = '';
+  SearchWidget(this.openSearch, {Key key}) : super(key: key);
+  @override
+  State<SearchWidget> createState() => _SearchWidgetState();
+}
+
+class _SearchWidgetState extends State<SearchWidget> {
+  final List<SearchResult> results = [];
+  @override
+  Widget build(BuildContext context) {
+    return widget.openSearch
+        ? Column(
+            children: [
+              Row(
+                children: [
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Container(
+                      color:
+                          Theme.of(context).colorScheme.defaultBackgroundColor,
+                      child: TextFormField(
+                        style: Theme.of(context).textTheme.subtitle1,
+                        decoration: InputDecoration(
+                          filled: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
+                          ),
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide.none,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.search),
+                        ),
+                        onChanged: (value) async {
+                          List<SearchResult> combinedResults = [];
+
+                          final collectionResults = await CollectionsService
+                              .instance
+                              .getFilteredCollectionsWithThumbnail(value);
+                          for (CollectionWithThumbnail collectionResult
+                              in collectionResults) {
+                            combinedResults
+                                .add(AlbumSearchResult(collectionResult));
+                          }
+                          final locationResults = await UserService.instance
+                              .getLocationsToMatchedFiles(value);
+                          for (final result in locationResults) {
+                            combinedResults.add(result);
+                          }
+                          final fileResults = await FilesDB.instance
+                              .getFilesOnFileNameSearch(value);
+                          for (File file in fileResults) {
+                            combinedResults.add(FileSearchResult(file));
+                          }
+                          setState(() {
+                            results.clear();
+                            results.addAll(combinedResults);
+                          });
+                        },
+                        autofocus: true,
+                      ),
                     ),
-                    border: UnderlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    prefixIcon: const Icon(Icons.search),
                   ),
-                  onChanged: (value) async {
-                    final locationResults = await UserService.instance
-                        .getLocationsToMatchedFiles(value);
-                    for (final result in locationResults) {
-                      results.add(result);
-                    }
-                    final collectionResults = await CollectionsService.instance
-                        .getFilteredCollectionsWithThumbnail(value);
-                    for (CollectionWithThumbnail collectionResult
-                        in collectionResults) {
-                      results.add(AlbumSearchResult(collectionResult));
-                    }
-                    final fileResults =
-                        await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    for (File file in fileResults) {
-                      results.add(FileSearchResult(file));
-                    }
-                    _searchQuery.value = value;
-                  },
-                  autofocus: true,
-                ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        widget.openSearch = !widget.openSearch;
+                      });
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
               ),
-            ),
-            IconButton(
-              onPressed: () {
-                setState(() {
-                  showSearchWidget = !showSearchWidget;
-                });
-              },
-              icon: const Icon(Icons.close),
-            ),
-          ],
-        ),
-        const SizedBox(height: 20),
-        ValueListenableBuilder(
-          valueListenable: _searchQuery,
-          builder: (
-            BuildContext context,
-            String newQuery,
-            Widget child,
-          ) {
-            return newQuery != ''
-                ? SearchResultsSuggestionsWidget(results)
-                : const SizedBox.shrink();
-          },
-        ),
-      ],
-    );
+              const SizedBox(height: 20),
+
+              SearchResultsSuggestionsWidget(results),
+              // const SizedBox.shrink();
+            ],
+          )
+        : const SearchIconWidget();
   }
 }
