@@ -8,7 +8,7 @@ class ThumbnailPlaceHolder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("building placeHolder for thumbnail");
+    // debugPrint("building placeHolder for thumbnail");
     return Container(
       alignment: Alignment.center,
       color: Theme.of(context).colorScheme.galleryThumbBackgroundColor,

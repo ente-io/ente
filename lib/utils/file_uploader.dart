@@ -309,6 +309,7 @@ class FileUploader {
           rethrow;
         }
       }
+
       Uint8List key;
       bool isUpdatedFile =
           file.uploadedFileID != null && file.updationTime == -1;
@@ -317,6 +318,19 @@ class FileUploader {
         key = decryptFileKey(file);
       } else {
         key = null;
+        // check if the file is already uploaded and can be mapping to existing
+        // stuff
+        final isMappedToExistingUpload = await _mapToExistingUploadWithSameHash(
+          mediaUploadData,
+          file,
+          collectionID,
+        );
+        if (isMappedToExistingUpload) {
+          debugPrint(
+            "File success mapped to existing uploaded ${file.toString()}",
+          );
+          return file;
+        }
       }
 
       if (io.File(encryptedFilePath).existsSync()) {
@@ -422,23 +436,133 @@ class FileUploader {
       }
       rethrow;
     } finally {
-      if (mediaUploadData != null && mediaUploadData.sourceFile != null) {
-        // delete the file from app's internal cache if it was copied to app
-        // for upload. Shared Media should only be cleared when the upload
-        // succeeds.
-        if (io.Platform.isIOS ||
-            (uploadCompleted && file.isSharedMediaToAppSandbox())) {
-          await mediaUploadData.sourceFile.delete();
-        }
-      }
-      if (io.File(encryptedFilePath).existsSync()) {
-        await io.File(encryptedFilePath).delete();
-      }
-      if (io.File(encryptedThumbnailPath).existsSync()) {
-        await io.File(encryptedThumbnailPath).delete();
-      }
-      await _uploadLocks.releaseLock(file.localID, _processType.toString());
+      await _onUploadDone(
+        mediaUploadData,
+        uploadCompleted,
+        file,
+        encryptedFilePath,
+        encryptedThumbnailPath,
+      );
     }
+  }
+
+  /*
+  // _mapToExistingUpload links the current file to be uploaded with the
+  // existing files. If the link is successful, it returns true other false.
+   When false, we should go ahead and re-upload or update the file
+    It performs following checks:
+    a) Uploaded file with same localID and destination collection. Delete the
+     fileToUpload entry
+    b) Uploaded file in destination collection but with missing localID.
+     Update the localID for uploadedFile and delete the fileToUpload entry
+    c) A uploaded file exist with same localID but in a different collection.
+    or
+    d) Uploaded file in different collection but missing localID.
+    For both c and d, perform add to collection operation.
+    e) File already exists but different localID. Re-upload
+    In case the existing files already have local identifier, which is
+    different from the {fileToUpload}, then most probably device has
+    duplicate files.
+  */
+  Future<bool> _mapToExistingUploadWithSameHash(
+    MediaUploadData mediaUploadData,
+    File fileToUpload,
+    int toCollectionID,
+  ) async {
+    List<String> hash = [mediaUploadData.fileHash];
+    if (fileToUpload.fileType == FileType.livePhoto) {
+      hash.add(mediaUploadData.zipHash);
+    }
+    List<File> existingFiles =
+        await FilesDB.instance.getUploadedFilesWithHashes(
+      hash,
+      fileToUpload.fileType,
+      Configuration.instance.getUserID(),
+    );
+    if (existingFiles?.isEmpty ?? true) {
+      return false;
+    } else {
+      debugPrint("Found some matches");
+    }
+    File fileSameLocalAndSameCollection = existingFiles.firstWhere(
+      (element) =>
+          element.uploadedFileID != -1 &&
+          element.collectionID == toCollectionID &&
+          element.localID == fileToUpload.localID,
+      orElse: () => null,
+    );
+    if (fileSameLocalAndSameCollection != null) {
+      debugPrint(
+        "fileSameLocalAndSameCollection: \n toUpload  ${fileToUpload.tag()} "
+        "\n existing: ${fileSameLocalAndSameCollection.tag()}",
+      );
+      // should delete the fileToUploadEntry
+      FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
+      return true;
+    }
+
+    File fileMissingLocalButSameCollection = existingFiles.firstWhere(
+      (element) =>
+          element.uploadedFileID != -1 &&
+          element.collectionID == toCollectionID &&
+          element.localID == null,
+      orElse: () => null,
+    );
+    if (fileMissingLocalButSameCollection != null) {
+      // update the local id of the existing file and delete the fileToUpload
+      // entry
+      debugPrint(
+        "fileMissingLocalButSameCollection: \n toUpload  ${fileToUpload.tag()} "
+        "\n existing: ${fileMissingLocalButSameCollection.tag()}",
+      );
+      fileMissingLocalButSameCollection.localID = fileToUpload.localID;
+      await FilesDB.instance.insert(fileMissingLocalButSameCollection);
+      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
+      return true;
+    }
+
+    File fileExistsButDifferentCollection = existingFiles.firstWhere(
+      (element) =>
+          element.uploadedFileID != -1 &&
+          element.collectionID != toCollectionID,
+      orElse: () => null,
+    );
+    if (fileExistsButDifferentCollection != null) {
+      debugPrint(
+        "fileExistsButDifferentCollection: \n toUpload  ${fileToUpload.tag()} "
+        "\n existing: ${fileExistsButDifferentCollection.tag()}",
+      );
+      await CollectionsService.instance
+          .linkLocalFileToExistingUploadedFileInAnotherCollection(
+              toCollectionID, fileToUpload, fileExistsButDifferentCollection);
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> _onUploadDone(
+    MediaUploadData mediaUploadData,
+    bool uploadCompleted,
+    File file,
+    String encryptedFilePath,
+    String encryptedThumbnailPath,
+  ) async {
+    if (mediaUploadData != null && mediaUploadData.sourceFile != null) {
+      // delete the file from app's internal cache if it was copied to app
+      // for upload. Shared Media should only be cleared when the upload
+      // succeeds.
+      if (io.Platform.isIOS ||
+          (uploadCompleted && file.isSharedMediaToAppSandbox())) {
+        await mediaUploadData.sourceFile.delete();
+      }
+    }
+    if (io.File(encryptedFilePath).existsSync()) {
+      await io.File(encryptedFilePath).delete();
+    }
+    if (io.File(encryptedThumbnailPath).existsSync()) {
+      await io.File(encryptedThumbnailPath).delete();
+    }
+    await _uploadLocks.releaseLock(file.localID, _processType.toString());
   }
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {

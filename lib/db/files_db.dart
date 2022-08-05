@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -814,6 +815,24 @@ class FilesDB {
     }
   }
 
+  Future<List<File>> getUploadedFilesWithHashes(
+    List<String> hash,
+    FileType fileType,
+    int ownerID,
+  ) async {
+    final db = await instance.database;
+    String rawQuery = 'SELECT * from files where ($columnUploadedFileID != '
+        'NULL OR $columnUploadedFileID != -1) AND $columnOwnerID = $ownerID '
+        'AND ($columnHash = "${hash.first}" OR $columnHash = "${hash.last}")';
+    final rows = await db.rawQuery(rawQuery, []);
+    if (rows.isNotEmpty) {
+      return _convertToFiles(rows);
+    } else {
+      debugPrint(rawQuery);
+      return [];
+    }
+  }
+
   Future<int> update(File file) async {
     final db = await instance.database;
     return await db.update(
@@ -840,6 +859,15 @@ class FilesDB {
       table,
       where: '$columnUploadedFileID =?',
       whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<int> deleteByGeneratedID(int genID) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnGeneratedID =?',
+      whereArgs: [genID],
     );
   }
 
