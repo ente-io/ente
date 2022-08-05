@@ -63,7 +63,7 @@ export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
     //     learningRate: 10.0,
     //     metric: 'euclidean',
     // },
-    mlVersion: 2,
+    mlVersion: 3,
 };
 
 export const DEFAULT_ML_SEARCH_CONFIG: MLSearchConfig = {
