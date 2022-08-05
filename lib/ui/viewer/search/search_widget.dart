@@ -25,20 +25,23 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      onPressed: () {
-        setState(
-          () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const SearchWidget(),
-              ),
-            );
-          },
-        );
-      },
-      icon: const Icon(Icons.search),
+    return Hero(
+      tag: "search icon",
+      child: IconButton(
+        onPressed: () {
+          setState(
+            () {
+              Navigator.push(
+                context,
+                TransparentRoute(
+                  builder: (BuildContext context) => const SearchWidget(),
+                ),
+              );
+            },
+          );
+        },
+        icon: const Icon(Icons.search),
+      ),
     );
   }
 }
@@ -76,7 +79,10 @@ class _SearchWidgetState extends State<SearchWidget> {
                         borderSide: BorderSide.none,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      prefixIcon: const Icon(Icons.search),
+                      prefixIcon: const Hero(
+                        tag: "search icon",
+                        child: Icon(Icons.search),
+                      ),
                     ),
                     onChanged: (value) async {
                       List<SearchResult> combinedResults = [];
@@ -119,10 +125,52 @@ class _SearchWidgetState extends State<SearchWidget> {
             ],
           ),
           const SizedBox(height: 20),
-
-          SearchResultsSuggestionsWidget(results),
-          // const SizedBox.shrink();
+          results.isNotEmpty
+              ? SearchResultsSuggestionsWidget(results)
+              : const SizedBox.shrink(),
         ],
+      ),
+    );
+  }
+}
+
+class TransparentRoute extends PageRoute<void> {
+  TransparentRoute({
+    @required this.builder,
+    RouteSettings settings,
+  })  : assert(builder != null),
+        super(settings: settings, fullscreenDialog: false);
+
+  final WidgetBuilder builder;
+
+  @override
+  bool get opaque => false;
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  String get barrierLabel => null;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => Duration(milliseconds: 350);
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    final result = builder(context);
+    return FadeTransition(
+      opacity: Tween<double>(begin: 0, end: 1).animate(animation),
+      child: Semantics(
+        scopesRoute: true,
+        explicitChildNodes: true,
+        child: result,
       ),
     );
   }

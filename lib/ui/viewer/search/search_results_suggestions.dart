@@ -19,7 +19,7 @@ class SearchResultsSuggestionsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints:
-          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+          BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.8),
       child: ListView.builder(
         itemCount: results.length,
         itemBuilder: (context, index) {
