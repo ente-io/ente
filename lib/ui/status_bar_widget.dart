@@ -211,7 +211,8 @@ class StatusBarBrandingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           height: kContainerHeight,
@@ -230,14 +231,11 @@ class StatusBarBrandingWidget extends StatelessWidget {
           ),
         ),
         FeatureFlagService.instance.enableSearchFeature()
-            ? SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: const Align(
-                  alignment: Alignment.centerRight,
-                  child: SearchIconWidget(),
-                ),
+            ? const SizedBox(
+                height: kContainerHeight,
+                child: SearchIconWidget(),
               )
-            : const SizedBox.shrink(),
+            : const SizedBox.shrink()
       ],
     );
   }
