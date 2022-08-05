@@ -469,6 +469,10 @@ class FileUploader {
     File fileToUpload,
     int toCollectionID,
   ) async {
+    if (fileToUpload.uploadedFileID != -1) {
+      _logger.warning('file is already uploaded, skipping mapping logic');
+      return false;
+    }
     List<String> hash = [mediaUploadData.fileHash];
     if (fileToUpload.fileType == FileType.livePhoto) {
       hash.add(mediaUploadData.zipHash);
@@ -484,23 +488,25 @@ class FileUploader {
     } else {
       debugPrint("Found some matches");
     }
-    File fileSameLocalAndSameCollection = existingFiles.firstWhere(
+    // case a
+    File sameLocalSameCollection = existingFiles.firstWhere(
       (element) =>
           element.uploadedFileID != -1 &&
           element.collectionID == toCollectionID &&
           element.localID == fileToUpload.localID,
       orElse: () => null,
     );
-    if (fileSameLocalAndSameCollection != null) {
+    if (sameLocalSameCollection != null) {
       debugPrint(
-        "fileSameLocalAndSameCollection: \n toUpload  ${fileToUpload.tag()} "
-        "\n existing: ${fileSameLocalAndSameCollection.tag()}",
+        "sameLocalSameCollection: \n toUpload  ${fileToUpload.tag()} "
+        "\n existing: ${sameLocalSameCollection.tag()}",
       );
       // should delete the fileToUploadEntry
       FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
       return true;
     }
 
+    // case b
     File fileMissingLocalButSameCollection = existingFiles.firstWhere(
       (element) =>
           element.uploadedFileID != -1 &&
@@ -521,6 +527,7 @@ class FileUploader {
       return true;
     }
 
+    // case c and d
     File fileExistsButDifferentCollection = existingFiles.firstWhere(
       (element) =>
           element.uploadedFileID != -1 &&
@@ -537,6 +544,7 @@ class FileUploader {
               toCollectionID, fileToUpload, fileExistsButDifferentCollection);
       return true;
     }
+    // case e
     return false;
   }
 
