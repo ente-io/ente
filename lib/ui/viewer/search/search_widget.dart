@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
@@ -75,10 +77,15 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
                     }
                     final collectionResults = await CollectionsService.instance
                         .getFilteredCollectionsWithThumbnail(value);
-                    results.add(AlbumSearchResult(collectionResults));
+                    for (CollectionWithThumbnail collectionResult
+                        in collectionResults) {
+                      results.add(AlbumSearchResult(collectionResult));
+                    }
                     final fileResults =
                         await FilesDB.instance.getFilesOnFileNameSearch(value);
-                    results.add(FileSearchResult(fileResults));
+                    for (File file in fileResults) {
+                      results.add(FileSearchResult(file));
+                    }
                     _searchQuery.value = value;
                   },
                   autofocus: true,
