@@ -1,7 +1,4 @@
-import 'dart:io' as io;
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -11,8 +8,8 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/feature_flag_service.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/exif_util.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 
 class File extends EnteFile {
   int generatedID;
@@ -149,7 +146,9 @@ class File extends EnteFile {
     metadataVersion = metadata["version"] ?? 0;
   }
 
-  Future<Map<String, dynamic>> getMetadataForUpload(io.File sourceFile) async {
+  Future<Map<String, dynamic>> getMetadataForUpload(
+    MediaUploadData mediaUploadData,
+  ) async {
     final asset = await getAsset();
     // asset can be null for files shared to app
     if (asset != null) {
@@ -159,12 +158,19 @@ class File extends EnteFile {
       }
     }
     if (fileType == FileType.image) {
-      final exifTime = await getCreationTimeFromEXIF(sourceFile);
+      final exifTime =
+          await getCreationTimeFromEXIF(mediaUploadData.sourceFile);
       if (exifTime != null) {
         creationTime = exifTime.microsecondsSinceEpoch;
       }
     }
-    hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+    // in metadataVersion V1, the hash for livePhoto is the hash of the
+    // zipped file.
+    // web uploads files without MetadataVersion and upload image hash as 'ha
+    // sh' key and video as 'vidHash'
+    hash = (fileType == FileType.livePhoto)
+        ? mediaUploadData.zipHash
+        : mediaUploadData.fileHash;
     return getMetadata();
   }
 

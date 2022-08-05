@@ -19,6 +19,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -168,6 +169,46 @@ class CollectionsService {
         .toList()
         .where((element) => !element.isDeleted)
         .toList();
+  }
+
+  // getFilteredCollectionsWithThumbnail removes deleted or archived or
+  // collections which don't have a file from search result
+  Future<List<CollectionWithThumbnail>> getFilteredCollectionsWithThumbnail(
+    String query,
+  ) async {
+    // identify collections which have at least one file as we don't display
+    // empty collection
+
+    List<File> latestCollectionFiles = await getLatestCollectionFiles();
+    Map<int, File> collectionIDToLatestFileMap = {
+      for (File file in latestCollectionFiles) file.collectionID: file
+    };
+
+    /* Identify collections whose name matches the search query
+      and is not archived
+      and is not deleted
+      and has at-least one file
+     */
+
+    List<Collection> matchedCollection = _collectionIDToCollections.values
+        .where(
+          (c) =>
+              !c.isDeleted && // not deleted
+              !c.isArchived() // not archived
+              &&
+              collectionIDToLatestFileMap.containsKey(c.id) && // the
+              // collection is not empty
+              c.name.contains(RegExp(query, caseSensitive: false)),
+        )
+        .toList();
+    List<CollectionWithThumbnail> result = [];
+    for (Collection collection in matchedCollection) {
+      result.add(CollectionWithThumbnail(
+        collection,
+        collectionIDToLatestFileMap[collection.id],
+      ));
+    }
+    return result;
   }
 
   Future<List<User>> getSharees(int collectionID) {
@@ -625,6 +666,48 @@ class CollectionsService {
       );
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> linkLocalFileToExistingUploadedFileInAnotherCollection(
+    int destCollectionID,
+    File localFileToUpload,
+    File file,
+  ) async {
+    final params = <String, dynamic>{};
+    params["collectionID"] = destCollectionID;
+    params["files"] = [];
+
+    final key = decryptFileKey(file);
+    file.generatedID = localFileToUpload.generatedID; // So that a new entry is
+    // created in the FilesDB
+    file.localID = localFileToUpload.localID;
+    file.collectionID = destCollectionID;
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(key, getCollectionKey(destCollectionID));
+    file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+    file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+
+    params["files"].add(
+      CollectionFileItem(
+        file.uploadedFileID,
+        file.encryptedKey,
+        file.keyDecryptionNonce,
+      ).toMap(),
+    );
+
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+        data: params,
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
+      );
+      await _filesDB.insertMultiple([file]);
+      Bus.instance.fire(CollectionUpdatedEvent(destCollectionID, [file]));
     } catch (e) {
       rethrow;
     }

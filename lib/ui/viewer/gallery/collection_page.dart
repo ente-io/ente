@@ -14,14 +14,12 @@ class CollectionPage extends StatelessWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final GalleryType appBarType;
-  final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.appBarType = GalleryType.ownedCollection,
-    this.overlayType = GalleryType.ownedCollection,
     Key key,
   }) : super(key: key);
 
@@ -67,7 +65,7 @@ class CollectionPage extends StatelessWidget {
         children: [
           gallery,
           GalleryOverlayWidget(
-            overlayType,
+            appBarType,
             _selectedFiles,
             collection: c.collection,
           ),

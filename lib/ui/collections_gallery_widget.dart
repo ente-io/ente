@@ -591,7 +591,6 @@ class DeviceFolderIcon extends StatelessWidget {
         child: SizedBox(
           height: 140,
           width: 120,
-          // padding: const EdgeInsets.all(8.0),
           child: Column(
             children: <Widget>[
               ClipRRect(
@@ -709,7 +708,7 @@ class CollectionItem extends StatelessWidget {
                       ),
                     );
                   } else {
-                    return Container();
+                    return const SizedBox.shrink();
                   }
                 },
               ),

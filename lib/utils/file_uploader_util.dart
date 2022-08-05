@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
+import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
@@ -14,6 +15,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -24,8 +26,20 @@ class MediaUploadData {
   final io.File sourceFile;
   final Uint8List thumbnail;
   final bool isDeleted;
+  // presents the hash for the original video or image file.
+  // for livePhotos, fileHash represents the image hash value
+  final String fileHash;
+  final String liveVideoHash;
+  final String zipHash;
 
-  MediaUploadData(this.sourceFile, this.thumbnail, this.isDeleted);
+  MediaUploadData(
+    this.sourceFile,
+    this.thumbnail,
+    this.isDeleted, {
+    this.fileHash,
+    this.liveVideoHash,
+    this.zipHash,
+  });
 }
 
 Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
@@ -40,6 +54,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   io.File sourceFile;
   Uint8List thumbnailData;
   bool isDeleted;
+  String fileHash, livePhotoVideoHash, zipHash;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
   final asset = await file
@@ -72,6 +87,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
 
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   await _decorateEnteFileData(file, asset);
+  fileHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
 
   if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
     final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
@@ -81,6 +97,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       _logger.severe(errMsg);
       throw InvalidFileUploadState(errMsg);
     }
+    livePhotoVideoHash = Sodium.bin2base64(await CryptoUtil.getHash(videoUrl));
     final tempPath = Configuration.instance.getTempDirectory();
     // .elp -> ente live photo
     final livePhotoPath = tempPath + file.generatedID.toString() + ".elp";
@@ -96,6 +113,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     }
     // new sourceFile which needs to be uploaded
     sourceFile = io.File(livePhotoPath);
+    zipHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
   }
 
   thumbnailData = await asset.thumbnailDataWithSize(
@@ -116,7 +134,14 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   }
 
   isDeleted = asset == null || !(await asset.exists);
-  return MediaUploadData(sourceFile, thumbnailData, isDeleted);
+  return MediaUploadData(
+    sourceFile,
+    thumbnailData,
+    isDeleted,
+    fileHash: fileHash,
+    liveVideoHash: livePhotoVideoHash,
+    zipHash: zipHash,
+  );
 }
 
 Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
@@ -128,7 +153,7 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
   }
 
   if (file.title == null || file.title.isEmpty) {
-    _logger.severe("Title was missing");
+    _logger.warning("Title was missing ${file.tag()}");
     file.title = await asset.titleAsync;
   }
 }
