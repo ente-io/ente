@@ -136,7 +136,10 @@ class LocalFileUpdateService {
         }
       }
     }
-    await _filesMigrationDB.deleteByLocalIDs(processedIDs.toList());
+    await _filesMigrationDB.deleteByLocalIDs(
+      processedIDs.toList(),
+      FilesMigrationDB.modificationTimeUpdated,
+    );
   }
 
   Future<void> _runMigrationForFilesWithMissingLocation() async {
@@ -201,7 +204,10 @@ class LocalFileUpdateService {
     }
     _logger.info('marking ${localIDsWithLocation.length} files for re-upload');
     await _filesDB.markForReUploadIfLocationMissing(localIDsWithLocation);
-    await _filesMigrationDB.deleteByLocalIDs(localIDsToProcess);
+    await _filesMigrationDB.deleteByLocalIDs(
+      localIDsToProcess,
+      FilesMigrationDB.missingLocation,
+    );
   }
 
   Future<void> _importLocalFilesForMigration() async {
@@ -213,7 +219,7 @@ class LocalFileUpdateService {
     var fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
     await _filesMigrationDB.insertMultiple(
       fileLocalIDs,
-      reason: FilesMigrationDB.missingLocation,
+      FilesMigrationDB.missingLocation,
     );
     final eTime = DateTime.now().microsecondsSinceEpoch;
     final d = Duration(microseconds: eTime - sTime);

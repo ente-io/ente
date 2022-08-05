@@ -252,8 +252,10 @@ class LocalSyncService {
           updatedLocalIDs.add(file.localID);
         }
       }
-      FilesMigrationDB.instance.insertMultiple(updatedLocalIDs,
-          reason: FilesMigrationDB.modificationTimeUpdated);
+      await FilesMigrationDB.instance.insertMultiple(
+        updatedLocalIDs,
+        FilesMigrationDB.modificationTimeUpdated,
+      );
       final List<File> allFiles = [];
       allFiles.addAll(files);
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));

@@ -34,6 +34,9 @@ class FilesMigrationDB {
       '''
         ALTER TABLE $tableName ADD COLUMN $_columnReason TEXT;
       ''',
+      '''
+        UPDATE TABLE $tableName SET $_columnReason = $missingLocation;
+      ''',
     ];
   }
 
@@ -74,9 +77,9 @@ class FilesMigrationDB {
   }
 
   Future<void> insertMultiple(
-    List<String> fileLocalIDs, {
+    List<String> fileLocalIDs,
     String reason,
-  }) async {
+  ) async {
     final startTime = DateTime.now();
     final db = await instance.database;
     var batch = db.batch();
@@ -106,9 +109,9 @@ class FilesMigrationDB {
     );
   }
 
-  Future<int> deleteByLocalIDs(List<String> localIDs) async {
+  Future<void> deleteByLocalIDs(List<String> localIDs, String reason) async {
     if (localIDs.isEmpty) {
-      return -1;
+      return;
     }
     String inParam = "";
     for (final localID in localIDs) {
@@ -119,7 +122,7 @@ class FilesMigrationDB {
     db.rawQuery(
       '''
       DELETE FROM $tableName
-      WHERE $_columnLocalID IN ($inParam);
+      WHERE $_columnLocalID IN ($inParam) AND $_columnReason = $reason;
     ''',
     );
   }
@@ -130,9 +133,6 @@ class FilesMigrationDB {
   ) async {
     final db = await instance.database;
     String whereClause = '$_columnReason = "$reason"';
-    if (reason == missingLocation) {
-      whereClause = '($_columnReason = "$reason" OR $_columnReason IS NULL)';
-    }
     final rows = await db.query(
       tableName,
       limit: limit,
