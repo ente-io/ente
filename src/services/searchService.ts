@@ -23,7 +23,7 @@ import ObjectService from './machineLearning/objectService';
 import textService from './machineLearning/textService';
 import { FILE_TYPE } from 'constants/file';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
-import { Person } from 'types/machineLearning';
+import { Person, ThingClass } from 'types/machineLearning';
 
 const ENDPOINT = getEndpoint();
 
@@ -244,22 +244,22 @@ async function getThingSuggestion(searchPhrase: string) {
     return thingResults.map(
         (searchResult) =>
             ({
-                type: SuggestionType.LOCATION,
-                value: searchResult.files,
+                type: SuggestionType.THING,
+                value: searchResult,
                 label: searchResult.className,
             } as Suggestion)
     );
 }
 
 async function getWordSuggestion(searchPhrase: string) {
-    const wordResults = await searchThing(searchPhrase);
+    const wordResults = await searchText(searchPhrase);
 
     return wordResults.map(
         (searchResult) =>
             ({
-                type: SuggestionType.LOCATION,
-                value: searchResult.files,
-                label: searchResult.className,
+                type: SuggestionType.TEXT,
+                value: searchResult,
+                label: searchResult.word,
             } as Suggestion)
     );
 }
@@ -311,21 +311,15 @@ async function searchLocation(
 
 export async function searchThing(searchPhrase: string) {
     const thingClasses = await ObjectService.getAllThingClasses();
-    return thingClasses
-        .filter((thingClass) =>
-            thingClass.className.toLocaleLowerCase().includes(searchPhrase)
-        )
-        .map(({ className, files }) => ({ className, files }));
+    return thingClasses.filter((thingClass) =>
+        thingClass.className.toLocaleLowerCase().includes(searchPhrase)
+    );
 }
 
 export async function searchText(searchPhrase: string) {
     const texts = await textService.clusterWords();
     return texts
         .filter((text) => text.word.toLocaleLowerCase().includes(searchPhrase))
-        .map(({ word, files }) => ({
-            word,
-            files,
-        }))
         .slice(0, 4);
 }
 
@@ -385,5 +379,8 @@ function convertSuggestionToSearchQuery(option: Suggestion): Search {
 
         case SuggestionType.PERSON:
             return { person: option.value as Person };
+
+        case SuggestionType.THING:
+            return { thing: option.value as ThingClass };
     }
 }
