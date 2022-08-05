@@ -1,1 +1,1 @@
-class SearchResult {}
+abstract class SearchResult {}
