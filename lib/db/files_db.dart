@@ -729,7 +729,7 @@ class FilesDB {
     return files;
   }
 
-  Future<List<File>> getAllLocalFiles() async {
+  Future<List<File>> getUnUploadedLocalFiles() async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,

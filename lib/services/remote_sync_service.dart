@@ -224,7 +224,7 @@ class RemoteSyncService {
     List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
         foldersToBackUp.isEmpty) {
-      filesToBeUploaded = await _db.getAllLocalFiles();
+      filesToBeUploaded = await _db.getUnUploadedLocalFiles();
     } else {
       filesToBeUploaded =
           await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
