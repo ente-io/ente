@@ -30,30 +30,36 @@ class SearchResultsSuggestionsWidget extends StatelessWidget {
             ),
           ],
         ),
-        margin: const EdgeInsets.only(top: 8),
-        constraints:
-            BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: results.length + 1,
-          itemBuilder: (context, index) {
-            if (results.length == index) {
-              return Container(
-                height: 6,
-                color: Theme.of(context).colorScheme.searchResultsColor,
-              );
-            }
-            final result = results[index];
-            if (result is AlbumSearchResult) {
-              return CollectionResultWidget(result);
-            } else if (result is FileSearchResult) {
-              return FilenameResultWidget(result);
-            } else if (result is LocationSearchResult) {
-              return LocationResultsWidget(result);
-            } else {
-              throw StateError("Invalid/Unsupported value");
-            }
-          },
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          child: Container(
+            margin: const EdgeInsets.only(top: 8),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
+            ),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: results.length + 1,
+              itemBuilder: (context, index) {
+                if (results.length == index) {
+                  return Container(
+                    height: 6,
+                    color: Theme.of(context).colorScheme.searchResultsColor,
+                  );
+                }
+                final result = results[index];
+                if (result is AlbumSearchResult) {
+                  return CollectionResultWidget(result);
+                } else if (result is FileSearchResult) {
+                  return FilenameResultWidget(result);
+                } else if (result is LocationSearchResult) {
+                  return LocationResultsWidget(result);
+                } else {
+                  throw StateError("Invalid/Unsupported value");
+                }
+              },
+            ),
+          ),
         ),
       ),
     );
