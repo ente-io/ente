@@ -131,11 +131,6 @@ class MLIDbStorage {
                         .objectStore('configs')
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
-                if (oldVersion < 4) {
-                    await tx
-                        .objectStore('configs')
-                        .add(DEFAULT_ML_SYNC_CONFIG, ML_SYNC_CONFIG_NAME);
-                }
                 console.log(
                     `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`
                 );
