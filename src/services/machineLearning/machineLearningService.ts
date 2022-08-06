@@ -549,7 +549,6 @@ class MachineLearningService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
-        console.time(`object detection time taken ${fileContext.enteFile.id}`);
         const { newMlFile } = fileContext;
         console.time(`face detection time taken ${fileContext.enteFile.id}`);
         await FaceService.syncFileFaceDetections(syncContext, fileContext);
