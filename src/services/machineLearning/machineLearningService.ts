@@ -34,6 +34,7 @@ import PeopleService from './peopleService';
 import ObjectService from './objectService';
 // import TextService from './textService';
 import ReaderService from './readerService';
+import { logError } from 'utils/sentry';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -361,6 +362,7 @@ class MachineLearningService {
             syncContext.nSyncedFiles += 1;
             return mlFileData;
         } catch (e) {
+            logError(e, 'ML syncFile failed');
             let error = e;
             console.error('Error in ml sync, fileId: ', enteFile.id, error);
             if ('status' in error) {
@@ -409,30 +411,10 @@ class MachineLearningService {
             newMlFile.mlVersion = fileContext.oldMlFile.mlVersion;
         }
 
-        await ReaderService.getImageBitmap(syncContext, fileContext);
-
-        const faceDetection = async () => {
-            console.time(`face detection time taken ${enteFile.id}`);
-            await FaceService.syncFileFaceDetections(syncContext, fileContext);
-
-            if (newMlFile.faces && newMlFile.faces.length > 0) {
-                await FaceService.syncFileFaceCrops(syncContext, fileContext);
-
-                await FaceService.syncFileFaceAlignments(
-                    syncContext,
-                    fileContext
-                );
-
-                await FaceService.syncFileFaceEmbeddings(
-                    syncContext,
-                    fileContext
-                );
-            }
-            console.timeEnd(`face detection time taken ${enteFile.id}`);
-        };
         try {
+            await ReaderService.getImageBitmap(syncContext, fileContext);
             await Promise.all([
-                faceDetection(),
+                this.syncFaceDetections(syncContext, fileContext),
                 ObjectService.syncFileObjectDetections(
                     syncContext,
                     fileContext
@@ -447,6 +429,7 @@ class MachineLearningService {
             newMlFile.lastErrorMessage = undefined;
             await this.persistMLFileData(syncContext, newMlFile);
         } catch (e) {
+            logError(e, 'ml detection failed');
             newMlFile.mlVersion = oldMlFile.mlVersion;
             throw e;
         } finally {
@@ -560,6 +543,25 @@ class MachineLearningService {
             .map((f) => Array.from(f.embedding));
         syncContext.tsne = toTSNE(input, syncContext.config.tsne);
         console.log('tsne: ', syncContext.tsne);
+    }
+
+    private async syncFaceDetections(
+        syncContext: MLSyncContext,
+        fileContext: MLSyncFileContext
+    ) {
+        console.time(`object detection time taken ${fileContext.enteFile.id}`);
+        const { newMlFile } = fileContext;
+        console.time(`face detection time taken ${fileContext.enteFile.id}`);
+        await FaceService.syncFileFaceDetections(syncContext, fileContext);
+
+        if (newMlFile.faces && newMlFile.faces.length > 0) {
+            await FaceService.syncFileFaceCrops(syncContext, fileContext);
+
+            await FaceService.syncFileFaceAlignments(syncContext, fileContext);
+
+            await FaceService.syncFileFaceEmbeddings(syncContext, fileContext);
+        }
+        console.timeEnd(`face detection time taken ${fileContext.enteFile.id}`);
     }
 }
 
