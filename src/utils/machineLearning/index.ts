@@ -393,7 +393,7 @@ export async function getThumbnailImageBitmap(file: EnteFile, token: string) {
         token,
         ML_SYNC_DOWNLOAD_TIMEOUT_MS
     );
-    console.log('[MLService] Got thumbnail: ', file.id.toString(), fileUrl);
+    console.log('[MLService] Got thumbnail: ', file.id.toString());
 
     const thumbFile = await fetch(fileUrl);
 
