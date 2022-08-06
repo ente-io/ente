@@ -26,7 +26,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   @override
   Widget build(BuildContext context) {
     return Hero(
-      tag: "search icon",
+      tag: "search_icon",
       child: IconButton(
         onPressed: () {
           setState(
@@ -85,7 +85,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           borderSide: BorderSide.none,
                         ),
                         prefixIcon: Hero(
-                          tag: "search icon",
+                          tag: "search_icon",
                           child: Icon(
                             Icons.search,
                             color: Theme.of(context)

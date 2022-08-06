@@ -71,7 +71,7 @@ class CollectionResultWidget extends StatelessWidget {
                 ),
               ),
               Hero(
-                tag: "collectionSearch" +
+                tag: "collection_search" +
                     albumSearchResult.collectionWithThumbnail.thumbnail.tag(),
                 child: SizedBox(
                   height: 50,
@@ -90,7 +90,7 @@ class CollectionResultWidget extends StatelessWidget {
           context,
           CollectionPage(
             albumSearchResult.collectionWithThumbnail,
-            tagPrefix: "collectionSearch",
+            tagPrefix: "collection_search",
           ),
           forceCustomPageRoute: true,
         );
