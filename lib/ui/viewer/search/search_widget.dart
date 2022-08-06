@@ -58,78 +58,92 @@ class _SearchWidgetState extends State<SearchWidget> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Column(
-        children: [
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              //const SizedBox(width: 12),
-              Flexible(
-                child: Container(
-                  color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                  child: TextFormField(
-                    style: Theme.of(context).textTheme.subtitle1,
-                    decoration: InputDecoration(
-                      hintText: 'Search for albums, location, files...',
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1.5),
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Flexible(
+                  child: Container(
+                    color: Theme.of(context).colorScheme.defaultBackgroundColor,
+                    child: TextFormField(
+                      style: Theme.of(context).textTheme.subtitle1,
+                      decoration: InputDecoration(
+                        hintText: 'Search for albums, locations, files...',
+                        filled: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        border: UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        prefixIcon: Hero(
+                          tag: "search icon",
+                          child: Icon(
+                            Icons.search,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .iconColor
+                                .withOpacity(0.5),
+                          ),
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(
+                            Icons.close,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .iconColor
+                                .withOpacity(0.5),
+                          ),
+                        ),
                       ),
-                      border: UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: const Hero(
-                        tag: "search icon",
-                        child: Icon(Icons.search),
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(Icons.close),
-                      ),
-                    ),
-                    onChanged: (value) async {
-                      List<SearchResult> combinedResults = [];
+                      onChanged: (value) async {
+                        List<SearchResult> combinedResults = [];
 
-                      final collectionResults = await CollectionsService
-                          .instance
-                          .getFilteredCollectionsWithThumbnail(value);
-                      for (CollectionWithThumbnail collectionResult
-                          in collectionResults) {
-                        combinedResults
-                            .add(AlbumSearchResult(collectionResult));
-                      }
-                      final locationResults = await UserService.instance
-                          .getLocationsToMatchedFiles(value);
-                      for (final result in locationResults) {
-                        combinedResults.add(result);
-                      }
-                      final fileResults = await FilesDB.instance
-                          .getFilesOnFileNameSearch(value);
-                      for (File file in fileResults) {
-                        combinedResults.add(FileSearchResult(file));
-                      }
-                      setState(() {
-                        results.clear();
-                        results.addAll(combinedResults);
-                      });
-                    },
-                    autofocus: true,
+                        final collectionResults = await CollectionsService
+                            .instance
+                            .getFilteredCollectionsWithThumbnail(value);
+                        for (CollectionWithThumbnail collectionResult
+                            in collectionResults) {
+                          combinedResults
+                              .add(AlbumSearchResult(collectionResult));
+                        }
+                        final locationResults = await UserService.instance
+                            .getLocationsToMatchedFiles(value);
+                        for (final result in locationResults) {
+                          combinedResults.add(result);
+                        }
+                        final fileResults = await FilesDB.instance
+                            .getFilesOnFileNameSearch(value);
+                        for (File file in fileResults) {
+                          combinedResults.add(FileSearchResult(file));
+                        }
+                        setState(() {
+                          results.clear();
+                          results.addAll(combinedResults);
+                        });
+                      },
+                      autofocus: true,
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          results.isNotEmpty
-              ? SearchResultsSuggestionsWidget(results)
-              : const SizedBox.shrink(),
-        ],
+              ],
+            ),
+            results.isNotEmpty
+                ? SearchResultsSuggestionsWidget(results)
+                : const SizedBox.shrink(),
+          ],
+        ),
       ),
     );
   }

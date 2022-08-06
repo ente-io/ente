@@ -17,9 +17,7 @@ class CollectionResultWidget extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
-        // color: Theme.of(context).colorScheme.defaultBackgroundColor,
         color: Theme.of(context).colorScheme.searchResultsColor,
-
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
