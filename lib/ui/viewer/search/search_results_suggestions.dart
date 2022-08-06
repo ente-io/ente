@@ -26,7 +26,7 @@ class SearchResultsSuggestionsWidget extends StatelessWidget {
               color: Colors.black.withOpacity(0.2),
               spreadRadius: -3,
               blurRadius: 6,
-              offset: const Offset(0, 6),
+              offset: const Offset(0, 8),
             ),
           ],
         ),
