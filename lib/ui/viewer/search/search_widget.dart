@@ -108,29 +108,28 @@ class _SearchWidgetState extends State<SearchWidget> {
                         ),
                       ),
                       onChanged: (value) async {
-                        List<SearchResult> combinedResults = [];
+                        List<SearchResult> allResults = [];
 
                         final collectionResults = await CollectionsService
                             .instance
                             .getFilteredCollectionsWithThumbnail(value);
                         for (CollectionWithThumbnail collectionResult
                             in collectionResults) {
-                          combinedResults
-                              .add(AlbumSearchResult(collectionResult));
+                          allResults.add(AlbumSearchResult(collectionResult));
                         }
                         final locationResults = await UserService.instance
                             .getLocationsToMatchedFiles(value);
                         for (final result in locationResults) {
-                          combinedResults.add(result);
+                          allResults.add(result);
                         }
                         final fileResults = await FilesDB.instance
                             .getFilesOnFileNameSearch(value);
                         for (File file in fileResults) {
-                          combinedResults.add(FileSearchResult(file));
+                          allResults.add(FileSearchResult(file));
                         }
                         setState(() {
                           results.clear();
-                          results.addAll(combinedResults);
+                          results.addAll(allResults);
                         });
                       },
                       autofocus: true,
