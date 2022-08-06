@@ -591,38 +591,6 @@ class FilesDB {
     return FileLoadResult(result, files.length == limit);
   }
 
-  Future<FileLoadResult> getFilesByIdForLoactionSearch(
-    Set<int> fileIDs,
-    int startTime,
-    int endTime,
-    int ownerID, {
-    int limit,
-    bool asc,
-    int visibility = kVisibilityVisible,
-    Set<int> ignoredCollectionIDs,
-  }) async {
-    final db = await instance.database;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    String inParam = "";
-    for (final fileID in fileIDs) {
-      inParam += "'" + fileID.toString() + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
-    final results = await db.query(
-      table,
-      where:
-          '$columnUploadedFileID IN ($inParam) AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnOwnerID = ? AND $columnMMdVisibility = ?',
-      whereArgs: [startTime, endTime, ownerID, visibility],
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
-    );
-    final files = _convertToFiles(results);
-    List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
-  }
-
   Future<List<File>> getAllVideos() async {
     final db = await instance.database;
     final results = await db.query(

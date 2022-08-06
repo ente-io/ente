@@ -863,7 +863,7 @@ class UserService {
     }
   }
 
-  Future<List<LocationSearchResult>> getLocationsToMatchedFiles(
+  Future<List<LocationSearchResult>> getLocationsAndMatchedFiles(
     String query,
   ) async {
     try {

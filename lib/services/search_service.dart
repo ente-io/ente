@@ -13,11 +13,11 @@ class SearchService {
   Future<void> init() async {
     // Intention of delay is to give more CPU cycles to other tasks
     Future.delayed(const Duration(seconds: 5), () async {
+      // In case home screen loads before 5 seconds and user starts search, future will not be null
       _future == null
-          ? //in case home screen loads before 5 seconds and user starts search, future will not be null
-          FilesDB.instance
-              .getAllFilesFromDB()
-              .then((value) => _cachedFiles = value)
+          ? FilesDB.instance.getAllFilesFromDB().then((value) {
+              _cachedFiles = value;
+            })
           : null;
     });
 
@@ -39,7 +39,7 @@ class SearchService {
   }
 
   Future<List<File>> _fetchAllFiles() async {
-    _cachedFiles ??= await FilesDB.instance.getAllFilesFromDB();
+    _cachedFiles = await FilesDB.instance.getAllFilesFromDB();
     return _cachedFiles;
   }
 

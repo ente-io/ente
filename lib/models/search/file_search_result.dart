@@ -6,9 +6,3 @@ class FileSearchResult extends SearchResult {
 
   FileSearchResult(this.file);
 }
-
-// class FileSearchResults extends SearchResult {
-//   final List<FileSearchResult> fileSearchResult;
-
-//   FileSearchResults(this.fileSearchResult);
-// }

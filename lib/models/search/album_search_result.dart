@@ -6,9 +6,3 @@ class AlbumSearchResult extends SearchResult {
 
   AlbumSearchResult(this.collectionWithThumbnail);
 }
-
-// class AlbumSearchResults extends SearchResult {
-//   final List<AlbumSearchResult> albumSearchResults;
-
-//   AlbumSearchResults(this.albumSearchResults);
-// }

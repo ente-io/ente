@@ -19,8 +19,8 @@ class LocationCollectionPage extends StatelessWidget {
   LocationCollectionPage({
     this.locationAndFiles,
     this.tagPrefix = "location_search",
-    this.appBarType = GalleryType.archive,
-    this.overlayType = GalleryType.archive,
+    this.appBarType = GalleryType.searchResults,
+    this.overlayType = GalleryType.searchResults,
     Key key,
   }) : super(key: key);
 
@@ -59,7 +59,7 @@ class LocationCollectionPage extends StatelessWidget {
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
-      initialFiles: null,
+      initialFiles: [locationAndFiles.files[0]],
       footer: const SizedBox(height: 120),
     );
     return Scaffold(
