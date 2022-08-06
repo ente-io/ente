@@ -10,18 +10,25 @@ class SearchService {
   static final SearchService instance = SearchService._privateConstructor();
 
   Future<void> init() async {
-    _cachedFiles = await FilesDB.instance.getAllFilesFromDB();
+    // Intention of delay is to give more CPU cycles to other tasks
+    Future.delayed(const Duration(seconds: 5), () async {
+      FilesDB.instance
+          .getAllFilesFromDB()
+          .then((value) => _cachedFiles = value);
+    });
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _cachedFiles = null;
       getAllFiles();
     });
-
-    //need collectionUpdatedEvent listener?
   }
 
   Future<List<File>> getAllFiles() async {
     _cachedFiles ??= await FilesDB.instance.getAllFilesFromDB();
     return _cachedFiles;
+  }
+
+  void clearCachedFiles() {
+    _cachedFiles.clear();
   }
 }

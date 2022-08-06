@@ -895,7 +895,6 @@ class UserService {
       List<LocationSearchResult> locationsAndMatchedFiles = [];
 
       for (var locationAndBbox in matchedLocationNamesAndBboxs) {
-        // locationsToMatchedFiles.addAll({locationAndBbox['place']: []});
         locationsAndMatchedFiles
             .add(LocationSearchResult(locationAndBbox['place'], []));
         for (File file in allFiles) {
