@@ -18,7 +18,7 @@ class LocationCollectionPage extends StatelessWidget {
 
   LocationCollectionPage({
     this.locationAndFiles,
-    this.tagPrefix = "location_collection_page",
+    this.tagPrefix = "location_search",
     this.appBarType = GalleryType.archive,
     this.overlayType = GalleryType.archive,
     Key key,
@@ -47,7 +47,6 @@ class LocationCollectionPage extends StatelessWidget {
                 ) !=
                 null,
           ),
-      removalEventTypes: const {EventType.unarchived},
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>

@@ -52,10 +52,13 @@ class LocationResultsWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 50,
-                width: 50,
-                child: ThumbnailWidget(locationAndMatchedFiles.files[0]),
+              Hero(
+                tag: "location_search" + locationAndMatchedFiles.files[0].tag(),
+                child: SizedBox(
+                  height: 50,
+                  width: 50,
+                  child: ThumbnailWidget(locationAndMatchedFiles.files[0]),
+                ),
               ),
             ],
           ),

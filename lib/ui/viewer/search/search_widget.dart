@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
@@ -7,6 +6,7 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/search_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
@@ -122,15 +122,17 @@ class _SearchWidgetState extends State<SearchWidget> {
                         for (final result in locationResults) {
                           allResults.add(result);
                         }
-                        final fileResults = await FilesDB.instance
-                            .getFilesOnFileNameSearch(value);
+                        final fileResults = await SearchService.instance
+                            .getFilesOnFilenameSearch(value);
                         for (File file in fileResults) {
                           allResults.add(FileSearchResult(file));
                         }
-                        setState(() {
-                          results.clear();
-                          results.addAll(allResults);
-                        });
+                        if (mounted) {
+                          setState(() {
+                            results.clear();
+                            results.addAll(allResults);
+                          });
+                        }
                       },
                       autofocus: true,
                     ),

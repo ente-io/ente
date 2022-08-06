@@ -34,13 +34,26 @@ class SearchService {
     if (_future != null) {
       return _future;
     }
-    _future = fetchAllFiles();
+    _future = _fetchAllFiles();
     return _future;
   }
 
-  Future<List<File>> fetchAllFiles() async {
+  Future<List<File>> _fetchAllFiles() async {
     _cachedFiles ??= await FilesDB.instance.getAllFilesFromDB();
     return _cachedFiles;
+  }
+
+  Future<List<File>> getFilesOnFilenameSearch(String query) async {
+    List<File> matchedFiles = [];
+    List<File> files = await getAllFiles();
+    //<20 to limit number of files in result
+    for (int i = 0; (i < files.length) && (matchedFiles.length < 20); i++) {
+      File file = files[i];
+      if (file.title.contains(RegExp(query, caseSensitive: false))) {
+        matchedFiles.add(file);
+      }
+    }
+    return matchedFiles;
   }
 
   void clearCachedFiles() {
