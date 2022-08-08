@@ -100,12 +100,17 @@ function getUniqueSavePath(filename: string, directory: string): string {
     let n = 0;
     let exists;
     let uniqueFileSavePath;
-    const [filenameWithoutExtension, extension] =
-        splitFilenameAndExtension(filename);
+    const { name: filenameWithoutExtension, ext: extension } =
+        path.parse(filename);
     do {
         let fileNameWithNumberedSuffix;
         if (n > 0) {
-            fileNameWithNumberedSuffix = `${filenameWithoutExtension}(${n}).${extension}`;
+            fileNameWithNumberedSuffix = [
+                `${filenameWithoutExtension}(${n})`,
+                extension,
+            ]
+                .filter((x) => x) // filters out undefined/null values
+                .join('.');
         } else {
             fileNameWithNumberedSuffix = filename;
         }
@@ -114,14 +119,4 @@ function getUniqueSavePath(filename: string, directory: string): string {
         n++;
     } while (exists);
     return uniqueFileSavePath;
-}
-
-function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf('.');
-    if (lastDotPosition === -1) return [filename, null];
-    else
-        return [
-            filename.slice(0, lastDotPosition),
-            filename.slice(lastDotPosition + 1),
-        ];
 }
