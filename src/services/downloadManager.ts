@@ -3,7 +3,7 @@ import { getFileURL, getThumbnailURL } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
 import {
     generateStreamFromArrayBuffer,
-    convertForPreview,
+    getRenderableFileURL,
     createTypedObjectURL,
 } from 'utils/file';
 import HTTPService from './HTTPService';
@@ -89,7 +89,7 @@ class DownloadManager {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    return await convertForPreview(file, fileBlob);
+                    return await getRenderableFileURL(file, fileBlob);
                 } else {
                     return [
                         await createTypedObjectURL(

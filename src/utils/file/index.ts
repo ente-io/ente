@@ -299,17 +299,17 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
+export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
     switch (file.metadata.fileType) {
         case FILE_TYPE.IMAGE: {
-            const convertedBlob = await convertIfHEIC(
+            const convertedBlob = await getRenderableImage(
                 file.metadata.title,
                 fileBlob
             );
             return [URL.createObjectURL(convertedBlob)];
         }
         case FILE_TYPE.LIVE_PHOTO: {
-            const livePhoto = await convertLivePhotoForPreview(file, fileBlob);
+            const livePhoto = await getRenderableLivePhoto(file, fileBlob);
             return livePhoto.map((asset) => URL.createObjectURL(asset));
         }
         default:
@@ -317,39 +317,39 @@ export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
     }
 }
 
-async function convertLivePhotoForPreview(
+async function getRenderableLivePhoto(
     file: EnteFile,
     fileBlob: Blob
 ): Promise<Blob[]> {
     const originalName = fileNameWithoutExtension(file.metadata.title);
     const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-    let image = new Blob([motionPhoto.image]);
-
-    // can run conversion in parellel as video and image
-    // have different processes
-    const convertedVideo = ffmpegService.convertToMP4(
-        motionPhoto.video,
-        motionPhoto.videoNameTitle
-    );
-
-    image = await convertIfHEIC(motionPhoto.imageNameTitle, image);
-    const video = new Blob([await convertedVideo]);
-
-    return [image, video];
+    const imageBlob = new Blob([motionPhoto.image]);
+    return await Promise.all([
+        getRenderableImage(motionPhoto.imageNameTitle, imageBlob),
+        getPlayableVideo(motionPhoto.videoNameTitle, motionPhoto.video),
+    ]);
 }
 
-async function convertIfHEIC(fileName: string, fileBlob: Blob) {
-    if (await isFileHEIC(fileBlob, fileName)) {
+async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
+    const mp4ConvertedVideo = await ffmpegService.convertToMP4(
+        video,
+        videoNameTitle
+    );
+    return new Blob([mp4ConvertedVideo]);
+}
+
+async function getRenderableImage(fileName: string, imageBlob: Blob) {
+    if (await isFileHEIC(imageBlob, fileName)) {
         addLogLine(
             `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
-                fileBlob.size
+                imageBlob.size
             )}`
         );
-        const convertedFileBlob = await HEICConverter.convert(fileBlob);
+        const convertedFileBlob = await HEICConverter.convert(imageBlob);
         addLogLine(`${fileName} successfully converted`);
         return convertedFileBlob;
     } else {
-        return fileBlob;
+        return imageBlob;
     }
 }
 

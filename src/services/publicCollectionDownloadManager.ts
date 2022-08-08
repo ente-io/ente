@@ -5,7 +5,7 @@ import {
 import CryptoWorker from 'utils/crypto';
 import {
     generateStreamFromArrayBuffer,
-    convertForPreview,
+    getRenderableFileURL,
     createTypedObjectURL,
 } from 'utils/file';
 import HTTPService from './HTTPService';
@@ -117,7 +117,7 @@ class PublicCollectionDownloadManager {
                 );
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    return await convertForPreview(file, fileBlob);
+                    return await getRenderableFileURL(file, fileBlob);
                 } else {
                     return [
                         await createTypedObjectURL(
