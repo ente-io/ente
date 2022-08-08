@@ -97,26 +97,21 @@ function handleDownloads() {
 }
 
 function getUniqueSavePath(filename: string, directory: string): string {
-    let n = 0;
-    let exists;
-    let uniqueFileSavePath;
+    let uniqueFileSavePath = path.join(directory, filename);
     const { name: filenameWithoutExtension, ext: extension } =
         path.parse(filename);
-    do {
-        let fileNameWithNumberedSuffix;
-        if (n > 0) {
-            fileNameWithNumberedSuffix = [
-                `${filenameWithoutExtension}(${n})`,
-                extension,
-            ]
-                .filter((x) => x) // filters out undefined/null values
-                .join('.');
-        } else {
-            fileNameWithNumberedSuffix = filename;
-        }
-        uniqueFileSavePath = path.join(directory, fileNameWithNumberedSuffix);
-        exists = existsSync(uniqueFileSavePath);
+    let n = 0;
+    while (existsSync(uniqueFileSavePath)) {
         n++;
-    } while (exists);
+        // filter need to remove undefined extension from the array
+        // else [`${fileName}`, undefined].join(".") will lead to `${fileName}.` as joined string
+        const fileNameWithNumberedSuffix = [
+            `${filenameWithoutExtension}(${n})`,
+            extension,
+        ]
+            .filter((x) => x) // filters out undefined/null values
+            .join('.');
+        uniqueFileSavePath = path.join(directory, fileNameWithNumberedSuffix);
+    }
     return uniqueFileSavePath;
 }
