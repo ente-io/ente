@@ -145,7 +145,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   @override
   Widget build(BuildContext context) {
     if (_files.isEmpty) {
-      return Container();
+      return const SizedBox.shrink();
     }
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),

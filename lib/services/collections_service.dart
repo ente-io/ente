@@ -203,10 +203,12 @@ class CollectionsService {
         .toList();
     List<CollectionWithThumbnail> result = [];
     for (Collection collection in matchedCollection) {
-      result.add(CollectionWithThumbnail(
-        collection,
-        collectionIDToLatestFileMap[collection.id],
-      ));
+      result.add(
+        CollectionWithThumbnail(
+          collection,
+          collectionIDToLatestFileMap[collection.id],
+        ),
+      );
     }
     return result;
   }

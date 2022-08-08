@@ -19,56 +19,71 @@ class CollectionResultWidget extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Album',
-                  style: TextStyle(fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  c.collection.name,
-                  style: const TextStyle(fontSize: 18),
-                ),
-                FutureBuilder<int>(
-                  future: FilesDB.instance.collectionFileCount(
-                    c.collection.id,
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Album',
+                    style: TextStyle(fontSize: 12),
                   ),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data > 0) {
-                      int noOfMemories = snapshot.data;
-                      return RichText(
-                        text: TextSpan(
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.defaultTextColor,
-                          ),
-                          children: [
-                            TextSpan(text: noOfMemories.toString()),
-                            TextSpan(
-                              text: noOfMemories != 1 ? ' memories' : ' memory',
+                  const SizedBox(height: 8),
+                  Text(
+                    c.collection.name,
+                    style: const TextStyle(fontSize: 18),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  FutureBuilder<int>(
+                    future: FilesDB.instance.collectionFileCount(
+                      c.collection.id,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data > 0) {
+                        int noOfMemories = snapshot.data;
+                        return RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .defaultTextColor,
                             ),
-                          ],
-                        ),
-                      );
-                    } else {
-                      return const SizedBox.shrink();
-                    }
-                  },
-                ),
-              ],
+                            children: [
+                              TextSpan(text: noOfMemories.toString()),
+                              TextSpan(
+                                text:
+                                    noOfMemories != 1 ? ' memories' : ' memory',
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
-            SizedBox(
-              height: 50,
-              width: 50,
-              child: ThumbnailWidget(c.thumbnail),
+            Hero(
+              tag: "collectionSearch" + c.thumbnail.tag(),
+              child: SizedBox(
+                height: 50,
+                width: 50,
+                child: ThumbnailWidget(c.thumbnail),
+              ),
             )
           ],
         ),
       ),
       onTap: () {
-        routeToPage(context, CollectionPage(c), forceCustomPageRoute: true);
+        routeToPage(
+          context,
+          CollectionPage(
+            c,
+            tagPrefix: "collectionSearch",
+          ),
+          forceCustomPageRoute: true,
+        );
       },
     );
   }
