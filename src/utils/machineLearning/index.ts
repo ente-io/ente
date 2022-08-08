@@ -355,7 +355,7 @@ async function getOriginalConvertedFile(
 ) {
     let fileBlob = await getOriginalImageFile(file, token, enteWorker, queue);
     if (needsConversionForPreview(file)) {
-        fileBlob = await convertForPreview(file, fileBlob)[0];
+        fileBlob = (await convertForPreview(file, fileBlob))[0];
     }
 
     return fileBlob;
