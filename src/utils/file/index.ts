@@ -345,9 +345,9 @@ async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 imageBlob.size
             )}`
         );
-        const convertedFileBlob = await HEICConverter.convert(imageBlob);
+        const convertedImageBlob = await HEICConverter.convert(imageBlob);
         addLogLine(`${fileName} successfully converted`);
-        return convertedFileBlob;
+        return convertedImageBlob;
     } else {
         return imageBlob;
     }
