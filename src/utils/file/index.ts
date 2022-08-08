@@ -353,9 +353,13 @@ async function convertIfHEIC(fileName: string, fileBlob: Blob) {
     }
 }
 
-async function isFileHEIC(fileBlob: Blob, fileName: string) {
+export async function isFileHEIC(fileBlob: Blob, fileName: string) {
     const tempFile = new File([fileBlob], fileName);
     const { exactType } = await getFileType(tempFile);
+    return isExactTypeHEIC(exactType);
+}
+
+export function isExactTypeHEIC(exactType: string) {
     return (
         exactType.toLowerCase().endsWith(TYPE_HEIC) ||
         exactType.toLowerCase().endsWith(TYPE_HEIF)
