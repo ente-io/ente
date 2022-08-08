@@ -497,10 +497,10 @@ export async function needsConversionForPreview(
     file: EnteFile,
     fileBlob: Blob
 ) {
+    const isHEIC = await isFileHEIC(fileBlob, file.metadata.title);
     return (
         file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
-        (file.metadata.fileType === FILE_TYPE.IMAGE &&
-            (await isFileHEIC(fileBlob, file.metadata.title)))
+        (file.metadata.fileType === FILE_TYPE.IMAGE && isHEIC)
     );
 }
 
