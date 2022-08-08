@@ -4,6 +4,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
+import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/search_service.dart';
@@ -71,7 +72,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                     child: TextFormField(
                       style: Theme.of(context).textTheme.subtitle1,
                       decoration: InputDecoration(
-                        hintText: 'Search for albums, locations, files...',
+                        hintText: 'Search for albums, locations & files',
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -108,7 +109,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                         ),
                       ),
                       onChanged: (value) async {
-                        List<SearchResult> allResults = [];
+                        final List<SearchResult> allResults = [];
 
                         final collectionResults = await CollectionsService
                             .instance
@@ -119,7 +120,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                         }
                         final locationResults = await UserService.instance
                             .getLocationsAndMatchedFiles(value);
-                        for (final result in locationResults) {
+                        for (LocationSearchResult result in locationResults) {
                           allResults.add(result);
                         }
                         final fileResults = await SearchService.instance
