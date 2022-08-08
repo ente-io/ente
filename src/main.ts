@@ -6,6 +6,7 @@ import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 import { isDev } from './utils/common';
+import { existsSync } from 'fs';
 
 if (isDev) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -89,10 +90,40 @@ function setupTrayItem() {
 
 function handleDownloads() {
     mainWindow.webContents.session.on('will-download', (event, item) => {
-        const savePath = path.join(
-            app.getPath('downloads'),
-            item.getFilename()
-        );
-        item.setSavePath(savePath);
+        item.setSavePath(getUniqueSavePath(item));
     });
+}
+
+function getUniqueSavePath(item: Electron.DownloadItem): string {
+    let n = 0;
+    let exists;
+    let uniqueFileSavePath;
+    const [filenameWithoutExtension, extension] = splitFilenameAndExtension(
+        item.getFilename()
+    );
+    do {
+        let fileNameWithNumberedSuffix;
+        if (n > 0) {
+            fileNameWithNumberedSuffix = `${filenameWithoutExtension}(${n}).${extension}`;
+        } else {
+            fileNameWithNumberedSuffix = item.getFilename();
+        }
+        uniqueFileSavePath = path.join(
+            app.getPath('downloads'),
+            fileNameWithNumberedSuffix
+        );
+        exists = existsSync(uniqueFileSavePath);
+        n++;
+    } while (exists);
+    return uniqueFileSavePath;
+}
+
+function splitFilenameAndExtension(filename: string): [string, string] {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return [filename, null];
+    else
+        return [
+            filename.slice(0, lastDotPosition),
+            filename.slice(lastDotPosition + 1),
+        ];
 }
