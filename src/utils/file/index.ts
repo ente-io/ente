@@ -132,14 +132,6 @@ function downloadUsingAnchor(link: string, name: string) {
     a.remove();
 }
 
-export function isFileHEIC(mimeType: string) {
-    return (
-        mimeType &&
-        (mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
-            mimeType.toLowerCase().endsWith(TYPE_HEIF))
-    );
-}
-
 export function sortFilesIntoCollections(files: EnteFile[]) {
     const collectionWiseFiles = new Map<number, EnteFile[]>([
         [ARCHIVE_SECTION, []],
@@ -307,46 +299,71 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function convertForPreview(
+export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
+    switch (file.metadata.fileType) {
+        case FILE_TYPE.IMAGE: {
+            const convertedBlob = await getRenderableImage(
+                file.metadata.title,
+                fileBlob
+            );
+            return [URL.createObjectURL(convertedBlob)];
+        }
+        case FILE_TYPE.LIVE_PHOTO: {
+            const livePhoto = await getRenderableLivePhoto(file, fileBlob);
+            return livePhoto.map((asset) => URL.createObjectURL(asset));
+        }
+        default:
+            return [URL.createObjectURL(fileBlob)];
+    }
+}
+
+async function getRenderableLivePhoto(
     file: EnteFile,
     fileBlob: Blob
 ): Promise<Blob[]> {
-    const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
-        const mimeType = (
-            await getFileType(new File([fileBlob], file.metadata.title))
-        ).exactType;
-        if (isFileHEIC(mimeType)) {
-            addLogLine(
-                `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
-                    fileBlob.size
-                )}`
-            );
-            fileBlob = await HEICConverter.convert(fileBlob);
-            addLogLine(`${fileName} successfully converted`);
-        }
-        return fileBlob;
-    };
+    const originalName = fileNameWithoutExtension(file.metadata.title);
+    const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+    const imageBlob = new Blob([motionPhoto.image]);
+    return await Promise.all([
+        getRenderableImage(motionPhoto.imageNameTitle, imageBlob),
+        getPlayableVideo(motionPhoto.videoNameTitle, motionPhoto.video),
+    ]);
+}
 
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const originalName = fileNameWithoutExtension(file.metadata.title);
-        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        let image = new Blob([motionPhoto.image]);
+async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
+    const mp4ConvertedVideo = await ffmpegService.convertToMP4(
+        video,
+        videoNameTitle
+    );
+    return new Blob([mp4ConvertedVideo]);
+}
 
-        // can run conversion in parellel as video and image
-        // have different processes
-        const convertedVideo = ffmpegService.convertToMP4(
-            motionPhoto.video,
-            motionPhoto.videoNameTitle
+async function getRenderableImage(fileName: string, imageBlob: Blob) {
+    if (await isFileHEIC(imageBlob, fileName)) {
+        addLogLine(
+            `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
+                imageBlob.size
+            )}`
         );
-
-        image = await convertIfHEIC(motionPhoto.imageNameTitle, image);
-        const video = new Blob([await convertedVideo]);
-
-        return [image, video];
+        const convertedImageBlob = await HEICConverter.convert(imageBlob);
+        addLogLine(`${fileName} successfully converted`);
+        return convertedImageBlob;
+    } else {
+        return imageBlob;
     }
+}
 
-    fileBlob = await convertIfHEIC(file.metadata.title, fileBlob);
-    return [fileBlob];
+export async function isFileHEIC(fileBlob: Blob, fileName: string) {
+    const tempFile = new File([fileBlob], fileName);
+    const { exactType } = await getFileType(tempFile);
+    return isExactTypeHEIC(exactType);
+}
+
+export function isExactTypeHEIC(exactType: string) {
+    return (
+        exactType.toLowerCase().endsWith(TYPE_HEIC) ||
+        exactType.toLowerCase().endsWith(TYPE_HEIF)
+    );
 }
 
 export async function changeFilesVisibility(
@@ -476,17 +493,15 @@ export async function downloadFiles(files: EnteFile[]) {
     }
 }
 
-export function needsConversionForPreview(file: EnteFile) {
-    const fileExtension = splitFilenameAndExtension(file.metadata.title)[1];
-    if (
+export async function needsConversionForPreview(
+    file: EnteFile,
+    fileBlob: Blob
+) {
+    const isHEIC = await isFileHEIC(fileBlob, file.metadata.title);
+    return (
         file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
-        (file.metadata.fileType === FILE_TYPE.IMAGE &&
-            isFileHEIC(fileExtension))
-    ) {
-        return true;
-    } else {
-        return false;
-    }
+        (file.metadata.fileType === FILE_TYPE.IMAGE && isHEIC)
+    );
 }
 
 export const isLivePhoto = (file: EnteFile) =>

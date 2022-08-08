@@ -3,7 +3,11 @@ import {
     getPublicCollectionThumbnailURL,
 } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
-import { generateStreamFromArrayBuffer, convertForPreview } from 'utils/file';
+import {
+    generateStreamFromArrayBuffer,
+    getRenderableFileURL,
+    createTypedObjectURL,
+} from 'utils/file';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 
@@ -113,15 +117,15 @@ class PublicCollectionDownloadManager {
                 );
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    const convertedBlobs = await convertForPreview(
-                        file,
-                        fileBlob
-                    );
-                    return convertedBlobs.map((blob) =>
-                        URL.createObjectURL(blob)
-                    );
+                    return await getRenderableFileURL(file, fileBlob);
+                } else {
+                    return [
+                        await createTypedObjectURL(
+                            fileBlob,
+                            file.metadata.title
+                        ),
+                    ];
                 }
-                return [URL.createObjectURL(fileBlob)];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
                 this.fileObjectURLPromise.set(fileKey, getFilePromise());

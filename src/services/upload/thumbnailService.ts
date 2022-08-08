@@ -4,7 +4,7 @@ import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import FFmpegService from 'services/ffmpeg/ffmpegService';
 import { convertBytesToHumanReadable } from 'utils/file/size';
-import { isFileHEIC } from 'utils/file';
+import { isExactTypeHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
 import HEICConverter from 'services/heicConverter/heicConverterService';
@@ -37,7 +37,7 @@ export async function generateThumbnail(
                 file = new File([await file.blob()], file.name);
             }
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-                const isHEIC = isFileHEIC(fileTypeInfo.exactType);
+                const isHEIC = isExactTypeHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(file, isHEIC);
             } else {
                 try {
