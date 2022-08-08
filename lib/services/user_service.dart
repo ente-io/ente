@@ -11,17 +11,13 @@ import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/delete_account.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
-import 'package:photos/models/location.dart';
 import 'package:photos/models/public_key.dart';
-import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/sessions.dart';
 import 'package:photos/models/set_keys_request.dart';
 import 'package:photos/models/set_recovery_key_request.dart';
 import 'package:photos/models/user_details.dart';
-import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/ott_verification_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
@@ -861,70 +857,5 @@ class UserService {
     } else {
       await Configuration.instance.setToken(response.data["token"]);
     }
-  }
-
-  Future<List<LocationSearchResult>> getLocationsAndMatchedFiles(
-    String query,
-  ) async {
-    try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/search/location",
-        queryParameters: {"query": query, "limit": 4},
-        options: Options(
-          headers: {"X-Auth-Token": _config.getToken()},
-        ),
-      );
-
-      List<dynamic> matchedLocationNamesAndBboxs =
-          response.data['results'] ?? [];
-
-      for (dynamic result in matchedLocationNamesAndBboxs) {
-        result.update(
-          'bbox',
-          (value) => {
-            /*bbox in response is of order (0-lng,1-lat,2-lng,3-lat) and southwest
-           coordinate is (0,1)(lng,lat) and northeast is (2,3)(lng,lat).
-           For location(), the order is location(lat,lng) */
-            "southWestCoordinates": Location(value[1], value[0]),
-            "northEastCoordinates": Location(value[3], value[2])
-          },
-        );
-      }
-
-      List<File> allFiles = await SearchService.instance.getAllFiles();
-      List<LocationSearchResult> locationsAndMatchedFiles = [];
-
-      for (var locationAndBbox in matchedLocationNamesAndBboxs) {
-        locationsAndMatchedFiles
-            .add(LocationSearchResult(locationAndBbox['place'], []));
-        for (File file in allFiles) {
-          if (_isValidLocation(file.location)) {
-            if (file.location.latitude >
-                    locationAndBbox['bbox']['southWestCoordinates'].latitude &&
-                file.location.longitude >
-                    locationAndBbox['bbox']['southWestCoordinates'].longitude &&
-                file.location.latitude <
-                    locationAndBbox['bbox']['northEastCoordinates'].latitude &&
-                file.location.longitude <
-                    locationAndBbox['bbox']['northEastCoordinates'].longitude) {
-              locationsAndMatchedFiles.last.files.add(file);
-            }
-          }
-        }
-      }
-      locationsAndMatchedFiles.removeWhere((e) => e.files.isEmpty);
-      return locationsAndMatchedFiles;
-    } on DioError catch (e) {
-      _logger.info(e);
-      rethrow;
-    }
-  }
-
-  bool _isValidLocation(Location location) {
-    return location != null &&
-        location.latitude != null &&
-        location.latitude != 0 &&
-        location.longitude != null &&
-        location.longitude != 0;
   }
 }

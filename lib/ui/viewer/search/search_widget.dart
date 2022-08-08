@@ -8,7 +8,6 @@ import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
 class SearchIconWidget extends StatefulWidget {
@@ -118,7 +117,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                             in collectionResults) {
                           allResults.add(AlbumSearchResult(collectionResult));
                         }
-                        final locationResults = await UserService.instance
+                        final locationResults = await SearchService.instance
                             .getLocationsAndMatchedFiles(value);
                         for (LocationSearchResult result in locationResults) {
                           allResults.add(result);
