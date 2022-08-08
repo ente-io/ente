@@ -89,7 +89,10 @@ function setupTrayItem() {
 
 function handleDownloads() {
     mainWindow.webContents.session.on('will-download', (event, item) => {
-        const savePath = app.getPath('downloads') + '/' + item.getFilename();
+        const savePath = path.join(
+            app.getPath('downloads'),
+            item.getFilename()
+        );
         item.setSavePath(savePath);
     });
 }
