@@ -65,17 +65,34 @@ if (!gotTheLock) {
             if (BrowserWindow.getAllWindows().length === 0) createWindow();
         });
 
-        const trayImgPath = isDev
-            ? 'build/taskbar-icon.png'
-            : path.join(process.resourcesPath, 'taskbar-icon.png');
-        const trayIcon = nativeImage.createFromPath(trayImgPath);
-        tray = new Tray(trayIcon);
-        tray.setToolTip('ente');
-        tray.setContextMenu(buildContextMenu(mainWindow));
-
+        setupTrayItem();
         setupIpcComs(tray, mainWindow);
-        if (!isDev) {
-            AppUpdater.checkForUpdate(tray, mainWindow);
-        }
+        handleUpdates();
+        handleDownloads();
+    });
+}
+function handleUpdates() {
+    if (!isDev) {
+        AppUpdater.checkForUpdate(tray, mainWindow);
+    }
+}
+
+function setupTrayItem() {
+    const trayImgPath = isDev
+        ? 'build/taskbar-icon.png'
+        : path.join(process.resourcesPath, 'taskbar-icon.png');
+    const trayIcon = nativeImage.createFromPath(trayImgPath);
+    tray = new Tray(trayIcon);
+    tray.setToolTip('ente');
+    tray.setContextMenu(buildContextMenu(mainWindow));
+}
+
+function handleDownloads() {
+    mainWindow.webContents.session.on('will-download', (event, item) => {
+        const savePath = path.join(
+            app.getPath('downloads'),
+            item.getFilename()
+        );
+        item.setSavePath(savePath);
     });
 }
