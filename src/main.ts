@@ -90,28 +90,26 @@ function setupTrayItem() {
 
 function handleDownloads() {
     mainWindow.webContents.session.on('will-download', (event, item) => {
-        item.setSavePath(getUniqueSavePath(item));
+        item.setSavePath(
+            getUniqueSavePath(item.getFilename(), app.getPath('downloads'))
+        );
     });
 }
 
-function getUniqueSavePath(item: Electron.DownloadItem): string {
+function getUniqueSavePath(filename: string, directory: string): string {
     let n = 0;
     let exists;
     let uniqueFileSavePath;
-    const [filenameWithoutExtension, extension] = splitFilenameAndExtension(
-        item.getFilename()
-    );
+    const [filenameWithoutExtension, extension] =
+        splitFilenameAndExtension(filename);
     do {
         let fileNameWithNumberedSuffix;
         if (n > 0) {
             fileNameWithNumberedSuffix = `${filenameWithoutExtension}(${n}).${extension}`;
         } else {
-            fileNameWithNumberedSuffix = item.getFilename();
+            fileNameWithNumberedSuffix = filename;
         }
-        uniqueFileSavePath = path.join(
-            app.getPath('downloads'),
-            fileNameWithNumberedSuffix
-        );
+        uniqueFileSavePath = path.join(directory, fileNameWithNumberedSuffix);
         exists = existsSync(uniqueFileSavePath);
         n++;
     } while (exists);
