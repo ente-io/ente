@@ -6,6 +6,7 @@ import setupIpcComs from './utils/ipcComms';
 import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
 import { isDev } from './utils/common';
+import { existsSync } from 'fs';
 
 if (isDev) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -89,10 +90,28 @@ function setupTrayItem() {
 
 function handleDownloads() {
     mainWindow.webContents.session.on('will-download', (event, item) => {
-        const savePath = path.join(
-            app.getPath('downloads'),
-            item.getFilename()
+        item.setSavePath(
+            getUniqueSavePath(item.getFilename(), app.getPath('downloads'))
         );
-        item.setSavePath(savePath);
     });
+}
+
+function getUniqueSavePath(filename: string, directory: string): string {
+    let uniqueFileSavePath = path.join(directory, filename);
+    const { name: filenameWithoutExtension, ext: extension } =
+        path.parse(filename);
+    let n = 0;
+    while (existsSync(uniqueFileSavePath)) {
+        n++;
+        // filter need to remove undefined extension from the array
+        // else [`${fileName}`, undefined].join(".") will lead to `${fileName}.` as joined string
+        const fileNameWithNumberedSuffix = [
+            `${filenameWithoutExtension}(${n})`,
+            extension,
+        ]
+            .filter((x) => x) // filters out undefined/null values
+            .join('.');
+        uniqueFileSavePath = path.join(directory, fileNameWithNumberedSuffix);
+    }
+    return uniqueFileSavePath;
 }
