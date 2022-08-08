@@ -132,14 +132,6 @@ function downloadUsingAnchor(link: string, name: string) {
     a.remove();
 }
 
-export function isFileHEIC(mimeType: string) {
-    return (
-        mimeType &&
-        (mimeType.toLowerCase().endsWith(TYPE_HEIC) ||
-            mimeType.toLowerCase().endsWith(TYPE_HEIF))
-    );
-}
-
 export function sortFilesIntoCollections(files: EnteFile[]) {
     const collectionWiseFiles = new Map<number, EnteFile[]>([
         [ARCHIVE_SECTION, []],
@@ -307,46 +299,67 @@ export function generateStreamFromArrayBuffer(data: Uint8Array) {
     });
 }
 
-export async function convertForPreview(
+export async function convertForPreview(file: EnteFile, fileBlob: Blob) {
+    switch (file.metadata.fileType) {
+        case FILE_TYPE.IMAGE: {
+            const convertedBlob = await convertIfHEIC(
+                file.metadata.title,
+                fileBlob
+            );
+            return [URL.createObjectURL(convertedBlob)];
+        }
+        case FILE_TYPE.LIVE_PHOTO: {
+            const livePhoto = await convertLivePhotoForPreview(file, fileBlob);
+            return livePhoto.map((asset) => URL.createObjectURL(asset));
+        }
+        default:
+            return [URL.createObjectURL(fileBlob)];
+    }
+}
+
+async function convertLivePhotoForPreview(
     file: EnteFile,
     fileBlob: Blob
 ): Promise<Blob[]> {
-    const convertIfHEIC = async (fileName: string, fileBlob: Blob) => {
-        const mimeType = (
-            await getFileType(new File([fileBlob], file.metadata.title))
-        ).exactType;
-        if (isFileHEIC(mimeType)) {
-            addLogLine(
-                `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
-                    fileBlob.size
-                )}`
-            );
-            fileBlob = await HEICConverter.convert(fileBlob);
-            addLogLine(`${fileName} successfully converted`);
-        }
-        return fileBlob;
-    };
+    const originalName = fileNameWithoutExtension(file.metadata.title);
+    const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+    let image = new Blob([motionPhoto.image]);
 
-    if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const originalName = fileNameWithoutExtension(file.metadata.title);
-        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
-        let image = new Blob([motionPhoto.image]);
+    // can run conversion in parellel as video and image
+    // have different processes
+    const convertedVideo = ffmpegService.convertToMP4(
+        motionPhoto.video,
+        motionPhoto.videoNameTitle
+    );
 
-        // can run conversion in parellel as video and image
-        // have different processes
-        const convertedVideo = ffmpegService.convertToMP4(
-            motionPhoto.video,
-            motionPhoto.videoNameTitle
+    image = await convertIfHEIC(motionPhoto.imageNameTitle, image);
+    const video = new Blob([await convertedVideo]);
+
+    return [image, video];
+}
+
+async function convertIfHEIC(fileName: string, fileBlob: Blob) {
+    if (await isFileHEIC(fileBlob, fileName)) {
+        addLogLine(
+            `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
+                fileBlob.size
+            )}`
         );
-
-        image = await convertIfHEIC(motionPhoto.imageNameTitle, image);
-        const video = new Blob([await convertedVideo]);
-
-        return [image, video];
+        const convertedFileBlob = await HEICConverter.convert(fileBlob);
+        addLogLine(`${fileName} successfully converted`);
+        return convertedFileBlob;
+    } else {
+        return fileBlob;
     }
+}
 
-    fileBlob = await convertIfHEIC(file.metadata.title, fileBlob);
-    return [fileBlob];
+async function isFileHEIC(fileBlob: Blob, fileName: string) {
+    const tempFile = new File([fileBlob], fileName);
+    const { exactType } = await getFileType(tempFile);
+    return (
+        exactType.toLowerCase().endsWith(TYPE_HEIC) ||
+        exactType.toLowerCase().endsWith(TYPE_HEIF)
+    );
 }
 
 export async function changeFilesVisibility(
@@ -476,17 +489,15 @@ export async function downloadFiles(files: EnteFile[]) {
     }
 }
 
-export function needsConversionForPreview(file: EnteFile) {
-    const fileExtension = splitFilenameAndExtension(file.metadata.title)[1];
-    if (
+export async function needsConversionForPreview(
+    file: EnteFile,
+    fileBlob: Blob
+) {
+    return (
         file.metadata.fileType === FILE_TYPE.LIVE_PHOTO ||
         (file.metadata.fileType === FILE_TYPE.IMAGE &&
-            isFileHEIC(fileExtension))
-    ) {
-        return true;
-    } else {
-        return false;
-    }
+            (await isFileHEIC(fileBlob, file.metadata.title)))
+    );
 }
 
 export const isLivePhoto = (file: EnteFile) =>

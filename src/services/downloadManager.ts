@@ -89,23 +89,15 @@ class DownloadManager {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
                 if (forPreview) {
-                    const convertedBlobs = await convertForPreview(
-                        file,
-                        fileBlob
-                    );
-                    return await Promise.all(
-                        convertedBlobs.map(
-                            async (blob) =>
-                                await createTypedObjectURL(
-                                    blob,
-                                    file.metadata.title
-                                )
-                        )
-                    );
+                    return await convertForPreview(file, fileBlob);
+                } else {
+                    return [
+                        await createTypedObjectURL(
+                            fileBlob,
+                            file.metadata.title
+                        ),
+                    ];
                 }
-                return [
-                    await createTypedObjectURL(fileBlob, file.metadata.title),
-                ];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
                 this.fileObjectURLPromise.set(fileKey, getFilePromise());
