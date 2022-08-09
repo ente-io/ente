@@ -8,7 +8,7 @@ import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
 import { ComlinkWorker } from 'utils/comlink';
 import isElectron from 'is-electron';
-import desktopService from 'services/desktopService';
+import safeStorageService from 'services/safeStorageService';
 
 export interface B64EncryptionResult {
     encryptedData: string;
@@ -103,7 +103,7 @@ export const saveKeyInSessionStore = async (
     const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
     if (isElectron() && !fromDesktop) {
-        desktopService.setEncryptionKey(key);
+        safeStorageService.setEncryptionKey(key);
     }
 };
 

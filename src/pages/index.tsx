@@ -13,7 +13,7 @@ import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import { EnteLogo } from 'components/EnteLogo';
 import isElectron from 'is-electron';
-import desktopService from 'services/desktopService';
+import safeStorageService from 'services/safeStorageService';
 import { saveKeyInSessionStore } from 'utils/crypto';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 
@@ -128,7 +128,7 @@ export default function LandingPage() {
         const user = getData(LS_KEYS.USER);
         let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key && isElectron()) {
-            key = await desktopService.getEncryptionKey();
+            key = await safeStorageService.getEncryptionKey();
             if (key) {
                 await saveKeyInSessionStore(
                     SESSION_KEYS.ENCRYPTION_KEY,
