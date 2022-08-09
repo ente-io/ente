@@ -5,7 +5,7 @@ export interface Log {
     logLine: string;
 }
 
-const MAX_LOG_LINES = 1000;
+const MAX_LOG_LINES = 10000;
 
 export const isFirstLogin = () =>
     getData(LS_KEYS.IS_FIRST_LOGIN)?.status ?? false;

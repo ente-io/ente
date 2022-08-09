@@ -19,7 +19,7 @@ import {
     getMLSearchConfig,
     updateMLSearchConfig,
 } from 'utils/machineLearning/config';
-import { addLogLine } from 'utils/logging';
+import { addLogLine, pipeConsoleLogsToDebugLogs } from 'utils/logging';
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
@@ -105,12 +105,9 @@ export default function App({ Component, err }) {
             process.env.NODE_ENV !== 'production'
         ) {
             console.warn('Progressive Web App support is disabled');
-            return;
-        }
-        // const wb = new Workbox('sw.js', { scope: '/' });
-        // wb.register();
-
-        if ('serviceWorker' in navigator) {
+        } else if ('serviceWorker' in navigator) {
+            // const wb = new Workbox('sw.js', { scope: '/' });
+            // wb.register();
             navigator.serviceWorker.onmessage = (event) => {
                 if (event.data.action === 'upload-files') {
                     const files = event.data.files;
@@ -133,6 +130,7 @@ export default function App({ Component, err }) {
                 return Promise.reject(error);
             }
         );
+        pipeConsoleLogsToDebugLogs();
     }, []);
 
     useEffect(() => {
