@@ -1,4 +1,4 @@
-import 'package:photos/models/search/place_and_bbox.dart';
+import 'package:photos/models/search/location_misc./place_and_bbox.dart';
 
 class ResultsToListOfPlaceAndBbox {
   List<PlaceAndBbox> results;
