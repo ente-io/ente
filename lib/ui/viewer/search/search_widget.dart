@@ -6,7 +6,6 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
-import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
 
@@ -110,8 +109,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       onChanged: (value) async {
                         final List<SearchResult> allResults = [];
 
-                        final collectionResults = await CollectionsService
-                            .instance
+                        final collectionResults = await SearchService.instance
                             .getFilteredCollectionsWithThumbnail(value);
                         for (CollectionWithThumbnail collectionResult
                             in collectionResults) {

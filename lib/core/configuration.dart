@@ -159,7 +159,7 @@ class Configuration {
     FavoritesService.instance.clearCache();
     MemoriesService.instance.clearCache();
     BillingService.instance.clearCache();
-    SearchService.instance.clearCachedFiles();
+    SearchService.instance.clearCache();
     Bus.instance.fire(UserLoggedOutEvent());
   }
 

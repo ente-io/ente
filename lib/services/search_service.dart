@@ -5,11 +5,14 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/collection.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/search/location_misc./place_and_bbox.dart';
 import 'package:photos/models/search/location_misc./results_to_list_of_place_and_bbox.dart';
 import 'package:photos/models/search/location_search_result.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 
 class SearchService {
@@ -18,6 +21,7 @@ class SearchService {
   final _dio = Network.instance.getDio();
   final _config = Configuration.instance;
   final _logger = Logger((UserService).toString());
+  final _collectionService = CollectionsService.instance;
 
   SearchService._privateConstructor();
   static final SearchService instance = SearchService._privateConstructor();
@@ -68,7 +72,7 @@ class SearchService {
     return matchedFiles;
   }
 
-  void clearCachedFiles() {
+  void clearCache() {
     _cachedFiles.clear();
   }
 
@@ -121,5 +125,52 @@ class SearchService {
         location.latitude != 0 &&
         location.longitude != null &&
         location.longitude != 0;
+  }
+
+  // getFilteredCollectionsWithThumbnail removes deleted or archived or
+  // collections which don't have a file from search result
+  Future<List<CollectionWithThumbnail>> getFilteredCollectionsWithThumbnail(
+    String query,
+  ) async {
+    // identify collections which have at least one file as we don't display
+    // empty collection
+
+    List<File> latestCollectionFiles =
+        await _collectionService.getLatestCollectionFiles();
+    Map<int, File> collectionIDToLatestFileMap = {
+      for (File file in latestCollectionFiles) file.collectionID: file
+    };
+
+    /* Identify collections whose name matches the search query
+      and is not archived
+      and is not deleted
+      and has at-least one file
+     */
+
+    List<Collection> matchedCollection = _collectionService
+        .getCollectionIDtoCollections()
+        .values
+        .where(
+          (c) =>
+              !c.isDeleted && // not deleted
+              !c.isArchived() // not archived
+              &&
+              collectionIDToLatestFileMap.containsKey(c.id) && // the
+              // collection is not empty
+              c.name.contains(RegExp(query, caseSensitive: false)),
+        )
+        .toList();
+    List<CollectionWithThumbnail> result = [];
+    final limit = matchedCollection.length < 20 ? matchedCollection.length : 20;
+    for (int i = 0; i < limit; i++) {
+      Collection collection = matchedCollection[i];
+      result.add(
+        CollectionWithThumbnail(
+          collection,
+          collectionIDToLatestFileMap[collection.id],
+        ),
+      );
+    }
+    return result;
   }
 }
