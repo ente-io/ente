@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -8,6 +10,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/search/location_search_result.dart';
+import 'package:photos/models/search/results_to_list_of_place_and_bbox.dart';
 import 'package:photos/services/user_service.dart';
 
 class SearchService {
@@ -84,6 +87,13 @@ class SearchService {
 
       List<dynamic> matchedLocationNamesAndBboxs =
           response.data['results'] ?? [];
+
+      final matchedLocationNamesAndBboxsNew =
+          ResultsToListOfPlaceAndBbox.fromMap(response.data);
+
+      // for(PlaceAndBbox locationAndBbox in matchedLocationNamesAndBboxsNew.results){
+
+      // }
 
       for (dynamic result in matchedLocationNamesAndBboxs) {
         result.update(
