@@ -12,6 +12,9 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
+import isElectron from 'is-electron';
+import electronService from 'services/electron/common';
+import electronCacheService from 'services/electron/cache';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
@@ -27,10 +30,18 @@ class DownloadManager {
                 const downloadPromise = async () => {
                     const thumbnailCache = await (async () => {
                         try {
-                            return await caches.open('thumbs');
+                            if (
+                                isElectron() &&
+                                electronService.checkIsBundledApp()
+                            ) {
+                                return await electronCacheService.open(
+                                    'thumbs'
+                                );
+                            } else {
+                                return await caches.open('thumbs');
+                            }
                         } catch (e) {
-                            return null;
-                            // ignore
+                            logError(e, 'cache open failed');
                         }
                     })();
 
@@ -48,6 +59,7 @@ class DownloadManager {
                             new Response(thumbBlob)
                         );
                     } catch (e) {
+                        logError(e, 'cache put failed');
                         // TODO: handle storage full exception.
                     }
                     return URL.createObjectURL(thumbBlob);
