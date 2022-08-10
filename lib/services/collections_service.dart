@@ -72,10 +72,6 @@ class CollectionsService {
     });
   }
 
-  Map<int, Collection> getCollectionIDtoCollections() {
-    return _collectionIDToCollections;
-  }
-
   Future<List<Collection>> sync() async {
     _logger.info("Syncing collections");
     final lastCollectionUpdationTime =

@@ -141,7 +141,7 @@ class _SearchWidgetState extends State<SearchWidget> {
       allResults.add(AlbumSearchResult(collectionResult));
     }
     final locationResults =
-        await SearchService.instance.getLocationsAndMatchedFiles(query);
+        await SearchService.instance.getLocationSearchResults(query);
     for (LocationSearchResult result in locationResults) {
       allResults.add(result);
     }
