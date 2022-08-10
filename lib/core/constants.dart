@@ -42,4 +42,4 @@ class FFDefault {
   static const bool enableMissingLocationMigration = false;
 }
 
-const kProductionEndpoint = 'https://api.ente.io';
+const kDefaultProductionEndpoint = 'https://api.ente.io';

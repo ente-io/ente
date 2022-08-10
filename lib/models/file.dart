@@ -189,7 +189,7 @@ class File extends EnteFile {
 
   String getDownloadUrl() {
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kProductionEndpoint ||
+    if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
       return endpoint + "/files/download/" + uploadedFileID.toString();
     } else {
@@ -200,7 +200,7 @@ class File extends EnteFile {
 
   String getThumbnailUrl() {
     final endpoint = Configuration.instance.getHttpEndpoint();
-    if (endpoint != kProductionEndpoint ||
+    if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
       return endpoint + "/files/preview/" + uploadedFileID.toString();
     } else {
