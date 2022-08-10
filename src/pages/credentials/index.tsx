@@ -25,7 +25,7 @@ import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
 import isElectron from 'is-electron';
-import safeStorageService from 'services/safeStorageService';
+import safeStorageService from 'services/electron/safeStorage';
 import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { Input } from '@mui/material';

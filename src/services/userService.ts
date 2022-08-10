@@ -20,7 +20,7 @@ import {
 import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
-import safeStorageService from './safeStorageService';
+import safeStorageService from './electron/safeStorage';
 
 const ENDPOINT = getEndpoint();
 

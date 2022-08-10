@@ -8,7 +8,7 @@ import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
 import { ComlinkWorker } from 'utils/comlink';
 import isElectron from 'is-electron';
-import safeStorageService from 'services/safeStorageService';
+import safeStorageService from 'services/electron/safeStorage';
 
 export interface B64EncryptionResult {
     encryptedData: string;

@@ -13,7 +13,7 @@ import { logError } from 'utils/sentry';
 import { getAlbumSiteHost, PAGES } from 'constants/pages';
 import { EnteLogo } from 'components/EnteLogo';
 import isElectron from 'is-electron';
-import safeStorageService from 'services/safeStorageService';
+import safeStorageService from 'services/electron/safeStorage';
 import { saveKeyInSessionStore } from 'utils/crypto';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 
