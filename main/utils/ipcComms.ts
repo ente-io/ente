@@ -5,6 +5,7 @@ import {
     Tray,
     Notification,
     safeStorage,
+    app,
 } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menuUtil';
@@ -81,5 +82,9 @@ export default function setupIpcComs(
 
     ipcMain.handle('safeStorage-decrypt', (_, message) => {
         return safeStorage.decryptString(message);
+    });
+
+    ipcMain.handle('get-path', (_, message) => {
+        return app.getPath(message);
     });
 }
