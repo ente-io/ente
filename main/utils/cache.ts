@@ -23,7 +23,7 @@ class DiskCache {
     constructor(private cacheBucketDir: string) {}
 
     async put(cacheKey: string, response: Response): Promise<void> {
-        const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
+        const cachePath = getAssetCachePath(this.cacheBucketDir, cacheKey);
         await writeFile(
             cachePath,
             new Uint8Array(await response.arrayBuffer())
@@ -31,7 +31,7 @@ class DiskCache {
     }
 
     async match(cacheKey: string): Promise<Response> {
-        const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
+        const cachePath = getAssetCachePath(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
             return new Response(await readFile(cachePath));
         } else {
@@ -40,7 +40,7 @@ class DiskCache {
     }
 }
 
-function makeAssetCachePath(cacheDir: string, cacheKey: string) {
+function getAssetCachePath(cacheDir: string, cacheKey: string) {
     // hashing the key to prevent illegal filenames
     const cacheKeyHash = crypto
         .createHash('sha256')
