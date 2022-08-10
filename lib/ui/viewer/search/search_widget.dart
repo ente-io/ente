@@ -7,7 +7,8 @@ import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
+import 'package:photos/ui/viewer/search/search_suggestions.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class SearchIconWidget extends StatefulWidget {
   const SearchIconWidget({Key key}) : super(key: key);
@@ -107,24 +108,8 @@ class _SearchWidgetState extends State<SearchWidget> {
                         ),
                       ),
                       onChanged: (value) async {
-                        final List<SearchResult> allResults = [];
-
-                        final collectionResults = await SearchService.instance
-                            .getFilteredCollectionsWithThumbnail(value);
-                        for (CollectionWithThumbnail collectionResult
-                            in collectionResults) {
-                          allResults.add(AlbumSearchResult(collectionResult));
-                        }
-                        final locationResults = await SearchService.instance
-                            .getLocationsAndMatchedFiles(value);
-                        for (LocationSearchResult result in locationResults) {
-                          allResults.add(result);
-                        }
-                        final fileResults = await SearchService.instance
-                            .getFilesOnFilenameSearch(value);
-                        for (File file in fileResults) {
-                          allResults.add(FileSearchResult(file));
-                        }
+                        final List<SearchResult> allResults =
+                            await getSearchResultsForQuery(value);
                         if (mounted) {
                           setState(() {
                             results.clear();
@@ -139,53 +124,32 @@ class _SearchWidgetState extends State<SearchWidget> {
               ],
             ),
             results.isNotEmpty
-                ? SearchResultsSuggestionsWidget(results)
+                ? SearchSuggestionsWidget(results)
                 : const SizedBox.shrink(),
           ],
         ),
       ),
     );
   }
-}
 
-class TransparentRoute extends PageRoute<void> {
-  TransparentRoute({
-    @required this.builder,
-    RouteSettings settings,
-  })  : assert(builder != null),
-        super(settings: settings, fullscreenDialog: false);
+  Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
+    final List<SearchResult> allResults = [];
 
-  final WidgetBuilder builder;
-
-  @override
-  bool get opaque => false;
-
-  @override
-  Color get barrierColor => null;
-
-  @override
-  String get barrierLabel => null;
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 350);
-
-  @override
-  Widget buildPage(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-  ) {
-    final result = builder(context);
-    return FadeTransition(
-      opacity: Tween<double>(begin: 0, end: 1).animate(animation),
-      child: Semantics(
-        scopesRoute: true,
-        explicitChildNodes: true,
-        child: result,
-      ),
-    );
+    final collectionResults =
+        await SearchService.instance.getFilteredCollectionsWithThumbnail(query);
+    for (CollectionWithThumbnail collectionResult in collectionResults) {
+      allResults.add(AlbumSearchResult(collectionResult));
+    }
+    final locationResults =
+        await SearchService.instance.getLocationsAndMatchedFiles(query);
+    for (LocationSearchResult result in locationResults) {
+      allResults.add(result);
+    }
+    final fileResults =
+        await SearchService.instance.getFilesOnFilenameSearch(query);
+    for (File file in fileResults) {
+      allResults.add(FileSearchResult(file));
+    }
+    return allResults;
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
@@ -8,9 +9,9 @@ import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_
 import 'package:photos/ui/viewer/search/search_result_widgets/filename_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
 
-class SearchResultsSuggestionsWidget extends StatelessWidget {
+class SearchSuggestionsWidget extends StatelessWidget {
   final List<SearchResult> results;
-  const SearchResultsSuggestionsWidget(
+  const SearchSuggestionsWidget(
     this.results, {
     Key key,
   }) : super(key: key);
@@ -49,13 +50,15 @@ class SearchResultsSuggestionsWidget extends StatelessWidget {
                 }
                 final result = results[index];
                 if (result is AlbumSearchResult) {
-                  return CollectionResultWidget(result);
+                  return AlbumSearchResultWidget(result);
                 } else if (result is FileSearchResult) {
-                  return FilenameResultWidget(result);
+                  return FileSearchResultWidget(result);
                 } else if (result is LocationSearchResult) {
-                  return LocationResultsWidget(result);
+                  return LocationSearchResultWidget(result);
                 } else {
-                  throw StateError("Invalid/Unsupported value");
+                  Logger('SearchSuggestionsWidget')
+                      .info("Invalid/Unsupported value");
+                  return const SizedBox.shrink();
                 }
               },
             ),

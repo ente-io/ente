@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
-import 'package:photos/ui/viewer/search/location_collection_page.dart';
+import 'package:photos/ui/viewer/search/collections/files_in_location_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class LocationResultsWidget extends StatelessWidget {
-  final LocationSearchResult locationAndMatchedFiles;
-  const LocationResultsWidget(this.locationAndMatchedFiles, {Key key})
+class LocationSearchResultWidget extends StatelessWidget {
+  final LocationSearchResult locationSearchResult;
+  const LocationSearchResultWidget(this.locationSearchResult, {Key key})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    int noOfMemories = locationAndMatchedFiles.files.length;
+    final noOfMemories = locationSearchResult.files.length;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -32,7 +32,7 @@ class LocationResultsWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      locationAndMatchedFiles.location,
+                      locationSearchResult.location,
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -53,11 +53,11 @@ class LocationResultsWidget extends StatelessWidget {
                 ),
               ),
               Hero(
-                tag: "location_search" + locationAndMatchedFiles.files[0].tag(),
+                tag: "location_search" + locationSearchResult.files[0].tag(),
                 child: SizedBox(
                   height: 50,
                   width: 50,
-                  child: ThumbnailWidget(locationAndMatchedFiles.files[0]),
+                  child: ThumbnailWidget(locationSearchResult.files[0]),
                 ),
               ),
             ],
@@ -67,8 +67,8 @@ class LocationResultsWidget extends StatelessWidget {
       onTap: () {
         routeToPage(
           context,
-          LocationCollectionPage(
-            locationSearchResult: locationAndMatchedFiles,
+          FilesInLocationPage(
+            locationSearchResult: locationSearchResult,
           ),
         );
       },

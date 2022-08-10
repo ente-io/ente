@@ -9,14 +9,14 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
-class LocationCollectionPage extends StatelessWidget {
+class FilesInLocationPage extends StatelessWidget {
   final LocationSearchResult locationSearchResult;
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
-  LocationCollectionPage({
+  FilesInLocationPage({
     this.locationSearchResult,
     this.tagPrefix = "location_search",
     this.appBarType = GalleryType.searchResults,

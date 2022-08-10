@@ -6,9 +6,9 @@ import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class FilenameResultWidget extends StatelessWidget {
+class FileSearchResultWidget extends StatelessWidget {
   final FileSearchResult matchedFile;
-  const FilenameResultWidget(this.matchedFile, {Key key}) : super(key: key);
+  const FileSearchResultWidget(this.matchedFile, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

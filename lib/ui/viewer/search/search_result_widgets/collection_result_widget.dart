@@ -6,10 +6,10 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class CollectionResultWidget extends StatelessWidget {
+class AlbumSearchResultWidget extends StatelessWidget {
   final AlbumSearchResult albumSearchResult;
 
-  const CollectionResultWidget(this.albumSearchResult, {Key key})
+  const AlbumSearchResultWidget(this.albumSearchResult, {Key key})
       : super(key: key);
 
   @override
