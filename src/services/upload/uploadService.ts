@@ -3,7 +3,7 @@ import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
-import { handleUploadError } from 'utils/error';
+import { CustomError, handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,
     BackupedFile,
@@ -13,6 +13,7 @@ import {
     FileWithCollection,
     FileWithMetadata,
     isDataStream,
+    IsUploadPausing,
     Metadata,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
@@ -44,6 +45,9 @@ class UploadService {
         number,
         MetadataAndFileTypeInfo
     >();
+    private uploadPausing: IsUploadPausing = {
+        val: false,
+    };
     private pendingUploadCount: number = 0;
 
     async setFileCount(fileCount: number) {
@@ -75,6 +79,14 @@ class UploadService {
         return isLivePhoto
             ? getLivePhotoName(livePhotoAssets.image.name)
             : getFilename(file);
+    }
+
+    setUploadPausing(isPausing: boolean) {
+        this.uploadPausing.val = isPausing;
+    }
+
+    isUploadPausing(): boolean {
+        return this.uploadPausing.val;
     }
 
     async getFileType(file: File | ElectronFile) {
@@ -131,6 +143,9 @@ class UploadService {
 
     async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
+            if (this.isUploadPausing()) {
+                throw Error(CustomError.UPLOAD_PAUSED);
+            }
             let fileObjectKey: string = null;
             if (isDataStream(file.file.encryptedData)) {
                 fileObjectKey = await uploadStreamUsingMultipart(

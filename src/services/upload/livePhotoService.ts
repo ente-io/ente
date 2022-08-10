@@ -79,6 +79,9 @@ export async function readLivePhoto(
     fileTypeInfo: FileTypeInfo,
     livePhotoAssets: LivePhotoAssets
 ) {
+    if (uploadService.isUploadPausing()) {
+        throw Error(CustomError.UPLOAD_PAUSED);
+    }
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         livePhotoAssets.image,
         {

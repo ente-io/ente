@@ -143,3 +143,7 @@ export interface ParsedExtractedMetadata {
     location: Location;
     creationTime: number;
 }
+
+export interface IsUploadPausing {
+    val: boolean;
+}

@@ -27,6 +27,7 @@ import { EnteFile } from 'types/file';
 import {
     ElectronFile,
     FileWithCollection,
+    IsUploadPausing,
     Metadata,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
@@ -61,7 +62,9 @@ class UploadManager {
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
-    private isUploadPausing: boolean = false;
+    private isUploadPausing: IsUploadPausing = {
+        val: false,
+    };
     public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
@@ -107,7 +110,7 @@ class UploadManager {
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
                 );
                 await this.parseMetadataJSONFiles(metadataJSONFiles);
-                if (this.isUploadPausing) {
+                if (this.isUploadPausing.val) {
                     this.uploadPausingDone();
                     return;
                 }
@@ -118,7 +121,7 @@ class UploadManager {
             if (mediaFiles.length) {
                 UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
                 await this.extractMetadataFromFiles(mediaFiles);
-                if (this.isUploadPausing) {
+                if (this.isUploadPausing.val) {
                     this.uploadPausingDone();
                     return;
                 }
@@ -175,7 +178,7 @@ class UploadManager {
                 );
 
                 await this.uploadMediaFiles(allFiles);
-                if (this.isUploadPausing) {
+                if (this.isUploadPausing.val) {
                     this.uploadPausingDone();
                     return;
                 }
@@ -204,7 +207,7 @@ class UploadManager {
 
             for (const { file, collectionID } of metadataFiles) {
                 try {
-                    if (this.isUploadPausing) {
+                    if (this.isUploadPausing.val) {
                         return;
                     }
 
@@ -249,7 +252,7 @@ class UploadManager {
             addLogLine(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
-                if (this.isUploadPausing) {
+                if (this.isUploadPausing.val) {
                     return;
                 }
                 let fileTypeInfo = null;
@@ -366,7 +369,7 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any) {
         while (this.filesToBeUploaded.length > 0) {
-            if (this.isUploadPausing) {
+            if (this.isUploadPausing.val) {
                 return;
             }
             let fileWithCollection = this.filesToBeUploaded.pop();
@@ -470,13 +473,15 @@ class UploadManager {
     public pauseWatchService() {
         if (isElectron()) {
             watchFolderService.pauseService();
-            this.isUploadPausing = true;
+            this.isUploadPausing.val = true;
+            UploadService.setUploadPausing(true);
             UIService.setUploadStage(UPLOAD_STAGES.PAUSING);
         }
     }
 
     private async uploadPausingDone() {
-        this.isUploadPausing = false;
+        this.isUploadPausing.val = false;
+        UploadService.setUploadPausing(false);
     }
 
     private updateExistingCollections(decryptedFile: EnteFile) {

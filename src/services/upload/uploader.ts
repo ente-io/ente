@@ -149,6 +149,8 @@ export default async function uploader(
         });
         const error = handleUploadError(e);
         switch (error.message) {
+            case CustomError.UPLOAD_PAUSED:
+                return { fileUploadResult: UPLOAD_RESULT.PAUSED };
             case CustomError.ETAG_MISSING:
                 return { fileUploadResult: UPLOAD_RESULT.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:

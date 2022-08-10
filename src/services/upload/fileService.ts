@@ -22,6 +22,8 @@ import {
     getUint8ArrayView,
 } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
+import uploadService from './uploadService';
+import { CustomError } from 'utils/error';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
@@ -37,6 +39,9 @@ export async function readFile(
     fileTypeInfo: FileTypeInfo,
     rawFile: File | ElectronFile
 ): Promise<FileInMemory> {
+    if (uploadService.isUploadPausing()) {
+        throw Error(CustomError.UPLOAD_PAUSED);
+    }
     const { thumbnail, hasStaticThumbnail } = await generateThumbnail(
         rawFile,
         fileTypeInfo
@@ -98,6 +103,9 @@ export async function encryptFile(
     encryptionKey: string
 ): Promise<EncryptedFile> {
     try {
+        if (uploadService.isUploadPausing()) {
+            throw Error(CustomError.UPLOAD_PAUSED);
+        }
         const { key: fileKey, file: encryptedFiledata } = await encryptFiledata(
             worker,
             file.filedata
