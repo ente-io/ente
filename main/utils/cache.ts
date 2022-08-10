@@ -2,7 +2,12 @@ import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
 import { readFile, writeFile, existsSync, mkdir } from 'promise-fs';
 
-const getCacheDir = async () => await ipcRenderer.invoke('get-path', 'cache');
+const CACHE_DIR = 'ente';
+
+const getCacheDir = async () => {
+    const systemCacheDir = await ipcRenderer.invoke('get-path', 'cache');
+    return path.join(systemCacheDir, CACHE_DIR);
+};
 
 export async function openLocalCache(cacheName: string) {
     const cacheDir = await getCacheDir();
