@@ -51,15 +51,13 @@ class DownloadManager {
                     }
                     const thumb = await this.downloadThumb(token, file);
                     const thumbBlob = new Blob([thumb]);
-                    try {
-                        await thumbnailCache?.put(
-                            file.id.toString(),
-                            new Response(thumbBlob)
-                        );
-                    } catch (e) {
-                        logError(e, 'cache put failed');
-                        // TODO: handle storage full exception.
-                    }
+
+                    thumbnailCache
+                        ?.put(file.id.toString(), new Response(thumbBlob))
+                        .catch((e) => {
+                            logError(e, 'cache put failed');
+                            // TODO: handle storage full exception.
+                        });
                     return URL.createObjectURL(thumbBlob);
                 };
                 this.thumbnailObjectURLPromise.set(file.id, downloadPromise());
