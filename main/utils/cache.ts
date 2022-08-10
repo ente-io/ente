@@ -14,6 +14,7 @@ import {
     rmdir,
 } from 'promise-fs';
 import getFolderSize from 'get-folder-size';
+import crypto from 'crypto';
 
 interface LeastRecentlyUsedResult {
     atime: Date;
@@ -41,7 +42,7 @@ class DiskCache {
     constructor(private cacheBucketDir: string) {}
 
     async put(cacheKey: string, response: Response): Promise<void> {
-        const cachePath = path.join(this.cacheBucketDir, cacheKey);
+        const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
         evictLeastRecentlyUsed(this.cacheBucketDir, MAX_CACHE_SIZE);
         await writeFile(
             cachePath,
@@ -50,7 +51,7 @@ class DiskCache {
     }
 
     async match(cacheKey: string): Promise<Response> {
-        const cachePath = path.join(this.cacheBucketDir, cacheKey);
+        const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
             touch(cachePath);
             return new Response(await readFile(cachePath));
@@ -58,6 +59,15 @@ class DiskCache {
             return undefined;
         }
     }
+}
+
+function makeAssetCachePath(cacheDir: string, cacheKey: string) {
+    // hashing the key to prevent illegal filenames
+    const cacheKeyHash = crypto
+        .createHash('sha256')
+        .update(cacheKey)
+        .digest('hex');
+    return path.join(cacheDir, cacheKeyHash);
 }
 
 async function touch(path: string) {
