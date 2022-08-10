@@ -37,15 +37,19 @@
         "filter": [
           "**/*"
         ]
-      }],
-      "files":[
-        "app/**/*",
-        {
-          "from": "ui",
-          "to": "ui",
-          "filter": ["!**/*", "out/**/*"]
-        }
-      ]
+      }
+    ],
+    "files": [
+      "app/**/*",
+      {
+        "from": "ui",
+        "to": "ui",
+        "filter": [
+          "!**/*",
+          "out/**/*"
+        ]
+      }
+    ]
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
@@ -54,16 +58,17 @@
     "lint": "eslint -c .eslintrc --ext .ts ./main",
     "watch": "tsc -w",
     "build-main": "yarn install && tsc",
-    "start-main":"yarn build-main && electron app/index.js",
-    "start-renderer":"cd ui && yarn install && yarn dev",
+    "start-main": "yarn build-main && electron app/index.js",
+    "start-renderer": "cd ui && yarn install && yarn dev",
     "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
-    "build-renderer" : "cd ui && yarn install && yarn build && cd ..",
-    "build":"yarn build-renderer && yarn build-main",
+    "build-renderer": "cd ui && yarn install && yarn build && cd ..",
+    "build": "yarn build-renderer && yarn build-main",
     "test-release": "yarn build && electron-builder"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
     "@sentry/cli": "^1.68.0",
+    "@types/get-folder-size": "^3.0.1",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "concurrently": "^7.0.0",
@@ -87,8 +92,9 @@
     "electron-reload": "^2.0.0-alpha.1",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
-    "node-stream-zip": "^1.15.0",
+    "get-folder-size": "^4.0.0",
     "next-electron-server": "^0.0.8",
+    "node-stream-zip": "^1.15.0",
     "promise-fs": "^2.1.1"
   },
   "standard": {
