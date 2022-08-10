@@ -15,6 +15,8 @@ import { CustomError } from 'utils/error';
 import electronService from 'services/electron/common';
 import electronCacheService from 'services/electron/cache';
 
+const THUMB_CACHE = 'thumbs';
+
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
@@ -31,10 +33,10 @@ class DownloadManager {
                         try {
                             if (electronService.checkIsBundledApp()) {
                                 return await electronCacheService.open(
-                                    'thumbs'
+                                    THUMB_CACHE
                                 );
                             } else {
-                                return await caches.open('thumbs');
+                                return await caches.open(THUMB_CACHE);
                             }
                         } catch (e) {
                             logError(e, 'cache open failed');
