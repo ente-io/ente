@@ -32,7 +32,9 @@ class DiskLRUService {
         if (!this.isRunning) {
             this.isRunning = this.evictLeastRecentlyUsed(cacheDir, maxSize);
             this.isRunning.then(() => {
+                this.isRunning = null;
                 if (this.reRun) {
+                    this.reRun = false;
                     this.enforceCacheSizeLimit(cacheDir, maxSize);
                 }
             });
