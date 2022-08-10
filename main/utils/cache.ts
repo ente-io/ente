@@ -41,6 +41,7 @@ class DiskCache {
 }
 
 function makeAssetCachePath(cacheDir: string, cacheKey: string) {
+    // hashing the key to prevent illegal filenames
     const cacheKeyHash = crypto
         .createHash('sha256')
         .update(cacheKey)
