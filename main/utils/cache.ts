@@ -80,19 +80,20 @@ async function touch(path: string) {
 }
 
 async function evictLeastRecentlyUsed(cacheDir: string, maxSize: number) {
-    const folderSizeInfo = await getFolderSize(cacheDir);
-    if (folderSizeInfo.errors) {
-        throw folderSizeInfo.errors;
-    }
-    if (folderSizeInfo.size >= maxSize) {
-        // find least recently used file
-        const leastRecentlyUsed = await findLeastRecentlyUsed(cacheDir);
-        // and delete it
-        const { dir } = path.parse(leastRecentlyUsed.path);
-        await unlink(leastRecentlyUsed.path);
-        await rmdir(dir);
-        evictLeastRecentlyUsed(cacheDir, maxSize);
-    }
+    getFolderSize(cacheDir, async (err, size) => {
+        if (err) {
+            throw err;
+        }
+        if (size >= maxSize) {
+            // find least recently used file
+            const leastRecentlyUsed = await findLeastRecentlyUsed(cacheDir);
+            // and delete it
+            const { dir } = path.parse(leastRecentlyUsed.path);
+            await unlink(leastRecentlyUsed.path);
+            await rmdir(dir);
+            evictLeastRecentlyUsed(cacheDir, maxSize);
+        }
+    });
 }
 
 async function findLeastRecentlyUsed(

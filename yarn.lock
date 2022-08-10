@@ -279,12 +279,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/get-folder-size@^3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@types/get-folder-size/-/get-folder-size-3.0.1.tgz#bedb72ecdaa03a5b5950d2fa5bd8647d565f66de"
-  integrity sha512-TyUyOJjzBYgfVRLusyb7tB7YXv5OgBz98a7gnSQzdaX+bqW1fqvFHRiDKKaFLAtbkYOD21nbZcAFuBxUuknDOQ==
-  dependencies:
-    "@types/node" "*"
+"@types/get-folder-size@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/get-folder-size/-/get-folder-size-2.0.0.tgz#acbb5bf5999410c375b2739863a9d2f9483fabf6"
+  integrity sha512-6VKKrDB20E/6ovi2Pfpy9Pcz8Me1ue/tReaZrwrz9mfVdsr6WAMiDZ+F1oAAcss4U5n2k673i1leDIx2aEBDFQ==
 
 "@types/glob@^7.1.1":
   version "7.2.0"
@@ -1906,12 +1904,13 @@ get-caller-file@^2.0.5:
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
 
-get-folder-size@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/get-folder-size/-/get-folder-size-4.0.0.tgz#d73eedb4b2fa9144a3b5a115909d129e1ba8300a"
-  integrity sha512-Z6sv92povPRhGTNv1j8pMOzkXCcJOYWFTSrulKzoF9qbIRHXtR2Vfjw964jsWVMrIKnwHzm/0jl8IFONbBbEKw==
+get-folder-size@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/get-folder-size/-/get-folder-size-2.0.1.tgz#3fe0524dd3bad05257ef1311331417bcd020a497"
+  integrity sha512-+CEb+GDCM7tkOS2wdMKTn9vU7DgnKUTuDlehkNJKNSovdCOVxs14OfKCk4cvSaR3za4gj+OBdl9opPN9xrJ0zA==
   dependencies:
     gar "^1.0.4"
+    tiny-each-async "2.0.3"
 
 get-intrinsic@^1.1.1:
   version "1.1.2"
@@ -3717,6 +3716,11 @@ through@^2.3.8:
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
   integrity sha512-w89qg7PI8wAdvX60bMDP+bFoD5Dvhm9oLheFp5O4a2QF0cSBGsBX4qZmadPMvVqlLJBBci+WqGGOAPvcDeNSVg==
+
+tiny-each-async@2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/tiny-each-async/-/tiny-each-async-2.0.3.tgz#8ebbbfd6d6295f1370003fbb37162afe5a0a51d1"
+  integrity sha512-5ROII7nElnAirvFn8g7H7MtpfV1daMcyfTGQwsn/x2VtyV+VPiO5CjReCJtWLvoKTDEDmZocf3cNPraiMnBXLA==
 
 tmp-promise@^3.0.2:
   version "3.0.3"
