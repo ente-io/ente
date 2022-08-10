@@ -2,8 +2,10 @@ import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
 import { readFile, writeFile, existsSync, mkdir } from 'promise-fs';
 import crypto from 'crypto';
+import DiskLRUService from './diskLRU';
 
 const CACHE_DIR = 'ente';
+const MAX_CACHE_SIZE = 1000 * 1000 * 1000; // 1GB
 
 const getCacheDir = async () => {
     const systemCacheDir = await ipcRenderer.invoke('get-path', 'cache');
@@ -28,11 +30,16 @@ class DiskCache {
             cachePath,
             new Uint8Array(await response.arrayBuffer())
         );
+        DiskLRUService.enforceCacheSizeLimit(
+            this.cacheBucketDir,
+            MAX_CACHE_SIZE
+        );
     }
 
     async match(cacheKey: string): Promise<Response> {
         const cachePath = getAssetCachePath(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
+            DiskLRUService.touch(cachePath);
             return new Response(await readFile(cachePath));
         } else {
             return undefined;
