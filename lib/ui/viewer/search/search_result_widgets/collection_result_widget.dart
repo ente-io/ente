@@ -44,7 +44,7 @@ class AlbumSearchResultWidget extends StatelessWidget {
                       ),
                       builder: (context, snapshot) {
                         if (snapshot.hasData && snapshot.data > 0) {
-                          int noOfMemories = snapshot.data;
+                          final noOfMemories = snapshot.data;
                           return RichText(
                             text: TextSpan(
                               style: TextStyle(
