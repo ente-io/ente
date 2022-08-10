@@ -28,12 +28,12 @@ class DiskLRUService {
         }
     }
 
-    pruneOldItems(cacheDir: string, maxSize: number) {
+    enforceCacheSizeLimit(cacheDir: string, maxSize: number) {
         if (!this.isRunning) {
             this.isRunning = this.evictLeastRecentlyUsed(cacheDir, maxSize);
             this.isRunning.then(() => {
                 if (this.reRun) {
-                    this.pruneOldItems(cacheDir, maxSize);
+                    this.enforceCacheSizeLimit(cacheDir, maxSize);
                 }
             });
         } else {

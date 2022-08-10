@@ -30,7 +30,10 @@ class DiskCache {
             cachePath,
             new Uint8Array(await response.arrayBuffer())
         );
-        DiskLRUService.pruneOldItems(this.cacheBucketDir, MAX_CACHE_SIZE);
+        DiskLRUService.enforceCacheSizeLimit(
+            this.cacheBucketDir,
+            MAX_CACHE_SIZE
+        );
     }
 
     async match(cacheKey: string): Promise<Response> {
