@@ -1,6 +1,5 @@
 import 'dart:io' as io;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -189,10 +188,10 @@ class File extends EnteFile {
   }
 
   String getDownloadUrl() {
-    if (kDebugMode || FeatureFlagService.instance.disableCFWorker()) {
-      return Configuration.instance.getHttpEndpoint() +
-          "/files/download/" +
-          uploadedFileID.toString();
+    final endpoint = Configuration.instance.getHttpEndpoint();
+    if (endpoint != kProductionEndpoint ||
+        FeatureFlagService.instance.disableCFWorker()) {
+      return endpoint + "/files/download/" + uploadedFileID.toString();
     } else {
       return "https://files.ente.workers.dev/?fileID=" +
           uploadedFileID.toString();
@@ -200,10 +199,10 @@ class File extends EnteFile {
   }
 
   String getThumbnailUrl() {
-    if (kDebugMode || FeatureFlagService.instance.disableCFWorker()) {
-      return Configuration.instance.getHttpEndpoint() +
-          "/files/preview/" +
-          uploadedFileID.toString();
+    final endpoint = Configuration.instance.getHttpEndpoint();
+    if (endpoint != kProductionEndpoint ||
+        FeatureFlagService.instance.disableCFWorker()) {
+      return endpoint + "/files/preview/" + uploadedFileID.toString();
     } else {
       return "https://thumbnails.ente.workers.dev/?fileID=" +
           uploadedFileID.toString();

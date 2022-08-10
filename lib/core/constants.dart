@@ -41,3 +41,5 @@ class FFDefault {
   static const bool disableCFWorker = false;
   static const bool enableMissingLocationMigration = false;
 }
+
+const kProductionEndpoint = 'https://api.ente.io';

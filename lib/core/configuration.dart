@@ -37,7 +37,7 @@ class Configuration {
 
   static final Configuration instance = Configuration._privateConstructor();
   static const endpoint =
-      String.fromEnvironment("endpoint", defaultValue: "https://api.ente.io");
+      String.fromEnvironment("endpoint", defaultValue: kProductionEndpoint);
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
