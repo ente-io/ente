@@ -1,25 +1,8 @@
 import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
-import {
-    readFile,
-    writeFile,
-    existsSync,
-    mkdir,
-    readdir,
-    stat,
-    utimes,
-    close,
-    open,
-    unlink,
-    rmdir,
-} from 'promise-fs';
-import getFolderSize from 'get-folder-size';
+import { readFile, writeFile, existsSync, mkdir } from 'promise-fs';
 import crypto from 'crypto';
-
-interface LeastRecentlyUsedResult {
-    atime: Date;
-    path: string;
-}
+import DiskLRUService from './diskLRU';
 
 const CACHE_DIR = 'ente';
 const MAX_CACHE_SIZE = 1000 * 1000 * 1000; // 1GB
@@ -43,7 +26,10 @@ class DiskCache {
 
     async put(cacheKey: string, response: Response): Promise<void> {
         const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
-        evictLeastRecentlyUsed(this.cacheBucketDir, MAX_CACHE_SIZE);
+        await DiskLRUService.evictLeastRecentlyUsed(
+            this.cacheBucketDir,
+            MAX_CACHE_SIZE
+        );
         await writeFile(
             cachePath,
             new Uint8Array(await response.arrayBuffer())
@@ -53,7 +39,7 @@ class DiskCache {
     async match(cacheKey: string): Promise<Response> {
         const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
-            touch(cachePath);
+            await DiskLRUService.touch(cachePath);
             return new Response(await readFile(cachePath));
         } else {
             return undefined;
@@ -68,57 +54,4 @@ function makeAssetCachePath(cacheDir: string, cacheKey: string) {
         .update(cacheKey)
         .digest('hex');
     return path.join(cacheDir, cacheKeyHash);
-}
-
-async function touch(path: string) {
-    const time = new Date();
-    try {
-        await utimes(path, time, time);
-    } catch (err) {
-        await close(await open(path, 'w'));
-    }
-}
-
-async function evictLeastRecentlyUsed(cacheDir: string, maxSize: number) {
-    getFolderSize(cacheDir, async (err, size) => {
-        if (err) {
-            throw err;
-        }
-        if (size >= maxSize) {
-            // find least recently used file
-            const leastRecentlyUsed = await findLeastRecentlyUsed(cacheDir);
-            // and delete it
-            const { dir } = path.parse(leastRecentlyUsed.path);
-            await unlink(leastRecentlyUsed.path);
-            await rmdir(dir);
-            evictLeastRecentlyUsed(cacheDir, maxSize);
-        }
-    });
-}
-
-async function findLeastRecentlyUsed(
-    dir: string,
-    result?: LeastRecentlyUsedResult
-): Promise<LeastRecentlyUsedResult> {
-    const files = await readdir(dir);
-    result = result || { atime: new Date(), path: '' };
-
-    files.forEach(async (file) => {
-        const newBase = path.join(dir, file);
-        const stats = await stat(newBase);
-        if (stats.isDirectory()) {
-            result = await findLeastRecentlyUsed(newBase, result);
-        } else {
-            const { atime } = await stat(newBase);
-
-            if (atime < result.atime) {
-                result = {
-                    atime,
-                    path: newBase,
-                };
-            }
-        }
-    });
-
-    return result;
 }
