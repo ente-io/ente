@@ -51,10 +51,10 @@ class SearchSuggestionsWidget extends StatelessWidget {
                 final result = results[index];
                 if (result is AlbumSearchResult) {
                   return AlbumSearchResultWidget(result);
-                } else if (result is FileSearchResult) {
-                  return FileSearchResultWidget(result);
                 } else if (result is LocationSearchResult) {
                   return LocationSearchResultWidget(result);
+                } else if (result is FileSearchResult) {
+                  return FileSearchResultWidget(result);
                 } else {
                   Logger('SearchSuggestionsWidget')
                       .info("Invalid/Unsupported value");

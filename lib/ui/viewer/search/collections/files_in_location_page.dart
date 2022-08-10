@@ -11,16 +11,13 @@ import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
 class FilesInLocationPage extends StatelessWidget {
   final LocationSearchResult locationSearchResult;
-  final String tagPrefix;
-  final GalleryType appBarType;
-  final GalleryType overlayType;
-  final _selectedFiles = SelectedFiles();
 
+  final _selectedFiles = SelectedFiles();
+  static const String kTagPrefix = "location_search";
+  static const GalleryType appBarType = GalleryType.searchResults;
+  static const GalleryType overlayType = GalleryType.searchResults;
   FilesInLocationPage({
     this.locationSearchResult,
-    this.tagPrefix = "location_search",
-    this.appBarType = GalleryType.searchResults,
-    this.overlayType = GalleryType.searchResults,
     Key key,
   }) : super(key: key);
 
@@ -60,7 +57,7 @@ class FilesInLocationPage extends StatelessWidget {
                   null,
             ),
       ],
-      tagPrefix: tagPrefix,
+      tagPrefix: kTagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: [locationSearchResult.files[0]],
       footer: const SizedBox(height: 120),

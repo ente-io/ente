@@ -22,7 +22,7 @@ class SearchService {
   final _config = Configuration.instance;
   final _logger = Logger((UserService).toString());
   final _collectionService = CollectionsService.instance;
-  static const _kMaximumResultsLimit = 20;
+  static const _maximumResultsLimit = 20;
 
   SearchService._privateConstructor();
   static final SearchService instance = SearchService._privateConstructor();
@@ -64,7 +64,7 @@ class SearchService {
     final List<File> matchedFiles = [];
     final List<File> files = await getAllFiles();
     for (int i = 0;
-        (i < files.length) && (matchedFiles.length < _kMaximumResultsLimit);
+        (i < files.length) && (matchedFiles.length < _maximumResultsLimit);
         i++) {
       File file = files[i];
       if (file.title.contains(RegExp(query, caseSensitive: false))) {
@@ -163,9 +163,9 @@ class SearchService {
         )
         .toList();
     final List<CollectionWithThumbnail> result = [];
-    final limit = matchedCollection.length < _kMaximumResultsLimit
+    final limit = matchedCollection.length < _maximumResultsLimit
         ? matchedCollection.length
-        : _kMaximumResultsLimit;
+        : _maximumResultsLimit;
     for (int i = 0; i < limit; i++) {
       Collection collection = matchedCollection[i];
       result.add(
