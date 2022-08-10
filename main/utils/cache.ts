@@ -26,20 +26,17 @@ class DiskCache {
 
     async put(cacheKey: string, response: Response): Promise<void> {
         const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
-        await DiskLRUService.evictLeastRecentlyUsed(
-            this.cacheBucketDir,
-            MAX_CACHE_SIZE
-        );
         await writeFile(
             cachePath,
             new Uint8Array(await response.arrayBuffer())
         );
+        DiskLRUService.pruneOldItems(this.cacheBucketDir, MAX_CACHE_SIZE);
     }
 
     async match(cacheKey: string): Promise<Response> {
         const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
-            await DiskLRUService.touch(cachePath);
+            DiskLRUService.touch(cachePath);
             return new Response(await readFile(cachePath));
         } else {
             return undefined;
