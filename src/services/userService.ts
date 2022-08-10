@@ -20,7 +20,7 @@ import {
 import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
-import desktopService from './desktopService';
+import safeStorageService from './electron/safeStorage';
 
 const ENDPOINT = getEndpoint();
 
@@ -124,7 +124,7 @@ export const logoutUser = async () => {
         }
         await clearFiles();
         if (isElectron()) {
-            desktopService.clearElectronStore();
+            safeStorageService.clearElectronStore();
         }
         router.push(PAGES.ROOT);
     } catch (e) {
