@@ -193,8 +193,7 @@ class File extends EnteFile {
         FeatureFlagService.instance.disableCFWorker()) {
       return endpoint + "/files/download/" + uploadedFileID.toString();
     } else {
-      return "https://files.ente.workers.dev/?fileID=" +
-          uploadedFileID.toString();
+      return "https://files.ente.io/?fileID=" + uploadedFileID.toString();
     }
   }
 
@@ -204,8 +203,7 @@ class File extends EnteFile {
         FeatureFlagService.instance.disableCFWorker()) {
       return endpoint + "/files/preview/" + uploadedFileID.toString();
     } else {
-      return "https://thumbnails.ente.workers.dev/?fileID=" +
-          uploadedFileID.toString();
+      return "https://thumbnails.ente.io/?fileID=" + uploadedFileID.toString();
     }
   }
 
