@@ -12,7 +12,6 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import isElectron from 'is-electron';
 import electronService from 'services/electron/common';
 import electronCacheService from 'services/electron/cache';
 
@@ -30,10 +29,7 @@ class DownloadManager {
                 const downloadPromise = async () => {
                     const thumbnailCache = await (async () => {
                         try {
-                            if (
-                                isElectron() &&
-                                electronService.checkIsBundledApp()
-                            ) {
+                            if (electronService.checkIsBundledApp()) {
                                 return await electronCacheService.open(
                                     'thumbs'
                                 );

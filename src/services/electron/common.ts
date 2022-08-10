@@ -1,3 +1,4 @@
+import isElectron from 'is-electron';
 import { runningInBrowser } from 'utils/common';
 
 class ElectronService {
@@ -10,7 +11,7 @@ class ElectronService {
     }
 
     checkIsBundledApp() {
-        return this.isBundledApp;
+        return isElectron() && this.isBundledApp;
     }
 }
 
