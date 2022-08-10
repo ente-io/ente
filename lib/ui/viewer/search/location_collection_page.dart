@@ -10,14 +10,14 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
 class LocationCollectionPage extends StatelessWidget {
-  final LocationSearchResult locationAndFiles;
+  final LocationSearchResult locationSearchResult;
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
   LocationCollectionPage({
-    this.locationAndFiles,
+    this.locationSearchResult,
     this.tagPrefix = "location_search",
     this.appBarType = GalleryType.searchResults,
     this.overlayType = GalleryType.searchResults,
@@ -28,7 +28,7 @@ class LocationCollectionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        final result = locationAndFiles.files
+        final result = locationSearchResult.files
             .where(
               (file) =>
                   file.creationTime >= creationStartTime &&
@@ -36,7 +36,10 @@ class LocationCollectionPage extends StatelessWidget {
             )
             .toList();
         return Future.value(
-          FileLoadResult(result, result.length < locationAndFiles.files.length),
+          FileLoadResult(
+            result,
+            result.length < locationSearchResult.files.length,
+          ),
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
@@ -59,7 +62,7 @@ class LocationCollectionPage extends StatelessWidget {
       ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
-      initialFiles: [locationAndFiles.files[0]],
+      initialFiles: [locationSearchResult.files[0]],
       footer: const SizedBox(height: 120),
     );
     return Scaffold(
@@ -67,7 +70,7 @@ class LocationCollectionPage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          locationAndFiles.location,
+          locationSearchResult.location,
           _selectedFiles,
         ),
       ),

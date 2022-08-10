@@ -22,6 +22,7 @@ class SearchService {
   final _config = Configuration.instance;
   final _logger = Logger((UserService).toString());
   final _collectionService = CollectionsService.instance;
+  static const _kMaximumResultsLimit = 20;
 
   SearchService._privateConstructor();
   static final SearchService instance = SearchService._privateConstructor();
@@ -31,7 +32,7 @@ class SearchService {
     Future.delayed(const Duration(seconds: 5), () async {
       // In case home screen loads before 5 seconds and user starts search, future will not be null
       _future == null
-          ? FilesDB.instance.getAllFilesFromDB().then((value) {
+          ? getAllFiles().then((value) {
               _cachedFiles = value;
             })
           : null;
@@ -60,10 +61,11 @@ class SearchService {
   }
 
   Future<List<File>> getFilesOnFilenameSearch(String query) async {
-    List<File> matchedFiles = [];
-    List<File> files = await getAllFiles();
-    //<20 to limit number of files in result
-    for (int i = 0; (i < files.length) && (matchedFiles.length < 20); i++) {
+    final List<File> matchedFiles = [];
+    final List<File> files = await getAllFiles();
+    for (int i = 0;
+        (i < files.length) && (matchedFiles.length < _kMaximumResultsLimit);
+        i++) {
       File file = files[i];
       if (file.title.contains(RegExp(query, caseSensitive: false))) {
         matchedFiles.add(file);
@@ -80,8 +82,8 @@ class SearchService {
     String query,
   ) async {
     try {
-      List<File> allFiles = await SearchService.instance.getAllFiles();
-      List<LocationSearchResult> locationsAndMatchedFiles = [];
+      final List<File> allFiles = await SearchService.instance.getAllFiles();
+      final List<LocationSearchResult> locationsAndMatchedFiles = [];
 
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",
@@ -135,9 +137,9 @@ class SearchService {
     // identify collections which have at least one file as we don't display
     // empty collection
 
-    List<File> latestCollectionFiles =
+    final List<File> latestCollectionFiles =
         await _collectionService.getLatestCollectionFiles();
-    Map<int, File> collectionIDToLatestFileMap = {
+    final Map<int, File> collectionIDToLatestFileMap = {
       for (File file in latestCollectionFiles) file.collectionID: file
     };
 
@@ -147,7 +149,7 @@ class SearchService {
       and has at-least one file
      */
 
-    List<Collection> matchedCollection = _collectionService
+    final List<Collection> matchedCollection = _collectionService
         .getCollectionIDtoCollections()
         .values
         .where(
@@ -160,8 +162,10 @@ class SearchService {
               c.name.contains(RegExp(query, caseSensitive: false)),
         )
         .toList();
-    List<CollectionWithThumbnail> result = [];
-    final limit = matchedCollection.length < 20 ? matchedCollection.length : 20;
+    final List<CollectionWithThumbnail> result = [];
+    final limit = matchedCollection.length < _kMaximumResultsLimit
+        ? matchedCollection.length
+        : _kMaximumResultsLimit;
     for (int i = 0; i < limit; i++) {
       Collection collection = matchedCollection[i];
       result.add(

@@ -68,7 +68,7 @@ class LocationResultsWidget extends StatelessWidget {
         routeToPage(
           context,
           LocationCollectionPage(
-            locationAndFiles: locationAndMatchedFiles,
+            locationSearchResult: locationAndMatchedFiles,
           ),
         );
       },
