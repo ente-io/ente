@@ -27,7 +27,6 @@ class DiskLRUService {
                     const leastRecentlyUsed = await this.findLeastRecentlyUsed(
                         cacheDir
                     );
-                    console.log(leastRecentlyUsed);
 
                     await unlink(leastRecentlyUsed.path);
                     this.evictLeastRecentlyUsed(cacheDir, maxSize);
