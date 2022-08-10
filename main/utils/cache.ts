@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
 import { readFile, writeFile, existsSync, mkdir } from 'promise-fs';
+import crypto from 'crypto';
 
 const CACHE_DIR = 'ente';
 
@@ -22,7 +23,7 @@ class DiskCache {
     constructor(private cacheBucketDir: string) {}
 
     async put(cacheKey: string, response: Response): Promise<void> {
-        const cachePath = path.join(this.cacheBucketDir, cacheKey);
+        const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
         await writeFile(
             cachePath,
             new Uint8Array(await response.arrayBuffer())
@@ -30,11 +31,19 @@ class DiskCache {
     }
 
     async match(cacheKey: string): Promise<Response> {
-        const cachePath = path.join(this.cacheBucketDir, cacheKey);
+        const cachePath = makeAssetCachePath(this.cacheBucketDir, cacheKey);
         if (existsSync(cachePath)) {
             return new Response(await readFile(cachePath));
         } else {
             return undefined;
         }
     }
+}
+
+function makeAssetCachePath(cacheDir: string, cacheKey: string) {
+    const cacheKeyHash = crypto
+        .createHash('sha256')
+        .update(cacheKey)
+        .digest('hex');
+    return path.join(cacheDir, cacheKeyHash);
 }
