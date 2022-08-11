@@ -15,8 +15,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 
 class SearchService {
-  List<File> _cachedFiles;
-  Future<List<File>> _future;
+  Future<List<File>> _cachedFilesFuture;
   final _dio = Network.instance.getDio();
   final _config = Configuration.instance;
   final _logger = Logger((UserService).toString());
@@ -31,26 +30,23 @@ class SearchService {
     Future.delayed(const Duration(seconds: 5), () async {
       /* In case home screen loads before 5 seconds and user starts search,
        future will not be null.So here getAllFiles won't run again in that case. */
-      if (_future == null) {
+      if (_cachedFilesFuture == null) {
         getAllFiles();
       }
     });
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _cachedFiles = null;
+      _cachedFilesFuture = null;
       getAllFiles();
     });
   }
 
   Future<List<File>> getAllFiles() async {
-    if (_cachedFiles != null) {
-      return _cachedFiles;
+    if (_cachedFilesFuture != null) {
+      return _cachedFilesFuture;
     }
-    if (_future != null) {
-      return _future;
-    }
-    _future = _fetchAllFiles();
-    return _future;
+    _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB();
+    return _cachedFilesFuture;
   }
 
   Future<List<File>> getFileSearchResults(String query) async {
@@ -69,19 +65,19 @@ class SearchService {
   }
 
   void clearCache() {
-    _cachedFiles.clear();
+    _cachedFilesFuture = null;
   }
 
   Future<List<LocationSearchResult>> getLocationSearchResults(
     String query,
   ) async {
+    final List<LocationSearchResult> locationSearchResults = [];
     try {
       final List<File> allFiles = await SearchService.instance.getAllFiles();
-      final List<LocationSearchResult> locationSearchResults = [];
 
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",
-        queryParameters: {"query": query, "limit": 4},
+        queryParameters: {"query": query, "limit": 10},
         options: Options(
           headers: {"X-Auth-Token": _config.getToken()},
         ),
@@ -100,17 +96,19 @@ class SearchService {
             filesInLocation.add(file);
           }
         }
+        filesInLocation.sort(
+          (first, second) => second.creationTime.compareTo(first.creationTime),
+        );
         if (filesInLocation.isNotEmpty) {
           locationSearchResults.add(
             LocationSearchResult(locationData.place, filesInLocation),
           );
         }
       }
-      return locationSearchResults;
-    } on DioError catch (e) {
-      _logger.info(e);
-      rethrow;
+    } catch (e) {
+      _logger.severe(e);
     }
+    return locationSearchResults;
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
@@ -159,10 +157,5 @@ class SearchService {
         location.latitude > locationData.bbox[1] &&
         location.longitude < locationData.bbox[2] &&
         location.latitude < locationData.bbox[3];
-  }
-
-  Future<List<File>> _fetchAllFiles() async {
-    _cachedFiles = await FilesDB.instance.getAllFilesFromDB();
-    return _cachedFiles;
   }
 }
