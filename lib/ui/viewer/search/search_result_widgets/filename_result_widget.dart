@@ -3,7 +3,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class FileSearchResultWidget extends StatelessWidget {
@@ -19,9 +19,14 @@ class FileSearchResultWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SearchResultThumbnailWidget(
+                matchedFile.file,
+                "file_details",
+              ),
+              const SizedBox(width: 12),
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,17 +45,6 @@ class FileSearchResultWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                ),
-              ),
-              Hero(
-                tag: "file_details" + matchedFile.file.tag(),
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: ThumbnailWidget(matchedFile.file),
-                  ),
                 ),
               ),
             ],

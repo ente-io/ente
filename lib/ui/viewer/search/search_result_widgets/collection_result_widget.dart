@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class AlbumSearchResultWidget extends StatelessWidget {
@@ -21,9 +21,14 @@ class AlbumSearchResultWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SearchResultThumbnailWidget(
+                albumSearchResult.collectionWithThumbnail.thumbnail,
+                "collection_search",
+              ),
+              const SizedBox(width: 16),
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +40,7 @@ class AlbumSearchResultWidget extends StatelessWidget {
                         color: Theme.of(context).colorScheme.subTextColor,
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
                     Text(
                       albumSearchResult.collectionWithThumbnail.collection.name,
                       style: const TextStyle(fontSize: 18),
@@ -74,20 +79,6 @@ class AlbumSearchResultWidget extends StatelessWidget {
                   ],
                 ),
               ),
-              Hero(
-                tag: "collection_search" +
-                    albumSearchResult.collectionWithThumbnail.thumbnail.tag(),
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: ThumbnailWidget(
-                      albumSearchResult.collectionWithThumbnail.thumbnail,
-                    ),
-                  ),
-                ),
-              )
             ],
           ),
         ),

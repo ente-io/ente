@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/location_search_result.dart';
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/search/collections/files_in_location_page.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LocationSearchResultWidget extends StatelessWidget {
@@ -24,9 +24,14 @@ class LocationSearchResultWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SearchResultThumbnailWidget(
+                locationSearchResult.files[0],
+                heroTagPrefix,
+              ),
+              const SizedBox(width: 12),
               Flexible(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,17 +66,6 @@ class LocationSearchResultWidget extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-              Hero(
-                tag: heroTagPrefix + locationSearchResult.files[0].tag(),
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(3),
-                    child: ThumbnailWidget(locationSearchResult.files[0]),
-                  ),
                 ),
               ),
             ],
