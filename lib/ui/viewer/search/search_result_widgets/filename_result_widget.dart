@@ -26,7 +26,7 @@ class FileSearchResultWidget extends StatelessWidget {
                 matchedFile.file,
                 "file_details",
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

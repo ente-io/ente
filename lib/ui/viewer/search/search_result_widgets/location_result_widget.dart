@@ -31,7 +31,7 @@ class LocationSearchResultWidget extends StatelessWidget {
                 locationSearchResult.files[0],
                 heroTagPrefix,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
