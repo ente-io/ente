@@ -355,7 +355,7 @@ extension CustomColorScheme on ColorScheme {
       : const Color.fromRGBO(30, 30, 30, 1.0);
 
   Color get searchResultsCountTextColor => brightness == Brightness.light
-      ? const Color.fromRGBO(180, 180, 180, 1)
+      ? const Color.fromRGBO(80, 80, 80, 1)
       : const Color.fromRGBO(150, 150, 150, 1);
 }
 
