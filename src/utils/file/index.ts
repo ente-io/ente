@@ -338,7 +338,7 @@ async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
     return new Blob([mp4ConvertedVideo]);
 }
 
-async function getRenderableImage(fileName: string, imageBlob: Blob) {
+export async function getRenderableImage(fileName: string, imageBlob: Blob) {
     if (await isFileHEIC(imageBlob, fileName)) {
         addLogLine(
             `HEICConverter called for ${fileName}-${makeHumanReadableStorage(

@@ -23,7 +23,7 @@ import {
     DetectedText,
 } from 'types/machineLearning';
 // import { mlFilesStore, mlPeopleStore } from 'utils/storage/mlStorage';
-import { convertForPreview, needsConversionForPreview } from 'utils/file';
+import { getRenderableImage } from 'utils/file';
 import { imageBitmapToBlob } from 'utils/image';
 import { cached } from 'utils/storage/cache';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
@@ -354,9 +354,7 @@ async function getOriginalConvertedFile(
     queue?: PQueue
 ) {
     let fileBlob = await getOriginalImageFile(file, token, enteWorker, queue);
-    if (needsConversionForPreview(file)) {
-        fileBlob = (await convertForPreview(file, fileBlob))[0];
-    }
+    fileBlob = await getRenderableImage(file.metadata.title, fileBlob);
 
     return fileBlob;
 }
@@ -405,9 +403,7 @@ export async function getLocalFileImageBitmap(
     localFile: globalThis.File
 ) {
     let fileBlob = localFile as Blob;
-    if (needsConversionForPreview(enteFile)) {
-        fileBlob = await convertForPreview(enteFile, fileBlob)[0];
-    }
+    fileBlob = await getRenderableImage(enteFile.metadata.title, fileBlob);
     return getImageBlobBitmap(fileBlob);
 }
 
