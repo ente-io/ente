@@ -23,6 +23,7 @@ class SearchSuggestionsWidget extends StatelessWidget {
         margin: const EdgeInsets.only(top: 8),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.searchResultsColor,
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
