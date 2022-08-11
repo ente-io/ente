@@ -28,16 +28,20 @@ class AlbumSearchResultWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Album',
-                      style: TextStyle(fontSize: 12),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.subTextColor,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       albumSearchResult.collectionWithThumbnail.collection.name,
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 2),
                     FutureBuilder<int>(
                       future: FilesDB.instance.collectionFileCount(
                         albumSearchResult.collectionWithThumbnail.collection.id,
@@ -50,7 +54,7 @@ class AlbumSearchResultWidget extends StatelessWidget {
                               style: TextStyle(
                                 color: Theme.of(context)
                                     .colorScheme
-                                    .defaultTextColor,
+                                    .searchResultsCountTextColor,
                               ),
                               children: [
                                 TextSpan(text: noOfMemories.toString()),

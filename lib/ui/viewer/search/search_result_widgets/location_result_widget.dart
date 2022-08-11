@@ -31,20 +31,26 @@ class LocationSearchResultWidget extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Location',
-                      style: TextStyle(fontSize: 12),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).colorScheme.subTextColor,
+                      ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
                     Text(
                       locationSearchResult.location,
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 2),
                     RichText(
                       text: TextSpan(
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.defaultTextColor,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .searchResultsCountTextColor,
                         ),
                         children: [
                           TextSpan(text: noOfMemories.toString()),
