@@ -53,19 +53,19 @@ class SearchService {
     return _future;
   }
 
-  Future<List<File>> getFilesOnFilenameSearch(String query) async {
-    final List<File> matchedFiles = [];
+  Future<List<File>> getFileSearchResults(String query) async {
+    final List<File> fileSearchResults = [];
     final List<File> files = await getAllFiles();
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
     for (File file in files) {
-      if (matchedFiles.length >= _maximumResultsLimit) {
+      if (fileSearchResults.length >= _maximumResultsLimit) {
         break;
       }
       if (file.title.contains(nonCaseSensitiveRegexForQuery)) {
-        matchedFiles.add(file);
+        fileSearchResults.add(file);
       }
     }
-    return matchedFiles;
+    return fileSearchResults;
   }
 
   void clearCache() {
@@ -115,7 +115,7 @@ class SearchService {
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
   // collections which don't have a file from search result
-  Future<List<CollectionWithThumbnail>> getFilteredCollectionsWithThumbnail(
+  Future<List<CollectionWithThumbnail>> getCollectionSearchResults(
     String query,
   ) async {
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
@@ -125,22 +125,21 @@ class SearchService {
     final List<File> latestCollectionFiles =
         await _collectionService.getLatestCollectionFiles();
 
-    final List<CollectionWithThumbnail> filteredCollectionsWithThumbnail = [];
+    final List<CollectionWithThumbnail> collectionSearchResults = [];
 
     for (File file in latestCollectionFiles) {
-      if (filteredCollectionsWithThumbnail.length >= _maximumResultsLimit) {
+      if (collectionSearchResults.length >= _maximumResultsLimit) {
         break;
       }
       final Collection collection =
           CollectionsService.instance.getCollectionByID(file.collectionID);
       if (!collection.isArchived() &&
           collection.name.contains(nonCaseSensitiveRegexForQuery)) {
-        filteredCollectionsWithThumbnail
-            .add(CollectionWithThumbnail(collection, file));
+        collectionSearchResults.add(CollectionWithThumbnail(collection, file));
       }
     }
 
-    return filteredCollectionsWithThumbnail;
+    return collectionSearchResults;
   }
 
   bool _isValidLocation(Location location) {

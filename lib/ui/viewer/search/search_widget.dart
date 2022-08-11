@@ -136,7 +136,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     final List<SearchResult> allResults = [];
 
     final collectionResults =
-        await SearchService.instance.getFilteredCollectionsWithThumbnail(query);
+        await SearchService.instance.getCollectionSearchResults(query);
     for (CollectionWithThumbnail collectionResult in collectionResults) {
       allResults.add(AlbumSearchResult(collectionResult));
     }
@@ -146,7 +146,7 @@ class _SearchWidgetState extends State<SearchWidget> {
       allResults.add(result);
     }
     final fileResults =
-        await SearchService.instance.getFilesOnFilenameSearch(query);
+        await SearchService.instance.getFileSearchResults(query);
     for (File file in fileResults) {
       allResults.add(FileSearchResult(file));
     }
