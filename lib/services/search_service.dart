@@ -15,7 +15,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 
 class SearchService {
-  Future<List<File>> _future;
+  Future<List<File>> _cachedFilesFuture;
   final _dio = Network.instance.getDio();
   final _config = Configuration.instance;
   final _logger = Logger((UserService).toString());
@@ -30,23 +30,23 @@ class SearchService {
     Future.delayed(const Duration(seconds: 5), () async {
       /* In case home screen loads before 5 seconds and user starts search,
        future will not be null.So here getAllFiles won't run again in that case. */
-      if (_future == null) {
+      if (_cachedFilesFuture == null) {
         getAllFiles();
       }
     });
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _future = null;
+      _cachedFilesFuture = null;
       getAllFiles();
     });
   }
 
   Future<List<File>> getAllFiles() async {
-    if (_future != null) {
-      return _future;
+    if (_cachedFilesFuture != null) {
+      return _cachedFilesFuture;
     }
-    _future = FilesDB.instance.getAllFilesFromDB();
-    return _future;
+    _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB();
+    return _cachedFilesFuture;
   }
 
   Future<List<File>> getFileSearchResults(String query) async {
@@ -65,7 +65,7 @@ class SearchService {
   }
 
   void clearCache() {
-    _future = null;
+    _cachedFilesFuture = null;
   }
 
   Future<List<LocationSearchResult>> getLocationSearchResults(
