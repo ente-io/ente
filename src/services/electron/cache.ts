@@ -1,11 +1,9 @@
-import { runningInBrowser } from 'utils/common';
-
 class ElectronCacheService {
     private ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
 
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.ElectronAPIs = globalThis['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.ElectronAPIs?.openDiskCache;
     }
     async open(cacheName: string): Promise<Cache> {
