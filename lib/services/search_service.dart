@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -62,7 +60,7 @@ class SearchService {
     for (int i = 0;
         (i < files.length) && (matchedFiles.length < _maximumResultsLimit);
         i++) {
-      File file = files[i];
+      final File file = files[i];
       if (file.title.contains(nonCaseSensitiveRegexForQuery)) {
         matchedFiles.add(file);
       }
@@ -120,38 +118,29 @@ class SearchService {
   Future<List<CollectionWithThumbnail>> getFilteredCollectionsWithThumbnail(
     String query,
   ) async {
-    // identify collections which have at least one file as we don't display
-    // empty collection
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
+
+    /*latestCollectionFiles is to identify collections which have at least one file as we don't display
+     empty collections and to get the file to pass for tumbnail */
     final List<File> latestCollectionFiles =
         await _collectionService.getLatestCollectionFiles();
-    final Map<int, File> collectionIDToLatestFileMap = {
-      for (File file in latestCollectionFiles) file.collectionID: file
-    };
 
-    final List<Collection> matchedCollections = _collectionService
-        .getActiveCollections()
-        .where(
-          (c) =>
-              !c.isArchived() // not archived
-              &&
-              collectionIDToLatestFileMap.containsKey(c.id) && // the
-              // collection is not empty
-              c.name.contains(nonCaseSensitiveRegexForQuery),
-        )
-        .toList();
-    final List<CollectionWithThumbnail> result = [];
-    final limit = min(matchedCollections.length, _maximumResultsLimit);
-    for (int i = 0; i < limit; i++) {
-      Collection collection = matchedCollections[i];
-      result.add(
-        CollectionWithThumbnail(
-          collection,
-          collectionIDToLatestFileMap[collection.id],
-        ),
-      );
+    final List<CollectionWithThumbnail> filteredCollectionsWithThumbnail = [];
+
+    for (File file in latestCollectionFiles) {
+      final Collection collection =
+          CollectionsService.instance.getCollectionByID(file.collectionID);
+      if (!collection.isArchived() &&
+          collection.name.contains(nonCaseSensitiveRegexForQuery)) {
+        filteredCollectionsWithThumbnail
+            .add(CollectionWithThumbnail(collection, file));
+      }
+      if (filteredCollectionsWithThumbnail.length > _maximumResultsLimit) {
+        break;
+      }
     }
-    return result;
+
+    return filteredCollectionsWithThumbnail;
   }
 
   bool _isValidLocation(Location location) {
