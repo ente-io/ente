@@ -21,6 +21,7 @@ import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
+import { deleteThumbnailCache } from './cacheService';
 
 const ENDPOINT = getEndpoint();
 
@@ -118,7 +119,7 @@ export const logoutUser = async () => {
         clearKeys();
         clearData();
         try {
-            await caches.delete('thumbs');
+            await deleteThumbnailCache();
         } catch (e) {
             // ignore
         }

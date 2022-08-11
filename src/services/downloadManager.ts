@@ -12,10 +12,7 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import electronService from 'services/electron/common';
-import electronCacheService from 'services/electron/cache';
-
-const THUMB_CACHE = 'thumbs';
+import { openThumbnailCache } from './cacheService';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
@@ -29,19 +26,7 @@ class DownloadManager {
             }
             if (!this.thumbnailObjectURLPromise.get(file.id)) {
                 const downloadPromise = async () => {
-                    const thumbnailCache = await (async () => {
-                        try {
-                            if (electronService.checkIsBundledApp()) {
-                                return await electronCacheService.open(
-                                    THUMB_CACHE
-                                );
-                            } else {
-                                return await caches.open(THUMB_CACHE);
-                            }
-                        } catch (e) {
-                            logError(e, 'cache open failed');
-                        }
-                    })();
+                    const thumbnailCache = await openThumbnailCache();
 
                     const cacheResp: Response = await thumbnailCache?.match(
                         file.id.toString()
