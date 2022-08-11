@@ -79,7 +79,6 @@ class FilesDB {
     initializationScript: initializationScript,
     migrationScripts: migrationScripts,
   );
-
   // make this a singleton class
   FilesDB._privateConstructor();
 
@@ -1142,23 +1141,21 @@ class FilesDB {
     return result;
   }
 
-  Future<List<File>> getFilesOnFileNameSearch(String query) async {
-    final db = await instance.database;
-    final results = await db.query(
-      table,
-      where: '$columnTitle LIKE ?',
-      whereArgs: ["%$query%"],
-    );
-    final files = _convertToFiles(results);
-    return files;
-  }
-
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
     final List<File> files = [];
     for (final result in results) {
       files.add(_getFileFromRow(result));
     }
     return files;
+  }
+
+  Future<List<File>> getAllFilesFromDB() async {
+    final db = await instance.database;
+    List<Map<String, dynamic>> result = await db.query(table);
+    List<File> files = _convertToFiles(result);
+    List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, null);
+    return deduplicatedFiles;
   }
 
   Map<String, dynamic> _getRowForFile(File file) {

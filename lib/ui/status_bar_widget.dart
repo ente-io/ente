@@ -60,7 +60,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               AnimatedOpacity(
                 opacity: _showStatus ? 0 : 1,
                 duration: const Duration(milliseconds: 1000),
-                child: const StatusBarBrandingWidget(),
+                child: const TopBarWidget(),
               ),
               AnimatedOpacity(
                 opacity: _showStatus ? 1 : 0,
@@ -206,12 +206,13 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 }
 
-class StatusBarBrandingWidget extends StatelessWidget {
-  const StatusBarBrandingWidget({Key key}) : super(key: key);
+class TopBarWidget extends StatelessWidget {
+  const TopBarWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           height: kContainerHeight,
@@ -230,14 +231,11 @@ class StatusBarBrandingWidget extends StatelessWidget {
           ),
         ),
         FeatureFlagService.instance.enableSearchFeature()
-            ? SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: const Align(
-                  alignment: Alignment.centerRight,
-                  child: SearchIconWidget(),
-                ),
+            ? const SizedBox(
+                height: kContainerHeight,
+                child: SearchIconWidget(),
               )
-            : const SizedBox.shrink(),
+            : const SizedBox.shrink()
       ],
     );
   }

@@ -26,6 +26,7 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/memories_service.dart';
+import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -160,6 +161,7 @@ class Configuration {
     FavoritesService.instance.clearCache();
     MemoriesService.instance.clearCache();
     BillingService.instance.clearCache();
+    SearchService.instance.clearCache();
     Bus.instance.fire(UserLoggedOutEvent());
   }
 
