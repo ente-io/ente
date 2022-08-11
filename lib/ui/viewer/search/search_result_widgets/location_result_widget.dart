@@ -6,7 +6,7 @@ import 'package:photos/ui/viewer/search/collections/files_in_location_page.dart'
 import 'package:photos/utils/navigation_util.dart';
 
 class LocationSearchResultWidget extends StatelessWidget {
-  static const String kTagPrefix = "location_search";
+  static const String _tagPrefix = "location_search";
 
   final LocationSearchResult locationSearchResult;
   const LocationSearchResultWidget(this.locationSearchResult, {Key key})
@@ -15,7 +15,7 @@ class LocationSearchResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final noOfMemories = locationSearchResult.files.length;
-    final heroTagPrefix = kTagPrefix + locationSearchResult.location;
+    final heroTagPrefix = _tagPrefix + locationSearchResult.location;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
