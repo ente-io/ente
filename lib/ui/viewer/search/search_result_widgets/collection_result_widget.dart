@@ -80,8 +80,11 @@ class AlbumSearchResultWidget extends StatelessWidget {
                 child: SizedBox(
                   height: 50,
                   width: 50,
-                  child: ThumbnailWidget(
-                    albumSearchResult.collectionWithThumbnail.thumbnail,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: ThumbnailWidget(
+                      albumSearchResult.collectionWithThumbnail.thumbnail,
+                    ),
                   ),
                 ),
               )

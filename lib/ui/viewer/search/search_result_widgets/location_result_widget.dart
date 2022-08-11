@@ -68,7 +68,10 @@ class LocationSearchResultWidget extends StatelessWidget {
                 child: SizedBox(
                   height: 50,
                   width: 50,
-                  child: ThumbnailWidget(locationSearchResult.files[0]),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: ThumbnailWidget(locationSearchResult.files[0]),
+                  ),
                 ),
               ),
             ],

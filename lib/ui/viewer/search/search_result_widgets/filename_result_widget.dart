@@ -47,7 +47,10 @@ class FileSearchResultWidget extends StatelessWidget {
                 child: SizedBox(
                   height: 50,
                   width: 50,
-                  child: ThumbnailWidget(matchedFile.file),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(3),
+                    child: ThumbnailWidget(matchedFile.file),
+                  ),
                 ),
               ),
             ],
