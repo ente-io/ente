@@ -26,7 +26,7 @@ import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import { CustomError } from 'utils/error';
 import isElectron from 'is-electron';
-import desktopService from 'services/desktopService';
+import safeStorageService from 'services/electron/safeStorage';
 import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
 import { Input } from '@mui/material';
@@ -44,7 +44,7 @@ export default function Credentials() {
             const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
             let key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
             if (!key && isElectron()) {
-                key = await desktopService.getEncryptionKey();
+                key = await safeStorageService.getEncryptionKey();
                 if (key) {
                     await saveKeyInSessionStore(
                         SESSION_KEYS.ENCRYPTION_KEY,

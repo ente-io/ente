@@ -1,6 +1,6 @@
 import { logError } from 'utils/sentry';
 
-class DesktopService {
+class SafeStorageService {
     private ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
     constructor() {
@@ -34,8 +34,8 @@ class DesktopService {
                 return await this.ElectronAPIs.clearElectronStore();
             }
         } catch (e) {
-            logError(e, 'getEncryptionKey failed');
+            logError(e, 'clearElectronStore failed');
         }
     }
 }
-export default new DesktopService();
+export default new SafeStorageService();
