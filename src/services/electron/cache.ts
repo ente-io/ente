@@ -6,7 +6,7 @@ class ElectronCacheService {
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.openLocalCache;
+        this.allElectronAPIsExist = !!this.ElectronAPIs?.openDiskCache;
     }
     async open(cacheName: string): Promise<Cache> {
         if (this.allElectronAPIsExist) {

@@ -7,7 +7,7 @@ class ElectronService {
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.isBundledApp = !!this.ElectronAPIs?.openLocalCache;
+        this.isBundledApp = !!this.ElectronAPIs?.openDiskCache;
     }
 
     checkIsBundledApp() {
