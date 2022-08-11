@@ -39,6 +39,7 @@ class SearchSuggestionsWidget extends StatelessWidget {
               maxHeight: MediaQuery.of(context).size.height * 0.5,
             ),
             child: ListView.builder(
+              physics: const ClampingScrollPhysics(),
               shrinkWrap: true,
               itemCount: results.length + 1,
               itemBuilder: (context, index) {
