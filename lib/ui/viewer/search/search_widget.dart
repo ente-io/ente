@@ -30,15 +30,11 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
       tag: "search_icon",
       child: IconButton(
         onPressed: () {
-          setState(
-            () {
-              Navigator.push(
-                context,
-                TransparentRoute(
-                  builder: (BuildContext context) => const SearchWidget(),
-                ),
-              );
-            },
+          Navigator.push(
+            context,
+            TransparentRoute(
+              builder: (BuildContext context) => const SearchWidget(),
+            ),
           );
         },
         icon: const Icon(Icons.search),
@@ -64,65 +60,59 @@ class _SearchWidgetState extends State<SearchWidget> {
         child: Column(
           children: [
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Flexible(
-                  child: Container(
-                    color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                    child: TextFormField(
-                      style: Theme.of(context).textTheme.subtitle1,
-                      decoration: InputDecoration(
-                        hintText: 'Search for albums, locations & files',
-                        filled: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        border: UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        focusedBorder: const UnderlineInputBorder(
-                          borderSide: BorderSide.none,
-                        ),
-                        prefixIcon: Hero(
-                          tag: "search_icon",
-                          child: Icon(
-                            Icons.search,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .iconColor
-                                .withOpacity(0.5),
-                          ),
-                        ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(
-                            Icons.close,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .iconColor
-                                .withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                      onChanged: (value) async {
-                        final List<SearchResult> allResults =
-                            await getSearchResultsForQuery(value);
-                        if (mounted) {
-                          setState(() {
-                            results.clear();
-                            results.addAll(allResults);
-                          });
-                        }
-                      },
-                      autofocus: true,
+            Container(
+              color: Theme.of(context).colorScheme.defaultBackgroundColor,
+              child: TextFormField(
+                style: Theme.of(context).textTheme.subtitle1,
+                decoration: InputDecoration(
+                  hintText: 'Search for albums, locations & files',
+                  filled: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  prefixIcon: Hero(
+                    tag: "search_icon",
+                    child: Icon(
+                      Icons.search,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .iconColor
+                          .withOpacity(0.5),
+                    ),
+                  ),
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                      Icons.close,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .iconColor
+                          .withOpacity(0.5),
                     ),
                   ),
                 ),
-              ],
+                onChanged: (value) async {
+                  final List<SearchResult> allResults =
+                      await getSearchResultsForQuery(value);
+                  if (mounted) {
+                    setState(() {
+                      results.clear();
+                      results.addAll(allResults);
+                    });
+                  }
+                },
+                autofocus: true,
+              ),
             ),
             results.isNotEmpty
                 ? SearchSuggestionsWidget(results)
