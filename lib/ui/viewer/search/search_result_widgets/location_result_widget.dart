@@ -6,12 +6,17 @@ import 'package:photos/ui/viewer/search/collections/files_in_location_page.dart'
 import 'package:photos/utils/navigation_util.dart';
 
 class LocationSearchResultWidget extends StatelessWidget {
+  static const String kTagPrefix = "location_search";
+
   final LocationSearchResult locationSearchResult;
   const LocationSearchResultWidget(this.locationSearchResult, {Key key})
       : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final noOfMemories = locationSearchResult.files.length;
+    final heroTagPrefix = kTagPrefix + locationSearchResult.location;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -53,7 +58,7 @@ class LocationSearchResultWidget extends StatelessWidget {
                 ),
               ),
               Hero(
-                tag: "location_search" + locationSearchResult.location,
+                tag: heroTagPrefix + locationSearchResult.files[0].tag(),
                 child: SizedBox(
                   height: 50,
                   width: 50,
@@ -67,9 +72,7 @@ class LocationSearchResultWidget extends StatelessWidget {
       onTap: () {
         routeToPage(
           context,
-          FilesInLocationPage(
-            locationSearchResult: locationSearchResult,
-          ),
+          FilesInLocationPage(locationSearchResult, heroTagPrefix),
           forceCustomPageRoute: true,
         );
       },
