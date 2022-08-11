@@ -77,7 +77,7 @@ class SearchService {
 
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",
-        queryParameters: {"query": query, "limit": 4},
+        queryParameters: {"query": query, "limit": 10},
         options: Options(
           headers: {"X-Auth-Token": _config.getToken()},
         ),
