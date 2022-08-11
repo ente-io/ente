@@ -6,7 +6,7 @@ import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/filename_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/file_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
 
 class SearchSuggestionsWidget extends StatelessWidget {
