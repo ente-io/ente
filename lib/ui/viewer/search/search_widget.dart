@@ -29,15 +29,11 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
       tag: "search_icon",
       child: IconButton(
         onPressed: () {
-          setState(
-            () {
-              Navigator.push(
-                context,
-                TransparentRoute(
-                  builder: (BuildContext context) => const SearchWidget(),
-                ),
-              );
-            },
+          Navigator.push(
+            context,
+            TransparentRoute(
+              builder: (BuildContext context) => const SearchWidget(),
+            ),
           );
         },
         icon: const Icon(Icons.search),
