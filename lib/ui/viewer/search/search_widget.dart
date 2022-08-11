@@ -136,6 +136,15 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
 
+    final queryAsInt = int.tryParse(query);
+    if (isYearValid(queryAsInt)) {
+      final yearResults =
+          await SearchService.instance.getYearSearchResults(queryAsInt);
+      if (yearResults.isNotEmpty) {
+        allResults.add(YearSearchResult(queryAsInt, yearResults));
+      }
+    }
+
     final collectionResults =
         await SearchService.instance.getCollectionSearchResults(query);
     for (CollectionWithThumbnail collectionResult in collectionResults) {
@@ -154,14 +163,6 @@ class _SearchWidgetState extends State<SearchWidget> {
       allResults.add(FileSearchResult(file));
     }
 
-    final queryAsInt = int.tryParse(query);
-    if (isYearValid(queryAsInt)) {
-      final yearResults =
-          await SearchService.instance.getYearSearchResults(queryAsInt);
-      if (yearResults.isNotEmpty) {
-        allResults.add(YearSearchResult(queryAsInt, yearResults));
-      }
-    }
     return allResults;
   }
 
