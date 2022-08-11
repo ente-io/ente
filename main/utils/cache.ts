@@ -28,7 +28,12 @@ export async function openDiskCache(cacheName: string) {
 
 export async function deleteDiskCache(cacheName: string) {
     const cacheBucketDir = await getCacheBucketDir(cacheName);
-    rmSync(cacheBucketDir, { recursive: true, force: true });
+    if (existsSync(cacheBucketDir)) {
+        rmSync(cacheBucketDir, { recursive: true, force: true });
+        return true;
+    } else {
+        return false;
+    }
 }
 
 class DiskCache {
