@@ -57,10 +57,10 @@ class SearchService {
     final List<File> matchedFiles = [];
     final List<File> files = await getAllFiles();
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
-    for (int i = 0;
-        (i < files.length) && (matchedFiles.length < _maximumResultsLimit);
-        i++) {
-      final File file = files[i];
+    for (File file in files) {
+      if (matchedFiles.length >= _maximumResultsLimit) {
+        break;
+      }
       if (file.title.contains(nonCaseSensitiveRegexForQuery)) {
         matchedFiles.add(file);
       }
@@ -128,15 +128,15 @@ class SearchService {
     final List<CollectionWithThumbnail> filteredCollectionsWithThumbnail = [];
 
     for (File file in latestCollectionFiles) {
+      if (filteredCollectionsWithThumbnail.length >= _maximumResultsLimit) {
+        break;
+      }
       final Collection collection =
           CollectionsService.instance.getCollectionByID(file.collectionID);
       if (!collection.isArchived() &&
           collection.name.contains(nonCaseSensitiveRegexForQuery)) {
         filteredCollectionsWithThumbnail
             .add(CollectionWithThumbnail(collection, file));
-      }
-      if (filteredCollectionsWithThumbnail.length > _maximumResultsLimit) {
-        break;
       }
     }
 
