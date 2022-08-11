@@ -71,9 +71,9 @@ class SearchService {
   Future<List<LocationSearchResult>> getLocationSearchResults(
     String query,
   ) async {
+    final List<LocationSearchResult> locationSearchResults = [];
     try {
       final List<File> allFiles = await SearchService.instance.getAllFiles();
-      final List<LocationSearchResult> locationSearchResults = [];
 
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",
@@ -105,11 +105,10 @@ class SearchService {
           );
         }
       }
-      return locationSearchResults;
-    } on DioError catch (e) {
-      _logger.info(e);
-      rethrow;
+    } catch (e) {
+      _logger.severe(e);
     }
+    return locationSearchResults;
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
