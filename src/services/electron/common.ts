@@ -2,7 +2,7 @@ import isElectron from 'is-electron';
 import { runningInBrowser } from 'utils/common';
 
 class ElectronService {
-    ElectronAPIs: any;
+    private ElectronAPIs: any;
     private isBundledApp: boolean = false;
 
     constructor() {
