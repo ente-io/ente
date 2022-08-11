@@ -96,6 +96,9 @@ class SearchService {
             filesInLocation.add(file);
           }
         }
+        filesInLocation.sort(
+          (first, second) => second.creationTime.compareTo(first.creationTime),
+        );
         if (filesInLocation.isNotEmpty) {
           locationSearchResults.add(
             LocationSearchResult(locationData.place, filesInLocation),
