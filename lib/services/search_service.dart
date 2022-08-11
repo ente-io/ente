@@ -15,7 +15,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 
 class SearchService {
-  List<File> _cachedFiles;
   Future<List<File>> _future;
   final _dio = Network.instance.getDio();
   final _config = Configuration.instance;
@@ -37,19 +36,16 @@ class SearchService {
     });
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _cachedFiles = null;
+      _future = null;
       getAllFiles();
     });
   }
 
   Future<List<File>> getAllFiles() async {
-    if (_cachedFiles != null) {
-      return _cachedFiles;
-    }
     if (_future != null) {
       return _future;
     }
-    _future = _fetchAllFiles();
+    _future = FilesDB.instance.getAllFilesFromDB();
     return _future;
   }
 
@@ -69,7 +65,7 @@ class SearchService {
   }
 
   void clearCache() {
-    _cachedFiles.clear();
+    _future = null;
   }
 
   Future<List<LocationSearchResult>> getLocationSearchResults(
@@ -159,10 +155,5 @@ class SearchService {
         location.latitude > locationData.bbox[1] &&
         location.longitude < locationData.bbox[2] &&
         location.latitude < locationData.bbox[3];
-  }
-
-  Future<List<File>> _fetchAllFiles() async {
-    _cachedFiles = await FilesDB.instance.getAllFilesFromDB();
-    return _cachedFiles;
   }
 }
