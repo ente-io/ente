@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
-import { readFile, writeFile, existsSync, mkdir } from 'promise-fs';
+import { readFile, writeFile, existsSync, mkdir, rmSync } from 'promise-fs';
 import crypto from 'crypto';
 import DiskLRUService from './diskLRU';
 
@@ -12,13 +12,18 @@ const getCacheDir = async () => {
     return path.join(systemCacheDir, CACHE_DIR);
 };
 
-export async function openLocalCache(cacheName: string) {
+export async function openDiskCache(cacheName: string) {
     const cacheDir = await getCacheDir();
     const cacheBucketDir = path.join(cacheDir, cacheName);
     if (!existsSync(cacheBucketDir)) {
         await mkdir(cacheBucketDir, { recursive: true });
     }
     return new DiskCache(cacheBucketDir);
+}
+
+export async function clearDiskCache() {
+    const cacheDir = await getCacheDir();
+    rmSync(cacheDir, { recursive: true, force: true });
 }
 
 class DiskCache {
