@@ -27,25 +27,31 @@ class FileSearchResultWidget extends StatelessWidget {
                 "file_details",
               ),
               const SizedBox(width: 12),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'File',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.subTextColor,
-                      ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'File',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.subTextColor,
                     ),
-                    const SizedBox(height: 6),
-                    Text(
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    width: 220,
+                    child: Text(
                       matchedFile.file.title,
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.subTextColor,
               ),
             ],
           ),

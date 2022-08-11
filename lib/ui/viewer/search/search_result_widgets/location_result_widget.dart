@@ -32,41 +32,44 @@ class LocationSearchResultWidget extends StatelessWidget {
                 heroTagPrefix,
               ),
               const SizedBox(width: 12),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Location',
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Location',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.subTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    locationSearchResult.location,
+                    style: const TextStyle(fontSize: 18),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  RichText(
+                    text: TextSpan(
                       style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.subTextColor,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .searchResultsCountTextColor,
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      locationSearchResult.location,
-                      style: const TextStyle(fontSize: 18),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .searchResultsCountTextColor,
+                      children: [
+                        TextSpan(text: noOfMemories.toString()),
+                        TextSpan(
+                          text: noOfMemories != 1 ? ' memories' : ' memory',
                         ),
-                        children: [
-                          TextSpan(text: noOfMemories.toString()),
-                          TextSpan(
-                            text: noOfMemories != 1 ? ' memories' : ' memory',
-                          ),
-                        ],
-                      ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.subTextColor,
               ),
             ],
           ),

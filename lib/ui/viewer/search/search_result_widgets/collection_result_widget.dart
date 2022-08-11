@@ -21,7 +21,7 @@ class AlbumSearchResultWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SearchResultThumbnailWidget(
@@ -29,55 +29,57 @@ class AlbumSearchResultWidget extends StatelessWidget {
                 "collection_search",
               ),
               const SizedBox(width: 16),
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Album',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).colorScheme.subTextColor,
-                      ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Album',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.subTextColor,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      albumSearchResult.collectionWithThumbnail.collection.name,
-                      style: const TextStyle(fontSize: 18),
-                      overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    albumSearchResult.collectionWithThumbnail.collection.name,
+                    style: const TextStyle(fontSize: 18),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  FutureBuilder<int>(
+                    future: FilesDB.instance.collectionFileCount(
+                      albumSearchResult.collectionWithThumbnail.collection.id,
                     ),
-                    const SizedBox(height: 2),
-                    FutureBuilder<int>(
-                      future: FilesDB.instance.collectionFileCount(
-                        albumSearchResult.collectionWithThumbnail.collection.id,
-                      ),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data > 0) {
-                          final noOfMemories = snapshot.data;
-                          return RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .searchResultsCountTextColor,
-                              ),
-                              children: [
-                                TextSpan(text: noOfMemories.toString()),
-                                TextSpan(
-                                  text: noOfMemories != 1
-                                      ? ' memories'
-                                      : ' memory',
-                                ),
-                              ],
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data > 0) {
+                        final noOfMemories = snapshot.data;
+                        return RichText(
+                          text: TextSpan(
+                            style: TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .searchResultsCountTextColor,
                             ),
-                          );
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    ),
-                  ],
-                ),
+                            children: [
+                              TextSpan(text: noOfMemories.toString()),
+                              TextSpan(
+                                text:
+                                    noOfMemories != 1 ? ' memories' : ' memory',
+                              ),
+                            ],
+                          ),
+                        );
+                      } else {
+                        return const SizedBox.shrink();
+                      }
+                    },
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.subTextColor,
               ),
             ],
           ),
