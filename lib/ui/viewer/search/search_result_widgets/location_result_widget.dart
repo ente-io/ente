@@ -53,7 +53,7 @@ class LocationSearchResultWidget extends StatelessWidget {
                 ),
               ),
               Hero(
-                tag: "location_search" + locationSearchResult.files[0].tag(),
+                tag: "location_search" + locationSearchResult.location,
                 child: SizedBox(
                   height: 50,
                   width: 50,
@@ -70,6 +70,7 @@ class LocationSearchResultWidget extends StatelessWidget {
           FilesInLocationPage(
             locationSearchResult: locationSearchResult,
           ),
+          forceCustomPageRoute: true,
         );
       },
     );
