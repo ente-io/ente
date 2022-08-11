@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/search/collections/files_from_year_page.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class YearSearchResultWidget extends StatelessWidget {
+  static const String _tagPrefix = "year_search";
+
   final YearSearchResult yearSearchResult;
   const YearSearchResultWidget(this.yearSearchResult, {Key key})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
     final noOfMemories = yearSearchResult.files.length;
+    final heroTagPrefix = _tagPrefix + yearSearchResult.year.toString();
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -51,7 +56,7 @@ class YearSearchResultWidget extends StatelessWidget {
                 ),
               ),
               Hero(
-                tag: "year_search" + yearSearchResult.files[0].tag(),
+                tag: heroTagPrefix + yearSearchResult.files[0].tag(),
                 child: SizedBox(
                   height: 50,
                   width: 50,
@@ -63,12 +68,10 @@ class YearSearchResultWidget extends StatelessWidget {
         ),
       ),
       onTap: () {
-        // routeToPage(
-        //   context,
-        //   FilesInLocationPage(
-        //     yearSearchResult: yearSearchResult,
-        //   ),
-        // );
+        routeToPage(
+          context,
+          FilesFromYearPage(yearSearchResult, heroTagPrefix),
+        );
       },
     );
   }
