@@ -1,3 +1,4 @@
+import { getCacheProvider } from 'services/cacheService';
 import { compose, Matrix, scale, translate } from 'transformation-matrix';
 import { BlobOptions, Dimensions } from 'types/image';
 import {
@@ -43,7 +44,7 @@ export async function storeFaceCropForBlob(
 ) {
     const faceCropUrl = `/${faceId}`;
     const faceCropResponse = new Response(faceCropBlob);
-    const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
+    const faceCropCache = await getCacheProvider().open(FACE_CROPS_CACHE_NAME);
     await faceCropCache.put(faceCropUrl, faceCropResponse);
     return {
         imageUrl: faceCropUrl,
@@ -104,7 +105,7 @@ export async function removeOldFaceCrops(
 
 export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
     console.log('Removing face crop urls: ', faceCropUrls);
-    const faceCropCache = await caches.open(FACE_CROPS_CACHE_NAME);
+    const faceCropCache = await getCacheProvider().open(FACE_CROPS_CACHE_NAME);
     const urlRemovalPromises = faceCropUrls?.map((url) =>
         faceCropCache.delete(url)
     );

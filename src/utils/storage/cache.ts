@@ -1,9 +1,11 @@
+import { getCacheProvider } from 'services/cacheService';
+
 export async function cached(
     cacheName: string,
     id: string,
     get: () => Promise<Blob>
 ): Promise<Blob> {
-    const cache = await caches.open(cacheName);
+    const cache = await getCacheProvider().open(cacheName);
     const cacheResponse = await cache.match(id);
 
     let result: Blob;
@@ -27,7 +29,7 @@ export async function getBlobFromCache(
     cacheName: string,
     url: string
 ): Promise<Blob> {
-    const cache = await caches.open(cacheName);
+    const cache = await getCacheProvider().open(cacheName);
     const response = await cache.match(url);
 
     return response.blob();
