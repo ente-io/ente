@@ -20,8 +20,10 @@ class SearchSuggestionsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
+        margin: const EdgeInsets.only(top: 8),
         decoration: BoxDecoration(
-          color: Colors.transparent,
+          color: Theme.of(context).colorScheme.searchResultsColor,
+          borderRadius: BorderRadius.circular(8),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.2),
@@ -34,11 +36,12 @@ class SearchSuggestionsWidget extends StatelessWidget {
         child: ClipRRect(
           borderRadius: const BorderRadius.all(Radius.circular(8)),
           child: Container(
-            margin: const EdgeInsets.only(top: 8),
+            margin: const EdgeInsets.only(top: 6),
             constraints: BoxConstraints(
               maxHeight: MediaQuery.of(context).size.height * 0.5,
             ),
             child: ListView.builder(
+              physics: const ClampingScrollPhysics(),
               shrinkWrap: true,
               itemCount: results.length + 1,
               itemBuilder: (context, index) {

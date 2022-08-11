@@ -3,7 +3,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class FileSearchResultWidget extends StatelessWidget {
@@ -19,34 +19,39 @@ class FileSearchResultWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'File',
-                      style: TextStyle(fontSize: 12),
+              SearchResultThumbnailWidget(
+                matchedFile.file,
+                "file_details",
+              ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'File',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.subTextColor,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
+                  ),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    width: 220,
+                    child: Text(
                       matchedFile.file.title,
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const Text('1 memory')
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Hero(
-                tag: "file_details" + matchedFile.file.tag(),
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ThumbnailWidget(matchedFile.file),
-                ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.subTextColor,
               ),
             ],
           ),

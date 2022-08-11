@@ -64,7 +64,7 @@ class _SearchWidgetState extends State<SearchWidget> {
               child: TextFormField(
                 style: Theme.of(context).textTheme.subtitle1,
                 decoration: InputDecoration(
-                  hintText: 'Search for albums, locations & files',
+                  hintText: 'Search for albums, places & files',
                   filled: true,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -125,15 +125,15 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
 
-    final collectionResults =
-        await SearchService.instance.getCollectionSearchResults(query);
-    for (CollectionWithThumbnail collectionResult in collectionResults) {
-      allResults.add(AlbumSearchResult(collectionResult));
-    }
     final locationResults =
         await SearchService.instance.getLocationSearchResults(query);
     for (LocationSearchResult result in locationResults) {
       allResults.add(result);
+    }
+    final collectionResults =
+        await SearchService.instance.getCollectionSearchResults(query);
+    for (CollectionWithThumbnail collectionResult in collectionResults) {
+      allResults.add(AlbumSearchResult(collectionResult));
     }
     final fileResults =
         await SearchService.instance.getFileSearchResults(query);

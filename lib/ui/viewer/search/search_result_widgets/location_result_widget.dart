@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/location_search_result.dart';
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/search/collections/files_in_location_page.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LocationSearchResultWidget extends StatelessWidget {
@@ -24,46 +24,52 @@ class LocationSearchResultWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Location',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      locationSearchResult.location,
-                      style: const TextStyle(fontSize: 18),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.defaultTextColor,
-                        ),
-                        children: [
-                          TextSpan(text: noOfMemories.toString()),
-                          TextSpan(
-                            text: noOfMemories != 1 ? ' memories' : ' memory',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              SearchResultThumbnailWidget(
+                locationSearchResult.files[0],
+                heroTagPrefix,
               ),
-              Hero(
-                tag: heroTagPrefix + locationSearchResult.files[0].tag(),
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ThumbnailWidget(locationSearchResult.files[0]),
-                ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Location',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.subTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    locationSearchResult.location,
+                    style: const TextStyle(fontSize: 18),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .searchResultsCountTextColor,
+                      ),
+                      children: [
+                        TextSpan(text: noOfMemories.toString()),
+                        TextSpan(
+                          text: noOfMemories != 1 ? ' memories' : ' memory',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.subTextColor,
               ),
             ],
           ),
