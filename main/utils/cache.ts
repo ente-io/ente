@@ -26,7 +26,7 @@ export async function openDiskCache(cacheName: string) {
     return new DiskCache(cacheBucketDir);
 }
 
-export async function clearDiskCache(cacheName: string) {
+export async function deleteDiskCache(cacheName: string) {
     const cacheBucketDir = await getCacheBucketDir(cacheName);
     rmSync(cacheBucketDir, { recursive: true, force: true });
 }

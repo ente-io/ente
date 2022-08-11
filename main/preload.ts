@@ -12,7 +12,7 @@ import { logError } from './utils/logging';
 import { ElectronFile } from './types';
 import { getEncryptionKey, setEncryptionKey } from './utils/safeStorage';
 import { clearElectronStore } from './utils/electronStore';
-import { openDiskCache, clearDiskCache } from './utils/cache';
+import { openDiskCache, deleteDiskCache } from './utils/cache';
 
 // Patch the global WebSocket constructor to use the correct DevServer url
 const fixHotReloadNext12 = () => {
@@ -195,5 +195,5 @@ windowObject['ElectronAPIs'] = {
     setEncryptionKey,
     clearElectronStore,
     openDiskCache,
-    clearDiskCache,
+    deleteDiskCache,
 };
