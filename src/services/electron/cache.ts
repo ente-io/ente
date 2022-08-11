@@ -6,11 +6,17 @@ class ElectronCacheService {
 
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.openLocalCache;
+        this.allElectronAPIsExist = !!this.ElectronAPIs?.openDiskCache;
     }
-    async open(cacheName: string) {
+    async open(cacheName: string): Promise<Cache> {
         if (this.allElectronAPIsExist) {
-            return await this.ElectronAPIs.openLocalCache(cacheName);
+            return await this.ElectronAPIs.openDiskCache(cacheName);
+        }
+    }
+
+    async delete(cacheName: string): Promise<boolean> {
+        if (this.allElectronAPIsExist) {
+            return await this.ElectronAPIs.deleteDiskCache(cacheName);
         }
     }
 }
