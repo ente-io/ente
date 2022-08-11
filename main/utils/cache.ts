@@ -12,18 +12,23 @@ const getCacheDir = async () => {
     return path.join(systemCacheDir, CACHE_DIR);
 };
 
-export async function openDiskCache(cacheName: string) {
+const getCacheBucketDir = async (cacheName: string) => {
     const cacheDir = await getCacheDir();
     const cacheBucketDir = path.join(cacheDir, cacheName);
+    return cacheBucketDir;
+};
+
+export async function openDiskCache(cacheName: string) {
+    const cacheBucketDir = await getCacheBucketDir(cacheName);
     if (!existsSync(cacheBucketDir)) {
         await mkdir(cacheBucketDir, { recursive: true });
     }
     return new DiskCache(cacheBucketDir);
 }
 
-export async function clearDiskCache() {
-    const cacheDir = await getCacheDir();
-    rmSync(cacheDir, { recursive: true, force: true });
+export async function clearDiskCache(cacheName: string) {
+    const cacheBucketDir = await getCacheBucketDir(cacheName);
+    rmSync(cacheBucketDir, { recursive: true, force: true });
 }
 
 class DiskCache {
