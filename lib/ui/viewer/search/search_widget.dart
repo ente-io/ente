@@ -6,6 +6,7 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
+import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -125,21 +126,38 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
 
-    final locationResults =
-        await SearchService.instance.getLocationSearchResults(query);
-    for (LocationSearchResult result in locationResults) {
-      allResults.add(result);
+    final queryAsIntForYear = int.tryParse(query);
+    if (isYearValid(queryAsIntForYear)) {
+      final yearResults =
+          await SearchService.instance.getYearSearchResults(queryAsIntForYear);
+      if (yearResults.isNotEmpty) {
+        allResults.add(YearSearchResult(queryAsIntForYear, yearResults));
+      }
     }
+
     final collectionResults =
         await SearchService.instance.getCollectionSearchResults(query);
     for (CollectionWithThumbnail collectionResult in collectionResults) {
       allResults.add(AlbumSearchResult(collectionResult));
+    }
+
+    final locationResults =
+        await SearchService.instance.getLocationSearchResults(query);
+    for (LocationSearchResult result in locationResults) {
+      allResults.add(result);
     }
     final fileResults =
         await SearchService.instance.getFileSearchResults(query);
     for (File file in fileResults) {
       allResults.add(FileSearchResult(file));
     }
+
     return allResults;
+  }
+
+  bool isYearValid(int year) {
+    return year != null &&
+        year >= 1970 &&
+        year <= int.parse(DateTime.now().year.toString());
   }
 }

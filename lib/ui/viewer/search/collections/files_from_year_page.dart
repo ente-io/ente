@@ -4,22 +4,22 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
-import 'package:photos/models/search/location_search_result.dart';
+import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
-class FilesInLocationPage extends StatelessWidget {
-  final LocationSearchResult locationSearchResult;
+class FilesFromYearPage extends StatelessWidget {
+  final YearSearchResult yearSearchResult;
   final String tagPrefix;
 
   final _selectedFiles = SelectedFiles();
   static const GalleryType appBarType = GalleryType.searchResults;
   static const GalleryType overlayType = GalleryType.searchResults;
 
-  FilesInLocationPage(
-    this.locationSearchResult,
+  FilesFromYearPage(
+    this.yearSearchResult,
     this.tagPrefix, {
     Key key,
   }) : super(key: key);
@@ -28,7 +28,7 @@ class FilesInLocationPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        final result = locationSearchResult.files
+        final result = yearSearchResult.files
             .where(
               (file) =>
                   file.creationTime >= creationStartTime &&
@@ -38,7 +38,7 @@ class FilesInLocationPage extends StatelessWidget {
         return Future.value(
           FileLoadResult(
             result,
-            result.length < locationSearchResult.files.length,
+            result.length < yearSearchResult.files.length,
           ),
         );
       },
@@ -47,26 +47,17 @@ class FilesInLocationPage extends StatelessWidget {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
       },
-      forceReloadEvents: [
-        Bus.instance.on<FilesUpdatedEvent>().where(
-              (event) =>
-                  event.updatedFiles.firstWhere(
-                    (element) => element.uploadedFileID != null,
-                    orElse: () => null,
-                  ) !=
-                  null,
-            ),
-      ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
-      initialFiles: [locationSearchResult.files[0]],
+      initialFiles: [yearSearchResult.files[0]],
+      footer: const SizedBox(height: 120),
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          locationSearchResult.location,
+          yearSearchResult.year.toString(),
           _selectedFiles,
         ),
       ),

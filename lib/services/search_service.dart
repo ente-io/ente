@@ -139,6 +139,20 @@ class SearchService {
     return collectionSearchResults;
   }
 
+  Future<List<File>> getYearSearchResults(int year) async {
+    final yearInMicroseconds = DateTime.utc(year).microsecondsSinceEpoch;
+    final nextYearInMicroseconds =
+        DateTime.utc(year + 1).microsecondsSinceEpoch;
+    final yearSearchResults =
+        await FilesDB.instance.getFilesCreatedWithinDurations(
+      [
+        [yearInMicroseconds, nextYearInMicroseconds]
+      ],
+      null,
+    );
+    return yearSearchResults;
+  }
+
   bool _isValidLocation(Location location) {
     return location != null &&
         location.latitude != null &&
