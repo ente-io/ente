@@ -4,6 +4,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
+import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/models/search/year_search_result.dart';
@@ -135,6 +136,12 @@ class _SearchWidgetState extends State<SearchWidget> {
       }
     }
 
+    final holidayResults =
+        SearchService.instance.getHolidaySearchResults(query);
+    for (HolidaySearchResult holidayResult in holidayResults) {
+      allResults.add(holidayResult);
+    }
+
     final collectionResults =
         await SearchService.instance.getCollectionSearchResults(query);
     for (CollectionWithThumbnail collectionResult in collectionResults) {
@@ -146,6 +153,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     for (LocationSearchResult result in locationResults) {
       allResults.add(result);
     }
+
     final fileResults =
         await SearchService.instance.getFileSearchResults(query);
     for (File file in fileResults) {
