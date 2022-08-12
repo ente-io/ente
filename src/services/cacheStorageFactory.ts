@@ -1,10 +1,16 @@
 import { LimitedCacheStorage } from 'types/cache/index';
 import electronService from 'services/electron/common';
 import ElectronCacheStorage from 'services/electron/cache';
+import { runningInWorker } from 'utils/common';
+import { getMainThreadElectronCacheStorageRemote } from 'utils/comlink';
 
 export function getCacheStorage(): LimitedCacheStorage {
     if (electronService.checkIsBundledApp()) {
-        return ElectronCacheStorage;
+        if (runningInWorker()) {
+            return getMainThreadElectronCacheStorageRemote();
+        } else {
+            return ElectronCacheStorage;
+        }
     } else {
         return transformBrowserCacheStorageToLimitedCacheStorage(caches);
     }

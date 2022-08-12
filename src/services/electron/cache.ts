@@ -1,6 +1,6 @@
 import { LimitedCache, LimitedCacheStorage } from 'types/cache';
 
-class ElectronCacheStorage implements LimitedCacheStorage {
+export class ElectronCacheStorage implements LimitedCacheStorage {
     private ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
 
