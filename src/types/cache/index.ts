@@ -4,7 +4,7 @@ export interface LimitedCacheStorage {
 }
 
 export interface LimitedCache {
-    match: (key: string) => Promise<ArrayBuffer>;
-    put: (key: string, data: ArrayBuffer) => Promise<void>;
+    match: (key: string) => Promise<Response>;
+    put: (key: string, data: Response) => Promise<void>;
     delete: (key: string) => Promise<boolean>;
 }
