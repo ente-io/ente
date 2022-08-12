@@ -65,7 +65,7 @@ class _SearchWidgetState extends State<SearchWidget> {
               child: TextFormField(
                 style: Theme.of(context).textTheme.subtitle1,
                 decoration: InputDecoration(
-                  hintText: 'Search for albums, locations & files',
+                  hintText: 'Search for albums, places & files',
                   filled: true,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -146,7 +146,6 @@ class _SearchWidgetState extends State<SearchWidget> {
     for (LocationSearchResult result in locationResults) {
       allResults.add(result);
     }
-
     final fileResults =
         await SearchService.instance.getFileSearchResults(query);
     for (File file in fileResults) {

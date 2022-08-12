@@ -12,13 +12,12 @@ import 'package:photos/models/location.dart';
 import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/user_service.dart';
 
 class SearchService {
   Future<List<File>> _cachedFilesFuture;
   final _dio = Network.instance.getDio();
   final _config = Configuration.instance;
-  final _logger = Logger((UserService).toString());
+  final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
 
