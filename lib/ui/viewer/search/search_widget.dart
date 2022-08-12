@@ -126,12 +126,12 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
 
-    final queryAsInt = int.tryParse(query);
-    if (isYearValid(queryAsInt)) {
+    final queryAsIntForYear = int.tryParse(query);
+    if (isYearValid(queryAsIntForYear)) {
       final yearResults =
-          await SearchService.instance.getYearSearchResults(queryAsInt);
+          await SearchService.instance.getYearSearchResults(queryAsIntForYear);
       if (yearResults.isNotEmpty) {
-        allResults.add(YearSearchResult(queryAsInt, yearResults));
+        allResults.add(YearSearchResult(queryAsIntForYear, yearResults));
       }
     }
 
