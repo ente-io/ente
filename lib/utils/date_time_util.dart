@@ -41,8 +41,6 @@ Map<int, String> _days = {
   7: "Sun",
 };
 
-int currentYear = DateTime.now().year.toInt();
-
 //Jun 2022
 String getMonthAndYear(DateTime dateTime) {
   return _months[dateTime.month] + " " + dateTime.year.toString();
