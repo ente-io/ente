@@ -9,6 +9,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/models/search/holiday_data.dart';
 import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/services/collections_service.dart';
@@ -20,6 +21,12 @@ class SearchService {
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
+  static const List<HolidayData> holidays = [
+    HolidayData('Chirstmas', 11, 25),
+    HolidayData('Christmas Eve', 11, 24),
+    HolidayData('New Year', 0, 1),
+    HolidayData('New Year Eve', 11, 31),
+  ];
 
   SearchService._privateConstructor();
   static final SearchService instance = SearchService._privateConstructor();
