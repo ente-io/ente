@@ -1,4 +1,6 @@
-class ElectronCacheService {
+import { LimitedCache, LimitedCacheStorage } from 'types/cache';
+
+class ElectronCacheStorage implements LimitedCacheStorage {
     private ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
 
@@ -6,7 +8,8 @@ class ElectronCacheService {
         this.ElectronAPIs = globalThis['ElectronAPIs'];
         this.allElectronAPIsExist = !!this.ElectronAPIs?.openDiskCache;
     }
-    async open(cacheName: string): Promise<Cache> {
+
+    async open(cacheName: string): Promise<LimitedCache> {
         if (this.allElectronAPIsExist) {
             return await this.ElectronAPIs.openDiskCache(cacheName);
         }
@@ -19,4 +22,4 @@ class ElectronCacheService {
     }
 }
 
-export default new ElectronCacheService();
+export default new ElectronCacheStorage();
