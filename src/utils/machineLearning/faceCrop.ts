@@ -1,4 +1,3 @@
-import { getCacheProvider } from 'services/cacheService';
 import { compose, Matrix, scale, translate } from 'transformation-matrix';
 import { BlobOptions, Dimensions } from 'types/image';
 import {
@@ -12,7 +11,7 @@ import {
     FaceDetection,
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
-import { getBlobFromCache } from 'utils/storage/cache';
+import { getBlobFromCache, openCache } from 'utils/storage/cache';
 import { enlargeBox } from '.';
 import { Box } from '../../../thirdparty/face-api/classes';
 import { getAlignedFaceBox } from './faceAlign';
@@ -44,7 +43,7 @@ export async function storeFaceCropForBlob(
 ) {
     const faceCropUrl = `/${faceId}`;
     const faceCropResponse = new Response(faceCropBlob);
-    const faceCropCache = await getCacheProvider().open(FACE_CROPS_CACHE_NAME);
+    const faceCropCache = await openCache(FACE_CROPS_CACHE_NAME);
     await faceCropCache.put(faceCropUrl, faceCropResponse);
     return {
         imageUrl: faceCropUrl,
@@ -105,7 +104,7 @@ export async function removeOldFaceCrops(
 
 export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
     console.log('Removing face crop urls: ', faceCropUrls);
-    const faceCropCache = await getCacheProvider().open(FACE_CROPS_CACHE_NAME);
+    const faceCropCache = await openCache(FACE_CROPS_CACHE_NAME);
     const urlRemovalPromises = faceCropUrls?.map((url) =>
         faceCropCache.delete(url)
     );

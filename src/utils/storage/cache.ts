@@ -1,11 +1,12 @@
-import { getCacheProvider } from 'services/cacheService';
+import { getCacheStorage } from 'services/cacheStorageFactory';
+import { logError } from 'utils/sentry';
 
 export async function cached(
     cacheName: string,
     id: string,
     get: () => Promise<Blob>
 ): Promise<Blob> {
-    const cache = await getCacheProvider().open(cacheName);
+    const cache = await openCache(cacheName);
     const cacheResponse = await cache.match(id);
 
     let result: Blob;
@@ -29,8 +30,23 @@ export async function getBlobFromCache(
     cacheName: string,
     url: string
 ): Promise<Blob> {
-    const cache = await getCacheProvider().open(cacheName);
+    const cache = await openCache(cacheName);
     const response = await cache.match(url);
 
     return response.blob();
+}
+
+export async function openCache(cacheName: string) {
+    try {
+        return await getCacheStorage().open(cacheName);
+    } catch (e) {
+        logError(e, 'openCache failed'); // log and ignore
+    }
+}
+export async function deleteCache(cacheName: string) {
+    try {
+        return await getCacheStorage().delete(cacheName);
+    } catch (e) {
+        logError(e, 'deleteCache failed'); // log and ignore
+    }
 }

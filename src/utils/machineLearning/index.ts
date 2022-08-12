@@ -369,7 +369,7 @@ export async function getOriginalImageBitmap(
     let fileBlob;
 
     if (useCache) {
-        fileBlob = await cached('files', '/' + file.id.toString(), () => {
+        fileBlob = await cached('files', file.id.toString(), () => {
             return getOriginalConvertedFile(file, token, enteWorker, queue);
         });
     } else {

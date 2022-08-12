@@ -11,7 +11,8 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
-import { openThumbnailCache } from './cacheService';
+import { openCache } from 'utils/storage/cache';
+import { THUMB_CACHE_NAME } from 'constants/cache';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
@@ -29,10 +30,10 @@ class DownloadManager {
             }
             if (!this.thumbnailObjectURLPromise.get(file.id)) {
                 const downloadPromise = async () => {
-                    const thumbnailCache = await openThumbnailCache();
+                    const thumbnailCache = await openCache(THUMB_CACHE_NAME);
 
                     const cacheResp: Response = await thumbnailCache?.match(
-                        '/' + file.id.toString()
+                        file.id.toString()
                     );
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
