@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/year_search_result.dart';
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/search/collections/files_from_year_page.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class YearSearchResultWidget extends StatelessWidget {
@@ -15,6 +15,7 @@ class YearSearchResultWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final noOfMemories = yearSearchResult.files.length;
     final heroTagPrefix = _tagPrefix + yearSearchResult.year.toString();
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -25,43 +26,49 @@ class YearSearchResultWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Flexible(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Year',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      yearSearchResult.year.toString(),
-                      style: const TextStyle(fontSize: 18),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.defaultTextColor,
-                        ),
-                        children: [
-                          TextSpan(text: noOfMemories.toString()),
-                          TextSpan(
-                            text: noOfMemories != 1 ? ' memories' : ' memory',
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              SearchResultThumbnailWidget(
+                yearSearchResult.files[0],
+                heroTagPrefix,
               ),
-              Hero(
-                tag: heroTagPrefix + yearSearchResult.files[0].tag(),
-                child: SizedBox(
-                  height: 50,
-                  width: 50,
-                  child: ThumbnailWidget(yearSearchResult.files[0]),
-                ),
+              const SizedBox(width: 16),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Year',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.subTextColor,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    yearSearchResult.year.toString(),
+                    style: const TextStyle(fontSize: 18),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  RichText(
+                    text: TextSpan(
+                      style: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .searchResultsCountTextColor,
+                      ),
+                      children: [
+                        TextSpan(text: noOfMemories.toString()),
+                        TextSpan(
+                          text: noOfMemories != 1 ? ' memories' : ' memory',
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              Icon(
+                Icons.chevron_right,
+                color: Theme.of(context).colorScheme.subTextColor,
               ),
             ],
           ),
@@ -71,6 +78,7 @@ class YearSearchResultWidget extends StatelessWidget {
         routeToPage(
           context,
           FilesFromYearPage(yearSearchResult, heroTagPrefix),
+          forceCustomPageRoute: true,
         );
       },
     );
