@@ -2,7 +2,8 @@ import { expose, wrap } from 'comlink';
 import { EnteFile } from 'types/file';
 import mlService from 'services/machineLearning/machineLearningService';
 import { MachineLearningWorker } from 'types/machineLearning';
-import { setupResponseComlinkTransferHandler } from 'utils/comlink';
+import ElectronCacheStorageProxy from './electronCacheStorage.proxy';
+// import { setupResponseComlinkTransferHandler } from 'utils/comlink';
 
 export class DedicatedMLWorker implements MachineLearningWorker {
     constructor() {
@@ -10,14 +11,13 @@ export class DedicatedMLWorker implements MachineLearningWorker {
     }
 
     public async init() {
-        const ElectronCacheStorageProxy = wrap(self) as any;
+        const electronCacheStorageProxy =
+            wrap<typeof ElectronCacheStorageProxy>(self);
         const proxiedElectronCacheService =
-            await new ElectronCacheStorageProxy();
+            await new electronCacheStorageProxy();
 
         const cacheProxy = await proxiedElectronCacheService.open('thumbs');
-        // const cache = await cacheProxy;
-        // const cacheMatch = await cache.match;
-        // console.log('worker init openDiskCache', cache);
+
         const thumb = await cacheProxy.match('13578875');
         console.log('worker init cache.match', thumb);
     }
@@ -45,4 +45,4 @@ export class DedicatedMLWorker implements MachineLearningWorker {
 
 expose(DedicatedMLWorker, self);
 
-setupResponseComlinkTransferHandler();
+// setupResponseComlinkTransferHandler();

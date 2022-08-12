@@ -20,21 +20,21 @@ const getDedicatedFFmpegWorker = (): ComlinkWorker => {
 
 export const getMainThreadElectronCacheStorageRemote = () => {
     if (runningInWorker()) {
-        setupResponseComlinkTransferHandler();
+        // setupResponseComlinkTransferHandler();
         return Comlink.wrap<ElectronCacheStorage>(self);
     }
 };
 
 export const FFmpegWorker: any = getDedicatedFFmpegWorker()?.comlink;
 
-export const setupResponseComlinkTransferHandler = () => {
-    const transferHandler: Comlink.TransferHandler<Response, ArrayBuffer> = {
-        canHandle: (obj: unknown): obj is Response => obj instanceof Response,
-        serialize: (response: Response) => [
-            response.arrayBuffer() as unknown as ArrayBuffer,
-            [],
-        ],
-        deserialize: (arrayBuffer: ArrayBuffer) => new Response(arrayBuffer),
-    };
-    Comlink.transferHandlers.set('RESPONSE', transferHandler);
-};
+// export const setupResponseComlinkTransferHandler = () => {
+//     const transferHandler: Comlink.TransferHandler<Response, ArrayBuffer> = {
+//         canHandle: (obj: unknown): obj is Response => obj instanceof Response,
+//         serialize: (response: Response) => [
+//             response.arrayBuffer() as unknown as ArrayBuffer,
+//             [],
+//         ],
+//         deserialize: (arrayBuffer: ArrayBuffer) => new Response(arrayBuffer),
+//     };
+//     Comlink.transferHandlers.set('RESPONSE', transferHandler);
+// };
