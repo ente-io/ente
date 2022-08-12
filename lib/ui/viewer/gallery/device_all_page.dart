@@ -34,7 +34,6 @@ class DeviceAllPage extends StatelessWidget {
       tagPrefix: "device_all",
       selectedFiles: _selectedFiles,
       initialFiles: null,
-      footer: const SizedBox(height: 120),
     );
     return Scaffold(
       appBar: PreferredSize(

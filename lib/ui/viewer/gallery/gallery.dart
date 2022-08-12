@@ -46,7 +46,7 @@ class Gallery extends StatefulWidget {
     this.forceReloadEvents,
     this.removalEventTypes = const {},
     this.header,
-    this.footer,
+    this.footer = const SizedBox(height: 120),
     this.smallerTodayFont = false,
     this.albumName = '',
     Key key,
