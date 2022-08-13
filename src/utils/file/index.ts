@@ -97,8 +97,7 @@ export async function downloadFile(
     let tempURL: string;
 
     if (file.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-        const originalName = fileNameWithoutExtension(file.metadata.title);
-        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+        const motionPhoto = await decodeMotionPhoto(file, fileBlob);
         const image = new File([motionPhoto.image], motionPhoto.imageNameTitle);
         const imageType = await getFileType(image);
         tempImageURL = URL.createObjectURL(
@@ -321,8 +320,7 @@ async function getRenderableLivePhoto(
     file: EnteFile,
     fileBlob: Blob
 ): Promise<Blob[]> {
-    const originalName = fileNameWithoutExtension(file.metadata.title);
-    const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+    const motionPhoto = await decodeMotionPhoto(file, fileBlob);
     const imageBlob = new Blob([motionPhoto.image]);
     return await Promise.all([
         getRenderableImage(motionPhoto.imageNameTitle, imageBlob),
