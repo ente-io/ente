@@ -7,7 +7,7 @@ import ReverseProxiedElectronCacheStorageProxy from 'worker/electronCacheStorage
 export function getCacheStorage(): LimitedCacheStorage {
     if (electronService.checkIsBundledApp()) {
         if (runningInWorker()) {
-            return ReverseProxiedElectronCacheStorageProxy;
+            return new ReverseProxiedElectronCacheStorageProxy();
         } else {
             return ElectronCacheStorage;
         }
