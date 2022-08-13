@@ -427,7 +427,7 @@ class MachineLearningService {
             ]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
-            // await this.persistMLFileData(syncContext, newMlFile);
+            await this.persistMLFileData(syncContext, newMlFile);
         } catch (e) {
             logError(e, 'ml detection failed');
             newMlFile.mlVersion = oldMlFile.mlVersion;
