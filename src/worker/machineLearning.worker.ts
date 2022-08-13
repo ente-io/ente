@@ -1,8 +1,8 @@
-import { expose, wrap } from 'comlink';
+import { expose } from 'comlink';
 import { EnteFile } from 'types/file';
 import mlService from 'services/machineLearning/machineLearningService';
 import { MachineLearningWorker } from 'types/machineLearning';
-import ElectronCacheStorageProxy from './electronCacheStorage.proxy';
+import ReverseProxiedElectronCacheStorageProxy from './electronCacheStorageProxy.proxy';
 // import { setupResponseComlinkTransferHandler } from 'utils/comlink';
 
 export class DedicatedMLWorker implements MachineLearningWorker {
@@ -11,12 +11,9 @@ export class DedicatedMLWorker implements MachineLearningWorker {
     }
 
     public async init() {
-        const electronCacheStorageProxy =
-            wrap<typeof ElectronCacheStorageProxy>(self);
-        const proxiedElectronCacheService =
-            await new electronCacheStorageProxy();
-
-        const cacheProxy = await proxiedElectronCacheService.open('thumbs');
+        const cacheProxy = await ReverseProxiedElectronCacheStorageProxy.open(
+            'thumbs'
+        );
 
         const thumb = await cacheProxy.match('13578875');
         console.log('worker init cache.match', thumb);
