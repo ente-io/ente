@@ -1,4 +1,7 @@
+import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 import { nativeImage, Tray, app, BrowserWindow, Menu } from 'electron';
+import electronReload from 'electron-reload';
+import serveNextAt from 'next-electron-server';
 import path from 'path';
 import { existsSync } from 'promise-fs';
 import appUpdater from './appUpdater';
@@ -60,4 +63,16 @@ export function setupMacWindowOnDockIconClick() {
 
 export function setupMainMenu() {
     Menu.setApplicationMenu(buildMenuBar());
+}
+
+export function setupMainHotReload() {
+    if (isDev) {
+        electronReload(__dirname, {});
+    }
+}
+
+export function setupNextElectronServe() {
+    serveNextAt(PROD_HOST_URL, {
+        outputDir: RENDERER_OUTPUT_DIR,
+    });
 }

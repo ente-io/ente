@@ -2,10 +2,6 @@ import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import initSentry from './utils/sentry';
-import electronReload from 'electron-reload';
-import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from './config';
-import { isDev } from './utils/common';
-import serveNextAt from 'next-electron-server';
 import { addAllowOriginHeader } from './utils/cors';
 import {
     setupTrayItem,
@@ -13,11 +9,9 @@ import {
     handleDownloads,
     setupMacWindowOnDockIconClick,
     setupMainMenu,
+    setupMainHotReload,
+    setupNextElectronServe,
 } from './utils/main';
-
-if (isDev) {
-    electronReload(__dirname, {});
-}
 
 let mainWindow: BrowserWindow;
 
@@ -40,9 +34,9 @@ export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
-serveNextAt(PROD_HOST_URL, {
-    outputDir: RENDERER_OUTPUT_DIR,
-});
+setupMainHotReload();
+
+setupNextElectronServe();
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
