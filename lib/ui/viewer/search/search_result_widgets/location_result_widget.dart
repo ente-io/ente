@@ -43,10 +43,13 @@ class LocationSearchResultWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    locationSearchResult.location,
-                    style: const TextStyle(fontSize: 18),
-                    overflow: TextOverflow.ellipsis,
+                  SizedBox(
+                    width: 220,
+                    child: Text(
+                      locationSearchResult.location,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   RichText(

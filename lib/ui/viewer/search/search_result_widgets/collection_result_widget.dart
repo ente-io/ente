@@ -40,10 +40,13 @@ class AlbumSearchResultWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    albumSearchResult.collectionWithThumbnail.collection.name,
-                    style: const TextStyle(fontSize: 18),
-                    overflow: TextOverflow.ellipsis,
+                  SizedBox(
+                    width: 220,
+                    child: Text(
+                      albumSearchResult.collectionWithThumbnail.collection.name,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   FutureBuilder<int>(
