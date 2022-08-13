@@ -3,7 +3,6 @@ import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
 import { EnteFile } from 'types/file';
 import { FILE_TYPE } from 'constants/file';
-import { FACE_CROPS_CACHE } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
 import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
@@ -12,6 +11,7 @@ import { logError } from 'utils/sentry';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
 import { deleteCache } from 'utils/storage/cache';
+import { FACE_CROPS_CACHE } from 'constants/cache';
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;

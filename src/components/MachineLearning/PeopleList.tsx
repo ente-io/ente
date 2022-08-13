@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Face, FACE_CROPS_CACHE, Person } from 'types/machineLearning';
+import { Face, Person } from 'types/machineLearning';
 import {
     getAllPeople,
     getPeopleList,
@@ -8,6 +8,7 @@ import {
 import styled from 'styled-components';
 import { EnteFile } from 'types/file';
 import { ImageCacheView } from './ImageViews';
+import { FACE_CROPS_CACHE } from 'constants/cache';
 
 const FaceChipContainer = styled.div`
     display: flex;
