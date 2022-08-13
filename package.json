@@ -4,7 +4,7 @@
   "version": "1.6.0-alpha.3",
   "private": true,
   "description": "Desktop client for ente.io",
-  "main": "app/index.js",
+  "main": "app/main.js",
   "build": {
     "appId": "io.ente.bhari-frame",
     "artifactName": "${productName}-${version}.${ext}",
@@ -53,12 +53,12 @@
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
-    "prebuild": "eslint \"main/**/*.{js,jsx,ts,tsx}\"",
+    "prebuild": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "prepare": "husky install",
-    "lint": "eslint -c .eslintrc --ext .ts ./main",
+    "lint": "eslint -c .eslintrc --ext .ts src",
     "watch": "tsc -w",
     "build-main": "yarn install && tsc",
-    "start-main": "yarn build-main && electron app/index.js",
+    "start-main": "yarn build-main && electron app/main.js",
     "start-renderer": "cd ui && yarn install && yarn dev",
     "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
     "build-renderer": "cd ui && yarn install && yarn build && cd ..",
@@ -101,7 +101,7 @@
     "parser": "babel-eslint"
   },
   "lint-staged": {
-    "main/**/*.{js,jsx,ts,tsx}": [
+    "src/**/*.{js,jsx,ts,tsx}": [
       "eslint --fix",
       "prettier --write --ignore-unknown"
     ]
