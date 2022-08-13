@@ -1,6 +1,5 @@
 import * as Comlink from 'comlink';
-import { runningInBrowser, runningInWorker } from 'utils/common';
-import { ElectronCacheStorage } from 'services/electron/cache';
+import { runningInBrowser } from 'utils/common';
 
 export interface ComlinkWorker {
     comlink: any;
@@ -15,13 +14,6 @@ const getDedicatedFFmpegWorker = (): ComlinkWorker => {
         );
         const comlink = Comlink.wrap(worker);
         return { comlink, worker };
-    }
-};
-
-export const getMainThreadElectronCacheStorageRemote = () => {
-    if (runningInWorker()) {
-        // setupResponseComlinkTransferHandler();
-        return Comlink.wrap<ElectronCacheStorage>(self);
     }
 };
 
