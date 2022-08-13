@@ -1,12 +1,12 @@
 import { LimitedCacheStorage } from 'types/cache/index';
-import ElectronCacheStorage from 'services/electron/cache/cache';
+import ElectronCacheStorage from 'services/electron/cache';
 import { runningInElectron, runningInWorker } from 'utils/common';
-import WorkerReverseProxyElectronCacheStorage from 'services/cache/workerReverseProxyElectronCacheStorage';
+import WorkerElectronCacheStorageService from 'services/workerElectronCache/workerElectronCacheStorageService';
 
 export function getCacheStorage(): LimitedCacheStorage {
     if (runningInElectron()) {
         if (runningInWorker()) {
-            return new WorkerReverseProxyElectronCacheStorage();
+            return new WorkerElectronCacheStorageService();
         } else {
             return ElectronCacheStorage;
         }
