@@ -1,0 +1,4 @@
+[submodule "bada-frame"]
+	path = ui
+	url = https://github.com/ente-io/bada-frame
+	branch = main

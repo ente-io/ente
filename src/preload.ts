@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import * as fs from 'promise-fs';
-import * as electron from 'electron';
+import { webFrame, ipcRenderer } from 'electron';
 import {
     getElectronFile,
     getPendingUploads,
@@ -12,8 +12,25 @@ import { logError } from './utils/logging';
 import { ElectronFile } from './types';
 import { getEncryptionKey, setEncryptionKey } from './utils/safeStorage';
 import { clearElectronStore } from './utils/electronStore';
+import { openDiskCache, deleteDiskCache } from './utils/cache';
 
-const { ipcRenderer } = electron;
+// Patch the global WebSocket constructor to use the correct DevServer url
+const fixHotReloadNext12 = () => {
+    webFrame.executeJavaScript(`Object.defineProperty(globalThis, 'WebSocket', {
+    value: new Proxy(WebSocket, {
+      construct: (Target, [url, protocols]) => {
+        if (url.endsWith('/_next/webpack-hmr')) {
+          // Fix the Next.js hmr client url
+          return new Target("ws://localhost:3000/_next/webpack-hmr", protocols)
+        } else {
+          return new Target(url, protocols)
+        }
+      }
+    })
+  });`);
+};
+
+fixHotReloadNext12();
 
 const responseToReadable = (fileStream: any) => {
     const reader = fileStream.getReader();
@@ -177,4 +194,6 @@ windowObject['ElectronAPIs'] = {
     getEncryptionKey,
     setEncryptionKey,
     clearElectronStore,
+    openDiskCache,
+    deleteDiskCache,
 };

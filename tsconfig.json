@@ -6,7 +6,7 @@
         "noImplicitAny": true,
         "sourceMap": true,
         "outDir": "app",
-        "baseUrl": "./src",
+        "baseUrl": "src",
         "paths": {
             "*": ["node_modules/*"]
         }

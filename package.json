@@ -1,7 +1,7 @@
 {
   "name": "ente",
   "productName": "ente",
-  "version": "1.5.4",
+  "version": "1.6.0-alpha.3",
   "private": true,
   "description": "Desktop client for ente.io",
   "main": "app/main.js",
@@ -20,6 +20,12 @@
       "category": "Photography"
     },
     "mac": {
+      "target": {
+        "target": "default",
+        "arch": [
+          "universal"
+        ]
+      },
       "category": "public.app-category.photography",
       "hardenedRuntime": true
     },
@@ -32,23 +38,40 @@
           "**/*"
         ]
       }
+    ],
+    "files": [
+      "app/**/*",
+      {
+        "from": "ui",
+        "to": "ui",
+        "filter": [
+          "!**/*",
+          "out/**/*"
+        ]
+      }
     ]
   },
   "scripts": {
     "postinstall": "electron-builder install-app-deps",
     "prebuild": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
-    "build": "tsc",
+    "prepare": "husky install",
+    "lint": "eslint -c .eslintrc --ext .ts src",
     "watch": "tsc -w",
-    "lint": "eslint -c .eslintrc --ext .ts ./src",
-    "start": "yarn build && electron ./app/main.js",
-    "test-release": "yarn build && electron-builder",
-    "prepare": "husky install"
+    "build-main": "yarn install && tsc",
+    "start-main": "yarn build-main && electron app/main.js",
+    "start-renderer": "cd ui && yarn install && yarn dev",
+    "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
+    "build-renderer": "cd ui && yarn install && yarn build && cd ..",
+    "build": "yarn build-renderer && yarn build-main",
+    "test-release": "yarn build && electron-builder"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
     "@sentry/cli": "^1.68.0",
+    "@types/get-folder-size": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
+    "concurrently": "^7.0.0",
     "electron": "^15.3.0",
     "electron-builder": "^23.0.3",
     "electron-builder-notarize": "^1.2.0",
@@ -69,6 +92,8 @@
     "electron-reload": "^2.0.0-alpha.1",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
+    "get-folder-size": "^2.0.1",
+    "next-electron-server": "^0.0.8",
     "node-stream-zip": "^1.15.0",
     "promise-fs": "^2.1.1"
   },
