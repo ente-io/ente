@@ -8,7 +8,7 @@ import {
     app,
 } from 'electron';
 import { createWindow } from './createWindow';
-import { buildContextMenu } from './menuUtil';
+import { buildContextMenu } from './menu';
 import { logErrorSentry } from './sentry';
 import { getFilesFromDir } from './upload';
 
