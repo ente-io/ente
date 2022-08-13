@@ -1,11 +1,10 @@
 import { LimitedCacheStorage } from 'types/cache/index';
-import electronService from 'services/electron/common';
 import ElectronCacheStorage from 'services/electron/cache';
-import { runningInWorker } from 'utils/common';
-import ReverseProxiedElectronCacheStorageProxy from 'worker/electronCacheStorageProxy.proxy';
+import { runningInElectron, runningInWorker } from 'utils/common';
+import ReverseProxiedElectronCacheStorageProxy from 'worker/electronCacheStorageProxy.worker';
 
 export function getCacheStorage(): LimitedCacheStorage {
-    if (electronService.checkIsBundledApp()) {
+    if (runningInElectron()) {
         if (runningInWorker()) {
             return new ReverseProxiedElectronCacheStorageProxy();
         } else {

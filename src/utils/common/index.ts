@@ -1,6 +1,7 @@
 import constants from 'utils/strings/constants';
 import { CustomError } from 'utils/error';
 import GetDeviceOS, { OS } from './deviceDetection';
+import isElectron from 'is-electron';
 
 const DESKTOP_APP_GITHUB_DOWNLOAD_URL =
     'https://github.com/ente-io/bhari-frame/releases/latest';
@@ -20,6 +21,10 @@ export function runningInBrowser() {
 
 export function runningInWorker() {
     return typeof importScripts === 'function';
+}
+
+export function runningInElectron() {
+    return isElectron();
 }
 
 export function runningInChrome(includeMobile: boolean) {
