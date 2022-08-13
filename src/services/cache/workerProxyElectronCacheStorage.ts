@@ -1,4 +1,4 @@
-import ElectronCacheStorage from 'services/electron/cache';
+import ElectronCacheStorage from 'services/electron/cache/cache';
 import * as Comlink from 'comlink';
 import {
     LimitedCache,
@@ -6,7 +6,7 @@ import {
     ProxiedWorkerLimitedCache,
 } from 'types/cache';
 
-export default class ElectronCacheStorageProxy
+export default class WorkerProxyElectronCacheStorage
     implements ProxiedLimitedCacheStorage
 {
     async open(cacheName: string) {

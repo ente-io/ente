@@ -1,4 +1,4 @@
-import { getCacheStorage } from 'services/cacheStorageFactory';
+import { getCacheStorage } from 'services/cache/cacheStorageFactory';
 import { logError } from 'utils/sentry';
 
 export async function cached(
