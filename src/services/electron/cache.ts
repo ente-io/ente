@@ -1,6 +1,6 @@
 import { LimitedCache, LimitedCacheStorage } from 'types/cache';
 
-export class ElectronCacheStorage implements LimitedCacheStorage {
+class ElectronCacheStorageService implements LimitedCacheStorage {
     private ElectronAPIs: any;
     private allElectronAPIsExist: boolean = false;
 
@@ -22,4 +22,4 @@ export class ElectronCacheStorage implements LimitedCacheStorage {
     }
 }
 
-export default new ElectronCacheStorage();
+export const ElectronCacheStorage = new ElectronCacheStorageService();

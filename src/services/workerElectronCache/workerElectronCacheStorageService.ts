@@ -4,13 +4,11 @@ import {
     LimitedCacheStorage,
     ProxiedWorkerLimitedCache,
 } from 'types/cache';
-import WorkerElectronCacheStorageClient from './workerElectronCacheStorageClient';
+import { WorkerElectronCacheStorageClient } from './workerElectronCacheStorageClient';
 import { wrap } from 'comlink';
 import { deserializeToResponse, serializeResponse } from 'utils/comlink/proxy';
 
-export default class WorkerElectronCacheStorageService
-    implements LimitedCacheStorage
-{
+export class WorkerElectronCacheStorageService implements LimitedCacheStorage {
     proxiedElectronCacheService: Comlink.Remote<WorkerElectronCacheStorageClient>;
     ready: Promise<any>;
 
