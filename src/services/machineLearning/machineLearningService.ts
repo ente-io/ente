@@ -361,7 +361,13 @@ class MachineLearningService {
         } catch (e) {
             logError(e, 'ML syncFile failed');
             let error = e;
-            console.error('Error in ml sync, fileId: ', enteFile.id, error);
+            console.error(
+                'Error in ml sync, fileId: ',
+                enteFile.id,
+                'name: ',
+                enteFile.metadata.title,
+                error
+            );
             if ('status' in error) {
                 const parsedMessage = parseServerError(error);
                 error = parsedMessage ? new Error(parsedMessage) : error;
