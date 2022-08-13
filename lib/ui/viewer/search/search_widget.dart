@@ -6,6 +6,7 @@ import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -119,7 +120,7 @@ class _SearchWidgetState extends State<SearchWidget> {
             ),
             results.isNotEmpty
                 ? SearchSuggestionsWidget(results)
-                : const SizedBox.shrink(),
+                : const NoResultWidget(),
           ],
         ),
       ),
