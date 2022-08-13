@@ -7,7 +7,7 @@ import {
 import ElectronCacheStorageProxy from './electronCacheStorage.proxy';
 import { wrap } from 'comlink';
 
-class ElectronCacheStorageReverseProxy implements LimitedCacheStorage {
+class ReverseProxiedElectronCacheStorageProxy implements LimitedCacheStorage {
     proxiedElectronCacheService: Comlink.Remote<ElectronCacheStorageProxy>;
     ready: Promise<any>;
 
@@ -36,7 +36,7 @@ class ElectronCacheStorageReverseProxy implements LimitedCacheStorage {
     }
 }
 
-export default new ElectronCacheStorageReverseProxy();
+export default new ReverseProxiedElectronCacheStorageProxy();
 
 function transformMatch(
     fn: ProxiedWorkerLimitedCache['match']
