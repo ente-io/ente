@@ -49,7 +49,9 @@ class SearchWidget extends StatefulWidget {
 }
 
 class _SearchWidgetState extends State<SearchWidget> {
-  final List<SearchResult> results = [];
+  String _query = "";
+  final List<SearchResult> _results = [];
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -109,17 +111,20 @@ class _SearchWidgetState extends State<SearchWidget> {
                       await getSearchResultsForQuery(value);
                   if (mounted) {
                     setState(() {
-                      results.clear();
-                      results.addAll(allResults);
+                      _query = value;
+                      _results.clear();
+                      _results.addAll(allResults);
                     });
                   }
                 },
                 autofocus: true,
               ),
             ),
-            results.isNotEmpty
-                ? SearchSuggestionsWidget(results)
-                : const NoResultWidget(),
+            _results.isNotEmpty
+                ? SearchSuggestionsWidget(_results)
+                : _query.isNotEmpty
+                    ? const NoResultWidget()
+                    : Container(),
           ],
         ),
       ),
