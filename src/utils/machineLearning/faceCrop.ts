@@ -1,3 +1,4 @@
+import { FACE_CROPS_CACHE } from 'constants/cache';
 import { compose, Matrix, scale, translate } from 'transformation-matrix';
 import { BlobOptions, Dimensions } from 'types/image';
 import {
@@ -5,7 +6,6 @@ import {
     FaceCropConfig,
     FaceCrop,
     StoredFaceCrop,
-    FACE_CROPS_CACHE,
     MlFileData,
     FaceAlignment,
     FaceDetection,
