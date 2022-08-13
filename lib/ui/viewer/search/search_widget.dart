@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/search/album_search_result.dart';
-import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/models/search/year_search_result.dart';
@@ -145,11 +143,6 @@ class _SearchWidgetState extends State<SearchWidget> {
         await SearchService.instance.getLocationSearchResults(query);
     for (LocationSearchResult result in locationResults) {
       allResults.add(result);
-    }
-    final fileResults =
-        await SearchService.instance.getFileSearchResults(query);
-    for (File file in fileResults) {
-      allResults.add(FileSearchResult(file));
     }
 
     return allResults;
