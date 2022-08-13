@@ -25,10 +25,7 @@ import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
 import { CustomError, parseServerError } from 'utils/error';
-import {
-    BATCHES_BEFORE_SYNCING_INDEX,
-    MAX_ML_SYNC_ERROR_COUNT,
-} from 'constants/machineLearning/config';
+import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
 import FaceService from './faceService';
 import PeopleService from './peopleService';
 import ObjectService from './objectService';
@@ -86,8 +83,8 @@ class MachineLearningService {
         // may be need to just take synced files on latest ml version for indexing
         if (
             syncContext.outOfSyncFiles.length <= 0 ||
-            syncContext.nSyncedFiles ===
-                syncContext.config.batchSize * BATCHES_BEFORE_SYNCING_INDEX
+            (syncContext.nSyncedFiles === syncContext.config.batchSize &&
+                Math.random() < 0.2)
         ) {
             await this.syncIndex(syncContext);
         }
