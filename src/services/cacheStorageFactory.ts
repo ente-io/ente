@@ -21,12 +21,12 @@ function transformBrowserCacheStorageToLimitedCacheStorage(
 ): LimitedCacheStorage {
     return {
         async open(cacheName) {
-            const {
-                match,
-                put,
-                delete: cacheDelete,
-            } = await caches.open(cacheName);
-            return { match, put, delete: cacheDelete };
+            const cache = await caches.open(cacheName);
+            return {
+                match: cache.match.bind(cache),
+                put: cache.put.bind(cache),
+                delete: cache.delete.bind(cache),
+            };
         },
         delete: caches.delete,
     };
