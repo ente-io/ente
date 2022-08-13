@@ -22,8 +22,7 @@ import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
-import { deleteCache } from 'utils/storage/cache';
-import { THUMB_CACHE_NAME } from 'constants/cache';
+import { deleteAllCache } from 'utils/storage/cache';
 
 const ENDPOINT = getEndpoint();
 
@@ -120,11 +119,7 @@ export const logoutUser = async () => {
         await _logout();
         clearKeys();
         clearData();
-        try {
-            await deleteCache(THUMB_CACHE_NAME);
-        } catch (e) {
-            // ignore
-        }
+        await deleteAllCache();
         await clearFiles();
         if (isElectron()) {
             safeStorageService.clearElectronStore();

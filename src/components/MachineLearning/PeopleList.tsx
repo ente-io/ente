@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Face, FACE_CROPS_CACHE_NAME, Person } from 'types/machineLearning';
+import { Face, FACE_CROPS_CACHE, Person } from 'types/machineLearning';
 import {
     getAllPeople,
     getPeopleList,
@@ -59,7 +59,7 @@ export function PeopleList(props: PeopleListProps) {
                     }>
                     <ImageCacheView
                         url={person.displayImageUrl}
-                        cacheName={FACE_CROPS_CACHE_NAME}
+                        cacheName={FACE_CROPS_CACHE}
                     />
                 </FaceChip>
             ))}
@@ -153,7 +153,7 @@ export function UnidentifiedFaces(props: {
                     <FaceChip key={index}>
                         <ImageCacheView
                             url={face.crop?.imageUrl}
-                            cacheName={FACE_CROPS_CACHE_NAME}
+                            cacheName={FACE_CROPS_CACHE}
                         />
                     </FaceChip>
                 ))}

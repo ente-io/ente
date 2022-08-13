@@ -9,7 +9,6 @@ import { runningInBrowser } from 'utils/common';
 import TFJSImage from './TFJSImage';
 import {
     Face,
-    FACE_CROPS_CACHE_NAME,
     MLDebugResult,
     MLSyncConfig,
     Person,
@@ -41,6 +40,7 @@ import {
     DEFAULT_ML_SYNC_JOB_CONFIG,
 } from 'constants/machineLearning/config';
 import { exportMlData, importMlData } from 'utils/machineLearning/mldataExport';
+import { FACE_CROPS_CACHE } from 'constants/cache';
 
 interface TSNEProps {
     mlResult: MLDebugResult;
@@ -92,7 +92,7 @@ const renderForeignObjectNode = ({ nodeDatum, foreignObjectProps }) => (
                     <D3ImageContainer>
                         <ImageCacheView
                             url={nodeDatum.attributes.face.crop?.imageUrl}
-                            cacheName={FACE_CROPS_CACHE_NAME}
+                            cacheName={FACE_CROPS_CACHE}
                         />
                     </D3ImageContainer>
                 )}

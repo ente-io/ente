@@ -5,7 +5,7 @@ import {
     FaceCropConfig,
     FaceCrop,
     StoredFaceCrop,
-    FACE_CROPS_CACHE_NAME,
+    FACE_CROPS_CACHE,
     MlFileData,
     FaceAlignment,
     FaceDetection,
@@ -43,7 +43,7 @@ export async function storeFaceCropForBlob(
 ) {
     const faceCropUrl = `/${faceId}`;
     const faceCropResponse = new Response(faceCropBlob);
-    const faceCropCache = await openCache(FACE_CROPS_CACHE_NAME);
+    const faceCropCache = await openCache(FACE_CROPS_CACHE);
     await faceCropCache.put(faceCropUrl, faceCropResponse);
     return {
         imageUrl: faceCropUrl,
@@ -63,7 +63,7 @@ export async function storeFaceCrop(
 export async function getFaceCropBlobFromStorage(
     storedFaceCrop: StoredFaceCrop
 ): Promise<Blob> {
-    return getBlobFromCache(FACE_CROPS_CACHE_NAME, storedFaceCrop.imageUrl);
+    return getBlobFromCache(FACE_CROPS_CACHE, storedFaceCrop.imageUrl);
 }
 
 export async function getFaceCropFromStorage(
@@ -104,7 +104,7 @@ export async function removeOldFaceCrops(
 
 export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
     console.log('Removing face crop urls: ', faceCropUrls);
-    const faceCropCache = await openCache(FACE_CROPS_CACHE_NAME);
+    const faceCropCache = await openCache(FACE_CROPS_CACHE);
     const urlRemovalPromises = faceCropUrls?.map((url) =>
         faceCropCache.delete(url)
     );

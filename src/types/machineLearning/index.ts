@@ -1,3 +1,4 @@
+import {} from './../../constants/cache/index';
 import * as tf from '@tensorflow/tfjs-core';
 
 // import {
@@ -141,8 +142,6 @@ export interface FaceCrop {
     // imageBox is relative to image dimentions stored at mlFileData
     imageBox: Box;
 }
-
-export const FACE_CROPS_CACHE_NAME = 'face-crops';
 
 export interface StoredFaceCrop {
     imageUrl: string;

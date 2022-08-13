@@ -37,6 +37,7 @@ import {
     getFaceCropBlobFromStorage,
     ibExtractFaceImagesFromCrops,
 } from './faceCrop';
+import { FILE_CACHE } from 'constants/cache';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -369,7 +370,7 @@ export async function getOriginalImageBitmap(
     let fileBlob;
 
     if (useCache) {
-        fileBlob = await cached('files', file.id.toString(), () => {
+        fileBlob = await cached(FILE_CACHE, file.id.toString(), () => {
             return getOriginalConvertedFile(file, token, enteWorker, queue);
         });
     } else {
