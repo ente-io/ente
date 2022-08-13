@@ -43,7 +43,6 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 }
 
 class SearchWidget extends StatefulWidget {
-  final String searchQuery = '';
   const SearchWidget({Key key}) : super(key: key);
   @override
   State<SearchWidget> createState() => _SearchWidgetState();
