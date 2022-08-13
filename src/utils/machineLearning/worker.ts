@@ -2,7 +2,7 @@ import { runningInBrowser } from 'utils/common';
 import { Remote, wrap, expose } from 'comlink';
 import { DedicatedMLWorker } from 'worker/machineLearning.worker';
 import { MachineLearningWorker } from 'types/machineLearning';
-import ElectronCacheStorageProxy from 'services/electron/electronCacheStorage.proxy';
+import ElectronCacheStorageProxy from 'services/cache/workerProxyElectronCacheStorage';
 
 export class MLWorkerWithProxy {
     public proxy: Promise<Remote<MachineLearningWorker>>;
