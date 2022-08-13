@@ -95,7 +95,6 @@ class AlbumSearchResultWidget extends StatelessWidget {
             albumSearchResult.collectionWithThumbnail,
             tagPrefix: "collection_search",
           ),
-          forceCustomPageRoute: true,
         );
       },
     );

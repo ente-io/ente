@@ -82,7 +82,6 @@ class LocationSearchResultWidget extends StatelessWidget {
         routeToPage(
           context,
           FilesInLocationPage(locationSearchResult, heroTagPrefix),
-          forceCustomPageRoute: true,
         );
       },
     );

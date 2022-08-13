@@ -78,7 +78,6 @@ class YearSearchResultWidget extends StatelessWidget {
         routeToPage(
           context,
           FilesFromYearPage(yearSearchResult, heroTagPrefix),
-          forceCustomPageRoute: true,
         );
       },
     );
