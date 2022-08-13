@@ -4,7 +4,7 @@ import {
     LimitedCacheStorage,
     ProxiedWorkerLimitedCache,
 } from 'types/cache';
-import { WorkerElectronCacheStorageClient } from './workerElectronCacheStorageClient';
+import { WorkerElectronCacheStorageClient } from './client';
 import { wrap } from 'comlink';
 import { deserializeToResponse, serializeResponse } from 'utils/comlink/proxy';
 

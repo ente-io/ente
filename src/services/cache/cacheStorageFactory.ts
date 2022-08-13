@@ -1,7 +1,7 @@
 import { LimitedCacheStorage } from 'types/cache/index';
 import { ElectronCacheStorage } from 'services/electron/cache';
 import { runningInElectron, runningInWorker } from 'utils/common';
-import { WorkerElectronCacheStorageService } from 'services/workerElectronCache/workerElectronCacheStorageService';
+import { WorkerElectronCacheStorageService } from 'services/workerElectronCache/service';
 
 export function getCacheStorage(): LimitedCacheStorage {
     if (runningInElectron()) {

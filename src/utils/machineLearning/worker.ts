@@ -2,7 +2,7 @@ import { runningInBrowser } from 'utils/common';
 import { Remote, wrap, expose } from 'comlink';
 import { DedicatedMLWorker } from 'worker/machineLearning.worker';
 import { MachineLearningWorker } from 'types/machineLearning';
-import ElectronCacheStorageProxy from 'services/workerElectronCache/workerElectronCacheStorageClient';
+import { WorkerElectronCacheStorageClient } from 'services/workerElectronCache/client';
 
 export class MLWorkerWithProxy {
     public proxy: Promise<Remote<MachineLearningWorker>>;
@@ -23,7 +23,7 @@ export class MLWorkerWithProxy {
         };
         console.log(`Initiated ${this.name}`);
         const comlink = wrap<typeof DedicatedMLWorker>(this.worker);
-        expose(ElectronCacheStorageProxy, this.worker);
+        expose(WorkerElectronCacheStorageClient, this.worker);
         this.proxy = new comlink();
     }
 
