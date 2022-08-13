@@ -62,6 +62,11 @@ class _SearchWidgetState extends State<SearchWidget> {
               color: Theme.of(context).colorScheme.defaultBackgroundColor,
               child: TextFormField(
                 style: Theme.of(context).textTheme.subtitle1,
+                // Below parameters are to disable auto-suggestion
+                enableSuggestions: false,
+                autocorrect: false,
+                keyboardType: TextInputType.visiblePassword,
+                // Above parameters are to disable auto-suggestion
                 decoration: InputDecoration(
                   hintText: 'Search for albums, places & files',
                   filled: true,
