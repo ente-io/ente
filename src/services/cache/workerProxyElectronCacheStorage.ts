@@ -5,6 +5,7 @@ import {
     ProxiedLimitedCacheStorage,
     ProxiedWorkerLimitedCache,
 } from 'types/cache';
+import { serializeResponse, deserializeToResponse } from 'utils/comlink/proxy';
 
 export default class WorkerProxyElectronCacheStorage
     implements ProxiedLimitedCacheStorage
@@ -38,17 +39,3 @@ function transformPut(
         fn(key, deserializeToResponse(data));
     };
 }
-
-function serializeResponse(response: Response) {
-    return response.arrayBuffer();
-}
-
-function deserializeToResponse(arrayBuffer: ArrayBuffer) {
-    return new Response(arrayBuffer);
-}
-
-// Comlink.transferHandlers.set('RESPONSE', {
-//     canHandle: (obj) => obj instanceof Response,
-//     serialize: (response: Response) => [response.arrayBuffer(), []],
-//     deserialize: (arrayBuffer: ArrayBuffer) => new Response(arrayBuffer),
-// });

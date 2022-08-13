@@ -6,6 +6,7 @@ import {
 } from 'types/cache';
 import WorkerProxyElectronCacheStorage from './workerProxyElectronCacheStorage';
 import { wrap } from 'comlink';
+import { deserializeToResponse, serializeResponse } from 'utils/comlink/proxy';
 
 export default class WorkerReverseProxyElectronCacheStorage
     implements LimitedCacheStorage
@@ -53,17 +54,3 @@ function transformPut(
         fn(key, await serializeResponse(data));
     };
 }
-
-function serializeResponse(response: Response) {
-    return response.arrayBuffer();
-}
-
-function deserializeToResponse(arrayBuffer: ArrayBuffer) {
-    return new Response(arrayBuffer);
-}
-
-// Comlink.transferHandlers.set('RESPONSE', {
-//     canHandle: (obj) => obj instanceof Response,
-//     serialize: (response: Response) => [response.arrayBuffer(), []],
-//     deserialize: (arrayBuffer: ArrayBuffer) => new Response(arrayBuffer),
-// });
