@@ -1,7 +1,7 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
 import * as path from 'path';
 import { isDev } from './common';
-import { isAppQuitting } from '..';
+import { isAppQuitting } from '../main';
 import { PROD_HOST_URL } from '../config';
 
 export function createWindow(): BrowserWindow {
