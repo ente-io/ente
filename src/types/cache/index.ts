@@ -9,6 +9,10 @@ export interface LimitedCache {
     delete: (key: string) => Promise<boolean>;
 }
 
+export interface ProxiedLimitedCacheStorage {
+    open: (cacheName: string) => Promise<ProxiedWorkerLimitedCache>;
+    delete: (cacheName: string) => Promise<boolean>;
+}
 export interface ProxiedWorkerLimitedCache {
     match: (key: string) => Promise<ArrayBuffer>;
     put: (key: string, data: ArrayBuffer) => Promise<void>;

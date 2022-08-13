@@ -1,13 +1,20 @@
 import ElectronCacheStorage from 'services/electron/cache';
 import * as Comlink from 'comlink';
-import { LimitedCache, ProxiedWorkerLimitedCache } from 'types/cache';
+import {
+    LimitedCache,
+    ProxiedLimitedCacheStorage,
+    ProxiedWorkerLimitedCache,
+} from 'types/cache';
 
-export default class ElectronCacheStorageProxy {
+export default class ElectronCacheStorageProxy
+    implements ProxiedLimitedCacheStorage
+{
     async open(cacheName: string) {
         const cache = await ElectronCacheStorage.open(cacheName);
         return Comlink.proxy({
             match: Comlink.proxy(transformMatch(cache.match.bind(cache))),
             put: Comlink.proxy(transformPut(cache.put.bind(cache))),
+            delete: Comlink.proxy(cache.delete.bind(cache)),
         });
     }
 
