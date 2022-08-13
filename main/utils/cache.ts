@@ -1,6 +1,13 @@
 import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
-import { readFile, writeFile, existsSync, mkdir, rmSync } from 'promise-fs';
+import {
+    readFile,
+    writeFile,
+    existsSync,
+    mkdir,
+    rmSync,
+    unlink,
+} from 'promise-fs';
 import crypto from 'crypto';
 import DiskLRUService from './diskLRU';
 
@@ -58,6 +65,15 @@ class DiskCache {
             return new Response(await readFile(cachePath));
         } else {
             return undefined;
+        }
+    }
+    async delete(cacheKey: string): Promise<boolean> {
+        const cachePath = getAssetCachePath(this.cacheBucketDir, cacheKey);
+        if (existsSync(cachePath)) {
+            await unlink(cachePath);
+            return true;
+        } else {
+            return false;
         }
     }
 }
