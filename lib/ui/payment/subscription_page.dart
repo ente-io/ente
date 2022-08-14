@@ -72,16 +72,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               purchase.verificationData.serverVerificationData,
             );
             await InAppPurchaseConnection.instance.completePurchase(purchase);
-            String text = "thank you for subscribing!";
+            String text = "Thank you for subscribing!";
             if (!widget.isOnboarding) {
               final isUpgrade = _hasActiveSubscription &&
                   newSubscription.storage > _currentSubscription.storage;
               final isDowngrade = _hasActiveSubscription &&
                   newSubscription.storage < _currentSubscription.storage;
               if (isUpgrade) {
-                text = "your plan was successfully upgraded";
+                text = "Your plan was successfully upgraded";
               } else if (isDowngrade) {
-                text = "your plan was successfully downgraded";
+                text = "Your plan was successfully downgraded";
               }
             }
             showToast(context, text);
@@ -98,8 +98,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             await _dialog.hide();
             showErrorDialog(
               context,
-              "payment failed",
-              "please talk to " +
+              "Payment failed",
+              "Please talk to " +
                   (Platform.isAndroid ? "PlayStore" : "AppStore") +
                   " support if you were charged",
             );
