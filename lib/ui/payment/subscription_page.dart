@@ -458,7 +458,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     if (_userDetails.subscription.productID == kFreeProductID) {
       await showErrorDialog(
         context,
-        "Now you can share your storage plan with your family members!",
+        "Share your storage plan with your family members!",
         "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",
       );
       return;
