@@ -128,16 +128,6 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<void> _initiateDelete(BuildContext context) async {
-    AppLock.of(context).setEnabled(false);
-    String reason = "Please authenticate to initiate account deletion";
-    final result = await requestAuthentication(reason);
-    AppLock.of(context).setEnabled(
-      Configuration.instance.shouldShowLockScreen(),
-    );
-    if (!result) {
-      showToast(context, reason);
-      return;
-    }
     final deleteChallengeResponse =
         await UserService.instance.getDeleteChallenge(context);
     if (deleteChallengeResponse == null) {
@@ -154,6 +144,16 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
+    AppLock.of(context).setEnabled(false);
+    String reason = "Please authenticate to initiate account deletion";
+    final result = await requestAuthentication(reason);
+    AppLock.of(context).setEnabled(
+      Configuration.instance.shouldShowLockScreen(),
+    );
+    if (!result) {
+      showToast(context, reason);
+      return;
+    }
     final choice = await showChoiceDialog(
       context,
       'Are you sure you want to delete your account?',
