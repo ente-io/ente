@@ -54,6 +54,8 @@ class HugeListView<T> extends StatefulWidget {
 
   final bool isDraggableScrollbarEnabled;
 
+  final EdgeInsetsGeometry thumbPadding;
+
   const HugeListView({
     Key key,
     this.controller,
@@ -69,6 +71,7 @@ class HugeListView<T> extends StatefulWidget {
     this.thumbDrawColor = Colors.yellow, //Colors.grey,
     this.thumbHeight = 48.0,
     this.isDraggableScrollbarEnabled = true,
+    this.thumbPadding,
   }) : super(key: key);
 
   @override
@@ -135,6 +138,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
           heightScrollThumb: widget.thumbHeight,
           currentFirstIndex: _currentFirst(),
           isEnabled: widget.isDraggableScrollbarEnabled,
+          padding: widget.thumbPadding,
           child: ScrollablePositionedList.builder(
             itemScrollController: widget.controller,
             itemPositionsListener: listener,

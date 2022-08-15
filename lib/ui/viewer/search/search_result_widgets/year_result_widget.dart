@@ -41,7 +41,7 @@ class YearSearchResultWidget extends StatelessWidget {
                       color: Theme.of(context).colorScheme.subTextColor,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Text(
                     yearSearchResult.year.toString(),
                     style: const TextStyle(fontSize: 18),
@@ -78,7 +78,6 @@ class YearSearchResultWidget extends StatelessWidget {
         routeToPage(
           context,
           FilesFromYearPage(yearSearchResult, heroTagPrefix),
-          forceCustomPageRoute: true,
         );
       },
     );
