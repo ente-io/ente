@@ -14,7 +14,7 @@ import {
     trashFiles,
     deleteFromTrash,
 } from 'services/fileService';
-import { styled } from '@mui/material';
+import { styled, Typography } from '@mui/material';
 import {
     syncCollections,
     getFavItemIds,
@@ -101,6 +101,7 @@ import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { CenteredFlex } from 'components/Container';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -109,12 +110,6 @@ export const DeadCenter = styled('div')`
     align-items: center;
     text-align: center;
     flex-direction: column;
-`;
-const AlertContainer = styled('div')`
-    background-color: #111;
-    padding: 5px 0;
-    font-size: 14px;
-    text-align: center;
 `;
 
 const defaultGalleryContext: GalleryContextType = {
@@ -609,9 +604,11 @@ export default function Gallery() {
                     </LoadingOverlay>
                 )}
                 {isFirstLoad && (
-                    <AlertContainer>
-                        {constants.INITIAL_LOAD_DELAY_WARNING}
-                    </AlertContainer>
+                    <CenteredFlex>
+                        <Typography color="text.secondary" variant="body2">
+                            {constants.INITIAL_LOAD_DELAY_WARNING}
+                        </Typography>
+                    </CenteredFlex>
                 )}
                 <PlanSelector
                     modalView={planModalView}

@@ -227,7 +227,7 @@ const englishConstants = {
                 target="_blank"
                 style={{ color: '#51cd7c' }}
                 rel="noreferrer">
-                android
+                Android
             </a>{' '}
             or{' '}
             <a
@@ -235,7 +235,7 @@ const englishConstants = {
                 style={{ color: '#51cd7c' }}
                 target="_blank"
                 rel="noreferrer">
-                ios app{' '}
+                iOS app{' '}
             </a>
             to automatically backup all your photos
         </>

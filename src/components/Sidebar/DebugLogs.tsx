@@ -4,6 +4,9 @@ import { downloadAsFile } from 'utils/file';
 import constants from 'utils/strings/constants';
 import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { User } from 'types/user';
+import { getSentryUserID } from 'utils/user';
 
 export default function DebugLogs() {
     const appContext = useContext(AppContext);
@@ -22,6 +25,11 @@ export default function DebugLogs() {
         });
 
     const downloadDebugLogs = () => {
+        addLogLine(
+            'latest commit id :' + process.env.NEXT_PUBLIC_LATEST_COMMIT_HASH
+        );
+        addLogLine(`user sentry id ${getSentryUserID()}`);
+        addLogLine(`ente userID ${(getData(LS_KEYS.USER) as User)?.id}`);
         addLogLine('exporting logs');
         const logs = getDebugLogs();
         const logString = logs.join('\n');

@@ -20,7 +20,8 @@ import {
 import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
-import desktopService from './desktopService';
+import safeStorageService from './electron/safeStorage';
+import { deleteThumbnailCache } from './cacheService';
 
 const ENDPOINT = getEndpoint();
 
@@ -118,13 +119,13 @@ export const logoutUser = async () => {
         clearKeys();
         clearData();
         try {
-            await caches.delete('thumbs');
+            await deleteThumbnailCache();
         } catch (e) {
             // ignore
         }
         await clearFiles();
         if (isElectron()) {
-            desktopService.clearElectronStore();
+            safeStorageService.clearElectronStore();
         }
         router.push(PAGES.ROOT);
     } catch (e) {

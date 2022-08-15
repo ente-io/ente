@@ -3,8 +3,7 @@ import { getFileURL, getThumbnailURL } from 'utils/common/apiUtil';
 import CryptoWorker from 'utils/crypto';
 import {
     generateStreamFromArrayBuffer,
-    convertForPreview,
-    needsConversionForPreview,
+    getRenderableFileURL,
     createTypedObjectURL,
 } from 'utils/file';
 import HTTPService from './HTTPService';
@@ -13,6 +12,7 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
+import { openThumbnailCache } from './cacheService';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
@@ -26,14 +26,7 @@ class DownloadManager {
             }
             if (!this.thumbnailObjectURLPromise.get(file.id)) {
                 const downloadPromise = async () => {
-                    const thumbnailCache = await (async () => {
-                        try {
-                            return await caches.open('thumbs');
-                        } catch (e) {
-                            return null;
-                            // ignore
-                        }
-                    })();
+                    const thumbnailCache = await openThumbnailCache();
 
                     const cacheResp: Response = await thumbnailCache?.match(
                         file.id.toString()
@@ -43,14 +36,13 @@ class DownloadManager {
                     }
                     const thumb = await this.downloadThumb(token, file);
                     const thumbBlob = new Blob([thumb]);
-                    try {
-                        await thumbnailCache?.put(
-                            file.id.toString(),
-                            new Response(thumbBlob)
-                        );
-                    } catch (e) {
-                        // TODO: handle storage full exception.
-                    }
+
+                    thumbnailCache
+                        ?.put(file.id.toString(), new Response(thumbBlob))
+                        .catch((e) => {
+                            logError(e, 'cache put failed');
+                            // TODO: handle storage full exception.
+                        });
                     return URL.createObjectURL(thumbBlob);
                 };
                 this.thumbnailObjectURLPromise.set(file.id, downloadPromise());
@@ -84,38 +76,24 @@ class DownloadManager {
     };
 
     getFile = async (file: EnteFile, forPreview = false) => {
-        const shouldBeConverted = forPreview && needsConversionForPreview(file);
-        const fileKey = shouldBeConverted
-            ? `${file.id}_converted`
-            : `${file.id}`;
+        const fileKey = forPreview ? `${file.id}_preview` : `${file.id}`;
         try {
-            const getFilePromise = async (convert: boolean) => {
+            const getFilePromise = async () => {
                 const fileStream = await this.downloadFile(file);
                 const fileBlob = await new Response(fileStream).blob();
-                if (convert) {
-                    const convertedBlobs = await convertForPreview(
-                        file,
-                        fileBlob
-                    );
-                    return await Promise.all(
-                        convertedBlobs.map(
-                            async (blob) =>
-                                await createTypedObjectURL(
-                                    blob,
-                                    file.metadata.title
-                                )
-                        )
-                    );
+                if (forPreview) {
+                    return await getRenderableFileURL(file, fileBlob);
+                } else {
+                    return [
+                        await createTypedObjectURL(
+                            fileBlob,
+                            file.metadata.title
+                        ),
+                    ];
                 }
-                return [
-                    await createTypedObjectURL(fileBlob, file.metadata.title),
-                ];
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
-                this.fileObjectURLPromise.set(
-                    fileKey,
-                    getFilePromise(shouldBeConverted)
-                );
+                this.fileObjectURLPromise.set(fileKey, getFilePromise());
             }
             const fileURLs = await this.fileObjectURLPromise.get(fileKey);
             return fileURLs;
