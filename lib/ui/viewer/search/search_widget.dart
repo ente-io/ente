@@ -124,7 +124,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                 ? SearchSuggestionsWidget(_results)
                 : _query.isNotEmpty
                     ? const NoResultWidget()
-                    : Container(),
+                    : const SizedBox.shrink(),
           ],
         ),
       ),
