@@ -1,5 +1,5 @@
 export function serializeResponse(response: Response) {
-    return response.arrayBuffer();
+    return response?.arrayBuffer();
 }
 
 export function deserializeToResponse(arrayBuffer: ArrayBuffer) {
