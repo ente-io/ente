@@ -62,7 +62,11 @@ class SearchSuggestionsWidget extends StatelessWidget {
                   return FileSearchResultWidget(result);
                 } else if (result is YearSearchResult) {
                   return YearSearchResultWidget(result);
-                } else {
+                }
+                //  else if (result is HolidaySearchResult) {
+                //   return HolidaySearchResultWidget(result);
+                // }
+                else {
                   Logger('SearchSuggestionsWidget')
                       .info("Invalid/Unsupported value");
                   return const SizedBox.shrink();

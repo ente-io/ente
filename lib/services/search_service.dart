@@ -13,6 +13,7 @@ import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/utils/date_time_util.dart';
 
 class SearchService {
   Future<List<File>> _cachedFilesFuture;
@@ -21,11 +22,11 @@ class SearchService {
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
-  static final List<HolidaySearchResult> holidays = [
-    HolidaySearchResult('Christmas', 11, 25),
-    HolidaySearchResult('Christmas Eve', 11, 24),
-    HolidaySearchResult('New Year', 0, 1),
-    HolidaySearchResult('New Year Eve', 11, 31),
+  static const List<HolidayData> holidays = [
+    HolidayData('Christmas', 11, 25),
+    HolidayData('Christmas Eve', 11, 24),
+    HolidayData('New Year', 0, 1),
+    HolidayData('New Year Eve', 11, 31),
   ];
 
   SearchService._privateConstructor();
@@ -147,13 +148,14 @@ class SearchService {
   }
 
   Future<List<File>> getYearSearchResults(int year) async {
-    final yearInMicroseconds = DateTime.utc(year).microsecondsSinceEpoch;
-    final nextYearInMicroseconds =
+    final yearInMicrosecondsSinceEpoch =
+        DateTime.utc(year).microsecondsSinceEpoch;
+    final nextYearInMicrosecondsSinceEpoch =
         DateTime.utc(year + 1).microsecondsSinceEpoch;
     final yearSearchResults =
         await FilesDB.instance.getFilesCreatedWithinDurations(
       [
-        [yearInMicroseconds, nextYearInMicroseconds]
+        [yearInMicrosecondsSinceEpoch, nextYearInMicrosecondsSinceEpoch]
       ],
       null,
     );
@@ -163,12 +165,28 @@ class SearchService {
   List<HolidaySearchResult> getHolidaySearchResults(String query) {
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
     final List<HolidaySearchResult> holidaySearchResult = [];
-    for (HolidaySearchResult holiday in holidays) {
+    for (HolidayData holiday in holidays) {
       if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
-        holidaySearchResult.add(holiday);
+        holidaySearchResult.add(
+          HolidaySearchResult(
+            holiday,
+            _getDurationsOfHolidays(holiday.day, holiday.month),
+          ),
+        );
       }
     }
     return holidaySearchResult;
+  }
+
+  List<List<int>> _getDurationsOfHolidays(int day, int month) {
+    List<List<int>> durationsOfHolidays = [];
+    for (int year = 1970; year < currentYear; year++) {
+      durationsOfHolidays.add([
+        DateTime.utc(year, month, day).microsecondsSinceEpoch,
+        DateTime.utc(year, month, day + 1).microsecondsSinceEpoch,
+      ]);
+    }
+    return durationsOfHolidays;
   }
 
   bool _isValidLocation(Location location) {
