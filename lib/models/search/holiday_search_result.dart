@@ -1,10 +1,16 @@
+import 'package:photos/models/file.dart';
 import 'package:photos/models/search/search_results.dart';
 
 class HolidaySearchResult extends SearchResult {
-  final HolidayData holidayData;
-  final List<List<int>>
-      durationsOFHoliday; //use a method to generate values for this and pass it on to get the files in that duraiton.
-  HolidaySearchResult(this.holidayData, this.durationsOFHoliday);
+  final String holidayName;
+  final List<File> files;
+  HolidaySearchResult(this.holidayName, this.files);
+}
+
+class HolidayDataWithDuration {
+  final String holidayName;
+  final List<List<int>> durationsOFHoliday;
+  HolidayDataWithDuration(this.holidayName, this.durationsOFHoliday);
 }
 
 class HolidayData {

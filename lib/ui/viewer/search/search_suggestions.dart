@@ -3,11 +3,13 @@ import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
+import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/file_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/holiday_results_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/year_result_widget.dart';
 
@@ -62,11 +64,9 @@ class SearchSuggestionsWidget extends StatelessWidget {
                   return FileSearchResultWidget(result);
                 } else if (result is YearSearchResult) {
                   return YearSearchResultWidget(result);
-                }
-                //  else if (result is HolidaySearchResult) {
-                //   return HolidaySearchResultWidget(result);
-                // }
-                else {
+                } else if (result is HolidaySearchResult) {
+                  return HolidaySearchResultWidget(result);
+                } else {
                   Logger('SearchSuggestionsWidget')
                       .info("Invalid/Unsupported value");
                   return const SizedBox.shrink();

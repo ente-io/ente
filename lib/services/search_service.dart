@@ -22,7 +22,7 @@ class SearchService {
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
-  static const List<HolidayData> holidays = [
+  static const List<HolidayData> allHolidays = [
     HolidayData('Christmas', 11, 25),
     HolidayData('Christmas Eve', 11, 24),
     HolidayData('New Year', 0, 1),
@@ -162,18 +162,32 @@ class SearchService {
     return yearSearchResults;
   }
 
-  List<HolidaySearchResult> getHolidaySearchResults(String query) {
-    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
+  Future<List<HolidaySearchResult>> getHolidaySearchResults(
+    String query,
+  ) async {
     final List<HolidaySearchResult> holidaySearchResult = [];
-    for (HolidayData holiday in holidays) {
+
+    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
+    final List<HolidayDataWithDuration> matchingHolidayDataWithDuration = [];
+
+    for (HolidayData holiday in allHolidays) {
       if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
-        holidaySearchResult.add(
-          HolidaySearchResult(
-            holiday,
+        matchingHolidayDataWithDuration.add(
+          HolidayDataWithDuration(
+            holiday.name,
             _getDurationsOfHolidays(holiday.day, holiday.month),
           ),
         );
       }
+    }
+    for (HolidayDataWithDuration element in matchingHolidayDataWithDuration) {
+      holidaySearchResult.add(
+        HolidaySearchResult(
+          element.holidayName,
+          await FilesDB.instance
+              .getFilesCreatedWithinDurations(element.durationsOFHoliday, null),
+        ),
+      );
     }
     return holidaySearchResult;
   }

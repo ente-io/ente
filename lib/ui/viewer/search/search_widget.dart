@@ -137,7 +137,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     }
 
     final holidayResults =
-        SearchService.instance.getHolidaySearchResults(query);
+        await SearchService.instance.getHolidaySearchResults(query);
     for (HolidaySearchResult holidayResult in holidayResults) {
       allResults.add(holidayResult);
     }
