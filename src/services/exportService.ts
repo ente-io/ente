@@ -32,7 +32,6 @@ import { EnteFile } from 'types/file';
 
 import { decodeMotionPhoto } from './motionPhotoService';
 import {
-    fileNameWithoutExtension,
     generateStreamFromArrayBuffer,
     getFileExtension,
     mergeMetadata,
@@ -473,8 +472,7 @@ class ExportService {
         collectionPath: string
     ) {
         const fileBlob = await new Response(fileStream).blob();
-        const originalName = fileNameWithoutExtension(file.metadata.title);
-        const motionPhoto = await decodeMotionPhoto(fileBlob, originalName);
+        const motionPhoto = await decodeMotionPhoto(file, fileBlob);
         const imageStream = generateStreamFromArrayBuffer(motionPhoto.image);
         const imageSaveName = getUniqueFileSaveName(
             collectionPath,
