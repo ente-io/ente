@@ -8,8 +8,8 @@ import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import isElectron from 'is-electron';
-import { downloadApp } from 'utils/common';
 import WatchFolder from 'components/WatchFolder';
+import { getDownloadAppMessage } from 'utils/ui';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -27,28 +27,17 @@ export default function UtilitySection({ closeSidebar }) {
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
     const closeRecoveryKeyModal = () => setRecoveryModalView(false);
 
-    const openTwoFactorModalView = () => setTwoFactorModalView(true);
-    const closeTwoFactorModalView = () => setTwoFactorModalView(false);
+    const openTwoFactorModal = () => setTwoFactorModalView(true);
+    const closeTwoFactorModal = () => setTwoFactorModalView(false);
 
-    const openWatchFolderView = () => {
+    const openWatchFolder = () => {
         if (isElectron()) {
             setWatchFolderView(true);
         } else {
-            setDialogMessage({
-                title: constants.DOWNLOAD_APP,
-                content: constants.DOWNLOAD_APP_MESSAGE,
-
-                proceed: {
-                    text: constants.DOWNLOAD,
-                    action: downloadApp,
-                    variant: 'accent',
-                },
-                close: {
-                    text: constants.CLOSE,
-                },
-            });
+            setDialogMessage(getDownloadAppMessage());
         }
     };
+    const closeWatchFolder = () => setWatchFolderView(false);
 
     const redirectToChangePasswordPage = () => {
         closeSidebar();
@@ -71,13 +60,12 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
-    const closeWatchFolder = () => setWatchFolderView(false);
     return (
         <>
             <SidebarButton onClick={openRecoveryKeyModal}>
                 {constants.RECOVERY_KEY}
             </SidebarButton>
-            <SidebarButton onClick={openTwoFactorModalView}>
+            <SidebarButton onClick={openTwoFactorModal}>
                 {constants.TWO_FACTOR}
             </SidebarButton>
             <SidebarButton onClick={redirectToChangePasswordPage}>
@@ -89,7 +77,7 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            <SidebarButton onClick={openWatchFolderView}>
+            <SidebarButton onClick={openWatchFolder}>
                 {constants.WATCH_FOLDERS}
             </SidebarButton>
 
@@ -104,7 +92,7 @@ export default function UtilitySection({ closeSidebar }) {
             />
             <TwoFactorModal
                 show={twoFactorModalView}
-                onHide={closeTwoFactorModalView}
+                onHide={closeTwoFactorModal}
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
