@@ -161,7 +161,8 @@ export default function Uploader(props: Props) {
                     // a user upload is already in progress
                     return;
                 }
-            } else if (isCanvasBlocked()) {
+            }
+            if (isCanvasBlocked()) {
                 appContext.setDialogMessage({
                     title: constants.CANVAS_BLOCKED_TITLE,
 
