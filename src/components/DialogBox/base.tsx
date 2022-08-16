@@ -1,9 +1,9 @@
 import { Dialog, styled } from '@mui/material';
 
-const DialogBoxBase = styled(Dialog)(({ theme, maxWidth }) => ({
+const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     '& .MuiDialog-paper': {
         padding: theme.spacing(1, 1.5),
-        maxWidth: maxWidth ?? '346px',
+        maxWidth: '346px',
     },
     '& .MuiDialogTitle-root': {
         padding: theme.spacing(2),
