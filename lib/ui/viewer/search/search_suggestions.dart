@@ -41,37 +41,39 @@ class SearchSuggestionsWidget extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(8)),
           child: Container(
             margin: const EdgeInsets.only(top: 6),
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.5,
+            constraints: const BoxConstraints(
+              maxHeight: 324,
             ),
-            child: ListView.builder(
-              physics: const ClampingScrollPhysics(),
-              shrinkWrap: true,
-              itemCount: results.length + 1,
-              itemBuilder: (context, index) {
-                if (results.length == index) {
-                  return Container(
-                    height: 6,
-                    color: Theme.of(context).colorScheme.searchResultsColor,
-                  );
-                }
-                final result = results[index];
-                if (result is AlbumSearchResult) {
-                  return AlbumSearchResultWidget(result);
-                } else if (result is LocationSearchResult) {
-                  return LocationSearchResultWidget(result);
-                } else if (result is FileSearchResult) {
-                  return FileSearchResultWidget(result);
-                } else if (result is YearSearchResult) {
-                  return YearSearchResultWidget(result);
-                } else if (result is HolidaySearchResult) {
-                  return HolidaySearchResultWidget(result);
-                } else {
-                  Logger('SearchSuggestionsWidget')
-                      .info("Invalid/Unsupported value");
-                  return const SizedBox.shrink();
-                }
-              },
+            child: Scrollbar(
+              child: ListView.builder(
+                physics: const ClampingScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: results.length + 1,
+                itemBuilder: (context, index) {
+                  if (results.length == index) {
+                    return Container(
+                      height: 6,
+                      color: Theme.of(context).colorScheme.searchResultsColor,
+                    );
+                  }
+                  final result = results[index];
+                  if (result is AlbumSearchResult) {
+                    return AlbumSearchResultWidget(result);
+                  } else if (result is LocationSearchResult) {
+                    return LocationSearchResultWidget(result);
+                  } else if (result is FileSearchResult) {
+                    return FileSearchResultWidget(result);
+                  } else if (result is YearSearchResult) {
+                    return YearSearchResultWidget(result);
+                  } else if (result is HolidaySearchResult) {
+                    return HolidaySearchResultWidget(result);
+                  } else {
+                    Logger('SearchSuggestionsWidget')
+                        .info("Invalid/Unsupported value");
+                    return const SizedBox.shrink();
+                  }
+                },
+              ),
             ),
           ),
         ),

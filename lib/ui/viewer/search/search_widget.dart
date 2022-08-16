@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/search/album_search_result.dart';
-import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -45,14 +44,15 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 }
 
 class SearchWidget extends StatefulWidget {
-  final String searchQuery = '';
   const SearchWidget({Key key}) : super(key: key);
   @override
   State<SearchWidget> createState() => _SearchWidgetState();
 }
 
 class _SearchWidgetState extends State<SearchWidget> {
-  final List<SearchResult> results = [];
+  String _query = "";
+  final List<SearchResult> _results = [];
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -65,6 +65,11 @@ class _SearchWidgetState extends State<SearchWidget> {
               color: Theme.of(context).colorScheme.defaultBackgroundColor,
               child: TextFormField(
                 style: Theme.of(context).textTheme.subtitle1,
+                // Below parameters are to disable auto-suggestion
+                enableSuggestions: false,
+                autocorrect: false,
+                keyboardType: TextInputType.visiblePassword,
+                // Above parameters are to disable auto-suggestion
                 decoration: InputDecoration(
                   hintText: 'Search for albums, places & files',
                   filled: true,
@@ -107,17 +112,20 @@ class _SearchWidgetState extends State<SearchWidget> {
                       await getSearchResultsForQuery(value);
                   if (mounted) {
                     setState(() {
-                      results.clear();
-                      results.addAll(allResults);
+                      _query = value;
+                      _results.clear();
+                      _results.addAll(allResults);
                     });
                   }
                 },
                 autofocus: true,
               ),
             ),
-            results.isNotEmpty
-                ? SearchSuggestionsWidget(results)
-                : const SizedBox.shrink(),
+            _results.isNotEmpty
+                ? SearchSuggestionsWidget(_results)
+                : _query.isNotEmpty
+                    ? const NoResultWidget()
+                    : const SizedBox.shrink(),
           ],
         ),
       ),
@@ -152,12 +160,6 @@ class _SearchWidgetState extends State<SearchWidget> {
         await SearchService.instance.getLocationSearchResults(query);
     for (LocationSearchResult result in locationResults) {
       allResults.add(result);
-    }
-
-    final fileResults =
-        await SearchService.instance.getFileSearchResults(query);
-    for (File file in fileResults) {
-      allResults.add(FileSearchResult(file));
     }
 
     return allResults;

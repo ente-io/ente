@@ -60,7 +60,6 @@ class FilesInLocationPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: [locationSearchResult.files[0]],
-      footer: const SizedBox(height: 120),
     );
     return Scaffold(
       appBar: PreferredSize(

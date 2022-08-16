@@ -153,6 +153,7 @@ class SearchService {
         [yearInMicrosecondsSinceEpoch, nextYearInMicrosecondsSinceEpoch]
       ],
       null,
+      order: 'DESC',
     );
     return yearSearchResults;
   }

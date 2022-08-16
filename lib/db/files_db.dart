@@ -615,8 +615,9 @@ class FilesDB {
 
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
-    Set<int> ignoredCollectionIDs,
-  ) async {
+    Set<int> ignoredCollectionIDs, {
+    String order = 'ASC',
+  }) async {
     final db = await instance.database;
     String whereClause = "( ";
     for (int index = 0; index < durations.length; index++) {
@@ -633,7 +634,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where: whereClause,
-      orderBy: '$columnCreationTime ASC',
+      orderBy: '$columnCreationTime ' + order,
     );
     final files = _convertToFiles(results);
     return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);

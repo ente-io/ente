@@ -72,6 +72,6 @@ class FileSearchResultWidget extends StatelessWidget {
         "file_details",
       ),
     );
-    routeToPage(context, page, forceCustomPageRoute: true);
+    routeToPage(context, page);
   }
 }

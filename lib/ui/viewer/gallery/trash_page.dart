@@ -74,7 +74,6 @@ class _TrashPageState extends State<TrashPage> {
       selectedFiles: widget._selectedFiles,
       header: _headerWidget(),
       initialFiles: null,
-      footer: const SizedBox(height: 120),
     );
 
     return Scaffold(

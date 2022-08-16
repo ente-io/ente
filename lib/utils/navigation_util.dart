@@ -13,8 +13,8 @@ Future<T> routeToPage<T extends Object>(
     );
   } else {
     return Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (BuildContext context) {
+      SwipeableRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) {
           return page;
         },
       ),
@@ -53,6 +53,57 @@ PageRouteBuilder<T> _buildPageRoute<T extends Object>(Widget page) {
     transitionDuration: const Duration(milliseconds: 200),
     opaque: false,
   );
+}
+
+class SwipeableRouteBuilder<T> extends PageRoute<T> {
+  final RoutePageBuilder pageBuilder;
+  final PageTransitionsBuilder matchingBuilder =
+      const CupertinoPageTransitionsBuilder(); // Default iOS/macOS (to get the swipe right to go back gesture)
+  // final PageTransitionsBuilder matchingBuilder = const FadeUpwardsPageTransitionsBuilder(); // Default Android/Linux/Windows
+
+  SwipeableRouteBuilder({this.pageBuilder});
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  String get barrierLabel => null;
+
+  @override
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
+    return pageBuilder(context, animation, secondaryAnimation);
+  }
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  Duration get transitionDuration => const Duration(
+        milliseconds: 300,
+      ); // Can give custom Duration, unlike in MaterialPageRoute
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return matchingBuilder.buildTransitions<T>(
+      this,
+      context,
+      animation,
+      secondaryAnimation,
+      child,
+    );
+  }
+
+  @override
+  bool get opaque => false;
 }
 
 class TransparentRoute extends PageRoute<void> {
