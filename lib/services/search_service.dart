@@ -163,32 +163,25 @@ class SearchService {
     final List<HolidaySearchResult> holidaySearchResult = [];
 
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
-    final List<HolidayDataWithDuration> matchingHolidayDataWithDuration = [];
 
     for (HolidayData holiday in allHolidays) {
       if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
-        matchingHolidayDataWithDuration.add(
-          HolidayDataWithDuration(
+        holidaySearchResult.add(
+          HolidaySearchResult(
             holiday.name,
-            _getDurationsOfHolidays(holiday.day, holiday.month),
+            await FilesDB.instance.getFilesCreatedWithinDurations(
+              _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
+              null,
+            ),
           ),
         );
       }
     }
-    for (HolidayDataWithDuration element in matchingHolidayDataWithDuration) {
-      holidaySearchResult.add(
-        HolidaySearchResult(
-          element.holidayName,
-          await FilesDB.instance
-              .getFilesCreatedWithinDurations(element.durationsOFHoliday, null),
-        ),
-      );
-    }
     return holidaySearchResult;
   }
 
-  List<List<int>> _getDurationsOfHolidays(int day, int month) {
-    List<List<int>> durationsOfHolidays = [];
+  List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
+    final List<List<int>> durationsOfHolidays = [];
     for (int year = 1970; year < currentYear; year++) {
       durationsOfHolidays.add([
         DateTime.utc(year, month, day).microsecondsSinceEpoch,

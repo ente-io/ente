@@ -7,12 +7,6 @@ class HolidaySearchResult extends SearchResult {
   HolidaySearchResult(this.holidayName, this.files);
 }
 
-class HolidayDataWithDuration {
-  final String holidayName;
-  final List<List<int>> durationsOFHoliday;
-  HolidayDataWithDuration(this.holidayName, this.durationsOFHoliday);
-}
-
 class HolidayData {
   final String name;
   final int month;
