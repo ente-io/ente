@@ -54,82 +54,87 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black.withOpacity(0.32),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 1.5),
-          child: Column(
-            children: [
-              const SizedBox(height: 8),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Container(
-                  color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                  child: TextFormField(
-                    style: Theme.of(context).textTheme.subtitle1,
-                    // Below parameters are to disable auto-suggestion
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    keyboardType: TextInputType.visiblePassword,
-                    // Above parameters are to disable auto-suggestion
-                    decoration: InputDecoration(
-                      hintText: 'Search for albums, places & files',
-                      filled: true,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      border: const UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      focusedBorder: const UnderlineInputBorder(
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: Hero(
-                        tag: "search_icon",
-                        child: Icon(
-                          Icons.search,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .iconColor
-                              .withOpacity(0.5),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Container(
+        color: Colors.black.withOpacity(0.32),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 1.5),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.defaultBackgroundColor,
+                    child: TextFormField(
+                      style: Theme.of(context).textTheme.subtitle1,
+                      // Below parameters are to disable auto-suggestion
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      keyboardType: TextInputType.visiblePassword,
+                      // Above parameters are to disable auto-suggestion
+                      decoration: InputDecoration(
+                        hintText: 'Search for albums, places, holidays & years',
+                        filled: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        border: const UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        prefixIcon: Hero(
+                          tag: "search_icon",
+                          child: Icon(
+                            Icons.search,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .iconColor
+                                .withOpacity(0.5),
+                          ),
+                        ),
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(
+                            Icons.close,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .iconColor
+                                .withOpacity(0.5),
+                          ),
                         ),
                       ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        icon: Icon(
-                          Icons.close,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .iconColor
-                              .withOpacity(0.5),
-                        ),
-                      ),
+                      onChanged: (value) async {
+                        final List<SearchResult> allResults =
+                            await getSearchResultsForQuery(value);
+                        if (mounted) {
+                          setState(() {
+                            _query = value;
+                            _results.clear();
+                            _results.addAll(allResults);
+                          });
+                        }
+                      },
+                      autofocus: true,
                     ),
-                    onChanged: (value) async {
-                      final List<SearchResult> allResults =
-                          await getSearchResultsForQuery(value);
-                      if (mounted) {
-                        setState(() {
-                          _query = value;
-                          _results.clear();
-                          _results.addAll(allResults);
-                        });
-                      }
-                    },
-                    autofocus: true,
                   ),
                 ),
-              ),
-              _results.isNotEmpty
-                  ? SearchSuggestionsWidget(_results)
-                  : _query.isNotEmpty
-                      ? const NoResultWidget()
-                      : const SizedBox.shrink(),
-            ],
+                _results.isNotEmpty
+                    ? SearchSuggestionsWidget(_results)
+                    : _query.isNotEmpty
+                        ? const NoResultWidget()
+                        : const SizedBox.shrink(),
+              ],
+            ),
           ),
         ),
       ),
