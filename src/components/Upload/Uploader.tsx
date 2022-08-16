@@ -108,6 +108,8 @@ export default function Uploader(props: Props) {
     const uploadType = useRef<UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
 
+    const closeUploadProgress = () => setUploadProgressView(false);
+
     useEffect(() => {
         UploadManager.initUploader(
             {
@@ -312,7 +314,7 @@ export default function Uploader(props: Props) {
                     );
                 }
             } catch (e) {
-                setUploadProgressView(false);
+                closeUploadProgress();
                 logError(e, 'Failed to create album');
                 appContext.setDialogMessage({
                     title: constants.ERROR,
@@ -359,7 +361,7 @@ export default function Uploader(props: Props) {
             );
         } catch (err) {
             showUserFacingError(err.message);
-            setUploadProgressView(false);
+            closeUploadProgress();
             throw err;
         } finally {
             props.setUploadInProgress(false);
@@ -376,7 +378,7 @@ export default function Uploader(props: Props) {
         } catch (err) {
             showUserFacingError(err.message);
 
-            setUploadProgressView(false);
+            closeUploadProgress();
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();
@@ -507,15 +509,13 @@ export default function Uploader(props: Props) {
     };
 
     const cancelUploads = async () => {
-        setUploadProgressView(false);
+        closeUploadProgress();
         if (isElectron()) {
             ImportService.cancelRemainingUploads();
         }
         props.setUploadInProgress(false);
         Router.reload();
     };
-
-    const closeUploadProgress = () => setUploadProgressView(false);
 
     const handleUpload = (type) => () => {
         if (isElectron() && importService.checkAllElectronAPIsExists()) {
