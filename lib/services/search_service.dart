@@ -173,6 +173,7 @@ class SearchService {
             await FilesDB.instance.getFilesCreatedWithinDurations(
               _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
               null,
+              order: 'DESC',
             ),
           ),
         );

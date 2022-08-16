@@ -52,6 +52,7 @@ class SearchWidget extends StatefulWidget {
 class _SearchWidgetState extends State<SearchWidget> {
   String _query = "";
   final List<SearchResult> _results = [];
+  final _searchService = SearchService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -138,26 +139,25 @@ class _SearchWidgetState extends State<SearchWidget> {
     final queryAsIntForYear = int.tryParse(query);
     if (isYearValid(queryAsIntForYear)) {
       final yearResults =
-          await SearchService.instance.getYearSearchResults(queryAsIntForYear);
+          await _searchService.getYearSearchResults(queryAsIntForYear);
       if (yearResults.isNotEmpty) {
         allResults.add(YearSearchResult(queryAsIntForYear, yearResults));
       }
     }
 
-    final holidayResults =
-        await SearchService.instance.getHolidaySearchResults(query);
+    final holidayResults = await _searchService.getHolidaySearchResults(query);
     for (HolidaySearchResult holidayResult in holidayResults) {
       allResults.add(holidayResult);
     }
 
     final collectionResults =
-        await SearchService.instance.getCollectionSearchResults(query);
+        await _searchService.getCollectionSearchResults(query);
     for (CollectionWithThumbnail collectionResult in collectionResults) {
       allResults.add(AlbumSearchResult(collectionResult));
     }
 
     final locationResults =
-        await SearchService.instance.getLocationSearchResults(query);
+        await _searchService.getLocationSearchResults(query);
     for (LocationSearchResult result in locationResults) {
       allResults.add(result);
     }

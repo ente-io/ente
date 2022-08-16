@@ -9,7 +9,7 @@ import 'package:photos/models/search/search_results.dart';
 import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/file_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/holiday_results_widget.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/holiday_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/year_result_widget.dart';
 

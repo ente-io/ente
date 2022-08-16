@@ -50,7 +50,6 @@ class FilesFromYearPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: [yearSearchResult.files[0]],
-      footer: const SizedBox(height: 120),
     );
     return Scaffold(
       appBar: PreferredSize(
