@@ -11,6 +11,7 @@ class HolidaySearchResultWidget extends StatelessWidget {
   final HolidaySearchResult holidaySearchResult;
   const HolidaySearchResultWidget(this.holidaySearchResult, {Key key})
       : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final noOfMemories = holidaySearchResult.files.length;
@@ -42,10 +43,13 @@ class HolidaySearchResultWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    holidaySearchResult.holidayName,
-                    style: const TextStyle(fontSize: 18),
-                    overflow: TextOverflow.ellipsis,
+                  SizedBox(
+                    width: 220,
+                    child: Text(
+                      holidaySearchResult.holidayName,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   RichText(
@@ -78,7 +82,6 @@ class HolidaySearchResultWidget extends StatelessWidget {
         routeToPage(
           context,
           FilesFromHolidayPage(holidaySearchResult, heroTagPrefix),
-          forceCustomPageRoute: true,
         );
       },
     );
