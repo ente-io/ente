@@ -14,7 +14,6 @@ export const MappingsContainer = styled(Box)(({ theme }) => ({
 }));
 
 export const NoMappingsContainer = styled(VerticallyCentered)({
-    height: '278px',
     textAlign: 'left',
     alignItems: 'flex-start',
 });

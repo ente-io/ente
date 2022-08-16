@@ -1,12 +1,11 @@
 import { MappingList } from './mappingList';
 import { NoMappingsContent } from './noMappingsContent';
 import React, { useContext, useEffect, useState } from 'react';
-import { Button, DialogActions, DialogContent } from '@mui/material';
+import { Button, Dialog, DialogContent, Stack } from '@mui/material';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import constants from 'utils/strings/constants';
-import DialogBoxBase from 'components/DialogBox/base';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
 import { UPLOAD_STRATEGY } from 'constants/upload';
@@ -87,36 +86,43 @@ export default function WatchFolder({ open, onClose }: Iprops) {
 
     return (
         <>
-            <DialogBoxBase maxWidth="xs" open={open} onClose={onClose}>
-                <DialogTitleWithCloseButton onClose={onClose}>
+            <Dialog
+                maxWidth="xs"
+                open={open}
+                onClose={onClose}
+                PaperProps={{ sx: { height: '450px' } }}>
+                <DialogTitleWithCloseButton
+                    onClose={onClose}
+                    sx={{ '&&&': { padding: '32px 16px 16px 24px' } }}>
                     {constants.WATCHED_FOLDERS}
                 </DialogTitleWithCloseButton>
-                <DialogContent>
-                    {mappings.length === 0 ? (
-                        <NoMappingsContent />
-                    ) : (
-                        <MappingList
-                            mappings={mappings}
-                            handleRemoveWatchMapping={handleRemoveWatchMapping}
-                        />
-                    )}
-                </DialogContent>
+                <DialogContent sx={{ flex: 1 }}>
+                    <Stack spacing={1} p={1.5} height={'100%'}>
+                        {mappings.length === 0 ? (
+                            <NoMappingsContent />
+                        ) : (
+                            <MappingList
+                                mappings={mappings}
+                                handleRemoveWatchMapping={
+                                    handleRemoveWatchMapping
+                                }
+                            />
+                        )}
 
-                <DialogActions>
-                    <Button
-                        sx={{ mt: 2 }}
-                        fullWidth
-                        color="accent"
-                        onClick={handleAddFolderClick}>
-                        +
-                        <span
-                            style={{
-                                marginLeft: '8px',
-                            }}></span>
-                        {constants.ADD_FOLDER}
-                    </Button>
-                </DialogActions>
-            </DialogBoxBase>
+                        <Button
+                            fullWidth
+                            color="accent"
+                            onClick={handleAddFolderClick}>
+                            +
+                            <span
+                                style={{
+                                    marginLeft: '8px',
+                                }}></span>
+                            {constants.ADD_FOLDER}
+                        </Button>
+                    </Stack>
+                </DialogContent>
+            </Dialog>
             <UploadStrategyChoiceModal
                 open={choicModalOpen}
                 onClose={closeChoiceModal}
