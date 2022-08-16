@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/holiday_search_result.dart';
+import 'package:photos/ui/viewer/search/collections/files_from_holiday_page.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class HolidaySearchResultWidget extends StatelessWidget {
   static const String _tagPrefix = "holiday_search";
@@ -72,7 +74,13 @@ class HolidaySearchResultWidget extends StatelessWidget {
           ),
         ),
       ),
-      onTap: () {},
+      onTap: () {
+        routeToPage(
+          context,
+          FilesFromHolidayPage(holidaySearchResult, heroTagPrefix),
+          forceCustomPageRoute: true,
+        );
+      },
     );
   }
 }
