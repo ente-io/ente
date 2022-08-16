@@ -18,8 +18,3 @@ export interface EventQueueItem {
     paths?: string[];
     files?: ElectronFile[];
 }
-
-export interface Lock {
-    wait: Promise<void>;
-    unlock(): void;
-}

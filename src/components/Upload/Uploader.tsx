@@ -21,7 +21,7 @@ import { SetLoading, SetFiles } from 'types/gallery';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
-import { downloadApp } from 'utils/common';
+import { downloadApp, waitAndRun } from 'utils/common';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
 import { NotificationAttributes } from 'types/Notification';
@@ -35,7 +35,6 @@ import { UPLOAD_STAGES } from 'constants/upload';
 import importService from 'services/importService';
 import { getDownloadAppMessage } from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
-import { newLock } from 'utils/common';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -59,12 +58,6 @@ interface Props {
     showSessionExpiredMessage: () => void;
     showUploadFilesDialog: () => void;
     showUploadDirsDialog: () => void;
-}
-
-export enum DESKTOP_UPLOAD_TYPE {
-    FILES = 'files',
-    FOLDERS = 'folders',
-    ZIPS = 'zips',
 }
 
 enum UPLOAD_STRATEGY {
@@ -115,8 +108,7 @@ export default function Uploader(props: Props) {
     const pendingDesktopUploadCollectionName = useRef<string>('');
     const uploadType = useRef<UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
-    const waitForPrevUpload = useRef<Promise<void>>(null);
-    const uploadDone = useRef<() => void>(null);
+    const previousUploadPromise = useRef<Promise<void>>(null);
 
     const closeUploadProgress = () => setUploadProgressView(false);
 
@@ -300,7 +292,9 @@ export default function Uploader(props: Props) {
                     localID: index,
                     collectionID: collection.id,
                 }));
-            await uploadFiles(filesWithCollectionToUpload, [collection]);
+            await waitInQueueAndUploadFiles(filesWithCollectionToUpload, [
+                collection,
+            ]);
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
         }
@@ -351,10 +345,23 @@ export default function Uploader(props: Props) {
                 });
                 throw e;
             }
-            await uploadFiles(filesWithCollectionToUpload, collections);
+            await waitInQueueAndUploadFiles(
+                filesWithCollectionToUpload,
+                collections
+            );
         } catch (e) {
             logError(e, 'Failed to upload files to new collections');
         }
+    };
+
+    const waitInQueueAndUploadFiles = async (
+        filesWithCollectionToUpload: FileWithCollection[],
+        collections: Collection[]
+    ) => {
+        const currentPromise = previousUploadPromise.current;
+        previousUploadPromise.current = waitAndRun(currentPromise, () =>
+            uploadFiles(filesWithCollectionToUpload, collections)
+        );
     };
 
     const uploadFiles = async (
@@ -362,10 +369,6 @@ export default function Uploader(props: Props) {
         collections: Collection[]
     ) => {
         try {
-            if (waitForPrevUpload.current !== null) {
-                await waitForPrevUpload.current; // wait for previous upload to finish
-            }
-            setUploadLock();
             uploadInit();
             props.setUploadInProgress(true);
             props.closeCollectionSelector();
@@ -395,7 +398,6 @@ export default function Uploader(props: Props) {
             closeUploadProgress();
             throw err;
         } finally {
-            unsetUploadLock();
             props.setUploadInProgress(false);
             props.syncWithRemote();
             if (isElectron()) {
@@ -412,17 +414,6 @@ export default function Uploader(props: Props) {
                 }
             }
         }
-    };
-
-    const setUploadLock = () => {
-        const { wait, unlock } = newLock();
-        waitForPrevUpload.current = wait;
-        uploadDone.current = unlock;
-    };
-
-    const unsetUploadLock = () => {
-        uploadDone.current();
-        waitForPrevUpload.current = null;
     };
 
     const retryFailed = async () => {
