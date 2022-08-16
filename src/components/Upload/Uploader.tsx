@@ -112,6 +112,11 @@ export default function Uploader(props: Props) {
 
     const closeUploadProgress = () => setUploadProgressView(false);
 
+    const setCollectionName = (collectionName: string) => {
+        isPendingDesktopUpload.current = true;
+        pendingDesktopUploadCollectionName.current = collectionName;
+    };
+
     useEffect(() => {
         UploadManager.initUploader(
             {
@@ -140,11 +145,6 @@ export default function Uploader(props: Props) {
             );
         }
     }, []);
-
-    const setCollectionName = (collectionName: string) => {
-        isPendingDesktopUpload.current = true;
-        pendingDesktopUploadCollectionName.current = collectionName;
-    };
 
     useEffect(() => {
         if (
