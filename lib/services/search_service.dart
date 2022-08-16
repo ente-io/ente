@@ -10,9 +10,11 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/location_search_result.dart';
+import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
 
@@ -115,7 +117,7 @@ class SearchService {
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
   // collections which don't have a file from search result
-  Future<List<CollectionWithThumbnail>> getCollectionSearchResults(
+  Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
@@ -125,7 +127,7 @@ class SearchService {
     final List<File> latestCollectionFiles =
         await _collectionService.getLatestCollectionFiles();
 
-    final List<CollectionWithThumbnail> collectionSearchResults = [];
+    final List<AlbumSearchResult> collectionSearchResults = [];
 
     for (File file in latestCollectionFiles) {
       if (collectionSearchResults.length >= _maximumResultsLimit) {
@@ -135,27 +137,33 @@ class SearchService {
           CollectionsService.instance.getCollectionByID(file.collectionID);
       if (!collection.isArchived() &&
           collection.name.contains(nonCaseSensitiveRegexForQuery)) {
-        collectionSearchResults.add(CollectionWithThumbnail(collection, file));
+        collectionSearchResults
+            .add(AlbumSearchResult(CollectionWithThumbnail(collection, file)));
       }
     }
 
     return collectionSearchResults;
   }
 
-  Future<List<File>> getYearSearchResults(int year) async {
+  Future<YearSearchResult> getYearSearchResults(int year) async {
     final yearInMicrosecondsSinceEpoch =
         DateTime.utc(year).microsecondsSinceEpoch;
+
     final nextYearInMicrosecondsSinceEpoch =
         DateTime.utc(year + 1).microsecondsSinceEpoch;
-    final yearSearchResults =
-        await FilesDB.instance.getFilesCreatedWithinDurations(
+
+    final filesInYear = await FilesDB.instance.getFilesCreatedWithinDurations(
       [
         [yearInMicrosecondsSinceEpoch, nextYearInMicrosecondsSinceEpoch]
       ],
       null,
       order: 'DESC',
     );
-    return yearSearchResults;
+    if (filesInYear.isEmpty) {
+      return null;
+    } else {
+      return YearSearchResult(year, filesInYear);
+    }
   }
 
   Future<List<HolidaySearchResult>> getHolidaySearchResults(
@@ -183,14 +191,14 @@ class SearchService {
   }
 
   List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
-    final List<List<int>> durationsOfHolidays = [];
+    final List<List<int>> durationsOfHolidayInEveryYear = [];
     for (int year = 1970; year < currentYear; year++) {
-      durationsOfHolidays.add([
+      durationsOfHolidayInEveryYear.add([
         DateTime.utc(year, month, day).microsecondsSinceEpoch,
         DateTime.utc(year, month, day + 1).microsecondsSinceEpoch,
       ]);
     }
-    return durationsOfHolidays;
+    return durationsOfHolidayInEveryYear;
   }
 
   bool _isValidLocation(Location location) {

@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/search/album_search_result.dart';
-import 'package:photos/models/search/holiday_search_result.dart';
-import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/search_results.dart';
-import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class SearchIconWidget extends StatefulWidget {
@@ -138,36 +134,26 @@ class _SearchWidgetState extends State<SearchWidget> {
 
     final queryAsIntForYear = int.tryParse(query);
     if (isYearValid(queryAsIntForYear)) {
-      final yearResults =
+      final yearResult =
           await _searchService.getYearSearchResults(queryAsIntForYear);
-      if (yearResults.isNotEmpty) {
-        allResults.add(YearSearchResult(queryAsIntForYear, yearResults));
-      }
+      allResults.add(yearResult); //only one year will be returned
     }
 
     final holidayResults = await _searchService.getHolidaySearchResults(query);
-    for (HolidaySearchResult holidayResult in holidayResults) {
-      allResults.add(holidayResult);
-    }
+    allResults.addAll(holidayResults);
 
     final collectionResults =
         await _searchService.getCollectionSearchResults(query);
-    for (CollectionWithThumbnail collectionResult in collectionResults) {
-      allResults.add(AlbumSearchResult(collectionResult));
-    }
+    allResults.addAll(collectionResults);
 
     final locationResults =
         await _searchService.getLocationSearchResults(query);
-    for (LocationSearchResult result in locationResults) {
-      allResults.add(result);
-    }
+    allResults.addAll(locationResults);
 
     return allResults;
   }
 
   bool isYearValid(int year) {
-    return year != null &&
-        year >= 1970 &&
-        year <= int.parse(DateTime.now().year.toString());
+    return year != null && year >= 1970 && year <= currentYear;
   }
 }
