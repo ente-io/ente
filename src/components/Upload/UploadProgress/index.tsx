@@ -43,6 +43,7 @@ export default function UploadProgress({
     const appContext = useContext(AppContext);
     const [expanded, setExpanded] = useState(true);
 
+    // run watch folder minimized by default
     useEffect(() => {
         if (
             appContext.isFolderSyncRunning &&
