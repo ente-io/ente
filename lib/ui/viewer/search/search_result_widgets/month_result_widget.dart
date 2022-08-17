@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/month_search_result.dart';
+import 'package:photos/ui/viewer/search/collections/files_from_month_page.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class MonthSearchResultWidget extends StatelessWidget {
   static const String _tagPrefix = "month_search";
@@ -76,7 +78,12 @@ class MonthSearchResultWidget extends StatelessWidget {
           ),
         ),
       ),
-      onTap: () {},
+      onTap: () {
+        routeToPage(
+          context,
+          FilesFromMonthPage(monthSearchResult, heroTagPrefix),
+        );
+      },
     );
   }
 }
