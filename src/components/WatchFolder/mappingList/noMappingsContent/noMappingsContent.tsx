@@ -3,7 +3,7 @@ import { FlexWrapper } from 'components/Container';
 import React from 'react';
 import constants from 'utils/strings/constants';
 import { CheckmarkIcon } from './checkmarkIcon';
-import { NoMappingsContainer } from './styledComponents';
+import { NoMappingsContainer } from '../../styledComponents';
 export function NoMappingsContent() {
     return (
         <NoMappingsContainer>

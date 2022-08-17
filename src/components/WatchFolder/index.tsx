@@ -1,5 +1,4 @@
 import { MappingList } from './mappingList';
-import { NoMappingsContent } from './noMappingsContent';
 import React, { useContext, useEffect, useState } from 'react';
 import { Button, Dialog, DialogContent, Stack } from '@mui/material';
 import watchFolderService from 'services/watchFolder/watchFolderService';
@@ -98,17 +97,10 @@ export default function WatchFolder({ open, onClose }: Iprops) {
                 </DialogTitleWithCloseButton>
                 <DialogContent sx={{ flex: 1 }}>
                     <Stack spacing={1} p={1.5} height={'100%'}>
-                        {mappings.length === 0 ? (
-                            <NoMappingsContent />
-                        ) : (
-                            <MappingList
-                                mappings={mappings}
-                                handleRemoveWatchMapping={
-                                    handleRemoveWatchMapping
-                                }
-                            />
-                        )}
-
+                        <MappingList
+                            mappings={mappings}
+                            handleRemoveWatchMapping={handleRemoveWatchMapping}
+                        />
                         <Button
                             fullWidth
                             color="accent"
