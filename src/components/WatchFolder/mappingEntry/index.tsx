@@ -6,7 +6,7 @@ import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import constants from 'utils/strings/constants';
-import MappingEntryOptions from '../mappingEntryOptions';
+import MappingEntryOptions from './mappingEntryOptions';
 import { EntryHeading } from './entryHeading';
 
 interface Iprops {
