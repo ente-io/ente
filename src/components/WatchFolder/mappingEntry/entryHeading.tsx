@@ -1,8 +1,7 @@
 import React, { useContext } from 'react';
-import { Typography } from '@mui/material';
+import { CircularProgress, Typography } from '@mui/material';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { AppContext } from 'pages/_app';
-import { SyncProgressIcon } from './syncProgressIcon';
 import { FlexWrapper } from 'components/Container';
 import { WatchMapping } from 'types/watchFolder';
 
@@ -13,11 +12,11 @@ interface Iprops {
 export function EntryHeading({ mapping }: Iprops) {
     const appContext = useContext(AppContext);
     return (
-        <FlexWrapper gap={0.5}>
+        <FlexWrapper gap={1}>
             <Typography>{mapping.rootFolderName}</Typography>
             {appContext.isFolderSyncRunning &&
                 watchFolderService.isMappingSyncing(mapping) && (
-                    <SyncProgressIcon />
+                    <CircularProgress size={12} />
                 )}
         </FlexWrapper>
     );
