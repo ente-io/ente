@@ -13,14 +13,8 @@ interface Iprops {
 export function EntryHeading({ mapping }: Iprops) {
     const appContext = useContext(AppContext);
     return (
-        <FlexWrapper sx={{ marginBottom: '4px' }}>
-            <Typography
-                sx={{
-                    fontSize: '16px',
-                    lineHeight: '20px',
-                }}>
-                {mapping.rootFolderName}
-            </Typography>
+        <FlexWrapper sx={{ mt: 0.5 }}>
+            <Typography>{mapping.rootFolderName}</Typography>
             {appContext.isFolderSyncRunning &&
                 watchFolderService.isMappingSyncing(mapping) && (
                     <SyncProgressIcon />

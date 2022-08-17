@@ -5,7 +5,7 @@ export function CheckmarkIcon() {
     return (
         <CheckIcon
             sx={{
-                marginRight: '8px',
+                mr: 1,
                 color: (theme) => theme.palette.secondary.main,
             }}
         />
