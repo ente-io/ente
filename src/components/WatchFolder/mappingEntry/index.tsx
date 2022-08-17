@@ -17,6 +17,10 @@ interface Iprops {
 export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
     const appContext = React.useContext(AppContext);
 
+    const stopWatching = () => {
+        handleRemoveMapping(mapping);
+    };
+
     const confirmStopWatching = () => {
         appContext.setDialogMessage({
             title: constants.STOP_WATCHING_FOLDER,
@@ -26,7 +30,7 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
                 variant: 'primary',
             },
             proceed: {
-                action: () => handleRemoveMapping(mapping),
+                action: stopWatching,
                 text: constants.YES_STOP,
                 variant: 'danger',
             },
