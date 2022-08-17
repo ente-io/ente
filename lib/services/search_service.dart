@@ -229,8 +229,9 @@ class SearchService {
     for (var year = 1970; year < currentYear; year++) {
       durationsOfMonthInEveryYear.add([
         DateTime.utc(year, month, 1).microsecondsSinceEpoch,
-        DateTime.utc(year, (month == 12 ? 1 : month + 1), 1)
-            .microsecondsSinceEpoch,
+        month == 12
+            ? DateTime.utc(year + 1, 1, 1).microsecondsSinceEpoch
+            : DateTime.utc(year, month + 1, 1).microsecondsSinceEpoch,
       ]);
     }
     return durationsOfMonthInEveryYear;
