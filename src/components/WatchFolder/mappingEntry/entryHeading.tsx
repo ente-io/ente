@@ -15,7 +15,7 @@ export function EntryHeading({ mapping }: Iprops) {
         <FlexWrapper gap={1}>
             <Typography>{mapping.rootFolderName}</Typography>
             {appContext.isFolderSyncRunning &&
-                watchFolderService.isMappingSyncing(mapping) && (
+                watchFolderService.isMappingSyncInProgress(mapping) && (
                     <CircularProgress size={12} />
                 )}
         </FlexWrapper>

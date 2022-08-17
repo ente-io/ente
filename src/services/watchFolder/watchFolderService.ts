@@ -102,7 +102,7 @@ class watchFolderService {
         }
     }
 
-    isMappingSyncing(mapping: WatchMapping) {
+    isMappingSyncInProgress(mapping: WatchMapping) {
         return this.currentEvent?.folderPath === mapping.folderPath;
     }
 
