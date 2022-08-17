@@ -3,14 +3,12 @@ import 'dart:io' as io;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart' as filePath;
+import 'package:path/path.dart' as file_path;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -24,7 +22,6 @@ import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
-import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -233,37 +230,6 @@ class FadingAppBarState extends State<FadingAppBar> {
     );
   }
 
-  void _showDateTimePicker(File file) async {
-    final dateResult = await DatePicker.showDatePicker(
-      context,
-      minTime: DateTime(1800, 1, 1),
-      maxTime: DateTime.now(),
-      currentTime: DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateResult == null) {
-      return;
-    }
-    final dateWithTimeResult = await DatePicker.showTime12hPicker(
-      context,
-      showTitleActions: true,
-      currentTime: dateResult,
-      locale: LocaleType.en,
-      theme: Theme.of(context).colorScheme.dateTimePickertheme,
-    );
-    if (dateWithTimeResult != null) {
-      if (await editTime(
-        context,
-        List.of([widget.file]),
-        dateWithTimeResult.microsecondsSinceEpoch,
-      )) {
-        widget.file.creationTime = dateWithTimeResult.microsecondsSinceEpoch;
-        setState(() {});
-      }
-    }
-  }
-
   void _showDeleteSheet(File file) {
     final List<Widget> actions = [];
     if (file.uploadedFileID == null || file.localID == null) {
@@ -351,8 +317,8 @@ class FadingAppBarState extends State<FadingAppBar> {
       if (liveVideo == null) {
         _logger.warning("Failed to find live video" + file.tag());
       } else {
-        final videoTitle = filePath.basenameWithoutExtension(file.title) +
-            filePath.extension(liveVideo.path);
+        final videoTitle = file_path.basenameWithoutExtension(file.title) +
+            file_path.extension(liveVideo.path);
         final savedAsset = (await PhotoManager.editor.saveVideo(
           liveVideo,
           title: videoTitle,
