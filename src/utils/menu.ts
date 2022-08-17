@@ -24,7 +24,7 @@ export function buildContextMenu(
         ...(isUpdateAvailable()
             ? [
                   {
-                      label: 'update available',
+                      label: 'Update available',
                       click: () => showUpdateDialog(),
                   },
               ]
@@ -39,7 +39,7 @@ export function buildContextMenu(
                   ...(paused
                       ? [
                             {
-                                label: 'resume export',
+                                label: 'Resume export',
                                 click: () =>
                                     mainWindow.webContents.send(
                                         'resume-export'
@@ -48,12 +48,12 @@ export function buildContextMenu(
                         ]
                       : [
                             {
-                                label: 'pause export',
+                                label: 'Pause export',
                                 click: () =>
                                     mainWindow.webContents.send('pause-export'),
                             },
                             {
-                                label: 'stop export',
+                                label: 'Stop export',
                                 click: () =>
                                     mainWindow.webContents.send('stop-export'),
                             },
@@ -63,18 +63,18 @@ export function buildContextMenu(
         ...(retryExport
             ? [
                   {
-                      label: 'export failed',
+                      label: 'Export failed',
                       click: null,
                   },
                   {
-                      label: 'retry export',
+                      label: 'Retry export',
                       click: () => mainWindow.webContents.send('retry-export'),
                   },
               ]
             : []),
         { type: 'separator' },
         {
-            label: 'open ente',
+            label: 'Open ente',
             click: function () {
                 mainWindow.show();
                 const isMac = process.platform === 'darwin';
@@ -82,7 +82,7 @@ export function buildContextMenu(
             },
         },
         {
-            label: 'quit ente',
+            label: 'Quit ente',
             click: function () {
                 setIsAppQuitting(true);
                 app.quit();
@@ -100,21 +100,21 @@ export function buildMenuBar(): Menu {
                 ...((isMac
                     ? [
                           {
-                              label: 'about',
+                              label: 'About',
                               role: 'about',
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
                 {
-                    label: 'faq',
+                    label: 'FAQ',
                     click: () => shell.openExternal('https://ente.io/faq/'),
                 },
                 {
-                    label: 'support',
+                    label: 'Support',
                     click: () => shell.openExternal('mailto:support@ente.io'),
                 },
                 {
-                    label: 'quit',
+                    label: 'Quit',
                     accelerator: 'CommandOrControl+Q',
                     click() {
                         setIsAppQuitting(true);
@@ -124,25 +124,25 @@ export function buildMenuBar(): Menu {
             ],
         },
         {
-            label: 'edit',
+            label: 'Edit',
             submenu: [
-                { role: 'undo', label: 'undo' },
-                { role: 'redo', label: 'redo' },
+                { role: 'undo', label: 'Undo' },
+                { role: 'redo', label: 'Redo' },
                 { type: 'separator' },
-                { role: 'cut', label: 'cut' },
-                { role: 'copy', label: 'copy' },
-                { role: 'paste', label: 'paste' },
+                { role: 'cut', label: 'Cut' },
+                { role: 'copy', label: 'Copy' },
+                { role: 'paste', label: 'Paste' },
                 ...((isMac
                     ? [
                           {
                               role: 'pasteAndMatchStyle',
-                              label: 'paste and match style',
+                              label: 'Paste and match style',
                           },
-                          { role: 'delete', label: 'delete' },
-                          { role: 'selectAll', label: 'select all' },
+                          { role: 'delete', label: 'Delete' },
+                          { role: 'selectAll', label: 'Select all' },
                           { type: 'separator' },
                           {
-                              label: 'speech',
+                              label: 'Speech',
                               submenu: [
                                   {
                                       role: 'startSpeaking',
@@ -157,39 +157,39 @@ export function buildMenuBar(): Menu {
                       ]
                     : [
                           { type: 'separator' },
-                          { role: 'selectAll', label: 'select all' },
+                          { role: 'selectAll', label: 'Select all' },
                       ]) as MenuItemConstructorOptions[]),
             ],
         },
         // { role: 'viewMenu' }
         {
-            label: 'view',
+            label: 'View',
             submenu: [
-                { role: 'reload', label: 'reload' },
-                { role: 'forceReload', label: 'force reload' },
-                { role: 'toggleDevTools', label: 'toggle devTools' },
+                { role: 'reload', label: 'Reload' },
+                { role: 'forceReload', label: 'Force reload' },
+                { role: 'toggleDevTools', label: 'Toggle dev tools' },
                 { type: 'separator' },
-                { role: 'resetZoom', label: 'reset zoom' },
-                { role: 'zoomIn', label: 'zoom in' },
-                { role: 'zoomOut', label: 'zoom out' },
+                { role: 'resetZoom', label: 'Reset zoom' },
+                { role: 'zoomIn', label: 'Zoom in' },
+                { role: 'zoomOut', label: 'Zoom out' },
                 { type: 'separator' },
-                { role: 'togglefullscreen', label: 'toggle fullscreen' },
+                { role: 'togglefullscreen', label: 'Toggle fullscreen' },
             ],
         },
         // { role: 'windowMenu' }
         {
-            label: 'window',
+            label: 'Window',
             submenu: [
-                { role: 'minimize', label: 'minimize' },
+                { role: 'minimize', label: 'Minimize' },
                 ...((isMac
                     ? [
                           { type: 'separator' },
-                          { role: 'front', label: 'front' },
+                          { role: 'front', label: 'Front' },
                           { type: 'separator' },
-                          { role: 'window', label: 'window' },
+                          { role: 'window', label: 'Window' },
                       ]
                     : [
-                          { role: 'close', label: 'close' },
+                          { role: 'close', label: 'Close' },
                       ]) as MenuItemConstructorOptions[]),
             ],
         },

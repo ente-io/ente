@@ -1,4 +1,4 @@
-import { reloadWindow, sendNotification, showOnTray } from './api/system';
+import { fixHotReloadNext12 } from './utils/next-serve';
 import {
     showUploadDirsDialog,
     showUploadFilesDialog,
@@ -31,9 +31,13 @@ import {
 } from './api/export';
 import { selectRootDirectory, clearElectronStore } from './api/common';
 import { getElectronFile, doesFolderExists } from './services/fs';
+import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
+import { openDiskCache, deleteDiskCache } from './api/cache';
+import { sendNotification, showOnTray, reloadWindow } from './api/system';
+
+fixHotReloadNext12();
 
 const windowObject: any = window;
-
 windowObject['ElectronAPIs'] = {
     exists,
     checkExistsAndCreateCollectionDir,
@@ -59,6 +63,10 @@ windowObject['ElectronAPIs'] = {
     showUploadZipDialog,
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
+    getEncryptionKey,
+    setEncryptionKey,
+    openDiskCache,
+    deleteDiskCache,
     getAllFilesFromDir,
     getWatchMappings,
     setWatchMappings,

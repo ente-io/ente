@@ -28,21 +28,27 @@ export const getFileStream = async (filePath: string) => {
     let offset = 0;
     const readableStream = new ReadableStream<Uint8Array>({
         async pull(controller) {
-            const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
+            try {
+                const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
 
-            // original types were not working correctly
-            const bytesRead = (await fs.read(
-                file,
-                buff,
-                0,
-                FILE_STREAM_CHUNK_SIZE,
-                offset
-            )) as unknown as number;
-            offset += bytesRead;
-            if (bytesRead === 0) {
-                controller.close();
-            } else {
-                controller.enqueue(buff);
+                // original types were not working correctly
+                const bytesRead = (await fs.read(
+                    file,
+                    buff,
+                    0,
+                    FILE_STREAM_CHUNK_SIZE,
+                    offset
+                )) as unknown as number;
+                offset += bytesRead;
+                if (bytesRead === 0) {
+                    controller.close();
+                    await fs.close(file);
+                } else {
+                    controller.enqueue(buff);
+                }
+            } catch (e) {
+                logError(e, 'stream pull failed');
+                await fs.close(file);
             }
         },
     });

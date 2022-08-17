@@ -1,8 +1,8 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
 import * as path from 'path';
 import { isDev } from './common';
-import { PROD_HOST_URL } from '../config';
 import { isAppQuitting } from '../main';
+import { PROD_HOST_URL } from '../config';
 
 export function createWindow(): BrowserWindow {
     const appImgPath = isDev
@@ -19,11 +19,10 @@ export function createWindow(): BrowserWindow {
             contextIsolation: false,
         },
         icon: appIcon,
-        show: false, // don't show the main window
+        show: false, // don't show the main window on load
     });
     mainWindow.maximize();
     const splash = new BrowserWindow({
-        alwaysOnTop: true,
         height: 600,
         width: 800,
         transparent: true,
@@ -32,7 +31,7 @@ export function createWindow(): BrowserWindow {
 
     if (isDev) {
         splash.loadFile(`../build/splash.html`);
-        mainWindow.loadURL('http://localhost:3000');
+        mainWindow.loadURL(PROD_HOST_URL);
         // Open the DevTools.
         mainWindow.webContents.openDevTools();
     } else {

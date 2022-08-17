@@ -1,6 +1,11 @@
 import { ipcRenderer } from 'electron/renderer';
 import { logError } from '../utils/logging';
-import { keysStore, uploadStatusStore, watchStore } from '../services/store';
+import {
+    keysStore,
+    uploadStatusStore,
+    watchStore,
+    safeStorageStore,
+} from '../services/store';
 
 export const selectRootDirectory = async () => {
     try {
@@ -15,6 +20,7 @@ export const clearElectronStore = () => {
         watchStore.clear();
         uploadStatusStore.clear();
         keysStore.clear();
+        safeStorageStore.clear();
     } catch (e) {
         logError(e, 'error while clearing electron store');
     }

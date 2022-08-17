@@ -2,7 +2,7 @@ import { BrowserWindow, dialog, Tray } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
-import { buildContextMenu } from './menuUtil';
+import { buildContextMenu } from './menu';
 
 class AppUpdater {
     constructor() {
@@ -26,9 +26,9 @@ export const showUpdateDialog = (): void => {
     dialog
         .showMessageBox({
             type: 'info',
-            title: 'install update',
-            message: 'restart to update to the latest version of ente',
-            buttons: ['later', 'restart now'],
+            title: 'Install update',
+            message: 'Restart to update to the latest version of ente',
+            buttons: ['Later', 'Restart now'],
         })
         .then((buttonIndex) => {
             if (buttonIndex.response === 1) {

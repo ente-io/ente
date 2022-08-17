@@ -1,20 +1,25 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron';
-import * as path from 'path';
-import AppUpdater from './utils/appUpdater';
+import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
-import { buildContextMenu, buildMenuBar } from './utils/menuUtil';
 import initSentry from './utils/sentry';
+import electronReload from 'electron-reload';
+import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from './config';
 import { isDev } from './utils/common';
 import { initWatcher } from './services/chokidar';
+import serveNextAt from 'next-electron-server';
+import { addAllowOriginHeader } from './utils/cors';
+import {
+    setupTrayItem,
+    handleUpdates,
+    handleDownloads,
+    setupMacWindowOnDockIconClick,
+    setupMainMenu,
+} from './utils/main';
 
 if (isDev) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const electronReload = require('electron-reload');
     electronReload(__dirname, {});
 }
 
-let tray: Tray;
 let mainWindow: BrowserWindow;
 
 let appIsQuitting = false;
@@ -36,10 +41,15 @@ export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
+serveNextAt(PROD_HOST_URL, {
+    outputDir: RENDERER_OUTPUT_DIR,
+});
+
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
 } else {
+    app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
     app.on('second-instance', () => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {
@@ -55,29 +65,15 @@ if (!gotTheLock) {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', () => {
-        initSentry();
-        setIsUpdateAvailable(false);
         mainWindow = createWindow();
-        Menu.setApplicationMenu(buildMenuBar());
-
-        app.on('activate', function () {
-            // On macOS it's common to re-create a window in the app when the
-            // dock icon is clicked and there are no other windows open.
-            if (BrowserWindow.getAllWindows().length === 0) createWindow();
-        });
-
-        const trayImgPath = isDev
-            ? 'build/taskbar-icon.png'
-            : path.join(process.resourcesPath, 'taskbar-icon.png');
-        const trayIcon = nativeImage.createFromPath(trayImgPath);
-        tray = new Tray(trayIcon);
-        tray.setToolTip('ente');
-        tray.setContextMenu(buildContextMenu(mainWindow));
-
+        const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);
+        setupMacWindowOnDockIconClick();
+        initSentry();
+        setupMainMenu();
         setupIpcComs(tray, mainWindow, watcher);
-        if (!isDev) {
-            AppUpdater.checkForUpdate(tray, mainWindow);
-        }
+        handleUpdates(mainWindow, tray);
+        handleDownloads(mainWindow);
+        addAllowOriginHeader(mainWindow);
     });
 }
