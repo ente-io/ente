@@ -18,7 +18,7 @@ interface Iprops {
 export default function WatchFolder({ open, onClose }: Iprops) {
     const [mappings, setMappings] = useState<WatchMapping[]>([]);
     const [inputFolderPath, setInputFolderPath] = useState('');
-    const [choicModalOpen, setChoiceModalOpen] = useState(false);
+    const [choiceModalOpen, setChoiceModalOpen] = useState(false);
     const appContext = useContext(AppContext);
 
     useEffect(() => {
@@ -124,7 +124,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
                 </DialogContent>
             </Dialog>
             <UploadStrategyChoiceModal
-                open={choicModalOpen}
+                open={choiceModalOpen}
                 onClose={closeChoiceModal}
                 uploadToSingleCollection={uploadToSingleCollection}
                 uploadToMultipleCollection={uploadToMultipleCollection}
