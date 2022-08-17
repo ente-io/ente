@@ -160,6 +160,9 @@ class _SearchWidgetState extends State<SearchWidget> {
         await _searchService.getLocationSearchResults(query);
     allResults.addAll(locationResults);
 
+    final monthResults = await _searchService.getMonthSearchResults(query);
+    allResults.addAll(monthResults);
+
     return allResults;
   }
 
