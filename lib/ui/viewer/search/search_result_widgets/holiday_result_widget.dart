@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/search/year_search_result.dart';
-import 'package:photos/ui/viewer/search/collections/files_from_year_page.dart';
+import 'package:photos/models/search/holiday_search_result.dart';
+import 'package:photos/ui/viewer/search/collections/files_from_holiday_page.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class YearSearchResultWidget extends StatelessWidget {
-  static const String _tagPrefix = "year_search";
+class HolidaySearchResultWidget extends StatelessWidget {
+  static const String _tagPrefix = "holiday_search";
 
-  final YearSearchResult yearSearchResult;
-  const YearSearchResultWidget(this.yearSearchResult, {Key key})
+  final HolidaySearchResult holidaySearchResult;
+  const HolidaySearchResultWidget(this.holidaySearchResult, {Key key})
       : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final noOfMemories = yearSearchResult.files.length;
-    final heroTagPrefix = _tagPrefix + yearSearchResult.year.toString();
+    final noOfMemories = holidaySearchResult.files.length;
+    final heroTagPrefix = _tagPrefix + holidaySearchResult.holidayName;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -27,7 +28,7 @@ class YearSearchResultWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               SearchResultThumbnailWidget(
-                yearSearchResult.files[0],
+                holidaySearchResult.files[0],
                 heroTagPrefix,
               ),
               const SizedBox(width: 16),
@@ -41,11 +42,14 @@ class YearSearchResultWidget extends StatelessWidget {
                       color: Theme.of(context).colorScheme.subTextColor,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    yearSearchResult.year.toString(),
-                    style: const TextStyle(fontSize: 18),
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: 220,
+                    child: Text(
+                      holidaySearchResult.holidayName,
+                      style: const TextStyle(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   RichText(
@@ -77,7 +81,7 @@ class YearSearchResultWidget extends StatelessWidget {
       onTap: () {
         routeToPage(
           context,
-          FilesFromYearPage(yearSearchResult, heroTagPrefix),
+          FilesFromHolidayPage(holidaySearchResult, heroTagPrefix),
         );
       },
     );

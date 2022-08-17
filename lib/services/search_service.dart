@@ -3,15 +3,20 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/data/holidays.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
+import 'package:photos/models/search/album_search_result.dart';
+import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/location_search_result.dart';
+import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/utils/date_time_util.dart';
 
 class SearchService {
   Future<List<File>> _cachedFilesFuture;
@@ -52,7 +57,7 @@ class SearchService {
     final List<File> fileSearchResults = [];
     final List<File> files = await getAllFiles();
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
-    for (File file in files) {
+    for (var file in files) {
       if (fileSearchResults.length >= _maximumResultsLimit) {
         break;
       }
@@ -85,11 +90,10 @@ class SearchService {
       final matchedLocationSearchResults =
           LocationApiResponse.fromMap(response.data);
 
-      for (LocationDataFromResponse locationData
-          in matchedLocationSearchResults.results) {
+      for (var locationData in matchedLocationSearchResults.results) {
         final List<File> filesInLocation = [];
 
-        for (File file in allFiles) {
+        for (var file in allFiles) {
           if (_isValidLocation(file.location) &&
               _isLocationWithinBounds(file.location, locationData)) {
             filesInLocation.add(file);
@@ -112,7 +116,7 @@ class SearchService {
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
   // collections which don't have a file from search result
-  Future<List<CollectionWithThumbnail>> getCollectionSearchResults(
+  Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
@@ -122,9 +126,9 @@ class SearchService {
     final List<File> latestCollectionFiles =
         await _collectionService.getLatestCollectionFiles();
 
-    final List<CollectionWithThumbnail> collectionSearchResults = [];
+    final List<AlbumSearchResult> collectionSearchResults = [];
 
-    for (File file in latestCollectionFiles) {
+    for (var file in latestCollectionFiles) {
       if (collectionSearchResults.length >= _maximumResultsLimit) {
         break;
       }
@@ -132,26 +136,68 @@ class SearchService {
           CollectionsService.instance.getCollectionByID(file.collectionID);
       if (!collection.isArchived() &&
           collection.name.contains(nonCaseSensitiveRegexForQuery)) {
-        collectionSearchResults.add(CollectionWithThumbnail(collection, file));
+        collectionSearchResults
+            .add(AlbumSearchResult(CollectionWithThumbnail(collection, file)));
       }
     }
 
     return collectionSearchResults;
   }
 
-  Future<List<File>> getYearSearchResults(int year) async {
-    final yearInMicroseconds = DateTime.utc(year).microsecondsSinceEpoch;
-    final nextYearInMicroseconds =
+  Future<YearSearchResult> getYearSearchResults(int year) async {
+    final yearInMicrosecondsSinceEpoch =
+        DateTime.utc(year).microsecondsSinceEpoch;
+
+    final nextYearInMicrosecondsSinceEpoch =
         DateTime.utc(year + 1).microsecondsSinceEpoch;
-    final yearSearchResults =
-        await FilesDB.instance.getFilesCreatedWithinDurations(
+
+    final filesInYear = await FilesDB.instance.getFilesCreatedWithinDurations(
       [
-        [yearInMicroseconds, nextYearInMicroseconds]
+        [yearInMicrosecondsSinceEpoch, nextYearInMicrosecondsSinceEpoch]
       ],
       null,
       order: 'DESC',
     );
-    return yearSearchResults;
+    if (filesInYear.isEmpty) {
+      return null;
+    } else {
+      return YearSearchResult(year, filesInYear);
+    }
+  }
+
+  Future<List<HolidaySearchResult>> getHolidaySearchResults(
+    String query,
+  ) async {
+    final List<HolidaySearchResult> holidaySearchResult = [];
+
+    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
+
+    for (var holiday in allHolidays) {
+      if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
+        holidaySearchResult.add(
+          HolidaySearchResult(
+            holiday.name,
+            await FilesDB.instance.getFilesCreatedWithinDurations(
+              _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
+              null,
+              order: 'DESC',
+            ),
+          ),
+        );
+      }
+    }
+    return holidaySearchResult;
+  }
+
+  List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
+    final List<List<int>> durationsOfHolidayInEveryYear = [];
+    for (var year = 1970; year < currentYear; year++) {
+      durationsOfHolidayInEveryYear.add([
+        DateTime.utc(year, month, day).microsecondsSinceEpoch,
+        DateTime.utc(year, month, day + 1).microsecondsSinceEpoch,
+      ]);
+    }
+    return durationsOfHolidayInEveryYear;
   }
 
   bool _isValidLocation(Location location) {
