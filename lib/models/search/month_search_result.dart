@@ -7,8 +7,8 @@ class MonthSearchResult extends SearchResult {
   MonthSearchResult(this.month, this.files);
 }
 
-class MonthWihMonthNumber {
-  final String month;
+class MonthData {
+  final String name;
   final int monthNumber;
-  MonthWihMonthNumber(this.month, this.monthNumber);
+  MonthData(this.name, this.monthNumber);
 }

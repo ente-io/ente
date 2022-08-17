@@ -1,16 +1,16 @@
 import 'package:photos/models/search/month_search_result.dart';
 
-List<MonthWihMonthNumber> allMonths = [
-  MonthWihMonthNumber('January', 1),
-  MonthWihMonthNumber('February', 2),
-  MonthWihMonthNumber('March', 3),
-  MonthWihMonthNumber('April', 4),
-  MonthWihMonthNumber('May', 5),
-  MonthWihMonthNumber('June', 6),
-  MonthWihMonthNumber('July', 7),
-  MonthWihMonthNumber('August', 8),
-  MonthWihMonthNumber('September', 9),
-  MonthWihMonthNumber('October', 10),
-  MonthWihMonthNumber('November', 11),
-  MonthWihMonthNumber('December', 12),
+List<MonthData> allMonths = [
+  MonthData('January', 1),
+  MonthData('February', 2),
+  MonthData('March', 3),
+  MonthData('April', 4),
+  MonthData('May', 5),
+  MonthData('June', 6),
+  MonthData('July', 7),
+  MonthData('August', 8),
+  MonthData('September', 9),
+  MonthData('October', 10),
+  MonthData('November', 11),
+  MonthData('December', 12),
 ];

@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/data/holidays.dart';
+import 'package:photos/data/months.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
@@ -14,6 +15,7 @@ import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/location_search_result.dart';
+import 'package:photos/models/search/month_search_result.dart';
 import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -168,13 +170,13 @@ class SearchService {
   Future<List<HolidaySearchResult>> getHolidaySearchResults(
     String query,
   ) async {
-    final List<HolidaySearchResult> holidaySearchResult = [];
+    final List<HolidaySearchResult> holidaySearchResults = [];
 
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
 
     for (var holiday in allHolidays) {
       if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
-        holidaySearchResult.add(
+        holidaySearchResults.add(
           HolidaySearchResult(
             holiday.name,
             await FilesDB.instance.getFilesCreatedWithinDurations(
@@ -186,7 +188,29 @@ class SearchService {
         );
       }
     }
-    return holidaySearchResult;
+    return holidaySearchResults;
+  }
+
+  Future<List<MonthSearchResult>> getMonthSearchResults(String query) async {
+    final List<MonthSearchResult> monthSearchResults = [];
+    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
+
+    for (var month in allMonths) {
+      if (month.name.startsWith(nonCaseSensitiveRegexForQuery)) {
+        monthSearchResults.add(
+          MonthSearchResult(
+            month.name,
+            await FilesDB.instance.getFilesCreatedWithinDurations(
+              _getDurationsOfMonthInEveryYear(month.monthNumber),
+              null,
+              order: 'DESC',
+            ),
+          ),
+        );
+      }
+    }
+
+    return monthSearchResults;
   }
 
   List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
@@ -198,6 +222,18 @@ class SearchService {
       ]);
     }
     return durationsOfHolidayInEveryYear;
+  }
+
+  List<List<int>> _getDurationsOfMonthInEveryYear(int month) {
+    final List<List<int>> durationsOfMonthInEveryYear = [];
+    for (var year = 1970; year < currentYear; year++) {
+      durationsOfMonthInEveryYear.add([
+        DateTime.utc(year, month, 1).microsecondsSinceEpoch,
+        DateTime.utc(year, (month == 12 ? 1 : month + 1), 1)
+            .microsecondsSinceEpoch,
+      ]);
+    }
+    return durationsOfMonthInEveryYear;
   }
 
   bool _isValidLocation(Location location) {
