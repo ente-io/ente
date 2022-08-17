@@ -93,16 +93,16 @@ class UploadManager {
     }
 
     public async queueFilesForUpload(
-        fileWithCollectionToBeUploaded: FileWithCollection[],
+        filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[]
     ) {
         try {
             await this.init(collections);
             addLogLine(
-                `received ${fileWithCollectionToBeUploaded.length} files to upload`
+                `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
             const { metadataJSONFiles, mediaFiles } =
-                segregateMetadataAndMediaFiles(fileWithCollectionToBeUploaded);
+                segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
             addLogLine(`has ${metadataJSONFiles.length} metadata json files`);
             addLogLine(`has ${mediaFiles.length} media files`);
             if (metadataJSONFiles.length) {
@@ -195,6 +195,17 @@ class UploadManager {
         } finally {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.worker.terminate();
+            }
+            if (isElectron()) {
+                if (watchFolderService.isUploadRunning()) {
+                    await watchFolderService.allFileUploadsDone(
+                        filesWithCollectionToUploadIn,
+                        collections
+                    );
+                } else if (watchFolderService.isServicePaused()) {
+                    // resume the service after user upload is done
+                    watchFolderService.resumeService();
+                }
             }
         }
     }

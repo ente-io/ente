@@ -356,17 +356,17 @@ export default function Uploader(props: Props) {
     };
 
     const waitInQueueAndUploadFiles = async (
-        filesWithCollectionToUpload: FileWithCollection[],
+        filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[]
     ) => {
         const currentPromise = previousUploadPromise.current;
         previousUploadPromise.current = waitAndRun(currentPromise, () =>
-            uploadFiles(filesWithCollectionToUpload, collections)
+            uploadFiles(filesWithCollectionToUploadIn, collections)
         );
     };
 
     const uploadFiles = async (
-        filesWithCollectionToUpload: FileWithCollection[],
+        filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[]
     ) => {
         try {
@@ -385,13 +385,13 @@ export default function Uploader(props: Props) {
                 }
                 await ImportService.setToUploadFiles(
                     UPLOAD_TYPE.FILES,
-                    filesWithCollectionToUpload.map(
+                    filesWithCollectionToUploadIn.map(
                         ({ file }) => (file as ElectronFile).path
                     )
                 );
             }
             await uploadManager.queueFilesForUpload(
-                filesWithCollectionToUpload,
+                filesWithCollectionToUploadIn,
                 collections
             );
         } catch (err) {
@@ -401,19 +401,6 @@ export default function Uploader(props: Props) {
         } finally {
             props.setUploadInProgress(false);
             props.syncWithRemote();
-            if (isElectron()) {
-                if (watchFolderService.isUploadRunning()) {
-                    await watchFolderService.allFileUploadsDone(
-                        filesWithCollectionToUpload,
-                        collections
-                    );
-                } else {
-                    if (watchFolderService.isServicePaused()) {
-                        // resume the service after user upload is done
-                        watchFolderService.resumeService();
-                    }
-                }
-            }
         }
     };
 
