@@ -13,11 +13,15 @@ export function NoMappingsContent() {
             <Typography mb={1}>
                 {constants.FOLDERS_AUTOMATICALLY_MONITORED}
             </Typography>
-            <FlexWrapper>
-                <CheckmarkIcon /> {constants.UPLOAD_NEW_FILES_TO_ENTE}
+            <FlexWrapper gap={1}>
+                <CheckmarkIcon />
+                <Typography>{constants.UPLOAD_NEW_FILES_TO_ENTE}</Typography>
             </FlexWrapper>
-            <FlexWrapper>
-                <CheckmarkIcon /> {constants.REMOVE_DELETED_FILES_FROM_ENTE}
+            <FlexWrapper gap={1}>
+                <CheckmarkIcon />
+                <Typography>
+                    {constants.REMOVE_DELETED_FILES_FROM_ENTE}
+                </Typography>
             </FlexWrapper>
         </NoMappingsContainer>
     );
