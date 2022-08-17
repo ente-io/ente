@@ -1,7 +1,7 @@
-import { EntryContainer, HorizontalFlex } from '../styledComponents';
+import { EntryContainer } from '../styledComponents';
 import React from 'react';
 import { Typography } from '@mui/material';
-import { SpaceBetweenFlex } from 'components/Container';
+import { HorizontalFlex, SpaceBetweenFlex } from 'components/Container';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';

@@ -1,3 +1,4 @@
+import {} from './../Container';
 import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import VerticallyCentered from 'components/Container';
@@ -16,10 +17,6 @@ export const MappingsContainer = styled(Box)(({ theme }) => ({
 export const NoMappingsContainer = styled(VerticallyCentered)({
     textAlign: 'left',
     alignItems: 'flex-start',
-});
-
-export const HorizontalFlex = styled(Box)({
-    display: 'flex',
 });
 
 export const EntryContainer = styled(Box)({
