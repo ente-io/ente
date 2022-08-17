@@ -57,7 +57,7 @@ class SearchService {
     final List<File> fileSearchResults = [];
     final List<File> files = await getAllFiles();
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
-    for (File file in files) {
+    for (var file in files) {
       if (fileSearchResults.length >= _maximumResultsLimit) {
         break;
       }
@@ -90,11 +90,10 @@ class SearchService {
       final matchedLocationSearchResults =
           LocationApiResponse.fromMap(response.data);
 
-      for (LocationDataFromResponse locationData
-          in matchedLocationSearchResults.results) {
+      for (var locationData in matchedLocationSearchResults.results) {
         final List<File> filesInLocation = [];
 
-        for (File file in allFiles) {
+        for (var file in allFiles) {
           if (_isValidLocation(file.location) &&
               _isLocationWithinBounds(file.location, locationData)) {
             filesInLocation.add(file);
@@ -129,7 +128,7 @@ class SearchService {
 
     final List<AlbumSearchResult> collectionSearchResults = [];
 
-    for (File file in latestCollectionFiles) {
+    for (var file in latestCollectionFiles) {
       if (collectionSearchResults.length >= _maximumResultsLimit) {
         break;
       }
@@ -173,7 +172,7 @@ class SearchService {
 
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
 
-    for (HolidayData holiday in allHolidays) {
+    for (var holiday in allHolidays) {
       if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
         holidaySearchResult.add(
           HolidaySearchResult(
@@ -192,7 +191,7 @@ class SearchService {
 
   List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
     final List<List<int>> durationsOfHolidayInEveryYear = [];
-    for (int year = 1970; year < currentYear; year++) {
+    for (var year = 1970; year < currentYear; year++) {
       durationsOfHolidayInEveryYear.add([
         DateTime.utc(year, month, day).microsecondsSinceEpoch,
         DateTime.utc(year, month, day + 1).microsecondsSinceEpoch,

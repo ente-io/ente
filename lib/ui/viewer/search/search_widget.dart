@@ -143,7 +143,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     final List<SearchResult> allResults = [];
 
     final queryAsIntForYear = int.tryParse(query);
-    if (isYearValid(queryAsIntForYear)) {
+    if (_isYearValid(queryAsIntForYear)) {
       final yearResult =
           await _searchService.getYearSearchResults(queryAsIntForYear);
       allResults.add(yearResult); //only one year will be returned
@@ -163,7 +163,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     return allResults;
   }
 
-  bool isYearValid(int year) {
+  bool _isYearValid(int year) {
     return year != null && year >= 1970 && year <= currentYear;
   }
 }
