@@ -36,11 +36,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
             '/models/mobilefacenet/mobilefacenet.tflite'
         );
 
-        console.log(
-            'loaded mobileFaceNetModel: ',
-            await this.mobileFaceNetModel,
-            await tf.getBackend()
-        );
+        console.log('loaded mobileFaceNetModel: ', tf.getBackend());
     }
 
     private async getMobileFaceNetModel() {
