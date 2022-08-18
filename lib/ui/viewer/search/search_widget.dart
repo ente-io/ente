@@ -142,26 +142,29 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
 
-    final queryAsIntForYear = int.tryParse(query);
-    if (_isYearValid(queryAsIntForYear)) {
-      final yearResult =
-          await _searchService.getYearSearchResults(queryAsIntForYear);
-      allResults.add(yearResult); //only one year will be returned
+    if (query.isNotEmpty) {
+      final queryAsIntForYear = int.tryParse(query);
+      if (_isYearValid(queryAsIntForYear)) {
+        final yearResult =
+            await _searchService.getYearSearchResults(queryAsIntForYear);
+        allResults.add(yearResult); //only one year will be returned
+      }
+
+      final holidayResults =
+          await _searchService.getHolidaySearchResults(query);
+      allResults.addAll(holidayResults);
+
+      final collectionResults =
+          await _searchService.getCollectionSearchResults(query);
+      allResults.addAll(collectionResults);
+
+      final locationResults =
+          await _searchService.getLocationSearchResults(query);
+      allResults.addAll(locationResults);
+
+      final monthResults = await _searchService.getMonthSearchResults(query);
+      allResults.addAll(monthResults);
     }
-
-    final holidayResults = await _searchService.getHolidaySearchResults(query);
-    allResults.addAll(holidayResults);
-
-    final collectionResults =
-        await _searchService.getCollectionSearchResults(query);
-    allResults.addAll(collectionResults);
-
-    final locationResults =
-        await _searchService.getLocationSearchResults(query);
-    allResults.addAll(locationResults);
-
-    final monthResults = await _searchService.getMonthSearchResults(query);
-    allResults.addAll(monthResults);
 
     return allResults;
   }
