@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_results.dart';
@@ -49,6 +51,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   String _query = "";
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
+  Timer _debounce;
 
   @override
   Widget build(BuildContext context) {
@@ -139,37 +142,51 @@ class _SearchWidgetState extends State<SearchWidget> {
     );
   }
 
-  Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
+  Future getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
+    final completer = Completer();
 
-    if (query.isNotEmpty) {
-      final queryAsIntForYear = int.tryParse(query);
-      if (_isYearValid(queryAsIntForYear)) {
-        final yearResult =
-            await _searchService.getYearSearchResults(queryAsIntForYear);
-        allResults.add(yearResult); //only one year will be returned
+    _debounceQuery(() async {
+      if (query.isNotEmpty) {
+        final queryAsIntForYear = int.tryParse(query);
+        if (_isYearValid(queryAsIntForYear)) {
+          final yearResult =
+              await _searchService.getYearSearchResults(queryAsIntForYear);
+          allResults.add(yearResult); //only one year will be returned
+        }
+
+        final holidayResults =
+            await _searchService.getHolidaySearchResults(query);
+        allResults.addAll(holidayResults);
+
+        final collectionResults =
+            await _searchService.getCollectionSearchResults(query);
+        allResults.addAll(collectionResults);
+
+        final locationResults =
+            await _searchService.getLocationSearchResults(query);
+        allResults.addAll(locationResults);
+
+        final monthResults = await _searchService.getMonthSearchResults(query);
+        allResults.addAll(monthResults);
+
+        completer.complete(allResults);
       }
+      completer.complete(allResults);
+    });
 
-      final holidayResults =
-          await _searchService.getHolidaySearchResults(query);
-      allResults.addAll(holidayResults);
-
-      final collectionResults =
-          await _searchService.getCollectionSearchResults(query);
-      allResults.addAll(collectionResults);
-
-      final locationResults =
-          await _searchService.getLocationSearchResults(query);
-      allResults.addAll(locationResults);
-
-      final monthResults = await _searchService.getMonthSearchResults(query);
-      allResults.addAll(monthResults);
-    }
-
-    return allResults;
+    return completer.future;
   }
 
   bool _isYearValid(int year) {
     return year != null && year >= 1970 && year <= currentYear;
+  }
+
+  _debounceQuery(fn) {
+    if (_debounce != null && _debounce.isActive) {
+      _debounce.cancel();
+    } else {
+      _debounce = Timer(const Duration(milliseconds: 250), fn);
+    }
   }
 }
