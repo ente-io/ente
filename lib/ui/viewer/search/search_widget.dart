@@ -153,8 +153,12 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
-      return allResults;
+      if (_debounce != null && _debounce.isActive) {
+        _debounce.cancel();
+      }
+      return (allResults);
     }
+
     final completer = Completer();
 
     _debounceQuery(() async {
@@ -194,7 +198,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     if (_debounce != null && _debounce.isActive) {
       _debounce.cancel();
     }
-    _debounce = Timer(const Duration(milliseconds: 250), fn);
+    _debounce = Timer(const Duration(milliseconds: 500), fn);
     debounceNotifier.value = _debounce;
   }
 }
