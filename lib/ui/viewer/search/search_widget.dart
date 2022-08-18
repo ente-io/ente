@@ -65,7 +65,7 @@ class _SearchWidgetState extends State<SearchWidget> {
         color: Colors.black.withOpacity(0.32),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1.5),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               children: [
                 const SizedBox(height: 8),
