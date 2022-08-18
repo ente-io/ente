@@ -53,7 +53,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
   Timer _debounce;
-  ValueNotifier<Timer> debounceNotifier = ValueNotifier(null);
+  final ValueNotifier<Timer> _debounceNotifier = ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +104,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ),
                         ),
                         suffixIcon: ValueListenableBuilder(
-                          valueListenable: debounceNotifier,
+                          valueListenable: _debounceNotifier,
                           builder: (
                             BuildContext context,
                             Timer debounce,
@@ -198,7 +198,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     if (_debounce != null && _debounce.isActive) {
       _debounce.cancel();
     }
-    _debounce = Timer(const Duration(milliseconds: 500), fn);
-    debounceNotifier.value = _debounce;
+    _debounce = Timer(const Duration(milliseconds: 250), fn);
+    _debounceNotifier.value = _debounce;
   }
 }
