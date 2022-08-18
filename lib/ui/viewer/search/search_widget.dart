@@ -171,8 +171,9 @@ class _SearchWidgetState extends State<SearchWidget> {
         allResults.addAll(monthResults);
 
         completer.complete(allResults);
+      } else {
+        completer.complete(allResults);
       }
-      completer.complete(allResults);
     });
 
     return completer.future;
@@ -185,10 +186,8 @@ class _SearchWidgetState extends State<SearchWidget> {
   _debounceQuery(fn) {
     if (_debounce != null && _debounce.isActive) {
       _debounce.cancel();
-      debounceNotifier.value = _debounce;
-    } else {
-      _debounce = Timer(const Duration(milliseconds: 250), fn);
-      debounceNotifier.value = _debounce;
     }
+    _debounce = Timer(const Duration(milliseconds: 250), fn);
+    debounceNotifier.value = _debounce;
   }
 }
