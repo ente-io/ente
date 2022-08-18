@@ -142,38 +142,45 @@ class _SearchWidgetState extends State<SearchWidget> {
     );
   }
 
+  @override
+  void dispose() {
+    if (_debounce != null) {
+      _debounce.cancel();
+    }
+    super.dispose();
+  }
+
   Future getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
+    if (query.isEmpty) {
+      return allResults;
+    }
     final completer = Completer();
 
     _debounceQuery(() async {
-      if (query.isNotEmpty) {
-        final queryAsIntForYear = int.tryParse(query);
-        if (_isYearValid(queryAsIntForYear)) {
-          final yearResult =
-              await _searchService.getYearSearchResults(queryAsIntForYear);
-          allResults.add(yearResult); //only one year will be returned
-        }
-
-        final holidayResults =
-            await _searchService.getHolidaySearchResults(query);
-        allResults.addAll(holidayResults);
-
-        final collectionResults =
-            await _searchService.getCollectionSearchResults(query);
-        allResults.addAll(collectionResults);
-
-        final locationResults =
-            await _searchService.getLocationSearchResults(query);
-        allResults.addAll(locationResults);
-
-        final monthResults = await _searchService.getMonthSearchResults(query);
-        allResults.addAll(monthResults);
-
-        completer.complete(allResults);
-      } else {
-        completer.complete(allResults);
+      final queryAsIntForYear = int.tryParse(query);
+      if (_isYearValid(queryAsIntForYear)) {
+        final yearResult =
+            await _searchService.getYearSearchResults(queryAsIntForYear);
+        allResults.add(yearResult); //only one year will be returned
       }
+
+      final holidayResults =
+          await _searchService.getHolidaySearchResults(query);
+      allResults.addAll(holidayResults);
+
+      final collectionResults =
+          await _searchService.getCollectionSearchResults(query);
+      allResults.addAll(collectionResults);
+
+      final locationResults =
+          await _searchService.getLocationSearchResults(query);
+      allResults.addAll(locationResults);
+
+      final monthResults = await _searchService.getMonthSearchResults(query);
+      allResults.addAll(monthResults);
+
+      completer.complete(allResults);
     });
 
     return completer.future;
