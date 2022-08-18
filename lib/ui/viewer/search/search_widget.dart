@@ -5,6 +5,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -52,6 +53,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
   Timer _debounce;
+  ValueNotifier<Timer> debounceNotifier = ValueNotifier(null);
 
   @override
   Widget build(BuildContext context) {
@@ -101,17 +103,15 @@ class _SearchWidgetState extends State<SearchWidget> {
                                 .withOpacity(0.5),
                           ),
                         ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
+                        suffixIcon: ValueListenableBuilder(
+                          valueListenable: debounceNotifier,
+                          builder: (
+                            BuildContext context,
+                            Timer debounce,
+                            Widget child,
+                          ) {
+                            return SearchSuffixIcon(debounce);
                           },
-                          icon: Icon(
-                            Icons.close,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .iconColor
-                                .withOpacity(0.5),
-                          ),
                         ),
                       ),
                       onChanged: (value) async {
@@ -185,8 +185,10 @@ class _SearchWidgetState extends State<SearchWidget> {
   _debounceQuery(fn) {
     if (_debounce != null && _debounce.isActive) {
       _debounce.cancel();
+      debounceNotifier.value = _debounce;
     } else {
       _debounce = Timer(const Duration(milliseconds: 250), fn);
+      debounceNotifier.value = _debounce;
     }
   }
 }
