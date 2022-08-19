@@ -152,9 +152,8 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
-      if (_debouncer.debounceTimer != null &&
-          _debouncer.debounceTimer.isActive) {
-        _debouncer.debounceTimer.cancel();
+      if (_debouncer.isActive()) {
+        _debouncer.cancel();
       }
       return (allResults);
     }

@@ -3,22 +3,26 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class Debouncer {
-  final Duration duration;
+  final Duration _duration;
   Timer debounceTimer;
   final ValueNotifier<Timer> debounceNotifier = ValueNotifier(null);
-  Debouncer(this.duration);
+  Debouncer(this._duration);
 
-  run(Function fn) {
+  void run(Function fn) {
     if (debounceTimer != null && debounceTimer.isActive) {
       debounceTimer.cancel();
     }
-    debounceTimer = Timer(const Duration(milliseconds: 250), fn);
+    debounceTimer = Timer(_duration, fn);
     debounceNotifier.value = debounceTimer;
   }
 
-  cancel() {
+  void cancel() {
     if (debounceTimer != null) {
       debounceTimer.cancel();
     }
+  }
+
+  bool isActive() {
+    return (debounceTimer != null) && debounceTimer.isActive;
   }
 }
