@@ -9,7 +9,7 @@ export const DEFAULT_ML_SYNC_JOB_CONFIG: JobConfig = {
 };
 
 export const DEFAULT_ML_SYNC_CONFIG: MLSyncConfig = {
-    batchSize: 10,
+    batchSize: 200,
     imageSource: 'Original',
     faceDetection: {
         method: 'BlazeFace',
