@@ -265,6 +265,11 @@
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-2.0.0.tgz#f544a148d3ab35801c1f633a7441fd87c2e484bf"
   integrity sha512-XCuKFP5PS55gnMVu3dty8KPatLqUoy/ZYzDzAGCQ8JNFCkLXzmI7vNHCR+XpbZaMWQK/vQubr7PkYq8g470J/A==
 
+"@types/auto-launch@^5.0.2":
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/@types/auto-launch/-/auto-launch-5.0.2.tgz#4970f01e5dd27572489b7fe77590204a19f86bd0"
+  integrity sha512-b03X09+GCM9t6AUECpwA2gUPYs8s5tJHFJw92sK8EiJ7G4QNbsHmXV7nfCfP6G6ivtm230vi4oNfe8AzRgzxMQ==
+
 "@types/debug@^4.1.6":
   version "4.1.7"
   resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.7.tgz#7cc0ea761509124709b8b2d1090d8f6c17aadb82"

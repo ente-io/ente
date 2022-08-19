@@ -68,6 +68,7 @@
   "author": "ente <code@ente.io>",
   "devDependencies": {
     "@sentry/cli": "^1.68.0",
+    "@types/auto-launch": "^5.0.2",
     "@types/get-folder-size": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
