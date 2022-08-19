@@ -3,7 +3,6 @@ import path from 'path';
 import { existsSync } from 'promise-fs';
 import appUpdater from './appUpdater';
 import { isDev } from './common';
-import { createWindow } from './createWindow';
 import { buildContextMenu, buildMenuBar } from './menu';
 
 export function handleUpdates(mainWindow: BrowserWindow, tray: Tray) {
@@ -53,9 +52,9 @@ export function getUniqueSavePath(filename: string, directory: string): string {
 
 export function setupMacWindowOnDockIconClick() {
     app.on('activate', function () {
-        // On macOS it's common to re-create a window in the app when the
-        // dock icon is clicked and there are no other windows open.
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+        const windows = BrowserWindow.getAllWindows();
+        // we allow only one window
+        windows[0].show();
     });
 }
 
