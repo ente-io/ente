@@ -1,7 +1,7 @@
 import AutoLaunch from 'auto-launch';
 
 class AutoLauncher {
-    instance: AutoLaunch;
+    private instance: AutoLaunch;
     constructor() {
         const autoLauncher = new AutoLaunch({
             name: 'ente',
@@ -9,14 +9,15 @@ class AutoLauncher {
         });
         this.instance = autoLauncher;
     }
-    enable() {
-        this.instance.enable();
-    }
-    disable() {
-        this.instance.disable();
-    }
     isEnabled() {
-        this.instance.isEnabled();
+        return this.instance.isEnabled();
+    }
+    async toggleAutoLaunch() {
+        if (await this.instance.isEnabled()) {
+            return this.instance.disable();
+        } else {
+            this.instance.isEnabled();
+        }
     }
 }
 
