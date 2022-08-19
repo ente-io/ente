@@ -14,9 +14,9 @@ class AutoLauncher {
     }
     async toggleAutoLaunch() {
         if (await this.instance.isEnabled()) {
-            return this.instance.disable();
+            await this.instance.disable();
         } else {
-            this.instance.isEnabled();
+            await this.instance.enable();
         }
     }
 }
