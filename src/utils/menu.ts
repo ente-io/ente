@@ -7,6 +7,7 @@ import {
 } from 'electron';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import { showUpdateDialog } from './appUpdater';
+import autoLauncher from './autoLauncher';
 
 const isMac = process.platform === 'darwin';
 
@@ -92,7 +93,9 @@ export function buildContextMenu(
     return contextMenu;
 }
 
-export function buildMenuBar(): Menu {
+export async function buildMenuBar(): Promise<Menu> {
+    const isAutoLaunchEnabled = await autoLauncher.isEnabled();
+    let latestValue = isAutoLaunchEnabled;
     const template: MenuItemConstructorOptions[] = [
         {
             label: 'ente',
@@ -105,6 +108,22 @@ export function buildMenuBar(): Menu {
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
+                { type: 'separator' },
+                {
+                    label: 'Preferences',
+                    submenu: [
+                        {
+                            label: 'Open ente on startup',
+                            type: 'checkbox',
+                            checked: latestValue,
+                            click: () => {
+                                autoLauncher.toggleAutoLaunch();
+                                latestValue = !latestValue;
+                            },
+                        },
+                    ],
+                },
+                { type: 'separator' },
                 ...((isMac
                     ? [
                           {

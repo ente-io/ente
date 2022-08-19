@@ -61,8 +61,8 @@ export function setupMacWindowOnDockIconClick() {
     });
 }
 
-export function setupMainMenu() {
-    Menu.setApplicationMenu(buildMenuBar());
+export async function setupMainMenu() {
+    Menu.setApplicationMenu(await buildMenuBar());
 }
 
 export function setupMainHotReload() {
