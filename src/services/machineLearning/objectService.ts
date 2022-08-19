@@ -54,19 +54,17 @@ class ObjectService {
             fileContext
         );
         const objectDetections =
-            //     await syncContext.objectDetectionService.detectObjects(
-            //         imageBitmap,
-            //         syncContext.config.objectDetection.maxNumBoxes,
-            //         syncContext.config.objectDetection.minScore
-            //     );
-            // objectDetections.push(
-            //     ...(
-            await syncContext.sceneDetectionService.detectScenes(
+            await syncContext.objectDetectionService.detectObjects(
+                imageBitmap,
+                syncContext.config.objectDetection.maxNumBoxes,
+                syncContext.config.objectDetection.minScore
+            );
+        objectDetections.push(
+            ...(await syncContext.sceneDetectionService.detectScenes(
                 imageBitmap,
                 syncContext.config.sceneDetection.minScore
-            );
-        //     )
-        // );
+            ))
+        );
         // console.log('3 TF Memory stats: ', tf.memory());
         // TODO: reenable faces filtering based on width
         const detectedObjects = objectDetections?.map((detection) => {

@@ -77,13 +77,13 @@ class MachineLearningService {
 
         // TODO: running index before all files are on latest ml version
         // may be need to just take synced files on latest ml version for indexing
-        // if (
-        //     syncContext.outOfSyncFiles.length <= 0 ||
-        //     (syncContext.nSyncedFiles === syncContext.config.batchSize &&
-        //         Math.random() < 0.2)
-        // ) {
-        // await this.syncIndex(syncContext);
-        // }
+        if (
+            syncContext.outOfSyncFiles.length <= 0 ||
+            (syncContext.nSyncedFiles === syncContext.config.batchSize &&
+                Math.random() < 0.2)
+        ) {
+            await this.syncIndex(syncContext);
+        }
 
         // tf.engine().endScope();
 
@@ -429,24 +429,18 @@ class MachineLearningService {
 
         try {
             await ReaderService.getImageBitmap(syncContext, fileContext);
-            console.log('ReaderService done');
-            // await this.syncFaceDetections(syncContext, fileContext);
-            await ObjectService.syncFileObjectDetections(
-                syncContext,
-                fileContext
-            );
-            // await Promise.all([
-            //     this.syncFaceDetections(syncContext, fileContext),
-            //     ObjectService.syncFileObjectDetections(
-            //         syncContext,
-            //         fileContext
-            //     ),
-            //     // TextService.syncFileTextDetections(
-            //     //     syncContext,
-            //     //     fileContext,
-            //     //     textDetectionTimeoutIndex
-            //     // ),
-            // ]);
+            await Promise.all([
+                this.syncFaceDetections(syncContext, fileContext),
+                ObjectService.syncFileObjectDetections(
+                    syncContext,
+                    fileContext
+                ),
+                // TextService.syncFileTextDetections(
+                //     syncContext,
+                //     fileContext,
+                //     textDetectionTimeoutIndex
+                // ),
+            ]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
             await this.persistMLFileData(syncContext, newMlFile);
