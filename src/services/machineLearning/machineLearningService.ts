@@ -42,6 +42,7 @@ class MachineLearningService {
     // private clusteringService: ClusteringService;
 
     private localSyncContext: Promise<MLSyncContext>;
+    private syncContext: Promise<MLSyncContext>;
 
     public constructor() {
         // setWasmPaths('/js/tfjs/');
@@ -64,12 +65,7 @@ class MachineLearningService {
         // needs to be cleaned using tf.dispose or tf.tidy
         // tf.engine().startScope();
 
-        const mlSyncConfig = await getMLSyncConfig();
-        const syncContext = MLFactory.getMLSyncContext(
-            token,
-            mlSyncConfig,
-            true
-        );
+        const syncContext = await this.getSyncContext(token);
 
         await this.syncLocalFiles(syncContext);
 
@@ -81,13 +77,13 @@ class MachineLearningService {
 
         // TODO: running index before all files are on latest ml version
         // may be need to just take synced files on latest ml version for indexing
-        if (
-            syncContext.outOfSyncFiles.length <= 0 ||
-            (syncContext.nSyncedFiles === syncContext.config.batchSize &&
-                Math.random() < 0.2)
-        ) {
-            await this.syncIndex(syncContext);
-        }
+        // if (
+        //     syncContext.outOfSyncFiles.length <= 0 ||
+        //     (syncContext.nSyncedFiles === syncContext.config.batchSize &&
+        //         Math.random() < 0.2)
+        // ) {
+        // await this.syncIndex(syncContext);
+        // }
 
         // tf.engine().endScope();
 
@@ -109,7 +105,7 @@ class MachineLearningService {
         };
         // console.log('[MLService] sync results: ', mlSyncResult);
 
-        await syncContext.dispose();
+        // await syncContext.dispose();
         console.log('Final TF Memory stats: ', tf.memory());
 
         return mlSyncResult;
@@ -295,14 +291,28 @@ class MachineLearningService {
         // await this.disposeMLModels();
     }
 
+    private async getSyncContext(token: string) {
+        if (!this.syncContext) {
+            console.log('Creating syncContext');
+
+            this.syncContext = getMLSyncConfig().then((mlSyncConfig) =>
+                MLFactory.getMLSyncContext(token, mlSyncConfig, true)
+            );
+        } else {
+            console.log('reusing existing syncContext');
+        }
+        return this.syncContext;
+    }
+
     private async getLocalSyncContext(token: string) {
         if (!this.localSyncContext) {
             console.log('Creating localSyncContext');
             this.localSyncContext = getMLSyncConfig().then((mlSyncConfig) =>
                 MLFactory.getMLSyncContext(token, mlSyncConfig, false)
             );
+        } else {
+            console.log('reusing existing localSyncContext');
         }
-
         return this.localSyncContext;
     }
 
@@ -396,14 +406,17 @@ class MachineLearningService {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         textDetectionTimeoutIndex?: number
     ) {
+        console.log('syncFile called');
         const fileContext: MLSyncFileContext = { enteFile, localFile };
         const oldMlFile =
             (fileContext.oldMlFile = await this.getMLFileData(enteFile.id)) ??
             this.newMlData(enteFile.id);
+        console.log('======1===========');
         if (
             fileContext.oldMlFile?.mlVersion === syncContext.config.mlVersion
             // TODO: reset mlversion of all files when user changes image source
         ) {
+            console.log('======2===========');
             return fileContext.oldMlFile;
         }
         const newMlFile = (fileContext.newMlFile = this.newMlData(enteFile.id));
@@ -416,18 +429,24 @@ class MachineLearningService {
 
         try {
             await ReaderService.getImageBitmap(syncContext, fileContext);
-            await Promise.all([
-                this.syncFaceDetections(syncContext, fileContext),
-                ObjectService.syncFileObjectDetections(
-                    syncContext,
-                    fileContext
-                ),
-                // TextService.syncFileTextDetections(
-                //     syncContext,
-                //     fileContext,
-                //     textDetectionTimeoutIndex
-                // ),
-            ]);
+            console.log('ReaderService done');
+            // await this.syncFaceDetections(syncContext, fileContext);
+            await ObjectService.syncFileObjectDetections(
+                syncContext,
+                fileContext
+            );
+            // await Promise.all([
+            //     this.syncFaceDetections(syncContext, fileContext),
+            //     ObjectService.syncFileObjectDetections(
+            //         syncContext,
+            //         fileContext
+            //     ),
+            //     // TextService.syncFileTextDetections(
+            //     //     syncContext,
+            //     //     fileContext,
+            //     //     textDetectionTimeoutIndex
+            //     // ),
+            // ]);
             newMlFile.errorCount = 0;
             newMlFile.lastErrorMessage = undefined;
             await this.persistMLFileData(syncContext, newMlFile);
