@@ -22,20 +22,58 @@ class NoResultWidget extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        children: [
-          const Text("Sorry, no results found"),
-          const SizedBox(
-            height: 12,
-          ),
-          Text(
-            "Try expanding your query",
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.subTextColor,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.all(8),
+                child: const Text(
+                  "No results found",
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+            // const SizedBox(
+            //   height: 16,
+            // ),
+            Container(
+              margin: const EdgeInsets.only(top: 16),
+              child: Text(
+                "You can try searching for a different query.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .defaultTextColor
+                      .withOpacity(0.5),
+                  height: 1.5,
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsets.only(bottom: 20, top: 12),
+              child: Text(
+                '''\u2022 Places (e.g. "London")
+\u2022 Years and months (e.g. "2022", "January")
+\u2022 Holidays (e.g. "Christmas")
+\u2022 Album names (e.g. "Recents")''',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .defaultTextColor
+                      .withOpacity(0.5),
+                  height: 1.5,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
