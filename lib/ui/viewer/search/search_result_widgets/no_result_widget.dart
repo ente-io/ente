@@ -38,9 +38,6 @@ class NoResultWidget extends StatelessWidget {
                 ),
               ),
             ),
-            // const SizedBox(
-            //   height: 16,
-            // ),
             Container(
               margin: const EdgeInsets.only(top: 16),
               child: Text(
