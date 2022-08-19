@@ -9,6 +9,7 @@ import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/search_debouncer.dart';
 
 class SearchIconWidget extends StatefulWidget {
   const SearchIconWidget({Key key}) : super(key: key);
@@ -104,7 +105,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ),
                         ),
                         suffixIcon: ValueListenableBuilder(
-                          valueListenable: _debouncer._debounceNotifier,
+                          valueListenable: _debouncer.debounceNotifier,
                           builder: (
                             BuildContext context,
                             Timer debounce,
@@ -151,66 +152,52 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
-      if (_debouncer._debounceTimer != null &&
-          _debouncer._debounceTimer.isActive) {
-        _debouncer._debounceTimer.cancel();
+      if (_debouncer.debounceTimer != null &&
+          _debouncer.debounceTimer.isActive) {
+        _debouncer.debounceTimer.cancel();
       }
       return (allResults);
     }
 
     final Completer<List<SearchResult>> completer = Completer();
 
-    _debouncer.run(() async {
-      final queryAsIntForYear = int.tryParse(query);
-      if (_isYearValid(queryAsIntForYear)) {
-        final yearResult =
-            await _searchService.getYearSearchResults(queryAsIntForYear);
-        allResults.add(yearResult); //only one year will be returned
-      }
-
-      final holidayResults =
-          await _searchService.getHolidaySearchResults(query);
-      allResults.addAll(holidayResults);
-
-      final collectionResults =
-          await _searchService.getCollectionSearchResults(query);
-      allResults.addAll(collectionResults);
-
-      final locationResults =
-          await _searchService.getLocationSearchResults(query);
-      allResults.addAll(locationResults);
-
-      final monthResults = await _searchService.getMonthSearchResults(query);
-      allResults.addAll(monthResults);
-
-      completer.complete(allResults);
+    _debouncer.run(() {
+      _getSearchResultsFromService(query, completer, allResults);
     });
 
     return completer.future;
   }
 
+  void _getSearchResultsFromService(
+    String query,
+    Completer completer,
+    List<SearchResult> allResults,
+  ) async {
+    final queryAsIntForYear = int.tryParse(query);
+    if (_isYearValid(queryAsIntForYear)) {
+      final yearResult =
+          await _searchService.getYearSearchResults(queryAsIntForYear);
+      allResults.add(yearResult); //only one year will be returned
+    }
+
+    final holidayResults = await _searchService.getHolidaySearchResults(query);
+    allResults.addAll(holidayResults);
+
+    final collectionResults =
+        await _searchService.getCollectionSearchResults(query);
+    allResults.addAll(collectionResults);
+
+    final locationResults =
+        await _searchService.getLocationSearchResults(query);
+    allResults.addAll(locationResults);
+
+    final monthResults = await _searchService.getMonthSearchResults(query);
+    allResults.addAll(monthResults);
+
+    completer.complete(allResults);
+  }
+
   bool _isYearValid(int year) {
     return year != null && year >= 1970 && year <= currentYear;
-  }
-}
-
-class Debouncer {
-  final Duration duration;
-  Timer _debounceTimer;
-  final ValueNotifier<Timer> _debounceNotifier = ValueNotifier(null);
-  Debouncer(this.duration);
-
-  run(Function fn) {
-    if (_debounceTimer != null && _debounceTimer.isActive) {
-      _debounceTimer.cancel();
-    }
-    _debounceTimer = Timer(const Duration(milliseconds: 250), fn);
-    _debounceNotifier.value = _debounceTimer;
-  }
-
-  cancel() {
-    if (_debounceTimer != null) {
-      _debounceTimer.cancel();
-    }
   }
 }
