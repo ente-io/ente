@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_results.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/search_debouncer.dart';
 
 class SearchIconWidget extends StatefulWidget {
   const SearchIconWidget({Key key}) : super(key: key);
@@ -49,6 +53,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   String _query = "";
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
+  final _debouncer = Debouncer(const Duration(milliseconds: 200));
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +65,7 @@ class _SearchWidgetState extends State<SearchWidget> {
         color: Colors.black.withOpacity(0.32),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 1.5),
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               children: [
                 const SizedBox(height: 8),
@@ -76,7 +81,8 @@ class _SearchWidgetState extends State<SearchWidget> {
                       keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
-                        hintText: 'Search for albums, places, holidays & years',
+                        hintText:
+                            'Search for albums, places, holidays, months & years',
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -98,17 +104,15 @@ class _SearchWidgetState extends State<SearchWidget> {
                                 .withOpacity(0.5),
                           ),
                         ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
+                        suffixIcon: ValueListenableBuilder(
+                          valueListenable: _debouncer.debounceNotifierGetter,
+                          builder: (
+                            BuildContext context,
+                            Timer debounceTimer,
+                            Widget child,
+                          ) {
+                            return SearchSuffixIcon(debounceTimer);
                           },
-                          icon: Icon(
-                            Icons.close,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .iconColor
-                                .withOpacity(0.5),
-                          ),
                         ),
                       ),
                       onChanged: (value) async {
@@ -139,9 +143,35 @@ class _SearchWidgetState extends State<SearchWidget> {
     );
   }
 
+  @override
+  void dispose() {
+    _debouncer.cancel();
+    super.dispose();
+  }
+
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
+    if (query.isEmpty) {
+      if (_debouncer.isActive()) {
+        _debouncer.cancel();
+      }
+      return (allResults);
+    }
 
+    final Completer<List<SearchResult>> completer = Completer();
+
+    _debouncer.run(() {
+      _getSearchResultsFromService(query, completer, allResults);
+    });
+
+    return completer.future;
+  }
+
+  void _getSearchResultsFromService(
+    String query,
+    Completer completer,
+    List<SearchResult> allResults,
+  ) async {
     final queryAsIntForYear = int.tryParse(query);
     if (_isYearValid(queryAsIntForYear)) {
       final yearResult =
@@ -163,7 +193,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     final monthResults = await _searchService.getMonthSearchResults(query);
     allResults.addAll(monthResults);
 
-    return allResults;
+    completer.complete(allResults);
   }
 
   bool _isYearValid(int year) {
