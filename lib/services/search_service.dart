@@ -147,11 +147,10 @@ class SearchService {
   }
 
   Future<YearSearchResult> getYearSearchResults(int year) async {
-    final yearInMicrosecondsSinceEpoch =
-        DateTime.utc(year).microsecondsSinceEpoch;
+    final yearInMicrosecondsSinceEpoch = DateTime(year).microsecondsSinceEpoch;
 
     final nextYearInMicrosecondsSinceEpoch =
-        DateTime.utc(year + 1).microsecondsSinceEpoch;
+        DateTime(year + 1).microsecondsSinceEpoch;
 
     final filesInYear = await FilesDB.instance.getFilesCreatedWithinDurations(
       [
@@ -215,10 +214,10 @@ class SearchService {
 
   List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
     final List<List<int>> durationsOfHolidayInEveryYear = [];
-    for (var year = 1970; year < currentYear; year++) {
+    for (var year = 1970; year <= currentYear; year++) {
       durationsOfHolidayInEveryYear.add([
-        DateTime.utc(year, month, day).microsecondsSinceEpoch,
-        DateTime.utc(year, month, day + 1).microsecondsSinceEpoch,
+        DateTime(year, month, day).microsecondsSinceEpoch,
+        DateTime(year, month, day + 1).microsecondsSinceEpoch,
       ]);
     }
     return durationsOfHolidayInEveryYear;
@@ -230,8 +229,8 @@ class SearchService {
       durationsOfMonthInEveryYear.add([
         DateTime.utc(year, month, 1).microsecondsSinceEpoch,
         month == 12
-            ? DateTime.utc(year + 1, 1, 1).microsecondsSinceEpoch
-            : DateTime.utc(year, month + 1, 1).microsecondsSinceEpoch,
+            ? DateTime(year + 1, 1, 1).microsecondsSinceEpoch
+            : DateTime(year, month + 1, 1).microsecondsSinceEpoch,
       ]);
     }
     return durationsOfMonthInEveryYear;
