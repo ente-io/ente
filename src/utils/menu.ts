@@ -200,9 +200,14 @@ export function buildMenuBar(): Menu {
                     label: 'FAQ',
                     click: () => shell.openExternal('https://ente.io/faq/'),
                 },
+                { type: 'separator' },
                 {
                     label: 'Support',
                     click: () => shell.openExternal('mailto:support@ente.io'),
+                },
+                {
+                    label: 'Product updates',
+                    click: () => shell.openExternal('https://ente.io/blog/'),
                 },
             ],
         },
