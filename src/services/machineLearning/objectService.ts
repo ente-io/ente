@@ -17,8 +17,6 @@ class ObjectService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
-        console.log('syncFileObjectDetections called');
-
         console.time(`object detection time taken ${fileContext.enteFile.id}`);
         const { oldMlFile, newMlFile } = fileContext;
         if (
@@ -32,15 +30,12 @@ class ObjectService {
             ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
-            console.log('object detection isDifferentOrOld FALSE');
             newMlFile.things = oldMlFile?.things;
             newMlFile.imageSource = oldMlFile.imageSource;
             newMlFile.imageDimensions = oldMlFile.imageDimensions;
             newMlFile.objectDetectionMethod = oldMlFile.objectDetectionMethod;
             newMlFile.sceneDetectionMethod = oldMlFile.sceneDetectionMethod;
             return;
-        } else {
-            console.log('object detection isDifferentOrOld TRUE');
         }
 
         newMlFile.objectDetectionMethod =
