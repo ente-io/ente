@@ -108,10 +108,10 @@ class _SearchWidgetState extends State<SearchWidget> {
                           valueListenable: _debouncer.debounceNotifier,
                           builder: (
                             BuildContext context,
-                            Timer debounce,
+                            Timer debounceTimer,
                             Widget child,
                           ) {
-                            return SearchSuffixIcon(debounce);
+                            return SearchSuffixIcon(debounceTimer);
                           },
                         ),
                       ),

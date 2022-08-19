@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class SearchSuffixIcon extends StatefulWidget {
-  final Timer debounce;
-  const SearchSuffixIcon(this.debounce, {Key key}) : super(key: key);
+  final Timer debounceTimer;
+  const SearchSuffixIcon(this.debounceTimer, {Key key}) : super(key: key);
 
   @override
   State<SearchSuffixIcon> createState() => _SearchSuffixIconState();
@@ -23,7 +23,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
       begin: 0.0,
       end: 1.0,
     ).animate(controller);
-    if (widget.debounce == null || !widget.debounce.isActive) {
+    if (widget.debounceTimer == null || !widget.debounceTimer.isActive) {
       controller.forward();
       return FadeTransition(
         opacity: animation,
