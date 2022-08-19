@@ -52,8 +52,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   String _query = "";
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
-  Timer _debounce;
-  final ValueNotifier<Timer> _debounceNotifier = ValueNotifier(null);
+  final _debouncer = Debouncer(const Duration(milliseconds: 200));
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +104,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ),
                         ),
                         suffixIcon: ValueListenableBuilder(
-                          valueListenable: _debounceNotifier,
+                          valueListenable: _debouncer._debounceNotifier,
                           builder: (
                             BuildContext context,
                             Timer debounce,
@@ -145,24 +144,23 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
-    if (_debounce != null) {
-      _debounce.cancel();
-    }
+    _debouncer.cancel();
     super.dispose();
   }
 
-  Future getSearchResultsForQuery(String query) async {
+  Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
-      if (_debounce != null && _debounce.isActive) {
-        _debounce.cancel();
+      if (_debouncer._debounceTimer != null &&
+          _debouncer._debounceTimer.isActive) {
+        _debouncer._debounceTimer.cancel();
       }
       return (allResults);
     }
 
-    final completer = Completer();
+    final Completer<List<SearchResult>> completer = Completer();
 
-    _debounceQuery(() async {
+    _debouncer.run(() async {
       final queryAsIntForYear = int.tryParse(query);
       if (_isYearValid(queryAsIntForYear)) {
         final yearResult =
@@ -194,12 +192,25 @@ class _SearchWidgetState extends State<SearchWidget> {
   bool _isYearValid(int year) {
     return year != null && year >= 1970 && year <= currentYear;
   }
+}
 
-  _debounceQuery(fn) {
-    if (_debounce != null && _debounce.isActive) {
-      _debounce.cancel();
+class Debouncer {
+  final Duration duration;
+  Timer _debounceTimer;
+  final ValueNotifier<Timer> _debounceNotifier = ValueNotifier(null);
+  Debouncer(this.duration);
+
+  run(Function fn) {
+    if (_debounceTimer != null && _debounceTimer.isActive) {
+      _debounceTimer.cancel();
     }
-    _debounce = Timer(const Duration(milliseconds: 250), fn);
-    _debounceNotifier.value = _debounce;
+    _debounceTimer = Timer(const Duration(milliseconds: 250), fn);
+    _debounceNotifier.value = _debounceTimer;
+  }
+
+  cancel() {
+    if (_debounceTimer != null) {
+      _debounceTimer.cancel();
+    }
   }
 }
