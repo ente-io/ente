@@ -406,17 +406,14 @@ class MachineLearningService {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         textDetectionTimeoutIndex?: number
     ) {
-        console.log('syncFile called');
         const fileContext: MLSyncFileContext = { enteFile, localFile };
         const oldMlFile =
             (fileContext.oldMlFile = await this.getMLFileData(enteFile.id)) ??
             this.newMlData(enteFile.id);
-        console.log('======1===========');
         if (
             fileContext.oldMlFile?.mlVersion === syncContext.config.mlVersion
             // TODO: reset mlversion of all files when user changes image source
         ) {
-            console.log('======2===========');
             return fileContext.oldMlFile;
         }
         const newMlFile = (fileContext.newMlFile = this.newMlData(enteFile.id));
@@ -429,6 +426,11 @@ class MachineLearningService {
 
         try {
             await ReaderService.getImageBitmap(syncContext, fileContext);
+            // await this.syncFaceDetections(syncContext, fileContext);
+            // await ObjectService.syncFileObjectDetections(
+            //     syncContext,
+            //     fileContext
+            // );
             await Promise.all([
                 this.syncFaceDetections(syncContext, fileContext),
                 ObjectService.syncFileObjectDetections(
