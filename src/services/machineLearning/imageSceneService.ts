@@ -14,16 +14,18 @@ class ImageScene implements SceneDetectionService {
     private model: tfjsConverter.GraphModel;
     private sceneMap: { [key: string]: string };
     private ready: Promise<void>;
+    private workerID: number;
 
     public constructor() {
         this.method = {
             value: 'ImageScene',
             version: 1,
         };
+        this.workerID = Math.round(Math.random() * 1000);
     }
 
     private async init() {
-        console.log('ImageScene init called');
+        console.log(`[${this.workerID}]`, 'ImageScene init called');
         if (this.model) {
             return;
         }
@@ -35,7 +37,11 @@ class ImageScene implements SceneDetectionService {
         this.model = await tfjsConverter.loadGraphModel(
             '/models/imagescene/model.json'
         );
-        console.log('loaded ImageScene model', tf.getBackend());
+        console.log(
+            `[${this.workerID}]`,
+            'loaded ImageScene model',
+            tf.getBackend()
+        );
 
         tf.tidy(() => {
             const zeroTensor = tf.zeros([1, 224, 224, 3]);
@@ -45,7 +51,10 @@ class ImageScene implements SceneDetectionService {
     }
 
     private async getImageSceneModel() {
-        console.log('ImageScene getImageSceneModel called');
+        console.log(
+            `[${this.workerID}]`,
+            'ImageScene getImageSceneModel called'
+        );
         if (!this.ready) {
             this.ready = this.init();
         }

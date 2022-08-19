@@ -17,6 +17,8 @@ class ObjectService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
+        console.log('syncFileObjectDetections called');
+
         console.time(`object detection time taken ${fileContext.enteFile.id}`);
         const { oldMlFile, newMlFile } = fileContext;
         if (
@@ -30,12 +32,15 @@ class ObjectService {
             ) &&
             oldMlFile?.imageSource === syncContext.config.imageSource
         ) {
+            console.log('object detection isDifferentOrOld FALSE');
             newMlFile.things = oldMlFile?.things;
             newMlFile.imageSource = oldMlFile.imageSource;
             newMlFile.imageDimensions = oldMlFile.imageDimensions;
             newMlFile.objectDetectionMethod = oldMlFile.objectDetectionMethod;
             newMlFile.sceneDetectionMethod = oldMlFile.sceneDetectionMethod;
             return;
+        } else {
+            console.log('object detection isDifferentOrOld TRUE');
         }
 
         newMlFile.objectDetectionMethod =
@@ -49,17 +54,19 @@ class ObjectService {
             fileContext
         );
         const objectDetections =
-            await syncContext.objectDetectionService.detectObjects(
-                imageBitmap,
-                syncContext.config.objectDetection.maxNumBoxes,
-                syncContext.config.objectDetection.minScore
-            );
-        objectDetections.push(
-            ...(await syncContext.sceneDetectionService.detectScenes(
+            //     await syncContext.objectDetectionService.detectObjects(
+            //         imageBitmap,
+            //         syncContext.config.objectDetection.maxNumBoxes,
+            //         syncContext.config.objectDetection.minScore
+            //     );
+            // objectDetections.push(
+            //     ...(
+            await syncContext.sceneDetectionService.detectScenes(
                 imageBitmap,
                 syncContext.config.sceneDetection.minScore
-            ))
-        );
+            );
+        //     )
+        // );
         // console.log('3 TF Memory stats: ', tf.memory());
         // TODO: reenable faces filtering based on width
         const detectedObjects = objectDetections?.map((detection) => {
