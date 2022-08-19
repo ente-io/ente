@@ -105,7 +105,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ),
                         ),
                         suffixIcon: ValueListenableBuilder(
-                          valueListenable: _debouncer.debounceNotifier,
+                          valueListenable: _debouncer.debounceNotifierGetter,
                           builder: (
                             BuildContext context,
                             Timer debounceTimer,
