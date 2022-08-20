@@ -62,7 +62,7 @@ class _SearchWidgetState extends State<SearchWidget> {
         Navigator.pop(context);
       },
       child: Container(
-        color: Colors.black.withOpacity(0.32),
+        color: Theme.of(context).colorScheme.searchResultsBackgroundColor,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
