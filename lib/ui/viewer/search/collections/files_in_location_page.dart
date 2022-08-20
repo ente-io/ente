@@ -47,16 +47,6 @@ class FilesInLocationPage extends StatelessWidget {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
       },
-      forceReloadEvents: [
-        Bus.instance.on<FilesUpdatedEvent>().where(
-              (event) =>
-                  event.updatedFiles.firstWhere(
-                    (element) => element.uploadedFileID != null,
-                    orElse: () => null,
-                  ) !=
-                  null,
-            ),
-      ],
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: [locationSearchResult.files[0]],
