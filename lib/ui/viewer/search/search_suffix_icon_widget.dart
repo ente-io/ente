@@ -21,21 +21,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
       begin: 0.0,
       end: 1.0,
     ).animate(controller);
-    if (!widget.timerIsActive) {
-      controller.forward();
-      return FadeTransition(
-        opacity: animation,
-        child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.close,
-            color: Theme.of(context).colorScheme.iconColor.withOpacity(0.5),
-          ),
-        ),
-      );
-    } else {
+    if (widget.timerIsActive) {
       controller.forward();
       return FadeTransition(
         opacity: animation,
@@ -50,6 +36,20 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
                 color: Theme.of(context).colorScheme.iconColor.withOpacity(0.5),
               ),
             ),
+          ),
+        ),
+      );
+    } else {
+      controller.forward();
+      return FadeTransition(
+        opacity: animation,
+        child: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: Icon(
+            Icons.close,
+            color: Theme.of(context).colorScheme.iconColor.withOpacity(0.5),
           ),
         ),
       );
