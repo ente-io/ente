@@ -107,10 +107,10 @@ class _SearchWidgetState extends State<SearchWidget> {
                           valueListenable: _debouncer.debounceNotifierGetter,
                           builder: (
                             BuildContext context,
-                            Timer debounceTimer,
+                            bool timerIsActive,
                             Widget child,
                           ) {
-                            return SearchSuffixIcon(debounceTimer);
+                            return SearchSuffixIcon(timerIsActive);
                           },
                         ),
                       ),
@@ -153,6 +153,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     if (query.isEmpty) {
       if (_debouncer.isActive()) {
         _debouncer.cancel();
+        _debouncer.setDebounceNotifier();
       }
       return (allResults);
     }
@@ -193,6 +194,8 @@ class _SearchWidgetState extends State<SearchWidget> {
     allResults.addAll(monthResults);
 
     completer.complete(allResults);
+    _debouncer
+        .setDebounceNotifier(); //to notifiy when to stop the search spinner
   }
 
   bool _isYearValid(int year) {
