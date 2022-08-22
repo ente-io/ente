@@ -14,7 +14,7 @@ class YearSearchResultWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final noOfMemories = yearSearchResult.files.length;
-    final heroTagPrefix = _tagPrefix + yearSearchResult.year.toString();
+    final heroTagPrefix = _tagPrefix + yearSearchResult.year;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -43,7 +43,7 @@ class YearSearchResultWidget extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    yearSearchResult.year.toString(),
+                    yearSearchResult.year,
                     style: const TextStyle(fontSize: 18),
                     overflow: TextOverflow.ellipsis,
                   ),
