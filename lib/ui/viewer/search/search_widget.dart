@@ -104,7 +104,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ),
                         ),
                         suffixIcon: ValueListenableBuilder(
-                          valueListenable: _debouncer.debounceNotifierGetter,
+                          valueListenable: _debouncer.timerIsActive,
                           builder: (
                             BuildContext context,
                             bool timerIsActive,
@@ -153,7 +153,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     if (query.isEmpty) {
       if (_debouncer.isActive()) {
         _debouncer.cancel();
-        _debouncer.setDebounceNotifier();
+        _debouncer.timerCompleted();
       }
       return (allResults);
     }
@@ -192,8 +192,7 @@ class _SearchWidgetState extends State<SearchWidget> {
     allResults.addAll(monthResults);
 
     completer.complete(allResults);
-    _debouncer
-        .setDebounceNotifier(); //to notifiy when to stop the search spinner
+    _debouncer.timerCompleted();
   }
 
   bool _isYearValid(String year) {
