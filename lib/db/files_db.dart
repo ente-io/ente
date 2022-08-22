@@ -820,6 +820,8 @@ class FilesDB {
     FileType fileType,
     int ownerID,
   ) async {
+    // look up two hash at max, for handling live photos
+    assert(hash.length < 3, "number of hash can not be more than 2");
     final db = await instance.database;
     String rawQuery = 'SELECT * from files where ($columnUploadedFileID != '
         'NULL OR $columnUploadedFileID != -1) AND $columnOwnerID = $ownerID '
@@ -828,7 +830,6 @@ class FilesDB {
     if (rows.isNotEmpty) {
       return _convertToFiles(rows);
     } else {
-      debugPrint(rawQuery);
       return [];
     }
   }
