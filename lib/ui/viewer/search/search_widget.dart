@@ -144,14 +144,14 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
-    _debouncer.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
-      _debouncer.cancel();
+      _debouncer.cancelDebounce();
       return (allResults);
     }
 
