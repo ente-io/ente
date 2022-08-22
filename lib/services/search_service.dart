@@ -5,6 +5,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/data/holidays.dart';
 import 'package:photos/data/months.dart';
+import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
@@ -146,24 +147,24 @@ class SearchService {
     return collectionSearchResults;
   }
 
-  Future<YearSearchResult> getYearSearchResults(int year) async {
-    final yearInMicrosecondsSinceEpoch = DateTime(year).microsecondsSinceEpoch;
-
-    final nextYearInMicrosecondsSinceEpoch =
-        DateTime(year + 1).microsecondsSinceEpoch;
-
-    final filesInYear = await FilesDB.instance.getFilesCreatedWithinDurations(
-      [
-        [yearInMicrosecondsSinceEpoch, nextYearInMicrosecondsSinceEpoch]
-      ],
-      null,
-      order: 'DESC',
-    );
-    if (filesInYear.isEmpty) {
-      return null;
-    } else {
-      return YearSearchResult(year, filesInYear);
+  Future<List<YearSearchResult>> getYearSearchResults(
+    String yearFromQuery,
+  ) async {
+    final List<YearSearchResult> yearSearchResults = [];
+    for (var yearData in YearsData.instance.yearsData) {
+      if (yearData.year.startsWith(yearFromQuery)) {
+        final List<File> filesInYear = await _getFilesInYear(yearData.duration);
+        if (filesInYear.isNotEmpty) {
+          yearSearchResults.add(
+            YearSearchResult(
+              yearData.year,
+              filesInYear,
+            ),
+          );
+        }
+      }
     }
+    return yearSearchResults;
   }
 
   Future<List<HolidaySearchResult>> getHolidaySearchResults(
@@ -210,6 +211,14 @@ class SearchService {
     }
 
     return monthSearchResults;
+  }
+
+  Future<List<File>> _getFilesInYear(List<int> durationOfYear) async {
+    return await FilesDB.instance.getFilesCreatedWithinDurations(
+      [durationOfYear],
+      null,
+      order: "DESC",
+    );
   }
 
   List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
