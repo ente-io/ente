@@ -8,8 +8,8 @@ import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.d
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/search_debouncer.dart';
 
 class SearchIconWidget extends StatefulWidget {
   const SearchIconWidget({Key key}) : super(key: key);
