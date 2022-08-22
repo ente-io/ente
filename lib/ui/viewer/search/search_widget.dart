@@ -171,11 +171,9 @@ class _SearchWidgetState extends State<SearchWidget> {
     Completer completer,
     List<SearchResult> allResults,
   ) async {
-    final queryAsInt = int.tryParse(query);
-    if (_isYearValid(queryAsInt)) {
-      final yearResult =
-          await _searchService.getYearSearchResults(queryAsInt, query);
-      allResults.add(yearResult);
+    if (_isYearValid(query)) {
+      final yearResult = await _searchService.getYearSearchResults(query);
+      allResults.addAll(yearResult);
     }
 
     final holidayResults = await _searchService.getHolidaySearchResults(query);
@@ -195,7 +193,8 @@ class _SearchWidgetState extends State<SearchWidget> {
     completer.complete(allResults);
   }
 
-  bool _isYearValid(int year) {
-    return year != null && year <= currentYear;
+  bool _isYearValid(String year) {
+    final yearAsInt = int.tryParse(year); //returns null if cannot be parsed
+    return yearAsInt != null && yearAsInt <= currentYear;
   }
 }

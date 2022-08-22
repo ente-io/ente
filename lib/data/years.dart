@@ -5,7 +5,7 @@ class YearsData {
   YearsData._privateConstructor() {
     for (int year = 1970; year <= currentYear; year++) {
       yearsData.add(
-        YearData(year.toString(), year, [
+        YearData(year.toString(), [
           DateTime(year).microsecondsSinceEpoch,
           DateTime(year + 1).microsecondsSinceEpoch,
         ]),
@@ -16,8 +16,7 @@ class YearsData {
 }
 
 class YearData {
-  final String yearInString;
-  final int yearInInt;
+  final String year;
   final List<int> duration;
-  YearData(this.yearInString, this.yearInInt, this.duration);
+  YearData(this.year, this.duration);
 }
