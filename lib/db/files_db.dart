@@ -1224,8 +1224,8 @@ class FilesDB {
 
   Future<List<File>> getAllFilesFromDB() async {
     final db = await instance.database;
-    List<Map<String, dynamic>> result = await db.query(table);
-    List<File> files = _convertToFiles(result);
+    List<Map<String, dynamic>> result = await db.query(filesTable);
+    List<File> files = convertToFiles(result);
     List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, null);
     return deduplicatedFiles;
