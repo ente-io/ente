@@ -3,7 +3,7 @@ import 'package:photos/utils/date_time_util.dart';
 class YearsData {
   final List<YearData> yearsData = [];
   YearsData._privateConstructor() {
-    for (int year = 1970; year <= currentYear; year++) {
+    for (int year = currentYear; year >= 1970; year--) {
       yearsData.add(
         YearData(year.toString(), [
           DateTime(year).microsecondsSinceEpoch,
