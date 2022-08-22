@@ -23,7 +23,9 @@ class Debouncer {
   void cancelDebounce() {
     if (_debounceTimer != null) {
       _debounceTimer.cancel();
-      _debounceActiveNotifier.value = false;
+      print('cancelDebounce');
+      // _debounceActiveNotifier.value =
+      //     false; //to not show spinner when query is empty
     }
   }
 

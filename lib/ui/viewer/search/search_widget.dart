@@ -144,6 +144,7 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
+    print('dispose');
     _debouncer.cancelDebounce();
     super.dispose();
   }
@@ -164,6 +165,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   ) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
+      // _debouncer.cancelDebounce();
       completer.complete(allResults);
       return;
     }
