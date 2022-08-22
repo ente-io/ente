@@ -176,16 +176,17 @@ class SearchService {
 
     for (var holiday in allHolidays) {
       if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
-        holidaySearchResults.add(
-          HolidaySearchResult(
-            holiday.name,
+        final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
-              _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
-              null,
-              order: 'DESC',
-            ),
-          ),
+          _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
+          null,
+          order: 'DESC',
         );
+        if (matchedFiles.isNotEmpty) {
+          holidaySearchResults.add(
+            HolidaySearchResult(holiday.name, matchedFiles),
+          );
+        }
       }
     }
     return holidaySearchResults;
