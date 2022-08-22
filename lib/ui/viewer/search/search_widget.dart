@@ -53,7 +53,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   String _query = "";
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
-  final _debouncer = Debouncer(const Duration(milliseconds: 200));
+  final _debouncer = Debouncer(const Duration(milliseconds: 250));
 
   @override
   Widget build(BuildContext context) {
@@ -149,16 +149,10 @@ class _SearchWidgetState extends State<SearchWidget> {
   }
 
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
-    final List<SearchResult> allResults = [];
-    if (query.isEmpty) {
-      _debouncer.cancelDebounce();
-      return (allResults);
-    }
-
     final Completer<List<SearchResult>> completer = Completer();
 
     _debouncer.run(() {
-      return _getSearchResultsFromService(query, completer, allResults);
+      return _getSearchResultsFromService(query, completer);
     });
 
     return completer.future;
@@ -167,8 +161,12 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<void> _getSearchResultsFromService(
     String query,
     Completer completer,
-    List<SearchResult> allResults,
   ) async {
+    final List<SearchResult> allResults = [];
+    if (query.isEmpty) {
+      completer.complete(allResults);
+      return;
+    }
     if (_isYearValid(query)) {
       final yearResults = await _searchService.getYearSearchResults(query);
       allResults.addAll(yearResults);

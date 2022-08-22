@@ -21,7 +21,6 @@ class Debouncer {
   }
 
   void cancelDebounce() {
-    print('cancel');
     if (_debounceTimer != null) {
       _debounceTimer.cancel();
       _debounceActiveNotifier.value = false;
