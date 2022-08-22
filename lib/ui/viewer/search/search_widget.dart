@@ -104,13 +104,13 @@ class _SearchWidgetState extends State<SearchWidget> {
                           ),
                         ),
                         suffixIcon: ValueListenableBuilder(
-                          valueListenable: _debouncer.timerIsActive,
+                          valueListenable: _debouncer.debounceActiveNotifier,
                           builder: (
                             BuildContext context,
-                            bool timerIsActive,
+                            bool isDebouncing,
                             Widget child,
                           ) {
-                            return SearchSuffixIcon(timerIsActive);
+                            return SearchSuffixIcon(isDebouncing);
                           },
                         ),
                       ),
@@ -151,23 +151,20 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
-      if (_debouncer.isActive()) {
-        _debouncer.cancel();
-        _debouncer.timerCompleted();
-      }
+      _debouncer.cancel();
       return (allResults);
     }
 
     final Completer<List<SearchResult>> completer = Completer();
 
     _debouncer.run(() {
-      _getSearchResultsFromService(query, completer, allResults);
+      return _getSearchResultsFromService(query, completer, allResults);
     });
 
     return completer.future;
   }
 
-  void _getSearchResultsFromService(
+  Future<void> _getSearchResultsFromService(
     String query,
     Completer completer,
     List<SearchResult> allResults,
@@ -192,7 +189,6 @@ class _SearchWidgetState extends State<SearchWidget> {
     allResults.addAll(monthResults);
 
     completer.complete(allResults);
-    _debouncer.timerCompleted();
   }
 
   bool _isYearValid(String year) {

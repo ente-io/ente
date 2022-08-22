@@ -4,16 +4,20 @@ import 'package:flutter/material.dart';
 
 class Debouncer {
   final Duration _duration;
+  final ValueNotifier<bool> _debounceActiveNotifier = ValueNotifier(false);
   Timer _debounceTimer;
-  final ValueNotifier<bool> _timerIsActive = ValueNotifier(false);
+  
   Debouncer(this._duration);
 
-  void run(Function fn) {
-    if (_debounceTimer != null && _debounceTimer.isActive) {
+  void run(Future<void> Function() fn) {
+    if (isActive()) {
       _debounceTimer.cancel();
     }
-    _debounceTimer = Timer(_duration, fn);
-    _timerIsActive.value = isActive();
+    _debounceTimer = Timer(_duration, () async {
+      await fn();
+      _debounceActiveNotifier.value = false;
+    });
+    _debounceActiveNotifier.value = true;
   }
 
   void cancel() {
@@ -23,14 +27,10 @@ class Debouncer {
   }
 
   bool isActive() {
-    return (_debounceTimer != null) && _debounceTimer.isActive;
+    return _debounceTimer != null && _debounceTimer.isActive;
   }
 
-  ValueNotifier<bool> get timerIsActive {
-    return _timerIsActive;
-  }
-
-  void timerCompleted() {
-    _timerIsActive.value = false;
+  ValueNotifier<bool> get debounceActiveNotifier {
+    return _debounceActiveNotifier;
   }
 }
