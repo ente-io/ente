@@ -4,6 +4,7 @@ class YearsData {
   final List<YearData> yearsData = [];
   YearsData._privateConstructor() {
     for (int year = currentYear; year >= 1970; year--) {
+      //appending from the latest year so that search results will show latest year first
       yearsData.add(
         YearData(year.toString(), [
           DateTime(year).microsecondsSinceEpoch,

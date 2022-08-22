@@ -172,8 +172,8 @@ class _SearchWidgetState extends State<SearchWidget> {
     List<SearchResult> allResults,
   ) async {
     if (_isYearValid(query)) {
-      final yearResult = await _searchService.getYearSearchResults(query);
-      allResults.addAll(yearResult);
+      final yearResults = await _searchService.getYearSearchResults(query);
+      allResults.addAll(yearResults);
     }
 
     final holidayResults = await _searchService.getHolidaySearchResults(query);

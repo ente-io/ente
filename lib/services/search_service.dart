@@ -148,12 +148,12 @@ class SearchService {
   }
 
   Future<List<YearSearchResult>> getYearSearchResults(
-    String year,
+    String yearFromQuery,
   ) async {
     final List<YearSearchResult> yearSearchResults = [];
     for (var yearData in YearsData.instance.yearsData) {
-      if (yearData.year.startsWith(year)) {
-        List<File> filesInYear = await _getFilesInYear(yearData.duration);
+      if (yearData.year.startsWith(yearFromQuery)) {
+        final List<File> filesInYear = await _getFilesInYear(yearData.duration);
         if (filesInYear.isNotEmpty) {
           yearSearchResults.add(
             YearSearchResult(
