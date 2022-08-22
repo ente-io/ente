@@ -80,7 +80,6 @@ class FilesDB {
     initializationScript: initializationScript,
     migrationScripts: migrationScripts,
   );
-
   // make this a singleton class
   FilesDB._privateConstructor();
 
@@ -617,8 +616,9 @@ class FilesDB {
 
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
-    Set<int> ignoredCollectionIDs,
-  ) async {
+    Set<int> ignoredCollectionIDs, {
+    String order = 'ASC',
+  }) async {
     final db = await instance.database;
     String whereClause = "( ";
     for (int index = 0; index < durations.length; index++) {
@@ -635,7 +635,7 @@ class FilesDB {
     final results = await db.query(
       table,
       where: whereClause,
-      orderBy: '$columnCreationTime ASC',
+      orderBy: '$columnCreationTime ' + order,
     );
     final files = _convertToFiles(results);
     return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
@@ -1160,6 +1160,15 @@ class FilesDB {
       files.add(_getFileFromRow(result));
     }
     return files;
+  }
+
+  Future<List<File>> getAllFilesFromDB() async {
+    final db = await instance.database;
+    List<Map<String, dynamic>> result = await db.query(table);
+    List<File> files = _convertToFiles(result);
+    List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, null);
+    return deduplicatedFiles;
   }
 
   Map<String, dynamic> _getRowForFile(File file) {

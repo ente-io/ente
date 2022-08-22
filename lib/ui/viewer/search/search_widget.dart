@@ -1,8 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/viewer/search/search_results_suggestions.dart';
+import 'package:photos/models/search/search_results.dart';
+import 'package:photos/services/search_service.dart';
+import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.dart';
+import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
+import 'package:photos/ui/viewer/search/search_suggestions.dart';
+import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/search_debouncer.dart';
 
 class SearchIconWidget extends StatefulWidget {
   const SearchIconWidget({Key key}) : super(key: key);
@@ -12,104 +19,182 @@ class SearchIconWidget extends StatefulWidget {
 }
 
 class _SearchIconWidgetState extends State<SearchIconWidget> {
-  bool showSearchWidget;
   @override
   void initState() {
     super.initState();
-    showSearchWidget = false;
   }
 
   @override
   Widget build(BuildContext context) {
-    return showSearchWidget
-        ? Searchwidget(showSearchWidget)
-        : IconButton(
-            onPressed: () {
-              setState(
-                () {
-                  showSearchWidget = !showSearchWidget;
-                },
-              );
-            },
-            icon: const Icon(Icons.search),
+    return Hero(
+      tag: "search_icon",
+      child: IconButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            TransparentRoute(
+              builder: (BuildContext context) => const SearchWidget(),
+            ),
           );
+        },
+        icon: const Icon(Icons.search),
+      ),
+    );
   }
 }
 
-// ignore: must_be_immutable
-class Searchwidget extends StatefulWidget {
-  bool openSearch;
-  final String searchQuery = '';
-  Searchwidget(this.openSearch, {Key key}) : super(key: key);
+class SearchWidget extends StatefulWidget {
+  const SearchWidget({Key key}) : super(key: key);
   @override
-  State<Searchwidget> createState() => _SearchwidgetState();
+  State<SearchWidget> createState() => _SearchWidgetState();
 }
 
-class _SearchwidgetState extends State<Searchwidget> {
-  final ValueNotifier<String> _searchQ = ValueNotifier('');
+class _SearchWidgetState extends State<SearchWidget> {
+  String _query = "";
+  final List<SearchResult> _results = [];
+  final _searchService = SearchService.instance;
+  final _debouncer = Debouncer(const Duration(milliseconds: 200));
+
   @override
   Widget build(BuildContext context) {
-    List<CollectionWithThumbnail> matchedCollections;
-    return widget.openSearch
-        ? Column(
-            children: [
-              Row(
-                children: [
-                  const SizedBox(width: 12),
-                  Flexible(
-                    child: Container(
-                      color:
-                          Theme.of(context).colorScheme.defaultBackgroundColor,
-                      child: TextFormField(
-                        style: Theme.of(context).textTheme.subtitle1,
-                        decoration: InputDecoration(
-                          filled: true,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 14,
-                          ),
-                          border: UnderlineInputBorder(
-                            borderSide: BorderSide.none,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          prefixIcon: const Icon(Icons.search),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pop(context);
+      },
+      child: Container(
+        color: Colors.black.withOpacity(0.32),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+            child: Column(
+              children: [
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.defaultBackgroundColor,
+                    child: TextFormField(
+                      style: Theme.of(context).textTheme.subtitle1,
+                      // Below parameters are to disable auto-suggestion
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      keyboardType: TextInputType.visiblePassword,
+                      // Above parameters are to disable auto-suggestion
+                      decoration: InputDecoration(
+                        hintText: "Places, moments, albums...",
+                        filled: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
                         ),
-                        onChanged: (value) async {
-                          matchedCollections = await CollectionsService.instance
-                              .getFilteredCollectionsWithThumbnail(value);
-                          _searchQ.value = value;
-                        },
-                        autofocus: true,
+                        border: const UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: const UnderlineInputBorder(
+                          borderSide: BorderSide.none,
+                        ),
+                        prefixIcon: Hero(
+                          tag: "search_icon",
+                          child: Icon(
+                            Icons.search,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .iconColor
+                                .withOpacity(0.5),
+                          ),
+                        ),
+                        suffixIcon: ValueListenableBuilder(
+                          valueListenable: _debouncer.debounceNotifierGetter,
+                          builder: (
+                            BuildContext context,
+                            Timer debounceTimer,
+                            Widget child,
+                          ) {
+                            return SearchSuffixIcon(debounceTimer);
+                          },
+                        ),
                       ),
+                      onChanged: (value) async {
+                        final List<SearchResult> allResults =
+                            await getSearchResultsForQuery(value);
+                        if (mounted) {
+                          setState(() {
+                            _query = value;
+                            _results.clear();
+                            _results.addAll(allResults);
+                          });
+                        }
+                      },
+                      autofocus: true,
                     ),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        widget.openSearch = !widget.openSearch;
-                      });
-                    },
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ValueListenableBuilder(
-                valueListenable: _searchQ,
-                builder: (
-                  BuildContext context,
-                  String newQuery,
-                  Widget child,
-                ) {
-                  return newQuery != ''
-                      ? SearchResultsSuggestions(
-                          collectionsWithThumbnail: matchedCollections,
-                        )
-                      : const SizedBox.shrink();
-                },
-              ),
-            ],
-          )
-        : SearchIconWidget();
+                ),
+                _results.isNotEmpty
+                    ? SearchSuggestionsWidget(_results)
+                    : _query.isNotEmpty
+                        ? const NoResultWidget()
+                        : const SizedBox.shrink(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _debouncer.cancel();
+    super.dispose();
+  }
+
+  Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
+    final List<SearchResult> allResults = [];
+    if (query.isEmpty) {
+      if (_debouncer.isActive()) {
+        _debouncer.cancel();
+      }
+      return (allResults);
+    }
+
+    final Completer<List<SearchResult>> completer = Completer();
+
+    _debouncer.run(() {
+      _getSearchResultsFromService(query, completer, allResults);
+    });
+
+    return completer.future;
+  }
+
+  void _getSearchResultsFromService(
+    String query,
+    Completer completer,
+    List<SearchResult> allResults,
+  ) async {
+    if (_isYearValid(query)) {
+      final yearResults = await _searchService.getYearSearchResults(query);
+      allResults.addAll(yearResults);
+    }
+
+    final holidayResults = await _searchService.getHolidaySearchResults(query);
+    allResults.addAll(holidayResults);
+
+    final collectionResults =
+        await _searchService.getCollectionSearchResults(query);
+    allResults.addAll(collectionResults);
+
+    final locationResults =
+        await _searchService.getLocationSearchResults(query);
+    allResults.addAll(locationResults);
+
+    final monthResults = await _searchService.getMonthSearchResults(query);
+    allResults.addAll(monthResults);
+
+    completer.complete(allResults);
+  }
+
+  bool _isYearValid(String year) {
+    final yearAsInt = int.tryParse(year); //returns null if cannot be parsed
+    return yearAsInt != null && yearAsInt <= currentYear;
   }
 }

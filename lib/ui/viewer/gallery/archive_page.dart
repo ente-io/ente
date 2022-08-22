@@ -58,7 +58,6 @@ class ArchivePage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
-      footer: const SizedBox(height: 120),
     );
     return Scaffold(
       appBar: PreferredSize(

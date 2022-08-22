@@ -26,6 +26,7 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/memories_service.dart';
+import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,8 +37,10 @@ class Configuration {
   Configuration._privateConstructor();
 
   static final Configuration instance = Configuration._privateConstructor();
-  static const endpoint =
-      String.fromEnvironment("endpoint", defaultValue: "https://api.ente.io");
+  static const endpoint = String.fromEnvironment(
+    "endpoint",
+    defaultValue: kDefaultProductionEndpoint,
+  );
   static const emailKey = "email";
   static const foldersToBackUpKey = "folders_to_back_up";
   static const keyAttributesKey = "key_attributes";
@@ -158,6 +161,7 @@ class Configuration {
     FavoritesService.instance.clearCache();
     MemoriesService.instance.clearCache();
     BillingService.instance.clearCache();
+    SearchService.instance.clearCache();
     Bus.instance.fire(UserLoggedOutEvent());
   }
 

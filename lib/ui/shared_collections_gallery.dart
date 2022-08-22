@@ -15,7 +15,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/ui/collections_gallery_widget.dart';
+import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
