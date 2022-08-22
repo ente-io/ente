@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/file_migration_db.dart';
@@ -95,7 +96,7 @@ class LocalFileUpdateService {
   Future<void> _checkAndMarkFilesWithDifferentHashForFileUpdate(
     List<String> localIDsToProcess,
   ) async {
-    _logger.info("files to process ${localIDsToProcess.length}");
+    _logger.info("files to process ${localIDsToProcess.length} for reupload");
     var localFiles = await FilesDB.instance.getLocalFiles(localIDsToProcess);
     Set<String> processedIDs = {};
     for (var file in localFiles) {
@@ -136,6 +137,7 @@ class LocalFileUpdateService {
         }
       }
     }
+    debugPrint("Deleting files ${processedIDs.length}");
     await _filesMigrationDB.deleteByLocalIDs(
       processedIDs.toList(),
       FilesMigrationDB.modificationTimeUpdated,

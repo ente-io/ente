@@ -119,10 +119,10 @@ class FilesMigrationDB {
     }
     inParam = inParam.substring(0, inParam.length - 1);
     final db = await instance.database;
-    db.rawQuery(
+    await db.rawQuery(
       '''
       DELETE FROM $tableName
-      WHERE $_columnLocalID IN ($inParam) AND $_columnReason = $reason;
+      WHERE $_columnLocalID IN ($inParam) AND $_columnReason = '$reason';
     ''',
     );
   }
