@@ -321,7 +321,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive ||
         widget.type == GalleryType.localFolder ||
-        widget.type == GalleryType.localAll) {
+        widget.type == GalleryType.localAll ||
+        widget.type == GalleryType.searchResults) {
       actions.add(
         Tooltip(
           message: "Delete",

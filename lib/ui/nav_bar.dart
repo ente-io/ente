@@ -334,7 +334,6 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
         highlightColor: widget.hoverColor,
         splashColor: widget.rippleColor,
         borderRadius: BorderRadius.circular(100),
-        // behavior: HitTestBehavior.opaque,
         onTap: () {
           widget.onPressed();
         },
@@ -342,11 +341,8 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
           padding: widget.margin,
           child: AnimatedContainer(
             curve: Curves.easeOut,
-            // padding: EdgeInsets.symmetric(horizontal: 5),
             padding: widget.padding,
-            // curve: Curves.easeOutQuad,
             duration: widget.duration,
-            // curve: !_expanded ? widget.curve : widget.curve.flipped,
             decoration: BoxDecoration(
               boxShadow: widget.shadow,
               border: widget.active

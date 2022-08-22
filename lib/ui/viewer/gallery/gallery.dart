@@ -46,7 +46,7 @@ class Gallery extends StatefulWidget {
     this.forceReloadEvents,
     this.removalEventTypes = const {},
     this.header,
-    this.footer,
+    this.footer = const SizedBox(height: 120),
     this.smallerTodayFont = false,
     this.albumName = '',
     Key key,
@@ -234,6 +234,9 @@ class _GalleryState extends State<Gallery> {
       thumbBackgroundColor:
           Theme.of(context).colorScheme.galleryThumbBackgroundColor,
       thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
+      thumbPadding: widget.header != null
+          ? const EdgeInsets.only(top: 60)
+          : const EdgeInsets.all(0),
       firstShown: (int firstIndex) {
         Bus.instance
             .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));

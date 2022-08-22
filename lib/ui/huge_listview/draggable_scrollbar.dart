@@ -124,20 +124,22 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     }
   }
 
-  Widget buildThumb() => Container(
-        alignment: Alignment.topRight,
-        margin: EdgeInsets.only(top: thumbOffset),
+  Widget buildThumb() => Padding(
         padding: widget.padding,
-        child: ScrollBarThumb(
-          widget.backgroundColor,
-          widget.drawColor,
-          widget.heightScrollThumb,
-          widget.labelTextBuilder.call(currentFirstIndex),
-          _labelAnimation,
-          _thumbAnimation,
-          onDragStart,
-          onDragUpdate,
-          onDragEnd,
+        child: Container(
+          alignment: Alignment.topRight,
+          margin: EdgeInsets.only(top: thumbOffset),
+          child: ScrollBarThumb(
+            widget.backgroundColor,
+            widget.drawColor,
+            widget.heightScrollThumb,
+            widget.labelTextBuilder.call(currentFirstIndex),
+            _labelAnimation,
+            _thumbAnimation,
+            onDragStart,
+            onDragUpdate,
+            onDragEnd,
+          ),
         ),
       );
 

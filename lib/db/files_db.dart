@@ -81,7 +81,6 @@ class FilesDB {
     initializationScript: initializationScript,
     migrationScripts: migrationScripts,
   );
-
   // make this a singleton class
   FilesDB._privateConstructor();
 
@@ -659,8 +658,9 @@ class FilesDB {
 
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
-    Set<int> ignoredCollectionIDs,
-  ) async {
+    Set<int> ignoredCollectionIDs, {
+    String order = 'ASC',
+  }) async {
     final db = await instance.database;
     String whereClause = "( ";
     for (int index = 0; index < durations.length; index++) {
@@ -677,7 +677,7 @@ class FilesDB {
     final results = await db.query(
       filesTable,
       where: whereClause,
-      orderBy: '$columnCreationTime ASC',
+      orderBy: '$columnCreationTime ' + order,
     );
     final files = convertToFiles(results);
     return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
@@ -862,6 +862,8 @@ class FilesDB {
     FileType fileType,
     int ownerID,
   ) async {
+    // look up two hash at max, for handling live photos
+    assert(hash.length < 3, "number of hash can not be more than 2");
     final db = await instance.database;
     String rawQuery = 'SELECT * from files where ($columnUploadedFileID != '
         'NULL OR $columnUploadedFileID != -1) AND $columnOwnerID = $ownerID '
@@ -1218,6 +1220,15 @@ class FilesDB {
       files.add(_getFileFromRow(result));
     }
     return files;
+  }
+
+  Future<List<File>> getAllFilesFromDB() async {
+    final db = await instance.database;
+    List<Map<String, dynamic>> result = await db.query(table);
+    List<File> files = _convertToFiles(result);
+    List<File> deduplicatedFiles =
+        _deduplicatedAndFilterIgnoredFiles(files, null);
+    return deduplicatedFiles;
   }
 
   Map<String, dynamic> _getRowForFile(File file) {
