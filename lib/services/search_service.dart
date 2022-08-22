@@ -198,16 +198,20 @@ class SearchService {
 
     for (var month in allMonths) {
       if (month.name.startsWith(nonCaseSensitiveRegexForQuery)) {
-        monthSearchResults.add(
-          MonthSearchResult(
-            month.name,
+        final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
-              _getDurationsOfMonthInEveryYear(month.monthNumber),
-              null,
-              order: 'DESC',
-            ),
-          ),
+          _getDurationsOfMonthInEveryYear(month.monthNumber),
+          null,
+          order: 'DESC',
         );
+        if (matchedFiles.isNotEmpty) {
+          monthSearchResults.add(
+            MonthSearchResult(
+              month.name,
+              matchedFiles,
+            ),
+          );
+        }
       }
     }
 
