@@ -33,7 +33,6 @@ export default function SubscriptionStatus({
         }
         if (
             hasPaidSubscription(userDetails.subscription) &&
-            isSubscriptionActive(userDetails.subscription) &&
             !isSubscriptionCancelled(userDetails.subscription)
         ) {
             return false;
