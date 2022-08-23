@@ -61,7 +61,7 @@ Future<List<Tuple2<AssetPathEntity, File>>>
   return result;
 }
 
-Future<List<LocalAsset>> getAllLocalAssets() async {
+Future<List<LocalPathAsset>> getAllLocalAssets() async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
     AssetType.image,
@@ -77,24 +77,28 @@ Future<List<LocalAsset>> getAllLocalAssets() async {
     type: RequestType.common,
     filterOption: filterOptionGroup,
   );
-  final List<LocalAsset> assets = [];
+  final List<LocalPathAsset> localPathAssets = [];
   for (final assetPath in assetPaths) {
+    Set<String> localIDs = <String>{};
     for (final asset in await _getAllAssetLists(assetPath)) {
-      assets.add(
-        LocalAsset(
-          id: asset.id,
-          pathName: assetPath.name,
-          pathID: assetPath.id,
-        ),
-      );
+      localIDs.add(asset.id);
     }
+    localPathAssets.add(
+      LocalPathAsset(
+        localIDs: localIDs,
+        pathName: assetPath.name,
+        pathID: assetPath.id,
+      ),
+    );
   }
-  return assets;
+  return localPathAssets;
 }
 
-Future<List<File>> getUnsyncedFiles(
-  List<LocalAsset> assets,
-  Set<String> existingIDs,
+Future<LocalUnSyncResult> getLocalUnsyncedFiles(
+  List<LocalPathAsset> assets,
+  // current set of assets available on device
+  Set<String> existingIDs, // localIDs of files already imported in app
+  Map<String, Set<String>> pathToLocalIDs,
   Set<String> invalidIDs,
   Computer computer,
 ) async {
@@ -102,53 +106,95 @@ Future<List<File>> getUnsyncedFiles(
   args['assets'] = assets;
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
-  final unsyncedAssets =
+  args['pathToLocalIDs'] = pathToLocalIDs;
+  final LocalUnSyncResult localUnSyncResult =
       await computer.compute(_getUnsyncedAssets, param: args);
-  if (unsyncedAssets.isEmpty) {
-    return [];
+  if (localUnSyncResult.localPathAssets.isEmpty) {
+    return LocalUnSyncResult();
   }
-  return _convertToFiles(unsyncedAssets, computer);
+  final unSyncedFiles =
+      await _convertToFiles(localUnSyncResult.localPathAssets, computer);
+  localUnSyncResult.uniqueLocalFiles = unSyncedFiles;
+  return localUnSyncResult;
 }
 
-List<LocalAsset> _getUnsyncedAssets(Map<String, dynamic> args) {
-  final List<LocalAsset> assets = args['assets'];
+// _getUnsyncedAssets performs following operation
+// Identify
+LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
+  final List<LocalPathAsset> localPathAssets = args['assets'];
   final Set<String> existingIDs = args['existingIDs'];
   final Set<String> invalidIDs = args['invalidIDs'];
-  final List<LocalAsset> unsyncedAssets = [];
-  for (final asset in assets) {
-    if (!existingIDs.contains(asset.id) && !invalidIDs.contains(asset.id)) {
-      unsyncedAssets.add(asset);
+  final Map<String, Set<String>> pathToLocalIDs = args['pathToLocalIDs'];
+  final Map<String, Set<String>> newPathToLocalIDs = <String, Set<String>>{};
+  final Map<String, Set<String>> removedPathToLocalIDs =
+      <String, Set<String>>{};
+  final List<LocalPathAsset> unsyncedAssets = [];
+  for (final localPathAsset in localPathAssets) {
+    String pathID = localPathAsset.pathID;
+
+    // Start identifying pathID to localID mapping changes which needs to be
+    // synced
+    Set<String> existingPathToLocalIDs = pathToLocalIDs[pathID] ?? <String>{};
+    Set<String> missingLocalIDsInPath = <String>{};
+    for (final String localID in localPathAsset.localIDs) {
+      if (existingPathToLocalIDs.contains(localID)) {
+        // remove the localID after checking. Any pending existing ID indicates
+        // the the local file was removed from the path.
+        existingPathToLocalIDs.remove(localID);
+      } else {
+        missingLocalIDsInPath.add(localID);
+      }
     }
+    if (existingPathToLocalIDs.isNotEmpty) {
+      removedPathToLocalIDs[pathID] = existingPathToLocalIDs;
+    }
+    if (missingLocalIDsInPath.isNotEmpty) {
+      newPathToLocalIDs[pathID] = missingLocalIDsInPath;
+    }
+    // End
+
+    localPathAsset.localIDs.removeAll(existingIDs);
+    localPathAsset.localIDs.removeAll(invalidIDs);
+    unsyncedAssets.add(localPathAsset);
   }
-  return unsyncedAssets;
+  return LocalUnSyncResult(
+    localPathAssets: unsyncedAssets,
+    newPathToLocalIDs: newPathToLocalIDs,
+    deletePathToLocalIDs: removedPathToLocalIDs,
+  );
 }
 
 Future<List<File>> _convertToFiles(
-  List<LocalAsset> assets,
+  List<LocalPathAsset> assets,
   Computer computer,
 ) async {
   final Map<String, AssetEntity> assetIDToEntityMap = {};
   final List<File> files = [];
-  for (final localAsset in assets) {
-    if (!assetIDToEntityMap.containsKey(localAsset.id)) {
-      assetIDToEntityMap[localAsset.id] =
-          await AssetEntity.fromId(localAsset.id);
+  for (LocalPathAsset localPathAsset in assets) {
+    for (final String localID in localPathAsset.localIDs) {
+      if (!assetIDToEntityMap.containsKey(localID)) {
+        assetIDToEntityMap[localID] = await AssetEntity.fromId(localID);
+      }
+      files.add(
+        File.fromAsset(
+          localPathAsset.pathName,
+          assetIDToEntityMap[localID],
+          devicePathID: localPathAsset.pathID,
+        ),
+      );
     }
-    files.add(
-      File.fromAsset(
-        localAsset.pathName,
-        assetIDToEntityMap[localAsset.id],
-        devicePathID: localAsset.pathID,
-      ),
-    );
   }
   return files;
 }
 
+/// returns a list of AssetPathEntity with relevant filter operations.
+/// [needTitle] impacts the performance for fetching the actual [AssetEntity]
+/// in iOS. Same is true for [containsModifiedPath]
 Future<List<AssetPathEntity>> _getGalleryList({
   final int updateFromTime,
   final int updateToTime,
   final bool containsModifiedPath = false,
+  // in iOS fetching the AssetEntity title impacts performance
   final bool needsTitle = true,
   final OrderOption orderOption,
 }) async {
@@ -179,6 +225,8 @@ Future<List<AssetPathEntity>> _getGalleryList({
     filterOption: filterOptionGroup,
   );
 
+  // todo: assetCount will be deprecated in the new version.
+  // disable sorting and either try to evaluate if it's required or yolo
   galleryList.sort((s1, s2) {
     return s2.assetCount.compareTo(s1.assetCount);
   });
@@ -221,6 +269,7 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
   final assetList = args["assetList"];
   final fromTime = args["fromTime"];
   final files = args["files"];
+
   for (AssetEntity entity in assetList) {
     if (max(
           entity.createDateTime.microsecondsSinceEpoch,
@@ -242,14 +291,35 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
   return files;
 }
 
-class LocalAsset {
-  final String id;
+class LocalPathAsset {
+  final Set<String> localIDs;
   final String pathID;
   final String pathName;
 
-  LocalAsset({
-    @required this.id,
+  LocalPathAsset({
+    @required this.localIDs,
     @required this.pathName,
     @required this.pathID,
+  });
+}
+
+class LocalUnSyncResult {
+  // unique localPath Assets.
+  final List<LocalPathAsset> localPathAssets;
+
+  // set of File object created from localPathAssets
+  List<File> uniqueLocalFiles;
+
+  // newPathToLocalIDs represents new entries which needs to be synced to
+  // the local db
+  final Map<String, Set<String>> newPathToLocalIDs;
+
+  final Map<String, Set<String>> deletePathToLocalIDs;
+
+  LocalUnSyncResult({
+    this.uniqueLocalFiles,
+    this.localPathAssets,
+    this.newPathToLocalIDs,
+    this.deletePathToLocalIDs,
   });
 }

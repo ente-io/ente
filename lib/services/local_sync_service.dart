@@ -130,10 +130,10 @@ class LocalSyncService {
     _existingSync = null;
   }
 
-  Future<void> refreshDeviceFolderCountAndCover() async {
+  Future<bool> refreshDeviceFolderCountAndCover() async {
     List<Tuple2<AssetPathEntity, File>> result =
         await getDeviceFolderWithCountAndCoverFile();
-    await _db.updateDeviceCoverWithCount(result);
+    return await _db.updateDeviceCoverWithCount(result);
   }
 
   Future<bool> syncAll() async {
@@ -149,19 +149,33 @@ class LocalSyncService {
           "ms",
     );
     await refreshDeviceFolderCountAndCover();
-    final existingIDs = await _db.getExistingLocalFileIDs();
+    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
     final invalidIDs = _getInvalidFileIDs().toSet();
-    final unsyncedFiles =
-        await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
-    if (unsyncedFiles.isNotEmpty) {
-      await _db.insertMultiple(unsyncedFiles);
+    final unsyncedFiles = await getLocalUnsyncedFiles(
+      localAssets,
+      existingLocalFileIDs,
+      pathToLocalIDs,
+      invalidIDs,
+      _computer,
+    );
+    if (unsyncedFiles.newPathToLocalIDs.isNotEmpty) {
+      await _db.insertPathIDToLocalIDMapping(unsyncedFiles.newPathToLocalIDs);
+    }
+    if (unsyncedFiles.deletePathToLocalIDs.isNotEmpty) {
+      _db.deletePathIDToLocalIDMapping(unsyncedFiles.deletePathToLocalIDs);
+    }
+    if (unsyncedFiles.uniqueLocalFiles.isNotEmpty) {
+      await _db.insertMultiple(unsyncedFiles.uniqueLocalFiles);
       _logger.info(
-        "Inserted " + unsyncedFiles.length.toString() + " unsynced files.",
+        "Inserted " +
+            unsyncedFiles.uniqueLocalFiles.toString() +
+            " unsynced files.",
       );
-      _updatePathsToBackup(unsyncedFiles);
-      Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
+      // todo: review
+      // _updatePathsToBackup(unsyncedFiles);
+      // Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
       return true;
     }
     return false;

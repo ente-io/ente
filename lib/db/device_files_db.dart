@@ -53,6 +53,61 @@ extension DeviceFiles on FilesDB {
     );
   }
 
+  Future<void> insertPathIDToLocalIDMapping(
+    Map<String, Set<String>> mappingToAdd, {
+    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
+  }) async {
+    debugPrint("Inserting missing PathIDToLocalIDMapping");
+    final db = await database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (MapEntry e in mappingToAdd.entries) {
+      String pathID = e.key;
+      for (String localID in e.value) {
+        if (batchCounter == 400) {
+          await batch.commit(noResult: true);
+          batch = db.batch();
+          batchCounter = 0;
+        }
+        batch.insert(
+          "device_files",
+          {
+            "id": localID,
+            "path_id": pathID,
+          },
+          conflictAlgorithm: conflictAlgorithm,
+        );
+        batchCounter++;
+      }
+    }
+    await batch.commit(noResult: true);
+  }
+
+  Future<void> deletePathIDToLocalIDMapping(
+      Map<String, Set<String>> mappingsToRemove) async {
+    debugPrint("removing PathIDToLocalIDMapping");
+    final db = await database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (MapEntry e in mappingsToRemove.entries) {
+      String pathID = e.key;
+      for (String localID in e.value) {
+        if (batchCounter == 400) {
+          await batch.commit(noResult: true);
+          batch = db.batch();
+          batchCounter = 0;
+        }
+        batch.delete(
+          "device_files",
+          where: 'id = ? AND path_id = ?',
+          whereArgs: [localID, pathID],
+        );
+        batchCounter++;
+      }
+    }
+    await batch.commit(noResult: true);
+  }
+
   Future<Map<String, int>> getDevicePathIDToImportedFileCount() async {
     try {
       final db = await database;
@@ -70,6 +125,27 @@ extension DeviceFiles on FilesDB {
       return result;
     } catch (e) {
       _logger.severe("failed to getDevicePathIDToImportedFileCount", e);
+      rethrow;
+    }
+  }
+
+  Future<Map<String, Set<String>>> getDevicePathIDToLocalIDMap() async {
+    try {
+      final db = await database;
+      final rows = await db.rawQuery(
+        ''' SELECT id, path_id FROM device_files; ''',
+      );
+      final result = <String, Set<String>>{};
+      for (final row in rows) {
+        final String pathID = row['path_id'];
+        if (!result.containsKey(pathID)) {
+          result[pathID] = <String>{};
+        }
+        result[pathID].add(row['id']);
+      }
+      return result;
+    } catch (e) {
+      _logger.severe("failed to getDevicePathIDToLocalIDMap", e);
       rethrow;
     }
   }
@@ -117,22 +193,25 @@ extension DeviceFiles on FilesDB {
     }
   }
 
-  Future<int> updateDeviceCoverWithCount(
+  Future<bool> updateDeviceCoverWithCount(
     List<Tuple2<AssetPathEntity, File>> devicePathInfo,
   ) async {
+    bool hasUpdated = false;
     try {
       final Database db = await database;
       final Set<String> existingPathIds = await getDevicePathIDs();
       for (Tuple2<AssetPathEntity, File> tup in devicePathInfo) {
         AssetPathEntity pathEntity = tup.item1;
         String localID = tup.item2.localID;
-        if (existingPathIds.contains(pathEntity.id)) {
+        bool shouldUpdate = existingPathIds.contains(pathEntity.id);
+        if (shouldUpdate) {
           await db.rawUpdate(
             "UPDATE device_path_collections SET name = ?, cover_id = ?, count"
             " = ? where id = ?",
             [pathEntity.name, localID, pathEntity.assetCount, pathEntity.id],
           );
         } else {
+          hasUpdated = true;
           await db.insert(
             "device_path_collections",
             {
@@ -144,6 +223,25 @@ extension DeviceFiles on FilesDB {
           );
         }
       }
+      // delete existing pathIDs which are missing on device
+      existingPathIds.removeAll(devicePathInfo.map((e) => e.item1.id).toSet());
+      if (existingPathIds.isNotEmpty) {
+        hasUpdated = true;
+        _logger.info('Deleting following pathIds from local $existingPathIds ');
+        for (String pathID in existingPathIds) {
+          await db.delete(
+            "device_path_collections",
+            where: 'id = ?',
+            whereArgs: [pathID],
+          );
+          await db.delete(
+            "device_files",
+            where: 'path_id = ?',
+            whereArgs: [pathID],
+          );
+        }
+      }
+      return hasUpdated;
     } catch (e) {
       _logger.severe("failed to save path names", e);
       rethrow;
