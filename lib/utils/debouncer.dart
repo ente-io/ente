@@ -7,9 +7,7 @@ class Debouncer {
   final ValueNotifier<bool> _debounceActiveNotifier = ValueNotifier(false);
   Timer _debounceTimer;
 
-  Debouncer(this._duration) {
-    print('debounce instansiated');
-  }
+  Debouncer(this._duration);
 
   void run(Future<void> Function() fn) {
     if (isActive()) {
@@ -25,7 +23,6 @@ class Debouncer {
   void cancelDebounce() {
     if (_debounceTimer != null) {
       _debounceTimer.cancel();
-      print('cancelDebounce');
     }
   }
 

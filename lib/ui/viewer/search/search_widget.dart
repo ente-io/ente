@@ -57,7 +57,6 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   Widget build(BuildContext context) {
-    print('building search');
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
@@ -104,6 +103,8 @@ class _SearchWidgetState extends State<SearchWidget> {
                                 .withOpacity(0.5),
                           ),
                         ),
+                        /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
+                        setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
                         suffixIcon: ValueListenableBuilder(
                           valueListenable: _debouncer.debounceActiveNotifier,
                           builder: (
@@ -111,7 +112,6 @@ class _SearchWidgetState extends State<SearchWidget> {
                             bool isDebouncing,
                             Widget child,
                           ) {
-                            print(_debouncer.debounceActiveNotifier.value);
                             return SearchSuffixIcon(
                               isDebouncing,
                             );
@@ -119,11 +119,13 @@ class _SearchWidgetState extends State<SearchWidget> {
                         ),
                       ),
                       onChanged: (value) async {
+                        _query = value;
                         final List<SearchResult> allResults =
                             await getSearchResultsForQuery(value);
-                        if (mounted) {
+                        /*checking if _query == value to make sure that the results are from the current query 
+                        and not from the previous query (race condition).*/
+                        if (mounted && _query == value) {
                           setState(() {
-                            _query = value;
                             _results.clear();
                             _results.addAll(allResults);
                           });
@@ -148,7 +150,6 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
-    print('dispose');
     _debouncer.cancelDebounce();
     super.dispose();
   }
@@ -192,7 +193,6 @@ class _SearchWidgetState extends State<SearchWidget> {
 
     final monthResults = await _searchService.getMonthSearchResults(query);
     allResults.addAll(monthResults);
-
     completer.complete(allResults);
   }
 
