@@ -329,12 +329,11 @@ class UploadManager {
         addLogLine(` extracting ${getFileNameSize(file)} metadata`);
         let metadata: Metadata;
         try {
-            metadata =
-                (await UploadService.extractFileMetadata(
-                    file,
-                    collectionID,
-                    fileTypeInfo
-                )) || null;
+            metadata = await UploadService.extractFileMetadata(
+                file,
+                collectionID,
+                fileTypeInfo
+            );
             const filePath = (file as any).path as string;
             return { fileTypeInfo, metadata, filePath };
         } catch (e) {
