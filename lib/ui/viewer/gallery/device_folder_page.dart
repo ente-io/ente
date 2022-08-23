@@ -40,8 +40,8 @@ class DeviceFolderPage extends StatelessWidget {
       tagPrefix: "device_folder:" + devicePathCollection.name,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
-          ? _getHeaderWidget()
-          : Container(),
+          ? BackupConfigurationHeaderWidget(devicePathCollection)
+          : const SizedBox.shrink(),
       initialFiles: [devicePathCollection.thumbnail],
     );
     return Scaffold(
@@ -85,9 +85,14 @@ class BackupConfigurationHeaderWidget extends StatefulWidget {
 
 class _BackupConfigurationHeaderWidgetState
     extends State<BackupConfigurationHeaderWidget> {
+  bool isBackedUp;
+  @override
+  void initState() {
+    isBackedUp = widget.devicePathCollection.sync;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isBackedUp = widget.devicePathCollection.sync;
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
       margin: const EdgeInsets.only(bottom: 12),
@@ -112,6 +117,7 @@ class _BackupConfigurationHeaderWidgetState
               await FilesDB.instance.updateDevicePathSyncStatus(
                 {widget.devicePathCollection.id: value},
               );
+              isBackedUp = value;
               setState(() {});
               Bus.instance.fire(BackupFoldersUpdatedEvent());
             },
