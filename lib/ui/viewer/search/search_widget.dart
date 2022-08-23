@@ -57,6 +57,7 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   Widget build(BuildContext context) {
+    print('building search');
     return GestureDetector(
       onTap: () {
         Navigator.pop(context);
@@ -110,7 +111,10 @@ class _SearchWidgetState extends State<SearchWidget> {
                             bool isDebouncing,
                             Widget child,
                           ) {
-                            return SearchSuffixIcon(isDebouncing);
+                            print(_debouncer.debounceActiveNotifier.value);
+                            return SearchSuffixIcon(
+                              isDebouncing,
+                            );
                           },
                         ),
                       ),
@@ -152,9 +156,11 @@ class _SearchWidgetState extends State<SearchWidget> {
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
     final Completer<List<SearchResult>> completer = Completer();
 
-    _debouncer.run(() {
-      return _getSearchResultsFromService(query, completer);
-    });
+    _debouncer.run(
+      () {
+        return _getSearchResultsFromService(query, completer);
+      },
+    );
 
     return completer.future;
   }
@@ -165,7 +171,6 @@ class _SearchWidgetState extends State<SearchWidget> {
   ) async {
     final List<SearchResult> allResults = [];
     if (query.isEmpty) {
-      // _debouncer.cancelDebounce();
       completer.complete(allResults);
       return;
     }

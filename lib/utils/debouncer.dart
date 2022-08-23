@@ -7,7 +7,9 @@ class Debouncer {
   final ValueNotifier<bool> _debounceActiveNotifier = ValueNotifier(false);
   Timer _debounceTimer;
 
-  Debouncer(this._duration);
+  Debouncer(this._duration) {
+    print('debounce instansiated');
+  }
 
   void run(Future<void> Function() fn) {
     if (isActive()) {
@@ -24,8 +26,6 @@ class Debouncer {
     if (_debounceTimer != null) {
       _debounceTimer.cancel();
       print('cancelDebounce');
-      // _debounceActiveNotifier.value =
-      //     false; //to not show spinner when query is empty
     }
   }
 

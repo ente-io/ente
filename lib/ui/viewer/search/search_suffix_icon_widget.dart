@@ -13,46 +13,34 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
     with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 200),
-    );
-    final animation = Tween(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(controller);
-    if (widget.isDebouncing) {
-      controller.forward();
-      return FadeTransition(
-        opacity: animation,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: SizedBox(
-            height: 6,
-            width: 6,
-            child: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 175),
+      child: widget.isDebouncing
+          ? Padding(
+              padding: const EdgeInsets.all(12),
+              child: SizedBox(
+                height: 20,
+                width: 20,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .iconColor
+                        .withOpacity(0.5),
+                  ),
+                ),
+              ),
+            )
+          : IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(
+                Icons.close,
                 color: Theme.of(context).colorScheme.iconColor.withOpacity(0.5),
               ),
             ),
-          ),
-        ),
-      );
-    } else {
-      controller.forward();
-      return FadeTransition(
-        opacity: animation,
-        child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.close,
-            color: Theme.of(context).colorScheme.iconColor.withOpacity(0.5),
-          ),
-        ),
-      );
-    }
+    );
   }
 }
