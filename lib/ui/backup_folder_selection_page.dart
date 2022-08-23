@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorderable_list.dart';
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -172,14 +173,17 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         ? null
                         : () async {
                             Map<String, bool> syncStatus = {};
-                            _allDevicePathIDs.forEach((element) {
-                              syncStatus[element] =
-                                  _selectedDevicePathIDs.contains(element);
-                            });
+                            for (String pathID in _allDevicePathIDs) {
+                              syncStatus[pathID] =
+                                  _selectedDevicePathIDs.contains(pathID);
+                            }
                             await FilesDB.instance
                                 .updateDevicePathSyncStatus(syncStatus);
-                            // await Configuration.instance
-                            //     .setPathsToBackUp(_selectedDevicePathIDs);
+                            await Configuration.instance
+                                .setSelectAllFoldersForBackup(
+                              _allDevicePathIDs.length ==
+                                  _selectedDevicePathIDs.length,
+                            );
                             Bus.instance.fire(BackupFoldersUpdatedEvent());
                             Navigator.of(context).pop();
                           },

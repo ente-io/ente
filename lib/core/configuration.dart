@@ -395,7 +395,7 @@ class Configuration {
     final allFolders = (await FilesDB.instance.getLatestLocalFiles())
         .map((file) => file.deviceFolder)
         .toList();
-    await _setSelectAllFoldersForBackup(newPaths.length == allFolders.length);
+    await setSelectAllFoldersForBackup(newPaths.length == allFolders.length);
     SyncService.instance.onFoldersSet(newPaths);
     SyncService.instance.sync();
   }
@@ -572,7 +572,7 @@ class Configuration {
     return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
   }
 
-  Future<void> _setSelectAllFoldersForBackup(bool value) async {
+  Future<void> setSelectAllFoldersForBackup(bool value) async {
     await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
   }
 
