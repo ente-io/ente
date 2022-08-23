@@ -8,10 +8,13 @@ import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
@@ -29,8 +32,10 @@ import 'package:photos/utils/toast_util.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
+  final DevicePathCollection devicePathCollection;
 
-  const SharingDialog(this.collection, {Key key}) : super(key: key);
+  const SharingDialog(this.collection, {Key key, this.devicePathCollection})
+      : super(key: key);
 
   @override
   State<SharingDialog> createState() => _SharingDialogState();
@@ -122,13 +127,11 @@ class _SharingDialogState extends State<SharingDialog> {
                     // Add local folder in backup patch before creating
                     // sharable link
                     if (widget.collection.type == CollectionType.folder) {
-                      final path = CollectionsService.instance
-                          .decryptCollectionPath(widget.collection);
-                      if (!Configuration.instance
-                          .getPathsToBackUp()
-                          .contains(path)) {
-                        await Configuration.instance
-                            .addPathToFoldersToBeBackedUp(path);
+                      if (widget.devicePathCollection != null &&
+                          !widget.devicePathCollection.sync) {
+                        await FilesDB.instance.updateDevicePathSyncStatus(
+                          {widget.devicePathCollection.id: true},
+                        );
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                       }
                     }
@@ -409,10 +412,12 @@ class _SharingDialogState extends State<SharingDialog> {
       final collection = widget.collection;
       try {
         if (collection.type == CollectionType.folder) {
-          final path =
-              CollectionsService.instance.decryptCollectionPath(collection);
-          if (!Configuration.instance.getPathsToBackUp().contains(path)) {
-            await Configuration.instance.addPathToFoldersToBeBackedUp(path);
+          if (widget.devicePathCollection != null &&
+              !widget.devicePathCollection.sync) {
+            await FilesDB.instance.updateDevicePathSyncStatus(
+              {widget.devicePathCollection.id: true},
+            );
+            Bus.instance.fire(BackupFoldersUpdatedEvent());
           }
         }
         await CollectionsService.instance

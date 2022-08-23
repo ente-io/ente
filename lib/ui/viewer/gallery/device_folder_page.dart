@@ -51,7 +51,7 @@ class DeviceFolderPage extends StatelessWidget {
           GalleryType.localFolder,
           devicePathCollection.name,
           _selectedFiles,
-          path: devicePathCollection.thumbnail.deviceFolder,
+          devicePathCollection: devicePathCollection,
         ),
       ),
       body: Stack(

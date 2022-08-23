@@ -400,12 +400,6 @@ class Configuration {
     SyncService.instance.sync();
   }
 
-  Future<void> addPathToFoldersToBeBackedUp(String path) async {
-    final currentPaths = getPathsToBackUp();
-    currentPaths.add(path);
-    return setPathsToBackUp(currentPaths);
-  }
-
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
     await _preferences.setString(keyAttributesKey, attributes?.toJson());
   }

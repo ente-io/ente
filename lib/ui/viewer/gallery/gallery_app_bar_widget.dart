@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
@@ -19,7 +20,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   final GalleryType type;
   final String title;
   final SelectedFiles selectedFiles;
-  final String path;
+  final DevicePathCollection devicePathCollection;
   final Collection collection;
 
   const GalleryAppBarWidget(
@@ -27,7 +28,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.title,
     this.selectedFiles, {
     Key key,
-    this.path,
+    this.devicePathCollection,
     this.collection,
   }) : super(key: key);
 
@@ -200,8 +201,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     try {
       if (collection == null) {
         if (widget.type == GalleryType.localFolder) {
-          collection =
-              await CollectionsService.instance.getOrCreateForPath(widget.path);
+          collection = await CollectionsService.instance
+              .getOrCreateForPath(widget.devicePathCollection.name);
         } else {
           throw Exception(
             "Cannot create a collection of type" + widget.type.toString(),
@@ -216,7 +217,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
-          return SharingDialog(collection);
+          return SharingDialog(
+            collection,
+            devicePathCollection: widget.devicePathCollection,
+          );
         },
       );
     } catch (e, s) {
