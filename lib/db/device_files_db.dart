@@ -10,6 +10,8 @@ import 'package:tuple/tuple.dart';
 
 extension DeviceFiles on FilesDB {
   static final Logger _logger = Logger("DeviceFilesDB");
+  static const _sqlBoolTrue = 1;
+  static const _sqlBoolFalse = 0;
 
   Future<void> insertDeviceFiles(
     List<File> files, {
@@ -165,8 +167,9 @@ extension DeviceFiles on FilesDB {
 
   // todo: covert it to batch
   Future<void> insertOrUpdatePathName(
-    List<AssetPathEntity> pathEntities,
-  ) async {
+    List<AssetPathEntity> pathEntities, {
+    bool autoSync = false,
+  }) async {
     try {
       final Set<String> existingPathIds = await getDevicePathIDs();
       final Database db = await database;
@@ -183,6 +186,7 @@ extension DeviceFiles on FilesDB {
             {
               "id": pathEntity.id,
               "name": pathEntity.name,
+              "sync": autoSync ? _sqlBoolTrue : _sqlBoolFalse
             },
           );
         }
@@ -194,8 +198,9 @@ extension DeviceFiles on FilesDB {
   }
 
   Future<bool> updateDeviceCoverWithCount(
-    List<Tuple2<AssetPathEntity, File>> devicePathInfo,
-  ) async {
+    List<Tuple2<AssetPathEntity, File>> devicePathInfo, {
+    bool autoSync = false,
+  }) async {
     bool hasUpdated = false;
     try {
       final Database db = await database;
@@ -219,6 +224,7 @@ extension DeviceFiles on FilesDB {
               "name": pathEntity.name,
               "count": pathEntity.assetCount,
               "cover_id": localID,
+              "sync": autoSync ? _sqlBoolTrue : _sqlBoolFalse
             },
           );
         }
@@ -246,6 +252,30 @@ extension DeviceFiles on FilesDB {
       _logger.severe("failed to save path names", e);
       rethrow;
     }
+  }
+
+  Future<void> updateDevicePathSyncStatus(Map<String, bool> syncStatus) async {
+    final db = await database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (MapEntry e in syncStatus.entries) {
+      String pathID = e.key;
+      if (batchCounter == 400) {
+        await batch.commit(noResult: true);
+        batch = db.batch();
+        batchCounter = 0;
+      }
+      batch.update(
+        "device_path_collections",
+        {
+          "sync": e.value ? _sqlBoolTrue : _sqlBoolFalse,
+        },
+        where: 'id = ?',
+        whereArgs: [pathID],
+      );
+      batchCounter++;
+    }
+    await batch.commit(noResult: true);
   }
 
   Future<FileLoadResult> getFilesInDevicePathCollection(
@@ -292,6 +322,7 @@ extension DeviceFiles on FilesDB {
           count: row['count'],
           collectionID: row["collection_id"],
           coverId: row["cover_id"],
+          sync: (row["sync"] ?? _sqlBoolFalse) == _sqlBoolTrue,
         );
         devicePathCollection.thumbnail = files.firstWhere(
           (element) => element.localID == devicePathCollection.coverId,

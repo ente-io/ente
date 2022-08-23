@@ -133,7 +133,10 @@ class LocalSyncService {
   Future<bool> refreshDeviceFolderCountAndCover() async {
     List<Tuple2<AssetPathEntity, File>> result =
         await getDeviceFolderWithCountAndCoverFile();
-    return await _db.updateDeviceCoverWithCount(result);
+    return await _db.updateDeviceCoverWithCount(
+      result,
+      autoSync: Configuration.instance.hasSelectedAllFoldersForBackup(),
+    );
   }
 
   Future<bool> syncAll() async {
@@ -164,7 +167,8 @@ class LocalSyncService {
       await _db.insertPathIDToLocalIDMapping(unsyncedFiles.newPathToLocalIDs);
     }
     if (unsyncedFiles.deletePathToLocalIDs.isNotEmpty) {
-      _db.deletePathIDToLocalIDMapping(unsyncedFiles.deletePathToLocalIDs);
+      await _db
+          .deletePathIDToLocalIDMapping(unsyncedFiles.deletePathToLocalIDs);
     }
     if (unsyncedFiles.uniqueLocalFiles.isNotEmpty) {
       await _db.insertMultiple(unsyncedFiles.uniqueLocalFiles);
@@ -173,9 +177,8 @@ class LocalSyncService {
             unsyncedFiles.uniqueLocalFiles.toString() +
             " unsynced files.",
       );
-      // todo: review
-      // _updatePathsToBackup(unsyncedFiles);
-      // Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
+
       return true;
     }
     return false;
@@ -274,21 +277,43 @@ class LocalSyncService {
     final deviceFiles = await getDeviceFiles(fromTime, toTime, _computer);
     final List<File> files = deviceFiles.item2;
     unawaited(FilesDB.instance.insertDeviceFiles(files));
-    unawaited(FilesDB.instance.insertOrUpdatePathName(deviceFiles.item1));
+    unawaited(
+      FilesDB.instance.insertOrUpdatePathName(
+        deviceFiles.item1,
+        autoSync: Configuration.instance.hasSelectedAllFoldersForBackup(),
+      ),
+    );
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
-      final updatedFiles = files
-          .where((file) => existingLocalFileIDs.contains(file.localID))
-          .toList();
-      updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
-      updatedFiles
-          .removeWhere((file) => downloadedFileIDs.contains(file.localID));
-      if (updatedFiles.isNotEmpty) {
-        _logger.info(
-          updatedFiles.length.toString() + " local files were updated.",
-        );
-      }
+      await _trackUpdatedFiles(
+          files, existingLocalFileIDs, editedFileIDs, downloadedFileIDs);
+      final List<File> allFiles = [];
+      allFiles.addAll(files);
+      files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
+      await _db.insertMultiple(files);
+      _logger.info("Inserted " + files.length.toString() + " files.");
+      // _updatePathsToBackup(files);
+      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
+    }
+    await _prefs.setInt(kDbUpdationTimeKey, toTime);
+  }
 
+  Future<void> _trackUpdatedFiles(
+    List<File> files,
+    Set<String> existingLocalFileIDs,
+    Set<String> editedFileIDs,
+    Set<String> downloadedFileIDs,
+  ) async {
+    final updatedFiles = files
+        .where((file) => existingLocalFileIDs.contains(file.localID))
+        .toList();
+    updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
+    updatedFiles
+        .removeWhere((file) => downloadedFileIDs.contains(file.localID));
+    if (updatedFiles.isNotEmpty) {
+      _logger.info(
+        updatedFiles.length.toString() + " local files were updated.",
+      );
       List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
         if (file.localID != null) {
@@ -299,23 +324,6 @@ class LocalSyncService {
         updatedLocalIDs,
         FilesMigrationDB.modificationTimeUpdated,
       );
-      final List<File> allFiles = [];
-      allFiles.addAll(files);
-      files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
-      await _db.insertMultiple(files);
-      _logger.info("Inserted " + files.length.toString() + " files.");
-      _updatePathsToBackup(files);
-      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
-    }
-    await _prefs.setInt(kDbUpdationTimeKey, toTime);
-  }
-
-  void _updatePathsToBackup(List<File> files) {
-    if (Configuration.instance.hasSelectedAllFoldersForBackup()) {
-      final pathsToBackup = Configuration.instance.getPathsToBackUp();
-      final newFilePaths = files.map((file) => file.deviceFolder).toList();
-      pathsToBackup.addAll(newFilePaths);
-      Configuration.instance.setPathsToBackUp(pathsToBackup);
     }
   }
 

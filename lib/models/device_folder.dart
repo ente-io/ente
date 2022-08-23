@@ -18,6 +18,7 @@ class DevicePathCollection {
   final String path;
   final String coverId;
   final int count;
+  final bool sync;
   final int collectionID;
   File thumbnail;
 
@@ -29,5 +30,6 @@ class DevicePathCollection {
     this.count,
     this.collectionID,
     this.thumbnail,
+    this.sync = false,
   });
 }
