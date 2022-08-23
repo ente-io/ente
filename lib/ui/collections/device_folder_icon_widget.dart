@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class DeviceFolderIcon extends StatelessWidget {
+  final DevicePathCollection devicePathCollection;
   const DeviceFolderIcon(
     this.devicePathCollection, {
     Key key,
@@ -36,13 +36,9 @@ class DeviceFolderIcon extends StatelessWidget {
     ),
   );
 
-  final DevicePathCollection devicePathCollection;
-
   @override
   Widget build(BuildContext context) {
-    final isBackedUp = Configuration.instance
-        .getPathsToBackUp()
-        .contains(devicePathCollection.name);
+    final isBackedUp = devicePathCollection.sync;
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
