@@ -74,12 +74,12 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     const closeChoiceModal = () => setChoiceModalOpen(false);
 
     const uploadToSingleCollection = () => {
-        setChoiceModalOpen(false);
+        closeChoiceModal();
         handleAddWatchMapping(UPLOAD_STRATEGY.SINGLE_COLLECTION);
     };
 
     const uploadToMultipleCollection = () => {
-        setChoiceModalOpen(false);
+        closeChoiceModal();
         handleAddWatchMapping(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
     };
 
@@ -105,7 +105,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
                             fullWidth
                             color="accent"
                             onClick={handleAddFolderClick}>
-                            +
+                            <span>+</span>
                             <span
                                 style={{
                                     marginLeft: '8px',
