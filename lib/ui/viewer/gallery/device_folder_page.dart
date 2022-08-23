@@ -68,14 +68,15 @@ class DeviceFolderPage extends StatelessWidget {
   }
 
   Widget _getHeaderWidget() {
-    return BackupConfigurationHeaderWidget(devicePathCollection.name);
+    return BackupConfigurationHeaderWidget(devicePathCollection);
   }
 }
 
 class BackupConfigurationHeaderWidget extends StatefulWidget {
-  final String path;
+  final DevicePathCollection devicePathCollection;
 
-  const BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
+  const BackupConfigurationHeaderWidget(this.devicePathCollection, {Key key})
+      : super(key: key);
 
   @override
   State<BackupConfigurationHeaderWidget> createState() =>
@@ -86,8 +87,7 @@ class _BackupConfigurationHeaderWidgetState
     extends State<BackupConfigurationHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(widget.path);
+    final isBackedUp = widget.devicePathCollection.sync;
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
       margin: const EdgeInsets.only(bottom: 12),
@@ -109,13 +109,9 @@ class _BackupConfigurationHeaderWidgetState
           Switch(
             value: isBackedUp,
             onChanged: (value) async {
-              final current = Configuration.instance.getPathsToBackUp();
-              if (value) {
-                current.add(widget.path);
-              } else {
-                current.remove(widget.path);
-              }
-              await Configuration.instance.setPathsToBackUp(current);
+              await FilesDB.instance.updateDevicePathSyncStatus(
+                {widget.devicePathCollection.id: value},
+              );
               setState(() {});
               Bus.instance.fire(BackupFoldersUpdatedEvent());
             },
