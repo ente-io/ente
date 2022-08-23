@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
@@ -14,17 +15,17 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
 class DeviceFolderPage extends StatelessWidget {
-  final DeviceFolder folder;
+  final DevicePathCollection devicePathCollection;
   final _selectedFiles = SelectedFiles();
 
-  DeviceFolderPage(this.folder, {Key key}) : super(key: key);
+  DeviceFolderPage(this.devicePathCollection, {Key key}) : super(key: key);
 
   @override
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInPath(
-          folder.path,
+        return FilesDB.instance.getFilesInDevicePathCollection(
+          devicePathCollection,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -36,21 +37,21 @@ class DeviceFolderPage extends StatelessWidget {
         EventType.deletedFromDevice,
         EventType.deletedFromEverywhere,
       },
-      tagPrefix: "device_folder:" + folder.path,
+      tagPrefix: "device_folder:" + devicePathCollection.name,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
           ? _getHeaderWidget()
           : Container(),
-      initialFiles: [folder.thumbnail],
+      initialFiles: [devicePathCollection.thumbnail],
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           GalleryType.localFolder,
-          folder.name,
+          devicePathCollection.name,
           _selectedFiles,
-          path: folder.thumbnail.deviceFolder,
+          path: devicePathCollection.thumbnail.deviceFolder,
         ),
       ),
       body: Stack(
@@ -67,7 +68,7 @@ class DeviceFolderPage extends StatelessWidget {
   }
 
   Widget _getHeaderWidget() {
-    return BackupConfigurationHeaderWidget(folder.path);
+    return BackupConfigurationHeaderWidget(devicePathCollection.name);
   }
 }
 

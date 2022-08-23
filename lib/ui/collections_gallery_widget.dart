@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -91,6 +92,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
     final List<DeviceFolder> folders = [];
+    final List<DevicePathCollection> devicePathCollections =
+        await filesDB.getDevicePathCollections();
     final latestLocalFiles = await filesDB.getLatestLocalFiles();
     for (final file in latestLocalFiles) {
       folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));
@@ -123,7 +126,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         }
       },
     );
-    return CollectionItems(folders, collectionsWithThumbnail);
+    return CollectionItems(devicePathCollections, collectionsWithThumbnail);
   }
 
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
@@ -157,12 +160,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               ],
             ),
             const SizedBox(height: 12),
-            items.folders.isEmpty
+            items.devicePathCollections.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.all(22),
                     child: EmptyState(),
                   )
-                : DeviceFoldersGridViewWidget(items.folders),
+                : DeviceFoldersGridViewWidget(items.devicePathCollections),
             const Padding(padding: EdgeInsets.all(4)),
             const Divider(),
             Row(

@@ -4,10 +4,10 @@ import 'package:photos/ui/collections/device_folder_icon_widget.dart';
 import 'package:photos/ui/viewer/gallery/empte_state.dart';
 
 class DeviceFoldersGridViewWidget extends StatelessWidget {
-  final List<DeviceFolder> folders;
+  final List<DevicePathCollection> devicePathCollections;
 
   const DeviceFoldersGridViewWidget(
-    this.folders, {
+    this.devicePathCollections, {
     Key key,
   }) : super(key: key);
 
@@ -19,7 +19,7 @@ class DeviceFoldersGridViewWidget extends StatelessWidget {
         height: 170,
         child: Align(
           alignment: Alignment.centerLeft,
-          child: folders.isEmpty
+          child: devicePathCollections.isEmpty
               ? const EmptyState()
               : ListView.builder(
                   shrinkWrap: true,
@@ -28,9 +28,10 @@ class DeviceFoldersGridViewWidget extends StatelessWidget {
                   physics: const ScrollPhysics(),
                   // to disable GridView's scrolling
                   itemBuilder: (context, index) {
-                    return DeviceFolderIcon(folders[index]);
+                    final devicePath = devicePathCollections[index];
+                    return DeviceFolderIcon(devicePath);
                   },
-                  itemCount: folders.length,
+                  itemCount: devicePathCollections.length,
                 ),
         ),
       ),

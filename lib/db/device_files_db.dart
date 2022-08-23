@@ -4,6 +4,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 extension DeviceFiles on FilesDB {
@@ -126,6 +127,30 @@ extension DeviceFiles on FilesDB {
       _logger.severe("failed to save path names", e);
       rethrow;
     }
+  }
+
+  Future<FileLoadResult> getFilesInDevicePathCollection(
+    DevicePathCollection devicePathCollection,
+    int startTime,
+    int endTime, {
+    int limit,
+    bool asc,
+  }) async {
+    final db = await database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    String rawQuery = '''
+    SELECT *
+          FROM ${FilesDB.filesTable}
+          WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
+          ${FilesDB.columnCreationTime} >= $startTime AND 
+          ${FilesDB.columnCreationTime} <= $endTime AND 
+          ${FilesDB.columnLocalID} IN 
+          (SELECT id FROM device_files where path_id = '${devicePathCollection.id}' ) 
+          ORDER BY ${FilesDB.columnCreationTime} $order , ${FilesDB.columnModificationTime} $order LIMIT $limit
+         ''';
+    final results = await db.rawQuery(rawQuery);
+    final files = convertToFiles(results);
+    return FileLoadResult(files, files.length == limit);
   }
 
   Future<List<DevicePathCollection>> getDevicePathCollections() async {
