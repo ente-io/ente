@@ -60,12 +60,26 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               AnimatedOpacity(
                 opacity: _showStatus ? 0 : 1,
                 duration: const Duration(milliseconds: 1000),
-                child: const TopBarWidget(),
+                child: const BrandingWidget(),
               ),
               AnimatedOpacity(
                 opacity: _showStatus ? 1 : 0,
                 duration: const Duration(milliseconds: 1000),
                 child: const SyncStatusWidget(),
+              ),
+              Positioned(
+                right: 0,
+                top: 0,
+                bottom: 0,
+                child: FeatureFlagService.instance.enableSearchFeature()
+                    ? Container(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .defaultBackgroundColor,
+                        height: kContainerHeight,
+                        child: const SearchIconWidget(),
+                      )
+                    : const SizedBox.shrink(),
               ),
             ],
           ),
@@ -118,7 +132,7 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
         (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
             kSleepDuration.inMicroseconds);
     if (_event == null || isNotOutdatedEvent) {
-      return Container();
+      return const SizedBox.shrink();
     }
     if (_event.status == SyncStatus.error) {
       return HeaderErrorWidget(error: _event.error);
@@ -206,13 +220,12 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 }
 
-class TopBarWidget extends StatelessWidget {
-  const TopBarWidget({Key key}) : super(key: key);
+class BrandingWidget extends StatelessWidget {
+  const BrandingWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           height: kContainerHeight,
@@ -230,12 +243,6 @@ class TopBarWidget extends StatelessWidget {
             ),
           ),
         ),
-        FeatureFlagService.instance.enableSearchFeature()
-            ? const SizedBox(
-                height: kContainerHeight,
-                child: SearchIconWidget(),
-              )
-            : const SizedBox.shrink()
       ],
     );
   }
@@ -246,7 +253,8 @@ class SyncStatusCompletedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      color: Theme.of(context).colorScheme.defaultBackgroundColor,
       height: kContainerHeight,
       child: Align(
         alignment: Alignment.center,
