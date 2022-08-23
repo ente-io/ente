@@ -43,7 +43,7 @@ class NoResultWidget extends StatelessWidget {
               child: Text(
                 "You can try searching for a different query.",
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Theme.of(context)
                       .colorScheme
                       .defaultTextColor
@@ -60,7 +60,7 @@ class NoResultWidget extends StatelessWidget {
 \u2022 Holidays (e.g. "Christmas")
 \u2022 Album names (e.g. "Recents")''',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 14,
                   color: Theme.of(context)
                       .colorScheme
                       .defaultTextColor

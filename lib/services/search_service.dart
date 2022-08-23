@@ -176,16 +176,17 @@ class SearchService {
 
     for (var holiday in allHolidays) {
       if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
-        holidaySearchResults.add(
-          HolidaySearchResult(
-            holiday.name,
+        final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
-              _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
-              null,
-              order: 'DESC',
-            ),
-          ),
+          _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
+          null,
+          order: 'DESC',
         );
+        if (matchedFiles.isNotEmpty) {
+          holidaySearchResults.add(
+            HolidaySearchResult(holiday.name, matchedFiles),
+          );
+        }
       }
     }
     return holidaySearchResults;
@@ -197,16 +198,20 @@ class SearchService {
 
     for (var month in allMonths) {
       if (month.name.startsWith(nonCaseSensitiveRegexForQuery)) {
-        monthSearchResults.add(
-          MonthSearchResult(
-            month.name,
+        final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
-              _getDurationsOfMonthInEveryYear(month.monthNumber),
-              null,
-              order: 'DESC',
-            ),
-          ),
+          _getDurationsOfMonthInEveryYear(month.monthNumber),
+          null,
+          order: 'DESC',
         );
+        if (matchedFiles.isNotEmpty) {
+          monthSearchResults.add(
+            MonthSearchResult(
+              month.name,
+              matchedFiles,
+            ),
+          );
+        }
       }
     }
 

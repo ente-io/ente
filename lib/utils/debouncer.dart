@@ -26,9 +26,7 @@ class Debouncer {
     }
   }
 
-  bool isActive() {
-    return _debounceTimer != null && _debounceTimer.isActive;
-  }
+  bool isActive() => _debounceTimer != null && _debounceTimer.isActive;
 
   ValueNotifier<bool> get debounceActiveNotifier {
     return _debounceActiveNotifier;

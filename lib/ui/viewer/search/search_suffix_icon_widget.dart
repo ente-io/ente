@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class SearchSuffixIcon extends StatefulWidget {
-  final bool isDebouncing;
-  const SearchSuffixIcon(this.isDebouncing, {Key key}) : super(key: key);
+  final bool shouldShowSpinner;
+  const SearchSuffixIcon(this.shouldShowSpinner, {Key key}) : super(key: key);
 
   @override
   State<SearchSuffixIcon> createState() => _SearchSuffixIconState();
@@ -15,7 +15,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 175),
-      child: widget.isDebouncing
+      child: widget.shouldShowSpinner
           ? Padding(
               padding: const EdgeInsets.all(12),
               child: SizedBox(
