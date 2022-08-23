@@ -67,7 +67,6 @@ class LocalSyncService {
         return;
       }
     }
-    refreshDeviceFolderCovers();
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
       return _existingSync.future;
@@ -119,7 +118,7 @@ class LocalSyncService {
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
-      await refreshDeviceFolderCovers();
+      await refreshDeviceFolderCountAndCover();
       _logger.fine("first gallery import finished");
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
@@ -131,13 +130,10 @@ class LocalSyncService {
     _existingSync = null;
   }
 
-  Future<void> refreshDeviceFolderCovers() async {
+  Future<void> refreshDeviceFolderCountAndCover() async {
     List<Tuple2<AssetPathEntity, File>> result =
-        await getDeviceFolderWithCountAndLatestFile();
-    for (Tuple2<AssetPathEntity, File> tup in result) {
-      await FilesDB.instance
-          .updateDeviceCoverWithCount(tup.item1, tup.item2.localID);
-    }
+        await getDeviceFolderWithCountAndCoverFile();
+    await _db.updateDeviceCoverWithCount(result);
   }
 
   Future<bool> syncAll() async {
@@ -152,8 +148,10 @@ class LocalSyncService {
           d.inMilliseconds.toString() +
           "ms",
     );
-    await refreshDeviceFolderCovers();
+    await refreshDeviceFolderCountAndCover();
     final existingIDs = await _db.getExistingLocalFileIDs();
+    final Map<String, Set<String>> pathToLocalIDs =
+        await _db.getDevicePathIDToLocalIDMap();
     final invalidIDs = _getInvalidFileIDs().toSet();
     final unsyncedFiles =
         await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);

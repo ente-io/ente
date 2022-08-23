@@ -6,11 +6,15 @@ import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:sqflite/sqlite_api.dart';
+import 'package:tuple/tuple.dart';
 
 extension DeviceFiles on FilesDB {
   static final Logger _logger = Logger("DeviceFilesDB");
 
-  Future<void> insertDeviceFiles(List<File> files) async {
+  Future<void> insertDeviceFiles(
+    List<File> files, {
+    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
+  }) async {
     final startTime = DateTime.now();
     final db = await database;
     var batch = db.batch();
@@ -34,7 +38,7 @@ extension DeviceFiles on FilesDB {
           "id": file.localID,
           "path_id": file.devicePathID,
         },
-        conflictAlgorithm: ConflictAlgorithm.ignore,
+        conflictAlgorithm: conflictAlgorithm,
       );
       batchCounter++;
     }
@@ -83,6 +87,7 @@ extension DeviceFiles on FilesDB {
     return result;
   }
 
+  // todo: covert it to batch
   Future<void> insertOrUpdatePathName(
     List<AssetPathEntity> pathEntities,
   ) async {
@@ -113,16 +118,32 @@ extension DeviceFiles on FilesDB {
   }
 
   Future<int> updateDeviceCoverWithCount(
-    AssetPathEntity pathEntity,
-    String localID,
+    List<Tuple2<AssetPathEntity, File>> devicePathInfo,
   ) async {
     try {
       final Database db = await database;
-      return db.rawUpdate(
-        "UPDATE device_path_collections SET name = ?, cover_id = ?, count"
-        " = ? where id = ?",
-        [pathEntity.name, localID, pathEntity.assetCount, pathEntity.id],
-      );
+      final Set<String> existingPathIds = await getDevicePathIDs();
+      for (Tuple2<AssetPathEntity, File> tup in devicePathInfo) {
+        AssetPathEntity pathEntity = tup.item1;
+        String localID = tup.item2.localID;
+        if (existingPathIds.contains(pathEntity.id)) {
+          await db.rawUpdate(
+            "UPDATE device_path_collections SET name = ?, cover_id = ?, count"
+            " = ? where id = ?",
+            [pathEntity.name, localID, pathEntity.assetCount, pathEntity.id],
+          );
+        } else {
+          await db.insert(
+            "device_path_collections",
+            {
+              "id": pathEntity.id,
+              "name": pathEntity.name,
+              "count": pathEntity.assetCount,
+              "cover_id": localID,
+            },
+          );
+        }
+      }
     } catch (e) {
       _logger.severe("failed to save path names", e);
       rethrow;
@@ -163,8 +184,7 @@ extension DeviceFiles on FilesDB {
       );
       final files = convertToFiles(fileRows);
       final devicePathRows = await db.rawQuery(
-        '''SELECT * from 
-    device_path_collections''',
+        '''SELECT * from device_path_collections''',
       );
       final List<DevicePathCollection> deviceCollections = [];
       for (var row in devicePathRows) {

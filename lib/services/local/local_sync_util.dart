@@ -32,12 +32,12 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
 }
 
 // getDeviceFolderWithCountAndLatestFile returns a tuple of AssetPathEntity and
-// latest file in the assetPath, along with modifiedAt time and total counts
+// latest file in the assetPath, along with modifiedPath time and total counts
 // of assets in a Asset Path. We use this result to update the latest thumbnail
-// for any collection and also identify which AssetPath needs to be resynced
+// for any collection and also identify which AssetPath needs to be re-synced
 // again.
 Future<List<Tuple2<AssetPathEntity, File>>>
-    getDeviceFolderWithCountAndLatestFile() async {
+    getDeviceFolderWithCountAndCoverFile() async {
   List<Tuple2<AssetPathEntity, File>> result = [];
   final pathEntities = await _getGalleryList(
     needsTitle: false,
@@ -46,6 +46,7 @@ Future<List<Tuple2<AssetPathEntity, File>>>
         const OrderOption(type: OrderOptionType.createDate, asc: false),
   );
   for (AssetPathEntity pathEntity in pathEntities) {
+    //todo: test and handle empty album case
     var latestEntity = await pathEntity.getAssetListPaged(
       page: 0,
       size: 1,
