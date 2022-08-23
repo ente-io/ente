@@ -95,26 +95,32 @@ export function buildContextMenu(
 export function buildMenuBar(): Menu {
     const template: MenuItemConstructorOptions[] = [
         {
-            label: app.name,
+            label: 'ente',
             submenu: [
                 ...((isMac
                     ? [
                           {
-                              label: 'About',
+                              label: 'About ente',
                               role: 'about',
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
+                ...((isMac
+                    ? [
+                          {
+                              label: 'Hide ente',
+                              role: 'hide',
+                          },
+                          {
+                              label: 'Hide others',
+                              role: 'hideOthers',
+                          },
+                      ]
+                    : []) as MenuItemConstructorOptions[]),
+
+                { type: 'separator' },
                 {
-                    label: 'FAQ',
-                    click: () => shell.openExternal('https://ente.io/faq/'),
-                },
-                {
-                    label: 'Support',
-                    click: () => shell.openExternal('mailto:support@ente.io'),
-                },
-                {
-                    label: 'Quit',
+                    label: 'Quit ente',
                     accelerator: 'CommandOrControl+Q',
                     click() {
                         setIsAppQuitting(true);
@@ -161,14 +167,9 @@ export function buildMenuBar(): Menu {
                       ]) as MenuItemConstructorOptions[]),
             ],
         },
-        // { role: 'viewMenu' }
         {
             label: 'View',
             submenu: [
-                { role: 'reload', label: 'Reload' },
-                { role: 'forceReload', label: 'Force reload' },
-                { role: 'toggleDevTools', label: 'Toggle dev tools' },
-                { type: 'separator' },
                 { role: 'resetZoom', label: 'Reset zoom' },
                 { role: 'zoomIn', label: 'Zoom in' },
                 { role: 'zoomOut', label: 'Zoom out' },
@@ -176,7 +177,6 @@ export function buildMenuBar(): Menu {
                 { role: 'togglefullscreen', label: 'Toggle fullscreen' },
             ],
         },
-        // { role: 'windowMenu' }
         {
             label: 'Window',
             submenu: [
@@ -184,13 +184,31 @@ export function buildMenuBar(): Menu {
                 ...((isMac
                     ? [
                           { type: 'separator' },
-                          { role: 'front', label: 'Front' },
+                          { role: 'front', label: 'Bring to front' },
                           { type: 'separator' },
-                          { role: 'window', label: 'Window' },
+                          { role: 'window', label: 'ente' },
                       ]
                     : [
-                          { role: 'close', label: 'Close' },
+                          { role: 'close', label: 'Close ente' },
                       ]) as MenuItemConstructorOptions[]),
+            ],
+        },
+        {
+            label: 'Help',
+            submenu: [
+                {
+                    label: 'FAQ',
+                    click: () => shell.openExternal('https://ente.io/faq/'),
+                },
+                { type: 'separator' },
+                {
+                    label: 'Support',
+                    click: () => shell.openExternal('mailto:support@ente.io'),
+                },
+                {
+                    label: 'Product updates',
+                    click: () => shell.openExternal('https://ente.io/blog/'),
+                },
             ],
         },
     ];
