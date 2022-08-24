@@ -32,13 +32,13 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
 }
 
 // getDeviceFolderWithCountAndLatestFile returns a tuple of AssetPathEntity and
-// latest file in the assetPath, along with modifiedPath time and total counts
-// of assets in a Asset Path. We use this result to update the latest thumbnail
-// for any collection and also identify which AssetPath needs to be re-synced
-// again.
-Future<List<Tuple2<AssetPathEntity, File>>>
-    getDeviceFolderWithCountAndCoverFile() async {
-  List<Tuple2<AssetPathEntity, File>> result = [];
+// latest file's localID in the assetPath, along with modifiedPath time and
+// total count of assets in a Asset Path.
+// We use this result to update the latest thumbnail for deviceFolder and
+// identify (in future) which AssetPath needs to be re-synced again.
+Future<List<Tuple2<AssetPathEntity, String>>>
+    getDeviceFolderWithCountAndCoverID() async {
+  List<Tuple2<AssetPathEntity, String>> result = [];
   final pathEntities = await _getGalleryList(
     needsTitle: false,
     containsModifiedPath: true,
@@ -51,12 +51,8 @@ Future<List<Tuple2<AssetPathEntity, File>>>
       page: 0,
       size: 1,
     );
-    final file = File.fromAsset(
-      pathEntity.name,
-      latestEntity.first,
-      devicePathID: pathEntity.id,
-    );
-    result.add(Tuple2(pathEntity, file));
+    String localCoverID = latestEntity.first.id;
+    result.add(Tuple2(pathEntity, localCoverID));
   }
   return result;
 }
@@ -129,9 +125,9 @@ LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
   final Map<String, Set<String>> removedPathToLocalIDs =
       <String, Set<String>>{};
   final List<LocalPathAsset> unsyncedAssets = [];
+
   for (final localPathAsset in localPathAssets) {
     String pathID = localPathAsset.pathID;
-
     // Start identifying pathID to localID mapping changes which needs to be
     // synced
     Set<String> existingPathToLocalIDs = pathToLocalIDs[pathID] ?? <String>{};

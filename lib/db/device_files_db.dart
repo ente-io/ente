@@ -198,16 +198,16 @@ extension DeviceFiles on FilesDB {
   }
 
   Future<bool> updateDeviceCoverWithCount(
-    List<Tuple2<AssetPathEntity, File>> devicePathInfo, {
+    List<Tuple2<AssetPathEntity, String>> devicePathInfo, {
     bool autoSync = false,
   }) async {
     bool hasUpdated = false;
     try {
       final Database db = await database;
       final Set<String> existingPathIds = await getDevicePathIDs();
-      for (Tuple2<AssetPathEntity, File> tup in devicePathInfo) {
+      for (Tuple2<AssetPathEntity, String> tup in devicePathInfo) {
         AssetPathEntity pathEntity = tup.item1;
-        String localID = tup.item2.localID;
+        String localID = tup.item2;
         bool shouldUpdate = existingPathIds.contains(pathEntity.id);
         if (shouldUpdate) {
           await db.rawUpdate(

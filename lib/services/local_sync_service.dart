@@ -132,8 +132,8 @@ class LocalSyncService {
   }
 
   Future<bool> refreshDeviceFolderCountAndCover() async {
-    List<Tuple2<AssetPathEntity, File>> result =
-        await getDeviceFolderWithCountAndCoverFile();
+    List<Tuple2<AssetPathEntity, String>> result =
+        await getDeviceFolderWithCountAndCoverID();
     return await _db.updateDeviceCoverWithCount(
       result,
       autoSync: Configuration.instance.hasSelectedAllFoldersForBackup(),
