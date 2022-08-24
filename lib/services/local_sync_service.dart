@@ -16,6 +16,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:tuple/tuple.dart';
 
 class LocalSyncService {
@@ -156,28 +157,32 @@ class LocalSyncService {
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
     final invalidIDs = _getInvalidFileIDs().toSet();
-    final unsyncedFiles = await getLocalUnsyncedFiles(
+    final localUnSyncResult = await getLocalUnsyncedFiles(
       localAssets,
       existingLocalFileIDs,
       pathToLocalIDs,
       invalidIDs,
       _computer,
     );
-    if (unsyncedFiles.newPathToLocalIDs.isNotEmpty) {
-      await _db.insertPathIDToLocalIDMapping(unsyncedFiles.newPathToLocalIDs);
-    }
-    if (unsyncedFiles.deletePathToLocalIDs.isNotEmpty) {
+    if (localUnSyncResult.newPathToLocalIDs.isNotEmpty) {
       await _db
-          .deletePathIDToLocalIDMapping(unsyncedFiles.deletePathToLocalIDs);
+          .insertPathIDToLocalIDMapping(localUnSyncResult.newPathToLocalIDs);
     }
-    if (unsyncedFiles.uniqueLocalFiles.isNotEmpty) {
-      await _db.insertMultiple(unsyncedFiles.uniqueLocalFiles);
-      _logger.info(
-        "Inserted " +
-            unsyncedFiles.uniqueLocalFiles.toString() +
-            " unsynced files.",
+    if (localUnSyncResult.deletePathToLocalIDs.isNotEmpty) {
+      await _db
+          .deletePathIDToLocalIDMapping(localUnSyncResult.deletePathToLocalIDs);
+    }
+    if (localUnSyncResult.uniqueLocalFiles.isNotEmpty) {
+      await _db.insertMultiple(
+        localUnSyncResult.uniqueLocalFiles,
+        conflictAlgorithm: ConflictAlgorithm.ignore,
       );
-      Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
+      _logger.info(
+        "Inserted ${localUnSyncResult.uniqueLocalFiles.length} "
+        "un-synced files",
+      );
+
+      Bus.instance.fire(LocalPhotosUpdatedEvent(localUnSyncResult));
 
       return true;
     }
@@ -286,11 +291,18 @@ class LocalSyncService {
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
       await _trackUpdatedFiles(
-          files, existingLocalFileIDs, editedFileIDs, downloadedFileIDs);
+        files,
+        existingLocalFileIDs,
+        editedFileIDs,
+        downloadedFileIDs,
+      );
       final List<File> allFiles = [];
       allFiles.addAll(files);
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
-      await _db.insertMultiple(files);
+      await _db.insertMultiple(
+        files,
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
       _logger.info("Inserted " + files.length.toString() + " files.");
       // _updatePathsToBackup(files);
       Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
