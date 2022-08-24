@@ -140,7 +140,7 @@ class HeaderErrorWidget extends StatelessWidget {
                 },
               ),
             ),
-            const Padding(padding: EdgeInsets.all(16)),
+            const Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );

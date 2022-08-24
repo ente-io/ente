@@ -61,48 +61,44 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 0),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              AnimatedOpacity(
-                opacity: _showStatus
-                    ? _showErrorBanner
-                        ? 1
-                        : 0
-                    : 1,
-                duration: const Duration(milliseconds: 1000),
-                child: const BrandingWidget(),
-              ),
-              AnimatedOpacity(
-                opacity: _showStatus ? 1 : 0,
-                duration: const Duration(milliseconds: 1000),
-                child: const SyncStatusWidget(),
-              ),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: FeatureFlagService.instance.enableSearchFeature()
-                    ? Container(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .defaultBackgroundColor,
-                        height: kContainerHeight,
-                        child: const SearchIconWidget(),
-                      )
-                    : const SizedBox(height: 36, width: 48),
-              ),
-            ],
-          ),
-          AnimatedOpacity(
-            opacity: _showStatus ? 1 : 0,
-            duration: const Duration(milliseconds: 1000),
-            child: const Divider(),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Stack(
+          children: [
+            AnimatedOpacity(
+              opacity: _showStatus
+                  ? _showErrorBanner
+                      ? 1
+                      : 0
+                  : 1,
+              duration: const Duration(milliseconds: 1000),
+              child: const BrandingWidget(),
+            ),
+            AnimatedOpacity(
+              opacity: _showStatus ? 1 : 0,
+              duration: const Duration(milliseconds: 1000),
+              child: const SyncStatusWidget(),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: FeatureFlagService.instance.enableSearchFeature()
+                  ? Container(
+                      color:
+                          Theme.of(context).colorScheme.defaultBackgroundColor,
+                      height: kContainerHeight,
+                      child: const SearchIconWidget(),
+                    )
+                  : const SizedBox(height: 36, width: 48),
+            ),
+          ],
+        ),
+        AnimatedOpacity(
+          opacity: _showStatus ? 1 : 0,
+          duration: const Duration(milliseconds: 1000),
+          child: const Divider(),
+        ),
+      ],
     );
   }
 }
