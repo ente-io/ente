@@ -75,7 +75,10 @@ class HeaderErrorWidget extends StatelessWidget {
               height: 52,
               padding: const EdgeInsets.fromLTRB(80, 0, 80, 0),
               child: OutlinedButton(
-                child: const Text("Upgrade"),
+                child: const Text(
+                  "Upgrade",
+                  style: TextStyle(height: 1.1),
+                ),
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
