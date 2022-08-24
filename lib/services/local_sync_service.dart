@@ -141,16 +141,10 @@ class LocalSyncService {
   }
 
   Future<bool> syncAll() async {
-    final sTime = DateTime.now().microsecondsSinceEpoch;
+    final stopwatch = Stopwatch()..start();
     final localAssets = await getAllLocalAssets();
-    final eTime = DateTime.now().microsecondsSinceEpoch;
-    final d = Duration(microseconds: eTime - sTime);
     _logger.info(
-      "Loading from the beginning returned " +
-          localAssets.length.toString() +
-          " assets and took " +
-          d.inMilliseconds.toString() +
-          "ms",
+      "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsed.inMilliseconds}ms ",
     );
     await refreshDeviceFolderCountAndCover();
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
@@ -181,12 +175,10 @@ class LocalSyncService {
         "Inserted ${localUnSyncResult.uniqueLocalFiles.length} "
         "un-synced files",
       );
-
       Bus.instance.fire(LocalPhotosUpdatedEvent(localUnSyncResult));
-
-      return true;
     }
-    return false;
+    _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
+    return localUnSyncResult.uniqueLocalFiles.isNotEmpty;
   }
 
   Future<void> trackEditedFile(File file) async {
