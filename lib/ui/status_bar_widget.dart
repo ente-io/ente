@@ -21,10 +21,20 @@ class StatusBarWidget extends StatefulWidget {
 class _StatusBarWidgetState extends State<StatusBarWidget> {
   StreamSubscription<SyncStatusUpdate> _subscription;
   bool _showStatus = false;
+  bool _showErrorBanner = false;
 
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      if (event.status == SyncStatus.error) {
+        setState(() {
+          _showErrorBanner = true;
+        });
+      } else {
+        setState(() {
+          _showErrorBanner = false;
+        });
+      }
       if (event.status == SyncStatus.completedFirstGalleryImport ||
           event.status == SyncStatus.completedBackup) {
         Future.delayed(const Duration(milliseconds: 2000), () {
@@ -51,31 +61,44 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 0),
-      child: Column(
-        children: [
-          Stack(
-            children: [
-              AnimatedOpacity(
-                opacity: _showStatus ? 0 : 1,
-                duration: const Duration(milliseconds: 1000),
-                child: const TopBarWidget(),
-              ),
-              AnimatedOpacity(
-                opacity: _showStatus ? 1 : 0,
-                duration: const Duration(milliseconds: 1000),
-                child: const SyncStatusWidget(),
-              ),
-            ],
-          ),
-          AnimatedOpacity(
-            opacity: _showStatus ? 1 : 0,
-            duration: const Duration(milliseconds: 1000),
-            child: const Divider(),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Stack(
+          children: [
+            AnimatedOpacity(
+              opacity: _showStatus
+                  ? _showErrorBanner
+                      ? 1
+                      : 0
+                  : 1,
+              duration: const Duration(milliseconds: 1000),
+              child: const BrandingWidget(),
+            ),
+            AnimatedOpacity(
+              opacity: _showStatus ? 1 : 0,
+              duration: const Duration(milliseconds: 1000),
+              child: const SyncStatusWidget(),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: FeatureFlagService.instance.enableSearchFeature()
+                  ? Container(
+                      color:
+                          Theme.of(context).colorScheme.defaultBackgroundColor,
+                      height: kContainerHeight,
+                      child: const SearchIconWidget(),
+                    )
+                  : const SizedBox(height: 36, width: 48),
+            ),
+          ],
+        ),
+        AnimatedOpacity(
+          opacity: _showStatus ? 1 : 0,
+          duration: const Duration(milliseconds: 1000),
+          child: const Divider(),
+        ),
+      ],
     );
   }
 }
@@ -118,10 +141,13 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
         (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
             kSleepDuration.inMicroseconds);
     if (_event == null || isNotOutdatedEvent) {
-      return Container();
+      return const SizedBox.shrink();
     }
     if (_event.status == SyncStatus.error) {
-      return HeaderErrorWidget(error: _event.error);
+      return Padding(
+        padding: const EdgeInsets.only(top: kContainerHeight + 8),
+        child: HeaderErrorWidget(error: _event.error),
+      );
     }
     if (_event.status == SyncStatus.completedBackup) {
       return const SyncStatusCompletedWidget();
@@ -206,13 +232,12 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 }
 
-class TopBarWidget extends StatelessWidget {
-  const TopBarWidget({Key key}) : super(key: key);
+class BrandingWidget extends StatelessWidget {
+  const BrandingWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           height: kContainerHeight,
@@ -230,12 +255,6 @@ class TopBarWidget extends StatelessWidget {
             ),
           ),
         ),
-        FeatureFlagService.instance.enableSearchFeature()
-            ? const SizedBox(
-                height: kContainerHeight,
-                child: SearchIconWidget(),
-              )
-            : const SizedBox.shrink()
       ],
     );
   }
@@ -246,7 +265,8 @@ class SyncStatusCompletedWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      color: Theme.of(context).colorScheme.defaultBackgroundColor,
       height: kContainerHeight,
       child: Align(
         alignment: Alignment.center,

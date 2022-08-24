@@ -49,11 +49,6 @@ class HeaderErrorWidget extends StatelessWidget {
               ),
             ),
             const Padding(padding: EdgeInsets.all(12)),
-            const Divider(
-              thickness: 2,
-              height: 0,
-            ),
-            const Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );
@@ -93,11 +88,6 @@ class HeaderErrorWidget extends StatelessWidget {
               ),
             ),
             const Padding(padding: EdgeInsets.all(12)),
-            const Divider(
-              thickness: 2,
-              height: 0,
-            ),
-            const Padding(padding: EdgeInsets.all(12)),
           ],
         ),
       );
@@ -105,6 +95,7 @@ class HeaderErrorWidget extends StatelessWidget {
       return Center(
         child: Column(
           children: [
+            const SizedBox(height: 8),
             Icon(
               Icons.error_outline,
               color: Colors.red[400],
@@ -148,11 +139,6 @@ class HeaderErrorWidget extends StatelessWidget {
                   );
                 },
               ),
-            ),
-            const Padding(padding: EdgeInsets.all(16)),
-            const Divider(
-              thickness: 2,
-              height: 0,
             ),
             const Padding(padding: EdgeInsets.all(12)),
           ],

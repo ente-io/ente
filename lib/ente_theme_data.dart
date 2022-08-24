@@ -375,7 +375,7 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
         borderRadius: BorderRadius.circular(8),
       ),
       alignment: Alignment.center,
-      padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
+      padding: const EdgeInsets.fromLTRB(50, 12, 50, 12),
       textStyle: const TextStyle(
         fontWeight: FontWeight.w600,
         fontFamily: 'Inter-SemiBold',
