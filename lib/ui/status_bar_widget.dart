@@ -241,7 +241,7 @@ class BrandingWidget extends StatelessWidget {
       children: [
         Container(
           height: kContainerHeight,
-          padding: const EdgeInsets.only(left: 12),
+          padding: const EdgeInsets.only(left: 12, top: 4),
           child: const Align(
             alignment: Alignment.centerLeft,
             child: Text(
