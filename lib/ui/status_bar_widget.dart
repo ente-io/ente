@@ -21,10 +21,20 @@ class StatusBarWidget extends StatefulWidget {
 class _StatusBarWidgetState extends State<StatusBarWidget> {
   StreamSubscription<SyncStatusUpdate> _subscription;
   bool _showStatus = false;
+  bool _showErrorBanner = false;
 
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
+      if (event.status == SyncStatus.error) {
+        setState(() {
+          _showErrorBanner = true;
+        });
+      } else {
+        setState(() {
+          _showErrorBanner = false;
+        });
+      }
       if (event.status == SyncStatus.completedFirstGalleryImport ||
           event.status == SyncStatus.completedBackup) {
         Future.delayed(const Duration(milliseconds: 2000), () {
@@ -58,7 +68,11 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
           Stack(
             children: [
               AnimatedOpacity(
-                opacity: _showStatus ? 0 : 1,
+                opacity: _showStatus
+                    ? _showErrorBanner
+                        ? 1
+                        : 0
+                    : 1,
                 duration: const Duration(milliseconds: 1000),
                 child: const BrandingWidget(),
               ),
@@ -70,7 +84,6 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               Positioned(
                 right: 0,
                 top: 0,
-                bottom: 0,
                 child: FeatureFlagService.instance.enableSearchFeature()
                     ? Container(
                         color: Theme.of(context)
@@ -79,7 +92,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
                         height: kContainerHeight,
                         child: const SearchIconWidget(),
                       )
-                    : const SizedBox.shrink(),
+                    : const SizedBox(height: 36, width: 48),
               ),
             ],
           ),
@@ -135,7 +148,10 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
       return const SizedBox.shrink();
     }
     if (_event.status == SyncStatus.error) {
-      return HeaderErrorWidget(error: _event.error);
+      return Padding(
+        padding: const EdgeInsets.only(top: kContainerHeight + 8),
+        child: HeaderErrorWidget(error: _event.error),
+      );
     }
     if (_event.status == SyncStatus.completedBackup) {
       return const SyncStatusCompletedWidget();
