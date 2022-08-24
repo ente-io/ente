@@ -341,7 +341,10 @@ class FilesDB {
     }
   }
 
-  Future<void> insertMultiple(List<File> files) async {
+  Future<void> insertMultiple(
+    List<File> files, {
+    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace,
+  }) async {
     final startTime = DateTime.now();
     final db = await instance.database;
     var batch = db.batch();
@@ -355,7 +358,7 @@ class FilesDB {
       batch.insert(
         filesTable,
         _getRowForFile(file),
-        conflictAlgorithm: ConflictAlgorithm.replace,
+        conflictAlgorithm: conflictAlgorithm,
       );
       batchCounter++;
     }
