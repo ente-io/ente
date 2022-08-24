@@ -90,7 +90,7 @@ Future<List<LocalPathAsset>> getAllLocalAssets() async {
   return localPathAssets;
 }
 
-Future<LocalUnSyncResult> getLocalUnsyncedFiles(
+Future<LocalUnSyncResult> getLocalUnSyncedFiles(
   List<LocalPathAsset> assets,
   // current set of assets available on device
   Set<String> existingIDs, // localIDs of files already imported in app
@@ -109,7 +109,7 @@ Future<LocalUnSyncResult> getLocalUnsyncedFiles(
     return LocalUnSyncResult();
   }
   final unSyncedFiles =
-      await _convertToFiles(localUnSyncResult.localPathAssets, computer);
+      await _convertToUniqueFilesFiles(localUnSyncResult.localPathAssets);
   localUnSyncResult.uniqueLocalFiles = unSyncedFiles;
   return localUnSyncResult;
 }
@@ -117,7 +117,7 @@ Future<LocalUnSyncResult> getLocalUnsyncedFiles(
 // _getUnsyncedAssets performs following operation
 // Identify
 LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
-  final List<LocalPathAsset> localPathAssets = args['assets'];
+  final List<LocalPathAsset> onDeviceLocalPathAsset = args['assets'];
   final Set<String> existingIDs = args['existingIDs'];
   final Set<String> invalidIDs = args['invalidIDs'];
   final Map<String, Set<String>> pathToLocalIDs = args['pathToLocalIDs'];
@@ -126,23 +126,24 @@ LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
       <String, Set<String>>{};
   final List<LocalPathAsset> unsyncedAssets = [];
 
-  for (final localPathAsset in localPathAssets) {
+  for (final localPathAsset in onDeviceLocalPathAsset) {
     String pathID = localPathAsset.pathID;
     // Start identifying pathID to localID mapping changes which needs to be
     // synced
-    Set<String> existingPathToLocalIDs = pathToLocalIDs[pathID] ?? <String>{};
+    Set<String> candidateLocalIDsForRemoval =
+        pathToLocalIDs[pathID] ?? <String>{};
     Set<String> missingLocalIDsInPath = <String>{};
     for (final String localID in localPathAsset.localIDs) {
-      if (existingPathToLocalIDs.contains(localID)) {
+      if (candidateLocalIDsForRemoval.contains(localID)) {
         // remove the localID after checking. Any pending existing ID indicates
         // the the local file was removed from the path.
-        existingPathToLocalIDs.remove(localID);
+        candidateLocalIDsForRemoval.remove(localID);
       } else {
         missingLocalIDsInPath.add(localID);
       }
     }
-    if (existingPathToLocalIDs.isNotEmpty) {
-      removedPathToLocalIDs[pathID] = existingPathToLocalIDs;
+    if (candidateLocalIDsForRemoval.isNotEmpty) {
+      removedPathToLocalIDs[pathID] = candidateLocalIDsForRemoval;
     }
     if (missingLocalIDsInPath.isNotEmpty) {
       newPathToLocalIDs[pathID] = missingLocalIDsInPath;
@@ -151,7 +152,9 @@ LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
 
     localPathAsset.localIDs.removeAll(existingIDs);
     localPathAsset.localIDs.removeAll(invalidIDs);
-    unsyncedAssets.add(localPathAsset);
+    if (localPathAsset.localIDs.isNotEmpty) {
+      unsyncedAssets.add(localPathAsset);
+    }
   }
   return LocalUnSyncResult(
     localPathAssets: unsyncedAssets,
@@ -160,24 +163,22 @@ LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
   );
 }
 
-Future<List<File>> _convertToFiles(
+Future<List<File>> _convertToUniqueFilesFiles(
   List<LocalPathAsset> assets,
-  Computer computer,
 ) async {
-  final Map<String, AssetEntity> assetIDToEntityMap = {};
+  final Set<String> alreadySeenLocalIDs = <String>{};
   final List<File> files = [];
   for (LocalPathAsset localPathAsset in assets) {
+    String localPathName = localPathAsset.pathName;
+    String pathID = localPathAsset.pathID;
     for (final String localID in localPathAsset.localIDs) {
-      if (!assetIDToEntityMap.containsKey(localID)) {
-        assetIDToEntityMap[localID] = await AssetEntity.fromId(localID);
+      if (!alreadySeenLocalIDs.contains(localID)) {
+        var assetEntity = await AssetEntity.fromId(localID);
+        files.add(
+          File.fromAsset(localPathName, assetEntity, devicePathID: pathID),
+        );
+        alreadySeenLocalIDs.add(localID);
       }
-      files.add(
-        File.fromAsset(
-          localPathAsset.pathName,
-          assetIDToEntityMap[localID],
-          devicePathID: localPathAsset.pathID,
-        ),
-      );
     }
   }
   return files;

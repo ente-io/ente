@@ -157,7 +157,7 @@ class LocalSyncService {
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
     final invalidIDs = _getInvalidFileIDs().toSet();
-    final localUnSyncResult = await getLocalUnsyncedFiles(
+    final localUnSyncResult = await getLocalUnSyncedFiles(
       localAssets,
       existingLocalFileIDs,
       pathToLocalIDs,
