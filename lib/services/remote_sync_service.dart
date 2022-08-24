@@ -7,12 +7,14 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -86,6 +88,7 @@ class RemoteSyncService {
       await TrashSyncService.instance
           .syncTrash()
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
+      await _syncDeviceCollectionFilesForUpload();
       final filesToBeUploaded = await _getFilesToBeUploaded();
       if (kDebugMode) {
         debugPrint("Skip upload for testing");
@@ -219,7 +222,43 @@ class RemoteSyncService {
     }
   }
 
+  Future<void> _syncDeviceCollectionFilesForUpload() async {
+    final devicePathCollections =
+        await FilesDB.instance.getDevicePathCollections();
+    devicePathCollections.removeWhere((element) => !element.sync);
+    await _createCollectionsForDevicePath(devicePathCollections);
+  }
+
+  Future<void> _createCollectionsForDevicePath(
+    List<DevicePathCollection> devicePathCollections,
+  ) async {
+    for (var devicePathCollection in devicePathCollections) {
+      int deviceCollectionID = devicePathCollection.collectionID;
+      if (deviceCollectionID != -1) {
+        var collectionByID =
+            CollectionsService.instance.getCollectionByID(deviceCollectionID);
+        if (collectionByID == null || collectionByID.isDeleted) {
+          _logger.info(
+            "Collection $deviceCollectionID either deleted or missing "
+            "for path ${devicePathCollection.name}",
+          );
+          deviceCollectionID = -1;
+        }
+      }
+      if (deviceCollectionID == -1) {
+        var collection = await CollectionsService.instance
+            .getOrCreateForPath(devicePathCollection.name);
+        await FilesDB.instance
+            .updateDevicePathCollection(devicePathCollection.id, collection.id);
+        devicePathCollection.collectionID = collection.id;
+      }
+    }
+  }
+
   Future<List<File>> _getFilesToBeUploaded() async {
+    final devicePathCollections =
+        await FilesDB.instance.getDevicePathCollections();
+    devicePathCollections.removeWhere((element) => !element.sync);
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&

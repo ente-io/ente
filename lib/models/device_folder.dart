@@ -19,7 +19,7 @@ class DevicePathCollection {
   final String coverId;
   final int count;
   final bool sync;
-  final int collectionID;
+  int collectionID;
   File thumbnail;
 
   DevicePathCollection(

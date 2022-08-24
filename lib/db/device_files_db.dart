@@ -278,6 +278,20 @@ extension DeviceFiles on FilesDB {
     await batch.commit(noResult: true);
   }
 
+  Future<void> updateDevicePathCollection(
+    String pathID,
+    int collectionID,
+  ) async {
+    final db = await database;
+    await db.update(
+      "device_path_collections",
+      {"collection_id": collectionID},
+      where: 'id = ?',
+      whereArgs: [pathID],
+    );
+    return;
+  }
+
   Future<FileLoadResult> getFilesInDevicePathCollection(
     DevicePathCollection devicePathCollection,
     int startTime,
