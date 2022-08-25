@@ -111,7 +111,8 @@ extension DeviceFiles on FilesDB {
   }
 
   Future<Set<String>> getDevicePathIDs() async {
-    final rows = await (await database).rawQuery(
+    final Database db = await database;
+    final rows = await db.rawQuery(
       '''
       SELECT id FROM device_path_collections
       ''',
@@ -153,6 +154,7 @@ extension DeviceFiles on FilesDB {
         }
       }
       // add the mappings for localIDs
+      debugPrint("Insert pathToLocalIDs mapping while importing localAssets");
       await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
     } catch (e) {
       _logger.severe("failed to save path names", e);
