@@ -11,7 +11,7 @@ final _logger = Logger("FileSyncUtil");
 const ignoreSizeConstraint = SizeConstraint(ignoreSize: true);
 const assetFetchPageSize = 2000;
 
-Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
+Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
   int fromTime,
   int toTime,
   Computer computer,
@@ -20,6 +20,7 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
     updateFromTime: fromTime,
     updateToTime: toTime,
   );
+  List<LocalPathAsset> localPathAssets = [];
 
   // alreadySeenLocalIDs is used to track and ignore file with particular
   // localID if it's already present in another album. This only impacts iOS
@@ -39,8 +40,15 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
     );
     alreadySeenLocalIDs.addAll(result.item1);
     uniqueFiles.addAll(result.item2);
+    localPathAssets.add(
+      LocalPathAsset(
+        localIDs: result.item1,
+        pathName: pathEntity.name,
+        pathID: pathEntity.id,
+      ),
+    );
   }
-  return Tuple2(pathEntities, uniqueFiles);
+  return Tuple2(localPathAssets, uniqueFiles);
 }
 
 // getDeviceFolderWithCountAndLatestFile returns a tuple of AssetPathEntity and

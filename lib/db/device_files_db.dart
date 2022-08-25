@@ -3,8 +3,8 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/device_folder.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/services/local/local_sync_util.dart';
 import 'package:sqflite/sqlite_api.dart';
 import 'package:tuple/tuple.dart';
 
@@ -12,48 +12,6 @@ extension DeviceFiles on FilesDB {
   static final Logger _logger = Logger("DeviceFilesDB");
   static const _sqlBoolTrue = 1;
   static const _sqlBoolFalse = 0;
-
-  Future<void> insertDeviceFiles(
-    List<File> files, {
-    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
-  }) async {
-    final startTime = DateTime.now();
-    final db = await database;
-    var batch = db.batch();
-    int batchCounter = 0;
-    for (File file in files) {
-      if (file.localID == null || file.devicePathID == null) {
-        debugPrint(
-          "attempting to insert file with missing local or "
-          "devicePathID ${file.tag()}",
-        );
-        continue;
-      }
-      if (batchCounter == 400) {
-        await batch.commit(noResult: true);
-        batch = db.batch();
-        batchCounter = 0;
-      }
-      batch.insert(
-        "device_files",
-        {
-          "id": file.localID,
-          "path_id": file.devicePathID,
-        },
-        conflictAlgorithm: conflictAlgorithm,
-      );
-      batchCounter++;
-    }
-    await batch.commit(noResult: true);
-    final endTime = DateTime.now();
-    final duration = Duration(
-      microseconds:
-          endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
-    );
-    _logger.info(
-      "Batch insert of  ${files.length} took ${duration.inMilliseconds} ms.",
-    );
-  }
 
   Future<void> insertPathIDToLocalIDMapping(
     Map<String, Set<String>> mappingToAdd, {
@@ -166,31 +124,36 @@ extension DeviceFiles on FilesDB {
   }
 
   // todo: covert it to batch
-  Future<void> insertOrUpdatePathName(
-    List<AssetPathEntity> pathEntities, {
+  Future<void> insertLocalAssets(
+    List<LocalPathAsset> localPathAssets, {
     bool autoSync = false,
   }) async {
+    final Database db = await database;
+    final Map<String, Set<String>> pathIDToLocalIDsMap = {};
     try {
       final Set<String> existingPathIds = await getDevicePathIDs();
-      final Database db = await database;
-      for (AssetPathEntity pathEntity in pathEntities) {
-        if (existingPathIds.contains(pathEntity.id)) {
+      for (LocalPathAsset localPathAsset in localPathAssets) {
+        pathIDToLocalIDsMap[localPathAsset.pathID] = localPathAsset.localIDs;
+        if (existingPathIds.contains(localPathAsset.pathID)) {
           await db.rawUpdate(
             "UPDATE device_path_collections SET name = ? where id = "
             "?",
-            [pathEntity.name, pathEntity.id],
+            [localPathAsset.pathName, localPathAsset.pathID],
           );
         } else {
           await db.insert(
             "device_path_collections",
             {
-              "id": pathEntity.id,
-              "name": pathEntity.name,
+              "id": localPathAsset.pathID,
+              "name": localPathAsset.pathName,
               "sync": autoSync ? _sqlBoolTrue : _sqlBoolFalse
             },
+            conflictAlgorithm: ConflictAlgorithm.ignore,
           );
         }
       }
+      // add the mappings for localIDs
+      await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
     } catch (e) {
       _logger.severe("failed to save path names", e);
       rethrow;

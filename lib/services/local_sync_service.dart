@@ -166,7 +166,9 @@ class LocalSyncService {
       await _db
           .deletePathIDToLocalIDMapping(localUnSyncResult.deletePathToLocalIDs);
     }
-    if (localUnSyncResult.uniqueLocalFiles?.isNotEmpty ?? false) {
+    bool hasUnsyncedFiles =
+        localUnSyncResult.uniqueLocalFiles?.isNotEmpty ?? false;
+    if (hasUnsyncedFiles) {
       await _db.insertMultiple(
         localUnSyncResult.uniqueLocalFiles,
         conflictAlgorithm: ConflictAlgorithm.ignore,
@@ -178,7 +180,7 @@ class LocalSyncService {
       Bus.instance.fire(LocalPhotosUpdatedEvent(localUnSyncResult));
     }
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
-    return localUnSyncResult.uniqueLocalFiles.isNotEmpty;
+    return hasUnsyncedFiles;
   }
 
   Future<void> trackEditedFile(File file) async {
@@ -271,15 +273,13 @@ class LocalSyncService {
           " to " +
           DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
     );
-    final deviceFiles = await getDeviceFiles(fromTime, toTime, _computer);
-    final List<File> files = deviceFiles.item2;
-    unawaited(FilesDB.instance.insertDeviceFiles(files));
-    unawaited(
-      FilesDB.instance.insertOrUpdatePathName(
-        deviceFiles.item1,
-        autoSync: Configuration.instance.hasSelectedAllFoldersForBackup(),
-      ),
+    final Tuple2<List<LocalPathAsset>, List<File>> result =
+        await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
+    FilesDB.instance.insertLocalAssets(
+      result.item1,
+      autoSync: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
+    final List<File> files = result.item2;
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
       await _trackUpdatedFiles(
