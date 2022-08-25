@@ -8,7 +8,7 @@ import {
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
 } from './api/upload';
-import { getEncryptionKey, setEncryptionKey } from './utils/safeStorage';
+import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
 import { clearElectronStore } from './utils/electronStore';
 import { openDiskCache, deleteDiskCache } from './utils/cache';
 import {
