@@ -71,8 +71,8 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               _passwordController.text,
               Configuration.instance.getKeyAttributes(),
             );
-          } catch (e) {
-            Logger("PRP").warning(e);
+          } catch (e, s) {
+            Logger("PRP").severe("Password verification failed", e, s);
             await dialog.hide();
             showErrorDialog(context, "Incorrect password", "Please try again");
             return;
