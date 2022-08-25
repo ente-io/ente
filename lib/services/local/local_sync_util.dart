@@ -126,7 +126,7 @@ Future<LocalUnSyncResult> getLocalUnSyncedFiles(
   final LocalUnSyncResult localUnSyncResult =
       await computer.compute(_getUnsyncedAssets, param: args);
   if (localUnSyncResult.localPathAssets.isEmpty) {
-    return LocalUnSyncResult();
+    return localUnSyncResult;
   }
   final unSyncedFiles =
       await _convertLocalAssetsToUniqueFiles(localUnSyncResult.localPathAssets);
@@ -272,7 +272,7 @@ Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
   final pathEntity = args["pathEntity"] as AssetPathEntity;
   final assetList = args["assetList"];
   final fromTime = args["fromTime"];
-  final alreadySeenFileIDs = args["alreadySeenFileIDs"] as Set<String>;
+  final alreadySeenLocalIDs = args["alreadySeenLocalIDs"] as Set<String>;
   final List<File> files = [];
   final Set<String> localIDs = {};
   for (AssetEntity entity in assetList) {
@@ -282,7 +282,7 @@ Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
           entity.modifiedDateTime.microsecondsSinceEpoch,
         ) >
         fromTime;
-    if (!alreadySeenFileIDs.contains(entity.id) &&
+    if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       try {
         final file = File.fromAsset(pathEntity.name, entity);
