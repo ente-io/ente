@@ -161,7 +161,10 @@ class _ZoomableImageState extends State<ZoomableImage>
 
     if (!_loadingFinalImage && !_loadedFinalImage) {
       _loadingFinalImage = true;
-      getFile(_photo).then((file) {
+      getFile(
+        _photo,
+        isOrigin: isGIF(), // since playback only happens on origin files
+      ).then((file) {
         if (file != null && file.existsSync()) {
           _onFinalImageLoaded(Image.file(file).image);
         } else {
@@ -212,4 +215,6 @@ class _ZoomableImageState extends State<ZoomableImage>
       });
     }
   }
+
+  bool isGIF() => _photo.getDisplayName().toLowerCase().endsWith(".gif");
 }
