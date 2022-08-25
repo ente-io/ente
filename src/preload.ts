@@ -10,7 +10,7 @@ import {
 } from './api/upload';
 import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
 import { clearElectronStore } from './api/electronStore';
-import { openDiskCache, deleteDiskCache } from './utils/cache';
+import { openDiskCache, deleteDiskCache } from './api/cache';
 import {
     checkExistsAndCreateCollectionDir,
     checkExistsAndRename,
