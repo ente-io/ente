@@ -24,9 +24,9 @@ import {
     setExportRecord,
     exists,
 } from './api/export';
-import { fixHotReloadNext12 } from './utils/preload';
 import { selectRootDirectory } from './api/common';
 import { getElectronFile } from './services/fs';
+import { fixHotReloadNext12 } from './utils/preload';
 
 fixHotReloadNext12();
 
