@@ -2,7 +2,7 @@ import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
 import { readFile, writeFile, existsSync, mkdir, rmSync } from 'promise-fs';
 import crypto from 'crypto';
-import DiskLRUService from './diskLRU';
+import DiskLRUService from '../services/diskLRU';
 
 const CACHE_DIR = 'ente';
 const MAX_CACHE_SIZE = 1000 * 1000 * 1000; // 1GB
