@@ -25,10 +25,10 @@ import {
     exists,
 } from './api/export';
 import { fixHotReloadNext12 } from './utils/preload';
-
-fixHotReloadNext12();
 import { selectRootDirectory } from './api/common';
 import { getElectronFile } from './services/fs';
+
+fixHotReloadNext12();
 
 const windowObject: any = window;
 
