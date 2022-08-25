@@ -163,7 +163,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       _loadingFinalImage = true;
       getFile(
         _photo,
-        isOrigin: isGIF(), // since playback only happens on origin files
+        isOrigin: _isGIF(), // since playback only happens on origin files
       ).then((file) {
         if (file != null && file.existsSync()) {
           _onFinalImageLoaded(Image.file(file).image);
@@ -216,5 +216,5 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  bool isGIF() => _photo.getDisplayName().toLowerCase().endsWith(".gif");
+  bool _isGIF() => _photo.getDisplayName().toLowerCase().endsWith(".gif");
 }
