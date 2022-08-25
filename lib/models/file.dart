@@ -17,9 +17,6 @@ class File extends EnteFile {
   int collectionID;
   String localID;
 
-  // devicePathID is usually only filled while showing just onDevice files.
-  // for on ente files, this information will be null.
-  String devicePathID;
   String title;
   String deviceFolder;
   int creationTime;
@@ -61,15 +58,10 @@ class File extends EnteFile {
 
   File();
 
-  static File fromAsset(
-    String pathName,
-    AssetEntity asset, {
-    String devicePathID,
-  }) {
+  static File fromAsset(String pathName, AssetEntity asset) {
     File file = File();
     file.localID = asset.id;
     file.title = asset.title;
-    file.devicePathID = devicePathID;
     file.deviceFolder = pathName;
     file.location = Location(asset.latitude, asset.longitude);
     file.fileType = _fileTypeFromAsset(asset);

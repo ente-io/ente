@@ -144,9 +144,12 @@ class LocalSyncService {
     final stopwatch = Stopwatch()..start();
     final localAssets = await getAllLocalAssets();
     _logger.info(
-      "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsed.inMilliseconds}ms ",
+      "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
     );
     await refreshDeviceFolderCountAndCover();
+    _logger.info(
+      "refreshDeviceFolderCountAndCover + allLocalAssets took ${stopwatch.elapsedMilliseconds}ms ",
+    );
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();

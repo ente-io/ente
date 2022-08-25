@@ -190,12 +190,11 @@ Future<List<File>> _convertLocalAssetsToUniqueFiles(
   final List<File> files = [];
   for (LocalPathAsset localPathAsset in assets) {
     String localPathName = localPathAsset.pathName;
-    String pathID = localPathAsset.pathID;
     for (final String localID in localPathAsset.localIDs) {
       if (!alreadySeenLocalIDs.contains(localID)) {
         var assetEntity = await AssetEntity.fromId(localID);
         files.add(
-          File.fromAsset(localPathName, assetEntity, devicePathID: pathID),
+          File.fromAsset(localPathName, assetEntity),
         );
         alreadySeenLocalIDs.add(localID);
       }
@@ -286,11 +285,7 @@ Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
     if (!alreadySeenFileIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       try {
-        final file = File.fromAsset(
-          pathEntity.name,
-          entity,
-          devicePathID: pathEntity.id,
-        );
+        final file = File.fromAsset(pathEntity.name, entity);
         files.add(file);
       } catch (e) {
         _logger.severe(e);
