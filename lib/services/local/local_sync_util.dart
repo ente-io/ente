@@ -24,10 +24,6 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
   for (AssetPathEntity pathEntity in pathEntities) {
     files = await _computeFiles(pathEntity, fromTime, files, computer);
   }
-  // todo: Check if sort is needed and document the reason.
-  files.sort(
-    (first, second) => first.creationTime.compareTo(second.creationTime),
-  );
   return Tuple2(pathEntities, files);
 }
 
