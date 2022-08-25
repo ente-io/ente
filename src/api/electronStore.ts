@@ -4,7 +4,7 @@ import {
     safeStorageStore,
 } from '../services/store';
 
-import { logError } from './logging';
+import { logError } from '../utils/logging';
 
 export const clearElectronStore = () => {
     try {

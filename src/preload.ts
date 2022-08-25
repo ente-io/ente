@@ -9,7 +9,7 @@ import {
     setToUploadCollection,
 } from './api/upload';
 import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
-import { clearElectronStore } from './utils/electronStore';
+import { clearElectronStore } from './api/electronStore';
 import { openDiskCache, deleteDiskCache } from './utils/cache';
 import {
     checkExistsAndCreateCollectionDir,
