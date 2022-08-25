@@ -20,11 +20,27 @@ Future<Tuple2<List<AssetPathEntity>, List<File>>> getDeviceFiles(
     updateFromTime: fromTime,
     updateToTime: toTime,
   );
-  List<File> files = [];
+
+  // alreadySeenLocalIDs is used to track and ignore file with particular
+  // localID if it's already present in another album. This only impacts iOS
+  // devices where a file can belong to multiple
+  Set<String> alreadySeenLocalIDs = {};
+  List<File> uniqueFiles = [];
   for (AssetPathEntity pathEntity in pathEntities) {
-    files = await _computeFiles(pathEntity, fromTime, files, computer);
+    List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
+    Tuple2<Set<String>, List<File>> result = await computer.compute(
+      _getLocalIDsAndFilesFromAssets,
+      param: <String, dynamic>{
+        "pathEntity": pathEntity,
+        "fromTime": fromTime,
+        "alreadySeenLocalIDs": alreadySeenLocalIDs,
+        "assetList": assetsInPath,
+      },
+    );
+    alreadySeenLocalIDs.addAll(result.item1);
+    uniqueFiles.addAll(result.item2);
   }
-  return Tuple2(pathEntities, files);
+  return Tuple2(pathEntities, uniqueFiles);
 }
 
 // getDeviceFolderWithCountAndLatestFile returns a tuple of AssetPathEntity and
@@ -105,7 +121,7 @@ Future<LocalUnSyncResult> getLocalUnSyncedFiles(
     return LocalUnSyncResult();
   }
   final unSyncedFiles =
-      await _convertToUniqueFilesFiles(localUnSyncResult.localPathAssets);
+      await _convertLocalAssetsToUniqueFiles(localUnSyncResult.localPathAssets);
   localUnSyncResult.uniqueLocalFiles = unSyncedFiles;
   return localUnSyncResult;
 }
@@ -159,7 +175,7 @@ LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
   );
 }
 
-Future<List<File>> _convertToUniqueFilesFiles(
+Future<List<File>> _convertLocalAssetsToUniqueFiles(
   List<LocalPathAsset> assets,
 ) async {
   final Set<String> alreadySeenLocalIDs = <String>{};
@@ -226,20 +242,6 @@ Future<List<AssetPathEntity>> _getGalleryList({
   return galleryList;
 }
 
-Future<List<File>> _computeFiles(
-  AssetPathEntity pathEntity,
-  int fromTime,
-  List<File> files,
-  Computer computer,
-) async {
-  final Map<String, dynamic> args = <String, dynamic>{};
-  args["pathEntity"] = pathEntity;
-  args["assetList"] = await _getAllAssetLists(pathEntity);
-  args["fromTime"] = fromTime;
-  args["files"] = files;
-  return await computer.compute(_getFiles, param: args);
-}
-
 Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
   List<AssetEntity> result = [];
   int currentPage = 0;
@@ -257,18 +259,24 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
 
 // review: do we need to run this inside compute, after making File.FromAsset
 // sync. If yes, update the method documentation with reason.
-Future<List<File>> _getFiles(Map<String, dynamic> args) async {
+Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
+  Map<String, dynamic> args,
+) async {
   final pathEntity = args["pathEntity"] as AssetPathEntity;
   final assetList = args["assetList"];
   final fromTime = args["fromTime"];
-  final files = args["files"];
-
+  final alreadySeenFileIDs = args["alreadySeenFileIDs"] as Set<String>;
+  final List<File> files = [];
+  final Set<String> localIDs = {};
   for (AssetEntity entity in assetList) {
-    if (max(
+    localIDs.add(entity.id);
+    bool assetCreatedOrUpdatedAfterGivenTime = max(
           entity.createDateTime.microsecondsSinceEpoch,
           entity.modifiedDateTime.microsecondsSinceEpoch,
         ) >
-        fromTime) {
+        fromTime;
+    if (!alreadySeenFileIDs.contains(entity.id) &&
+        assetCreatedOrUpdatedAfterGivenTime) {
       try {
         final file = File.fromAsset(
           pathEntity.name,
@@ -281,7 +289,7 @@ Future<List<File>> _getFiles(Map<String, dynamic> args) async {
       }
     }
   }
-  return files;
+  return Tuple2(localIDs, files);
 }
 
 class LocalPathAsset {

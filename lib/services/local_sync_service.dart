@@ -158,15 +158,15 @@ class LocalSyncService {
       invalidIDs,
       _computer,
     );
-    if (localUnSyncResult.newPathToLocalIDs.isNotEmpty) {
+    if (localUnSyncResult.newPathToLocalIDs?.isNotEmpty ?? false) {
       await _db
           .insertPathIDToLocalIDMapping(localUnSyncResult.newPathToLocalIDs);
     }
-    if (localUnSyncResult.deletePathToLocalIDs.isNotEmpty) {
+    if (localUnSyncResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
       await _db
           .deletePathIDToLocalIDMapping(localUnSyncResult.deletePathToLocalIDs);
     }
-    if (localUnSyncResult.uniqueLocalFiles.isNotEmpty) {
+    if (localUnSyncResult.uniqueLocalFiles?.isNotEmpty ?? false) {
       await _db.insertMultiple(
         localUnSyncResult.uniqueLocalFiles,
         conflictAlgorithm: ConflictAlgorithm.ignore,
