@@ -1,7 +1,7 @@
 import { nativeImage, Tray, app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import { existsSync } from 'promise-fs';
-import appUpdater from './appUpdater';
+import appUpdater from '../services/appUpdater';
 import { isDev } from './common';
 import { buildContextMenu, buildMenuBar } from './menu';
 

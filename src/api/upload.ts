@@ -2,7 +2,7 @@ import { getZipFileStream } from './../services/fs';
 import { getElectronFile, getValidPaths } from './../services/fs';
 import path from 'path';
 import StreamZip from 'node-stream-zip';
-import { uploadStatusStore } from '../services/store';
+import { uploadStatusStore } from '../stores/upload.store';
 import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
 import { logError } from '../utils/logging';
 import { ipcRenderer } from 'electron';

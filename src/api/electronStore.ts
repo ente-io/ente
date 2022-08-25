@@ -1,10 +1,7 @@
-import {
-    uploadStatusStore,
-    keysStore,
-    safeStorageStore,
-} from '../services/store';
-
-import { logError } from './logging';
+import { keysStore } from '../stores/keys.store';
+import { safeStorageStore } from '../stores/safeStorage.store';
+import { uploadStatusStore } from '../stores/upload.store';
+import { logError } from '../utils/logging';
 
 export const clearElectronStore = () => {
     try {

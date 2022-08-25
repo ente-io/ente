@@ -9,7 +9,7 @@ import {
 } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
-import { logErrorSentry } from './sentry';
+import { logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getFilesFromDir } from '../services/fs';

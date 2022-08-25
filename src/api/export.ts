@@ -1,4 +1,3 @@
-import {} from './common';
 import {
     createDirectory,
     doesPathExists,

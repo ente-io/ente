@@ -1,5 +1,5 @@
 import path from 'path';
-import { watchStore } from '../services/store';
+import { watchStore } from '../stores/watch.store';
 import { ipcRenderer } from 'electron';
 import { ElectronFile, WatchStoreType } from '../types';
 import { getElectronFile, getFilesFromDir } from '../services/fs';

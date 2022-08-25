@@ -6,7 +6,7 @@ import {
     MenuItemConstructorOptions,
 } from 'electron';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
-import { showUpdateDialog } from './appUpdater';
+import { showUpdateDialog } from '../services/appUpdater';
 
 const isMac = process.platform === 'darwin';
 

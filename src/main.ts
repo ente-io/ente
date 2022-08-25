@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
-import initSentry from './utils/sentry';
+import { initSentry } from './services/sentry';
 import electronReload from 'electron-reload';
 import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from './config';
 import { isDev } from './utils/common';
