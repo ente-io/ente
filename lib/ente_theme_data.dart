@@ -357,6 +357,10 @@ extension CustomColorScheme on ColorScheme {
   Color get searchResultsCountTextColor => brightness == Brightness.light
       ? const Color.fromRGBO(80, 80, 80, 1)
       : const Color.fromRGBO(150, 150, 150, 1);
+
+  Color get searchResultsBackgroundColor => brightness == Brightness.light
+      ? Colors.black.withOpacity(0.32)
+      : Colors.black.withOpacity(0.64);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({

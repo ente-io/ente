@@ -39,7 +39,7 @@ class AlbumSearchResultWidget extends StatelessWidget {
                       color: Theme.of(context).colorScheme.subTextColor,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   SizedBox(
                     width: 220,
                     child: Text(
