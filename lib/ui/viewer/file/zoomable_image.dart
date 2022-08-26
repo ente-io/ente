@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
@@ -161,7 +163,11 @@ class _ZoomableImageState extends State<ZoomableImage>
 
     if (!_loadingFinalImage && !_loadedFinalImage) {
       _loadingFinalImage = true;
-      getFile(_photo).then((file) {
+      getFile(
+        _photo,
+        isOrigin: Platform.isIOS &&
+            _isGIF(), // since on iOS GIFs playback only when origin-files are loaded
+      ).then((file) {
         if (file != null && file.existsSync()) {
           _onFinalImageLoaded(Image.file(file).image);
         } else {
@@ -212,4 +218,6 @@ class _ZoomableImageState extends State<ZoomableImage>
       });
     }
   }
+
+  bool _isGIF() => _photo.getDisplayName().toLowerCase().endsWith(".gif");
 }
