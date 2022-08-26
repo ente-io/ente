@@ -299,8 +299,11 @@ class RemoteSyncService {
   }
 
   Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
-    final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
-    _logger.info(updatedFileIDs.length.toString() + " files updated.");
+    int ownerID = Configuration.instance.getUserID();
+    final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
+    if (updatedFileIDs.isNotEmpty) {
+      _logger.info("Identified ${updatedFileIDs.length} files for reupload");
+    }
 
     _completedUploads = 0;
     int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;

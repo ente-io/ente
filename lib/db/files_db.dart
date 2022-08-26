@@ -744,13 +744,16 @@ class FilesDB {
     return convertToFiles(results);
   }
 
-  Future<List<int>> getUploadedFileIDsToBeUpdated() async {
+  Future<List<int>> getUploadedFileIDsToBeUpdated(int ownerID) async {
     final db = await instance.database;
     final rows = await db.query(
       filesTable,
       columns: [columnUploadedFileID],
-      where:
-          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NULL)',
+      where: '($columnLocalID IS NOT NULL AND $columnOwnerID = ? AND '
+          '($columnUploadedFileID '
+          'IS NOT '
+          'NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NULL)',
+      whereArgs: [ownerID],
       orderBy: '$columnCreationTime DESC',
       distinct: true,
     );
