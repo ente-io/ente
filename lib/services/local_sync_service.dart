@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -10,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_migration_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
@@ -264,6 +266,7 @@ class LocalSyncService {
   Future<void> resetLocalSync() async {
     assert(kDebugMode, "only available in debug mode");
     await FilesDB.instance.deleteDB();
+    await IgnoredFilesDB.instance.clearTable();
     for (var element in [
       kHasCompletedFirstImportKey,
       kDbUpdationTimeKey,
