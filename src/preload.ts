@@ -12,7 +12,7 @@ import {
     registerWatcherFunctions,
     addWatchMapping,
     removeWatchMapping,
-    updateMappingFiles,
+    updateWatchMappingFiles,
     getWatchMappings,
 } from './api/watch';
 import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
@@ -73,5 +73,5 @@ windowObject['ElectronAPIs'] = {
     removeWatchMapping,
     registerWatcherFunctions,
     doesFolderExists,
-    updateMappingFiles,
+    updateWatchMappingFiles,
 };

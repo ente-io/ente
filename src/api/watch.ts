@@ -50,7 +50,7 @@ export async function removeWatchMapping(folderPath: string) {
     setWatchMappings(watchMappings);
 }
 
-export function updateMappingFiles(
+export function updateWatchMappingFiles(
     folderPath: string,
     files: WatchMapping['files']
 ): void {
