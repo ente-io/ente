@@ -82,7 +82,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             Positioned(
               right: 0,
               top: 0,
-              child: FeatureFlagService.instance.enableSearchFeature()
+              child: FeatureFlagService.instance.enableSearch()
                   ? Container(
                       color:
                           Theme.of(context).colorScheme.defaultBackgroundColor,
