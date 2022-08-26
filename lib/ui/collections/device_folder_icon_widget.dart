@@ -54,8 +54,9 @@ class DeviceFolderIcon extends StatelessWidget {
                   width: 120,
                   child: Hero(
                     tag: "device_folder:" +
-                        devicePathCollection.name +
-                        devicePathCollection.thumbnail.tag(),
+                            devicePathCollection.name +
+                            devicePathCollection.thumbnail?.tag() ??
+                        "",
                     child: Stack(
                       children: [
                         ThumbnailWidget(
@@ -63,8 +64,9 @@ class DeviceFolderIcon extends StatelessWidget {
                           shouldShowSyncStatus: false,
                           key: Key(
                             "device_folder:" +
-                                devicePathCollection.name +
-                                devicePathCollection.thumbnail.tag(),
+                                    devicePathCollection.name +
+                                    devicePathCollection.thumbnail?.tag() ??
+                                "",
                           ),
                         ),
                         isBackedUp ? Container() : kUnsyncedIconOverlay,
