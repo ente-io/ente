@@ -5,7 +5,7 @@ const List<HolidayData> allHolidays = [
   HolidayData('Epiphany', 1, 6),
   HolidayData('Pongal', 1, 14),
   HolidayData('Makar Sankranthi', 1, 14),
-  HolidayData('Valentines Day', 2, 14),
+  HolidayData('Valentine\'s Day', 2, 14),
   HolidayData('Nowruz', 3, 21),
   HolidayData('Walpurgis Night', 4, 30),
   HolidayData('Vappu', 4, 30),
@@ -16,5 +16,5 @@ const List<HolidayData> allHolidays = [
   HolidayData('Halloween', 10, 31),
   HolidayData('Christmas', 12, 25),
   HolidayData('Boxing Day', 12, 26),
-  HolidayData('New Year Eve', 12, 31),
+  HolidayData('New Year\'s Eve', 12, 31),
 ];
