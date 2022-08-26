@@ -534,7 +534,7 @@ class FilesDB {
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
-  List<File> _deduplicateByLocalID(List<File> files) {
+  List<File> deduplicateByLocalID(List<File> files) {
     final localIDs = <String>{};
     final List<File> deduplicatedFiles = [];
     for (final file in files) {
@@ -633,7 +633,7 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    final result = _deduplicateByLocalID(files);
+    final result = deduplicateByLocalID(files);
     return FileLoadResult(result, files.length == limit);
   }
 

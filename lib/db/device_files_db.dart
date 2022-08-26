@@ -296,7 +296,8 @@ extension DeviceFiles on FilesDB {
         (limit != null ? ' limit $limit;' : ';');
     final results = await db.rawQuery(rawQuery);
     final files = convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
+    final dedupe = deduplicateByLocalID(files);
+    return FileLoadResult(dedupe, files.length == limit);
   }
 
   Future<List<DevicePathCollection>> getDevicePathCollections() async {
