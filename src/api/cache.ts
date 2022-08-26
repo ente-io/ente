@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron/renderer';
 import path from 'path';
 import { existsSync, mkdir, rmSync } from 'promise-fs';
 import { DiskCache } from '../services/diskCache';
