@@ -41,7 +41,6 @@ export const getExportRecord = async (filePath: string) => {
         const recordFile = await readTextFile(filePath);
         return recordFile;
     } catch (e) {
-        // ignore exportFile missing
         logError(e, 'error while selecting files');
     }
 };
