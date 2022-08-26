@@ -161,13 +161,16 @@ class LocalSyncService {
       invalidIDs,
       _computer,
     );
+    bool hasAnyMappingChanged = false;
     if (localUnSyncResult.newPathToLocalIDs?.isNotEmpty ?? false) {
       await _db
           .insertPathIDToLocalIDMapping(localUnSyncResult.newPathToLocalIDs);
+      hasAnyMappingChanged = true;
     }
     if (localUnSyncResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
       await _db
           .deletePathIDToLocalIDMapping(localUnSyncResult.deletePathToLocalIDs);
+      hasAnyMappingChanged = true;
     }
     bool hasUnsyncedFiles =
         localUnSyncResult.uniqueLocalFiles?.isNotEmpty ?? false;
@@ -180,7 +183,15 @@ class LocalSyncService {
         "Inserted ${localUnSyncResult.uniqueLocalFiles.length} "
         "un-synced files",
       );
-      Bus.instance.fire(LocalPhotosUpdatedEvent(localUnSyncResult));
+    }
+    debugPrint(
+      "syncAll: mappingChange : $hasAnyMappingChanged, "
+      "unSyncedFiles: $hasUnsyncedFiles",
+    );
+    if (hasAnyMappingChanged || hasUnsyncedFiles) {
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(localUnSyncResult.uniqueLocalFiles),
+      );
     }
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
     return hasUnsyncedFiles;
