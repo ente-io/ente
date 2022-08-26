@@ -360,7 +360,7 @@ extension CustomColorScheme on ColorScheme {
 
   Color get searchResultsBackgroundColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.32)
-      : Colors.black.withOpacity(0.12);
+      : Colors.black.withOpacity(0.64);
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({
