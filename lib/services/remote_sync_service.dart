@@ -93,7 +93,7 @@ class RemoteSyncService {
       final filesToBeUploaded = await _getFilesToBeUploaded();
       if (kDebugMode) {
         debugPrint("Skip upload for testing");
-        filesToBeUploaded.clear();
+        // filesToBeUploaded.clear();
       }
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
@@ -337,14 +337,12 @@ class RemoteSyncService {
     final devicePathCollections =
         await FilesDB.instance.getDevicePathCollections();
     devicePathCollections.removeWhere((element) => !element.sync);
-    final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
-        foldersToBackUp.isEmpty) {
+        devicePathCollections.isEmpty) {
       filesToBeUploaded = await _db.getUnUploadedLocalFiles();
     } else {
-      filesToBeUploaded =
-          await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+      filesToBeUploaded = await _db.getPendingManualUploads();
     }
     if (!Configuration.instance.shouldBackupVideos() || _shouldThrottleSync()) {
       filesToBeUploaded
@@ -363,11 +361,6 @@ class RemoteSyncService {
               " files were ignored for upload",
         );
       }
-    }
-    if (filesToBeUploaded.isEmpty) {
-      // look for files which user manually tried to back up but they are not
-      // uploaded yet. These files should ignore video backup & ignored files filter
-      filesToBeUploaded = await _db.getPendingManualUploads();
     }
     _sortByTimeAndType(filesToBeUploaded);
     _logger.info(
