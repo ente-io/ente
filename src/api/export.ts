@@ -1,5 +1,4 @@
 import {
-    createDirectory,
     readTextFile,
     renameDirectory,
     writeFile,
@@ -15,7 +14,7 @@ export const exists = (path: string) => {
 
 export const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
     if (!fs.existsSync(dirPath)) {
-        await createDirectory(dirPath);
+        await fs.mkdir(dirPath);
     }
 };
 

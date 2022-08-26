@@ -178,10 +178,6 @@ export const convertBrowserStreamToNode = (fileStream: any) => {
     return rs;
 };
 
-export async function createDirectory(dirPath: string) {
-    await fs.mkdir(dirPath);
-}
-
 export async function renameDirectory(oldDirPath: string, newDirPath: string) {
     await fs.rename(oldDirPath, newDirPath);
 }
