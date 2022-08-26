@@ -2,7 +2,7 @@ import { isMappingPresent } from '../utils/watch';
 import path from 'path';
 import { ipcRenderer } from 'electron';
 import { ElectronFile } from '../types';
-import { getElectronFile, getFilesFromDir } from '../services/fs';
+import { getElectronFile } from '../services/fs';
 import { getWatchMappings, setWatchMappings } from '../services/watch';
 
 export async function addWatchMapping(
@@ -48,12 +48,6 @@ export async function removeWatchMapping(folderPath: string) {
     );
 
     setWatchMappings(watchMappings);
-}
-
-export async function getAllFilesFromDir(dirPath: string) {
-    const files = await getFilesFromDir(dirPath);
-    const electronFiles = await Promise.all(files.map(getElectronFile));
-    return electronFiles;
 }
 
 export function registerWatcherFunctions(

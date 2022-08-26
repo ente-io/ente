@@ -9,10 +9,7 @@ import {
     setToUploadCollection,
 } from './api/upload';
 import {
-    getAllFilesFromDir,
-    getWatchMappings,
     registerWatcherFunctions,
-    setWatchMappings,
     addWatchMapping,
     removeWatchMapping,
 } from './api/watch';
@@ -33,8 +30,10 @@ import {
     exists,
 } from './api/export';
 import { selectRootDirectory } from './api/common';
-import { getElectronFile, doesFolderExists } from './services/fs';
+import { doesFolderExists } from './services/fs';
 import { fixHotReloadNext12 } from './utils/preload';
+import { getAllFilesFromDir } from './api/fs';
+import { getWatchMappings, setWatchMappings } from './services/watch';
 
 fixHotReloadNext12();
 
@@ -57,7 +56,6 @@ windowObject['ElectronAPIs'] = {
     registerRetryFailedExportListener,
     getExportRecord,
     setExportRecord,
-    getElectronFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
     getPendingUploads,
