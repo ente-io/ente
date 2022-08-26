@@ -85,9 +85,7 @@ class watchFolderService {
 
             for (const mapping of mappings) {
                 const filesOnDisk: ElectronFile[] =
-                    await this.ElectronAPIs.getAllFilesFromDir(
-                        mapping.folderPath
-                    );
+                    await this.ElectronAPIs.getDirFiles(mapping.folderPath);
 
                 this.uploadDiffOfFiles(mapping, filesOnDisk);
                 this.trashDiffOfFiles(mapping, filesOnDisk);
@@ -166,11 +164,12 @@ class watchFolderService {
             const mappingExists = await this.ElectronAPIs.doesFolderExists(
                 mapping.folderPath
             );
-            if (mappingExists) {
+            if (!mappingExists) {
+                this.ElectronAPIs.removeWatchMapping(mapping.folderPath);
+            } else {
                 notDeletedMappings.push(mapping);
             }
         }
-        this.ElectronAPIs.setWatchMappings(notDeletedMappings);
         return notDeletedMappings;
     }
 
@@ -325,7 +324,10 @@ class watchFolderService {
                     );
                     if (mapping) {
                         mapping.files = [...mapping.files, ...uploadedFiles];
-                        this.ElectronAPIs.setWatchMappings(mappings);
+                        this.ElectronAPIs.updateWatchMappingFiles(
+                            mapping.folderPath,
+                            mapping.files
+                        );
                     }
                 }
 
@@ -410,7 +412,10 @@ class watchFolderService {
             mappings[mappingIdx].files = mappings[mappingIdx].files.filter(
                 (file) => !filePathsToRemove.has(file.path)
             );
-            this.ElectronAPIs.setWatchMappings(mappings);
+            this.ElectronAPIs.updateWatchMappingFiles(
+                mappings[mappingIdx].folderPath,
+                mappings[mappingIdx].files
+            );
         } catch (e) {
             logError(e, 'error while running next trash');
         }

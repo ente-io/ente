@@ -36,9 +36,12 @@ export interface ElectronAPIsInterface {
         filePath: string
     ) => Promise<ElectronFile[]>;
     setToUploadCollection: (collectionName: string) => void;
-    getAllFilesFromDir: (dirPath: string) => Promise<ElectronFile[]>;
+    getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
     getWatchMappings: () => WatchMapping[];
-    setWatchMappings: (watchMappings: WatchMapping[]) => void;
+    updateWatchMappingFiles: (
+        folderPath: string,
+        files: WatchMapping['files']
+    ) => void;
     addWatchMapping: (
         collectionName: string,
         folderPath: string,
