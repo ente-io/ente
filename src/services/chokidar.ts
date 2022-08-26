@@ -23,7 +23,7 @@ export function initWatcher(mainWindow: BrowserWindow) {
             mainWindow.webContents.send('watch-unlink', path);
         })
         .on('unlinkDir', (path) => {
-            mainWindow.webContents.send('watch-unlink', path, true);
+            mainWindow.webContents.send('watch-unlink-dir', path);
         })
         .on('error', (error) => {
             logError(error, 'error while watching files');

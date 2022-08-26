@@ -84,17 +84,14 @@ export function registerWatcherFunctions(
         await removeFile(filePath);
         await addFile(await getElectronFile(filePath));
     });
-    ipcRenderer.on(
-        'watch-unlink',
-        async (_, filePath: string, isDir?: boolean) => {
-            filePath = filePath.split(path.sep).join(path.posix.sep);
-            if (isDir) {
-                await removeFolder(filePath);
-            } else {
-                await removeFile(filePath);
-            }
-        }
-    );
+    ipcRenderer.on('watch-unlink', async (_, filePath: string) => {
+        filePath = filePath.split(path.sep).join(path.posix.sep);
+        await removeFile(filePath);
+    });
+    ipcRenderer.on('watch-unlink-dir', async (_, folderPath: string) => {
+        folderPath = folderPath.split(path.sep).join(path.posix.sep);
+        await removeFolder(folderPath);
+    });
 }
 
 export { getWatchMappings } from '../services/watch';
