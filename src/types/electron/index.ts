@@ -20,7 +20,6 @@ export interface ElectronAPIsInterface {
     registerRetryFailedExportListener: (retryFailedExport: () => void) => void;
     getExportRecord: (filePath: string) => Promise<string>;
     setExportRecord: (filePath: string, data: string) => Promise<void>;
-    getElectronFile: (filePath: string) => Promise<ElectronFile>;
     showUploadFilesDialog: () => Promise<ElectronFile[]>;
     showUploadDirsDialog: () => Promise<ElectronFile[]>;
     getPendingUploads: () => Promise<{
