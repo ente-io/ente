@@ -274,8 +274,9 @@ extension DeviceFiles on FilesDB {
           ${FilesDB.columnCreationTime} <= $endTime AND 
           ${FilesDB.columnLocalID} IN 
           (SELECT id FROM device_files where path_id = '${devicePathCollection.id}' ) 
-          ORDER BY ${FilesDB.columnCreationTime} $order , ${FilesDB.columnModificationTime} $order LIMIT $limit
-         ''';
+          ORDER BY ${FilesDB.columnCreationTime} $order , ${FilesDB.columnModificationTime} $order
+         ''' +
+        (limit != null ? ' limit $limit;' : ';');
     final results = await db.rawQuery(rawQuery);
     final files = convertToFiles(results);
     return FileLoadResult(files, files.length == limit);
