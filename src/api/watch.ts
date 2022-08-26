@@ -1,24 +1,17 @@
+import { isMappingPresent } from '../utils/watch';
 import path from 'path';
-import { watchStore } from '../stores/watch.store';
 import { ipcRenderer } from 'electron';
-import { ElectronFile, WatchStoreType } from '../types';
+import { ElectronFile } from '../types';
 import { getElectronFile, getFilesFromDir } from '../services/fs';
+import { getWatchMappings, setWatchMappings } from '../services/watch';
 
 export async function addWatchMapping(
     rootFolderName: string,
     folderPath: string,
     uploadStrategy: number
 ) {
-    let watchMappings = getWatchMappings();
-    if (!watchMappings) {
-        watchMappings = [];
-    }
-
-    const watchMapping = watchMappings?.find(
-        (mapping) => mapping.folderPath === folderPath
-    );
-
-    if (watchMapping) {
+    const watchMappings = getWatchMappings();
+    if (isMappingPresent(watchMappings, folderPath)) {
         return;
     }
 
@@ -55,15 +48,6 @@ export async function removeWatchMapping(folderPath: string) {
     );
 
     setWatchMappings(watchMappings);
-}
-
-export function getWatchMappings() {
-    const mappings = watchStore.get('mappings') ?? [];
-    return mappings;
-}
-
-export function setWatchMappings(watchMappings: WatchStoreType['mappings']) {
-    watchStore.set('mappings', watchMappings);
 }
 
 export async function getAllFilesFromDir(dirPath: string) {

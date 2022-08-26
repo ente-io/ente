@@ -25,7 +25,7 @@ type FileMapping = {
     id: number;
 };
 
-interface Mapping {
+export interface Mapping {
     rootFolderName: string;
     uploadStrategy: number;
     folderPath: string;
