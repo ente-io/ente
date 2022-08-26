@@ -529,14 +529,15 @@ class FilesDB {
     int endTime, {
     int limit,
     bool asc,
+    int visibility = kVisibilityVisible,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
     final results = await db.query(
       table,
       where:
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?',
-      whereArgs: [collectionID, startTime, endTime],
+          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?  AND $columnMMdVisibility = ?',
+      whereArgs: [collectionID, startTime, endTime, visibility],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
