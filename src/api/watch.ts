@@ -1,7 +1,7 @@
 import { isMappingPresent } from '../utils/watch';
 import path from 'path';
 import { ipcRenderer } from 'electron';
-import { ElectronFile } from '../types';
+import { ElectronFile, WatchMapping } from '../types';
 import { getElectronFile } from '../services/fs';
 import { getWatchMappings, setWatchMappings } from '../services/watch';
 
@@ -50,6 +50,23 @@ export async function removeWatchMapping(folderPath: string) {
     setWatchMappings(watchMappings);
 }
 
+export function updateMappingFiles(
+    folderPath: string,
+    files: WatchMapping['files']
+): void {
+    const watchMappings = getWatchMappings();
+    const watchMapping = watchMappings.find(
+        (mapping) => mapping.folderPath === folderPath
+    );
+
+    if (!watchMapping) {
+        throw Error(`Watch mapping not found for ${folderPath}`);
+    }
+
+    watchMapping.files = files;
+    setWatchMappings(watchMappings);
+}
+
 export function registerWatcherFunctions(
     addFile: (file: ElectronFile) => Promise<void>,
     removeFile: (path: string) => Promise<void>,
@@ -79,3 +96,5 @@ export function registerWatcherFunctions(
         }
     );
 }
+
+export { getWatchMappings } from '../services/watch';

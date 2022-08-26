@@ -12,6 +12,8 @@ import {
     registerWatcherFunctions,
     addWatchMapping,
     removeWatchMapping,
+    updateMappingFiles,
+    getWatchMappings,
 } from './api/watch';
 import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
 import { clearElectronStore } from './api/electronStore';
@@ -30,10 +32,8 @@ import {
     exists,
 } from './api/export';
 import { selectRootDirectory } from './api/common';
-import { doesFolderExists } from './services/fs';
 import { fixHotReloadNext12 } from './utils/preload';
-import { getAllFilesFromDir } from './api/fs';
-import { getWatchMappings, setWatchMappings } from './services/watch';
+import { doesFolderExists, getAllFilesFromDir } from './api/fs';
 
 fixHotReloadNext12();
 
@@ -69,9 +69,9 @@ windowObject['ElectronAPIs'] = {
     deleteDiskCache,
     getAllFilesFromDir,
     getWatchMappings,
-    setWatchMappings,
     addWatchMapping,
     removeWatchMapping,
     registerWatcherFunctions,
     doesFolderExists,
+    updateMappingFiles,
 };

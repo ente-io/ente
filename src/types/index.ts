@@ -25,7 +25,7 @@ type FileMapping = {
     id: number;
 };
 
-export interface Mapping {
+export interface WatchMapping {
     rootFolderName: string;
     uploadStrategy: number;
     folderPath: string;
@@ -33,7 +33,7 @@ export interface Mapping {
 }
 
 export interface WatchStoreType {
-    mappings: Mapping[];
+    mappings: WatchMapping[];
 }
 
 export enum FILE_PATH_TYPE {
