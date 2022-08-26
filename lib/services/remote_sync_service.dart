@@ -302,12 +302,8 @@ class RemoteSyncService {
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
     _logger.info(updatedFileIDs.length.toString() + " files updated.");
 
-    final editedFiles = await _db.getEditedRemoteFiles();
-    _logger.info(editedFiles.length.toString() + " files edited.");
-
     _completedUploads = 0;
-    int toBeUploaded =
-        filesToBeUploaded.length + updatedFileIDs.length + editedFiles.length;
+    int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
 
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
@@ -341,15 +337,6 @@ class RemoteSyncService {
                   .getOrCreateForPath(file.deviceFolder))
               .id;
       _uploadFile(file, collectionID, futures);
-    }
-
-    for (final file in editedFiles) {
-      if (_shouldThrottleSync() &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info("Skipping some edited files as we are throttling uploads");
-        break;
-      }
-      _uploadFile(file, file.collectionID, futures);
     }
 
     try {
