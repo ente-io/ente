@@ -801,6 +801,28 @@ class FilesDB {
     return result;
   }
 
+  // Sets the collectionID for the files with given LocalIDs if the
+  // corresponding file entries are not already mapped to some other collection
+  Future<int> setCollectionIDForUnMappedLocalFiles(
+    int collectionID,
+    Set<String> localIDs,
+  ) async {
+    final db = await instance.database;
+    String inParam = "";
+    for (final localID in localIDs) {
+      inParam += "'" + localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    return await db.rawUpdate(
+      '''
+      UPDATE $filesTable
+      SET $columnCollectionID = $collectionID
+      WHERE $columnLocalID IN ($inParam) AND ($columnCollectionID IS NULL OR 
+      $columnCollectionID = -1);
+    ''',
+    );
+  }
+
   Future<int> getNumberOfUploadedFiles() async {
     final db = await instance.database;
     final rows = await db.query(
