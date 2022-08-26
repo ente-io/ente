@@ -27,6 +27,7 @@ import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 class RemoteSyncService {
   final _logger = Logger("RemoteSyncService");
@@ -223,10 +224,42 @@ class RemoteSyncService {
   }
 
   Future<void> _syncDeviceCollectionFilesForUpload() async {
-    final devicePathCollections =
-        await FilesDB.instance.getDevicePathCollections();
+    final FilesDB fileDb = FilesDB.instance;
+    final devicePathCollections = await fileDb.getDevicePathCollections();
     devicePathCollections.removeWhere((element) => !element.sync);
     await _createCollectionsForDevicePath(devicePathCollections);
+    Map<String, Set<String>> unSyncedPathIdToLocalIDs =
+        await fileDb.getDevicePathIDToLocalIDMap(syncStatus: false);
+    /*
+       A) Check if mapping for localID already exist in the collection
+       B) Check if
+     */
+    for (final eachDevicePath in devicePathCollections) {
+      String pathID = eachDevicePath.id;
+      Set<String> unSyncedLocalIDs =
+          unSyncedPathIdToLocalIDs[eachDevicePath.id] ?? {};
+      if (unSyncedLocalIDs.isNotEmpty && eachDevicePath.collectionID != -1) {
+        // mark IDs as already synced if corresponding entry is present in
+        // the collection. This can happen when a user has marked a folder
+        // for sync, then un-synced it and again tries to mark if for sync.
+        Set<String> existingMapping = await fileDb
+            .getLocalFileIDsForCollection(eachDevicePath.collectionID);
+        Set<String> commonElements =
+            unSyncedLocalIDs.intersection(existingMapping);
+        if (commonElements.isNotEmpty) {
+          debugPrint(
+            "${commonElements.length} files already existing in "
+            "collection ${eachDevicePath.collectionID} for ${eachDevicePath.name}",
+          );
+          await fileDb.insertPathIDToLocalIDMapping(
+            {pathID: commonElements},
+            conflictAlgorithm: ConflictAlgorithm.replace,
+            syncStatus: true,
+          );
+          unSyncedLocalIDs.removeAll(commonElements);
+        }
+      }
+    }
   }
 
   Future<void> _createCollectionsForDevicePath(

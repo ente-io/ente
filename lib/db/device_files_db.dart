@@ -13,9 +13,12 @@ extension DeviceFiles on FilesDB {
   static const _sqlBoolTrue = 1;
   static const _sqlBoolFalse = 0;
 
+  // insertPathIDToLocalIDMapping is used to insert of update the pathID
+  // to localID mapping.
   Future<void> insertPathIDToLocalIDMapping(
     Map<String, Set<String>> mappingToAdd, {
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
+    bool syncStatus = false,
   }) async {
     debugPrint("Inserting missing PathIDToLocalIDMapping");
     final db = await database;
@@ -34,6 +37,7 @@ extension DeviceFiles on FilesDB {
           {
             "id": localID,
             "path_id": pathID,
+            "synced": syncStatus ? _sqlBoolTrue : _sqlBoolFalse
           },
           conflictAlgorithm: conflictAlgorithm,
         );
@@ -89,9 +93,16 @@ extension DeviceFiles on FilesDB {
     }
   }
 
-  Future<Map<String, Set<String>>> getDevicePathIDToLocalIDMap() async {
+  Future<Map<String, Set<String>>> getDevicePathIDToLocalIDMap({
+    bool syncStatus,
+  }) async {
     try {
       final db = await database;
+      String query = 'SELECT id, path_id FROM device_files';
+      if (syncStatus != null) {
+        query =
+            'SELECT id, path_id FROM device_files where synced = ${syncStatus ? _sqlBoolTrue : _sqlBoolFalse} ;';
+      }
       final rows = await db.rawQuery(
         ''' SELECT id, path_id FROM device_files; ''',
       );
@@ -156,7 +167,11 @@ extension DeviceFiles on FilesDB {
       // add the mappings for localIDs
       if (pathIDToLocalIDsMap.isNotEmpty) {
         debugPrint("Insert pathToLocalIDs mapping while importing localAssets");
-        await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
+        await insertPathIDToLocalIDMapping(
+          pathIDToLocalIDsMap,
+          conflictAlgorithm: ConflictAlgorithm.ignore, // do not reset sync
+          // status
+        );
       }
     } catch (e) {
       _logger.severe("failed to save path names", e);

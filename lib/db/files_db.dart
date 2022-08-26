@@ -647,18 +647,6 @@ class FilesDB {
     return convertToFiles(results);
   }
 
-  Future<List<File>> getAllInPath(String path) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnLocalID IS NOT NULL AND $columnDeviceFolder = ?',
-      whereArgs: [path],
-      orderBy: '$columnCreationTime DESC',
-      groupBy: columnLocalID,
-    );
-    return convertToFiles(results);
-  }
-
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
@@ -790,6 +778,24 @@ class FilesDB {
     );
     final result = <String>{};
     for (final row in rows) {
+      result.add(row[columnLocalID]);
+    }
+    return result;
+  }
+
+  Future<Set<String>> getLocalFileIDsForCollection(int collectionID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      where: '$columnLocalID IS NOT NULL AND $columnCollectionID = ?',
+      whereArgs: [collectionID],
+    );
+    final result = <String>{};
+    for (final row in rows) {
+      if (kDebugMode && result.contains(row[columnLocalID])) {
+        throw Exception("Two mappings existing for same localID");
+      }
       result.add(row[columnLocalID]);
     }
     return result;
@@ -950,6 +956,8 @@ class FilesDB {
     );
   }
 
+  // getLocalFiles is used in multiple places. Do not add dedupte logic
+  // while
   Future<List<File>> getLocalFiles(List<String> localIDs) async {
     String inParam = "";
     for (final localID in localIDs) {
