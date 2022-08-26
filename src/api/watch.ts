@@ -12,7 +12,7 @@ export async function addWatchMapping(
 ) {
     const watchMappings = getWatchMappings();
     if (isMappingPresent(watchMappings, folderPath)) {
-        return;
+        throw new Error(`Watch mapping for ${folderPath} already exists`);
     }
 
     await ipcRenderer.invoke('add-watcher', {
@@ -36,7 +36,7 @@ export async function removeWatchMapping(folderPath: string) {
     );
 
     if (!watchMapping) {
-        return;
+        throw new Error(`Watch mapping for ${folderPath} does not exist`);
     }
 
     await ipcRenderer.invoke('remove-watcher', {
