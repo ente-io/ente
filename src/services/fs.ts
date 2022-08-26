@@ -178,14 +178,6 @@ export const convertBrowserStreamToNode = (fileStream: any) => {
     return rs;
 };
 
-export async function renameDirectory(oldDirPath: string, newDirPath: string) {
-    await fs.rename(oldDirPath, newDirPath);
-}
-
-export async function writeFile(filePath: string, fileData: any) {
-    await fs.writeFile(filePath, fileData);
-}
-
 export function writeStream(filePath: string, fileStream: any) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);

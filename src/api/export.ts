@@ -1,9 +1,4 @@
-import {
-    readTextFile,
-    renameDirectory,
-    writeFile,
-    writeStream,
-} from './../services/fs';
+import { readTextFile, writeStream } from './../services/fs';
 import { ipcRenderer } from 'electron';
 import { logError } from '../utils/logging';
 import * as fs from 'promise-fs';
@@ -23,7 +18,7 @@ export const checkExistsAndRename = async (
     newDirPath: string
 ) => {
     if (fs.existsSync(oldDirPath)) {
-        await renameDirectory(oldDirPath, newDirPath);
+        await fs.rename(oldDirPath, newDirPath);
     }
 };
 
@@ -35,7 +30,7 @@ export const saveStreamToDisk = (
 };
 
 export const saveFileToDisk = async (path: string, fileData: any) => {
-    await writeFile(path, fileData);
+    await fs.writeFile(path, fileData);
 };
 
 export const getExportRecord = async (filePath: string) => {
@@ -52,7 +47,7 @@ export const getExportRecord = async (filePath: string) => {
 };
 
 export const setExportRecord = async (filePath: string, data: string) => {
-    await writeFile(filePath, data);
+    await fs.writeFile(filePath, data);
 };
 
 export const registerResumeExportListener = (resumeExport: () => void) => {
