@@ -298,7 +298,7 @@ class FilesDB {
   static List<String> createOnDeviceFilesAndPathCollection() {
     return [
       '''
-        CREATE TABLE device_files (
+        CREATE TABLE IF NOT EXISTS device_files (
           id TEXT NOT NULL,
           path_id TEXT NOT NULL,
           synced INTEGER NOT NULL DEFAULT 0,
@@ -306,7 +306,7 @@ class FilesDB {
        );
        ''',
       '''
-       CREATE TABLE device_path_collections (
+       CREATE TABLE IF NOT EXISTS device_path_collections (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT,
           modified_at INTEGER NOT NULL DEFAULT 0,
