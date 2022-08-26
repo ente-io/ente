@@ -84,7 +84,16 @@ class FeatureFlagService {
     }
   }
 
-  bool enableSearchFeature() {
+  bool enableSearch() {
+    try {
+      return _isInternalUserOrDebugBuild() || _getFeatureFlags().enableSearch;
+    } catch (e) {
+      _logger.severe("failed to getSearchFeatureFlag", e);
+      return FFDefault.enableSearch;
+    }
+  }
+
+  bool _isInternalUserOrDebugBuild() {
     String email = Configuration.instance.getEmail();
     return (email != null && email.endsWith("@ente.io")) || kDebugMode;
   }
@@ -111,18 +120,21 @@ class FeatureFlags {
     disableUrlSharing: FFDefault.disableUrlSharing,
     enableStripe: FFDefault.enableStripe,
     enableMissingLocationMigration: FFDefault.enableMissingLocationMigration,
+    enableSearch: FFDefault.enableSearch,
   );
 
   final bool disableCFWorker;
   final bool disableUrlSharing;
   final bool enableStripe;
   final bool enableMissingLocationMigration;
+  final bool enableSearch;
 
   FeatureFlags({
     @required this.disableCFWorker,
     @required this.disableUrlSharing,
     @required this.enableStripe,
     @required this.enableMissingLocationMigration,
+    @required this.enableSearch,
   });
 
   Map<String, dynamic> toMap() {
@@ -131,6 +143,7 @@ class FeatureFlags {
       "disableUrlSharing": disableUrlSharing,
       "enableStripe": enableStripe,
       "enableMissingLocationMigration": enableMissingLocationMigration,
+      "enableSearch": enableSearch,
     };
   }
 
@@ -147,6 +160,7 @@ class FeatureFlags {
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
       enableMissingLocationMigration: json["enableMissingLocationMigration"] ??
           FFDefault.enableMissingLocationMigration,
+      enableSearch: json["enableSearch"] ?? FFDefault.enableSearch,
     );
   }
 

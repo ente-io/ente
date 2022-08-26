@@ -8,8 +8,8 @@ import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.d
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/search_debouncer.dart';
 
 class SearchIconWidget extends StatefulWidget {
   const SearchIconWidget({Key key}) : super(key: key);
@@ -53,7 +53,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   String _query = "";
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
-  final _debouncer = Debouncer(const Duration(milliseconds: 200));
+  final _debouncer = Debouncer(const Duration(milliseconds: 100));
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +62,7 @@ class _SearchWidgetState extends State<SearchWidget> {
         Navigator.pop(context);
       },
       child: Container(
-        color: Colors.black.withOpacity(0.32),
+        color: Theme.of(context).colorScheme.searchResultsBackgroundColor,
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -103,23 +103,29 @@ class _SearchWidgetState extends State<SearchWidget> {
                                 .withOpacity(0.5),
                           ),
                         ),
+                        /*Using valueListenableBuilder inside a stateful widget because this widget is only rebuild when
+                        setState is called when deboucncing is over and the spinner needs to be shown while debouncing */
                         suffixIcon: ValueListenableBuilder(
-                          valueListenable: _debouncer.debounceNotifierGetter,
+                          valueListenable: _debouncer.debounceActiveNotifier,
                           builder: (
                             BuildContext context,
-                            Timer debounceTimer,
+                            bool isDebouncing,
                             Widget child,
                           ) {
-                            return SearchSuffixIcon(debounceTimer);
+                            return SearchSuffixIcon(
+                              isDebouncing,
+                            );
                           },
                         ),
                       ),
                       onChanged: (value) async {
+                        _query = value;
                         final List<SearchResult> allResults =
                             await getSearchResultsForQuery(value);
-                        if (mounted) {
+                        /*checking if _query == value to make sure that the results are from the current query 
+                        and not from the previous query (race condition).*/
+                        if (mounted && _query == value) {
                           setState(() {
-                            _query = value;
                             _results.clear();
                             _results.addAll(allResults);
                           });
@@ -144,33 +150,31 @@ class _SearchWidgetState extends State<SearchWidget> {
 
   @override
   void dispose() {
-    _debouncer.cancel();
+    _debouncer.cancelDebounce();
     super.dispose();
   }
 
   Future<List<SearchResult>> getSearchResultsForQuery(String query) async {
-    final List<SearchResult> allResults = [];
-    if (query.isEmpty) {
-      if (_debouncer.isActive()) {
-        _debouncer.cancel();
-      }
-      return (allResults);
-    }
-
     final Completer<List<SearchResult>> completer = Completer();
 
-    _debouncer.run(() {
-      _getSearchResultsFromService(query, completer, allResults);
-    });
+    _debouncer.run(
+      () {
+        return _getSearchResultsFromService(query, completer);
+      },
+    );
 
     return completer.future;
   }
 
-  void _getSearchResultsFromService(
+  Future<void> _getSearchResultsFromService(
     String query,
     Completer completer,
-    List<SearchResult> allResults,
   ) async {
+    final List<SearchResult> allResults = [];
+    if (query.isEmpty) {
+      completer.complete(allResults);
+      return;
+    }
     if (_isYearValid(query)) {
       final yearResults = await _searchService.getYearSearchResults(query);
       allResults.addAll(yearResults);
@@ -189,7 +193,6 @@ class _SearchWidgetState extends State<SearchWidget> {
 
     final monthResults = await _searchService.getMonthSearchResults(query);
     allResults.addAll(monthResults);
-
     completer.complete(allResults);
   }
 

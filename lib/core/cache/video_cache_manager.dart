@@ -7,6 +7,7 @@ class VideoCacheManager {
     Config(
       key,
       maxNrOfCacheObjects: 50,
+      stalePeriod: const Duration(days: 3),
     ),
   );
 }
