@@ -7,7 +7,7 @@ import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
 
 // https://stackoverflow.com/a/63111390
-export const getFilesFromDir = async (dirPath: string) => {
+export const getDirFilePaths = async (dirPath: string) => {
     if (!(await fs.stat(dirPath)).isDirectory()) {
         return [dirPath];
     }
@@ -17,7 +17,7 @@ export const getFilesFromDir = async (dirPath: string) => {
 
     for (const filePath of filePaths) {
         const absolute = path.join(dirPath, filePath);
-        files = files.concat(await getFilesFromDir(absolute));
+        files = files.concat(await getDirFilePaths(absolute));
     }
 
     return files;

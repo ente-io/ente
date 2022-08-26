@@ -1,7 +1,7 @@
-import { getElectronFile, getFilesFromDir } from '../services/fs';
+import { getElectronFile, getDirFilePaths } from '../services/fs';
 
-export async function getAllFilesFromDir(dirPath: string) {
-    const files = await getFilesFromDir(dirPath);
+export async function getDirFiles(dirPath: string) {
+    const files = await getDirFilePaths(dirPath);
     const electronFiles = await Promise.all(files.map(getElectronFile));
     return electronFiles;
 }

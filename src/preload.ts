@@ -33,7 +33,7 @@ import {
 } from './api/export';
 import { selectRootDirectory } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
-import { doesFolderExists, getAllFilesFromDir } from './api/fs';
+import { doesFolderExists, getDirFiles } from './api/fs';
 
 fixHotReloadNext12();
 
@@ -67,7 +67,7 @@ windowObject['ElectronAPIs'] = {
     setEncryptionKey,
     openDiskCache,
     deleteDiskCache,
-    getAllFilesFromDir,
+    getDirFiles,
     getWatchMappings,
     addWatchMapping,
     removeWatchMapping,

@@ -12,7 +12,7 @@ import { buildContextMenu } from './menu';
 import { logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
-import { getFilesFromDir } from '../services/fs';
+import { getDirFilePaths } from '../services/fs';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -71,7 +71,7 @@ export default function setupIpcComs(
 
         let files: string[] = [];
         for (const dirPath of dir.filePaths) {
-            files = files.concat(await getFilesFromDir(dirPath));
+            files = files.concat(await getDirFilePaths(dirPath));
         }
 
         return files;
