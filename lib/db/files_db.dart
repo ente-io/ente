@@ -403,7 +403,7 @@ class FilesDB {
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
-  Future<FileLoadResult> getAllUploadedFiles(
+  Future<FileLoadResult> getAllUploadedVisibleFiles(
     int startTime,
     int endTime,
     int ownerID, {
@@ -428,6 +428,24 @@ class FilesDB {
     List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
+  }
+
+  Future<Set<int>> getCollectionIDsOfHiddenFiles(
+    int ownerID, {
+    int visibility = kVisibilityArchive,
+  }) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnOwnerID = ? AND $columnMMdVisibility = ?',
+      columns: [columnCollectionID],
+      whereArgs: [ownerID, visibility],
+    );
+    List<int> collectionIDsOfHiddenFiles = [];
+    for (var result in results) {
+      collectionIDsOfHiddenFiles.add(result['collection_id']);
+    }
+    return collectionIDsOfHiddenFiles.toSet();
   }
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
