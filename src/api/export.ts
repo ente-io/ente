@@ -1,6 +1,5 @@
 import {
     createDirectory,
-    doesPathExists,
     readTextFile,
     renameDirectory,
     writeFile,
@@ -8,13 +7,14 @@ import {
 } from './../services/fs';
 import { ipcRenderer } from 'electron';
 import { logError } from '../utils/logging';
+import * as fs from 'promise-fs';
 
 export const exists = (path: string) => {
-    return doesPathExists(path);
+    return fs.existsSync(path);
 };
 
 export const checkExistsAndCreateCollectionDir = async (dirPath: string) => {
-    if (!doesPathExists(dirPath)) {
+    if (!fs.existsSync(dirPath)) {
         await createDirectory(dirPath);
     }
 };
@@ -23,7 +23,7 @@ export const checkExistsAndRename = async (
     oldDirPath: string,
     newDirPath: string
 ) => {
-    if (doesPathExists(oldDirPath)) {
+    if (fs.existsSync(oldDirPath)) {
         await renameDirectory(oldDirPath, newDirPath);
     }
 };
@@ -41,7 +41,7 @@ export const saveFileToDisk = async (path: string, fileData: any) => {
 
 export const getExportRecord = async (filePath: string) => {
     try {
-        if (!(await doesPathExists(filePath))) {
+        if (!fs.existsSync(filePath)) {
             return null;
         }
         const recordFile = await readTextFile(filePath);
