@@ -51,6 +51,13 @@ class IgnoredFilesService {
     List<IgnoredFile> ignoredFiles = [];
     Set<String> idsToRemoveFromCache = {};
     for (var file in files) {
+      if (Platform.isIOS && file.localID != null) {
+        // in IOS, the imported file might not have title fetched by default.
+        // fetching title has performance impact.
+        if (file.title == null || file.title.isEmpty) {
+          file.title = 'dummyTitle';
+        }
+      }
       var ignoredFile = IgnoredFile.fromFile(file);
       if (ignoredFile != null) {
         ignoredFiles.add(ignoredFile);
@@ -58,6 +65,9 @@ class IgnoredFilesService {
         if (id != null) {
           idsToRemoveFromCache.add(id);
         }
+      } else {
+        _logger.warning(
+            'ignoredFile should not be null while removing mapping ${file.tag()}');
       }
     }
     if (ignoredFiles.isNotEmpty) {

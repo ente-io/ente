@@ -119,8 +119,7 @@ class IgnoredFilesDB {
       }
       batch.rawDelete(
         "DELETE from $tableName WHERE "
-        "$columnLocalID = '${file.localID}' OR ( $columnDeviceFolder = '${file.deviceFolder}' AND $columnTitle = '${file.title}' ) "
-        " ) ",
+        "$columnLocalID = '${file.localID}' OR ( $columnDeviceFolder = '${file.deviceFolder}' AND $columnTitle = '${file.title}' ) ",
       );
       batchCounter++;
     }
