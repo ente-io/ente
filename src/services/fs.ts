@@ -176,7 +176,7 @@ export const convertBrowserStreamToNode = (fileStream: any) => {
     return rs;
 };
 
-export function writeStream(filePath: string, fileStream: ReadableStream<any>) {
+export function writeStream(filePath: string, fileStream: any) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);
     readable.pipe(writeable);

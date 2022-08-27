@@ -1,5 +1,6 @@
 import { readTextFile, writeStream } from './../services/fs';
 import { ipcRenderer } from 'electron';
+import { logError } from '../utils/logging';
 import * as fs from 'promise-fs';
 
 export const exists = (path: string) => {
@@ -33,11 +34,15 @@ export const saveFileToDisk = async (path: string, fileData: any) => {
 };
 
 export const getExportRecord = async (filePath: string) => {
-    if (!fs.existsSync(filePath)) {
-        return null;
+    try {
+        if (!fs.existsSync(filePath)) {
+            return null;
+        }
+        const recordFile = await readTextFile(filePath);
+        return recordFile;
+    } catch (e) {
+        logError(e, 'error while selecting files');
     }
-    const recordFile = await readTextFile(filePath);
-    return recordFile;
 };
 
 export const setExportRecord = async (filePath: string, data: string) => {
