@@ -25,7 +25,7 @@ import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
-import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
+
 import { addLogLine } from 'utils/logging';
 import { makeHumanReadableStorage } from 'utils/billing';
 export function downloadAsFile(filename: string, content: string) {
@@ -133,21 +133,13 @@ function downloadUsingAnchor(link: string, name: string) {
 }
 
 export function sortFilesIntoCollections(files: EnteFile[]) {
-    const collectionWiseFiles = new Map<number, EnteFile[]>([
-        [ARCHIVE_SECTION, []],
-        [TRASH_SECTION, []],
-    ]);
+    const collectionWiseFiles = new Map<number, EnteFile[]>();
     for (const file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {
             collectionWiseFiles.set(file.collectionID, []);
         }
-        if (file.isTrashed) {
-            collectionWiseFiles.get(TRASH_SECTION).push(file);
-        } else {
+        if (!file.isTrashed) {
             collectionWiseFiles.get(file.collectionID).push(file);
-            if (IsArchived(file)) {
-                collectionWiseFiles.get(ARCHIVE_SECTION).push(file);
-            }
         }
     }
     return collectionWiseFiles;
