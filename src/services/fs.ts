@@ -183,5 +183,5 @@ export function writeStream(filePath: string, fileStream: any) {
 }
 
 export async function readTextFile(filePath: string) {
-    await fs.readFile(filePath, 'utf-8');
+    return await fs.readFile(filePath, 'utf-8');
 }
