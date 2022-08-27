@@ -85,6 +85,7 @@ export const getValidPaths = (paths: string[]) => {
         }
     });
 };
+
 export const getZipFileStream = async (
     zip: StreamZip.StreamZipAsync,
     filePath: string
