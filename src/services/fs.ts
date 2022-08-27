@@ -30,7 +30,6 @@ export const getFileStream = async (filePath: string) => {
         async pull(controller) {
             try {
                 const buff = new Uint8Array(FILE_STREAM_CHUNK_SIZE);
-
                 // original types were not working correctly
                 const bytesRead = (await fs.read(
                     file,
@@ -161,15 +160,6 @@ export async function doesFolderExists(dirPath: string) {
         .catch(() => false);
 }
 
-export async function doesPathExists(dirPath: string) {
-    return await fs
-        .stat(dirPath)
-        .then((stats: fs.Stats) => {
-            return stats.isFile() || stats.isDirectory();
-        })
-        .catch(() => false);
-}
-
 export const convertBrowserStreamToNode = (fileStream: any) => {
     const reader = fileStream.getReader();
     const rs = new Readable();
@@ -188,19 +178,7 @@ export const convertBrowserStreamToNode = (fileStream: any) => {
     return rs;
 };
 
-export async function createDirectory(dirPath: string) {
-    await fs.mkdir(dirPath);
-}
-
-export async function renameDirectory(oldDirPath: string, newDirPath: string) {
-    await fs.rename(oldDirPath, newDirPath);
-}
-
-export async function writeFile(filePath: string, fileData: any) {
-    await fs.writeFile(filePath, fileData);
-}
-
-export function writeStream(filePath: string, fileStream: any) {
+export function writeStream(filePath: string, fileStream: ReadableStream<any>) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);
     readable.pipe(writeable);

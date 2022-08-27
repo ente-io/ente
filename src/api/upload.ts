@@ -4,7 +4,6 @@ import path from 'path';
 import StreamZip from 'node-stream-zip';
 import { uploadStatusStore } from '../stores/upload.store';
 import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
-import { logError } from '../utils/logging';
 import { ipcRenderer } from 'electron';
 
 async function getZipEntryAsElectronFile(
@@ -90,48 +89,36 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     return files;
 };
 
-export const showUploadDirsDialog = async () => {
-    try {
-        const filePaths: string[] = await ipcRenderer.invoke(
-            'show-upload-dirs-dialog'
-        );
-        const files = await Promise.all(filePaths.map(getElectronFile));
-        return files;
-    } catch (e) {
-        logError(e, 'error while selecting folders');
-    }
+export const showUploadFilesDialog = async () => {
+    const filePaths: string[] = await ipcRenderer.invoke(
+        'show-upload-files-dialog'
+    );
+    const files = await Promise.all(filePaths.map(getElectronFile));
+    return files;
 };
 
-export const showUploadFilesDialog = async () => {
-    try {
-        const filePaths: string[] = await ipcRenderer.invoke(
-            'show-upload-files-dialog'
-        );
-        const files = await Promise.all(filePaths.map(getElectronFile));
-        return files;
-    } catch (e) {
-        logError(e, 'error while selecting files');
-    }
+export const showUploadDirsDialog = async () => {
+    const filePaths: string[] = await ipcRenderer.invoke(
+        'show-upload-dirs-dialog'
+    );
+    const files = await Promise.all(filePaths.map(getElectronFile));
+    return files;
 };
 
 export const showUploadZipDialog = async () => {
-    try {
-        const filePaths: string[] = await ipcRenderer.invoke(
-            'show-upload-zip-dialog'
-        );
-        const files: ElectronFile[] = [];
+    const filePaths: string[] = await ipcRenderer.invoke(
+        'show-upload-zip-dialog'
+    );
 
-        for (const filePath of filePaths) {
-            files.push(...(await getElectronFilesFromGoogleZip(filePath)));
-        }
-
-        return {
-            zipPaths: filePaths,
-            files,
-        };
-    } catch (e) {
-        logError(e, 'error while selecting zips');
+    const files: ElectronFile[] = [];
+    for (const filePath of filePaths) {
+        files.push(...(await getElectronFilesFromGoogleZip(filePath)));
     }
+
+    return {
+        zipPaths: filePaths,
+        files,
+    };
 };
 
 const getSavedPaths = (type: FILE_PATH_TYPE) => {
