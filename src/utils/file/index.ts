@@ -132,7 +132,7 @@ function downloadUsingAnchor(link: string, name: string) {
     a.remove();
 }
 
-export function groupFilesIntoCollections(files: EnteFile[]) {
+export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
     const collectionWiseFiles = new Map<number, EnteFile[]>();
     for (const file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {

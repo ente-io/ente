@@ -13,7 +13,7 @@ import { CustomError } from 'utils/error';
 import {
     isSharedFile,
     sortFiles,
-    groupFilesIntoCollections as groupFilesBasedOnCollectionID,
+    groupFilesBasedOnCollectionID,
 } from 'utils/file';
 import {
     Collection,
