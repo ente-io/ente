@@ -1,8 +1,9 @@
+import { ElectronAPIs } from 'types/electron';
 import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 
 class SafeStorageService {
-    private ElectronAPIs: any;
+    private ElectronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];

@@ -1,8 +1,9 @@
 import isElectron from 'is-electron';
+import { ElectronAPIs } from 'types/electron';
 import { runningInBrowser } from 'utils/common';
 
 class ElectronService {
-    private ElectronAPIs: any;
+    private ElectronAPIs: ElectronAPIs;
     private isBundledApp: boolean = false;
 
     constructor() {
