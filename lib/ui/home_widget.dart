@@ -416,7 +416,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               ignoredCollectionIDs: archivedCollectionIds,
             );
           } else {
-            result = await FilesDB.instance.getAllUploadedVisibleFiles(
+            result = await FilesDB.instance.getAllUploadedFiles(
               creationStartTime,
               creationEndTime,
               ownerID,

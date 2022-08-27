@@ -9,6 +9,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -403,7 +404,7 @@ class FilesDB {
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
-  Future<FileLoadResult> getAllUploadedVisibleFiles(
+  Future<FileLoadResult> getAllUploadedFiles(
     int startTime,
     int endTime,
     int ownerID, {
@@ -551,11 +552,22 @@ class FilesDB {
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
+    String whereClause;
+    List<Object> whereArgs;
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      whereClause =
+          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnMMdVisibility = ?';
+      whereArgs = [collectionID, startTime, endTime, visibility];
+    } else {
+      whereClause =
+          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
+      whereArgs = [collectionID, startTime, endTime];
+    }
+
     final results = await db.query(
       table,
-      where:
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?  AND $columnMMdVisibility = ?',
-      whereArgs: [collectionID, startTime, endTime, visibility],
+      where: whereClause,
+      whereArgs: whereArgs,
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -1025,9 +1037,9 @@ class FilesDB {
   }
 
   Future<List<File>> getLatestCollectionFiles() async {
-    final db = await instance.database;
-    final rows = await db.rawQuery(
-      '''
+    String query;
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      query = '''
       SELECT $table.*
       FROM $table
       INNER JOIN
@@ -1039,7 +1051,26 @@ class FilesDB {
         ) latest_files
         ON $table.$columnCollectionID = latest_files.$columnCollectionID
         AND $table.$columnCreationTime = latest_files.max_creation_time;
-    ''',
+    ''';
+    } else {
+      query = '''
+      SELECT $table.*
+      FROM $table
+      INNER JOIN
+        (
+          SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
+          FROM $table
+          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)
+          GROUP BY $columnCollectionID
+        ) latest_files
+        ON $table.$columnCollectionID = latest_files.$columnCollectionID
+        AND $table.$columnCreationTime = latest_files.max_creation_time;
+    ''';
+    }
+
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      query,
     );
     final files = _convertToFiles(rows);
     // TODO: Do this de-duplication within the SQL Query

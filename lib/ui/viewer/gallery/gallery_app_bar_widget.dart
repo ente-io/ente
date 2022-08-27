@@ -12,6 +12,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/sharing/share_collection_widget.dart';
@@ -132,7 +133,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           child: IconButton(
             icon: Icon(Icons.adaptive.share),
             onPressed: () async {
-              if (await _collectionHasSharedFiles()) {
+              if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
+                  await _collectionHasSharedFiles()) {
                 final choice = await showChoiceDialog(
                   context,
                   'Share hidden items?',
