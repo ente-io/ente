@@ -9,7 +9,7 @@ export interface ElectronAPIs {
     ) => Promise<void>;
     saveStreamToDisk: (path: string, fileStream: ReadableStream<any>) => void;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
-    selectRootDirectory: () => Promise<any>;
+    selectRootDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
     showOnTray: (content?: any) => void;
     registerResumeExportListener: (resumeExport: () => void) => void;
@@ -36,7 +36,7 @@ export interface ElectronAPIs {
     setToUploadCollection: (collectionName: string) => void;
     clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
-    getEncryptionKey: () => Promise<any>;
+    getEncryptionKey: () => Promise<string>;
     openDiskCache: (cacheName: string) => Promise<Cache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
 }

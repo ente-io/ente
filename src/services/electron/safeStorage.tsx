@@ -33,7 +33,7 @@ class SafeStorageService {
     async clearElectronStore() {
         try {
             if (this.allElectronAPIsExist) {
-                return await this.ElectronAPIs.clearElectronStore();
+                return this.ElectronAPIs.clearElectronStore();
             }
         } catch (e) {
             logError(e, 'clearElectronStore failed');
