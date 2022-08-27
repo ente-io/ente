@@ -831,7 +831,8 @@ function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
     const collectionWiseFiles = sortFilesIntoCollections(files);
     const collectionFilesCount = new Map<number, number>();
     for (const [id, files] of collectionWiseFiles) {
-        collectionFilesCount.set(id, files.length);
+        const uniqueFileCount = new Set(files.map((file) => file.id)).size;
+        collectionFilesCount.set(id, uniqueFileCount);
     }
     return collectionFilesCount;
 }
