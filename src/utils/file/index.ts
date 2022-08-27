@@ -418,9 +418,7 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return file;
 }
 
-export function isSharedFile(file: EnteFile) {
-    const user: User = getData(LS_KEYS.USER);
-
+export function isSharedFile(user: User, file: EnteFile) {
     if (!user?.id || !file?.ownerID) {
         return false;
     }

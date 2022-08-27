@@ -28,6 +28,8 @@ import { isSameDayAnyYear, isInsideBox } from 'utils/search';
 import { Search } from 'types/search';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
+import { User } from 'types/user';
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 
 const Container = styled('div')`
     display: block;
@@ -161,6 +163,7 @@ const PhotoFrame = ({
 
     useEffect(() => {
         const idSet = new Set();
+        const user: User = getData(LS_KEYS.USER);
         filteredDataRef.current = files
             .map((item, index) => ({
                 ...item,
@@ -204,7 +207,7 @@ const PhotoFrame = ({
                     return false;
                 }
 
-                if (isSharedFile(item) && !isSharedCollection) {
+                if (isSharedFile(user, item) && !isSharedCollection) {
                     return false;
                 }
                 if (activeCollection === TRASH_SECTION && !item.isTrashed) {
