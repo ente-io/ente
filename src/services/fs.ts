@@ -2,7 +2,6 @@ import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import path from 'path';
 import * as fs from 'promise-fs';
 import { ElectronFile } from '../types';
-import { logError } from '../utils/logging';
 import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
 
@@ -46,7 +45,6 @@ export const getFileStream = async (filePath: string) => {
                     controller.enqueue(buff);
                 }
             } catch (e) {
-                logError(e, 'stream pull failed');
                 await fs.close(file);
             }
         },
@@ -143,7 +141,6 @@ export const getZipFileStream = async (
                     controller.close();
                 }
             } catch (e) {
-                logError(e, 'stream reading failed');
                 controller.close();
             }
         },

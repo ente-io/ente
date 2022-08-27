@@ -1,10 +1,11 @@
 import { getZipFileStream } from './../services/fs';
-import { getElectronFile, getValidPaths } from './../services/fs';
+import { getElectronFile } from './../services/fs';
 import path from 'path';
 import StreamZip from 'node-stream-zip';
 import { uploadStatusStore } from '../stores/upload.store';
 import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
 import { ipcRenderer } from 'electron';
+import { getSavedFilePaths } from '../utils/upload';
 
 async function getZipEntryAsElectronFile(
     zip: StreamZip.StreamZipAsync,
@@ -47,8 +48,8 @@ export const setToUploadCollection = (collectionName: string) => {
 };
 
 export const getPendingUploads = async () => {
-    const filePaths = getSavedPaths(FILE_PATH_TYPE.FILES);
-    const zipPaths = getSavedPaths(FILE_PATH_TYPE.ZIPS);
+    const filePaths = getSavedFilePaths(FILE_PATH_TYPE.FILES);
+    const zipPaths = getSavedFilePaths(FILE_PATH_TYPE.ZIPS);
     const collectionName = uploadStatusStore.get('collectionName');
 
     let files: ElectronFile[] = [];
@@ -119,14 +120,4 @@ export const showUploadZipDialog = async () => {
         zipPaths: filePaths,
         files,
     };
-};
-
-const getSavedPaths = (type: FILE_PATH_TYPE) => {
-    const paths =
-        getValidPaths(
-            uploadStatusStore.get(FILE_PATH_KEYS[type]) as string[]
-        ) ?? [];
-
-    setToUploadFiles(type, paths);
-    return paths;
 };
