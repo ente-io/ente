@@ -10,7 +10,11 @@ import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import { isSharedFile, sortFiles, sortFilesIntoCollections } from 'utils/file';
+import {
+    isSharedFile,
+    sortFiles,
+    groupFilesIntoCollections as groupFilesBasedOnCollectionID,
+} from 'utils/file';
 import {
     Collection,
     CollectionLatestFiles,
@@ -828,9 +832,9 @@ function getCollectionsFileCount(
     files: EnteFile[],
     archivedCollections: Set<number>
 ): CollectionFilesCount {
-    const collectionWiseFiles = sortFilesIntoCollections(files);
+    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
     const collectionFilesCount = new Map<number, number>();
-    for (const [id, files] of collectionWiseFiles) {
+    for (const [id, files] of collectionIDToFileMap) {
         collectionFilesCount.set(id, files.length);
     }
     const user: User = getData(LS_KEYS.USER);
@@ -838,14 +842,15 @@ function getCollectionsFileCount(
     const uniqueArchivedFileIDs = new Set<number>();
     const uniqueAllSectionFileIDs = new Set<number>();
     for (const file of files) {
+        if (isSharedFile(user, file)) {
+            continue;
+        }
         if (file.isTrashed) {
             uniqueTrashedFileIDs.add(file.id);
-        } else if (!isSharedFile(user, file)) {
-            if (IsArchived(file)) {
-                uniqueArchivedFileIDs.add(file.id);
-            } else if (!archivedCollections.has(file.collectionID)) {
-                uniqueAllSectionFileIDs.add(file.id);
-            }
+        } else if (IsArchived(file)) {
+            uniqueArchivedFileIDs.add(file.id);
+        } else if (!archivedCollections.has(file.collectionID)) {
+            uniqueAllSectionFileIDs.add(file.id);
         }
     }
     collectionFilesCount.set(TRASH_SECTION, uniqueTrashedFileIDs.size);
