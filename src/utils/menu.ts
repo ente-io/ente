@@ -7,6 +7,7 @@ import {
 } from 'electron';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import { showUpdateDialog } from '../services/appUpdater';
+import { isDev } from './common';
 
 const isMac = process.platform === 'darwin';
 
@@ -170,6 +171,14 @@ export function buildMenuBar(): Menu {
         {
             label: 'View',
             submenu: [
+                ...((isDev
+                    ? [
+                          { role: 'reload', label: 'Reload' },
+                          { role: 'forceReload', label: 'Force reload' },
+                          { role: 'toggleDevTools', label: 'Toggle dev tools' },
+                          { type: 'separator' },
+                      ]
+                    : []) as MenuItemConstructorOptions[]),
                 { role: 'resetZoom', label: 'Reset zoom' },
                 { role: 'zoomIn', label: 'Zoom in' },
                 { role: 'zoomOut', label: 'Zoom out' },
