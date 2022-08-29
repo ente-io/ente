@@ -33,7 +33,7 @@ import {
 } from './api/export';
 import { selectRootDirectory } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
-import { doesFolderExists, getDirFiles } from './api/fs';
+import { isFolder, getDirFiles } from './api/fs';
 
 fixHotReloadNext12();
 
@@ -72,6 +72,6 @@ windowObject['ElectronAPIs'] = {
     addWatchMapping,
     removeWatchMapping,
     registerWatcherFunctions,
-    doesFolderExists,
+    isFolder,
     updateWatchMappingFiles,
 };

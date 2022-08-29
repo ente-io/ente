@@ -5,4 +5,4 @@ export async function getDirFiles(dirPath: string) {
     const electronFiles = await Promise.all(files.map(getElectronFile));
     return electronFiles;
 }
-export { doesFolderExists } from '../services/fs';
+export { isFolder } from '../services/fs';

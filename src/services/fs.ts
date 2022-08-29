@@ -151,7 +151,7 @@ export const getZipFileStream = async (
     return readableStream;
 };
 
-export async function doesFolderExists(dirPath: string) {
+export async function isFolder(dirPath: string) {
     return await fs
         .stat(dirPath)
         .then((stats) => {
