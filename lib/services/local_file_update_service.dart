@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/db/file_migration_db.dart';
+import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // changed/modified on the device and needed to be uploaded again.
 class LocalFileUpdateService {
   FilesDB _filesDB;
-  FilesMigrationDB _filesMigrationDB;
+  FileUpdationDB _fileUpdationDB;
   SharedPreferences _prefs;
   Logger _logger;
   static const isLocationMigrationComplete = "fm_isLocationMigrationComplete";
@@ -24,7 +24,7 @@ class LocalFileUpdateService {
   LocalFileUpdateService._privateConstructor() {
     _logger = Logger((LocalFileUpdateService).toString());
     _filesDB = FilesDB.instance;
-    _filesMigrationDB = FilesMigrationDB.instance;
+    _fileUpdationDB = FileUpdationDB.instance;
   }
 
   Future<void> init() async {
@@ -74,9 +74,9 @@ class LocalFileUpdateService {
     const int limitInBatch = 100;
     while (hasData) {
       var localIDsToProcess =
-          await _filesMigrationDB.getLocalIDsForPotentialReUpload(
+          await _fileUpdationDB.getLocalIDsForPotentialReUpload(
         limitInBatch,
-        FilesMigrationDB.modificationTimeUpdated,
+        FileUpdationDB.modificationTimeUpdated,
       );
       if (localIDsToProcess.isEmpty) {
         hasData = false;
@@ -138,9 +138,9 @@ class LocalFileUpdateService {
       }
     }
     debugPrint("Deleting files ${processedIDs.length}");
-    await _filesMigrationDB.deleteByLocalIDs(
+    await _fileUpdationDB.deleteByLocalIDs(
       processedIDs.toList(),
-      FilesMigrationDB.modificationTimeUpdated,
+      FileUpdationDB.modificationTimeUpdated,
     );
   }
 
@@ -158,9 +158,9 @@ class LocalFileUpdateService {
       const int limitInBatch = 100;
       while (hasData) {
         var localIDsToProcess =
-            await _filesMigrationDB.getLocalIDsForPotentialReUpload(
+            await _fileUpdationDB.getLocalIDsForPotentialReUpload(
           limitInBatch,
-          FilesMigrationDB.missingLocation,
+          FileUpdationDB.missingLocation,
         );
         if (localIDsToProcess.isEmpty) {
           hasData = false;
@@ -206,9 +206,9 @@ class LocalFileUpdateService {
     }
     _logger.info('marking ${localIDsWithLocation.length} files for re-upload');
     await _filesDB.markForReUploadIfLocationMissing(localIDsWithLocation);
-    await _filesMigrationDB.deleteByLocalIDs(
+    await _fileUpdationDB.deleteByLocalIDs(
       localIDsToProcess,
-      FilesMigrationDB.missingLocation,
+      FileUpdationDB.missingLocation,
     );
   }
 
@@ -219,9 +219,9 @@ class LocalFileUpdateService {
     final sTime = DateTime.now().microsecondsSinceEpoch;
     _logger.info('importing files without location info');
     var fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
-    await _filesMigrationDB.insertMultiple(
+    await _fileUpdationDB.insertMultiple(
       fileLocalIDs,
-      FilesMigrationDB.missingLocation,
+      FileUpdationDB.missingLocation,
     );
     final eTime = DateTime.now().microsecondsSinceEpoch;
     final d = Duration(microseconds: eTime - sTime);

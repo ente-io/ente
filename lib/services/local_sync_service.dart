@@ -6,7 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/file_migration_db.dart';
+import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -252,9 +252,9 @@ class LocalSyncService {
           updatedLocalIDs.add(file.localID);
         }
       }
-      await FilesMigrationDB.instance.insertMultiple(
+      await FileUpdationDB.instance.insertMultiple(
         updatedLocalIDs,
-        FilesMigrationDB.modificationTimeUpdated,
+        FileUpdationDB.modificationTimeUpdated,
       );
       final List<File> allFiles = [];
       allFiles.addAll(files);
