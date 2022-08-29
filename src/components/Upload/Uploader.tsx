@@ -19,7 +19,6 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { ElectronFile, FileWithCollection } from 'types/upload';
-import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp, waitAndRun } from 'utils/common';
 import watchFolderService from 'services/watchFolder/watchFolderService';
@@ -548,7 +547,6 @@ export default function Uploader(props: Props) {
             ImportService.cancelRemainingUploads();
         }
         props.setUploadInProgress(false);
-        Router.reload();
     };
 
     const handleUpload = (type) => () => {
