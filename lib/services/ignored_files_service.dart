@@ -48,8 +48,8 @@ class IgnoredFilesService {
   }
 
   Future<void> removeIgnoredMappings(List<File> files) async {
-    List<IgnoredFile> ignoredFiles = [];
-    Set<String> idsToRemoveFromCache = {};
+    final List<IgnoredFile> ignoredFiles = [];
+    final Set<String> idsToRemoveFromCache = {};
     for (var file in files) {
       if (Platform.isIOS && file.localID != null) {
         // in IOS, the imported file might not have title fetched by default.
@@ -58,16 +58,17 @@ class IgnoredFilesService {
           file.title = 'dummyTitle';
         }
       }
-      var ignoredFile = IgnoredFile.fromFile(file);
+      final ignoredFile = IgnoredFile.fromFile(file);
       if (ignoredFile != null) {
         ignoredFiles.add(ignoredFile);
-        var id = _idForIgnoredFile(ignoredFile);
+        final id = _idForIgnoredFile(ignoredFile);
         if (id != null) {
           idsToRemoveFromCache.add(id);
         }
       } else {
         _logger.warning(
-            'ignoredFile should not be null while removing mapping ${file.tag()}');
+          'ignoredFile should not be null while removing mapping ${file.tag()}',
+        );
       }
     }
     if (ignoredFiles.isNotEmpty) {

@@ -336,9 +336,9 @@ class FilesDB {
   Future<void> deleteDB() async {
     if (kDebugMode) {
       debugPrint("Deleting files db");
-      io.Directory documentsDirectory =
+      final io.Directory documentsDirectory =
           await getApplicationDocumentsDirectory();
-      String path = join(documentsDirectory.path, _databaseName);
+      final String path = join(documentsDirectory.path, _databaseName);
       io.File(path).deleteSync(recursive: true);
       _dbFuture = null;
     }

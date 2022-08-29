@@ -172,7 +172,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     onPressed: _selectedDevicePathIDs.isEmpty
                         ? null
                         : () async {
-                            Map<String, bool> syncStatus = {};
+                            final Map<String, bool> syncStatus = {};
                             for (String pathID in _allDevicePathIDs) {
                               syncStatus[pathID] =
                                   _selectedDevicePathIDs.contains(pathID);

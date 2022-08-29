@@ -22,7 +22,7 @@ extension DeviceFiles on FilesDB {
     var batch = db.batch();
     int batchCounter = 0;
     for (MapEntry e in mappingToAdd.entries) {
-      String pathID = e.key;
+      final String pathID = e.key;
       for (String localID in e.value) {
         if (batchCounter == 400) {
           await batch.commit(noResult: true);
@@ -44,13 +44,14 @@ extension DeviceFiles on FilesDB {
   }
 
   Future<void> deletePathIDToLocalIDMapping(
-      Map<String, Set<String>> mappingsToRemove) async {
+    Map<String, Set<String>> mappingsToRemove,
+  ) async {
     debugPrint("removing PathIDToLocalIDMapping");
     final db = await database;
     var batch = db.batch();
     int batchCounter = 0;
     for (MapEntry e in mappingsToRemove.entries) {
-      String pathID = e.key;
+      final String pathID = e.key;
       for (String localID in e.value) {
         if (batchCounter == 400) {
           await batch.commit(noResult: true);
@@ -171,9 +172,9 @@ extension DeviceFiles on FilesDB {
       final Database db = await database;
       final Set<String> existingPathIds = await getDevicePathIDs();
       for (Tuple2<AssetPathEntity, String> tup in devicePathInfo) {
-        AssetPathEntity pathEntity = tup.item1;
-        String localID = tup.item2;
-        bool shouldUpdate = existingPathIds.contains(pathEntity.id);
+        final AssetPathEntity pathEntity = tup.item1;
+        final String localID = tup.item2;
+        final bool shouldUpdate = existingPathIds.contains(pathEntity.id);
         if (shouldUpdate) {
           await db.rawUpdate(
             "UPDATE device_path_collections SET name = ?, cover_id = ?, count"
@@ -224,7 +225,7 @@ extension DeviceFiles on FilesDB {
     var batch = db.batch();
     int batchCounter = 0;
     for (MapEntry e in syncStatus.entries) {
-      String pathID = e.key;
+      final String pathID = e.key;
       if (batchCounter == 400) {
         await batch.commit(noResult: true);
         batch = db.batch();
@@ -266,7 +267,7 @@ extension DeviceFiles on FilesDB {
   }) async {
     final db = await database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    String rawQuery = '''
+    final String rawQuery = '''
     SELECT *
           FROM ${FilesDB.filesTable}
           WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
@@ -296,7 +297,7 @@ extension DeviceFiles on FilesDB {
       );
       final List<DevicePathCollection> deviceCollections = [];
       for (var row in devicePathRows) {
-        DevicePathCollection devicePathCollection = DevicePathCollection(
+        final DevicePathCollection devicePathCollection = DevicePathCollection(
           row["id"],
           row['name'],
           count: row['count'],

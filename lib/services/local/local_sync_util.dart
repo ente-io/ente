@@ -20,16 +20,16 @@ Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
     updateFromTime: fromTime,
     updateToTime: toTime,
   );
-  List<LocalPathAsset> localPathAssets = [];
+  final List<LocalPathAsset> localPathAssets = [];
 
   // alreadySeenLocalIDs is used to track and ignore file with particular
   // localID if it's already present in another album. This only impacts iOS
   // devices where a file can belong to multiple
-  Set<String> alreadySeenLocalIDs = {};
-  List<File> uniqueFiles = [];
+  final Set<String> alreadySeenLocalIDs = {};
+  final List<File> uniqueFiles = [];
   for (AssetPathEntity pathEntity in pathEntities) {
-    List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
-    Tuple2<Set<String>, List<File>> result = await computer.compute(
+    final List<AssetEntity> assetsInPath = await _getAllAssetLists(pathEntity);
+    final Tuple2<Set<String>, List<File>> result = await computer.compute(
       _getLocalIDsAndFilesFromAssets,
       param: <String, dynamic>{
         "pathEntity": pathEntity,
@@ -58,7 +58,7 @@ Future<Tuple2<List<LocalPathAsset>, List<File>>> getLocalPathAssetsAndFiles(
 // identify (in future) which AssetPath needs to be re-synced again.
 Future<List<Tuple2<AssetPathEntity, String>>>
     getDeviceFolderWithCountAndCoverID() async {
-  List<Tuple2<AssetPathEntity, String>> result = [];
+  final List<Tuple2<AssetPathEntity, String>> result = [];
   final pathEntities = await _getGalleryList(
     needsTitle: false,
     containsModifiedPath: true,
@@ -67,11 +67,11 @@ Future<List<Tuple2<AssetPathEntity, String>>>
   );
   for (AssetPathEntity pathEntity in pathEntities) {
     //todo: test and handle empty album case
-    var latestEntity = await pathEntity.getAssetListPaged(
+    final latestEntity = await pathEntity.getAssetListPaged(
       page: 0,
       size: 1,
     );
-    String localCoverID = latestEntity.first.id;
+    final String localCoverID = latestEntity.first.id;
     result.add(Tuple2(pathEntity, localCoverID));
   }
   return result;
@@ -95,7 +95,7 @@ Future<List<LocalPathAsset>> getAllLocalAssets() async {
   );
   final List<LocalPathAsset> localPathAssets = [];
   for (final assetPath in assetPaths) {
-    Set<String> localIDs = <String>{};
+    final Set<String> localIDs = <String>{};
     for (final asset in await _getAllAssetLists(assetPath)) {
       localIDs.add(asset.id);
     }
@@ -147,12 +147,12 @@ LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
   final List<LocalPathAsset> unsyncedAssets = [];
 
   for (final localPathAsset in onDeviceLocalPathAsset) {
-    String pathID = localPathAsset.pathID;
+    final String pathID = localPathAsset.pathID;
     // Start identifying pathID to localID mapping changes which needs to be
     // synced
-    Set<String> candidateLocalIDsForRemoval =
+    final Set<String> candidateLocalIDsForRemoval =
         pathToLocalIDs[pathID] ?? <String>{};
-    Set<String> missingLocalIDsInPath = <String>{};
+    final Set<String> missingLocalIDsInPath = <String>{};
     for (final String localID in localPathAsset.localIDs) {
       if (candidateLocalIDsForRemoval.contains(localID)) {
         // remove the localID after checking. Any pending existing ID indicates
@@ -189,10 +189,10 @@ Future<List<File>> _convertLocalAssetsToUniqueFiles(
   final Set<String> alreadySeenLocalIDs = <String>{};
   final List<File> files = [];
   for (LocalPathAsset localPathAsset in assets) {
-    String localPathName = localPathAsset.pathName;
+    final String localPathName = localPathAsset.pathName;
     for (final String localID in localPathAsset.localIDs) {
       if (!alreadySeenLocalIDs.contains(localID)) {
-        var assetEntity = await AssetEntity.fromId(localID);
+        final assetEntity = await AssetEntity.fromId(localID);
         files.add(
           await File.fromAsset(localPathName, assetEntity),
         );
@@ -250,7 +250,7 @@ Future<List<AssetPathEntity>> _getGalleryList({
 }
 
 Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
-  List<AssetEntity> result = [];
+  final List<AssetEntity> result = [];
   int currentPage = 0;
   List<AssetEntity> currentPageResult = [];
   do {
@@ -277,7 +277,7 @@ Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
   final Set<String> localIDs = {};
   for (AssetEntity entity in assetList) {
     localIDs.add(entity.id);
-    bool assetCreatedOrUpdatedAfterGivenTime = max(
+    final bool assetCreatedOrUpdatedAfterGivenTime = max(
           entity.createDateTime.microsecondsSinceEpoch,
           entity.modifiedDateTime.microsecondsSinceEpoch,
         ) >

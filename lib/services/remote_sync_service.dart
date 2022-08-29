@@ -235,7 +235,7 @@ class RemoteSyncService {
     for (var devicePathCollection in devicePathCollections) {
       int deviceCollectionID = devicePathCollection.collectionID;
       if (deviceCollectionID != -1) {
-        var collectionByID =
+        final collectionByID =
             CollectionsService.instance.getCollectionByID(deviceCollectionID);
         if (collectionByID == null || collectionByID.isDeleted) {
           _logger.info(
@@ -246,7 +246,7 @@ class RemoteSyncService {
         }
       }
       if (deviceCollectionID == -1) {
-        var collection = await CollectionsService.instance
+        final collection = await CollectionsService.instance
             .getOrCreateForPath(devicePathCollection.name);
         await FilesDB.instance
             .updateDevicePathCollection(devicePathCollection.id, collection.id);

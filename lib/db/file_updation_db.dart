@@ -132,7 +132,7 @@ class FileUpdationDB {
     String reason,
   ) async {
     final db = await instance.database;
-    String whereClause = '$columnReason = "$reason"';
+    final String whereClause = '$columnReason = "$reason"';
     final rows = await db.query(
       tableName,
       limit: limit,

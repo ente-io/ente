@@ -132,7 +132,7 @@ class LocalSyncService {
   }
 
   Future<bool> refreshDeviceFolderCountAndCover() async {
-    List<Tuple2<AssetPathEntity, String>> result =
+    final List<Tuple2<AssetPathEntity, String>> result =
         await getDeviceFolderWithCountAndCoverID();
     return await _db.updateDeviceCoverWithCount(
       result,
@@ -172,7 +172,7 @@ class LocalSyncService {
           .deletePathIDToLocalIDMapping(localUnSyncResult.deletePathToLocalIDs);
       hasAnyMappingChanged = true;
     }
-    bool hasUnsyncedFiles =
+    final bool hasUnsyncedFiles =
         localUnSyncResult.uniqueLocalFiles?.isNotEmpty ?? false;
     if (hasUnsyncedFiles) {
       await _db.insertMultiple(
