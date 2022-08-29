@@ -147,3 +147,24 @@ export interface ParsedExtractedMetadata {
 export interface IsUploadPausing {
     val: boolean;
 }
+
+export enum UPLOAD_STRATEGY {
+    SINGLE_COLLECTION,
+    COLLECTION_PER_FOLDER,
+}
+
+export enum UPLOAD_TYPE {
+    FILES = 'files',
+    FOLDERS = 'folders',
+    ZIPS = 'zips',
+}
+
+export interface AnalysisResult {
+    suggestedCollectionName: string;
+    multipleFolders: boolean;
+}
+
+export const NULL_ANALYSIS_RESULT = {
+    suggestedCollectionName: '',
+    multipleFolders: false,
+};

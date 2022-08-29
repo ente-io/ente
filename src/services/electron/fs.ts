@@ -9,6 +9,12 @@ class ElectronFSService {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
     }
 
+    getDirFiles(dirPath: string) {
+        if (this.ElectronAPIs.getDirFiles) {
+            return this.ElectronAPIs.getDirFiles(dirPath);
+        }
+    }
+
     async isFolder(folderPath: string) {
         try {
             const isFolder = await this.ElectronAPIs.isFolder(folderPath);

@@ -8,6 +8,9 @@ import constants from 'utils/strings/constants';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
 import { UPLOAD_STRATEGY } from 'constants/upload';
+import { analyseUploadFiles } from 'utils/upload/fs';
+import electronFSService from 'services/electron/fs';
+import { UPLOAD_TYPE } from 'types/upload';
 
 interface Iprops {
     open: boolean;
@@ -39,7 +42,19 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             const path = (folder.path as string).replace(/\\/g, '/');
             if (await watchFolderService.isFolder(path)) {
                 setInputFolderPath(path);
-                setChoiceModalOpen(true);
+                const files = await electronFSService.getDirFiles(path);
+                const analysisResult = analyseUploadFiles(
+                    files,
+                    UPLOAD_TYPE.FOLDERS
+                );
+                if (analysisResult.multipleFolders) {
+                    setChoiceModalOpen(true);
+                } else {
+                    handleAddWatchMapping(
+                        UPLOAD_STRATEGY.SINGLE_COLLECTION,
+                        path
+                    );
+                }
             }
         }
     };
@@ -52,14 +67,30 @@ export default function WatchFolder({ open, onClose }: Iprops) {
         const folderPath = await watchFolderService.selectFolder();
         if (folderPath) {
             setInputFolderPath(folderPath);
-            setChoiceModalOpen(true);
+            const files = await electronFSService.getDirFiles(folderPath);
+            const analysisResult = analyseUploadFiles(
+                files,
+                UPLOAD_TYPE.FOLDERS
+            );
+            if (analysisResult.multipleFolders) {
+                setChoiceModalOpen(true);
+            } else {
+                handleAddWatchMapping(
+                    UPLOAD_STRATEGY.SINGLE_COLLECTION,
+                    folderPath
+                );
+            }
         }
     };
 
-    const handleAddWatchMapping = async (uploadStrategy: UPLOAD_STRATEGY) => {
+    const handleAddWatchMapping = async (
+        uploadStrategy: UPLOAD_STRATEGY,
+        folderPath?: string
+    ) => {
+        folderPath = folderPath || inputFolderPath;
         await watchFolderService.addWatchMapping(
-            inputFolderPath.substring(inputFolderPath.lastIndexOf('/') + 1),
-            inputFolderPath,
+            folderPath.substring(folderPath.lastIndexOf('/') + 1),
+            folderPath,
             uploadStrategy
         );
         setInputFolderPath('');

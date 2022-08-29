@@ -18,7 +18,13 @@ import { METADATA_FOLDER_NAME } from 'constants/export';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
-import { ElectronFile, FileWithCollection } from 'types/upload';
+import {
+    AnalysisResult,
+    ElectronFile,
+    FileWithCollection,
+    NULL_ANALYSIS_RESULT,
+    UPLOAD_TYPE,
+} from 'types/upload';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp, waitAndRun } from 'utils/common';
 import watchFolderService from 'services/watchFolder/watchFolderService';
@@ -30,10 +36,11 @@ import {
     SegregatedFinishedUploads,
     InProgressUpload,
 } from 'types/upload/ui';
-import { UPLOAD_STAGES } from 'constants/upload';
+import { UPLOAD_STAGES, UPLOAD_STRATEGY } from 'constants/upload';
 import importService from 'services/importService';
 import { getDownloadAppMessage } from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
+import { analyseUploadFiles } from 'utils/upload/fs';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -58,27 +65,6 @@ interface Props {
     showUploadFilesDialog: () => void;
     showUploadDirsDialog: () => void;
 }
-
-enum UPLOAD_STRATEGY {
-    SINGLE_COLLECTION,
-    COLLECTION_PER_FOLDER,
-}
-
-export enum UPLOAD_TYPE {
-    FILES = 'files',
-    FOLDERS = 'folders',
-    ZIPS = 'zips',
-}
-
-interface AnalysisResult {
-    suggestedCollectionName: string;
-    multipleFolders: boolean;
-}
-
-const NULL_ANALYSIS_RESULT = {
-    suggestedCollectionName: '',
-    multipleFolders: false,
-};
 
 export default function Uploader(props: Props) {
     const [uploadProgressView, setUploadProgressView] = useState(false);
@@ -188,7 +174,10 @@ export default function Uploader(props: Props) {
                 toUploadFiles.current = props.electronFiles;
                 props.setElectronFiles([]);
             }
-            const analysisResult = analyseUploadFiles();
+            const analysisResult = analyseUploadFiles(
+                toUploadFiles.current,
+                uploadType.current
+            );
             setAnalysisResult(analysisResult);
 
             handleCollectionCreationAndUpload(
@@ -224,45 +213,6 @@ export default function Uploader(props: Props) {
         }
     };
 
-    function analyseUploadFiles(): AnalysisResult {
-        if (isElectron() && uploadType.current === UPLOAD_TYPE.FILES) {
-            return NULL_ANALYSIS_RESULT;
-        }
-
-        const paths: string[] = toUploadFiles.current.map(
-            (file) => file['path']
-        );
-        const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
-        paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
-        const firstPath = paths[0];
-        const lastPath = paths[paths.length - 1];
-
-        const L = firstPath.length;
-        let i = 0;
-        const firstFileFolder = firstPath.substring(
-            0,
-            firstPath.lastIndexOf('/')
-        );
-        const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf('/'));
-        while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
-        let commonPathPrefix = firstPath.substring(0, i);
-
-        if (commonPathPrefix) {
-            commonPathPrefix = commonPathPrefix.substring(
-                0,
-                commonPathPrefix.lastIndexOf('/')
-            );
-            if (commonPathPrefix) {
-                commonPathPrefix = commonPathPrefix.substring(
-                    commonPathPrefix.lastIndexOf('/') + 1
-                );
-            }
-        }
-        return {
-            suggestedCollectionName: commonPathPrefix || null,
-            multipleFolders: firstFileFolder !== lastFileFolder,
-        };
-    }
     function getCollectionWiseFiles() {
         const collectionWiseFiles = new Map<string, (File | ElectronFile)[]>();
         for (const file of toUploadFiles.current) {
