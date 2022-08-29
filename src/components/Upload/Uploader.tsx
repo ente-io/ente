@@ -188,7 +188,7 @@ export default function Uploader(props: Props) {
         }
     }, [props.webFiles, appContext.sharedFiles, props.electronFiles]);
 
-    const uploadInit = async () => {
+    const preUploadAction = async () => {
         setUploadStage(UPLOAD_STAGES.START);
         setUploadCounter({ finished: 0, total: 0 });
         setInProgressUploads([]);
@@ -323,7 +323,7 @@ export default function Uploader(props: Props) {
         collections: Collection[]
     ) => {
         try {
-            uploadInit();
+            preUploadAction();
             if (isElectron() && !isPendingDesktopUpload.current) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
@@ -356,7 +356,7 @@ export default function Uploader(props: Props) {
 
     const retryFailed = async () => {
         try {
-            uploadInit();
+            preUploadAction();
             await uploadManager.retryFailedFiles();
         } catch (err) {
             showUserFacingError(err.message);
