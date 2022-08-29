@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,6 +9,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -816,17 +816,27 @@ class FilesDB {
   }
 
   Future<List<File>> getUploadedFilesWithHashes(
-    List<String> hash,
+    FileHashData hashData,
     FileType fileType,
     int ownerID,
   ) async {
-    // look up two hash at max, for handling live photos
-    assert(hash.length < 3, "number of hash can not be more than 2");
+    String inParam = "'${hashData.fileHash}'";
+    if (fileType == FileType.livePhoto && hashData.zipHash != null) {
+      inParam += ",'${hashData.zipHash}'";
+    }
+
     final db = await instance.database;
-    String rawQuery = 'SELECT * from files where ($columnUploadedFileID != '
-        'NULL OR $columnUploadedFileID != -1) AND $columnOwnerID = $ownerID '
-        'AND ($columnHash = "${hash.first}" OR $columnHash = "${hash.last}")';
-    final rows = await db.rawQuery(rawQuery, []);
+    final rows = await db.query(
+      table,
+      where: '($columnUploadedFileID != NULL OR $columnUploadedFileID != -1) '
+          'AND $columnOwnerID = ? AND $columnFileType ='
+          ' ? '
+          'AND $columnHash IN ($inParam)',
+      whereArgs: [
+        ownerID,
+        getInt(fileType),
+      ],
+    );
     if (rows.isNotEmpty) {
       return _convertToFiles(rows);
     } else {

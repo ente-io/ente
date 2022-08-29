@@ -447,10 +447,10 @@ class FileUploader {
   }
 
   /*
-  // _mapToExistingUpload links the current file to be uploaded with the
-  // existing files. If the link is successful, it returns true other false.
-   When false, we should go ahead and re-upload or update the file
-    It performs following checks:
+  _mapToExistingUpload links the fileToUpload with the existing uploaded
+  files. if the link is successful, it returns true otherwise false.
+  When false, we should go ahead and re-upload or update the file.
+  It performs following checks:
     a) Uploaded file with same localID and destination collection. Delete the
      fileToUpload entry
     b) Uploaded file in destination collection but with missing localID.
@@ -476,13 +476,10 @@ class FileUploader {
       );
       return false;
     }
-    List<String> hash = [mediaUploadData.fileHash];
-    if (fileToUpload.fileType == FileType.livePhoto) {
-      hash.add(mediaUploadData.zipHash);
-    }
+
     final List<File> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
-      hash,
+      mediaUploadData.hashData,
       fileToUpload.fileType,
       Configuration.instance.getUserID(),
     );
