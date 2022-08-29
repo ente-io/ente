@@ -245,7 +245,10 @@ class Configuration {
   ) async {
     _logger.info('Start decryptAndSaveSecrets');
     validatePreVerificationStateCheck(
-        attributes, password, getEncryptedToken());
+      attributes,
+      password,
+      getEncryptedToken(),
+    );
     _logger.info('state validation done');
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password),
@@ -263,7 +266,7 @@ class Configuration {
         Sodium.base642bin(attributes.keyDecryptionNonce),
       );
     } catch (e) {
-      _logger.severe('master-key failed, incorrect password?');
+      _logger.severe('master-key failed, incorrect password?', e);
       throw Exception("Incorrect password");
     }
     _logger.info("master-key done");
