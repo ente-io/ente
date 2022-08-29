@@ -97,7 +97,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
   }
 
   void _sendScroll() {
-    int current = _currentFirst();
+    final int current = _currentFirst();
     widget.firstShown?.call(current);
     scrollKey.currentState?.setPosition(current / widget.totalCount, current);
   }

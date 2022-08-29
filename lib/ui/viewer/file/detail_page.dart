@@ -139,7 +139,7 @@ class _DetailPageState extends State<DetailPage> {
     return PageView.builder(
       itemBuilder: (context, index) {
         final file = _files[index];
-        Widget content = FileWidget(
+        final Widget content = FileWidget(
           file,
           autoPlay: !_hasPageChanged,
           tagPrefix: widget.config.tagPrefix,

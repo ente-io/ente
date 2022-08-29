@@ -135,7 +135,7 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    bool isNotOutdatedEvent = _event != null &&
+    final bool isNotOutdatedEvent = _event != null &&
         (_event.status == SyncStatus.completedBackup ||
             _event.status == SyncStatus.completedFirstGalleryImport) &&
         (DateTime.now().microsecondsSinceEpoch - _event.timestamp >

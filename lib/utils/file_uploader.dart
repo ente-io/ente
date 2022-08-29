@@ -155,7 +155,7 @@ class FileUploader {
   }
 
   void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
-    List<String> uploadsToBeRemoved = [];
+    final List<String> uploadsToBeRemoved = [];
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
@@ -254,7 +254,7 @@ class FileUploader {
     bool forcedUpload,
   ) async {
     final connectivityResult = await (Connectivity().checkConnectivity());
-    var canUploadUnderCurrentNetworkConditions =
+    final canUploadUnderCurrentNetworkConditions =
         (connectivityResult == ConnectivityResult.wifi ||
             Configuration.instance.shouldBackupOverMobileData());
     if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
@@ -311,7 +311,7 @@ class FileUploader {
       }
 
       Uint8List key;
-      bool isUpdatedFile =
+      final bool isUpdatedFile =
           file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
         _logger.info("File was updated " + file.toString());
@@ -342,7 +342,7 @@ class FileUploader {
         encryptedFilePath,
         key: key,
       );
-      var thumbnailData = mediaUploadData.thumbnail;
+      final thumbnailData = mediaUploadData.thumbnail;
 
       final encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
@@ -354,11 +354,11 @@ class FileUploader {
           .writeAsBytes(encryptedThumbnailData.encryptedData);
 
       final thumbnailUploadURL = await _getUploadURL();
-      String thumbnailObjectKey =
+      final String thumbnailObjectKey =
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
       final fileUploadURL = await _getUploadURL();
-      String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+      final String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
       final metadata = await file.getMetadataForUpload(mediaUploadData);
       final encryptedMetadataData = await CryptoUtil.encryptChaCha(
@@ -447,10 +447,10 @@ class FileUploader {
   }
 
   /*
-  // _mapToExistingUpload links the current file to be uploaded with the
-  // existing files. If the link is successful, it returns true other false.
-   When false, we should go ahead and re-upload or update the file
-    It performs following checks:
+  _mapToExistingUpload links the fileToUpload with the existing uploaded
+  files. if the link is successful, it returns true otherwise false.
+  When false, we should go ahead and re-upload or update the file.
+  It performs following checks:
     a) Uploaded file with same localID and destination collection. Delete the
      fileToUpload entry
     b) Uploaded file in destination collection but with missing localID.
@@ -469,32 +469,28 @@ class FileUploader {
     File fileToUpload,
     int toCollectionID,
   ) async {
-    if (fileToUpload.uploadedFileID != -1 &&
-        fileToUpload.uploadedFileID != null) {
-      _logger.warning('file is already uploaded, skipping mapping logic');
+    if (fileToUpload.uploadedFileID != null) {
+      _logger.severe(
+        'Critical: file is already uploaded, skipped mapping',
+      );
       return false;
     }
-    List<String> hash = [mediaUploadData.fileHash];
-    if (fileToUpload.fileType == FileType.livePhoto) {
-      hash.add(mediaUploadData.zipHash);
-    }
-    List<File> existingFiles =
+
+    final List<File> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
-      hash,
+      mediaUploadData.hashData,
       fileToUpload.fileType,
       Configuration.instance.getUserID(),
     );
-    if (existingFiles?.isEmpty ?? true) {
+    if (existingUploadedFiles?.isEmpty ?? true) {
       return false;
     } else {
       debugPrint("Found some matches");
     }
     // case a
-    File sameLocalSameCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID == toCollectionID &&
-          element.localID == fileToUpload.localID,
+    final File sameLocalSameCollection = existingUploadedFiles.firstWhere(
+      (e) =>
+          e.collectionID == toCollectionID && e.localID == fileToUpload.localID,
       orElse: () => null,
     );
     if (sameLocalSameCollection != null) {
@@ -503,16 +499,14 @@ class FileUploader {
         "\n existing: ${sameLocalSameCollection.tag()}",
       );
       // should delete the fileToUploadEntry
-      FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
+      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
       return true;
     }
 
     // case b
-    File fileMissingLocalButSameCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID == toCollectionID &&
-          element.localID == null,
+    final File fileMissingLocalButSameCollection =
+        existingUploadedFiles.firstWhere(
+      (e) => e.collectionID == toCollectionID && e.localID == null,
       orElse: () => null,
     );
     if (fileMissingLocalButSameCollection != null) {
@@ -529,10 +523,9 @@ class FileUploader {
     }
 
     // case c and d
-    File fileExistsButDifferentCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID != toCollectionID,
+    final File fileExistsButDifferentCollection =
+        existingUploadedFiles.firstWhere(
+      (e) => e.collectionID != toCollectionID,
       orElse: () => null,
     );
     if (fileExistsButDifferentCollection != null) {
@@ -542,7 +535,10 @@ class FileUploader {
       );
       await CollectionsService.instance
           .linkLocalFileToExistingUploadedFileInAnotherCollection(
-              toCollectionID, fileToUpload, fileExistsButDifferentCollection);
+        toCollectionID,
+        localFileToUpload: fileToUpload,
+        existingUploadedFile: fileExistsButDifferentCollection,
+      );
       return true;
     }
     // case e
@@ -575,7 +571,7 @@ class FileUploader {
   }
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
-    String ext = file.title == null ? "no title" : extension(file.title);
+    final String ext = file.title == null ? "no title" : extension(file.title);
     _logger.severe(
       "Invalid file: (ext: $ext) encountered: " + file.toString(),
       e,

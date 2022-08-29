@@ -54,12 +54,14 @@ class File extends EnteFile {
 
   set pubMagicMetadata(val) => _pubMmd = val;
 
-  static const kCurrentMetadataVersion = 1;
+  // in Version 1, live photo hash is stored as zip's hash.
+  // in V2: LivePhoto hash is stored as imgHash:vidHash
+  static const kCurrentMetadataVersion = 2;
 
   File();
 
-  static File fromAsset(String pathName, AssetEntity asset) {
-    File file = File();
+  static Future<File> fromAsset(String pathName, AssetEntity asset) async {
+    final File file = File();
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;
@@ -134,6 +136,15 @@ class File extends EnteFile {
     duration = metadata["duration"] ?? 0;
     exif = metadata["exif"];
     hash = metadata["hash"];
+    // handle past live photos upload from web client
+    if (hash == null &&
+        fileType == FileType.livePhoto &&
+        metadata.containsKey('imgHash') &&
+        metadata.containsKey('vidHash')) {
+      // convert to imgHash:vidHash
+      hash =
+          '${metadata['imgHash']}$kLivePhotoHashSeparator${metadata['vidHash']}';
+    }
     metadataVersion = metadata["version"] ?? 0;
   }
 
@@ -155,13 +166,7 @@ class File extends EnteFile {
         creationTime = exifTime.microsecondsSinceEpoch;
       }
     }
-    // in metadataVersion V1, the hash for livePhoto is the hash of the
-    // zipped file.
-    // web uploads files without MetadataVersion and upload image hash as 'ha
-    // sh' key and video as 'vidHash'
-    hash = (fileType == FileType.livePhoto)
-        ? mediaUploadData.zipHash
-        : mediaUploadData.fileHash;
+    hash = mediaUploadData.hashData?.fileHash;
     return getMetadata();
   }
 

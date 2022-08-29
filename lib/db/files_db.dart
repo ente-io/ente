@@ -1,4 +1,5 @@
 import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -10,6 +11,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -97,8 +99,9 @@ class FilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    io.Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, _databaseName);
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
   }
@@ -298,7 +301,7 @@ class FilesDB {
   static List<String> createOnDeviceFilesAndPathCollection() {
     return [
       '''
-        CREATE TABLE device_files (
+        CREATE TABLE IF NOT EXISTS device_files (
           id TEXT NOT NULL,
           path_id TEXT NOT NULL,
           synced INTEGER NOT NULL DEFAULT 0,
@@ -306,7 +309,7 @@ class FilesDB {
        );
        ''',
       '''
-       CREATE TABLE device_path_collections (
+       CREATE TABLE IF NOT EXISTS device_path_collections (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT,
           modified_at INTEGER NOT NULL DEFAULT 0,
@@ -471,7 +474,7 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    List<File> deduplicatedFiles =
+    final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
@@ -497,7 +500,7 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    List<File> deduplicatedFiles =
+    final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
@@ -529,7 +532,7 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    List<File> deduplicatedFiles =
+    final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
@@ -720,7 +723,7 @@ class FilesDB {
       orderBy: '$columnCreationTime DESC',
       groupBy: columnLocalID,
     );
-    var files = convertToFiles(results);
+    final files = convertToFiles(results);
     // future-safe filter just to ensure that the query doesn't end up  returning files
     // which should not be backed up
     files.removeWhere(
@@ -861,22 +864,28 @@ class FilesDB {
   }
 
   Future<List<File>> getUploadedFilesWithHashes(
-    List<String> hash,
+    FileHashData hashData,
     FileType fileType,
     int ownerID,
   ) async {
-    // look up two hash at max, for handling live photos
-    assert(hash.length < 3, "number of hash can not be more than 2");
-    final db = await instance.database;
-    String rawQuery = 'SELECT * from files where ($columnUploadedFileID != '
-        'NULL OR $columnUploadedFileID != -1) AND $columnOwnerID = $ownerID '
-        'AND ($columnHash = "${hash.first}" OR $columnHash = "${hash.last}")';
-    final rows = await db.rawQuery(rawQuery, []);
-    if (rows.isNotEmpty) {
-      return convertToFiles(rows);
-    } else {
-      return [];
+    String inParam = "'${hashData.fileHash}'";
+    if (fileType == FileType.livePhoto && hashData.zipHash != null) {
+      inParam += ",'${hashData.zipHash}'";
     }
+
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      where: '($columnUploadedFileID != NULL OR $columnUploadedFileID != -1) '
+          'AND $columnOwnerID = ? AND $columnFileType ='
+          ' ? '
+          'AND $columnHash IN ($inParam)',
+      whereArgs: [
+        ownerID,
+        getInt(fileType),
+      ],
+    );
+    return convertToFiles(rows);
   }
 
   Future<int> update(File file) async {
@@ -1011,7 +1020,7 @@ class FilesDB {
 
   Future<int> collectionFileCount(int collectionID) async {
     final db = await instance.database;
-    var count = Sqflite.firstIntValue(
+    final count = Sqflite.firstIntValue(
       await db.rawQuery(
         'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = $collectionID',
       ),
@@ -1021,7 +1030,7 @@ class FilesDB {
 
   Future<int> fileCountWithVisibility(int visibility, int ownerID) async {
     final db = await instance.database;
-    var count = Sqflite.firstIntValue(
+    final count = Sqflite.firstIntValue(
       await db.rawQuery(
         'SELECT COUNT(*) FROM $filesTable where $columnMMdVisibility = $visibility AND $columnOwnerID = $ownerID',
       ),
@@ -1227,9 +1236,9 @@ class FilesDB {
 
   Future<List<File>> getAllFilesFromDB() async {
     final db = await instance.database;
-    List<Map<String, dynamic>> result = await db.query(filesTable);
-    List<File> files = convertToFiles(result);
-    List<File> deduplicatedFiles =
+    final List<Map<String, dynamic>> result = await db.query(filesTable);
+    final List<File> files = convertToFiles(result);
+    final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, null);
     return deduplicatedFiles;
   }

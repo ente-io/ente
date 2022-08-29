@@ -131,12 +131,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               false,
                           onChanged: (enablePassword) async {
                             if (enablePassword) {
-                              var inputResult =
+                              final inputResult =
                                   await _displayLinkPasswordInput(context);
                               if (inputResult != null &&
                                   inputResult == 'ok' &&
                                   _textFieldController.text.trim().isNotEmpty) {
-                                var propToUpdate = await _getEncryptedPassword(
+                                final propToUpdate = await _getEncryptedPassword(
                                   _textFieldController.text,
                                 );
                                 await _updateUrlSettings(context, propToUpdate);
@@ -250,10 +250,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   CupertinoButton(
                     onPressed: () async {
                       int newValidTill = -1;
-                      int expireAfterInMicroseconds = _selectedExpiry.item3;
+                      final int expireAfterInMicroseconds = _selectedExpiry.item3;
                       // need to manually select time
                       if (expireAfterInMicroseconds < 0) {
-                        var timeInMicrosecondsFromEpoch =
+                        final timeInMicrosecondsFromEpoch =
                             await _showDateTimePicker();
                         if (timeInMicrosecondsFromEpoch != null) {
                           newValidTill = timeInMicrosecondsFromEpoch;
@@ -293,7 +293,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 backgroundColor:
                     Theme.of(context).backgroundColor.withOpacity(0.95),
                 onSelectedItemChanged: (value) {
-                  var firstWhere = _expiryOptions
+                  final firstWhere = _expiryOptions
                       .firstWhere((element) => element.item1 == value);
                   setState(() {
                     _selectedExpiry = firstWhere;
@@ -410,8 +410,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       Sodium.cryptoPwhashAlgArgon2id13 == Sodium.cryptoPwhashAlgDefault,
       "mismatch in expected default pw hashing algo",
     );
-    int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
-    int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
+    final int memLimit = Sodium.cryptoPwhashMemlimitInteractive;
+    final int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final result = await CryptoUtil.deriveKey(
       utf8.encode(pass),
@@ -444,7 +444,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Text _getLinkExpiryTimeWidget() {
-    int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
+    final int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
     if (validTill == 0) {
       return const Text(
         'Never',
@@ -470,7 +470,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<void> _showDeviceLimitPicker() async {
-    List<Text> options = [];
+    final List<Text> options = [];
     for (int i = 50; i > 0; i--) {
       options.add(
         Text(i.toString(), style: Theme.of(context).textTheme.subtitle1),

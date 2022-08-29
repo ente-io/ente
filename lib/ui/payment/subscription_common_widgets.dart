@@ -87,7 +87,7 @@ class ValidityWidget extends StatelessWidget {
     if (currentSubscription == null) {
       return Container();
     }
-    var endDate = getDateAndMonthAndYear(
+    final endDate = getDateAndMonthAndYear(
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime),
     );
     var message = "Renews on $endDate";

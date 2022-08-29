@@ -44,12 +44,12 @@ Future<void> share(
 
 Rect shareButtonRect(BuildContext context, GlobalKey shareButtonKey) {
   Size size = MediaQuery.of(context).size;
-  RenderBox renderBox = shareButtonKey?.currentContext?.findRenderObject();
+  final RenderBox renderBox = shareButtonKey?.currentContext?.findRenderObject();
   if (renderBox == null) {
     return Rect.fromLTWH(0, 0, size.width, size.height / 2);
   }
   size = renderBox.size;
-  Offset position = renderBox.localToGlobal(Offset.zero);
+  final Offset position = renderBox.localToGlobal(Offset.zero);
   return Rect.fromCenter(
     center: position + Offset(size.width / 2, size.height / 2),
     width: size.width,
@@ -65,7 +65,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
   List<SharedMediaFile> sharedMedia,
   int collectionID,
 ) async {
-  List<File> localFiles = [];
+  final List<File> localFiles = [];
   for (var media in sharedMedia) {
     if (!(media.type == SharedMediaType.IMAGE ||
         media.type == SharedMediaType.VIDEO)) {
@@ -74,7 +74,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
       );
       continue;
     }
-    var enteFile = File();
+    final enteFile = File();
     // fileName: img_x.jpg
     enteFile.title = basename(media.path);
     var ioFile = dartio.File(media.path);

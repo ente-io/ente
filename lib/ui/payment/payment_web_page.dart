@@ -77,7 +77,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                   ),
                 ),
                 shouldOverrideUrlLoading: (controller, navigationAction) async {
-                  var loadingUri = navigationAction.request.url;
+                  final loadingUri = navigationAction.request.url;
                   _logger.info("Loading url $loadingUri");
                   // handle the payment response
                   if (_isPaymentActionComplete(loadingUri)) {
@@ -130,7 +130,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       'action': widget.actionType,
       'redirectURL': kWebPaymentRedirectUrl,
     };
-    var tryParse = Uri.tryParse(kWebPaymentBaseEndpoint);
+    final tryParse = Uri.tryParse(kWebPaymentBaseEndpoint);
     if (kDebugMode && kWebPaymentBaseEndpoint.startsWith("http://")) {
       return Uri.http(tryParse.authority, tryParse.path, queryParameters);
     } else {
@@ -173,13 +173,13 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   }
 
   Future<void> _handlePaymentResponse(Uri uri) async {
-    var queryParams = uri.queryParameters;
-    var paymentStatus = uri.queryParameters['status'] ?? '';
+    final queryParams = uri.queryParameters;
+    final paymentStatus = uri.queryParameters['status'] ?? '';
     _logger.fine('handle payment response with status $paymentStatus');
     if (paymentStatus == 'success') {
       await _handlePaymentSuccess(queryParams);
     } else if (paymentStatus == 'fail') {
-      var reason = queryParams['reason'] ?? '';
+      final reason = queryParams['reason'] ?? '';
       await _handlePaymentFailure(reason);
     } else {
       // should never reach here
@@ -210,17 +210,17 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   // return true if verifySubscription didn't throw any exceptions
   Future<void> _handlePaymentSuccess(Map<String, String> queryParams) async {
-    var checkoutSessionID = queryParams['session_id'] ?? '';
+    final checkoutSessionID = queryParams['session_id'] ?? '';
     await _dialog.show();
     try {
-      var response = await billingService.verifySubscription(
+      final response = await billingService.verifySubscription(
         widget.planId,
         checkoutSessionID,
         paymentProvider: kStripe,
       );
       await _dialog.hide();
       if (response != null) {
-        var content = widget.actionType == 'buy'
+        final content = widget.actionType == 'buy'
             ? 'Your purchase was successful'
             : 'Your subscription was updated successfully';
         await _showExitPageDialog(title: 'Thank you', content: content);

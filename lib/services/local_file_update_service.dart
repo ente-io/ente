@@ -5,8 +5,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/db/file_migration_db.dart';
+import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/file.dart' as ente;
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,7 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 // changed/modified on the device and needed to be uploaded again.
 class LocalFileUpdateService {
   FilesDB _filesDB;
-  FilesMigrationDB _filesMigrationDB;
+  FileUpdationDB _fileUpdationDB;
   SharedPreferences _prefs;
   Logger _logger;
   static const isLocationMigrationComplete = "fm_isLocationMigrationComplete";
@@ -24,7 +25,7 @@ class LocalFileUpdateService {
   LocalFileUpdateService._privateConstructor() {
     _logger = Logger((LocalFileUpdateService).toString());
     _filesDB = FilesDB.instance;
-    _filesMigrationDB = FilesMigrationDB.instance;
+    _fileUpdationDB = FileUpdationDB.instance;
   }
 
   Future<void> init() async {
@@ -55,11 +56,10 @@ class LocalFileUpdateService {
         await _runMigrationForFilesWithMissingLocation();
       }
       await _markFilesWhichAreActuallyUpdated();
-      _existingMigration.complete();
-      _existingMigration = null;
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
-      _existingMigration.complete();
+    } finally {
+      _existingMigration?.complete();
       _existingMigration = null;
     }
   }
@@ -73,10 +73,10 @@ class LocalFileUpdateService {
     bool hasData = true;
     const int limitInBatch = 100;
     while (hasData) {
-      var localIDsToProcess =
-          await _filesMigrationDB.getLocalIDsForPotentialReUpload(
+      final localIDsToProcess =
+          await _fileUpdationDB.getLocalIDsForPotentialReUpload(
         limitInBatch,
-        FilesMigrationDB.modificationTimeUpdated,
+        FileUpdationDB.modificationTimeUpdated,
       );
       if (localIDsToProcess.isEmpty) {
         hasData = false;
@@ -97,18 +97,21 @@ class LocalFileUpdateService {
     List<String> localIDsToProcess,
   ) async {
     _logger.info("files to process ${localIDsToProcess.length} for reupload");
-    var localFiles = await FilesDB.instance.getLocalFiles(localIDsToProcess);
+    List<ente.File> localFiles =
+        (await FilesDB.instance.getLocalFiles(localIDsToProcess));
     Set<String> processedIDs = {};
-    for (var file in localFiles) {
+    for (ente.File file in localFiles) {
       if (processedIDs.contains(file.localID)) {
         continue;
       }
       MediaUploadData uploadData;
       try {
-        uploadData = await getUploadDataFromEnteFile(file);
-        if (file.hash != null ||
-            (file.hash == uploadData.fileHash ||
-                file.hash == uploadData.zipHash)) {
+        uploadData = await getUploadData(file);
+        if (uploadData != null &&
+            uploadData.hashData != null &&
+            file.hash != null &&
+            (file.hash == uploadData.hashData.fileHash ||
+                file.hash == uploadData.hashData.zipHash)) {
           _logger.info("Skip file update as hash matched ${file.tag()}");
         } else {
           _logger.info(
@@ -126,22 +129,26 @@ class LocalFileUpdateService {
         processedIDs.add(file.localID);
       } catch (e) {
         _logger.severe("Failed to get file uploadData", e);
-      } finally {
-        // delete the file from app's internal cache if it was copied to app
-        // for upload. Shared Media should only be cleared when the upload
-        // succeeds.
-        if (Platform.isIOS &&
-            uploadData != null &&
-            uploadData.sourceFile != null) {
-          await uploadData.sourceFile.delete();
-        }
-      }
+      } finally {}
     }
     debugPrint("Deleting files ${processedIDs.length}");
-    await _filesMigrationDB.deleteByLocalIDs(
+    await _fileUpdationDB.deleteByLocalIDs(
       processedIDs.toList(),
-      FilesMigrationDB.modificationTimeUpdated,
+      FileUpdationDB.modificationTimeUpdated,
     );
+  }
+
+  Future<MediaUploadData> getUploadData(ente.File file) async {
+    final mediaUploadData = await getUploadDataFromEnteFile(file);
+    // delete the file from app's internal cache if it was copied to app
+    // for upload. Shared Media should only be cleared when the upload
+    // succeeds.
+    if (Platform.isIOS &&
+        mediaUploadData != null &&
+        mediaUploadData.sourceFile != null) {
+      await mediaUploadData.sourceFile.delete();
+    }
+    return mediaUploadData;
   }
 
   Future<void> _runMigrationForFilesWithMissingLocation() async {
@@ -158,9 +165,9 @@ class LocalFileUpdateService {
       const int limitInBatch = 100;
       while (hasData) {
         var localIDsToProcess =
-            await _filesMigrationDB.getLocalIDsForPotentialReUpload(
+            await _fileUpdationDB.getLocalIDsForPotentialReUpload(
           limitInBatch,
-          FilesMigrationDB.missingLocation,
+          FileUpdationDB.missingLocation,
         );
         if (localIDsToProcess.isEmpty) {
           hasData = false;
@@ -206,9 +213,9 @@ class LocalFileUpdateService {
     }
     _logger.info('marking ${localIDsWithLocation.length} files for re-upload');
     await _filesDB.markForReUploadIfLocationMissing(localIDsWithLocation);
-    await _filesMigrationDB.deleteByLocalIDs(
+    await _fileUpdationDB.deleteByLocalIDs(
       localIDsToProcess,
-      FilesMigrationDB.missingLocation,
+      FileUpdationDB.missingLocation,
     );
   }
 
@@ -219,9 +226,9 @@ class LocalFileUpdateService {
     final sTime = DateTime.now().microsecondsSinceEpoch;
     _logger.info('importing files without location info');
     var fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
-    await _filesMigrationDB.insertMultiple(
+    await _fileUpdationDB.insertMultiple(
       fileLocalIDs,
-      FilesMigrationDB.missingLocation,
+      FileUpdationDB.missingLocation,
     );
     final eTime = DateTime.now().microsecondsSinceEpoch;
     final d = Duration(microseconds: eTime - sTime);

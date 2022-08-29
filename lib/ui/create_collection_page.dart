@@ -203,7 +203,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   void _showNameAlbumDialog() async {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text("Album title"),
       content: TextFormField(
         decoration: const InputDecoration(
@@ -285,7 +285,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final dialog = createProgressDialog(context, "Moving files to album...");
     await dialog.show();
     try {
-      int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
+      final int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,

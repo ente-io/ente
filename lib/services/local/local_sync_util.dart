@@ -194,7 +194,7 @@ Future<List<File>> _convertLocalAssetsToUniqueFiles(
       if (!alreadySeenLocalIDs.contains(localID)) {
         var assetEntity = await AssetEntity.fromId(localID);
         files.add(
-          File.fromAsset(localPathName, assetEntity),
+          await File.fromAsset(localPathName, assetEntity),
         );
         alreadySeenLocalIDs.add(localID);
       }
@@ -285,7 +285,7 @@ Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       try {
-        final file = File.fromAsset(pathEntity.name, entity);
+        final file = await File.fromAsset(pathEntity.name, entity);
         files.add(file);
       } catch (e) {
         _logger.severe(e);

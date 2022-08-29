@@ -59,7 +59,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   }
 
   Widget _getBottomBar() {
-    List<Widget> children = [];
+    final List<Widget> children = [];
     children.add(
       Tooltip(
         message: "Info",
@@ -103,7 +103,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       }
       if (widget.file.uploadedFileID != null &&
           widget.file.ownerID == Configuration.instance.getUserID()) {
-        bool isArchived =
+        final bool isArchived =
             widget.file.magicMetadata.visibility == kVisibilityArchive;
         children.add(
           Tooltip(
@@ -151,7 +151,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
         ),
       );
     }
-    var safeAreaBottomPadding = MediaQuery.of(context).padding.bottom * .5;
+    final safeAreaBottomPadding = MediaQuery.of(context).padding.bottom * .5;
     return IgnorePointer(
       ignoring: _shouldHide,
       child: AnimatedOpacity(

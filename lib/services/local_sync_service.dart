@@ -8,7 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/file_migration_db.dart';
+import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -207,7 +207,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey);
     } else {
-      List<String> editedIDs = [];
+      final List<String> editedIDs = [];
       return editedIDs;
     }
   }
@@ -332,15 +332,13 @@ class LocalSyncService {
       _logger.info(
         updatedFiles.length.toString() + " local files were updated.",
       );
-      List<String> updatedLocalIDs = [];
+      final List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
-        if (file.localID != null) {
-          updatedLocalIDs.add(file.localID);
-        }
+        updatedLocalIDs.add(file.localID);
       }
-      await FilesMigrationDB.instance.insertMultiple(
+      await FileUpdationDB.instance.insertMultiple(
         updatedLocalIDs,
-        FilesMigrationDB.modificationTimeUpdated,
+        FileUpdationDB.modificationTimeUpdated,
       );
     }
   }
