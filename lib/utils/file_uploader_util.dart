@@ -32,9 +32,9 @@ class MediaUploadData {
   MediaUploadData(
     this.sourceFile,
     this.thumbnail,
-    this.isDeleted, {
+    this.isDeleted,
     this.hashData,
-  });
+  );
 }
 
 class FileHashData {
@@ -147,7 +147,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     sourceFile,
     thumbnailData,
     isDeleted,
-    hashData: FileHashData(fileHash, zipHash: zipHash),
+    FileHashData(fileHash, zipHash: zipHash),
   );
 }
 
@@ -177,7 +177,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   }
   try {
     thumbnailData = await getThumbnailFromInAppCacheFile(file);
-    return MediaUploadData(sourceFile, thumbnailData, isDeleted);
+    final fileHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+    return MediaUploadData(
+      sourceFile,
+      thumbnailData,
+      isDeleted,
+      FileHashData(fileHash),
+    );
   } catch (e, s) {
     _logger.severe("failed to generate thumbnail", e, s);
     throw InvalidFileError(
