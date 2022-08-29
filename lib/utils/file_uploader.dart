@@ -471,14 +471,16 @@ class FileUploader {
   ) async {
     if (fileToUpload.uploadedFileID != -1 &&
         fileToUpload.uploadedFileID != null) {
-      _logger.warning('file is already uploaded, skipping mapping logic');
+      _logger.severe(
+        'Critical: file is already uploaded, skipped mapping',
+      );
       return false;
     }
     List<String> hash = [mediaUploadData.fileHash];
     if (fileToUpload.fileType == FileType.livePhoto) {
       hash.add(mediaUploadData.zipHash);
     }
-    List<File> existingUploadedFiles =
+    final List<File> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
       hash,
       fileToUpload.fileType,
@@ -490,7 +492,7 @@ class FileUploader {
       debugPrint("Found some matches");
     }
     // case a
-    File sameLocalSameCollection = existingUploadedFiles.firstWhere(
+    final File sameLocalSameCollection = existingUploadedFiles.firstWhere(
       (e) =>
           e.collectionID == toCollectionID && e.localID == fileToUpload.localID,
       orElse: () => null,
@@ -506,7 +508,8 @@ class FileUploader {
     }
 
     // case b
-    File fileMissingLocalButSameCollection = existingUploadedFiles.firstWhere(
+    final File fileMissingLocalButSameCollection =
+        existingUploadedFiles.firstWhere(
       (e) => e.collectionID == toCollectionID && e.localID == null,
       orElse: () => null,
     );
@@ -524,7 +527,8 @@ class FileUploader {
     }
 
     // case c and d
-    File fileExistsButDifferentCollection = existingUploadedFiles.firstWhere(
+    final File fileExistsButDifferentCollection =
+        existingUploadedFiles.firstWhere(
       (e) => e.collectionID != toCollectionID,
       orElse: () => null,
     );

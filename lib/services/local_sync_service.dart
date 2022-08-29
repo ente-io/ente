@@ -246,7 +246,7 @@ class LocalSyncService {
         );
       }
 
-      List<String> updatedLocalIDs = [];
+      final List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
         if (file.localID != null) {
           updatedLocalIDs.add(file.localID);
