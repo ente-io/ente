@@ -478,23 +478,21 @@ class FileUploader {
     if (fileToUpload.fileType == FileType.livePhoto) {
       hash.add(mediaUploadData.zipHash);
     }
-    List<File> existingFiles =
+    List<File> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
       hash,
       fileToUpload.fileType,
       Configuration.instance.getUserID(),
     );
-    if (existingFiles?.isEmpty ?? true) {
+    if (existingUploadedFiles?.isEmpty ?? true) {
       return false;
     } else {
       debugPrint("Found some matches");
     }
     // case a
-    File sameLocalSameCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID == toCollectionID &&
-          element.localID == fileToUpload.localID,
+    File sameLocalSameCollection = existingUploadedFiles.firstWhere(
+      (e) =>
+          e.collectionID == toCollectionID && e.localID == fileToUpload.localID,
       orElse: () => null,
     );
     if (sameLocalSameCollection != null) {
@@ -503,16 +501,13 @@ class FileUploader {
         "\n existing: ${sameLocalSameCollection.tag()}",
       );
       // should delete the fileToUploadEntry
-      FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
+      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
       return true;
     }
 
     // case b
-    File fileMissingLocalButSameCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID == toCollectionID &&
-          element.localID == null,
+    File fileMissingLocalButSameCollection = existingUploadedFiles.firstWhere(
+      (e) => e.collectionID == toCollectionID && e.localID == null,
       orElse: () => null,
     );
     if (fileMissingLocalButSameCollection != null) {
@@ -529,10 +524,8 @@ class FileUploader {
     }
 
     // case c and d
-    File fileExistsButDifferentCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID != toCollectionID,
+    File fileExistsButDifferentCollection = existingUploadedFiles.firstWhere(
+      (e) => e.collectionID != toCollectionID,
       orElse: () => null,
     );
     if (fileExistsButDifferentCollection != null) {
