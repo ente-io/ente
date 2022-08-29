@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/file.dart' as ente;
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,11 +56,10 @@ class LocalFileUpdateService {
         await _runMigrationForFilesWithMissingLocation();
       }
       await _markFilesWhichAreActuallyUpdated();
-      _existingMigration.complete();
-      _existingMigration = null;
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
-      _existingMigration.complete();
+    } finally {
+      _existingMigration?.complete();
       _existingMigration = null;
     }
   }
@@ -73,7 +73,7 @@ class LocalFileUpdateService {
     bool hasData = true;
     const int limitInBatch = 100;
     while (hasData) {
-      var localIDsToProcess =
+      final localIDsToProcess =
           await _fileUpdationDB.getLocalIDsForPotentialReUpload(
         limitInBatch,
         FileUpdationDB.modificationTimeUpdated,
@@ -97,16 +97,18 @@ class LocalFileUpdateService {
     List<String> localIDsToProcess,
   ) async {
     _logger.info("files to process ${localIDsToProcess.length} for reupload");
-    var localFiles = await FilesDB.instance.getLocalFiles(localIDsToProcess);
+    List<ente.File> localFiles =
+        (await FilesDB.instance.getLocalFiles(localIDsToProcess));
     Set<String> processedIDs = {};
-    for (var file in localFiles) {
+    for (ente.File file in localFiles) {
       if (processedIDs.contains(file.localID)) {
         continue;
       }
       MediaUploadData uploadData;
       try {
-        uploadData = await getUploadDataFromEnteFile(file);
-        if (uploadData.hashData != null &&
+        uploadData = await getUploadData(file);
+        if (uploadData != null &&
+            uploadData.hashData != null &&
             file.hash != null &&
             (file.hash == uploadData.hashData.fileHash ||
                 file.hash == uploadData.hashData.zipHash)) {
@@ -127,22 +129,26 @@ class LocalFileUpdateService {
         processedIDs.add(file.localID);
       } catch (e) {
         _logger.severe("Failed to get file uploadData", e);
-      } finally {
-        // delete the file from app's internal cache if it was copied to app
-        // for upload. Shared Media should only be cleared when the upload
-        // succeeds.
-        if (Platform.isIOS &&
-            uploadData != null &&
-            uploadData.sourceFile != null) {
-          await uploadData.sourceFile.delete();
-        }
-      }
+      } finally {}
     }
     debugPrint("Deleting files ${processedIDs.length}");
     await _fileUpdationDB.deleteByLocalIDs(
       processedIDs.toList(),
       FileUpdationDB.modificationTimeUpdated,
     );
+  }
+
+  Future<MediaUploadData> getUploadData(ente.File file) async {
+    final mediaUploadData = await getUploadDataFromEnteFile(file);
+    // delete the file from app's internal cache if it was copied to app
+    // for upload. Shared Media should only be cleared when the upload
+    // succeeds.
+    if (Platform.isIOS &&
+        mediaUploadData != null &&
+        mediaUploadData.sourceFile != null) {
+      await mediaUploadData.sourceFile.delete();
+    }
+    return mediaUploadData;
   }
 
   Future<void> _runMigrationForFilesWithMissingLocation() async {

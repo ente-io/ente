@@ -469,8 +469,7 @@ class FileUploader {
     File fileToUpload,
     int toCollectionID,
   ) async {
-    if (fileToUpload.uploadedFileID != -1 &&
-        fileToUpload.uploadedFileID != null) {
+    if (fileToUpload.uploadedFileID != null) {
       _logger.severe(
         'Critical: file is already uploaded, skipped mapping',
       );

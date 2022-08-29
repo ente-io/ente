@@ -248,9 +248,7 @@ class LocalSyncService {
 
       final List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
-        if (file.localID != null) {
-          updatedLocalIDs.add(file.localID);
-        }
+        updatedLocalIDs.add(file.localID);
       }
       await FileUpdationDB.instance.insertMultiple(
         updatedLocalIDs,

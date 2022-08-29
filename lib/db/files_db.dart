@@ -837,11 +837,7 @@ class FilesDB {
         getInt(fileType),
       ],
     );
-    if (rows.isNotEmpty) {
-      return _convertToFiles(rows);
-    } else {
-      return [];
-    }
+    return _convertToFiles(rows);
   }
 
   Future<int> update(File file) async {
