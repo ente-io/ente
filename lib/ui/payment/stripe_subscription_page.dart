@@ -307,7 +307,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   Future<void> _launchStripePortal() async {
     await _dialog.show();
     try {
-      String url = await _billingService.getStripeCustomerPortalUrl();
+      final String url = await _billingService.getStripeCustomerPortalUrl();
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (BuildContext context) {
@@ -353,9 +353,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Widget _stripeRenewOrCancelButton() {
-    bool isRenewCancelled =
+    final bool isRenewCancelled =
         _currentSubscription.attributes?.isCancelled ?? false;
-    String title =
+    final String title =
         isRenewCancelled ? "Renew subscription" : "Cancel subscription";
     return TextButton(
       child: Text(
@@ -370,7 +370,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       onPressed: () async {
         bool confirmAction = false;
         if (isRenewCancelled) {
-          var choice = await showChoiceDialog(
+          final choice = await showChoiceDialog(
             context,
             title,
             "Are you sure you want to renew?",
@@ -379,7 +379,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           );
           confirmAction = choice == DialogUserChoice.secondChoice;
         } else {
-          var choice = await showChoiceDialog(
+          final choice = await showChoiceDialog(
             context,
             title,
             'Are you sure you want to cancel?',
@@ -455,7 +455,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not
-                var result = await showChoiceDialog(
+                final result = await showChoiceDialog(
                   context,
                   "Confirm plan change",
                   "Are you sure you want to change your plan?",

@@ -48,7 +48,7 @@ class DebugSectionWidget extends StatelessWidget {
 
   void _showKeyAttributesDialog(BuildContext context) {
     final keyAttributes = Configuration.instance.getKeyAttributes();
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text("key attributes"),
       content: SingleChildScrollView(
         child: Column(

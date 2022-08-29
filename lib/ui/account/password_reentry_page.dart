@@ -79,7 +79,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
 
-            var dialogUserChoice = await showChoiceDialog(
+            final dialogUserChoice = await showChoiceDialog(
               context,
               "Incorrect password",
               "Please try again",

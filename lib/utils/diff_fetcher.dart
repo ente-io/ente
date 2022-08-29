@@ -76,7 +76,7 @@ class DiffFetcher {
             fileDecryptionKey,
             Sodium.base642bin(file.metadataDecryptionHeader),
           );
-          Map<String, dynamic> metadata =
+          final Map<String, dynamic> metadata =
               jsonDecode(utf8.decode(encodedMetadata));
           file.applyMetadata(metadata);
           if (item['magicMetadata'] != null) {

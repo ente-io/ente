@@ -53,7 +53,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   }
 
   Future<void> _onLogoutTapped() async {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text(
         "Logout",
         style: TextStyle(

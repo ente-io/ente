@@ -53,7 +53,7 @@ class FavoritesService {
 
   Future<void> removeFromFavorites(File file) async {
     final collectionID = await _getOrCreateFavoriteCollectionID();
-    var fileID = file.uploadedFileID;
+    final fileID = file.uploadedFileID;
     if (fileID == null) {
       // Do nothing, ignore
     } else {

@@ -40,8 +40,8 @@ class FilesMigrationDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, _databaseName);
+    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, _databaseName);
     return await openDatabase(
       path,
       version: _databaseVersion,

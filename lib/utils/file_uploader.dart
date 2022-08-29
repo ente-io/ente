@@ -209,7 +209,7 @@ class FileUploader {
   }
 
   void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
-    List<String> uploadsToBeRemoved = [];
+    final List<String> uploadsToBeRemoved = [];
     _queue.entries
         .where((entry) => entry.value.status == UploadStatus.notStarted)
         .forEach((pendingUpload) {
@@ -308,7 +308,7 @@ class FileUploader {
     bool forcedUpload,
   ) async {
     final connectivityResult = await (Connectivity().checkConnectivity());
-    var canUploadUnderCurrentNetworkConditions =
+    final canUploadUnderCurrentNetworkConditions =
         (connectivityResult == ConnectivityResult.wifi ||
             Configuration.instance.shouldBackupOverMobileData());
     if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
@@ -363,7 +363,7 @@ class FileUploader {
         }
       }
       Uint8List key;
-      bool isUpdatedFile =
+      final bool isUpdatedFile =
           file.uploadedFileID != null && file.updationTime == -1;
       if (isUpdatedFile) {
         _logger.info("File was updated " + file.toString());
@@ -381,7 +381,7 @@ class FileUploader {
         encryptedFilePath,
         key: key,
       );
-      var thumbnailData = mediaUploadData.thumbnail;
+      final thumbnailData = mediaUploadData.thumbnail;
 
       final encryptedThumbnailData =
           await CryptoUtil.encryptChaCha(thumbnailData, fileAttributes.key);
@@ -393,11 +393,11 @@ class FileUploader {
           .writeAsBytes(encryptedThumbnailData.encryptedData);
 
       final thumbnailUploadURL = await _getUploadURL();
-      String thumbnailObjectKey =
+      final String thumbnailObjectKey =
           await _putFile(thumbnailUploadURL, encryptedThumbnailFile);
 
       final fileUploadURL = await _getUploadURL();
-      String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
+      final String fileObjectKey = await _putFile(fileUploadURL, encryptedFile);
 
       final metadata =
           await file.getMetadataForUpload(mediaUploadData.sourceFile);
@@ -496,7 +496,7 @@ class FileUploader {
   }
 
   Future _onInvalidFileError(File file, InvalidFileError e) async {
-    String ext = file.title == null ? "no title" : extension(file.title);
+    final String ext = file.title == null ? "no title" : extension(file.title);
     _logger.severe(
       "Invalid file: (ext: $ext) encountered: " + file.toString(),
       e,

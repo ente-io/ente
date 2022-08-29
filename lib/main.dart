@@ -231,8 +231,8 @@ Future<void> _killBGTask([String taskId]) async {
 }
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  bool isRunningInFG = await _isRunningInForeground(); // hb
-  bool isInForeground = AppLifecycleService.instance.isForeground;
+  final bool isRunningInFG = await _isRunningInForeground(); // hb
+  final bool isInForeground = AppLifecycleService.instance.isForeground;
   if (_isProcessRunning) {
     _logger.info(
       "Background push received when app is alive and runningInFS: $isRunningInFG inForeground: $isInForeground",
@@ -259,18 +259,18 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Future<void> _logFGHeartBeatInfo() async {
-  bool isRunningInFG = await _isRunningInForeground();
+  final bool isRunningInFG = await _isRunningInForeground();
   final prefs = await SharedPreferences.getInstance();
   await prefs.reload();
-  var lastFGTaskHeartBeatTime = prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0;
-  String lastRun = lastFGTaskHeartBeatTime == 0
+  final lastFGTaskHeartBeatTime = prefs.getInt(kLastFGTaskHeartBeatTime) ?? 0;
+  final String lastRun = lastFGTaskHeartBeatTime == 0
       ? 'never'
       : DateTime.fromMicrosecondsSinceEpoch(lastFGTaskHeartBeatTime).toString();
   _logger.info('isAlreaduunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
 void _scheduleSuicide(Duration duration, [String taskID]) {
-  var taskIDVal = taskID ?? 'no taskID';
+  final taskIDVal = taskID ?? 'no taskID';
   _logger.warning("Schedule seppuku taskID: $taskIDVal");
   Future.delayed(duration, () {
     _logger.warning("TLE, committing seppuku for taskID: $taskIDVal");

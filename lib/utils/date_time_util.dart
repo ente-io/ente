@@ -131,7 +131,7 @@ String getFullDate(DateTime dateTime) {
 }
 
 String daysLeft(int futureTime) {
-  int daysLeft = ((futureTime - DateTime.now().microsecondsSinceEpoch) /
+  final int daysLeft = ((futureTime - DateTime.now().microsecondsSinceEpoch) /
           Duration.microsecondsPerDay)
       .ceil();
   return '$daysLeft day' + (daysLeft <= 1 ? "" : "s");
@@ -143,7 +143,7 @@ String formatDuration(Duration position) {
   int seconds = ms ~/ 1000;
   final int hours = seconds ~/ 3600;
   seconds = seconds % 3600;
-  var minutes = seconds ~/ 60;
+  final minutes = seconds ~/ 60;
   seconds = seconds % 60;
 
   final hoursString = hours >= 10
@@ -230,15 +230,15 @@ String secondsToHHMMSS(int value) {
   h = value ~/ 3600;
   m = ((value - h * 3600)) ~/ 60;
   s = value - (h * 3600) - (m * 60);
-  String hourLeft = h.toString().length < 2 ? "0" + h.toString() : h.toString();
+  final String hourLeft = h.toString().length < 2 ? "0" + h.toString() : h.toString();
 
-  String minuteLeft =
+  final String minuteLeft =
       m.toString().length < 2 ? "0" + m.toString() : m.toString();
 
-  String secondsLeft =
+  final String secondsLeft =
       s.toString().length < 2 ? "0" + s.toString() : s.toString();
 
-  String result = "$hourLeft:$minuteLeft:$secondsLeft";
+  final String result = "$hourLeft:$minuteLeft:$secondsLeft";
 
   return result;
 }
