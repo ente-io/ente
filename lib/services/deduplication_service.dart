@@ -18,7 +18,7 @@ class DeduplicationService {
 
   Future<List<DuplicateFiles>> getDuplicateFiles() async {
     try {
-      DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
+      final DuplicateFilesResponse dupes = await _fetchDuplicateFileIDs();
       final ids = <int>[];
       for (final dupe in dupes.duplicates) {
         ids.addAll(dupe.fileIDs);

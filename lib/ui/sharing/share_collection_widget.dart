@@ -91,7 +91,7 @@ class _SharingDialogState extends State<SharingDialog> {
     }
 
     if (!FeatureFlagService.instance.disableUrlSharing()) {
-      bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
+      final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
       children.addAll([
         const Padding(padding: EdgeInsets.all(16)),
         const Divider(height: 1),
@@ -246,10 +246,10 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   Widget _getShareableUrlWidget(BuildContext parentContext) {
-    String collectionKey = Base58Encode(
+    final String collectionKey = Base58Encode(
       CollectionsService.instance.getCollectionKey(widget.collection.id),
     );
-    String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
+    final String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -436,7 +436,7 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   void _showUnSupportedAlert() {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text("Sorry"),
       content: const Text(
         "Sharing is not permitted for free accounts, please subscribe",

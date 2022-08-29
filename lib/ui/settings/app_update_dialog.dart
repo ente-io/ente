@@ -153,7 +153,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
       OpenFile.open(_saveUrl);
     } catch (e) {
       Logger("ApkDownloader").severe(e);
-      AlertDialog alert = AlertDialog(
+      final AlertDialog alert = AlertDialog(
         title: const Text("Sorry"),
         content: const Text("The download could not be completed"),
         actions: [

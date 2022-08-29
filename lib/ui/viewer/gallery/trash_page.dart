@@ -48,7 +48,7 @@ class _TrashPageState extends State<TrashPage> {
 
   @override
   Widget build(Object context) {
-    bool filesAreSelected = widget._selectedFiles.files.isNotEmpty;
+    final bool filesAreSelected = widget._selectedFiles.files.isNotEmpty;
 
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {

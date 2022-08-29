@@ -123,7 +123,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
-      AlertDialog alert = AlertDialog(
+      final AlertDialog alert = AlertDialog(
         title: const Text("Session expired"),
         content: const Text("Please login again"),
         actions: [
@@ -344,7 +344,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      String initialLink = await getInitialLink();
+      final String initialLink = await getInitialLink();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
@@ -609,7 +609,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
 
   @override
   Widget build(BuildContext context) {
-    bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,

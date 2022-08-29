@@ -22,7 +22,7 @@ class SocialSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    List<Widget> options = [
+    final List<Widget> options = [
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {

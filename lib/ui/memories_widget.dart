@@ -66,9 +66,9 @@ class MemoriesWidget extends StatelessWidget {
   }
 
   bool _areMemoriesFromSameYear(Memory first, Memory second) {
-    var firstDate =
+    final firstDate =
         DateTime.fromMicrosecondsSinceEpoch(first.file.creationTime);
-    var secondDate =
+    final secondDate =
         DateTime.fromMicrosecondsSinceEpoch(second.file.creationTime);
     return firstDate.year == secondDate.year;
   }

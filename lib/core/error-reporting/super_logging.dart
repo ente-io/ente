@@ -23,7 +23,7 @@ extension SuperString on String {
     var start = 0;
 
     while (true) {
-      var stop = start + chunkSize;
+      final stop = start + chunkSize;
       if (stop > length) break;
       yield substring(start, stop);
       start = stop;
@@ -37,7 +37,7 @@ extension SuperString on String {
 
 extension SuperLogRecord on LogRecord {
   String toPrettyString([String extraLines]) {
-    var header = "[$loggerName] [$level] [$time]";
+    final header = "[$loggerName] [$level] [$time]";
 
     var msg = "$header $message";
 
@@ -236,7 +236,7 @@ class SuperLogging {
       extraLines = null;
     }
 
-    var str = config.prefix + " " + rec.toPrettyString(extraLines);
+    final str = config.prefix + " " + rec.toPrettyString(extraLines);
 
     // write to stdout
     printLog(str);
@@ -316,21 +316,21 @@ class SuperLogging {
 
     // choose [logDir]
     if (dirPath.isEmpty) {
-      var root = await getExternalStorageDirectory();
+      final root = await getExternalStorageDirectory();
       dirPath = '${root.path}/logs';
     }
 
     // create [logDir]
-    var dir = Directory(dirPath);
+    final dir = Directory(dirPath);
     await dir.create(recursive: true);
 
-    var files = <File>[];
-    var dates = <File, DateTime>{};
+    final files = <File>[];
+    final dates = <File, DateTime>{};
 
     // collect all log files with valid names
     await for (final file in dir.list()) {
       try {
-        var date = config.dateFmt.parse(basename(file.path));
+        final date = config.dateFmt.parse(basename(file.path));
         dates[file as File] = date;
         files.add(file);
       } on FormatException {}
@@ -363,7 +363,7 @@ class SuperLogging {
   static String appVersion;
 
   static Future<String> getAppVersion() async {
-    var pkgInfo = await PackageInfo.fromPlatform();
+    final pkgInfo = await PackageInfo.fromPlatform();
     return "${pkgInfo.version}+${pkgInfo.buildNumber}";
   }
 
@@ -372,7 +372,7 @@ class SuperLogging {
     if (!Platform.isAndroid) {
       return false;
     }
-    var pkgName = (await PackageInfo.fromPlatform()).packageName;
+    final pkgName = (await PackageInfo.fromPlatform()).packageName;
     return pkgName.startsWith("io.ente.photos.fdroid");
   }
 }

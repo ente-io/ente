@@ -10,7 +10,7 @@ class LRUMap<K, V> {
   LRUMap(this._maxSize, [this._handler]);
 
   V get(K key) {
-    V value = _map.remove(key);
+    final V value = _map.remove(key);
     if (value != null) {
       _map[key] = value;
     }
@@ -21,8 +21,8 @@ class LRUMap<K, V> {
     _map.remove(key);
     _map[key] = value;
     if (_map.length > _maxSize) {
-      K evictedKey = _map.keys.first;
-      V evictedValue = _map.remove(evictedKey);
+      final K evictedKey = _map.keys.first;
+      final V evictedValue = _map.remove(evictedKey);
       if (_handler != null) {
         _handler(evictedKey, evictedValue);
       }

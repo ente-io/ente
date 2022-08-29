@@ -164,7 +164,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey);
     } else {
-      List<String> editedIDs = [];
+      final List<String> editedIDs = [];
       return editedIDs;
     }
   }
@@ -179,7 +179,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kDownloadedFileIDsKey)) {
       return _prefs.getStringList(kDownloadedFileIDsKey);
     } else {
-      List<String> downloadedIDs = [];
+      final List<String> downloadedIDs = [];
       return downloadedIDs;
     }
   }
@@ -194,7 +194,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kInvalidFileIDsKey)) {
       return _prefs.getStringList(kInvalidFileIDsKey);
     } else {
-      List<String> invalidIDs = [];
+      final List<String> invalidIDs = [];
       return invalidIDs;
     }
   }

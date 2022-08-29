@@ -112,7 +112,7 @@ class Configuration {
       _logger.warning(e);
     }
     tempDirectory.createSync(recursive: true);
-    var tempDirectoryPath = (await getTemporaryDirectory()).path;
+    final tempDirectoryPath = (await getTemporaryDirectory()).path;
     _thumbnailCacheDirectory = tempDirectoryPath + "/thumbnail-cache";
     io.Directory(_thumbnailCacheDirectory).createSync(recursive: true);
     _sharedTempMediaDirectory = tempDirectoryPath + "/ente-shared-media";

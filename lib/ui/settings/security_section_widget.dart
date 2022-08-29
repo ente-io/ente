@@ -83,7 +83,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         value: snapshot.data,
                         onChanged: (value) async {
                           AppLock.of(context).setEnabled(false);
-                          String reason =
+                          const String reason =
                               "Please authenticate to configure two-factor authentication";
                           final result = await requestAuthentication(reason);
                           AppLock.of(context).setEnabled(
@@ -164,7 +164,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   value: _config.shouldHideFromRecents(),
                   onChanged: (value) async {
                     if (value) {
-                      AlertDialog alert = AlertDialog(
+                      final AlertDialog alert = AlertDialog(
                         title: const Text("Hide from recents?"),
                         content: SingleChildScrollView(
                           child: Column(
@@ -278,7 +278,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   void _disableTwoFactor() {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text("Disable two-factor"),
       content: const Text(
         "Are you sure you want to disable two-factor authentication?",

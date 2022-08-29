@@ -98,7 +98,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
     final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
     if (videoUrl == null || !videoUrl.existsSync()) {
-      String errMsg =
+      final String errMsg =
           "missing livePhoto url for  ${file.toString()} with subType ${file.fileSubType}";
       _logger.severe(errMsg);
       throw InvalidFileUploadState(errMsg);
@@ -111,7 +111,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     // .elp -> ente live photo
     final livePhotoPath = tempPath + file.generatedID.toString() + ".elp";
     _logger.fine("Uploading zipped live photo from " + livePhotoPath);
-    var encoder = ZipFileEncoder();
+    final encoder = ZipFileEncoder();
     encoder.create(livePhotoPath);
     encoder.addFile(videoUrl, "video" + extension(videoUrl.path));
     encoder.addFile(sourceFile, "image" + extension(sourceFile.path));
@@ -168,8 +168,8 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
 Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   io.File sourceFile;
   Uint8List thumbnailData;
-  bool isDeleted = false;
-  var localPath = getSharedMediaFilePath(file);
+  const bool isDeleted = false;
+  final localPath = getSharedMediaFilePath(file);
   sourceFile = io.File(localPath);
   if (!sourceFile.existsSync()) {
     _logger.warning("File doesn't exist in app sandbox");

@@ -30,7 +30,7 @@ class FileMagicService {
       FileMagicService._privateConstructor();
 
   Future<void> changeVisibility(List<File> files, int visibility) async {
-    Map<String, dynamic> update = {kMagicKeyVisibility: visibility};
+    final Map<String, dynamic> update = {kMagicKeyVisibility: visibility};
     await _updateMagicData(files, update);
     if (visibility == kVisibilityVisible) {
       // Force reload home gallery to pull in the now unarchived files
@@ -62,7 +62,7 @@ class FileMagicService {
         // read the existing magic metadata and apply new updates to existing data
         // current update is simple replace. This will be enhanced in the future,
         // as required.
-        Map<String, dynamic> jsonToUpdate = jsonDecode(file.pubMmdEncodedJson);
+        final Map<String, dynamic> jsonToUpdate = jsonDecode(file.pubMmdEncodedJson);
         newMetadataUpdate.forEach((key, value) {
           jsonToUpdate[key] = value;
         });
@@ -132,7 +132,7 @@ class FileMagicService {
         // read the existing magic metadata and apply new updates to existing data
         // current update is simple replace. This will be enhanced in the future,
         // as required.
-        Map<String, dynamic> jsonToUpdate = jsonDecode(file.mMdEncodedJson);
+        final Map<String, dynamic> jsonToUpdate = jsonDecode(file.mMdEncodedJson);
         newMetadataUpdate.forEach((key, value) {
           jsonToUpdate[key] = value;
         });
@@ -224,7 +224,7 @@ class MetadataRequest {
   }
 
   Map<String, dynamic> toJson() {
-    var map = <String, dynamic>{};
+    final map = <String, dynamic>{};
     map['version'] = version;
     map['count'] = count;
     map['data'] = data;

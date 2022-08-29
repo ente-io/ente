@@ -262,7 +262,7 @@ class RemoteSyncService {
     _logger.info(editedFiles.length.toString() + " files edited.");
 
     _completedUploads = 0;
-    int toBeUploaded =
+    final int toBeUploaded =
         filesToBeUploaded.length + updatedFileIDs.length + editedFiles.length;
 
     if (toBeUploaded > 0) {
@@ -371,8 +371,8 @@ class RemoteSyncService {
         localButUpdatedOnRemote = 0,
         localButAddedToNewCollectionOnRemote = 0;
     bool hasAnyCreationTimeChanged = false;
-    List<File> toBeInserted = [];
-    int userID = Configuration.instance.getUserID();
+    final List<File> toBeInserted = [];
+    final int userID = Configuration.instance.getUserID();
     for (File file in diff) {
       final existingFiles = file.deviceFolder == null
           ? null
@@ -417,7 +417,7 @@ class RemoteSyncService {
         } else {
           file.localID = null;
         }
-        bool wasUploadedOnAPreviousInstallation =
+        final bool wasUploadedOnAPreviousInstallation =
             existingFiles.length == 1 && existingFiles[0].collectionID == null;
         if (wasUploadedOnAPreviousInstallation) {
           file.generatedID = existingFiles[0].generatedID;

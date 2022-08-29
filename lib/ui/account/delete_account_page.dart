@@ -145,7 +145,7 @@ class DeleteAccountPage extends StatelessWidget {
     DeleteChallengeResponse response,
   ) async {
     AppLock.of(context).setEnabled(false);
-    String reason = "Please authenticate to initiate account deletion";
+    const String reason = "Please authenticate to initiate account deletion";
     final result = await requestAuthentication(reason);
     AppLock.of(context).setEnabled(
       Configuration.instance.shouldShowLockScreen(),
@@ -177,7 +177,7 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text(
         "Delete account",
         style: TextStyle(
