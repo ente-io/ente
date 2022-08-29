@@ -50,7 +50,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
 
     const handleFolderSelection = async () => {
         const folderPath = await watchFolderService.selectFolder();
-        if (folderPath?.length > 0) {
+        if (folderPath) {
             setInputFolderPath(folderPath);
             setChoiceModalOpen(true);
         }
