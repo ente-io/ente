@@ -81,10 +81,12 @@ class BackupConfigurationHeaderWidget extends StatefulWidget {
 
 class _BackupConfigurationHeaderWidgetState
     extends State<BackupConfigurationHeaderWidget> {
-  bool isBackedUp;
+  bool _isBackedUp;
+
   @override
   void initState() {
-    isBackedUp = widget.devicePathCollection.sync;
+    _isBackedUp = widget.devicePathCollection.sync;
+    super.initState();
   }
 
   @override
@@ -96,7 +98,7 @@ class _BackupConfigurationHeaderWidgetState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          isBackedUp
+          _isBackedUp
               ? const Text("Backup enabled")
               : Text(
                   "Backup disabled",
@@ -108,12 +110,12 @@ class _BackupConfigurationHeaderWidgetState
                   ),
                 ),
           Switch(
-            value: isBackedUp,
+            value: _isBackedUp,
             onChanged: (value) async {
               await FilesDB.instance.updateDevicePathSyncStatus(
                 {widget.devicePathCollection.id: value},
               );
-              isBackedUp = value;
+              _isBackedUp = value;
               setState(() {});
               Bus.instance.fire(BackupFoldersUpdatedEvent());
             },
