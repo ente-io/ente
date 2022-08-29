@@ -161,7 +161,7 @@ class watchFolderService {
     ): Promise<WatchMapping[]> {
         const notDeletedMappings = [];
         for (const mapping of mappings) {
-            const mappingExists = await this.ElectronAPIs.doesFolderExists(
+            const mappingExists = await this.ElectronAPIs.isFolder(
                 mapping.folderPath
             );
             if (!mappingExists) {
@@ -531,9 +531,7 @@ class watchFolderService {
 
     async isFolder(folderPath: string) {
         try {
-            const isFolder = await this.ElectronAPIs.doesFolderExists(
-                folderPath
-            );
+            const isFolder = await this.ElectronAPIs.isFolder(folderPath);
             return isFolder;
         } catch (e) {
             logError(e, 'error while checking if folder exists');

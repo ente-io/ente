@@ -1,7 +1,6 @@
-import { UPLOAD_TYPE } from 'components/Upload/Uploader';
 import { Collection } from 'types/collection';
 import { ElectronAPIs } from 'types/electron';
-import { ElectronFile, FileWithCollection } from 'types/upload';
+import { ElectronFile, FileWithCollection, UPLOAD_TYPE } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 
