@@ -200,7 +200,7 @@ export default function Uploader(props: Props) {
         }
     }, [props.webFiles, appContext.sharedFiles, props.electronFiles]);
 
-    const uploadInit = function () {
+    const uploadInit = async () => {
         setUploadStage(UPLOAD_STAGES.START);
         setUploadCounter({ finished: 0, total: 0 });
         setInProgressUploads([]);
@@ -208,6 +208,8 @@ export default function Uploader(props: Props) {
         setPercentComplete(0);
         props.closeCollectionSelector();
         setUploadProgressView(true);
+        props.setUploadInProgress(true);
+        await props.syncWithRemote(true, true);
     };
 
     const resumeDesktopUpload = async (
@@ -287,6 +289,7 @@ export default function Uploader(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
+            props.closeCollectionSelector();
             const filesWithCollectionToUpload: FileWithCollection[] =
                 toUploadFiles.current.map((file, index) => ({
                     file,
@@ -306,6 +309,7 @@ export default function Uploader(props: Props) {
         collectionName?: string
     ) => {
         try {
+            props.closeCollectionSelector();
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionWiseFiles = new Map<
@@ -371,9 +375,6 @@ export default function Uploader(props: Props) {
     ) => {
         try {
             uploadInit();
-            props.setUploadInProgress(true);
-            props.closeCollectionSelector();
-            await props.syncWithRemote(true, true);
             if (isElectron() && !isPendingDesktopUpload.current) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
@@ -406,9 +407,7 @@ export default function Uploader(props: Props) {
 
     const retryFailed = async () => {
         try {
-            props.setUploadInProgress(true);
             uploadInit();
-            await props.syncWithRemote(true, true);
             await uploadManager.retryFailedFiles();
         } catch (err) {
             showUserFacingError(err.message);

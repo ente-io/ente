@@ -75,7 +75,7 @@ class watchFolderService {
 
             console.log('mappings', mappings);
 
-            if (!mappings) {
+            if (!mappings?.length) {
                 return;
             }
 
