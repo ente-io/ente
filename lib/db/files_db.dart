@@ -438,7 +438,8 @@ class FilesDB {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where: '$columnOwnerID = ? AND $columnMMdVisibility = ?',
+      where:
+          '$columnOwnerID = ? AND $columnMMdVisibility = ? AND $columnCollectionID != -1',
       columns: [columnCollectionID],
       whereArgs: [ownerID, visibility],
     );
