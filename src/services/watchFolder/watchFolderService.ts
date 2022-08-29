@@ -9,7 +9,7 @@ import {
 import { getLocalFiles } from '../fileService';
 import { logError } from 'utils/sentry';
 import { EventQueueItem, WatchMapping } from 'types/watchFolder';
-import { ElectronAPIsInterface } from 'types/electron';
+import { ElectronAPIs } from 'types/electron';
 import debounce from 'debounce-promise';
 import {
     diskFileAddedCallback,
@@ -20,7 +20,7 @@ import { getParentFolderName } from './utils';
 import { UPLOAD_STRATEGY } from 'constants/upload';
 
 class watchFolderService {
-    private ElectronAPIs: ElectronAPIsInterface;
+    private ElectronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
@@ -36,7 +36,7 @@ class watchFolderService {
 
     constructor() {
         this.ElectronAPIs = (runningInBrowser() &&
-            window['ElectronAPIs']) as ElectronAPIsInterface;
+            window['ElectronAPIs']) as ElectronAPIs;
         this.allElectronAPIsExist = !!this.ElectronAPIs?.getWatchMappings;
     }
 
