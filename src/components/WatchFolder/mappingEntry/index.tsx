@@ -5,9 +5,11 @@ import { HorizontalFlex, SpaceBetweenFlex } from 'components/Container';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
+import FolderCopyOutlinedIcon from '@mui/icons-material/FolderCopyOutlined';
 import constants from 'utils/strings/constants';
 import MappingEntryOptions from './mappingEntryOptions';
 import { EntryHeading } from './entryHeading';
+import { UPLOAD_STRATEGY } from 'constants/upload';
 
 interface Iprops {
     mapping: WatchMapping;
@@ -40,7 +42,12 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
     return (
         <SpaceBetweenFlex>
             <HorizontalFlex>
-                <FolderOpenIcon />
+                {mapping &&
+                mapping.uploadStrategy === UPLOAD_STRATEGY.SINGLE_COLLECTION ? (
+                    <FolderOpenIcon />
+                ) : (
+                    <FolderCopyOutlinedIcon />
+                )}
                 <EntryContainer>
                     <EntryHeading mapping={mapping} />
                     <Typography color="text.secondary" variant="body2">
