@@ -21,6 +21,7 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
 const kMaximumThumbnailCompressionAttempts = 2;
+const kLivePhotoHashSeparator = ':';
 
 class MediaUploadData {
   final io.File sourceFile;
@@ -104,7 +105,8 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     }
     String livePhotoVideoHash =
         Sodium.bin2base64(await CryptoUtil.getHash(videoUrl));
-    fileHash = '$fileHash:$livePhotoVideoHash';
+    // imgHash:vidHash
+    fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
     final tempPath = Configuration.instance.getTempDirectory();
     // .elp -> ente live photo
     final livePhotoPath = tempPath + file.generatedID.toString() + ".elp";

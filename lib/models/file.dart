@@ -135,6 +135,15 @@ class File extends EnteFile {
     duration = metadata["duration"] ?? 0;
     exif = metadata["exif"];
     hash = metadata["hash"];
+    // handle past live photos upload from web client
+    if (hash == null &&
+        fileType == FileType.livePhoto &&
+        metadata.containsKey('imgHash') &&
+        metadata.containsKey('vidHash')) {
+      // convert to imgHash:vidHash
+      hash =
+          '${metadata['imgHash']}$kLivePhotoHashSeparator${metadata['vidHash']}';
+    }
     metadataVersion = metadata["version"] ?? 0;
   }
 
