@@ -94,7 +94,7 @@ export default function App({ Component, err }) {
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
     const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
-    const [watchFolderView, setWatchFolderView] = useState(true);
+    const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery('(max-width:428px)');
 

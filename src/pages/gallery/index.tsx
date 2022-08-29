@@ -207,7 +207,7 @@ export default function Gallery() {
     const [webFiles, setWebFiles] = useState([]);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
-    const [sidebarView, setSidebarView] = useState(true);
+    const [sidebarView, setSidebarView] = useState(false);
 
     const closeSidebar = () => setSidebarView(false);
     const openSidebar = () => setSidebarView(true);
