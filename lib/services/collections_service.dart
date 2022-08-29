@@ -631,29 +631,30 @@ class CollectionsService {
   }
 
   Future<void> linkLocalFileToExistingUploadedFileInAnotherCollection(
-    int destCollectionID,
-    File localFileToUpload,
-    File file,
-  ) async {
+    int destCollectionID, {
+    @required File localFileToUpload,
+    @required File existingUploadedFile,
+  }) async {
     final params = <String, dynamic>{};
     params["collectionID"] = destCollectionID;
     params["files"] = [];
+    final int uploadedFileID = existingUploadedFile.uploadedFileID;
 
-    final key = decryptFileKey(file);
-    file.generatedID = localFileToUpload.generatedID; // So that a new entry is
-    // created in the FilesDB
-    file.localID = localFileToUpload.localID;
-    file.collectionID = destCollectionID;
+    // encrypt the fileKey with destination collection's key
+    final fileKey = decryptFileKey(existingUploadedFile);
     final encryptedKeyData =
-        CryptoUtil.encryptSync(key, getCollectionKey(destCollectionID));
-    file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
-    file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+        CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
+
+    localFileToUpload.encryptedKey =
+        Sodium.bin2base64(encryptedKeyData.encryptedData);
+    localFileToUpload.keyDecryptionNonce =
+        Sodium.bin2base64(encryptedKeyData.nonce);
 
     params["files"].add(
       CollectionFileItem(
-        file.uploadedFileID,
-        file.encryptedKey,
-        file.keyDecryptionNonce,
+        uploadedFileID,
+        localFileToUpload.encryptedKey,
+        localFileToUpload.keyDecryptionNonce,
       ).toMap(),
     );
 
@@ -665,8 +666,12 @@ class CollectionsService {
           headers: {"X-Auth-Token": Configuration.instance.getToken()},
         ),
       );
-      await _filesDB.insertMultiple([file]);
-      Bus.instance.fire(CollectionUpdatedEvent(destCollectionID, [file]));
+      localFileToUpload.collectionID = destCollectionID;
+      localFileToUpload.uploadedFileID = uploadedFileID;
+      await _filesDB.insertMultiple([localFileToUpload]);
+      Bus.instance.fire(
+        CollectionUpdatedEvent(destCollectionID, [localFileToUpload]),
+      );
     } catch (e) {
       rethrow;
     }

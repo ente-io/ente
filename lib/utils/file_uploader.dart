@@ -539,7 +539,10 @@ class FileUploader {
       );
       await CollectionsService.instance
           .linkLocalFileToExistingUploadedFileInAnotherCollection(
-              toCollectionID, fileToUpload, fileExistsButDifferentCollection);
+        toCollectionID,
+        localFileToUpload: fileToUpload,
+        existingUploadedFile: fileExistsButDifferentCollection,
+      );
       return true;
     }
     // case e
