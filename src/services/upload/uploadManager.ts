@@ -2,7 +2,7 @@ import { getLocalFiles, setLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
-    sortFilesIntoCollections,
+    groupFilesBasedOnCollectionID,
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
@@ -74,7 +74,7 @@ class UploadManager {
     private async init(collections: Collection[]) {
         this.resetState();
         this.existingFiles = await getLocalFiles();
-        this.existingFilesCollectionWise = sortFilesIntoCollections(
+        this.existingFilesCollectionWise = groupFilesBasedOnCollectionID(
             this.existingFiles
         );
         this.collections = new Map(
