@@ -162,7 +162,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey);
     } else {
-      List<String> editedIDs = [];
+      final List<String> editedIDs = [];
       return editedIDs;
     }
   }
@@ -177,7 +177,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kDownloadedFileIDsKey)) {
       return _prefs.getStringList(kDownloadedFileIDsKey);
     } else {
-      List<String> downloadedIDs = [];
+      final List<String> downloadedIDs = [];
       return downloadedIDs;
     }
   }
@@ -192,7 +192,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kInvalidFileIDsKey)) {
       return _prefs.getStringList(kInvalidFileIDsKey);
     } else {
-      List<String> invalidIDs = [];
+      final List<String> invalidIDs = [];
       return invalidIDs;
     }
   }
@@ -273,9 +273,9 @@ class LocalSyncService {
     );
     try {
       if (Platform.isIOS) {
-        var assetEntity = await AssetEntity.fromId(file.localID);
+        final assetEntity = await AssetEntity.fromId(file.localID);
         if (assetEntity != null) {
-          var isLocallyAvailable =
+          final isLocallyAvailable =
               await assetEntity.isLocallyAvailable(isOrigin: true);
           _logger.info(
             're-upload asset ${file.toString()} with localAvailableFlag '

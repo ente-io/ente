@@ -30,7 +30,7 @@ void validatePreVerificationStateCheck(
   }
   // check password encoding issues
   try {
-    Uint8List passwordL = utf8.encode(password);
+    final Uint8List passwordL = utf8.encode(password);
     try {
       utf8.decode(passwordL);
     } catch (e) {

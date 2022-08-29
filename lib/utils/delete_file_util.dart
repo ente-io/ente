@@ -418,7 +418,7 @@ Future<List<String>> _deleteLocalFilesInBatches(
 
 Future<bool> _localFileExist(File file) {
   if (file.isSharedMediaToAppSandbox()) {
-    var localFile = io.File(getSharedMediaFilePath(file));
+    final localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists();
   } else {
     return file.getAsset().then((asset) {
@@ -434,7 +434,7 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
   final List<String> actuallyDeletedIDs = [];
   try {
     return Future.forEach(localIDs, (id) async {
-      String localPath = getSharedMediaPathFromLocalID(id);
+      final String localPath = getSharedMediaPathFromLocalID(id);
       try {
         // verify the file exists as the OS may have already deleted it from cache
         if (io.File(localPath).existsSync()) {

@@ -25,7 +25,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () async {
-        int now = DateTime.now().millisecondsSinceEpoch;
+        final int now = DateTime.now().millisecondsSinceEpoch;
         if (now - (_lastTap ?? now) < kConsecutiveTapTimeWindowInMilliseconds) {
           _consecutiveTaps++;
           if (_consecutiveTaps == kTapThresholdForInspector) {

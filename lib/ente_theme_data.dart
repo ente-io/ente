@@ -10,11 +10,6 @@ final lightThemeData = ThemeData(
   iconTheme: const IconThemeData(color: Colors.black),
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
-  colorScheme: const ColorScheme.light(
-    primary: Colors.black,
-    secondary: Color.fromARGB(255, 163, 163, 163),
-  ),
-  accentColor: const Color.fromRGBO(0, 0, 0, 0.6),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
     bgDisabled: Colors.grey.shade500,
     bgEnabled: Colors.black,
@@ -78,7 +73,10 @@ final lightThemeData = ThemeData(
           ? Colors.white
           : Colors.black;
     }),
-  ),
+  ), colorScheme: const ColorScheme.light(
+    primary: Colors.black,
+    secondary: Color.fromARGB(255, 163, 163, 163),
+  ).copyWith(secondary: const Color.fromRGBO(0, 0, 0, 0.6)),
 );
 
 final darkThemeData = ThemeData(
@@ -89,8 +87,6 @@ final darkThemeData = ThemeData(
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
   hintColor: Colors.grey,
-  colorScheme: const ColorScheme.dark(primary: Colors.white),
-  accentColor: const Color.fromRGBO(45, 194, 98, 0.2),
   buttonTheme: const ButtonThemeData().copyWith(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   ),
@@ -154,7 +150,7 @@ final darkThemeData = ThemeData(
         return Colors.grey;
       }
     }),
-  ),
+  ), colorScheme: const ColorScheme.dark(primary: Colors.white).copyWith(secondary: const Color.fromRGBO(45, 194, 98, 0.2)),
 );
 
 TextTheme _buildTextTheme(Color textColor) {

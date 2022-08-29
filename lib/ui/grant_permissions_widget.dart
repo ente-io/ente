@@ -94,7 +94,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                 state == PermissionState.limited) {
               await SyncService.instance.onPermissionGranted(state);
             } else if (state == PermissionState.denied) {
-              AlertDialog alert = AlertDialog(
+              final AlertDialog alert = AlertDialog(
                 title: const Text("Please grant permissions"),
                 content: const Text(
                   "ente can encrypt and preserve files only if you grant access to them",

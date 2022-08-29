@@ -17,8 +17,8 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     const double horizontalPaddingOfGridRow = 16;
     const double crossAxisSpacingOfGrid = 9;
-    Size size = MediaQuery.of(context).size;
-    int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
+    final Size size = MediaQuery.of(context).size;
+    final int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
     final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
         horizontalPaddingOfGridRow -
         ((crossAxisSpacingOfGrid / 2) * (albumsCountInOneRow - 1));

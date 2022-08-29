@@ -61,7 +61,7 @@ class File extends EnteFile {
   File();
 
   static Future<File> fromAsset(String pathName, AssetEntity asset) async {
-    File file = File();
+    final File file = File();
     file.localID = asset.id;
     file.title = asset.title;
     file.deviceFolder = pathName;

@@ -167,7 +167,7 @@ Future<List<File>> _computeFiles(
 }
 
 Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
-  List<AssetEntity> result = [];
+  final List<AssetEntity> result = [];
   int currentPage = 0;
   List<AssetEntity> currentPageResult = [];
   do {
