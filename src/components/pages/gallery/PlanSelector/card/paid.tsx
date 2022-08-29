@@ -4,7 +4,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { SpaceBetweenFlex } from 'components/Container';
 import React from 'react';
-import { convertBytesToGBs } from 'utils/billing';
+import { convertBytesToGBs, isSubscriptionCancelled } from 'utils/billing';
 import constants from 'utils/strings/constants';
 import { ManageSubscription } from '../manageSubscription';
 import { PeriodToggler } from '../periodToggler';
@@ -76,9 +76,13 @@ export default function PaidSubscriptionPlanSelectorCard({
 
                 <Box py={1} px={1.5}>
                     <Typography color={'text.secondary'}>
-                        {constants.RENEWAL_ACTIVE_SUBSCRIPTION_INFO(
-                            subscription.expiryTime
-                        )}
+                        {!isSubscriptionCancelled(subscription)
+                            ? constants.RENEWAL_ACTIVE_SUBSCRIPTION_STATUS(
+                                  subscription.expiryTime
+                              )
+                            : constants.RENEWAL_CANCELLED_SUBSCRIPTION_STATUS(
+                                  subscription.expiryTime
+                              )}
                     </Typography>
                 </Box>
             </Box>

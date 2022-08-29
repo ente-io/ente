@@ -1,6 +1,6 @@
 import { UPLOAD_TYPE } from 'components/Upload/Uploader';
 import { Collection } from 'types/collection';
-import { ElectronAPIsInterface } from 'types/electron';
+import { ElectronAPIs } from 'types/electron';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
@@ -16,7 +16,7 @@ interface selectZipResult {
     zipPaths: string[];
 }
 class ImportService {
-    ElectronAPIs: ElectronAPIsInterface;
+    ElectronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
 
     constructor() {

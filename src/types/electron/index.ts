@@ -1,7 +1,7 @@
 import { ElectronFile } from 'types/upload';
 import { WatchMapping } from 'types/watchFolder';
 
-export interface ElectronAPIsInterface {
+export interface ElectronAPIs {
     exists: (path: string) => boolean;
     checkExistsAndCreateCollectionDir: (dirPath: string) => Promise<void>;
     checkExistsAndRename: (
@@ -10,10 +10,9 @@ export interface ElectronAPIsInterface {
     ) => Promise<void>;
     saveStreamToDisk: (path: string, fileStream: ReadableStream<any>) => void;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
-    selectRootDirectory: () => Promise<any>;
+    selectRootDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
     showOnTray: (content?: any) => void;
-    reloadWindow: () => void;
     registerResumeExportListener: (resumeExport: () => void) => void;
     registerStopExportListener: (abortExport: () => void) => void;
     registerPauseExportListener: (pauseExport: () => void) => void;
@@ -55,4 +54,8 @@ export interface ElectronAPIsInterface {
     ) => void;
     doesFolderExists: (dirPath: string) => Promise<boolean>;
     clearElectronStore: () => void;
+    setEncryptionKey: (encryptionKey: string) => Promise<void>;
+    getEncryptionKey: () => Promise<string>;
+    openDiskCache: (cacheName: string) => Promise<Cache>;
+    deleteDiskCache: (cacheName: string) => Promise<boolean>;
 }

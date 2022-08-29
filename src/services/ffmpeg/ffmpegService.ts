@@ -6,7 +6,8 @@ import { ParsedExtractedMetadata } from 'types/upload';
 import { FFmpegWorker } from 'utils/comlink';
 import { promiseWithTimeout } from 'utils/common';
 
-const FFMPEG_EXECUTION_WAIT_TIME = 10 * 1000;
+const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
+
 class FFmpegService {
     private ffmpegWorker = null;
     private ffmpegTaskQueue = new QueueProcessor<any>(1);

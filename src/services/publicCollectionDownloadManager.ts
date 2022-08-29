@@ -176,6 +176,9 @@ class PublicCollectionDownloadManager {
         const resp = await fetch(getPublicCollectionFileURL(file.id), {
             headers: {
                 'X-Auth-Access-Token': token,
+                ...(passwordToken && {
+                    'X-Auth-Access-Token-JWT': passwordToken,
+                }),
             },
         });
         const reader = resp.body.getReader();

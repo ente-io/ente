@@ -117,6 +117,8 @@ export default function Uploader(props: Props) {
         pendingDesktopUploadCollectionName.current = collectionName;
     };
 
+    const closeUploadProgress = () => setUploadProgressView(false);
+
     useEffect(() => {
         UploadManager.initUploader(
             {

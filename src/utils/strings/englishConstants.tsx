@@ -273,8 +273,11 @@ const englishConstants = {
 
     FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
 
-    RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
+    RENEWAL_ACTIVE_SUBSCRIPTION_STATUS: (expiryTime) => (
         <>Renews on {dateString(expiryTime)}</>
+    ),
+    RENEWAL_CANCELLED_SUBSCRIPTION_STATUS: (expiryTime) => (
+        <>Ends on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
@@ -493,7 +496,7 @@ const englishConstants = {
     SUCCESSFULLY_EXPORTED_FILES: 'Successful exports',
     FAILED_EXPORTED_FILES: 'Failed exports',
     EXPORT_AGAIN: 'Resync',
-    RETRY_EXPORT_: 'Tetry failed exports',
+    RETRY_EXPORT_: 'Retry failed exports',
     LOCAL_STORAGE_NOT_ACCESSIBLE: 'Local storage not accessible',
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'Your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
