@@ -52,7 +52,7 @@ export interface ElectronAPIs {
         removeFile: (path: string) => Promise<void>,
         removeFolder: (folderPath: string) => Promise<void>
     ) => void;
-    doesFolderExists: (dirPath: string) => Promise<boolean>;
+    isFolder: (dirPath: string) => Promise<boolean>;
     clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;
