@@ -29,6 +29,7 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wakelock/wakelock.dart';
@@ -242,12 +243,21 @@ class Configuration {
     String password,
     KeyAttributes attributes,
   ) async {
+    _logger.info('Start decryptAndSaveSecrets');
+    validatePreVerificationStateCheck(
+      attributes,
+      password,
+      getEncryptedToken(),
+    );
+    _logger.info('state validation done');
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password),
       Sodium.base642bin(attributes.kekSalt),
       attributes.memLimit,
       attributes.opsLimit,
     );
+
+    _logger.info('user-key done');
     Uint8List key;
     try {
       key = CryptoUtil.decryptSync(
@@ -256,20 +266,24 @@ class Configuration {
         Sodium.base642bin(attributes.keyDecryptionNonce),
       );
     } catch (e) {
+      _logger.severe('master-key failed, incorrect password?', e);
       throw Exception("Incorrect password");
     }
+    _logger.info("master-key done");
     await setKey(Sodium.bin2base64(key));
     final secretKey = CryptoUtil.decryptSync(
       Sodium.base642bin(attributes.encryptedSecretKey),
       key,
       Sodium.base642bin(attributes.secretKeyDecryptionNonce),
     );
+    _logger.info("secret-key done");
     await setSecretKey(Sodium.bin2base64(secretKey));
     final token = CryptoUtil.openSealSync(
       Sodium.base642bin(getEncryptedToken()),
       Sodium.base642bin(attributes.publicKey),
       secretKey,
     );
+    _logger.info('appToken done');
     await setToken(
       Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe),
     );
