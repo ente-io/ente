@@ -61,15 +61,15 @@ class watchFolderService {
                 this.syncWithRemote = syncWithRemote;
                 this.setWatchFolderServiceIsRunning =
                     setWatchFolderServiceIsRunning;
-
-                await this.getAndSyncDiffOfFiles(true);
+                this.setupWatcherFunctions();
+                await this.getAndSyncDiffOfFiles();
             } catch (e) {
                 logError(e, 'error while initializing watch service');
             }
         }
     }
 
-    async getAndSyncDiffOfFiles(init = false) {
+    async getAndSyncDiffOfFiles() {
         try {
             let mappings = this.getWatchMappings();
 
@@ -91,9 +91,6 @@ class watchFolderService {
                 this.trashDiffOfFiles(mapping, filesOnDisk);
             }
 
-            if (init) {
-                this.setWatchFunctions();
-            }
             await this.runNextEvent();
         } catch (e) {
             logError(e, 'error while getting and syncing diff of files');
@@ -182,7 +179,7 @@ class watchFolderService {
         this.trashingDirQueue.push(path);
     }
 
-    private setWatchFunctions() {
+    private setupWatcherFunctions() {
         if (this.allElectronAPIsExist) {
             this.ElectronAPIs.registerWatcherFunctions(
                 diskFileAddedCallback,
@@ -204,6 +201,7 @@ class watchFolderService {
                     folderPath,
                     uploadStrategy
                 );
+                this.getAndSyncDiffOfFiles();
             } catch (e) {
                 logError(e, 'error while adding watch mapping');
             }
