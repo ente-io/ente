@@ -3,10 +3,13 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
+import 'package:photos/models/key_attributes.dart';
 import 'package:photos/ui/account/recovery_page.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/email_util.dart';
 
 class PasswordReentryPage extends StatefulWidget {
   const PasswordReentryPage({Key key}) : super(key: key);
@@ -16,6 +19,7 @@ class PasswordReentryPage extends StatefulWidget {
 }
 
 class _PasswordReentryPageState extends State<PasswordReentryPage> {
+  final _logger = Logger((_PasswordReentryPageState).toString());
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
   String email;
@@ -72,9 +76,26 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               Configuration.instance.getKeyAttributes(),
             );
           } catch (e, s) {
-            Logger("PRP").severe("Password verification failed", e, s);
+            _logger.severe("Password verification failed", e, s);
             await dialog.hide();
-            showErrorDialog(context, "Incorrect password", "Please try again");
+
+            var dialogUserChoice = await showChoiceDialog(
+              context,
+              "Incorrect password",
+              "Please try again",
+              firstAction: "Contact Support",
+              firstActionColor: Theme.of(context).colorScheme.primary,
+              secondAction: "Ok",
+              secondActionColor: Theme.of(context).colorScheme.primary,
+            );
+            if (dialogUserChoice == DialogUserChoice.firstChoice) {
+              await sendLogs(
+                context,
+                "Contact support",
+                "support@ente.io",
+                postShare: () {},
+              );
+            }
             return;
           }
           await dialog.hide();
@@ -230,5 +251,11 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         ),
       ],
     );
+  }
+
+  void validatePreVerificationState(KeyAttributes keyAttributes) {
+    if (keyAttributes == null) {
+      throw Exception("Key Attributes can not be null");
+    }
   }
 }
