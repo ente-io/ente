@@ -663,6 +663,10 @@ export default function Gallery() {
                         null,
                         true
                     )}
+                    closeUploadTypeSelector={setUploadTypeSelectorView.bind(
+                        null,
+                        false
+                    )}
                     setCollectionSelectorAttributes={
                         setCollectionSelectorAttributes
                     }

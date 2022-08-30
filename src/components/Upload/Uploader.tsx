@@ -45,6 +45,7 @@ const FIRST_ALBUM_NAME = 'My First Album';
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     closeCollectionSelector: () => void;
+    closeUploadTypeSelector: () => void;
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
@@ -184,6 +185,7 @@ export default function Uploader(props: Props) {
 
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
+            await preUploadAction();
             const filesWithCollectionToUpload: FileWithCollection[] =
                 toUploadFiles.current.map((file, index) => ({
                     file,
@@ -201,6 +203,7 @@ export default function Uploader(props: Props) {
         collectionName?: string
     ) => {
         try {
+            await preUploadAction();
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionWiseFiles = new Map<
@@ -251,6 +254,7 @@ export default function Uploader(props: Props) {
 
     const preUploadAction = async () => {
         props.closeCollectionSelector();
+        props.closeUploadTypeSelector();
         uploadManager.prepareForNewUpload();
         setUploadProgressView(true);
         props.setUploadInProgress(true);
@@ -267,7 +271,6 @@ export default function Uploader(props: Props) {
         collections: Collection[]
     ) => {
         try {
-            await preUploadAction();
             await props.syncWithRemote(true, true);
             if (isElectron() && !isPendingDesktopUpload.current) {
                 await ImportService.setToUploadCollection(collections);

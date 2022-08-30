@@ -124,7 +124,6 @@ class UploadManager {
                     this.metadataAndFileTypeInfoMap
                 );
 
-                UIService.setUploadStage(UPLOAD_STAGES.START);
                 addLogLine(`clusterLivePhotoFiles called`);
 
                 // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
