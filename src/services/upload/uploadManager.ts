@@ -398,10 +398,15 @@ class UploadManager {
                         fileWithCollection.collection.key
                     );
                     break;
+                case UPLOAD_RESULT.ALREADY_UPLOADED:
+                    // no-op
+                    break;
                 default:
-                    throw Error('Invalid Upload Result');
+                    throw Error('Invalid Upload Result' + fileUploadResult);
             }
-            await this.updateExistingFiles(decryptedFile);
+            if (fileUploadResult !== UPLOAD_RESULT.ALREADY_UPLOADED) {
+                await this.updateExistingFiles(decryptedFile);
+            }
             return fileUploadResult;
         } catch (e) {
             logError(e, 'failed to do post file upload action');
