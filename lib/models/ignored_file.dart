@@ -11,7 +11,7 @@ class IgnoredFile {
 
   IgnoredFile(this.localID, this.title, this.deviceFolder, this.reason);
 
-  factory IgnoredFile.fromFile(TrashFile trashFile) {
+  factory IgnoredFile.fromTrashItem(TrashFile trashFile) {
     if (trashFile == null) return null;
     if (trashFile.localID == null ||
         trashFile.localID.isEmpty ||

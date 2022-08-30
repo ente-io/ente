@@ -16,7 +16,6 @@ class File extends EnteFile {
   int ownerID;
   int collectionID;
   String localID;
-
   String title;
   String deviceFolder;
   int creationTime;
