@@ -338,9 +338,8 @@ class UploadManager {
             return { fileTypeInfo, metadata, filePath };
         } catch (e) {
             logError(e, 'failed to extract file metadata');
-            return { fileTypeInfo, metadata: null };
+            return { fileTypeInfo, metadata: null, filePath: null };
         }
-        return { fileTypeInfo, metadata };
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
