@@ -173,8 +173,6 @@ class UploadManager {
 
                 await this.uploadMediaFiles(allFiles);
             }
-            UIService.setUploadStage(UPLOAD_STAGES.FINISH);
-            UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
@@ -189,6 +187,8 @@ class UploadManager {
                 throw e;
             }
         } finally {
+            UIService.setUploadStage(UPLOAD_STAGES.FINISH);
+            UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.worker.terminate();
             }
@@ -444,8 +444,11 @@ class UploadManager {
                         fileWithCollection.collection.key
                     );
                     break;
+                case UPLOAD_RESULT.CANCELLED:
+                    // no-op
+                    break;
                 default:
-                // no-op
+                    throw Error('Invalid Upload Result');
             }
             if (decryptedFile) {
                 await this.updateExistingFiles(decryptedFile);
