@@ -134,7 +134,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             icon: Icon(Icons.adaptive.share),
             onPressed: () async {
               if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
-                  await _collectionHasSharedFiles()) {
+                  await _collectionHasHiddenFiles(widget.collection.id)) {
                 final choice = await showChoiceDialog(
                   context,
                   'Share hidden items?',
@@ -246,11 +246,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
   }
 
-  Future<bool> _collectionHasSharedFiles() async {
+  Future<bool> _collectionHasHiddenFiles(int collectionID) async {
     final collectionIDsWithHiddenFiles =
         await FilesDB.instance.getCollectionIDsOfHiddenFiles(
       Configuration.instance.getUserID(),
     );
-    return collectionIDsWithHiddenFiles.contains(widget.collection.id);
+    return collectionIDsWithHiddenFiles.contains(collectionID);
   }
 }

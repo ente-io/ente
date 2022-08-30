@@ -445,11 +445,11 @@ class FilesDB {
       whereArgs: [ownerID, visibility],
       distinct: true,
     );
-    List<int> collectionIDsOfHiddenFiles = [];
+    Set<int> collectionIDsOfHiddenFiles = {};
     for (var result in results) {
       collectionIDsOfHiddenFiles.add(result['collection_id']);
     }
-    return collectionIDsOfHiddenFiles.toSet();
+    return collectionIDsOfHiddenFiles;
   }
 
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
