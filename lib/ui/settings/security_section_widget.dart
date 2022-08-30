@@ -83,10 +83,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch.adaptive(
                         value: snapshot.data,
                         onChanged: (value) async {
-<<<<<<< HEAD
                           if (await LocalAuthentication().isDeviceSupported()) {
                             AppLock.of(context).setEnabled(false);
-                            String reason =
+                            const String reason =
                                 "Please authenticate to configure two-factor authentication";
                             final result = await requestAuthentication(reason);
                             AppLock.of(context).setEnabled(
@@ -96,18 +95,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                               showToast(context, reason);
                               return;
                             }
-=======
-                          AppLock.of(context).setEnabled(false);
-                          const String reason =
-                              "Please authenticate to configure two-factor authentication";
-                          final result = await requestAuthentication(reason);
-                          AppLock.of(context).setEnabled(
-                            Configuration.instance.shouldShowLockScreen(),
-                          );
-                          if (!result) {
-                            showToast(context, reason);
-                            return;
->>>>>>> master
                           }
                           if (value) {
                             UserService.instance.setupTwoFactor(context);
