@@ -1,3 +1,4 @@
+import { Canceler } from 'axios';
 import {
     UPLOAD_RESULT,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -10,6 +11,7 @@ import {
     ProgressUpdater,
     SegregatedFinishedUploads,
 } from 'types/upload/ui';
+import { CustomError } from 'utils/error';
 import uploadCancelService from './uploadCancelService';
 
 class UIService {
@@ -112,17 +114,20 @@ class UIService {
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
         index = 0
     ) {
-        const cancel = { exec: () => {} };
+        const cancel: { exec: Canceler } = { exec: () => {} };
         let timeout = null;
         const resetTimeout = () => {
             if (timeout) {
                 clearTimeout(timeout);
             }
-            timeout = setTimeout(() => cancel.exec(), 30 * 1000);
+            timeout = setTimeout(
+                () => cancel.exec(CustomError.REQUEST_TIMEOUT),
+                30 * 1000
+            );
         };
         const cancelIfUploadPaused = () => {
             if (uploadCancelService.isUploadCancelationRequested()) {
-                cancel.exec();
+                cancel.exec(CustomError.UPLOAD_CANCELLED);
             }
         };
         return {

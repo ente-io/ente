@@ -46,6 +46,7 @@ export enum CustomError {
     WEAK_DEVICE = 'password decryption failed on the device',
     INCORRECT_PASSWORD = 'incorrect password',
     UPLOAD_CANCELLED = 'upload cancelled',
+    REQUEST_TIMEOUT = 'request taking too long',
 }
 
 function parseUploadErrorCodes(error) {
