@@ -83,6 +83,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch.adaptive(
                         value: snapshot.data,
                         onChanged: (value) async {
+<<<<<<< HEAD
                           if (await LocalAuthentication().isDeviceSupported()) {
                             AppLock.of(context).setEnabled(false);
                             String reason =
@@ -95,6 +96,18 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                               showToast(context, reason);
                               return;
                             }
+=======
+                          AppLock.of(context).setEnabled(false);
+                          const String reason =
+                              "Please authenticate to configure two-factor authentication";
+                          final result = await requestAuthentication(reason);
+                          AppLock.of(context).setEnabled(
+                            Configuration.instance.shouldShowLockScreen(),
+                          );
+                          if (!result) {
+                            showToast(context, reason);
+                            return;
+>>>>>>> master
                           }
                           if (value) {
                             UserService.instance.setupTwoFactor(context);
@@ -167,7 +180,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   value: _config.shouldHideFromRecents(),
                   onChanged: (value) async {
                     if (value) {
-                      AlertDialog alert = AlertDialog(
+                      final AlertDialog alert = AlertDialog(
                         title: const Text("Hide from recents?"),
                         content: SingleChildScrollView(
                           child: Column(
@@ -281,7 +294,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   void _disableTwoFactor() {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text("Disable two-factor"),
       content: const Text(
         "Are you sure you want to disable two-factor authentication?",

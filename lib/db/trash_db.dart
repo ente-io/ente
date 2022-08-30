@@ -85,8 +85,8 @@ class TrashDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, _databaseName);
+    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabase(
       path,
@@ -103,7 +103,7 @@ class TrashDB {
   // getRecentlyTrashedFile returns the file which was trashed recently
   Future<TrashFile> getRecentlyTrashedFile() async {
     final db = await instance.database;
-    var rows = await db.query(
+    final rows = await db.query(
       tableName,
       orderBy: '$columnTrashDeleteBy DESC',
       limit: 1,
@@ -116,7 +116,7 @@ class TrashDB {
 
   Future<int> count() async {
     final db = await instance.database;
-    var count = Sqflite.firstIntValue(
+    final count = Sqflite.firstIntValue(
       await db.rawQuery('SELECT COUNT(*) FROM $tableName'),
     );
     return count;

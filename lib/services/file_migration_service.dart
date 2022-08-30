@@ -63,14 +63,14 @@ class FileMigrationService {
     }
     // migration only needs to run if Android API Level is 29 or higher
     final int version = int.parse(await PhotoManager.systemVersion());
-    bool isMigrationRequired = version >= 29;
+    final bool isMigrationRequired = version >= 29;
     if (isMigrationRequired) {
       await _importLocalFilesForMigration();
       final sTime = DateTime.now().microsecondsSinceEpoch;
       bool hasData = true;
       const int limitInBatch = 100;
       while (hasData) {
-        var localIDsToProcess = await _filesMigrationDB
+        final localIDsToProcess = await _filesMigrationDB
             .getLocalIDsForPotentialReUpload(limitInBatch);
         if (localIDsToProcess.isEmpty) {
           hasData = false;
@@ -91,15 +91,15 @@ class FileMigrationService {
     List<String> localIDsToProcess,
   ) async {
     _logger.info("files to process ${localIDsToProcess.length}");
-    var localIDsWithLocation = <String>[];
+    final localIDsWithLocation = <String>[];
     for (var localID in localIDsToProcess) {
       bool hasLocation = false;
       try {
-        var assetEntity = await AssetEntity.fromId(localID);
+        final assetEntity = await AssetEntity.fromId(localID);
         if (assetEntity == null) {
           continue;
         }
-        var latLng = await assetEntity.latlngAsync();
+        final latLng = await assetEntity.latlngAsync();
         if ((latLng.longitude ?? 0.0) != 0.0 ||
             (latLng.longitude ?? 0.0) != 0.0) {
           _logger.finest(
@@ -125,7 +125,7 @@ class FileMigrationService {
     }
     final sTime = DateTime.now().microsecondsSinceEpoch;
     _logger.info('importing files without location info');
-    var fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
+    final fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
     await _filesMigrationDB.insertMultiple(fileLocalIDs);
     final eTime = DateTime.now().microsecondsSinceEpoch;
     final d = Duration(microseconds: eTime - sTime);

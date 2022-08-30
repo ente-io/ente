@@ -91,7 +91,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     // If yes, parent thumbnail widget can be stateless
     Widget content;
     if (image != null) {
-      List<Widget> contentChildren = [image];
+      final List<Widget> contentChildren = [image];
       if (widget.file.fileType == FileType.video) {
         contentChildren.add(const VideoOverlayIcon());
       } else if (widget.file.fileType == FileType.livePhoto &&
@@ -105,7 +105,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               children: contentChildren,
             );
     }
-    List<Widget> viewChildren = [
+    final List<Widget> viewChildren = [
       const ThumbnailPlaceHolder(),
       AnimatedOpacity(
         opacity: content == null ? 0 : 1.0,

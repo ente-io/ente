@@ -76,7 +76,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         _exifData["ISO"] != null;
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
-    var listTiles = <Widget>[
+    final listTiles = <Widget>[
       ListTile(
         leading: const Padding(
           padding: EdgeInsets.only(top: 8, left: 6),
@@ -207,7 +207,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           onTap: () {
             if (file.collectionID != null) {
               Navigator.pop(context); // info dialog
-              Collection c = CollectionsService.instance
+              final Collection c = CollectionsService.instance
                   .getCollectionByID(file.collectionID);
               routeToPage(
                 context,

@@ -181,7 +181,7 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text(
         "Delete account",
         style: TextStyle(

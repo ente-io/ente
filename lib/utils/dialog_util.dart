@@ -29,7 +29,7 @@ Future<dynamic> showErrorDialog(
   String title,
   String content,
 ) {
-  AlertDialog alert = AlertDialog(
+  final AlertDialog alert = AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     title: Text(
       title,
@@ -77,7 +77,7 @@ Future<T> showConfettiDialog<T>({
   final pageBuilder = Builder(
     builder: builder,
   );
-  ConfettiController confettiController =
+  final ConfettiController confettiController =
       ConfettiController(duration: const Duration(seconds: 1));
   confettiController.play();
   return showDialog(

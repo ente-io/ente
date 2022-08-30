@@ -300,9 +300,9 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
-    FileType type = file.fileType;
+    final FileType type = file.fileType;
     // save and track image for livePhoto/image and video for FileType.video
-    io.File fileToSave = await getFile(file);
+    final io.File fileToSave = await getFile(file);
     final savedAsset = type == FileType.video
         ? (await PhotoManager.editor.saveVideo(fileToSave, title: file.title))
         : (await PhotoManager.editor
@@ -313,7 +313,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     await FilesDB.instance.insert(file);
 
     if (type == FileType.livePhoto) {
-      io.File liveVideo = await getFileFromServer(file, liveVideo: true);
+      final io.File liveVideo = await getFileFromServer(file, liveVideo: true);
       if (liveVideo == null) {
         _logger.warning("Failed to find live video" + file.tag());
       } else {
