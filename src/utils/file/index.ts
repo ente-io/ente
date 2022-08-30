@@ -249,21 +249,6 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
     }
 }
 
-export async function getFileKey(file: EnteFile, collectionKey: string) {
-    try {
-        const worker = await new CryptoWorker();
-        file.key = await worker.decryptB64(
-            file.encryptedKey,
-            file.keyDecryptionNonce,
-            collectionKey
-        );
-        return file.key;
-    } catch (e) {
-        logError(e, 'get file key failed');
-        throw e;
-    }
-}
-
 export const preservePhotoswipeProps =
     (newFiles: EnteFile[]) =>
     (currentFiles: EnteFile[]): EnteFile[] => {
