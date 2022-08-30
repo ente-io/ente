@@ -96,7 +96,8 @@ class FilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
@@ -442,6 +443,7 @@ class FilesDB {
           '$columnOwnerID = ? AND $columnMMdVisibility = ? AND $columnCollectionID != -1',
       columns: [columnCollectionID],
       whereArgs: [ownerID, visibility],
+      distinct: true,
     );
     List<int> collectionIDsOfHiddenFiles = [];
     for (var result in results) {

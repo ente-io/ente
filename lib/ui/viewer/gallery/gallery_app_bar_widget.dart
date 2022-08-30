@@ -144,9 +144,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   secondActionColor:
                       Theme.of(context).colorScheme.defaultTextColor,
                 );
-                if (choice != DialogUserChoice.secondChoice) {
-                  return;
-                } else {
+                if (choice == DialogUserChoice.secondChoice) {
                   _showShareCollectionDialog();
                 }
               } else {
