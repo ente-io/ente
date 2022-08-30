@@ -285,7 +285,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final dialog = createProgressDialog(context, "Moving files to album...");
     await dialog.show();
     try {
-      final int fromCollectionID = widget.selectedFiles.files?.first?.collectionID;
+      final int fromCollectionID =
+          widget.selectedFiles.files?.first?.collectionID;
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,
@@ -355,7 +356,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         }
       }
       if (filesPendingUpload.isNotEmpty) {
-        await IgnoredFilesService.instance.removeIgnoredMappings(filesPendingUpload);
+        // filesPendingUpload might be getting ignored during auto-upload
+        // because the user deleted these files from ente in the past.
+        await IgnoredFilesService.instance
+            .removeIgnoredMappings(filesPendingUpload);
         await FilesDB.instance.insertMultiple(filesPendingUpload);
       }
       if (files.isNotEmpty) {
