@@ -119,7 +119,7 @@ class LocalSyncService {
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
-      await refreshDeviceFolderCountAndCover();
+      await _refreshDeviceFolderCountAndCover();
       _logger.fine("first gallery import finished");
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
@@ -131,7 +131,7 @@ class LocalSyncService {
     _existingSync = null;
   }
 
-  Future<bool> refreshDeviceFolderCountAndCover() async {
+  Future<bool> _refreshDeviceFolderCountAndCover() async {
     final List<Tuple2<AssetPathEntity, String>> result =
         await getDeviceFolderWithCountAndCoverID();
     return await _db.updateDeviceCoverWithCount(
@@ -146,7 +146,7 @@ class LocalSyncService {
     _logger.info(
       "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
     );
-    await refreshDeviceFolderCountAndCover();
+    await _refreshDeviceFolderCountAndCover();
     _logger.info(
       "refreshDeviceFolderCountAndCover + allLocalAssets took ${stopwatch.elapsedMilliseconds}ms ",
     );
