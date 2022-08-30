@@ -26,15 +26,17 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
 
 Future<dynamic> showErrorDialog(
   BuildContext context,
-  String title,
-  String content,
-) {
+  String content, [
+  String title = '',
+]) {
   final AlertDialog alert = AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    title: Text(
-      title,
-      style: Theme.of(context).textTheme.headline6,
-    ),
+    title: title.isEmpty
+        ? const SizedBox.shrink()
+        : Text(
+            title,
+            style: Theme.of(context).textTheme.headline6,
+          ),
     content: Text(content),
     actions: [
       TextButton(

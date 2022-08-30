@@ -17,6 +17,7 @@ import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
@@ -132,17 +133,24 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             Switch.adaptive(
               value: _config.shouldShowLockScreen(),
               onChanged: (value) async {
-                AppLock.of(context).disable();
-                final result = await requestAuthentication(
-                  "Please authenticate to change lockscreen setting",
-                );
-                if (result) {
-                  AppLock.of(context).setEnabled(value);
-                  _config.setShouldShowLockScreen(value);
-                  setState(() {});
+                if (await LocalAuthentication().isDeviceSupported()) {
+                  AppLock.of(context).disable();
+                  final result = await requestAuthentication(
+                    "Please authenticate to change lockscreen setting",
+                  );
+                  if (result) {
+                    AppLock.of(context).setEnabled(value);
+                    _config.setShouldShowLockScreen(value);
+                    setState(() {});
+                  } else {
+                    AppLock.of(context)
+                        .setEnabled(_config.shouldShowLockScreen());
+                  }
                 } else {
-                  AppLock.of(context)
-                      .setEnabled(_config.shouldShowLockScreen());
+                  showErrorDialog(
+                    context,
+                    "To enable the ente lockscreen, please setup the device passcode or screen lock in the system settings.",
+                  );
                 }
               },
             ),
@@ -253,13 +261,15 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
-          AppLock.of(context).setEnabled(false);
-          final result = await requestAuthentication(kAuthToViewSessions);
-          AppLock.of(context)
-              .setEnabled(Configuration.instance.shouldShowLockScreen());
-          if (!result) {
-            showToast(context, kAuthToViewSessions);
-            return;
+          if (await LocalAuthentication().isDeviceSupported()) {
+            AppLock.of(context).setEnabled(false);
+            final result = await requestAuthentication(kAuthToViewSessions);
+            AppLock.of(context)
+                .setEnabled(Configuration.instance.shouldShowLockScreen());
+            if (!result) {
+              showToast(context, kAuthToViewSessions);
+              return;
+            }
           }
           Navigator.of(context).push(
             MaterialPageRoute(
