@@ -50,12 +50,13 @@ import {
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportType, ExportNotification, RecordType } from 'constants/export';
+import { ElectronAPIs } from 'types/electron';
 
 const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
 class ExportService {
-    ElectronAPIs: any;
+    ElectronAPIs: ElectronAPIs;
 
     private exportInProgress: Promise<{ paused: boolean }> = null;
     private exportRecordUpdater = new QueueProcessor<void>(1);

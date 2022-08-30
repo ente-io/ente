@@ -1,7 +1,8 @@
+import { ElectronAPIs } from 'types/electron';
 import { runningInBrowser } from 'utils/common';
 
 class ElectronCacheService {
-    private ElectronAPIs: any;
+    private ElectronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
 
     constructor() {

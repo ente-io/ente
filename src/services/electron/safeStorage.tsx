@@ -1,8 +1,9 @@
+import { ElectronAPIs } from 'types/electron';
 import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 
 class SafeStorageService {
-    private ElectronAPIs: any;
+    private ElectronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
     constructor() {
         this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
@@ -32,7 +33,7 @@ class SafeStorageService {
     async clearElectronStore() {
         try {
             if (this.allElectronAPIsExist) {
-                return await this.ElectronAPIs.clearElectronStore();
+                return this.ElectronAPIs.clearElectronStore();
             }
         } catch (e) {
             logError(e, 'clearElectronStore failed');
