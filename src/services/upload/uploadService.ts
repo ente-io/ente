@@ -13,7 +13,6 @@ import {
     FileWithCollection,
     FileWithMetadata,
     isDataStream,
-    IsUploadPausing,
     Metadata,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
@@ -45,9 +44,7 @@ class UploadService {
         number,
         MetadataAndFileTypeInfo
     >();
-    private uploadPausing: IsUploadPausing = {
-        val: false,
-    };
+
     private pendingUploadCount: number = 0;
 
     async setFileCount(fileCount: number) {
@@ -79,14 +76,6 @@ class UploadService {
         return isLivePhoto
             ? getLivePhotoName(livePhotoAssets.image.name)
             : getFilename(file);
-    }
-
-    setUploadPausing(isPausing: boolean) {
-        this.uploadPausing.val = isPausing;
-    }
-
-    isUploadPausing(): boolean {
-        return this.uploadPausing.val;
     }
 
     async getFileType(file: File | ElectronFile) {
@@ -143,9 +132,6 @@ class UploadService {
 
     async uploadToBucket(file: ProcessedFile): Promise<BackupedFile> {
         try {
-            if (this.isUploadPausing()) {
-                throw Error(CustomError.UPLOAD_PAUSED);
-            }
             let fileObjectKey: string = null;
             if (isDataStream(file.file.encryptedData)) {
                 fileObjectKey = await uploadStreamUsingMultipart(
@@ -200,7 +186,9 @@ class UploadService {
             };
             return backupedFile;
         } catch (e) {
-            logError(e, 'error uploading to bucket');
+            if (e.message !== CustomError.UPLOAD_PAUSED) {
+                logError(e, 'error uploading to bucket');
+            }
             throw e;
         }
     }

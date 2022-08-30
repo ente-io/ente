@@ -10,6 +10,7 @@ import {
     ProgressUpdater,
     SegregatedFinishedUploads,
 } from 'types/upload/ui';
+import uploadPausingService from './uploadPausingService';
 
 class UIService {
     private perFileProgress: number;
@@ -107,13 +108,18 @@ class UIService {
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
         index = 0
     ) {
-        const cancel = { exec: null };
+        const cancel = { exec: () => {} };
         let timeout = null;
         const resetTimeout = () => {
             if (timeout) {
                 clearTimeout(timeout);
             }
             timeout = setTimeout(() => cancel.exec(), 30 * 1000);
+        };
+        const cancelIfUploadPaused = () => {
+            if (uploadPausingService.isUploadPausing()) {
+                cancel.exec();
+            }
         };
         return {
             cancel,
@@ -134,6 +140,7 @@ class UIService {
                 } else {
                     resetTimeout();
                 }
+                cancelIfUploadPaused();
             },
         };
     }

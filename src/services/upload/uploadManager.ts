@@ -47,6 +47,7 @@ import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
+import uploadPausingService from './uploadPausingService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -483,14 +484,14 @@ class UploadManager {
         if (isElectron()) {
             watchFolderService.pauseService();
             this.isUploadPausing.val = true;
-            UploadService.setUploadPausing(true);
+            uploadPausingService.setUploadPausing(true);
             UIService.setUploadStage(UPLOAD_STAGES.PAUSING);
         }
     }
 
     private async uploadPausingDone() {
         this.isUploadPausing.val = false;
-        UploadService.setUploadPausing(false);
+        uploadPausingService.setUploadPausing(false);
     }
 
     private updateExistingCollections(decryptedFile: EnteFile) {

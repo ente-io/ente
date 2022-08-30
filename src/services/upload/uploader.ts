@@ -16,6 +16,7 @@ import { addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
+import uploadPausingService from './uploadPausingService';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -96,6 +97,9 @@ export default async function uploader(
                 };
             }
         }
+        if (uploadPausingService.isUploadPausing()) {
+            throw Error(CustomError.UPLOAD_PAUSED);
+        }
         addLogLine(`reading asset ${fileNameSize}`);
 
         const file = await UploadService.readAsset(fileTypeInfo, uploadAsset);
@@ -110,6 +114,9 @@ export default async function uploader(
             metadata,
         };
 
+        if (uploadPausingService.isUploadPausing()) {
+            throw Error(CustomError.UPLOAD_PAUSED);
+        }
         addLogLine(`encryptAsset ${fileNameSize}`);
         const encryptedFile = await UploadService.encryptAsset(
             worker,
@@ -117,6 +124,9 @@ export default async function uploader(
             collection.key
         );
 
+        if (uploadPausingService.isUploadPausing()) {
+            throw Error(CustomError.UPLOAD_PAUSED);
+        }
         addLogLine(`uploadToBucket ${fileNameSize}`);
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
@@ -143,10 +153,11 @@ export default async function uploader(
         };
     } catch (e) {
         addLogLine(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
-
-        logError(e, 'file upload failed', {
-            fileFormat: fileTypeInfo?.exactType,
-        });
+        if (e.message !== CustomError.UPLOAD_PAUSED) {
+            logError(e, 'file upload failed', {
+                fileFormat: fileTypeInfo?.exactType,
+            });
+        }
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.UPLOAD_PAUSED:
