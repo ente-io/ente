@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/user_service.dart';
@@ -144,16 +145,19 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
-    AppLock.of(context).setEnabled(false);
-    String reason = "Please authenticate to initiate account deletion";
-    final result = await requestAuthentication(reason);
-    AppLock.of(context).setEnabled(
-      Configuration.instance.shouldShowLockScreen(),
-    );
-    if (!result) {
-      showToast(context, reason);
-      return;
+    if (await LocalAuthentication().isDeviceSupported()) {
+      AppLock.of(context).setEnabled(false);
+      String reason = "Please authenticate to initiate account deletion";
+      final result = await requestAuthentication(reason);
+      AppLock.of(context).setEnabled(
+        Configuration.instance.shouldShowLockScreen(),
+      );
+      if (!result) {
+        showToast(context, reason);
+        return;
+      }
     }
+
     final choice = await showChoiceDialog(
       context,
       'Are you sure you want to delete your account?',

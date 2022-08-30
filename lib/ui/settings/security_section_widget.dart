@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -82,16 +83,18 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch.adaptive(
                         value: snapshot.data,
                         onChanged: (value) async {
-                          AppLock.of(context).setEnabled(false);
-                          String reason =
-                              "Please authenticate to configure two-factor authentication";
-                          final result = await requestAuthentication(reason);
-                          AppLock.of(context).setEnabled(
-                            Configuration.instance.shouldShowLockScreen(),
-                          );
-                          if (!result) {
-                            showToast(context, reason);
-                            return;
+                          if (await LocalAuthentication().isDeviceSupported()) {
+                            AppLock.of(context).setEnabled(false);
+                            String reason =
+                                "Please authenticate to configure two-factor authentication";
+                            final result = await requestAuthentication(reason);
+                            AppLock.of(context).setEnabled(
+                              Configuration.instance.shouldShowLockScreen(),
+                            );
+                            if (!result) {
+                              showToast(context, reason);
+                              return;
+                            }
                           }
                           if (value) {
                             UserService.instance.setupTwoFactor(context);

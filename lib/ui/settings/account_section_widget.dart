@@ -1,6 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/change_email_dialog.dart';
@@ -39,14 +40,16 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            AppLock.of(context).setEnabled(false);
-            String reason = "Please authenticate to view your recovery key";
-            final result = await requestAuthentication(reason);
-            AppLock.of(context)
-                .setEnabled(Configuration.instance.shouldShowLockScreen());
-            if (!result) {
-              showToast(context, reason);
-              return;
+            if (await LocalAuthentication().isDeviceSupported()) {
+              AppLock.of(context).setEnabled(false);
+              String reason = "Please authenticate to view your recovery key";
+              final result = await requestAuthentication(reason);
+              AppLock.of(context)
+                  .setEnabled(Configuration.instance.shouldShowLockScreen());
+              if (!result) {
+                showToast(context, reason);
+                return;
+              }
             }
 
             String recoveryKey;
@@ -75,14 +78,16 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            AppLock.of(context).setEnabled(false);
-            String reason = "Please authenticate to change your email";
-            final result = await requestAuthentication(reason);
-            AppLock.of(context)
-                .setEnabled(Configuration.instance.shouldShowLockScreen());
-            if (!result) {
-              showToast(context, reason);
-              return;
+            if (await LocalAuthentication().isDeviceSupported()) {
+              AppLock.of(context).setEnabled(false);
+              String reason = "Please authenticate to change your email";
+              final result = await requestAuthentication(reason);
+              AppLock.of(context)
+                  .setEnabled(Configuration.instance.shouldShowLockScreen());
+              if (!result) {
+                showToast(context, reason);
+                return;
+              }
             }
             showDialog(
               context: context,
@@ -102,14 +107,16 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            AppLock.of(context).setEnabled(false);
-            String reason = "Please authenticate to change your password";
-            final result = await requestAuthentication(reason);
-            AppLock.of(context)
-                .setEnabled(Configuration.instance.shouldShowLockScreen());
-            if (!result) {
-              showToast(context, reason);
-              return;
+            if (await LocalAuthentication().isDeviceSupported()) {
+              AppLock.of(context).setEnabled(false);
+              String reason = "Please authenticate to change your password";
+              final result = await requestAuthentication(reason);
+              AppLock.of(context)
+                  .setEnabled(Configuration.instance.shouldShowLockScreen());
+              if (!result) {
+                showToast(context, reason);
+                return;
+              }
             }
             Navigator.of(context).push(
               MaterialPageRoute(
