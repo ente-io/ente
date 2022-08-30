@@ -113,7 +113,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                 value: Configuration.instance.shouldKeepDeviceAwake(),
                 onChanged: (value) async {
                   if (value) {
-                    var choice = await showChoiceDialog(
+                    final choice = await showChoiceDialog(
                       context,
                       "Disable automatic screen lock when ente is running?",
                       "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
@@ -158,7 +158,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                 "You've no files on this device that can be deleted",
               );
             } else {
-              bool result = await routeToPage(context, FreeSpacePage(status));
+              final bool result = await routeToPage(context, FreeSpacePage(status));
               if (result == true) {
                 _showSpaceFreedDialog(status);
               }
@@ -193,7 +193,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                 "You've no duplicate files that can be cleared",
               );
             } else {
-              DeduplicationResult result =
+              final DeduplicationResult result =
                   await routeToPage(context, DeduplicatePage(duplicates));
               if (result != null) {
                 _showDuplicateFilesDeletedDialog(result);
@@ -213,7 +213,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text("Success"),
       content: Text(
         "You have successfully freed up " + formatBytes(status.size) + "!",
@@ -268,10 +268,10 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   void _showDuplicateFilesDeletedDialog(DeduplicationResult result) {
-    String countText = result.count.toString() +
+    final String countText = result.count.toString() +
         " duplicate file" +
         (result.count == 1 ? "" : "s");
-    AlertDialog alert = AlertDialog(
+    final AlertDialog alert = AlertDialog(
       title: const Text("✨ Success"),
       content: Text(
         "You have cleaned up " +

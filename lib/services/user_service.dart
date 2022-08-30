@@ -806,7 +806,7 @@ class UserService {
 
   Future<String> getPaymentToken() async {
     try {
-      var response = await _dio.get(
+      final response = await _dio.get(
         "${_config.getHttpEndpoint()}/users/payment-token",
         options: Options(
           headers: {
@@ -827,7 +827,7 @@ class UserService {
 
   Future<String> getFamiliesToken() async {
     try {
-      var response = await _dio.get(
+      final response = await _dio.get(
         "${_config.getHttpEndpoint()}/users/families-token",
         options: Options(
           headers: {

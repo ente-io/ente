@@ -65,8 +65,9 @@ class FilesMigrationDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, _databaseName);
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
+    final String path = join(documentsDirectory.path, _databaseName);
     debugPrint("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
   }
@@ -132,7 +133,7 @@ class FilesMigrationDB {
     String reason,
   ) async {
     final db = await instance.database;
-    String whereClause = '$_columnReason = "$reason"';
+    final String whereClause = '$_columnReason = "$reason"';
     final rows = await db.query(
       tableName,
       limit: limit,

@@ -19,7 +19,7 @@ Future<DialogUserChoice> showChoiceDialog<T>(
   Color secondActionColor,
   ActionType actionType = ActionType.confirm,
 }) {
-  AlertDialog alert = AlertDialog(
+  final AlertDialog alert = AlertDialog(
     title: Text(
       title,
       style: TextStyle(

@@ -228,7 +228,7 @@ class RemoteSyncService {
     final devicePathCollections = await fileDb.getDevicePathCollections();
     devicePathCollections.removeWhere((element) => !element.sync);
     await _createCollectionsForDevicePath(devicePathCollections);
-    Map<String, Set<String>> unSyncedPathIdToLocalIDs =
+    final Map<String, Set<String>> unSyncedPathIdToLocalIDs =
         await fileDb.getDevicePathIDToLocalIDMap(syncStatus: false);
     /*
        A) Check if mapping for localID already exist in the collection
@@ -236,8 +236,8 @@ class RemoteSyncService {
      */
     for (final eachDevicePath in devicePathCollections) {
       debugPrint("Processing ${eachDevicePath.name}");
-      String pathID = eachDevicePath.id;
-      Set<String> unSyncedLocalIDs =
+      final String pathID = eachDevicePath.id;
+      final Set<String> unSyncedLocalIDs =
           unSyncedPathIdToLocalIDs[eachDevicePath.id] ?? {};
       if (unSyncedLocalIDs.isNotEmpty && eachDevicePath.collectionID != -1) {
         await fileDb.setCollectionIDForUnMappedLocalFiles(
@@ -248,9 +248,9 @@ class RemoteSyncService {
         // mark IDs as already synced if corresponding entry is present in
         // the collection. This can happen when a user has marked a folder
         // for sync, then un-synced it and again tries to mark if for sync.
-        Set<String> existingMapping = await fileDb
+        final Set<String> existingMapping = await fileDb
             .getLocalFileIDsForCollection(eachDevicePath.collectionID);
-        Set<String> commonElements =
+        final Set<String> commonElements =
             unSyncedLocalIDs.intersection(existingMapping);
         if (commonElements.isNotEmpty) {
           debugPrint(
@@ -273,12 +273,12 @@ class RemoteSyncService {
             'Adding new entries for ${unSyncedLocalIDs.length} files'
             ' for ${eachDevicePath.name}',
           );
-          var filesWithPotentialCollectionID =
+          final filesWithPotentialCollectionID =
               await fileDb.getLocalFiles(unSyncedLocalIDs.toList());
-          List<File> newFilesToInsert = [];
+          final List<File> newFilesToInsert = [];
           final Set<String> fileFoundForLocalIDs = {};
           for (var existingFile in filesWithPotentialCollectionID) {
-            String localID = existingFile.localID;
+            final String localID = existingFile.localID;
             if (localID != null && !fileFoundForLocalIDs.contains(localID)) {
               existingFile.collectionID = eachDevicePath.collectionID;
               existingFile.uploadedFileID = -1;
@@ -313,7 +313,7 @@ class RemoteSyncService {
     for (var devicePathCollection in devicePathCollections) {
       int deviceCollectionID = devicePathCollection.collectionID;
       if (deviceCollectionID != -1) {
-        var collectionByID =
+        final collectionByID =
             CollectionsService.instance.getCollectionByID(deviceCollectionID);
         if (collectionByID == null || collectionByID.isDeleted) {
           _logger.info(
@@ -324,7 +324,7 @@ class RemoteSyncService {
         }
       }
       if (deviceCollectionID == -1) {
-        var collection = await CollectionsService.instance
+        final collection = await CollectionsService.instance
             .getOrCreateForPath(devicePathCollection.name);
         await FilesDB.instance
             .updateDevicePathCollection(devicePathCollection.id, collection.id);
@@ -370,15 +370,14 @@ class RemoteSyncService {
   }
 
   Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
-    int ownerID = Configuration.instance.getUserID();
+    final int ownerID = Configuration.instance.getUserID();
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
     if (updatedFileIDs.isNotEmpty) {
       _logger.info("Identified ${updatedFileIDs.length} files for reupload");
     }
 
     _completedUploads = 0;
-    int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
-
+    final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
       // verify if files upload is allowed based on their subscription plan and
@@ -476,8 +475,8 @@ class RemoteSyncService {
         localButUpdatedOnRemote = 0,
         localButAddedToNewCollectionOnRemote = 0;
     bool hasAnyCreationTimeChanged = false;
-    List<File> toBeInserted = [];
-    int userID = Configuration.instance.getUserID();
+    final List<File> toBeInserted = [];
+    final int userID = Configuration.instance.getUserID();
     for (File file in diff) {
       final existingFiles = file.deviceFolder == null
           ? null
@@ -522,7 +521,7 @@ class RemoteSyncService {
         } else {
           file.localID = null;
         }
-        bool wasUploadedOnAPreviousInstallation =
+        final bool wasUploadedOnAPreviousInstallation =
             existingFiles.length == 1 && existingFiles[0].collectionID == null;
         if (wasUploadedOnAPreviousInstallation) {
           file.generatedID = existingFiles[0].generatedID;

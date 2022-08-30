@@ -66,10 +66,6 @@ class DeviceFolderPage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _getHeaderWidget() {
-    return BackupConfigurationHeaderWidget(devicePathCollection);
-  }
 }
 
 class BackupConfigurationHeaderWidget extends StatefulWidget {

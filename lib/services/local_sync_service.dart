@@ -134,7 +134,7 @@ class LocalSyncService {
   }
 
   Future<bool> refreshDeviceFolderCountAndCover() async {
-    List<Tuple2<AssetPathEntity, String>> result =
+    final List<Tuple2<AssetPathEntity, String>> result =
         await getDeviceFolderWithCountAndCoverID();
     return await _db.updateDeviceCoverWithCount(
       result,
@@ -174,7 +174,7 @@ class LocalSyncService {
           .deletePathIDToLocalIDMapping(localUnSyncResult.deletePathToLocalIDs);
       hasAnyMappingChanged = true;
     }
-    bool hasUnsyncedFiles =
+    final bool hasUnsyncedFiles =
         localUnSyncResult.uniqueLocalFiles?.isNotEmpty ?? false;
     if (hasUnsyncedFiles) {
       await _db.insertMultiple(
@@ -209,7 +209,7 @@ class LocalSyncService {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey);
     } else {
-      List<String> editedIDs = [];
+      final List<String> editedIDs = [];
       return editedIDs;
     }
   }
@@ -335,7 +335,7 @@ class LocalSyncService {
       _logger.info(
         updatedFiles.length.toString() + " local files were updated.",
       );
-      List<String> updatedLocalIDs = [];
+      final List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
         if (file.localID != null) {
           updatedLocalIDs.add(file.localID);

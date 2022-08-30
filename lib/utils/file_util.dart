@@ -40,7 +40,7 @@ Future<io.File> getFile(
   if (file.isRemoteFile()) {
     return getFileFromServer(file, liveVideo: liveVideo);
   } else {
-    String key = file.tag() + liveVideo.toString() + isOrigin.toString();
+    final String key = file.tag() + liveVideo.toString() + isOrigin.toString();
     final cachedFile = FileLruCache.get(key);
     if (cachedFile == null) {
       final diskFile = await _getLocalDiskFile(
@@ -69,7 +69,7 @@ Future<io.File> _getLocalDiskFile(
   bool isOrigin = false,
 }) async {
   if (file.isSharedMediaToAppSandbox()) {
-    var localFile = io.File(getSharedMediaFilePath(file));
+    final localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists().then((exist) {
       return exist ? localFile : null;
     });
@@ -194,17 +194,17 @@ Future<_LivePhoto> _downloadLivePhoto(
     }
     _logger.fine("Decoded zipped live photo from " + decryptedFile.path);
     io.File imageFileCache, videoFileCache;
-    List<int> bytes = await decryptedFile.readAsBytes();
-    Archive archive = ZipDecoder().decodeBytes(bytes);
+    final List<int> bytes = await decryptedFile.readAsBytes();
+    final Archive archive = ZipDecoder().decodeBytes(bytes);
     final tempPath = Configuration.instance.getTempDirectory();
     // Extract the contents of Zip compressed archive to disk
     for (ArchiveFile archiveFile in archive) {
       if (archiveFile.isFile) {
-        String filename = archiveFile.name;
-        String fileExtension = getExtension(archiveFile.name);
-        String decodePath =
+        final String filename = archiveFile.name;
+        final String fileExtension = getExtension(archiveFile.name);
+        final String decodePath =
             tempPath + file.uploadedFileID.toString() + filename;
-        List<int> data = archiveFile.content;
+        final List<int> data = archiveFile.content;
         if (filename.startsWith("image")) {
           final imageFile = io.File(decodePath);
           await imageFile.create(recursive: true);
@@ -259,8 +259,8 @@ Future<io.File> _downloadAndCache(
     if (decryptedFile == null) {
       return null;
     }
-    var decryptedFilePath = decryptedFile.path;
-    String fileExtension = getExtension(file.title);
+    final decryptedFilePath = decryptedFile.path;
+    final String fileExtension = getExtension(file.title);
     var outputFile = decryptedFile;
     if ((fileExtension == "unknown" && file.fileType == FileType.image) ||
         (io.Platform.isAndroid && fileExtension == "heic")) {

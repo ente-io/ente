@@ -242,7 +242,7 @@ class _VideoControlsState extends State<VideoControls> {
   }
 
   void _playPause() {
-    bool isFinished = _latestValue.position >= _latestValue.duration;
+    final bool isFinished = _latestValue.position >= _latestValue.duration;
 
     setState(() {
       if (controller.value.isPlaying) {
