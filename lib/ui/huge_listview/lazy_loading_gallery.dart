@@ -71,7 +71,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
     _currentIndexSubscription =
         widget.currentIndexStream.listen((currentIndex) {
-      bool shouldRender = (currentIndex - widget.index).abs() <
+      final bool shouldRender = (currentIndex - widget.index).abs() <
           kNumberOfDaysToRenderBeforeAndAfter;
       if (mounted && shouldRender != _shouldRender) {
         setState(() {
@@ -163,7 +163,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   Widget _getGallery() {
-    List<Widget> childGalleries = [];
+    final List<Widget> childGalleries = [];
     for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
       childGalleries.add(
         LazyLoadingGridView(

@@ -93,8 +93,13 @@ class FeatureFlagService {
     }
   }
 
+<<<<<<< HEAD
   bool isInternalUserOrDebugBuild() {
     String email = Configuration.instance.getEmail();
+=======
+  bool _isInternalUserOrDebugBuild() {
+    final String email = Configuration.instance.getEmail();
+>>>>>>> master
     return (email != null && email.endsWith("@ente.io")) || kDebugMode;
   }
 

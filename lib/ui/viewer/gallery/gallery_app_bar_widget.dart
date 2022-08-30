@@ -122,7 +122,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   List<Widget> _getDefaultActions(BuildContext context) {
-    List<Widget> actions = <Widget>[];
+    final List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
         (widget.type == GalleryType.localFolder ||
@@ -178,7 +178,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ),
               );
             }
-            bool isArchived = widget.collection.isArchived();
+            final bool isArchived = widget.collection.isArchived();
             items.add(
               PopupMenuItem(
                 value: 2,

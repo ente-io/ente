@@ -186,7 +186,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   }
 
   List<Widget> _saveOptions(BuildContext context, String recoveryKey) {
-    List<Widget> childrens = [];
+    final List<Widget> childrens = [];
     if (!_hasTriedToSave) {
       childrens.add(
         ElevatedButton(

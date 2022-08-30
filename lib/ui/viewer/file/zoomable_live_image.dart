@@ -152,7 +152,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   VideoPlayerController _setVideoPlayerController({io.File file}) {
-    var videoPlayerController = VideoPlayerController.file(file);
+    final videoPlayerController = VideoPlayerController.file(file);
     return _videoPlayerController = videoPlayerController
       ..initialize().whenComplete(() {
         if (mounted) {
@@ -164,8 +164,8 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
   }
 
   void _showLivePhotoToast() async {
-    var preferences = await SharedPreferences.getInstance();
-    int promptTillNow = preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
+    final preferences = await SharedPreferences.getInstance();
+    final int promptTillNow = preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
     if (promptTillNow < kMaxLivePhotoToastCount && mounted) {
       showToast(context, "Press and hold to play video");
       preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);

@@ -116,7 +116,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
             Divider(
               height: 1,
               thickness: 1,
-              color: Theme.of(context).accentColor,
+              color: Theme.of(context).colorScheme.secondary,
             ),
             _getVerificationWidget(),
           ],
@@ -126,7 +126,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   }
 
   Widget _getSecretCode() {
-    Color textColor = Theme.of(context).colorScheme.onSurface;
+    final Color textColor = Theme.of(context).colorScheme.onSurface;
     return GestureDetector(
       onTap: () async {
         await Clipboard.setData(ClipboardData(text: widget.secretCode));

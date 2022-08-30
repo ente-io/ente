@@ -308,7 +308,7 @@ class CollectionsService {
       // read the existing magic metadata and apply new updates to existing data
       // current update is simple replace. This will be enhanced in the future,
       // as required.
-      Map<String, dynamic> jsonToUpdate =
+      final Map<String, dynamic> jsonToUpdate =
           jsonDecode(collection.mMdEncodedJson ?? '{}');
       newMetadataUpdate.forEach((key, value) {
         jsonToUpdate[key] = value;
@@ -325,7 +325,7 @@ class CollectionsService {
       );
       // for required field, the json validator on golang doesn't treat 0 as valid
       // value. Instead of changing version to ptr, decided to start version with 1.
-      int currentVersion = max(collection.mMdVersion, 1);
+      final int currentVersion = max(collection.mMdVersion, 1);
       final params = UpdateMagicMetadataRequest(
         id: collection.id,
         magicMetadata: MetadataRequest(
