@@ -103,7 +103,7 @@ export default function Uploader(props: Props) {
     };
 
     useEffect(() => {
-        UploadManager.initUploader(
+        UploadManager.init(
             {
                 setPercentComplete,
                 setUploadCounter,

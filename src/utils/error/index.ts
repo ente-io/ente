@@ -45,7 +45,7 @@ export enum CustomError {
     FILE_ID_NOT_FOUND = 'file with id not found',
     WEAK_DEVICE = 'password decryption failed on the device',
     INCORRECT_PASSWORD = 'incorrect password',
-    UPLOAD_PAUSED = 'upload paused',
+    UPLOAD_CANCELLED = 'upload cancelled',
 }
 
 function parseUploadErrorCodes(error) {

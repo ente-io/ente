@@ -186,7 +186,7 @@ class UploadService {
             };
             return backupedFile;
         } catch (e) {
-            if (e.message !== CustomError.UPLOAD_PAUSED) {
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
                 logError(e, 'error uploading to bucket');
             }
             throw e;

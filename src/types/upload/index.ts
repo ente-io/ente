@@ -144,10 +144,6 @@ export interface ParsedExtractedMetadata {
     creationTime: number;
 }
 
-export interface IsUploadPausing {
-    val: boolean;
-}
-
 export enum UPLOAD_STRATEGY {
     SINGLE_COLLECTION,
     COLLECTION_PER_FOLDER,

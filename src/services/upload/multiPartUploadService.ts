@@ -8,7 +8,7 @@ import UploadHttpClient from './uploadHttpClient';
 import * as convert from 'xml-js';
 import { CustomError } from 'utils/error';
 import { DataStream, MultipartUploadURLs } from 'types/upload';
-import uploadPausingService from './uploadPausingService';
+import uploadPausingService from './uploadCancelService';
 
 interface PartEtag {
     PartNumber: number;
@@ -52,8 +52,8 @@ export async function uploadStreamInParts(
         index,
         fileUploadURL,
     ] of multipartUploadURLs.partURLs.entries()) {
-        if (uploadPausingService.isUploadPausing()) {
-            throw Error(CustomError.UPLOAD_PAUSED);
+        if (uploadPausingService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
         }
         const uploadChunk = await combineChunksToFormUploadPart(streamReader);
         const progressTracker = UIService.trackUploadProgress(

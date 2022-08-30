@@ -27,7 +27,6 @@ import { EnteFile } from 'types/file';
 import {
     ElectronFile,
     FileWithCollection,
-    IsUploadPausing,
     Metadata,
     MetadataAndFileTypeInfo,
     MetadataAndFileTypeInfoMap,
@@ -47,7 +46,8 @@ import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
-import uploadPausingService from './uploadPausingService';
+import uploadPausingService from './uploadCancelService';
+import uploadCancelService from './uploadCancelService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -63,10 +63,12 @@ class UploadManager {
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
-    private isUploadPausing: IsUploadPausing = {
-        val: false,
-    };
-    public initUploader(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
+
+    async init(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
+        this.existingFiles = await getLocalFiles();
+        this.existingFilesCollectionWise = groupFilesBasedOnCollectionID(
+            this.existingFiles
+        );
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
     }
@@ -82,12 +84,10 @@ class UploadManager {
         >();
     }
 
-    private async init(collections: Collection[]) {
+    private async prepareForNewUpload(collections: Collection[]) {
         this.resetState();
-        this.existingFiles = await getLocalFiles();
-        this.existingFilesCollectionWise = groupFilesBasedOnCollectionID(
-            this.existingFiles
-        );
+        UIService.reset();
+        uploadCancelService.reset();
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
         );
@@ -98,7 +98,7 @@ class UploadManager {
         collections: Collection[]
     ) {
         try {
-            await this.init(collections);
+            await this.prepareForNewUpload(collections);
             addLogLine(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
@@ -111,10 +111,7 @@ class UploadManager {
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
                 );
                 await this.parseMetadataJSONFiles(metadataJSONFiles);
-                if (this.isUploadPausing.val) {
-                    this.uploadPausingDone();
-                    return;
-                }
+
                 UploadService.setParsedMetadataJSONMap(
                     this.parsedMetadataJSONMap
                 );
@@ -122,10 +119,7 @@ class UploadManager {
             if (mediaFiles.length) {
                 UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
                 await this.extractMetadataFromFiles(mediaFiles);
-                if (this.isUploadPausing.val) {
-                    this.uploadPausingDone();
-                    return;
-                }
+
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
@@ -179,10 +173,6 @@ class UploadManager {
                 );
 
                 await this.uploadMediaFiles(allFiles);
-                if (this.isUploadPausing.val) {
-                    this.uploadPausingDone();
-                    return;
-                }
             }
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
@@ -219,8 +209,8 @@ class UploadManager {
 
             for (const { file, collectionID } of metadataFiles) {
                 try {
-                    if (this.isUploadPausing.val) {
-                        return;
+                    if (uploadCancelService.isUploadCancelationRequested()) {
+                        throw Error(CustomError.UPLOAD_CANCELLED);
                     }
 
                     addLogLine(
@@ -245,7 +235,12 @@ class UploadManager {
                         )}`
                     );
                 } catch (e) {
-                    logError(e, 'parsing failed for a file');
+                    if (e.message === CustomError.UPLOAD_CANCELLED) {
+                        throw e;
+                    } else {
+                        logError(e, 'parsing failed for a file');
+                        // and don't break for subsequent files
+                    }
                     addLogLine(
                         `failed to parse metadata json file ${getFileNameSize(
                             file
@@ -254,7 +249,10 @@ class UploadManager {
                 }
             }
         } catch (e) {
-            logError(e, 'error seeding MetadataMap');
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+                logError(e, 'error seeding MetadataMap');
+            }
+            throw e;
             // silently ignore the error
         }
     }
@@ -264,8 +262,8 @@ class UploadManager {
             addLogLine(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
-                if (this.isUploadPausing.val) {
-                    return;
+                if (uploadCancelService.isUploadCancelationRequested()) {
+                    throw Error(CustomError.UPLOAD_CANCELLED);
                 }
                 let fileTypeInfo = null;
                 let metadata = null;
@@ -287,7 +285,12 @@ class UploadManager {
                         )} `
                     );
                 } catch (e) {
-                    logError(e, 'extractFileTypeAndMetadata failed');
+                    if (e.message === CustomError.UPLOAD_CANCELLED) {
+                        throw e;
+                    } else {
+                        logError(e, 'extractFileTypeAndMetadata failed');
+                        // and don't break for subsequent files
+                    }
                     addLogLine(
                         `metadata extraction failed ${getFileNameSize(
                             file
@@ -302,7 +305,9 @@ class UploadManager {
                 UIService.increaseFileUploaded();
             }
         } catch (e) {
-            logError(e, 'error extracting metadata');
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+                logError(e, 'error extracting metadata');
+            }
             throw e;
         }
     }
@@ -379,8 +384,8 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any) {
         while (this.filesToBeUploaded.length > 0) {
-            if (this.isUploadPausing.val) {
-                return;
+            if (uploadCancelService.isUploadCancelationRequested()) {
+                throw Error(CustomError.UPLOAD_CANCELLED);
             }
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
@@ -483,15 +488,13 @@ class UploadManager {
     public pauseWatchService() {
         if (isElectron()) {
             watchFolderService.pauseService();
-            this.isUploadPausing.val = true;
-            uploadPausingService.setUploadPausing(true);
+            uploadPausingService.signalCancelUpload();
             UIService.setUploadStage(UPLOAD_STAGES.PAUSING);
         }
     }
 
     private async uploadPausingDone() {
-        this.isUploadPausing.val = false;
-        uploadPausingService.setUploadPausing(false);
+        uploadPausingService.reset();
     }
 
     private updateExistingCollections(decryptedFile: EnteFile) {

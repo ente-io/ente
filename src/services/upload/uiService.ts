@@ -10,7 +10,7 @@ import {
     ProgressUpdater,
     SegregatedFinishedUploads,
 } from 'types/upload/ui';
-import uploadPausingService from './uploadPausingService';
+import uploadPausingService from './uploadCancelService';
 
 class UIService {
     private perFileProgress: number;
@@ -24,7 +24,7 @@ class UIService {
         this.progressUpdater = progressUpdater;
     }
 
-    reset(count: number) {
+    reset(count = 0) {
         this.setTotalFileCount(count);
         this.filesUploaded = 0;
         this.inProgressUploads = new Map<number, number>();
@@ -34,7 +34,11 @@ class UIService {
 
     setTotalFileCount(count: number) {
         this.totalFileCount = count;
-        this.perFileProgress = 100 / this.totalFileCount;
+        if (count > 0) {
+            this.perFileProgress = 100 / this.totalFileCount;
+        } else {
+            this.perFileProgress = 0;
+        }
     }
 
     setFileProgress(key: number, progress: number) {
@@ -117,7 +121,7 @@ class UIService {
             timeout = setTimeout(() => cancel.exec(), 30 * 1000);
         };
         const cancelIfUploadPaused = () => {
-            if (uploadPausingService.isUploadPausing()) {
+            if (uploadPausingService.isUploadCancelationRequested()) {
                 cancel.exec();
             }
         };
