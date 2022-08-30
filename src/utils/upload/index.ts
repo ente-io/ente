@@ -1,21 +1,32 @@
-import { FileWithCollection, Metadata } from 'types/upload';
+import {
+    AnalysisResult,
+    ElectronFile,
+    FileWithCollection,
+    Metadata,
+} from 'types/upload';
 import { EnteFile } from 'types/file';
-import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
+import {
+    A_SEC_IN_MICROSECONDS,
+    NULL_ANALYSIS_RESULT,
+    UPLOAD_TYPE,
+} from 'constants/upload';
 import { FILE_TYPE } from 'constants/file';
+import { METADATA_FOLDER_NAME } from 'constants/export';
+import isElectron from 'is-electron';
 
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 
-export function fileAlreadyInCollection(
-    existingFilesInCollection: EnteFile[],
+export function findMatchingExistingFile(
+    existingFiles: EnteFile[],
     newFileMetadata: Metadata
-): boolean {
-    for (const existingFile of existingFilesInCollection) {
+): EnteFile {
+    for (const existingFile of existingFiles) {
         if (areFilesSame(existingFile.metadata, newFileMetadata)) {
-            return true;
+            return existingFile;
         }
     }
-    return false;
+    return null;
 }
 
 export function findSameFileInOtherCollection(
@@ -119,4 +130,61 @@ export function areFileWithCollectionsSame(
     secondFile: FileWithCollection
 ): boolean {
     return firstFile.localID === secondFile.localID;
+}
+
+export function analyseUploadFiles(
+    uploadType: UPLOAD_TYPE,
+    toUploadFiles: File[] | ElectronFile[]
+): AnalysisResult {
+    if (isElectron() && uploadType === UPLOAD_TYPE.FILES) {
+        return NULL_ANALYSIS_RESULT;
+    }
+
+    const paths: string[] = toUploadFiles.map((file) => file['path']);
+    const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
+    paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
+    const firstPath = paths[0];
+    const lastPath = paths[paths.length - 1];
+
+    const L = firstPath.length;
+    let i = 0;
+    const firstFileFolder = firstPath.substring(0, firstPath.lastIndexOf('/'));
+    const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf('/'));
+    while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
+    let commonPathPrefix = firstPath.substring(0, i);
+
+    if (commonPathPrefix) {
+        commonPathPrefix = commonPathPrefix.substring(
+            0,
+            commonPathPrefix.lastIndexOf('/')
+        );
+        if (commonPathPrefix) {
+            commonPathPrefix = commonPathPrefix.substring(
+                commonPathPrefix.lastIndexOf('/') + 1
+            );
+        }
+    }
+    return {
+        suggestedCollectionName: commonPathPrefix || null,
+        multipleFolders: firstFileFolder !== lastFileFolder,
+    };
+}
+export function getCollectionWiseFiles(toUploadFiles: File[] | ElectronFile[]) {
+    const collectionWiseFiles = new Map<string, (File | ElectronFile)[]>();
+    for (const file of toUploadFiles) {
+        const filePath = file['path'] as string;
+
+        let folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
+            folderPath = folderPath.substring(0, folderPath.lastIndexOf('/'));
+        }
+        const folderName = folderPath.substring(
+            folderPath.lastIndexOf('/') + 1
+        );
+        if (!collectionWiseFiles.has(folderName)) {
+            collectionWiseFiles.set(folderName, []);
+        }
+        collectionWiseFiles.get(folderName).push(file);
+    }
+    return collectionWiseFiles;
 }

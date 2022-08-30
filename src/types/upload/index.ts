@@ -1,3 +1,4 @@
+import {} from './../../constants/upload/index';
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
 import { fileAttribute } from 'types/file';
@@ -141,4 +142,9 @@ export interface UploadFile extends BackupedFile {
 export interface ParsedExtractedMetadata {
     location: Location;
     creationTime: number;
+}
+
+export interface AnalysisResult {
+    suggestedCollectionName: string;
+    multipleFolders: boolean;
 }

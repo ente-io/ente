@@ -14,11 +14,10 @@ import UploadManager from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
 import isElectron from 'is-electron';
-import { METADATA_FOLDER_NAME } from 'constants/export';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
-import { ElectronFile, FileWithCollection } from 'types/upload';
+import { AnalysisResult, ElectronFile, FileWithCollection } from 'types/upload';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
@@ -30,10 +29,16 @@ import {
     SegregatedFinishedUploads,
     InProgressUpload,
 } from 'types/upload/ui';
-import { UPLOAD_STAGES } from 'constants/upload';
+import {
+    NULL_ANALYSIS_RESULT,
+    UPLOAD_STAGES,
+    UPLOAD_STRATEGY,
+    UPLOAD_TYPE,
+} from 'constants/upload';
 import importService from 'services/importService';
 import { getDownloadAppMessage } from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
+import { analyseUploadFiles, getCollectionWiseFiles } from 'utils/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -58,27 +63,6 @@ interface Props {
     showUploadFilesDialog: () => void;
     showUploadDirsDialog: () => void;
 }
-
-enum UPLOAD_STRATEGY {
-    SINGLE_COLLECTION,
-    COLLECTION_PER_FOLDER,
-}
-
-export enum UPLOAD_TYPE {
-    FILES = 'files',
-    FOLDERS = 'folders',
-    ZIPS = 'zips',
-}
-
-interface AnalysisResult {
-    suggestedCollectionName: string;
-    multipleFolders: boolean;
-}
-
-const NULL_ANALYSIS_RESULT = {
-    suggestedCollectionName: '',
-    multipleFolders: false,
-};
 
 export default function Uploader(props: Props) {
     const [uploadProgressView, setUploadProgressView] = useState(false);
@@ -111,7 +95,7 @@ export default function Uploader(props: Props) {
     const closeUploadProgress = () => setUploadProgressView(false);
 
     useEffect(() => {
-        UploadManager.initUploader(
+        UploadManager.init(
             {
                 setPercentComplete,
                 setUploadCounter,
@@ -142,7 +126,9 @@ export default function Uploader(props: Props) {
             if (props.uploadInProgress) {
                 // no-op
                 // a upload is already in progress
-            } else if (isCanvasBlocked()) {
+                return;
+            }
+            if (isCanvasBlocked()) {
                 appContext.setDialogMessage({
                     title: constants.CANVAS_BLOCKED_TITLE,
 
@@ -154,41 +140,34 @@ export default function Uploader(props: Props) {
                         variant: 'accent',
                     },
                 });
-            } else {
-                props.setLoading(true);
-                if (props.webFiles?.length > 0) {
-                    // File selection by drag and drop or selection of file.
-                    toUploadFiles.current = props.webFiles;
-                    props.setWebFiles([]);
-                } else if (appContext.sharedFiles?.length > 0) {
-                    toUploadFiles.current = appContext.sharedFiles;
-                    appContext.resetSharedFiles();
-                } else if (props.electronFiles?.length > 0) {
-                    // File selection from desktop app
-                    toUploadFiles.current = props.electronFiles;
-                    props.setElectronFiles([]);
-                }
-                const analysisResult = analyseUploadFiles();
-                setAnalysisResult(analysisResult);
-
-                handleCollectionCreationAndUpload(
-                    analysisResult,
-                    props.isFirstUpload
-                );
-                props.setLoading(false);
+                return;
             }
+            props.setLoading(true);
+            if (props.webFiles?.length > 0) {
+                // File selection by drag and drop or selection of file.
+                toUploadFiles.current = props.webFiles;
+                props.setWebFiles([]);
+            } else if (appContext.sharedFiles?.length > 0) {
+                toUploadFiles.current = appContext.sharedFiles;
+                appContext.resetSharedFiles();
+            } else if (props.electronFiles?.length > 0) {
+                // File selection from desktop app
+                toUploadFiles.current = props.electronFiles;
+                props.setElectronFiles([]);
+            }
+            const analysisResult = analyseUploadFiles(
+                uploadType.current,
+                toUploadFiles.current
+            );
+            setAnalysisResult(analysisResult);
+
+            handleCollectionCreationAndUpload(
+                analysisResult,
+                props.isFirstUpload
+            );
+            props.setLoading(false);
         }
     }, [props.webFiles, appContext.sharedFiles, props.electronFiles]);
-
-    const uploadInit = function () {
-        setUploadStage(UPLOAD_STAGES.START);
-        setUploadCounter({ finished: 0, total: 0 });
-        setInProgressUploads([]);
-        setFinishedUploads(new Map());
-        setPercentComplete(0);
-        props.closeCollectionSelector();
-        setUploadProgressView(true);
-    };
 
     const resumeDesktopUpload = async (
         type: UPLOAD_TYPE,
@@ -202,68 +181,6 @@ export default function Uploader(props: Props) {
             props.setElectronFiles(electronFiles);
         }
     };
-
-    function analyseUploadFiles(): AnalysisResult {
-        if (isElectron() && uploadType.current === UPLOAD_TYPE.FILES) {
-            return NULL_ANALYSIS_RESULT;
-        }
-
-        const paths: string[] = toUploadFiles.current.map(
-            (file) => file['path']
-        );
-        const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
-        paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
-        const firstPath = paths[0];
-        const lastPath = paths[paths.length - 1];
-
-        const L = firstPath.length;
-        let i = 0;
-        const firstFileFolder = firstPath.substring(
-            0,
-            firstPath.lastIndexOf('/')
-        );
-        const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf('/'));
-        while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
-        let commonPathPrefix = firstPath.substring(0, i);
-
-        if (commonPathPrefix) {
-            commonPathPrefix = commonPathPrefix.substring(
-                0,
-                commonPathPrefix.lastIndexOf('/')
-            );
-            if (commonPathPrefix) {
-                commonPathPrefix = commonPathPrefix.substring(
-                    commonPathPrefix.lastIndexOf('/') + 1
-                );
-            }
-        }
-        return {
-            suggestedCollectionName: commonPathPrefix || null,
-            multipleFolders: firstFileFolder !== lastFileFolder,
-        };
-    }
-    function getCollectionWiseFiles() {
-        const collectionWiseFiles = new Map<string, (File | ElectronFile)[]>();
-        for (const file of toUploadFiles.current) {
-            const filePath = file['path'] as string;
-
-            let folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
-            if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
-                folderPath = folderPath.substring(
-                    0,
-                    folderPath.lastIndexOf('/')
-                );
-            }
-            const folderName = folderPath.substring(
-                folderPath.lastIndexOf('/') + 1
-            );
-            if (!collectionWiseFiles.has(folderName)) {
-                collectionWiseFiles.set(folderName, []);
-            }
-            collectionWiseFiles.get(folderName).push(file);
-        }
-        return collectionWiseFiles;
-    }
 
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
@@ -293,7 +210,9 @@ export default function Uploader(props: Props) {
             if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
                 collectionWiseFiles.set(collectionName, toUploadFiles.current);
             } else {
-                collectionWiseFiles = getCollectionWiseFiles();
+                collectionWiseFiles = getCollectionWiseFiles(
+                    toUploadFiles.current
+                );
             }
             try {
                 const existingCollection = await syncCollections();
@@ -330,14 +249,25 @@ export default function Uploader(props: Props) {
         }
     };
 
+    const preUploadAction = async () => {
+        props.closeCollectionSelector();
+        uploadManager.prepareForNewUpload();
+        setUploadProgressView(true);
+        props.setUploadInProgress(true);
+        await props.syncWithRemote(true, true);
+    };
+
+    function postUploadAction() {
+        props.setUploadInProgress(false);
+        props.syncWithRemote();
+    }
+
     const uploadFiles = async (
-        filesWithCollectionToUpload: FileWithCollection[],
+        filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[]
     ) => {
         try {
-            uploadInit();
-            props.setUploadInProgress(true);
-            props.closeCollectionSelector();
+            await preUploadAction();
             await props.syncWithRemote(true, true);
             if (isElectron() && !isPendingDesktopUpload.current) {
                 await ImportService.setToUploadCollection(collections);
@@ -350,13 +280,13 @@ export default function Uploader(props: Props) {
                 }
                 await ImportService.setToUploadFiles(
                     UPLOAD_TYPE.FILES,
-                    filesWithCollectionToUpload.map(
+                    filesWithCollectionToUploadIn.map(
                         ({ file }) => (file as ElectronFile).path
                     )
                 );
             }
             await uploadManager.queueFilesForUpload(
-                filesWithCollectionToUpload,
+                filesWithCollectionToUploadIn,
                 collections
             );
         } catch (err) {
@@ -364,24 +294,19 @@ export default function Uploader(props: Props) {
             closeUploadProgress();
             throw err;
         } finally {
-            props.setUploadInProgress(false);
-            props.syncWithRemote();
+            postUploadAction();
         }
     };
 
     const retryFailed = async () => {
         try {
-            props.setUploadInProgress(true);
-            uploadInit();
-            await props.syncWithRemote(true, true);
+            await preUploadAction();
             await uploadManager.retryFailedFiles();
         } catch (err) {
             showUserFacingError(err.message);
-
             closeUploadProgress();
         } finally {
-            props.setUploadInProgress(false);
-            props.syncWithRemote();
+            postUploadAction();
         }
     };
 

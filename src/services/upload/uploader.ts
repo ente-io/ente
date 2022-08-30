@@ -1,11 +1,7 @@
 import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
-import {
-    fileAlreadyInCollection,
-    findSameFileInOtherCollection,
-    shouldDedupeAcrossCollection,
-} from 'utils/upload';
+import { findMatchingExistingFile } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
@@ -20,8 +16,8 @@ import { addToCollection } from 'services/collectionService';
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
     uploadedFile?: EnteFile;
-    skipDecryption?: boolean;
 }
+
 export default async function uploader(
     worker: any,
     existingFilesInCollection: EnteFile[],
@@ -50,40 +46,27 @@ export default async function uploader(
             throw Error(CustomError.NO_METADATA);
         }
 
-        if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-            addLogLine(`skipped upload for  ${fileNameSize}`);
-            return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
+        const existingFile = findMatchingExistingFile(existingFiles, metadata);
+        if (existingFile) {
+            if (existingFile.collectionID === collection.id) {
+                addLogLine(
+                    `file already present in the collection , skipped upload for  ${fileNameSize}`
+                );
+                return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
+            } else {
+                addLogLine(
+                    `same file in other collection found for  ${fileNameSize}`
+                );
+                const resultFile = Object.assign({}, existingFile);
+                resultFile.collectionID = collection.id;
+                await addToCollection(collection, [resultFile]);
+                return {
+                    fileUploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
+                    uploadedFile: resultFile,
+                };
+            }
         }
 
-        const sameFileInOtherCollection = findSameFileInOtherCollection(
-            existingFiles,
-            metadata
-        );
-
-        if (sameFileInOtherCollection) {
-            addLogLine(
-                `same file in other collection found for  ${fileNameSize}`
-            );
-            const resultFile = Object.assign({}, sameFileInOtherCollection);
-            resultFile.collectionID = collection.id;
-            await addToCollection(collection, [resultFile]);
-            return {
-                fileUploadResult: UPLOAD_RESULT.UPLOADED,
-                uploadedFile: resultFile,
-                skipDecryption: true,
-            };
-        }
-
-        // iOS exports via album doesn't export files without collection and if user exports all photos, album info is not preserved.
-        // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
-        // as part of the albums
-        if (
-            shouldDedupeAcrossCollection(fileWithCollection.collection.name) &&
-            fileAlreadyInCollection(existingFiles, metadata)
-        ) {
-            addLogLine(`deduped upload for  ${fileNameSize}`);
-            return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
-        }
         addLogLine(`reading asset ${fileNameSize}`);
 
         const file = await UploadService.readAsset(fileTypeInfo, uploadAsset);

@@ -40,6 +40,18 @@ export enum UPLOAD_RESULT {
     LARGER_THAN_AVAILABLE_STORAGE,
     UPLOADED,
     UPLOADED_WITH_STATIC_THUMBNAIL,
+    ADDED_SYMLINK,
+}
+
+export enum UPLOAD_STRATEGY {
+    SINGLE_COLLECTION,
+    COLLECTION_PER_FOLDER,
+}
+
+export enum UPLOAD_TYPE {
+    FILES = 'files',
+    FOLDERS = 'folders',
+    ZIPS = 'zips',
 }
 
 export const MAX_FILE_SIZE_SUPPORTED = 4 * 1024 * 1024 * 1024; // 4 GB
@@ -54,6 +66,11 @@ export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 export const A_SEC_IN_MICROSECONDS = 1e6;
 
 export const USE_CF_PROXY = false;
+
+export const NULL_ANALYSIS_RESULT = {
+    suggestedCollectionName: '',
+    multipleFolders: false,
+};
 
 export const BLACK_THUMBNAIL_BASE64 =
     '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB' +

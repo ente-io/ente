@@ -1,4 +1,4 @@
-import { UPLOAD_TYPE } from 'components/Upload/Uploader';
+import { UPLOAD_TYPE } from 'constants/upload';
 import { Collection } from 'types/collection';
 import { ElectronAPIs } from 'types/electron';
 import { ElectronFile, FileWithCollection } from 'types/upload';
