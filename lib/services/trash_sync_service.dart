@@ -67,7 +67,7 @@ class TrashSyncService {
   Future<void> _updateIgnoredFiles(Diff diff) async {
     final ignoredFiles = <IgnoredFile>[];
     for (TrashFile t in diff.trashedFiles) {
-      final file = IgnoredFile.fromFile(t);
+      final file = IgnoredFile.fromTrashItem(t);
       if (file != null) {
         ignoredFiles.add(file);
       }

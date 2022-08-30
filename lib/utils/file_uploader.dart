@@ -447,10 +447,10 @@ class FileUploader {
   }
 
   /*
-  // _mapToExistingUpload links the current file to be uploaded with the
-  // existing files. If the link is successful, it returns true other false.
-   When false, we should go ahead and re-upload or update the file
-    It performs following checks:
+  _mapToExistingUpload links the fileToUpload with the existing uploaded
+  files. if the link is successful, it returns true otherwise false.
+  When false, we should go ahead and re-upload or update the file.
+  It performs following checks:
     a) Uploaded file with same localID and destination collection. Delete the
      fileToUpload entry
     b) Uploaded file in destination collection but with missing localID.
@@ -469,32 +469,27 @@ class FileUploader {
     File fileToUpload,
     int toCollectionID,
   ) async {
-    if (fileToUpload.uploadedFileID != -1 &&
-        fileToUpload.uploadedFileID != null) {
-      _logger.warning('file is already uploaded, skipping mapping logic');
+    if (fileToUpload.uploadedFileID != null) {
+      _logger.severe(
+        'Critical: file is already uploaded, skipped mapping',
+      );
       return false;
     }
-    final List<String> hash = [mediaUploadData.fileHash];
-    if (fileToUpload.fileType == FileType.livePhoto) {
-      hash.add(mediaUploadData.zipHash);
-    }
-    final List<File> existingFiles =
+    final List<File> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
-      hash,
+      mediaUploadData.hashData,
       fileToUpload.fileType,
       Configuration.instance.getUserID(),
     );
-    if (existingFiles?.isEmpty ?? true) {
+    if (existingUploadedFiles?.isEmpty ?? true) {
       return false;
     } else {
       debugPrint("Found some matches");
     }
     // case a
-    final File sameLocalSameCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID == toCollectionID &&
-          element.localID == fileToUpload.localID,
+    final File sameLocalSameCollection = existingUploadedFiles.firstWhere(
+      (e) =>
+          e.collectionID == toCollectionID && e.localID == fileToUpload.localID,
       orElse: () => null,
     );
     if (sameLocalSameCollection != null) {
@@ -503,16 +498,14 @@ class FileUploader {
         "\n existing: ${sameLocalSameCollection.tag()}",
       );
       // should delete the fileToUploadEntry
-      FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
+      await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
       return true;
     }
 
     // case b
-    final File fileMissingLocalButSameCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID == toCollectionID &&
-          element.localID == null,
+    final File fileMissingLocalButSameCollection =
+        existingUploadedFiles.firstWhere(
+      (e) => e.collectionID == toCollectionID && e.localID == null,
       orElse: () => null,
     );
     if (fileMissingLocalButSameCollection != null) {
@@ -529,10 +522,9 @@ class FileUploader {
     }
 
     // case c and d
-    final File fileExistsButDifferentCollection = existingFiles.firstWhere(
-      (element) =>
-          element.uploadedFileID != -1 &&
-          element.collectionID != toCollectionID,
+    final File fileExistsButDifferentCollection =
+        existingUploadedFiles.firstWhere(
+      (e) => e.collectionID != toCollectionID,
       orElse: () => null,
     );
     if (fileExistsButDifferentCollection != null) {
@@ -542,7 +534,10 @@ class FileUploader {
       );
       await CollectionsService.instance
           .linkLocalFileToExistingUploadedFileInAnotherCollection(
-              toCollectionID, fileToUpload, fileExistsButDifferentCollection);
+        toCollectionID,
+        localFileToUpload: fileToUpload,
+        existingUploadedFile: fileExistsButDifferentCollection,
+      );
       return true;
     }
     // case e

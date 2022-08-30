@@ -47,35 +47,29 @@ class IgnoredFilesService {
     return false;
   }
 
+  // removeIgnoredMappings is used to remove the ignore mapping for the given
+  // set of files so that they can be uploaded.
   Future<void> removeIgnoredMappings(List<File> files) async {
     final List<IgnoredFile> ignoredFiles = [];
     final Set<String> idsToRemoveFromCache = {};
-    for (var file in files) {
-      if (Platform.isIOS && file.localID != null) {
-        // in IOS, the imported file might not have title fetched by default.
-        // fetching title has performance impact.
-        if (file.title == null || file.title.isEmpty) {
-          file.title = 'dummyTitle';
-        }
+    final Set<String> currentlyIgnoredIDs = await ignoredIDs;
+    for (final file in files) {
+      // check if upload is not skipped for file. If not, no need to remove
+      // any mapping
+      if (!shouldSkipUpload(currentlyIgnoredIDs, file)) {
+        continue;
       }
-      final ignoredFile = IgnoredFile.fromFile(file);
-      if (ignoredFile != null) {
-        ignoredFiles.add(ignoredFile);
-        final id = _idForIgnoredFile(ignoredFile);
-        if (id != null) {
-          idsToRemoveFromCache.add(id);
-        }
-      } else {
-        _logger.warning(
-            'ignoredFile should not be null while removing mapping ${file.tag()}');
-      }
+      final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
+      idsToRemoveFromCache.add(id);
+      ignoredFiles.add(
+        IgnoredFile(file.localID, file.title, file.deviceFolder, ""),
+      );
     }
+
     if (ignoredFiles.isNotEmpty) {
       await _db.removeIgnoredEntries(ignoredFiles);
-      final existingIDs = await ignoredIDs;
-      existingIDs.removeAll(idsToRemoveFromCache);
+      currentlyIgnoredIDs.removeAll(idsToRemoveFromCache);
     }
-    return;
   }
 
   Future<Set<String>> _loadExistingIDs() async {
@@ -95,7 +89,7 @@ class IgnoredFilesService {
     );
   }
 
-  // _computeIgnoreID will return null if don't have sufficient information
+  // _getIgnoreID will return null if don't have sufficient information
   // to ignore the file based on the platform. Uploads from web or files shared to
   // end usually don't have local id.
   // For Android: It returns deviceFolder-title as ID for Android.

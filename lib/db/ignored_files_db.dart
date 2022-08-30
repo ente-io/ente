@@ -52,7 +52,8 @@ class IgnoredFilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     return await openDatabase(
       path,
@@ -117,10 +118,17 @@ class IgnoredFilesDB {
         batch = db.batch();
         batchCounter = 0;
       }
-      batch.rawDelete(
-        "DELETE from $tableName WHERE "
-        "$columnLocalID = '${file.localID}' OR ( $columnDeviceFolder = '${file.deviceFolder}' AND $columnTitle = '${file.title}' ) ",
-      );
+      // on Android, we track device folder and title to track files to ignore.
+      // See IgnoredFileService#_getIgnoreID method for more detail
+      if (Platform.isAndroid) {
+        batch.rawDelete(
+          "DELETE from $tableName WHERE  $columnDeviceFolder = '${file.deviceFolder}' AND $columnTitle = '${file.title}' ",
+        );
+      } else {
+        batch.rawDelete(
+          "DELETE from $tableName WHERE $columnLocalID = '${file.localID}' ",
+        );
+      }
       batchCounter++;
     }
     await batch.commit(noResult: true);

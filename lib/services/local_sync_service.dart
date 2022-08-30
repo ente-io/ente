@@ -9,7 +9,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/file_migration_db.dart';
+import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -121,7 +121,7 @@ class LocalSyncService {
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
-      await refreshDeviceFolderCountAndCover();
+      await _refreshDeviceFolderCountAndCover();
       _logger.fine("first gallery import finished");
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
@@ -133,7 +133,7 @@ class LocalSyncService {
     _existingSync = null;
   }
 
-  Future<bool> refreshDeviceFolderCountAndCover() async {
+  Future<bool> _refreshDeviceFolderCountAndCover() async {
     final List<Tuple2<AssetPathEntity, String>> result =
         await getDeviceFolderWithCountAndCoverID();
     return await _db.updateDeviceCoverWithCount(
@@ -148,7 +148,7 @@ class LocalSyncService {
     _logger.info(
       "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
     );
-    await refreshDeviceFolderCountAndCover();
+    await _refreshDeviceFolderCountAndCover();
     _logger.info(
       "refreshDeviceFolderCountAndCover + allLocalAssets took ${stopwatch.elapsedMilliseconds}ms ",
     );
@@ -337,13 +337,11 @@ class LocalSyncService {
       );
       final List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
-        if (file.localID != null) {
-          updatedLocalIDs.add(file.localID);
-        }
+        updatedLocalIDs.add(file.localID);
       }
-      await FilesMigrationDB.instance.insertMultiple(
+      await FileUpdationDB.instance.insertMultiple(
         updatedLocalIDs,
-        FilesMigrationDB.modificationTimeUpdated,
+        FileUpdationDB.modificationTimeUpdated,
       );
     }
   }

@@ -7,13 +7,13 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
-class FilesMigrationDB {
+class FileUpdationDB {
   static const _databaseName = "ente.files_migration.db";
-  static final Logger _logger = Logger((FilesMigrationDB).toString());
+  static final Logger _logger = Logger((FileUpdationDB).toString());
 
   static const tableName = 're_upload_tracker';
-  static const _columnLocalID = 'local_id';
-  static const _columnReason = 'reason';
+  static const columnLocalID = 'local_id';
+  static const columnReason = 'reason';
   static const missingLocation = 'missing_location';
   static const modificationTimeUpdated = 'modificationTimeUpdated';
 
@@ -22,8 +22,8 @@ class FilesMigrationDB {
     return [
       ''' 
       CREATE TABLE $tableName (
-      $_columnLocalID TEXT NOT NULL,
-      UNIQUE($_columnLocalID)
+      $columnLocalID TEXT NOT NULL,
+      UNIQUE($columnLocalID)
       ); 
       ''',
     ];
@@ -32,10 +32,10 @@ class FilesMigrationDB {
   static List<String> addReasonColumn() {
     return [
       '''
-        ALTER TABLE $tableName ADD COLUMN $_columnReason TEXT;
+        ALTER TABLE $tableName ADD COLUMN $columnReason TEXT;
       ''',
       '''
-        UPDATE $tableName SET $_columnReason = '$missingLocation';
+        UPDATE $tableName SET $columnReason = '$missingLocation';
       ''',
     ];
   }
@@ -49,10 +49,9 @@ class FilesMigrationDB {
     migrationScripts: migrationScripts,
   );
 
-  FilesMigrationDB._privateConstructor();
+  FileUpdationDB._privateConstructor();
 
-  static final FilesMigrationDB instance =
-      FilesMigrationDB._privateConstructor();
+  static final FileUpdationDB instance = FileUpdationDB._privateConstructor();
 
   // only have a single app-wide reference to the database
   static Future<Database> _dbFuture;
@@ -123,7 +122,7 @@ class FilesMigrationDB {
     await db.rawQuery(
       '''
       DELETE FROM $tableName
-      WHERE $_columnLocalID IN ($inParam) AND $_columnReason = '$reason';
+      WHERE $columnLocalID IN ($inParam) AND $columnReason = '$reason';
     ''',
     );
   }
@@ -133,7 +132,7 @@ class FilesMigrationDB {
     String reason,
   ) async {
     final db = await instance.database;
-    final String whereClause = '$_columnReason = "$reason"';
+    final String whereClause = '$columnReason = "$reason"';
     final rows = await db.query(
       tableName,
       limit: limit,
@@ -141,7 +140,7 @@ class FilesMigrationDB {
     );
     final result = <String>[];
     for (final row in rows) {
-      result.add(row[_columnLocalID]);
+      result.add(row[columnLocalID]);
     }
     return result;
   }
@@ -149,8 +148,8 @@ class FilesMigrationDB {
   Map<String, dynamic> _getRowForReUploadTable(String localID, String reason) {
     assert(localID != null);
     final row = <String, dynamic>{};
-    row[_columnLocalID] = localID;
-    row[_columnReason] = reason;
+    row[columnLocalID] = localID;
+    row[columnReason] = reason;
     return row;
   }
 }

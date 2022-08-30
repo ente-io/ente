@@ -21,25 +21,31 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 final _logger = Logger("FileUtil");
 const kMaximumThumbnailCompressionAttempts = 2;
+const kLivePhotoHashSeparator = ':';
 
 class MediaUploadData {
   final io.File sourceFile;
   final Uint8List thumbnail;
   final bool isDeleted;
-  // presents the hash for the original video or image file.
-  // for livePhotos, fileHash represents the image hash value
-  final String fileHash;
-  final String liveVideoHash;
-  final String zipHash;
+  final FileHashData hashData;
 
   MediaUploadData(
     this.sourceFile,
     this.thumbnail,
-    this.isDeleted, {
-    this.fileHash,
-    this.liveVideoHash,
-    this.zipHash,
-  });
+    this.isDeleted,
+    this.hashData,
+  );
+}
+
+class FileHashData {
+  // For livePhotos, the fileHash value will be imageHash:videoHash
+  final String fileHash;
+
+  // zipHash is used to take care of existing live photo uploads from older
+  // mobile clients
+  String zipHash;
+
+  FileHashData(this.fileHash, {this.zipHash});
 }
 
 Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
@@ -54,7 +60,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   io.File sourceFile;
   Uint8List thumbnailData;
   bool isDeleted;
-  String fileHash, livePhotoVideoHash, zipHash;
+  String fileHash, zipHash;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
   final asset = await file
@@ -97,7 +103,10 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       _logger.severe(errMsg);
       throw InvalidFileUploadState(errMsg);
     }
-    livePhotoVideoHash = Sodium.bin2base64(await CryptoUtil.getHash(videoUrl));
+    final String livePhotoVideoHash =
+        Sodium.bin2base64(await CryptoUtil.getHash(videoUrl));
+    // imgHash:vidHash
+    fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';
     final tempPath = Configuration.instance.getTempDirectory();
     // .elp -> ente live photo
     final livePhotoPath = tempPath + file.generatedID.toString() + ".elp";
@@ -138,9 +147,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     sourceFile,
     thumbnailData,
     isDeleted,
-    fileHash: fileHash,
-    liveVideoHash: livePhotoVideoHash,
-    zipHash: zipHash,
+    FileHashData(fileHash, zipHash: zipHash),
   );
 }
 
@@ -170,7 +177,13 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   }
   try {
     thumbnailData = await getThumbnailFromInAppCacheFile(file);
-    return MediaUploadData(sourceFile, thumbnailData, isDeleted);
+    final fileHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+    return MediaUploadData(
+      sourceFile,
+      thumbnailData,
+      isDeleted,
+      FileHashData(fileHash),
+    );
   } catch (e, s) {
     _logger.severe("failed to generate thumbnail", e, s);
     throw InvalidFileError(

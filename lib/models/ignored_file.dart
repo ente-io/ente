@@ -1,4 +1,4 @@
-import 'package:photos/models/file.dart';
+import 'package:photos/models/trash_file.dart';
 
 const kIgnoreReasonTrash = "trash";
 const kIgnoreReasonInvalidFile = "invalidFile";
@@ -11,7 +11,7 @@ class IgnoredFile {
 
   IgnoredFile(this.localID, this.title, this.deviceFolder, this.reason);
 
-  factory IgnoredFile.fromFile(File trashFile) {
+  factory IgnoredFile.fromTrashItem(TrashFile trashFile) {
     if (trashFile == null) return null;
     if (trashFile.localID == null ||
         trashFile.localID.isEmpty ||

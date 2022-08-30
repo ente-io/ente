@@ -48,7 +48,8 @@ extension DeviceFiles on FilesDB {
   }
 
   Future<void> deletePathIDToLocalIDMapping(
-      Map<String, Set<String>> mappingsToRemove) async {
+    Map<String, Set<String>> mappingsToRemove,
+  ) async {
     debugPrint("removing PathIDToLocalIDMapping");
     final db = await database;
     var batch = db.batch();

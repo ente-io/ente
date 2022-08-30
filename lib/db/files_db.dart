@@ -11,6 +11,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -82,6 +83,7 @@ class FilesDB {
     initializationScript: initializationScript,
     migrationScripts: migrationScripts,
   );
+
   // make this a singleton class
   FilesDB._privateConstructor();
 
@@ -498,7 +500,6 @@ class FilesDB {
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
     );
-
     final files = convertToFiles(results);
     final List<File> deduplicatedFiles =
         _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
@@ -883,23 +884,27 @@ class FilesDB {
   }
 
   Future<List<File>> getUploadedFilesWithHashes(
-    List<String> hash,
+    FileHashData hashData,
     FileType fileType,
     int ownerID,
   ) async {
-    // look up two hash at max, for handling live photos
-    assert(hash.length < 3, "number of hash can not be more than 2");
-    final db = await instance.database;
-    final String rawQuery =
-        'SELECT * from files where ($columnUploadedFileID != '
-        'NULL OR $columnUploadedFileID != -1) AND $columnOwnerID = $ownerID '
-        'AND ($columnHash = "${hash.first}" OR $columnHash = "${hash.last}")';
-    final rows = await db.rawQuery(rawQuery, []);
-    if (rows.isNotEmpty) {
-      return convertToFiles(rows);
-    } else {
-      return [];
+    String inParam = "'${hashData.fileHash}'";
+    if (fileType == FileType.livePhoto && hashData.zipHash != null) {
+      inParam += ",'${hashData.zipHash}'";
     }
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      where: '($columnUploadedFileID != NULL OR $columnUploadedFileID != -1) '
+          'AND $columnOwnerID = ? AND $columnFileType ='
+          ' ? '
+          'AND $columnHash IN ($inParam)',
+      whereArgs: [
+        ownerID,
+        getInt(fileType),
+      ],
+    );
+    return convertToFiles(rows);
   }
 
   Future<int> update(File file) async {
