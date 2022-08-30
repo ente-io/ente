@@ -16,7 +16,7 @@ import { addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
-import uploadPausingService from './uploadCancelService';
+import uploadCancelService from './uploadCancelService';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -97,7 +97,7 @@ export default async function uploader(
                 };
             }
         }
-        if (uploadPausingService.isUploadCancelationRequested()) {
+        if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
         addLogLine(`reading asset ${fileNameSize}`);
@@ -114,7 +114,7 @@ export default async function uploader(
             metadata,
         };
 
-        if (uploadPausingService.isUploadCancelationRequested()) {
+        if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
         addLogLine(`encryptAsset ${fileNameSize}`);
@@ -124,7 +124,7 @@ export default async function uploader(
             collection.key
         );
 
-        if (uploadPausingService.isUploadCancelationRequested()) {
+        if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
         addLogLine(`uploadToBucket ${fileNameSize}`);

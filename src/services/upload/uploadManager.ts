@@ -46,7 +46,6 @@ import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
-import uploadPausingService from './uploadCancelService';
 import uploadCancelService from './uploadCancelService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
@@ -177,26 +176,21 @@ class UploadManager {
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
-            logError(e, 'uploading failed with error');
-            addLogLine(
-                `uploading failed with error -> ${e.message}
+            if (e.message === CustomError.UPLOAD_CANCELLED) {
+                if (isElectron()) {
+                    ImportService.cancelRemainingUploads();
+                }
+            } else {
+                logError(e, 'uploading failed with error');
+                addLogLine(
+                    `uploading failed with error -> ${e.message}
                 ${(e as Error).stack}`
-            );
-            throw e;
+                );
+                throw e;
+            }
         } finally {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.worker.terminate();
-            }
-            if (isElectron()) {
-                if (watchFolderService.isUploadRunning()) {
-                    await watchFolderService.allFileUploadsDone(
-                        filesWithCollectionToUploadIn,
-                        collections
-                    );
-                } else if (watchFolderService.isServicePaused()) {
-                    // resume the service after user upload is done
-                    watchFolderService.resumeService();
-                }
             }
         }
     }
@@ -485,16 +479,9 @@ class UploadManager {
         }
     }
 
-    public pauseWatchService() {
-        if (isElectron()) {
-            watchFolderService.pauseService();
-            uploadPausingService.signalCancelUpload();
-            UIService.setUploadStage(UPLOAD_STAGES.PAUSING);
-        }
-    }
-
-    private async uploadPausingDone() {
-        uploadPausingService.reset();
+    public cancelRunningUpload() {
+        UIService.setUploadStage(UPLOAD_STAGES.PAUSING);
+        uploadCancelService.requestUploadCancelation();
     }
 
     private updateExistingCollections(decryptedFile: EnteFile) {

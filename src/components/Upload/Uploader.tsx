@@ -140,7 +140,7 @@ export default function Uploader(props: Props) {
             if (props.uploadInProgress) {
                 if (watchFolderService.isUploadRunning()) {
                     // pause watch folder service on user upload
-                    uploadManager.pauseWatchService();
+                    watchFolderService.pauseRunningSync();
                 } else {
                     // no-op
                     // a user upload is already in progress
@@ -344,6 +344,17 @@ export default function Uploader(props: Props) {
                 filesWithCollectionToUploadIn,
                 collections
             );
+            if (isElectron()) {
+                if (watchFolderService.isUploadRunning()) {
+                    await watchFolderService.allFileUploadsDone(
+                        filesWithCollectionToUploadIn,
+                        collections
+                    );
+                } else if (watchFolderService.isServicePaused()) {
+                    // resume the service after user upload is done
+                    watchFolderService.resumePausedSync();
+                }
+            }
         } catch (err) {
             showUserFacingError(err.message);
             closeUploadProgress();
@@ -492,11 +503,7 @@ export default function Uploader(props: Props) {
     };
 
     const cancelUploads = async () => {
-        closeUploadProgress();
-        if (isElectron()) {
-            ImportService.cancelRemainingUploads();
-        }
-        props.setUploadInProgress(false);
+        uploadManager.cancelRunningUpload();
     };
 
     const handleUpload = (type) => () => {

@@ -10,7 +10,7 @@ import {
     ProgressUpdater,
     SegregatedFinishedUploads,
 } from 'types/upload/ui';
-import uploadPausingService from './uploadCancelService';
+import uploadCancelService from './uploadCancelService';
 
 class UIService {
     private perFileProgress: number;
@@ -121,7 +121,7 @@ class UIService {
             timeout = setTimeout(() => cancel.exec(), 30 * 1000);
         };
         const cancelIfUploadPaused = () => {
-            if (uploadPausingService.isUploadCancelationRequested()) {
+            if (uploadCancelService.isUploadCancelationRequested()) {
                 cancel.exec();
             }
         };

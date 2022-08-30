@@ -18,6 +18,7 @@ import {
 } from './watchFolderEventHandlers';
 import { getParentFolderName } from './utils';
 import { UPLOAD_STRATEGY } from 'constants/upload';
+import uploadManager from 'services/upload/uploadManager';
 
 class watchFolderService {
     private ElectronAPIs: ElectronAPIs;
@@ -536,11 +537,12 @@ class watchFolderService {
         }
     }
 
-    pauseService() {
+    pauseRunningSync() {
         this.isPaused = true;
+        uploadManager.cancelRunningUpload();
     }
 
-    resumeService() {
+    resumePausedSync() {
         this.isPaused = false;
         this.getAndSyncDiffOfFiles();
     }

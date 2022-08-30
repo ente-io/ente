@@ -11,7 +11,7 @@ class UploadCancelService {
         this.shouldUploadBeCancelled.val = false;
     }
 
-    signalCancelUpload() {
+    requestUploadCancelation() {
         this.shouldUploadBeCancelled.val = true;
     }
 
