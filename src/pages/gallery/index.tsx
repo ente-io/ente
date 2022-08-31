@@ -562,7 +562,11 @@ export default function Gallery() {
         setSetSearchResultSummary(null);
     };
 
-    const openUploader = () => setUploadTypeSelectorView(true);
+    const openUploader = () => {
+        if (!uploadInProgress) {
+            setUploadTypeSelectorView(true);
+        }
+    };
 
     return (
         <GalleryContext.Provider
