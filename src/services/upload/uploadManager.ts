@@ -390,6 +390,7 @@ class UploadManager {
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
                     decryptedFile = uploadedFile;
+                    fileUploadResult = UPLOAD_RESULT.UPLOADED;
                     break;
                 case UPLOAD_RESULT.UPLOADED:
                 case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
