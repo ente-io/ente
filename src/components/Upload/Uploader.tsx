@@ -18,7 +18,6 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
 import { AnalysisResult, ElectronFile, FileWithCollection } from 'types/upload';
-import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
@@ -457,12 +456,7 @@ export default function Uploader(props: Props) {
     };
 
     const cancelUploads = async () => {
-        closeUploadProgress();
-        if (isElectron()) {
-            ImportService.cancelRemainingUploads();
-        }
-        props.setUploadInProgress(false);
-        Router.reload();
+        uploadManager.cancelRunningUpload();
     };
 
     const handleUpload = (type) => () => {
