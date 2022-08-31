@@ -54,15 +54,14 @@ interface Props {
     showCollectionSelector: () => void;
     setFiles: SetFiles;
     isFirstUpload: boolean;
-    electronFiles: ElectronFile[];
-    setElectronFiles: (files: ElectronFile[]) => void;
-    webFiles: File[];
-    setWebFiles: (files: File[]) => void;
     uploadTypeSelectorView: boolean;
     setUploadTypeSelectorView: (open: boolean) => void;
     showSessionExpiredMessage: () => void;
     showUploadFilesDialog: () => void;
     showUploadDirsDialog: () => void;
+    folderSelectorFiles: File[];
+    fileSelectorFiles: File[];
+    dragAndDropFiles: File[];
 }
 
 export default function Uploader(props: Props) {
@@ -92,6 +91,8 @@ export default function Uploader(props: Props) {
     const pendingDesktopUploadCollectionName = useRef<string>('');
     const uploadType = useRef<UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
+    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
+    const [webFiles, setWebFiles] = useState([]);
 
     const closeUploadProgress = () => setUploadProgressView(false);
 
@@ -120,8 +121,28 @@ export default function Uploader(props: Props) {
 
     useEffect(() => {
         if (
-            props.electronFiles?.length > 0 ||
-            props.webFiles?.length > 0 ||
+            uploadType.current === UPLOAD_TYPE.FOLDERS &&
+            props.folderSelectorFiles?.length > 0
+        ) {
+            setWebFiles(props.folderSelectorFiles);
+        } else if (
+            uploadType.current === UPLOAD_TYPE.FILES &&
+            props.fileSelectorFiles?.length > 0
+        ) {
+            setWebFiles(props.fileSelectorFiles);
+        } else if (props.dragAndDropFiles?.length > 0) {
+            setWebFiles(props.dragAndDropFiles);
+        }
+    }, [
+        props.dragAndDropFiles,
+        props.fileSelectorFiles,
+        props.folderSelectorFiles,
+    ]);
+
+    useEffect(() => {
+        if (
+            electronFiles?.length > 0 ||
+            webFiles?.length > 0 ||
             appContext.sharedFiles?.length > 0
         ) {
             if (props.uploadInProgress) {
@@ -144,17 +165,17 @@ export default function Uploader(props: Props) {
                 return;
             }
             props.setLoading(true);
-            if (props.webFiles?.length > 0) {
+            if (webFiles?.length > 0) {
                 // File selection by drag and drop or selection of file.
-                toUploadFiles.current = props.webFiles;
-                props.setWebFiles([]);
+                toUploadFiles.current = webFiles;
+                setWebFiles([]);
             } else if (appContext.sharedFiles?.length > 0) {
                 toUploadFiles.current = appContext.sharedFiles;
                 appContext.resetSharedFiles();
-            } else if (props.electronFiles?.length > 0) {
+            } else if (electronFiles?.length > 0) {
                 // File selection from desktop app
-                toUploadFiles.current = props.electronFiles;
-                props.setElectronFiles([]);
+                toUploadFiles.current = electronFiles;
+                setElectronFiles([]);
             }
             const analysisResult = analyseUploadFiles(
                 uploadType.current,
@@ -168,7 +189,7 @@ export default function Uploader(props: Props) {
             );
             props.setLoading(false);
         }
-    }, [props.webFiles, appContext.sharedFiles, props.electronFiles]);
+    }, [webFiles, appContext.sharedFiles, electronFiles]);
 
     const resumeDesktopUpload = async (
         type: UPLOAD_TYPE,
@@ -179,7 +200,7 @@ export default function Uploader(props: Props) {
             isPendingDesktopUpload.current = true;
             pendingDesktopUploadCollectionName.current = collectionName;
             uploadType.current = type;
-            props.setElectronFiles(electronFiles);
+            setElectronFiles(electronFiles);
         }
     };
 
@@ -420,7 +441,7 @@ export default function Uploader(props: Props) {
             zipPaths.current = response.zipPaths;
         }
         if (files?.length > 0) {
-            props.setElectronFiles(files);
+            setElectronFiles(files);
             props.setUploadTypeSelectorView(false);
         }
     };
@@ -456,8 +477,6 @@ export default function Uploader(props: Props) {
     const handleFileUpload = handleUpload(UPLOAD_TYPE.FILES);
     const handleFolderUpload = handleUpload(UPLOAD_TYPE.FOLDERS);
     const handleZipUpload = handleUpload(UPLOAD_TYPE.ZIPS);
-    const closeUploadTypeSelector = () =>
-        props.setUploadTypeSelectorView(false);
 
     return (
         <>
@@ -477,7 +496,7 @@ export default function Uploader(props: Props) {
             />
             <UploadTypeSelector
                 show={props.uploadTypeSelectorView}
-                onHide={closeUploadTypeSelector}
+                onHide={props.closeUploadTypeSelector}
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}
