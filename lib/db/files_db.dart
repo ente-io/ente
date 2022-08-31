@@ -305,7 +305,6 @@ class FilesDB {
         CREATE TABLE IF NOT EXISTS device_files (
           id TEXT NOT NULL,
           path_id TEXT NOT NULL,
-          synced INTEGER NOT NULL DEFAULT 0,
           UNIQUE(id, path_id)
        );
        ''',

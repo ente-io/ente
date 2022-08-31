@@ -319,8 +319,11 @@ extension DeviceFiles on FilesDB {
             orElse: () => null,
           );
           if (deviceCollection.thumbnail == null) {
+            //todo: find another image which is already imported in db for
+            // this collection
             _logger.warning(
-                'Failed to find coverThum for ${deviceCollection.name}');
+              'Failed to find coverThumbnail for ${deviceCollection.name}',
+            );
             continue;
           }
         } else {
