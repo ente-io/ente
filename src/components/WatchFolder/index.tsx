@@ -8,9 +8,9 @@ import constants from 'utils/strings/constants';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
 import { UPLOAD_STRATEGY } from 'constants/upload';
-import { analyseUploadFiles } from 'utils/upload/fs';
+import { analyseUploadFiles } from 'utils/upload';
 import electronFSService from 'services/electron/fs';
-import { UPLOAD_TYPE } from 'types/upload';
+import { UPLOAD_TYPE } from 'constants/upload';
 
 interface Iprops {
     open: boolean;
@@ -44,8 +44,8 @@ export default function WatchFolder({ open, onClose }: Iprops) {
                 setInputFolderPath(path);
                 const files = await electronFSService.getDirFiles(path);
                 const analysisResult = analyseUploadFiles(
-                    files,
-                    UPLOAD_TYPE.FOLDERS
+                    UPLOAD_TYPE.FOLDERS,
+                    files
                 );
                 if (analysisResult.multipleFolders) {
                     setChoiceModalOpen(true);
@@ -69,8 +69,8 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             setInputFolderPath(folderPath);
             const files = await electronFSService.getDirFiles(folderPath);
             const analysisResult = analyseUploadFiles(
-                files,
-                UPLOAD_TYPE.FOLDERS
+                UPLOAD_TYPE.FOLDERS,
+                files
             );
             if (analysisResult.multipleFolders) {
                 setChoiceModalOpen(true);

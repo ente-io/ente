@@ -58,16 +58,15 @@ class UploadManager {
     private filesToBeUploaded: FileWithCollection[];
     private remainingFiles: FileWithCollection[] = [];
     private failedFiles: FileWithCollection[];
-    private existingFilesCollectionWise: Map<number, EnteFile[]>;
+    private collectionToExistingFilesMap: Map<number, EnteFile[]>;
     private existingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
+    private uploadInProgress: boolean;
 
-    async init(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
-        this.existingFiles = await getLocalFiles();
-        this.existingFilesCollectionWise = groupFilesBasedOnCollectionID(
-            this.existingFiles
-        );
+    public async init(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
+        UIService.init(progressUpdater);
+        this.setFiles = setFiles;
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
     }
@@ -83,10 +82,17 @@ class UploadManager {
         >();
     }
 
-    private async prepareForNewUpload(collections: Collection[]) {
+    prepareForNewUpload() {
         this.resetState();
         UIService.reset();
-        uploadCancelService.reset();
+        UIService.setUploadStage(UPLOAD_STAGES.START);
+    }
+
+    async updateExistingFilesAndCollections(collections: Collection[]) {
+        this.existingFiles = await getLocalFiles();
+        this.collectionToExistingFilesMap = groupFilesBasedOnCollectionID(
+            this.existingFiles
+        );
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
         );
@@ -97,7 +103,11 @@ class UploadManager {
         collections: Collection[]
     ) {
         try {
-            await this.prepareForNewUpload(collections);
+            if (this.uploadInProgress) {
+                throw Error("can't run multiple uploads at once");
+            }
+            this.uploadInProgress = true;
+            await this.updateExistingFilesAndCollections(collections);
             addLogLine(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
@@ -123,7 +133,6 @@ class UploadManager {
                     this.metadataAndFileTypeInfoMap
                 );
 
-                UIService.setUploadStage(UPLOAD_STAGES.START);
                 addLogLine(`clusterLivePhotoFiles called`);
 
                 // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
@@ -192,6 +201,7 @@ class UploadManager {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.worker.terminate();
             }
+            this.uploadInProgress = false;
         }
     }
 
@@ -383,13 +393,13 @@ class UploadManager {
             }
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
-            const existingFilesInCollection =
-                this.existingFilesCollectionWise.get(collectionID) ?? [];
+            const collectionExistingFiles =
+                this.collectionToExistingFilesMap.get(collectionID) ?? [];
             const collection = this.collections.get(collectionID);
             fileWithCollection = { ...fileWithCollection, collection };
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
-                existingFilesInCollection,
+                collectionExistingFiles,
                 this.existingFiles,
                 fileWithCollection
             );
@@ -436,6 +446,7 @@ class UploadManager {
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
                     decryptedFile = uploadedFile;
+                    fileUploadResult = UPLOAD_RESULT.UPLOADED;
                     break;
                 case UPLOAD_RESULT.UPLOADED:
                 case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
@@ -448,15 +459,10 @@ class UploadManager {
                     // no-op
                     break;
                 default:
-                    throw Error('Invalid Upload Result');
+                    throw Error('Invalid Upload Result' + fileUploadResult);
             }
             if (decryptedFile) {
                 await this.updateExistingFiles(decryptedFile);
-                this.updateExistingCollections(decryptedFile);
-                await this.watchFolderCallback(
-                    fileWithCollection,
-                    uploadedFile
-                );
                 await this.updateFilePaths(decryptedFile, fileWithCollection);
             }
             return fileUploadResult;
@@ -487,20 +493,29 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    private updateExistingCollections(decryptedFile: EnteFile) {
-        if (!this.existingFilesCollectionWise.has(decryptedFile.collectionID)) {
-            this.existingFilesCollectionWise.set(
+    async retryFailedFiles() {
+        await this.queueFilesForUpload(this.failedFiles, [
+            ...this.collections.values(),
+        ]);
+    }
+
+    private updateExistingFileToCollectionMap(decryptedFile: EnteFile) {
+        if (
+            !this.collectionToExistingFilesMap.has(decryptedFile.collectionID)
+        ) {
+            this.collectionToExistingFilesMap.set(
                 decryptedFile.collectionID,
                 []
             );
         }
-        this.existingFilesCollectionWise
+        this.collectionToExistingFilesMap
             .get(decryptedFile.collectionID)
             .push(decryptedFile);
     }
 
     private async updateExistingFiles(decryptedFile: EnteFile) {
         this.existingFiles.push(decryptedFile);
+        this.updateExistingFileToCollectionMap(decryptedFile);
         this.existingFiles = sortFiles(this.existingFiles);
         await setLocalFiles(this.existingFiles);
         this.setFiles(preservePhotoswipeProps(this.existingFiles));
@@ -527,12 +542,6 @@ class UploadManager {
 
         const updatedFile = await appendNewFilePath(decryptedFile, filePath);
         await updateFileMagicMetadata([updatedFile]);
-    }
-
-    async retryFailedFiles() {
-        await this.queueFilesForUpload(this.failedFiles, [
-            ...this.collections.values(),
-        ]);
     }
 }
 

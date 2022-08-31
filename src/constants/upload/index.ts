@@ -50,6 +50,12 @@ export enum UPLOAD_RESULT {
     CANCELLED,
 }
 
+export enum UPLOAD_TYPE {
+    FILES = 'files',
+    FOLDERS = 'folders',
+    ZIPS = 'zips',
+}
+
 export const MAX_FILE_SIZE_SUPPORTED = 4 * 1024 * 1024 * 1024; // 4 GB
 
 export const LIVE_PHOTO_ASSET_SIZE_LIMIT = 20 * 1024 * 1024; // 20MB
@@ -62,6 +68,11 @@ export const NULL_EXTRACTED_METADATA: ParsedExtractedMetadata = {
 export const A_SEC_IN_MICROSECONDS = 1e6;
 
 export const USE_CF_PROXY = false;
+
+export const NULL_ANALYSIS_RESULT = {
+    suggestedCollectionName: '',
+    multipleFolders: false,
+};
 
 export const BLACK_THUMBNAIL_BASE64 =
     '/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAEBAQEBAQEB' +

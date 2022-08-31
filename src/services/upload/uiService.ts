@@ -78,11 +78,11 @@ class UIService {
     updateProgressBarUI() {
         const {
             setPercentComplete,
-            setUploadCounter: setFileCounter,
+            setUploadCounter,
             setInProgressUploads,
             setFinishedUploads,
         } = this.progressUpdater;
-        setFileCounter({
+        setUploadCounter({
             finished: this.filesUploaded,
             total: this.totalFileCount,
         });

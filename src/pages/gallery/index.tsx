@@ -90,7 +90,6 @@ import { EnteFile } from 'types/file';
 import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Notification from 'components/Notification';
-import { ElectronFile } from 'types/upload';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
@@ -203,8 +202,6 @@ export default function Gallery() {
 
     const showPlanSelectorModal = () => setPlanModalView(true);
 
-    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [webFiles, setWebFiles] = useState([]);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
     const [sidebarView, setSidebarView] = useState(false);
@@ -285,18 +282,6 @@ export default function Gallery() {
         () => notificationAttributes && setNotificationView(true),
         [notificationAttributes]
     );
-
-    useEffect(() => {
-        if (!appContext.watchFolderView) {
-            if (dragAndDropFiles?.length > 0) {
-                setWebFiles(dragAndDropFiles);
-            } else if (folderSelectorFiles?.length > 0) {
-                setWebFiles(folderSelectorFiles);
-            } else if (fileSelectorFiles?.length > 0) {
-                setWebFiles(fileSelectorFiles);
-            }
-        }
-    }, [dragAndDropFiles, fileSelectorFiles, folderSelectorFiles]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -578,7 +563,11 @@ export default function Gallery() {
         setSetSearchResultSummary(null);
     };
 
-    const openUploader = () => setUploadTypeSelectorView(true);
+    const openUploader = () => {
+        if (!uploadInProgress) {
+            setUploadTypeSelectorView(true);
+        }
+    };
 
     return (
         <GalleryContext.Provider
@@ -666,6 +655,10 @@ export default function Gallery() {
                         null,
                         true
                     )}
+                    closeUploadTypeSelector={setUploadTypeSelectorView.bind(
+                        null,
+                        false
+                    )}
                     setCollectionSelectorAttributes={
                         setCollectionSelectorAttributes
                     }
@@ -679,12 +672,10 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     setFiles={setFiles}
                     isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
-                    electronFiles={electronFiles}
-                    setElectronFiles={setElectronFiles}
-                    webFiles={webFiles}
-                    setWebFiles={setWebFiles}
+                    fileSelectorFiles={fileSelectorFiles}
+                    folderSelectorFiles={folderSelectorFiles}
+                    dragAndDropFiles={dragAndDropFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
-                    setUploadTypeSelectorView={setUploadTypeSelectorView}
                     showUploadFilesDialog={openFileSelector}
                     showUploadDirsDialog={openFolderSelector}
                     showSessionExpiredMessage={showSessionExpiredMessage}
