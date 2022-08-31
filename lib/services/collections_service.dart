@@ -630,7 +630,7 @@ class CollectionsService {
     }
   }
 
-  Future<void> linkLocalFileToExistingUploadedFileInAnotherCollection(
+  Future<File> linkLocalFileToExistingUploadedFileInAnotherCollection(
     int destCollectionID, {
     @required File localFileToUpload,
     @required File existingUploadedFile,
@@ -669,9 +669,7 @@ class CollectionsService {
       localFileToUpload.collectionID = destCollectionID;
       localFileToUpload.uploadedFileID = uploadedFileID;
       await _filesDB.insertMultiple([localFileToUpload]);
-      Bus.instance.fire(
-        CollectionUpdatedEvent(destCollectionID, [localFileToUpload]),
-      );
+      return localFileToUpload;
     } catch (e) {
       rethrow;
     }
