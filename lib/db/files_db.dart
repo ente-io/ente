@@ -1128,7 +1128,7 @@ class FilesDB {
     final db = await instance.database;
     final rows = await db.rawQuery(
       '''
-      SELECT COUNT($columnGeneratedID) as count, $columnDeviceFolder
+      SELECT COUNT(DISTINCT($columnLocalID)) as count, $columnDeviceFolder
       FROM $table
       WHERE $columnLocalID IS NOT NULL
       GROUP BY $columnDeviceFolder
