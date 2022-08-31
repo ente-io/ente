@@ -292,7 +292,6 @@ export default function Uploader(props: Props) {
         collections: Collection[]
     ) => {
         try {
-            await props.syncWithRemote(true, true);
             if (isElectron() && !isPendingDesktopUpload.current) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
