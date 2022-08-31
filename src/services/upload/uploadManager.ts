@@ -180,6 +180,9 @@ class UploadManager {
                 if (isElectron()) {
                     ImportService.cancelRemainingUploads();
                 }
+                if (!UIService.hasFilesInResultList()) {
+                    return true;
+                }
             } else {
                 logError(e, 'uploading failed with error');
                 addLogLine(

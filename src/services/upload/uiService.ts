@@ -76,7 +76,19 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    updateProgressBarUI() {
+    hasFilesInResultList() {
+        const finishedUploadsList = segregatedFinishedUploadsToList(
+            this.finishedUploads
+        );
+        for (const x of finishedUploadsList.values()) {
+            if (x.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private updateProgressBarUI() {
         const {
             setPercentComplete,
             setUploadCounter,
@@ -103,10 +115,10 @@ class UIService {
 
         setPercentComplete(percentComplete);
         setInProgressUploads(
-            this.convertInProgressUploadsToList(this.inProgressUploads)
+            convertInProgressUploadsToList(this.inProgressUploads)
         );
         setFinishedUploads(
-            this.segregatedFinishedUploadsToList(this.finishedUploads)
+            segregatedFinishedUploadsToList(this.finishedUploads)
         );
     }
 
@@ -154,28 +166,27 @@ class UIService {
             },
         };
     }
-
-    convertInProgressUploadsToList(inProgressUploads) {
-        return [...inProgressUploads.entries()].map(
-            ([localFileID, progress]) =>
-                ({
-                    localFileID,
-                    progress,
-                } as InProgressUpload)
-        );
-    }
-
-    segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
-        const segregatedFinishedUploads =
-            new Map() as SegregatedFinishedUploads;
-        for (const [localID, result] of finishedUploads) {
-            if (!segregatedFinishedUploads.has(result)) {
-                segregatedFinishedUploads.set(result, []);
-            }
-            segregatedFinishedUploads.get(result).push(localID);
-        }
-        return segregatedFinishedUploads;
-    }
 }
 
 export default new UIService();
+
+function convertInProgressUploadsToList(inProgressUploads) {
+    return [...inProgressUploads.entries()].map(
+        ([localFileID, progress]) =>
+            ({
+                localFileID,
+                progress,
+            } as InProgressUpload)
+    );
+}
+
+function segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
+    const segregatedFinishedUploads = new Map() as SegregatedFinishedUploads;
+    for (const [localID, result] of finishedUploads) {
+        if (!segregatedFinishedUploads.has(result)) {
+            segregatedFinishedUploads.set(result, []);
+        }
+        segregatedFinishedUploads.get(result).push(localID);
+    }
+    return segregatedFinishedUploads;
+}

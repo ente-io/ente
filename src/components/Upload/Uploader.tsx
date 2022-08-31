@@ -307,10 +307,14 @@ export default function Uploader(props: Props) {
                     )
                 );
             }
-            await uploadManager.queueFilesForUpload(
-                filesWithCollectionToUploadIn,
-                collections
-            );
+            const shouldCloseUploadProgress =
+                await uploadManager.queueFilesForUpload(
+                    filesWithCollectionToUploadIn,
+                    collections
+                );
+            if (shouldCloseUploadProgress) {
+                closeUploadProgress();
+            }
         } catch (err) {
             showUserFacingError(err.message);
             closeUploadProgress();
