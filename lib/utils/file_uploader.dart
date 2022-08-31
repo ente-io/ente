@@ -32,6 +32,7 @@ import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tuple/tuple.dart';
 
 class FileUploader {
   static const kMaximumConcurrentUploads = 4;
@@ -109,6 +110,8 @@ class FileUploader {
     });
   }
 
+  // upload future will return null as File when the file entry is deleted
+  // locally because it's already present in the destination collection.
   Future<File> upload(File file, int collectionID) {
     // If the file hasn't been queued yet, queue it
     _totalCountInUploadSession++;
@@ -126,10 +129,25 @@ class FileUploader {
       _totalCountInUploadSession--;
       return item.completer.future;
     }
-
+    debugPrint(
+      "Wait on another upload on same local ID to finish before "
+      "adding it to new collection",
+    );
     // Else wait for the existing upload to complete,
     // and add it to the relevant collection
     return item.completer.future.then((uploadedFile) {
+      // If the fileUploader completer returned null,
+      _logger.info(
+        "original upload completer resolved, try adding the file to another "
+        "collection",
+      );
+      if (uploadedFile == null) {
+        /* todo: handle this case, ideally during next sync the localId
+          should be uploaded to this collection ID
+         */
+        _logger.severe('unexpected upload state');
+        return null;
+      }
       return CollectionsService.instance
           .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
         return uploadedFile;
@@ -318,18 +336,21 @@ class FileUploader {
         key = decryptFileKey(file);
       } else {
         key = null;
-        // check if the file is already uploaded and can be mapping to existing
-        // stuff
-        final isMappedToExistingUpload = await _mapToExistingUploadWithSameHash(
+        // check if the file is already uploaded and can be mapped to existing
+        // uploaded file. If map is found, it also returns the corresponding
+        // mapped or update file entry.
+        final result = await _mapToExistingUploadWithSameHash(
           mediaUploadData,
           file,
           collectionID,
         );
+        final isMappedToExistingUpload = result.item1;
         if (isMappedToExistingUpload) {
           debugPrint(
             "File success mapped to existing uploaded ${file.toString()}",
           );
-          return file;
+          // return the mapped file
+          return result.item2;
         }
       }
 
@@ -464,16 +485,18 @@ class FileUploader {
     different from the {fileToUpload}, then most probably device has
     duplicate files.
   */
-  Future<bool> _mapToExistingUploadWithSameHash(
+  Future<Tuple2<bool, File>> _mapToExistingUploadWithSameHash(
     MediaUploadData mediaUploadData,
     File fileToUpload,
     int toCollectionID,
   ) async {
     if (fileToUpload.uploadedFileID != null) {
+      // ideally this should never happen, but because the code below this case
+      // can do unexpected mapping, we are adding this additional check
       _logger.severe(
         'Critical: file is already uploaded, skipped mapping',
       );
-      return false;
+      return Tuple2(false, fileToUpload);
     }
 
     final List<File> existingUploadedFiles =
@@ -483,7 +506,8 @@ class FileUploader {
       Configuration.instance.getUserID(),
     );
     if (existingUploadedFiles?.isEmpty ?? true) {
-      return false;
+      // continueUploading this file
+      return Tuple2(false, fileToUpload);
     } else {
       debugPrint("Found some matches");
     }
@@ -500,7 +524,7 @@ class FileUploader {
       );
       // should delete the fileToUploadEntry
       await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
-      return true;
+      return Tuple2(true, sameLocalSameCollection);
     }
 
     // case b
@@ -519,7 +543,7 @@ class FileUploader {
       fileMissingLocalButSameCollection.localID = fileToUpload.localID;
       await FilesDB.instance.insert(fileMissingLocalButSameCollection);
       await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
-      return true;
+      return Tuple2(true, fileMissingLocalButSameCollection);
     }
 
     // case c and d
@@ -533,16 +557,16 @@ class FileUploader {
         "fileExistsButDifferentCollection: \n toUpload  ${fileToUpload.tag()} "
         "\n existing: ${fileExistsButDifferentCollection.tag()}",
       );
-      await CollectionsService.instance
+      final linkedFile = await CollectionsService.instance
           .linkLocalFileToExistingUploadedFileInAnotherCollection(
         toCollectionID,
         localFileToUpload: fileToUpload,
         existingUploadedFile: fileExistsButDifferentCollection,
       );
-      return true;
+      return Tuple2(true, linkedFile);
     }
     // case e
-    return false;
+    return Tuple2(false, fileToUpload);
   }
 
   Future<void> _onUploadDone(
