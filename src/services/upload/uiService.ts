@@ -119,9 +119,9 @@ class UIService {
         const cancelTimedOutRequest = () =>
             cancel.exec(CustomError.REQUEST_TIMEOUT);
 
-        const cancelCancelledUploadRequest = () => {
+        const cancelCancelledUploadRequest = () =>
             cancel.exec(CustomError.UPLOAD_CANCELLED);
-        };
+
         let timeout = null;
         const resetTimeout = () => {
             if (timeout) {
