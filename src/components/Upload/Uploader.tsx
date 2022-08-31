@@ -455,7 +455,7 @@ export default function Uploader(props: Props) {
         }
     };
 
-    const cancelUploads = async () => {
+    const cancelUploads = () => {
         uploadManager.cancelRunningUpload();
     };
 

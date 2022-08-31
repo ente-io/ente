@@ -14,6 +14,7 @@ import { Canceler } from 'axios';
 import { CustomError } from 'utils/error';
 import uploadCancelService from './uploadCancelService';
 
+const REQUEST_TIMEOUT_TIME = 30 * 1000; // 30 sec;
 class UIService {
     private perFileProgress: number;
     private filesUploaded: number;
@@ -115,20 +116,18 @@ class UIService {
         index = 0
     ) {
         const cancel: { exec: Canceler } = { exec: () => {} };
+        const cancelTimedOutRequest = () =>
+            cancel.exec(CustomError.REQUEST_TIMEOUT);
+
+        const cancelCancelledUploadRequest = () => {
+            cancel.exec(CustomError.UPLOAD_CANCELLED);
+        };
         let timeout = null;
         const resetTimeout = () => {
             if (timeout) {
                 clearTimeout(timeout);
             }
-            timeout = setTimeout(
-                () => cancel.exec(CustomError.REQUEST_TIMEOUT),
-                30 * 1000
-            );
-        };
-        const cancelIfUploadPaused = () => {
-            if (uploadCancelService.isUploadCancelationRequested()) {
-                cancel.exec(CustomError.UPLOAD_CANCELLED);
-            }
+            timeout = setTimeout(cancelTimedOutRequest, REQUEST_TIMEOUT_TIME);
         };
         return {
             cancel,
@@ -149,7 +148,9 @@ class UIService {
                 } else {
                     resetTimeout();
                 }
-                cancelIfUploadPaused();
+                if (uploadCancelService.isUploadCancelationRequested()) {
+                    cancelCancelledUploadRequest;
+                }
             },
         };
     }

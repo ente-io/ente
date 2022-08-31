@@ -174,8 +174,6 @@ class UploadManager {
 
                 await this.uploadMediaFiles(allFiles);
             }
-            UIService.setUploadStage(UPLOAD_STAGES.FINISH);
-            UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
                 if (isElectron()) {
@@ -210,7 +208,6 @@ class UploadManager {
                     if (uploadCancelService.isUploadCancelationRequested()) {
                         throw Error(CustomError.UPLOAD_CANCELLED);
                     }
-
                     addLogLine(
                         `parsing metadata json file ${getFileNameSize(file)}`
                     );
@@ -236,8 +233,8 @@ class UploadManager {
                     if (e.message === CustomError.UPLOAD_CANCELLED) {
                         throw e;
                     } else {
+                        // and don't break for subsequent files just log and move on
                         logError(e, 'parsing failed for a file');
-                        // and don't break for subsequent files
                     }
                     addLogLine(
                         `failed to parse metadata json file ${getFileNameSize(
@@ -283,8 +280,8 @@ class UploadManager {
                     if (e.message === CustomError.UPLOAD_CANCELLED) {
                         throw e;
                     } else {
+                        // and don't break for subsequent files just log and move on
                         logError(e, 'extractFileTypeAndMetadata failed');
-                        // and don't break for subsequent files
                     }
                     addLogLine(
                         `metadata extraction failed ${getFileNameSize(

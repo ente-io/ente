@@ -129,7 +129,6 @@ export default async function uploader(
                 fileFormat: fileTypeInfo?.exactType,
             });
         }
-
         const error = handleUploadError(e);
         switch (error.message) {
             case CustomError.UPLOAD_CANCELLED:
