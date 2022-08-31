@@ -154,7 +154,7 @@ class LocalSyncService {
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
     final invalidIDs = _getInvalidFileIDs().toSet();
-    final localUnSyncResult = await getLocalUnSyncedFiles(
+    final localDiffResult = await getDiffWithLocal(
       localAssets,
       existingLocalFileIDs,
       pathToLocalIDs,
@@ -162,25 +162,24 @@ class LocalSyncService {
       _computer,
     );
     bool hasAnyMappingChanged = false;
-    if (localUnSyncResult.newPathToLocalIDs?.isNotEmpty ?? false) {
-      await _db
-          .insertPathIDToLocalIDMapping(localUnSyncResult.newPathToLocalIDs);
+    if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
+      await _db.insertPathIDToLocalIDMapping(localDiffResult.newPathToLocalIDs);
       hasAnyMappingChanged = true;
     }
-    if (localUnSyncResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
+    if (localDiffResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
       await _db
-          .deletePathIDToLocalIDMapping(localUnSyncResult.deletePathToLocalIDs);
+          .deletePathIDToLocalIDMapping(localDiffResult.deletePathToLocalIDs);
       hasAnyMappingChanged = true;
     }
     final bool hasUnsyncedFiles =
-        localUnSyncResult.uniqueLocalFiles?.isNotEmpty ?? false;
+        localDiffResult.uniqueLocalFiles?.isNotEmpty ?? false;
     if (hasUnsyncedFiles) {
       await _db.insertMultiple(
-        localUnSyncResult.uniqueLocalFiles,
+        localDiffResult.uniqueLocalFiles,
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
       _logger.info(
-        "Inserted ${localUnSyncResult.uniqueLocalFiles.length} "
+        "Inserted ${localDiffResult.uniqueLocalFiles.length} "
         "un-synced files",
       );
     }
@@ -190,7 +189,7 @@ class LocalSyncService {
     );
     if (hasAnyMappingChanged || hasUnsyncedFiles) {
       Bus.instance.fire(
-        LocalPhotosUpdatedEvent(localUnSyncResult.uniqueLocalFiles),
+        LocalPhotosUpdatedEvent(localDiffResult.uniqueLocalFiles),
       );
     }
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
