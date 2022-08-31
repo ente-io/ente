@@ -149,7 +149,7 @@ class UIService {
                     resetTimeout();
                 }
                 if (uploadCancelService.isUploadCancelationRequested()) {
-                    cancelCancelledUploadRequest;
+                    cancelCancelledUploadRequest();
                 }
             },
         };
