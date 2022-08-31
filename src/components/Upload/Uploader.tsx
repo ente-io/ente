@@ -55,7 +55,6 @@ interface Props {
     setFiles: SetFiles;
     isFirstUpload: boolean;
     uploadTypeSelectorView: boolean;
-    setUploadTypeSelectorView: (open: boolean) => void;
     showSessionExpiredMessage: () => void;
     showUploadFilesDialog: () => void;
     showUploadDirsDialog: () => void;
@@ -441,7 +440,7 @@ export default function Uploader(props: Props) {
         }
         if (files?.length > 0) {
             setElectronFiles(files);
-            props.setUploadTypeSelectorView(false);
+            props.closeUploadTypeSelector();
         }
     };
 

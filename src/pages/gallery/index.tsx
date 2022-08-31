@@ -675,7 +675,6 @@ export default function Gallery() {
                     folderSelectorFiles={folderSelectorFiles}
                     dragAndDropFiles={dragAndDropFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
-                    setUploadTypeSelectorView={setUploadTypeSelectorView}
                     showUploadFilesDialog={openFileSelector}
                     showUploadDirsDialog={openFolderSelector}
                     showSessionExpiredMessage={showSessionExpiredMessage}
