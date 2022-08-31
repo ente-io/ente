@@ -310,7 +310,7 @@ class FilesDB {
        );
        ''',
       '''
-       CREATE TABLE IF NOT EXISTS device_path_collections (
+       CREATE TABLE IF NOT EXISTS device_collections (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT,
           modified_at INTEGER NOT NULL DEFAULT 0,

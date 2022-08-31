@@ -12,7 +12,7 @@ class DeviceFolder {
   );
 }
 
-class DevicePathCollection {
+class DeviceCollection {
   final String id;
   final String name;
   final String path;
@@ -22,7 +22,7 @@ class DevicePathCollection {
   int collectionID;
   File thumbnail;
 
-  DevicePathCollection(
+  DeviceCollection(
     this.id,
     this.name, {
     this.path,

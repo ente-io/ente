@@ -15,17 +15,17 @@ import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
 class DeviceFolderPage extends StatelessWidget {
-  final DevicePathCollection devicePathCollection;
+  final DeviceCollection deviceCollection;
   final _selectedFiles = SelectedFiles();
 
-  DeviceFolderPage(this.devicePathCollection, {Key key}) : super(key: key);
+  DeviceFolderPage(this.deviceCollection, {Key key}) : super(key: key);
 
   @override
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInDevicePathCollection(
-          devicePathCollection,
+        return FilesDB.instance.getFilesInDeviceCollection(
+          deviceCollection,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -37,21 +37,21 @@ class DeviceFolderPage extends StatelessWidget {
         EventType.deletedFromDevice,
         EventType.deletedFromEverywhere,
       },
-      tagPrefix: "device_folder:" + devicePathCollection.name,
+      tagPrefix: "device_folder:" + deviceCollection.name,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
-          ? BackupConfigurationHeaderWidget(devicePathCollection)
+          ? BackupConfigurationHeaderWidget(deviceCollection)
           : const SizedBox.shrink(),
-      initialFiles: [devicePathCollection.thumbnail],
+      initialFiles: [deviceCollection.thumbnail],
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           GalleryType.localFolder,
-          devicePathCollection.name,
+          deviceCollection.name,
           _selectedFiles,
-          devicePathCollection: devicePathCollection,
+          deviceCollection: deviceCollection,
         ),
       ),
       body: Stack(
@@ -69,9 +69,9 @@ class DeviceFolderPage extends StatelessWidget {
 }
 
 class BackupConfigurationHeaderWidget extends StatefulWidget {
-  final DevicePathCollection devicePathCollection;
+  final DeviceCollection deviceCollection;
 
-  const BackupConfigurationHeaderWidget(this.devicePathCollection, {Key key})
+  const BackupConfigurationHeaderWidget(this.deviceCollection, {Key key})
       : super(key: key);
 
   @override
@@ -85,7 +85,7 @@ class _BackupConfigurationHeaderWidgetState
 
   @override
   void initState() {
-    _isBackedUp = widget.devicePathCollection.sync;
+    _isBackedUp = widget.deviceCollection.sync;
     super.initState();
   }
 
@@ -113,7 +113,7 @@ class _BackupConfigurationHeaderWidgetState
             value: _isBackedUp,
             onChanged: (value) async {
               await FilesDB.instance.updateDevicePathSyncStatus(
-                {widget.devicePathCollection.id: value},
+                {widget.deviceCollection.id: value},
               );
               _isBackedUp = value;
               setState(() {});

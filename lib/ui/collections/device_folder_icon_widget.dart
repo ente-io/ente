@@ -5,9 +5,9 @@ import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class DeviceFolderIcon extends StatelessWidget {
-  final DevicePathCollection devicePathCollection;
+  final DeviceCollection deviceCollection;
   const DeviceFolderIcon(
-    this.devicePathCollection, {
+    this.deviceCollection, {
     Key key,
   }) : super(key: key);
 
@@ -38,7 +38,7 @@ class DeviceFolderIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBackedUp = devicePathCollection.sync;
+    final isBackedUp = deviceCollection.sync;
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -54,17 +54,17 @@ class DeviceFolderIcon extends StatelessWidget {
                   width: 120,
                   child: Hero(
                     tag: "device_folder:" +
-                        devicePathCollection.name +
-                        devicePathCollection.thumbnail.tag(),
+                        deviceCollection.name +
+                        deviceCollection.thumbnail.tag(),
                     child: Stack(
                       children: [
                         ThumbnailWidget(
-                          devicePathCollection.thumbnail,
+                          deviceCollection.thumbnail,
                           shouldShowSyncStatus: false,
                           key: Key(
                             "device_folder:" +
-                                devicePathCollection.name +
-                                devicePathCollection.thumbnail.tag(),
+                                deviceCollection.name +
+                                deviceCollection.thumbnail.tag(),
                           ),
                         ),
                         isBackedUp ? Container() : kUnsyncedIconOverlay,
@@ -76,7 +76,7 @@ class DeviceFolderIcon extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
-                  devicePathCollection.name,
+                  deviceCollection.name,
                   style: Theme.of(context)
                       .textTheme
                       .subtitle1
@@ -89,7 +89,7 @@ class DeviceFolderIcon extends StatelessWidget {
         ),
       ),
       onTap: () {
-        routeToPage(context, DeviceFolderPage(devicePathCollection));
+        routeToPage(context, DeviceFolderPage(deviceCollection));
       },
     );
   }

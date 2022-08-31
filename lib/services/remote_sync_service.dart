@@ -223,42 +223,40 @@ class RemoteSyncService {
   }
 
   Future<void> _syncDeviceCollectionFilesForUpload() async {
-    final devicePathCollections =
-        await FilesDB.instance.getDevicePathCollections();
-    devicePathCollections.removeWhere((element) => !element.sync);
-    await _createCollectionsForDevicePath(devicePathCollections);
+    final deviceCollections = await FilesDB.instance.getDeviceCollections();
+    deviceCollections.removeWhere((element) => !element.sync);
+    await _createCollectionsForDevicePath(deviceCollections);
   }
 
   Future<void> _createCollectionsForDevicePath(
-    List<DevicePathCollection> devicePathCollections,
+    List<DeviceCollection> deviceCollections,
   ) async {
-    for (var devicePathCollection in devicePathCollections) {
-      int deviceCollectionID = devicePathCollection.collectionID;
+    for (var deviceCollection in deviceCollections) {
+      int deviceCollectionID = deviceCollection.collectionID;
       if (deviceCollectionID != -1) {
         final collectionByID =
             CollectionsService.instance.getCollectionByID(deviceCollectionID);
         if (collectionByID == null || collectionByID.isDeleted) {
           _logger.info(
             "Collection $deviceCollectionID either deleted or missing "
-            "for path ${devicePathCollection.name}",
+            "for path ${deviceCollection.name}",
           );
           deviceCollectionID = -1;
         }
       }
       if (deviceCollectionID == -1) {
         final collection = await CollectionsService.instance
-            .getOrCreateForPath(devicePathCollection.name);
+            .getOrCreateForPath(deviceCollection.name);
         await FilesDB.instance
-            .updateDevicePathCollection(devicePathCollection.id, collection.id);
-        devicePathCollection.collectionID = collection.id;
+            .updateDeviceCollection(deviceCollection.id, collection.id);
+        deviceCollection.collectionID = collection.id;
       }
     }
   }
 
   Future<List<File>> _getFilesToBeUploaded() async {
-    final devicePathCollections =
-        await FilesDB.instance.getDevicePathCollections();
-    devicePathCollections.removeWhere((element) => !element.sync);
+    final deviceCollections = await FilesDB.instance.getDeviceCollections();
+    deviceCollections.removeWhere((element) => !element.sync);
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&

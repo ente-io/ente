@@ -92,8 +92,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
     final List<DeviceFolder> folders = [];
-    final List<DevicePathCollection> devicePathCollections =
-        await filesDB.getDevicePathCollections();
+    final List<DeviceCollection> deviceCollections =
+        await filesDB.getDeviceCollections();
     final latestLocalFiles = await filesDB.getLatestLocalFiles();
     for (final file in latestLocalFiles) {
       folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));
@@ -126,7 +126,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         }
       },
     );
-    return CollectionItems(devicePathCollections, collectionsWithThumbnail);
+    return CollectionItems(deviceCollections, collectionsWithThumbnail);
   }
 
   Widget _getCollectionsGalleryWidget(CollectionItems items) {
@@ -160,12 +160,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               ],
             ),
             const SizedBox(height: 12),
-            items.devicePathCollections.isEmpty
+            items.deviceCollections.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.all(22),
                     child: EmptyState(),
                   )
-                : DeviceFoldersGridViewWidget(items.devicePathCollections),
+                : DeviceFoldersGridViewWidget(items.deviceCollections),
             const Padding(padding: EdgeInsets.all(4)),
             const Divider(),
             Row(

@@ -32,9 +32,9 @@ import 'package:photos/utils/toast_util.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
-  final DevicePathCollection devicePathCollection;
+  final DeviceCollection deviceCollection;
 
-  const SharingDialog(this.collection, {Key key, this.devicePathCollection})
+  const SharingDialog(this.collection, {Key key, this.deviceCollection})
       : super(key: key);
 
   @override
@@ -127,10 +127,10 @@ class _SharingDialogState extends State<SharingDialog> {
                     // Add local folder in backup patch before creating
                     // sharable link
                     if (widget.collection.type == CollectionType.folder) {
-                      if (widget.devicePathCollection != null &&
-                          !widget.devicePathCollection.sync) {
+                      if (widget.deviceCollection != null &&
+                          !widget.deviceCollection.sync) {
                         await FilesDB.instance.updateDevicePathSyncStatus(
-                          {widget.devicePathCollection.id: true},
+                          {widget.deviceCollection.id: true},
                         );
                         Bus.instance.fire(BackupFoldersUpdatedEvent());
                       }
@@ -252,7 +252,8 @@ class _SharingDialogState extends State<SharingDialog> {
     final String collectionKey = Base58Encode(
       CollectionsService.instance.getCollectionKey(widget.collection.id),
     );
-    final String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
+    final String url =
+        "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -412,10 +413,10 @@ class _SharingDialogState extends State<SharingDialog> {
       final collection = widget.collection;
       try {
         if (collection.type == CollectionType.folder) {
-          if (widget.devicePathCollection != null &&
-              !widget.devicePathCollection.sync) {
+          if (widget.deviceCollection != null &&
+              !widget.deviceCollection.sync) {
             await FilesDB.instance.updateDevicePathSyncStatus(
-              {widget.devicePathCollection.id: true},
+              {widget.deviceCollection.id: true},
             );
             Bus.instance.fire(BackupFoldersUpdatedEvent());
           }
