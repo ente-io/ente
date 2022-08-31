@@ -1,12 +1,17 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import SidebarButton from './Button';
 import constants from 'utils/strings/constants';
-import { initiateEmail } from 'utils/common';
 import { logoutUser } from 'services/userService';
 import { AppContext } from 'pages/_app';
+import DeleteAccountModal from 'components/DeleteAccountModal';
 
 export default function ExitSection() {
     const { setDialogMessage } = useContext(AppContext);
+
+    const [deleteAccountModalView, setDeleteAccountModalView] = useState(true);
+
+    const closeDeleteAccountModal = () => setDeleteAccountModalView(false);
+    const openDeleteAccountModal = () => setDeleteAccountModalView(true);
 
     const confirmLogout = () => {
         setDialogMessage({
@@ -20,29 +25,18 @@ export default function ExitSection() {
         });
     };
 
-    const showDeleteAccountDirections = () => {
-        setDialogMessage({
-            title: constants.DELETE_ACCOUNT,
-            content: constants.DELETE_ACCOUNT_MESSAGE(),
-            proceed: {
-                text: constants.DELETE,
-                action: () => {
-                    initiateEmail('account-deletion@ente.io');
-                },
-                variant: 'danger',
-            },
-            close: { text: constants.CANCEL },
-        });
-    };
-
     return (
         <>
             <SidebarButton onClick={confirmLogout} color="danger">
                 {constants.LOGOUT}
             </SidebarButton>
-            <SidebarButton onClick={showDeleteAccountDirections} color="danger">
+            <SidebarButton onClick={openDeleteAccountModal} color="danger">
                 {constants.DELETE_ACCOUNT}
             </SidebarButton>
+            <DeleteAccountModal
+                open={deleteAccountModalView}
+                onClose={closeDeleteAccountModal}
+            />
         </>
     );
 }
