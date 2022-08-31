@@ -79,6 +79,7 @@ class UploadManager {
     prepareForNewUpload() {
         this.resetState();
         UIService.reset();
+        uploadCancelService.reset();
         UIService.setUploadStage(UPLOAD_STAGES.START);
     }
 
