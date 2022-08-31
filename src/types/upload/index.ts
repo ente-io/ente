@@ -1,4 +1,3 @@
-import {} from './../../constants/upload/index';
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
 import { fileAttribute } from 'types/file';
