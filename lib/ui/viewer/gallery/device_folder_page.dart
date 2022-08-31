@@ -85,7 +85,7 @@ class _BackupConfigurationHeaderWidgetState
 
   @override
   void initState() {
-    _isBackedUp = widget.deviceCollection.sync;
+    _isBackedUp = widget.deviceCollection.shouldBackup;
     super.initState();
   }
 

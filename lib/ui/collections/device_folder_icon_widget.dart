@@ -38,7 +38,7 @@ class DeviceFolderIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBackedUp = deviceCollection.sync;
+    final isBackedUp = deviceCollection.shouldBackup;
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),

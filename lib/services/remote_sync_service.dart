@@ -224,7 +224,7 @@ class RemoteSyncService {
 
   Future<void> _syncDeviceCollectionFilesForUpload() async {
     final deviceCollections = await FilesDB.instance.getDeviceCollections();
-    deviceCollections.removeWhere((element) => !element.sync);
+    deviceCollections.removeWhere((element) => !element.shouldBackup);
     await _createCollectionsForDevicePath(deviceCollections);
   }
 
@@ -256,7 +256,7 @@ class RemoteSyncService {
 
   Future<List<File>> _getFilesToBeUploaded() async {
     final deviceCollections = await FilesDB.instance.getDeviceCollections();
-    deviceCollections.removeWhere((element) => !element.sync);
+    deviceCollections.removeWhere((element) => !element.shouldBackup);
     final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&

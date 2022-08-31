@@ -148,7 +148,7 @@ extension DeviceFiles on FilesDB {
             {
               "id": localPathAsset.pathID,
               "name": localPathAsset.pathName,
-              "sync": autoSync ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": autoSync ? _sqlBoolTrue : _sqlBoolFalse
             },
             conflictAlgorithm: ConflictAlgorithm.ignore,
           );
@@ -165,7 +165,7 @@ extension DeviceFiles on FilesDB {
 
   Future<bool> updateDeviceCoverWithCount(
     List<Tuple2<AssetPathEntity, String>> devicePathInfo, {
-    bool autoSync = false,
+    bool shouldBackup = false,
   }) async {
     bool hasUpdated = false;
     try {
@@ -190,7 +190,7 @@ extension DeviceFiles on FilesDB {
               "name": pathEntity.name,
               "count": pathEntity.assetCount,
               "cover_id": localID,
-              "sync": autoSync ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse
             },
           );
         }
@@ -234,7 +234,7 @@ extension DeviceFiles on FilesDB {
       batch.update(
         "device_collections",
         {
-          "sync": e.value ? _sqlBoolTrue : _sqlBoolFalse,
+          "should_backup": e.value ? _sqlBoolTrue : _sqlBoolFalse,
         },
         where: 'id = ?',
         whereArgs: [pathID],
@@ -303,7 +303,7 @@ extension DeviceFiles on FilesDB {
           count: row['count'],
           collectionID: row["collection_id"],
           coverId: row["cover_id"],
-          sync: (row["sync"] ?? _sqlBoolFalse) == _sqlBoolTrue,
+          shouldBackup: (row["should_backup"] ?? _sqlBoolFalse) == _sqlBoolTrue,
         );
         deviceCollection.thumbnail = files.firstWhere(
           (element) => element.localID == deviceCollection.coverId,

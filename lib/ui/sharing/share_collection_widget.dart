@@ -128,7 +128,7 @@ class _SharingDialogState extends State<SharingDialog> {
                     // sharable link
                     if (widget.collection.type == CollectionType.folder) {
                       if (widget.deviceCollection != null &&
-                          !widget.deviceCollection.sync) {
+                          !widget.deviceCollection.shouldBackup) {
                         await FilesDB.instance.updateDevicePathSyncStatus(
                           {widget.deviceCollection.id: true},
                         );
@@ -414,7 +414,7 @@ class _SharingDialogState extends State<SharingDialog> {
       try {
         if (collection.type == CollectionType.folder) {
           if (widget.deviceCollection != null &&
-              !widget.deviceCollection.sync) {
+              !widget.deviceCollection.shouldBackup) {
             await FilesDB.instance.updateDevicePathSyncStatus(
               {widget.deviceCollection.id: true},
             );

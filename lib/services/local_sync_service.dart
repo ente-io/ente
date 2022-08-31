@@ -136,7 +136,7 @@ class LocalSyncService {
         await getDeviceFolderWithCountAndCoverID();
     return await _db.updateDeviceCoverWithCount(
       result,
-      autoSync: Configuration.instance.hasSelectedAllFoldersForBackup(),
+      shouldBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
   }
 

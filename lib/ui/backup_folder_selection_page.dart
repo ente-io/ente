@@ -51,7 +51,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         });
         for (final file in _deviceCollections) {
           _allDevicePathIDs.add(file.id);
-          if (file.sync) {
+          if (file.shouldBackup) {
             _selectedDevicePathIDs.add(file.id);
           }
         }

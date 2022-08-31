@@ -18,7 +18,7 @@ class DeviceCollection {
   final String path;
   final String coverId;
   final int count;
-  final bool sync;
+  final bool shouldBackup;
   int collectionID;
   File thumbnail;
 
@@ -30,6 +30,6 @@ class DeviceCollection {
     this.count,
     this.collectionID,
     this.thumbnail,
-    this.sync = false,
+    this.shouldBackup = false,
   });
 }
