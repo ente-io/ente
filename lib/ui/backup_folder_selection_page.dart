@@ -41,7 +41,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
 
   @override
   void initState() {
-    FilesDB.instance.getDeviceCollections().then((files) async {
+    FilesDB.instance
+        .getDeviceCollections(includeCoverThumbnail: true)
+        .then((files) async {
       _pathIDToItemCount =
           await FilesDB.instance.getDevicePathIDToImportedFileCount();
       setState(() {

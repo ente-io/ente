@@ -93,7 +93,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final userID = Configuration.instance.getUserID();
     final List<DeviceFolder> folders = [];
     final List<DeviceCollection> deviceCollections =
-        await filesDB.getDeviceCollections();
+        await filesDB.getDeviceCollections(includeCoverThumbnail: true);
     final latestLocalFiles = await filesDB.getLatestLocalFiles();
     for (final file in latestLocalFiles) {
       folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));

@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -283,15 +284,22 @@ extension DeviceFiles on FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
-  Future<List<DeviceCollection>> getDeviceCollections() async {
-    debugPrint("Fetching DeviceCollections From DB");
+  Future<List<DeviceCollection>> getDeviceCollections({
+    bool includeCoverThumbnail = false,
+  }) async {
+    debugPrint(
+        "Fetching DeviceCollections From DB with thumnail = $includeCoverThumbnail");
     try {
       final db = await database;
-      final fileRows = await db.rawQuery(
-        '''SELECT * FROM FILES where local_id in (select cover_id from device_collections) group by local_id;
+      final coverFiles = <File>[];
+      if (includeCoverThumbnail) {
+        final fileRows = await db.rawQuery(
+          '''SELECT * FROM FILES where local_id in (select cover_id from device_collections) group by local_id;
           ''',
-      );
-      final files = convertToFiles(fileRows);
+        );
+        final files = convertToFiles(fileRows);
+        coverFiles.addAll(files);
+      }
       final deviceCollectionRows = await db.rawQuery(
         '''SELECT * from device_collections''',
       );
@@ -305,11 +313,19 @@ extension DeviceFiles on FilesDB {
           coverId: row["cover_id"],
           shouldBackup: (row["should_backup"] ?? _sqlBoolFalse) == _sqlBoolTrue,
         );
-        deviceCollection.thumbnail = files.firstWhere(
-          (element) => element.localID == deviceCollection.coverId,
-          orElse: () => null,
-        );
-        deviceCollections.add(deviceCollection);
+        if (includeCoverThumbnail) {
+          deviceCollection.thumbnail = coverFiles.firstWhere(
+            (element) => element.localID == deviceCollection.coverId,
+            orElse: () => null,
+          );
+          if (deviceCollection.thumbnail == null) {
+            _logger.warning(
+                'Failed to find coverThum for ${deviceCollection.name}');
+            continue;
+          }
+        } else {
+          deviceCollections.add(deviceCollection);
+        }
       }
       return deviceCollections;
     } catch (e) {
