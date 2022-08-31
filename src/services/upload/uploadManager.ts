@@ -180,9 +180,6 @@ class UploadManager {
                 if (isElectron()) {
                     ImportService.cancelRemainingUploads();
                 }
-                if (!UIService.hasFilesInResultList()) {
-                    return true;
-                }
             } else {
                 logError(e, 'uploading failed with error');
                 addLogLine(
@@ -198,6 +195,16 @@ class UploadManager {
                 this.cryptoWorkers[i]?.worker.terminate();
             }
             this.uploadInProgress = false;
+        }
+        try {
+            if (!UIService.hasFilesInResultList()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            logError(e, ' failed to return shouldCloseProgressBar');
+            return false;
         }
     }
 
