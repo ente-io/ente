@@ -422,7 +422,7 @@ class UploadManager {
         }
     }
 
-    async getFailedFilesWithCollection() {
+    async getFailedFilesWithCollections() {
         return {
             files: this.failedFiles,
             collections: [...this.collections.values()],
