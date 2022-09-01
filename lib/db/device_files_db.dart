@@ -90,16 +90,9 @@ extension DeviceFiles on FilesDB {
     }
   }
 
-  Future<Map<String, Set<String>>> getDevicePathIDToLocalIDMap({
-    bool syncStatus,
-  }) async {
+  Future<Map<String, Set<String>>> getDevicePathIDToLocalIDMap() async {
     try {
       final db = await database;
-      String query = 'SELECT id, path_id FROM device_files';
-      if (syncStatus != null) {
-        query =
-            'SELECT id, path_id FROM device_files where synced = ${syncStatus ? _sqlBoolTrue : _sqlBoolFalse} ;';
-      }
       final rows = await db.rawQuery(
         ''' SELECT id, path_id FROM device_files; ''',
       );
@@ -338,9 +331,8 @@ extension DeviceFiles on FilesDB {
             );
             continue;
           }
-        } else {
-          deviceCollections.add(deviceCollection);
         }
+        deviceCollections.add(deviceCollection);
       }
       return deviceCollections;
     } catch (e) {

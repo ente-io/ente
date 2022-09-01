@@ -498,6 +498,7 @@ class FileUploader {
       );
       return Tuple2(false, fileToUpload);
     }
+
     final List<File> existingUploadedFiles =
         await FilesDB.instance.getUploadedFilesWithHashes(
       mediaUploadData.hashData,
