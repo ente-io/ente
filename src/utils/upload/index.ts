@@ -1,5 +1,5 @@
 import {
-    AnalysisResult,
+    ImportSuggestion,
     ElectronFile,
     FileWithCollection,
     Metadata,
@@ -7,7 +7,7 @@ import {
 import { EnteFile } from 'types/file';
 import {
     A_SEC_IN_MICROSECONDS,
-    NULL_ANALYSIS_RESULT,
+    DEFAULT_IMPORT_SUGGESTION,
     UPLOAD_TYPE,
 } from 'constants/upload';
 import { FILE_TYPE } from 'constants/file';
@@ -132,12 +132,12 @@ export function areFileWithCollectionsSame(
     return firstFile.localID === secondFile.localID;
 }
 
-export function analyseUploadFiles(
+export function getImportSuggestion(
     uploadType: UPLOAD_TYPE,
     toUploadFiles: File[] | ElectronFile[]
-): AnalysisResult {
+): ImportSuggestion {
     if (isElectron() && uploadType === UPLOAD_TYPE.FILES) {
-        return NULL_ANALYSIS_RESULT;
+        return DEFAULT_IMPORT_SUGGESTION;
     }
 
     const paths: string[] = toUploadFiles.map((file) => file['path']);
@@ -165,8 +165,8 @@ export function analyseUploadFiles(
         }
     }
     return {
-        suggestedCollectionName: commonPathPrefix || null,
-        multipleFolders: firstFileFolder !== lastFileFolder,
+        rootFolderName: commonPathPrefix || null,
+        hasNestedFolders: firstFileFolder !== lastFileFolder,
     };
 }
 

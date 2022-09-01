@@ -1,6 +1,10 @@
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
 import { FILE_TYPE } from 'constants/file';
-import { Location, ParsedExtractedMetadata } from 'types/upload';
+import {
+    ImportSuggestion,
+    Location,
+    ParsedExtractedMetadata,
+} from 'types/upload';
 
 // list of format that were missed by type-detection for some files.
 export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
@@ -67,9 +71,9 @@ export const A_SEC_IN_MICROSECONDS = 1e6;
 
 export const USE_CF_PROXY = false;
 
-export const NULL_ANALYSIS_RESULT = {
-    suggestedCollectionName: '',
-    multipleFolders: false,
+export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
+    rootFolderName: '',
+    hasNestedFolders: false,
 };
 
 export const BLACK_THUMBNAIL_BASE64 =

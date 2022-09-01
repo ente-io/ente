@@ -17,7 +17,11 @@ import isElectron from 'is-electron';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { SetLoading, SetFiles } from 'types/gallery';
-import { AnalysisResult, ElectronFile, FileWithCollection } from 'types/upload';
+import {
+    ImportSuggestion,
+    ElectronFile,
+    FileWithCollection,
+} from 'types/upload';
 import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
@@ -30,7 +34,7 @@ import {
     InProgressUpload,
 } from 'types/upload/ui';
 import {
-    NULL_ANALYSIS_RESULT,
+    DEFAULT_IMPORT_SUGGESTION,
     UPLOAD_STAGES,
     UPLOAD_STRATEGY,
     UPLOAD_TYPE,
@@ -39,7 +43,7 @@ import importService from 'services/importService';
 import { getDownloadAppMessage } from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
 import {
-    analyseUploadFiles,
+    getImportSuggestion,
     groupFilesBasedOnParentFolder,
 } from 'utils/upload';
 
@@ -83,8 +87,9 @@ export default function Uploader(props: Props) {
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
     const [choiceModalView, setChoiceModalView] = useState(false);
-    const [analysisResult, setAnalysisResult] =
-        useState<AnalysisResult>(NULL_ANALYSIS_RESULT);
+    const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
+        DEFAULT_IMPORT_SUGGESTION
+    );
     const appContext = useContext(AppContext);
     const galleryContext = useContext(GalleryContext);
 
@@ -179,14 +184,14 @@ export default function Uploader(props: Props) {
                 toUploadFiles.current = electronFiles;
                 setElectronFiles([]);
             }
-            const analysisResult = analyseUploadFiles(
+            const importSuggestion = getImportSuggestion(
                 uploadType.current,
                 toUploadFiles.current
             );
-            setAnalysisResult(analysisResult);
+            setImportSuggestion(importSuggestion);
 
             handleCollectionCreationAndUpload(
-                analysisResult,
+                importSuggestion,
                 props.isFirstUpload
             );
             props.setLoading(false);
@@ -396,7 +401,7 @@ export default function Uploader(props: Props) {
     };
 
     const handleCollectionCreationAndUpload = (
-        analysisResult: AnalysisResult,
+        importSuggestion: ImportSuggestion,
         isFirstUpload: boolean
     ) => {
         if (isPendingDesktopUpload.current) {
@@ -417,17 +422,15 @@ export default function Uploader(props: Props) {
             uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
             return;
         }
-        if (isFirstUpload && !analysisResult.suggestedCollectionName) {
-            analysisResult.suggestedCollectionName = FIRST_ALBUM_NAME;
+        if (isFirstUpload && !importSuggestion.rootFolderName) {
+            importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
         }
         let showNextModal = () => {};
-        if (analysisResult.multipleFolders) {
+        if (importSuggestion.hasNestedFolders) {
             showNextModal = () => setChoiceModalView(true);
         } else {
             showNextModal = () =>
-                uploadToSingleNewCollection(
-                    analysisResult.suggestedCollectionName
-                );
+                uploadToSingleNewCollection(importSuggestion.rootFolderName);
         }
         props.setCollectionSelectorAttributes({
             callback: uploadFilesToExistingCollection,
@@ -491,9 +494,7 @@ export default function Uploader(props: Props) {
                 open={choiceModalView}
                 onClose={() => setChoiceModalView(false)}
                 uploadToSingleCollection={() =>
-                    uploadToSingleNewCollection(
-                        analysisResult.suggestedCollectionName
-                    )
+                    uploadToSingleNewCollection(importSuggestion.rootFolderName)
                 }
                 uploadToMultipleCollection={() =>
                     uploadFilesToNewCollections(
