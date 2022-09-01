@@ -425,7 +425,7 @@ class UploadManager {
     }
 
     private async updateExistingFiles(decryptedFile: EnteFile) {
-        if (decryptedFile) {
+        if (!decryptedFile) {
             throw Error("decrypted file can't be undefined");
         }
         this.existingFiles.push(decryptedFile);
