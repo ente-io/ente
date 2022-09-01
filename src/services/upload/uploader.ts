@@ -1,7 +1,7 @@
 import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
-import { findMatchingExistingFile } from 'utils/upload';
+import { findMatchingExistingFiles } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
@@ -20,7 +20,6 @@ interface UploadResponse {
 
 export default async function uploader(
     worker: any,
-    existingFilesInCollection: EnteFile[],
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
@@ -46,9 +45,14 @@ export default async function uploader(
             throw Error(CustomError.NO_METADATA);
         }
 
-        const existingFile = findMatchingExistingFile(existingFiles, metadata);
-        if (existingFile) {
-            if (existingFile.collectionID === collection.id) {
+        const matchingExistingFiles = findMatchingExistingFiles(
+            existingFiles,
+            metadata
+        );
+        if (matchingExistingFiles?.length > 0) {
+            const matchingExistingFilesCollectionIDs =
+                matchingExistingFiles.map((e) => e.collectionID);
+            if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
                 addLogLine(
                     `file already present in the collection , skipped upload for  ${fileNameSize}`
                 );
@@ -57,7 +61,8 @@ export default async function uploader(
                 addLogLine(
                     `same file in other collection found for  ${fileNameSize}`
                 );
-                const resultFile = Object.assign({}, existingFile);
+                // any of the matching file can used to add a symlink
+                const resultFile = Object.assign({}, existingFiles[0]);
                 resultFile.collectionID = collection.id;
                 await addToCollection(collection, [resultFile]);
                 return {

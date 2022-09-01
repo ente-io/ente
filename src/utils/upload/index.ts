@@ -17,35 +17,17 @@ import isElectron from 'is-electron';
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 
-export function findMatchingExistingFile(
+export function findMatchingExistingFiles(
     existingFiles: EnteFile[],
     newFileMetadata: Metadata
-): EnteFile {
+): EnteFile[] {
+    const matchingFiles: EnteFile[] = [];
     for (const existingFile of existingFiles) {
         if (areFilesSame(existingFile.metadata, newFileMetadata)) {
-            return existingFile;
+            matchingFiles.push(existingFile);
         }
     }
-    return null;
-}
-
-export function findSameFileInOtherCollection(
-    existingFiles: EnteFile[],
-    newFileMetadata: Metadata
-) {
-    if (!hasFileHash(newFileMetadata)) {
-        return null;
-    }
-
-    for (const existingFile of existingFiles) {
-        if (
-            hasFileHash(existingFile.metadata) &&
-            areFilesWithFileHashSame(existingFile.metadata, newFileMetadata)
-        ) {
-            return existingFile;
-        }
-    }
-    return null;
+    return matchingFiles;
 }
 
 export function shouldDedupeAcrossCollection(collectionName: string): boolean {
