@@ -110,7 +110,7 @@ Future<List<LocalPathAsset>> getAllLocalAssets() async {
   return localPathAssets;
 }
 
-Future<LocalUnSyncResult> getLocalUnSyncedFiles(
+Future<LocalDiffResult> getDiffWithLocal(
   List<LocalPathAsset> assets,
   // current set of assets available on device
   Set<String> existingIDs, // localIDs of files already imported in app
@@ -123,20 +123,20 @@ Future<LocalUnSyncResult> getLocalUnSyncedFiles(
   args['existingIDs'] = existingIDs;
   args['invalidIDs'] = invalidIDs;
   args['pathToLocalIDs'] = pathToLocalIDs;
-  final LocalUnSyncResult localUnSyncResult =
-      await computer.compute(_getUnsyncedAssets, param: args);
-  if (localUnSyncResult.localPathAssets.isEmpty) {
-    return localUnSyncResult;
+  final LocalDiffResult diffResult =
+      await computer.compute(_getLocalAssetsDiff, param: args);
+  if (diffResult.localPathAssets.isEmpty) {
+    return diffResult;
   }
   final unSyncedFiles =
-      await _convertLocalAssetsToUniqueFiles(localUnSyncResult.localPathAssets);
-  localUnSyncResult.uniqueLocalFiles = unSyncedFiles;
-  return localUnSyncResult;
+      await _convertLocalAssetsToUniqueFiles(diffResult.localPathAssets);
+  diffResult.uniqueLocalFiles = unSyncedFiles;
+  return diffResult;
 }
 
-// _getUnsyncedAssets performs following operation
-// Identify
-LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
+// _getLocalAssetsDiff compares local db with the file system and compute
+// the files which needs to be added or removed from device collection.
+LocalDiffResult _getLocalAssetsDiff(Map<String, dynamic> args) {
   final List<LocalPathAsset> onDeviceLocalPathAsset = args['assets'];
   final Set<String> existingIDs = args['existingIDs'];
   final Set<String> invalidIDs = args['invalidIDs'];
@@ -176,7 +176,7 @@ LocalUnSyncResult _getUnsyncedAssets(Map<String, dynamic> args) {
       unsyncedAssets.add(localPathAsset);
     }
   }
-  return LocalUnSyncResult(
+  return LocalDiffResult(
     localPathAssets: unsyncedAssets,
     newPathToLocalIDs: newPathToLocalIDs,
     deletePathToLocalIDs: removedPathToLocalIDs,
@@ -307,7 +307,7 @@ class LocalPathAsset {
   });
 }
 
-class LocalUnSyncResult {
+class LocalDiffResult {
   // unique localPath Assets.
   final List<LocalPathAsset> localPathAssets;
 
@@ -320,7 +320,7 @@ class LocalUnSyncResult {
 
   final Map<String, Set<String>> deletePathToLocalIDs;
 
-  LocalUnSyncResult({
+  LocalDiffResult({
     this.uniqueLocalFiles,
     this.localPathAssets,
     this.newPathToLocalIDs,

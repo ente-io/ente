@@ -306,16 +306,15 @@ class FilesDB {
         CREATE TABLE IF NOT EXISTS device_files (
           id TEXT NOT NULL,
           path_id TEXT NOT NULL,
-          synced INTEGER NOT NULL DEFAULT 0,
           UNIQUE(id, path_id)
        );
        ''',
       '''
-       CREATE TABLE IF NOT EXISTS device_path_collections (
+       CREATE TABLE IF NOT EXISTS device_collections (
           id TEXT PRIMARY KEY NOT NULL,
           name TEXT,
           modified_at INTEGER NOT NULL DEFAULT 0,
-          sync INTEGER NOT NULL DEFAULT 0,
+          should_backup INTEGER NOT NULL DEFAULT 0,
           count INTEGER NOT NULL DEFAULT 0,
           collection_id INTEGER DEFAULT -1,
           cover_id TEXT
@@ -1144,6 +1143,7 @@ class FilesDB {
 
   Future<List<File>> getLatestCollectionFiles() async {
     debugPrint("Fetching latestCollectionFiles from db");
+
     final db = await instance.database;
 
     String query;
@@ -1174,6 +1174,7 @@ class FilesDB {
         ) latest_files
         ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
         AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
+
   ''';
     }
 
@@ -1194,27 +1195,11 @@ class FilesDB {
     return collectionMap.values.toList();
   }
 
-  Future<File> getLastModifiedFileInCollection(int collectionID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      where: '$columnCollectionID = ?',
-      whereArgs: [collectionID],
-      orderBy: '$columnUpdationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      return null;
-    }
-  }
-
   Future<Map<String, int>> getFileCountInDeviceFolders() async {
     final db = await instance.database;
     final rows = await db.rawQuery(
       '''
-      SELECT COUNT($columnGeneratedID) as count, $columnDeviceFolder
+      SELECT COUNT(DISTINCT($columnLocalID)) as count, $columnDeviceFolder
       FROM $filesTable
       WHERE $columnLocalID IS NOT NULL
       GROUP BY $columnDeviceFolder

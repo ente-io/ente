@@ -12,17 +12,17 @@ class DeviceFolder {
   );
 }
 
-class DevicePathCollection {
+class DeviceCollection {
   final String id;
   final String name;
   final String path;
   final String coverId;
   final int count;
-  final bool sync;
+  final bool shouldBackup;
   int collectionID;
   File thumbnail;
 
-  DevicePathCollection(
+  DeviceCollection(
     this.id,
     this.name, {
     this.path,
@@ -30,6 +30,6 @@ class DevicePathCollection {
     this.count,
     this.collectionID,
     this.thumbnail,
-    this.sync = false,
+    this.shouldBackup = false,
   });
 }

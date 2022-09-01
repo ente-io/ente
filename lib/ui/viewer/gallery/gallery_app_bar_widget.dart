@@ -24,7 +24,7 @@ class GalleryAppBarWidget extends StatefulWidget {
   final GalleryType type;
   final String title;
   final SelectedFiles selectedFiles;
-  final DevicePathCollection devicePathCollection;
+  final DeviceCollection deviceCollection;
   final Collection collection;
 
   const GalleryAppBarWidget(
@@ -32,7 +32,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.title,
     this.selectedFiles, {
     Key key,
-    this.devicePathCollection,
+    this.deviceCollection,
     this.collection,
   }) : super(key: key);
 
@@ -222,7 +222,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (collection == null) {
         if (widget.type == GalleryType.localFolder) {
           collection = await CollectionsService.instance
-              .getOrCreateForPath(widget.devicePathCollection.name);
+              .getOrCreateForPath(widget.deviceCollection.name);
         } else {
           throw Exception(
             "Cannot create a collection of type" + widget.type.toString(),
@@ -239,7 +239,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         builder: (BuildContext context) {
           return SharingDialog(
             collection,
-            devicePathCollection: widget.devicePathCollection,
+            deviceCollection: widget.deviceCollection,
           );
         },
       );

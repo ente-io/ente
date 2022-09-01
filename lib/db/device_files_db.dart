@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -17,9 +18,8 @@ extension DeviceFiles on FilesDB {
   // to localID mapping.
   Future<void> insertPathIDToLocalIDMapping(
     Map<String, Set<String>> mappingToAdd, {
-    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
-    bool syncStatus = false,
-  }) async {
+        ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore
+      }) async {
     debugPrint("Inserting missing PathIDToLocalIDMapping");
     final db = await database;
     var batch = db.batch();
@@ -37,7 +37,6 @@ extension DeviceFiles on FilesDB {
           {
             "id": localID,
             "path_id": pathID,
-            "synced": syncStatus ? _sqlBoolTrue : _sqlBoolFalse
           },
           conflictAlgorithm: conflictAlgorithm,
         );
@@ -126,7 +125,7 @@ extension DeviceFiles on FilesDB {
     final Database db = await database;
     final rows = await db.rawQuery(
       '''
-      SELECT id FROM device_path_collections
+      SELECT id FROM device_collections
       ''',
     );
     final Set<String> result = <String>{};
@@ -149,17 +148,17 @@ extension DeviceFiles on FilesDB {
         pathIDToLocalIDsMap[localPathAsset.pathID] = localPathAsset.localIDs;
         if (existingPathIds.contains(localPathAsset.pathID)) {
           await db.rawUpdate(
-            "UPDATE device_path_collections SET name = ? where id = "
+            "UPDATE device_collections SET name = ? where id = "
             "?",
             [localPathAsset.pathName, localPathAsset.pathID],
           );
         } else {
           await db.insert(
-            "device_path_collections",
+            "device_collections",
             {
               "id": localPathAsset.pathID,
               "name": localPathAsset.pathName,
-              "sync": autoSync ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": autoSync ? _sqlBoolTrue : _sqlBoolFalse
             },
             conflictAlgorithm: ConflictAlgorithm.ignore,
           );
@@ -182,7 +181,7 @@ extension DeviceFiles on FilesDB {
 
   Future<bool> updateDeviceCoverWithCount(
     List<Tuple2<AssetPathEntity, String>> devicePathInfo, {
-    bool autoSync = false,
+    bool shouldBackup = false,
   }) async {
     bool hasUpdated = false;
     try {
@@ -194,20 +193,20 @@ extension DeviceFiles on FilesDB {
         final bool shouldUpdate = existingPathIds.contains(pathEntity.id);
         if (shouldUpdate) {
           await db.rawUpdate(
-            "UPDATE device_path_collections SET name = ?, cover_id = ?, count"
+            "UPDATE device_collections SET name = ?, cover_id = ?, count"
             " = ? where id = ?",
             [pathEntity.name, localID, pathEntity.assetCount, pathEntity.id],
           );
         } else {
           hasUpdated = true;
           await db.insert(
-            "device_path_collections",
+            "device_collections",
             {
               "id": pathEntity.id,
               "name": pathEntity.name,
               "count": pathEntity.assetCount,
               "cover_id": localID,
-              "sync": autoSync ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse
             },
           );
         }
@@ -219,7 +218,7 @@ extension DeviceFiles on FilesDB {
         _logger.info('Deleting following pathIds from local $existingPathIds ');
         for (String pathID in existingPathIds) {
           await db.delete(
-            "device_path_collections",
+            "device_collections",
             where: 'id = ?',
             whereArgs: [pathID],
           );
@@ -249,9 +248,9 @@ extension DeviceFiles on FilesDB {
         batchCounter = 0;
       }
       batch.update(
-        "device_path_collections",
+        "device_collections",
         {
-          "sync": e.value ? _sqlBoolTrue : _sqlBoolFalse,
+          "should_backup": e.value ? _sqlBoolTrue : _sqlBoolFalse,
         },
         where: 'id = ?',
         whereArgs: [pathID],
@@ -261,13 +260,13 @@ extension DeviceFiles on FilesDB {
     await batch.commit(noResult: true);
   }
 
-  Future<void> updateDevicePathCollection(
+  Future<void> updateDeviceCollection(
     String pathID,
     int collectionID,
   ) async {
     final db = await database;
     await db.update(
-      "device_path_collections",
+      "device_collections",
       {"collection_id": collectionID},
       where: 'id = ?',
       whereArgs: [pathID],
@@ -275,8 +274,8 @@ extension DeviceFiles on FilesDB {
     return;
   }
 
-  Future<FileLoadResult> getFilesInDevicePathCollection(
-    DevicePathCollection devicePathCollection,
+  Future<FileLoadResult> getFilesInDeviceCollection(
+    DeviceCollection deviceCollection,
     int startTime,
     int endTime, {
     int limit,
@@ -291,7 +290,7 @@ extension DeviceFiles on FilesDB {
           ${FilesDB.columnCreationTime} >= $startTime AND 
           ${FilesDB.columnCreationTime} <= $endTime AND 
           ${FilesDB.columnLocalID} IN 
-          (SELECT id FROM device_files where path_id = '${devicePathCollection.id}' ) 
+          (SELECT id FROM device_files where path_id = '${deviceCollection.id}' ) 
           ORDER BY ${FilesDB.columnCreationTime} $order , ${FilesDB.columnModificationTime} $order
          ''' +
         (limit != null ? ' limit $limit;' : ';');
@@ -301,37 +300,55 @@ extension DeviceFiles on FilesDB {
     return FileLoadResult(dedupe, files.length == limit);
   }
 
-  Future<List<DevicePathCollection>> getDevicePathCollections() async {
-    debugPrint("Fetching DevicePathCollections From DB");
+  Future<List<DeviceCollection>> getDeviceCollections({
+    bool includeCoverThumbnail = false,
+  }) async {
+    debugPrint(
+        "Fetching DeviceCollections From DB with thumnail = $includeCoverThumbnail");
     try {
       final db = await database;
-      final fileRows = await db.rawQuery(
-        '''SELECT * FROM FILES where local_id in (select cover_id from device_path_collections) group by local_id;
+      final coverFiles = <File>[];
+      if (includeCoverThumbnail) {
+        final fileRows = await db.rawQuery(
+          '''SELECT * FROM FILES where local_id in (select cover_id from device_collections) group by local_id;
           ''',
+        );
+        final files = convertToFiles(fileRows);
+        coverFiles.addAll(files);
+      }
+      final deviceCollectionRows = await db.rawQuery(
+        '''SELECT * from device_collections''',
       );
-      final files = convertToFiles(fileRows);
-      final devicePathRows = await db.rawQuery(
-        '''SELECT * from device_path_collections''',
-      );
-      final List<DevicePathCollection> deviceCollections = [];
-      for (var row in devicePathRows) {
-        final DevicePathCollection devicePathCollection = DevicePathCollection(
+      final List<DeviceCollection> deviceCollections = [];
+      for (var row in deviceCollectionRows) {
+        final DeviceCollection deviceCollection = DeviceCollection(
           row["id"],
           row['name'],
           count: row['count'],
           collectionID: row["collection_id"],
           coverId: row["cover_id"],
-          sync: (row["sync"] ?? _sqlBoolFalse) == _sqlBoolTrue,
+          shouldBackup: (row["should_backup"] ?? _sqlBoolFalse) == _sqlBoolTrue,
         );
-        devicePathCollection.thumbnail = files.firstWhere(
-          (element) => element.localID == devicePathCollection.coverId,
-          orElse: () => null,
-        );
-        deviceCollections.add(devicePathCollection);
+        if (includeCoverThumbnail) {
+          deviceCollection.thumbnail = coverFiles.firstWhere(
+            (element) => element.localID == deviceCollection.coverId,
+            orElse: () => null,
+          );
+          if (deviceCollection.thumbnail == null) {
+            //todo: find another image which is already imported in db for
+            // this collection
+            _logger.warning(
+              'Failed to find coverThumbnail for ${deviceCollection.name}',
+            );
+            continue;
+          }
+        } else {
+          deviceCollections.add(deviceCollection);
+        }
       }
       return deviceCollections;
     } catch (e) {
-      _logger.severe('Failed to getDevicePathCollections', e);
+      _logger.severe('Failed to getDeviceCollections', e);
       rethrow;
     }
   }

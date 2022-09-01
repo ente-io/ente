@@ -3,10 +3,10 @@ import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';
 
 class CollectionItems {
-  final List<DevicePathCollection> devicePathCollections;
+  final List<DeviceCollection> deviceCollections;
   final List<CollectionWithThumbnail> collections;
 
-  CollectionItems(this.devicePathCollections, this.collections);
+  CollectionItems(this.deviceCollections, this.collections);
 }
 
 class CollectionWithThumbnail {
