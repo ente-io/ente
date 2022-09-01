@@ -8,9 +8,9 @@ import constants from 'utils/strings/constants';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import UploadStrategyChoiceModal from 'components/Upload/UploadStrategyChoiceModal';
 import { UPLOAD_STRATEGY } from 'constants/upload';
-import { analyseUploadFiles } from 'utils/upload';
+import { getImportSuggestion } from 'utils/upload';
 import electronFSService from 'services/electron/fs';
-import { UPLOAD_TYPE } from 'constants/upload';
+import { PICKED_UPLOAD_TYPE } from 'constants/upload';
 
 interface Iprops {
     open: boolean;
@@ -41,21 +41,22 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             const folder: any = folders[i];
             const path = (folder.path as string).replace(/\\/g, '/');
             if (await watchFolderService.isFolder(path)) {
-                setInputFolderPath(path);
-                const files = await electronFSService.getDirFiles(path);
-                const analysisResult = analyseUploadFiles(
-                    UPLOAD_TYPE.FOLDERS,
-                    files
-                );
-                if (analysisResult.multipleFolders) {
-                    setChoiceModalOpen(true);
-                } else {
-                    handleAddWatchMapping(
-                        UPLOAD_STRATEGY.SINGLE_COLLECTION,
-                        path
-                    );
-                }
+                await addFolderForWatching(path);
             }
+        }
+    };
+
+    const addFolderForWatching = async (path: string) => {
+        setInputFolderPath(path);
+        const files = await electronFSService.getDirFiles(path);
+        const analysisResult = getImportSuggestion(
+            PICKED_UPLOAD_TYPE.FOLDERS,
+            files
+        );
+        if (analysisResult.hasNestedFolders) {
+            setChoiceModalOpen(true);
+        } else {
+            handleAddWatchMapping(UPLOAD_STRATEGY.SINGLE_COLLECTION, path);
         }
     };
 
@@ -66,20 +67,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     const handleFolderSelection = async () => {
         const folderPath = await watchFolderService.selectFolder();
         if (folderPath) {
-            setInputFolderPath(folderPath);
-            const files = await electronFSService.getDirFiles(folderPath);
-            const analysisResult = analyseUploadFiles(
-                UPLOAD_TYPE.FOLDERS,
-                files
-            );
-            if (analysisResult.multipleFolders) {
-                setChoiceModalOpen(true);
-            } else {
-                handleAddWatchMapping(
-                    UPLOAD_STRATEGY.SINGLE_COLLECTION,
-                    folderPath
-                );
-            }
+            await addFolderForWatching(folderPath);
         }
     };
 
