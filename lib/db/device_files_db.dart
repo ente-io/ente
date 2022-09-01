@@ -14,12 +14,9 @@ extension DeviceFiles on FilesDB {
   static const _sqlBoolTrue = 1;
   static const _sqlBoolFalse = 0;
 
-  // insertPathIDToLocalIDMapping is used to insert of update the pathID
-  // to localID mapping.
   Future<void> insertPathIDToLocalIDMapping(
-    Map<String, Set<String>> mappingToAdd, {
-        ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore
-      }) async {
+      Map<String, Set<String>> mappingToAdd,
+      {ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore}) async {
     debugPrint("Inserting missing PathIDToLocalIDMapping");
     final db = await database;
     var batch = db.batch();
@@ -169,8 +166,7 @@ extension DeviceFiles on FilesDB {
         debugPrint("Insert pathToLocalIDs mapping while importing localAssets");
         await insertPathIDToLocalIDMapping(
           pathIDToLocalIDsMap,
-          conflictAlgorithm: ConflictAlgorithm.ignore, // do not reset sync
-          // status
+          conflictAlgorithm: ConflictAlgorithm.ignore,
         );
       }
     } catch (e) {
