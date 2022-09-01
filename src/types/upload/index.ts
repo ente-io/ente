@@ -143,7 +143,8 @@ export interface ParsedExtractedMetadata {
     creationTime: number;
 }
 
-export interface AnalysisResult {
-    suggestedCollectionName: string;
-    multipleFolders: boolean;
+// This is used to prompt the user the make upload strategy choice
+export interface ImportSuggestion {
+    rootFolderName: string;
+    hasNestedFolders: boolean;
 }

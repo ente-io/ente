@@ -1,4 +1,4 @@
-import { UPLOAD_TYPE } from 'constants/upload';
+import { PICKED_UPLOAD_TYPE } from 'constants/upload';
 import { Collection } from 'types/collection';
 import { ElectronAPIs } from 'types/electron';
 import { ElectronFile, FileWithCollection } from 'types/upload';
@@ -8,7 +8,7 @@ import { logError } from 'utils/sentry';
 interface PendingUploads {
     files: ElectronFile[];
     collectionName: string;
-    type: UPLOAD_TYPE;
+    type: PICKED_UPLOAD_TYPE;
 }
 
 interface selectZipResult {
@@ -88,7 +88,7 @@ class ImportService {
     }
 
     async setToUploadFiles(
-        type: UPLOAD_TYPE.FILES | UPLOAD_TYPE.ZIPS,
+        type: PICKED_UPLOAD_TYPE.FILES | PICKED_UPLOAD_TYPE.ZIPS,
         filePaths: string[]
     ) {
         if (this.allElectronAPIsExist) {
@@ -117,14 +117,14 @@ class ImportService {
                     );
                 }
             }
-            this.setToUploadFiles(UPLOAD_TYPE.FILES, filePaths);
+            this.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, filePaths);
         }
     }
     cancelRemainingUploads() {
         if (this.allElectronAPIsExist) {
             this.ElectronAPIs.setToUploadCollection(null);
-            this.ElectronAPIs.setToUploadFiles(UPLOAD_TYPE.ZIPS, []);
-            this.ElectronAPIs.setToUploadFiles(UPLOAD_TYPE.FILES, []);
+            this.ElectronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.ZIPS, []);
+            this.ElectronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, []);
         }
     }
 }

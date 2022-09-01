@@ -1,4 +1,4 @@
-export const METADATA_FOLDER_NAME = 'metadata';
+export const ENTE_METADATA_FOLDER = 'metadata';
 
 export enum ExportNotification {
     START = 'export started',

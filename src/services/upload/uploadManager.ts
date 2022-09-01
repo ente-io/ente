@@ -1,11 +1,11 @@
-import { getLocalFiles, setLocalFiles } from '../fileService';
+import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
-    groupFilesBasedOnCollectionID,
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
+    getUserOwnedNonTrashedFiles,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -52,8 +52,8 @@ class UploadManager {
     private filesToBeUploaded: FileWithCollection[];
     private remainingFiles: FileWithCollection[] = [];
     private failedFiles: FileWithCollection[];
-    private collectionToExistingFilesMap: Map<number, EnteFile[]>;
     private existingFiles: EnteFile[];
+    private userOwnedNonTrashedExistingFiles: EnteFile[];
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
@@ -85,7 +85,7 @@ class UploadManager {
 
     async updateExistingFilesAndCollections(collections: Collection[]) {
         this.existingFiles = await getLocalFiles();
-        this.collectionToExistingFilesMap = groupFilesBasedOnCollectionID(
+        this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
             this.existingFiles
         );
         this.collections = new Map(
@@ -390,14 +390,11 @@ class UploadManager {
             }
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
-            const collectionExistingFiles =
-                this.collectionToExistingFilesMap.get(collectionID) ?? [];
             const collection = this.collections.get(collectionID);
             fileWithCollection = { ...fileWithCollection, collection };
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
-                collectionExistingFiles,
-                this.existingFiles,
+                this.userOwnedNonTrashedExistingFiles,
                 fileWithCollection
             );
 
@@ -417,7 +414,7 @@ class UploadManager {
 
     async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
-        uploadedFile: EnteFile,
+        uploadedFile: EnteFile | null,
         fileWithCollection: FileWithCollection
     ) {
         try {
@@ -449,7 +446,13 @@ class UploadManager {
                 default:
                     throw Error('Invalid Upload Result' + fileUploadResult);
             }
-            if (decryptedFile) {
+            if (
+                [
+                    UPLOAD_RESULT.ADDED_SYMLINK,
+                    UPLOAD_RESULT.UPLOADED,
+                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
+                ].includes(fileUploadResult)
+            ) {
                 await this.updateExistingFiles(decryptedFile);
             }
             return fileUploadResult;
@@ -468,31 +471,24 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    async retryFailedFiles() {
-        await this.queueFilesForUpload(this.failedFiles, [
-            ...this.collections.values(),
-        ]);
-    }
-
-    private updateExistingFileToCollectionMap(decryptedFile: EnteFile) {
-        if (
-            !this.collectionToExistingFilesMap.has(decryptedFile.collectionID)
-        ) {
-            this.collectionToExistingFilesMap.set(
-                decryptedFile.collectionID,
-                []
-            );
-        }
-        this.collectionToExistingFilesMap
-            .get(decryptedFile.collectionID)
-            .push(decryptedFile);
+    async getFailedFilesWithCollections() {
+        return {
+            files: this.failedFiles,
+            collections: [...this.collections.values()],
+        };
     }
 
     private async updateExistingFiles(decryptedFile: EnteFile) {
+        if (!decryptedFile) {
+            throw Error("decrypted file can't be undefined");
+        }
+        this.userOwnedNonTrashedExistingFiles.push(decryptedFile);
+        await this.updateUIFiles(decryptedFile);
+    }
+
+    private async updateUIFiles(decryptedFile: EnteFile) {
         this.existingFiles.push(decryptedFile);
-        this.updateExistingFileToCollectionMap(decryptedFile);
         this.existingFiles = sortFiles(this.existingFiles);
-        await setLocalFiles(this.existingFiles);
         this.setFiles(preservePhotoswipeProps(this.existingFiles));
     }
 
