@@ -376,7 +376,7 @@ class UploadManager {
 
     async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
-        uploadedFile: EnteFile,
+        uploadedFile: EnteFile | null,
         fileWithCollection: FileWithCollection
     ) {
         try {
@@ -405,7 +405,13 @@ class UploadManager {
                 default:
                     throw Error('Invalid Upload Result' + fileUploadResult);
             }
-            if (fileUploadResult !== UPLOAD_RESULT.ALREADY_UPLOADED) {
+            if (
+                [
+                    UPLOAD_RESULT.ADDED_SYMLINK,
+                    UPLOAD_RESULT.UPLOADED,
+                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
+                ].includes(fileUploadResult)
+            ) {
                 await this.updateExistingFiles(decryptedFile);
             }
             return fileUploadResult;
@@ -440,6 +446,9 @@ class UploadManager {
     }
 
     private async updateExistingFiles(decryptedFile: EnteFile) {
+        if (decryptedFile) {
+            throw Error("decrypted file can't be undefined");
+        }
         this.existingFiles.push(decryptedFile);
         this.updateExistingFileToCollectionMap(decryptedFile);
         this.existingFiles = sortFiles(this.existingFiles);
