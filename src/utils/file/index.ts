@@ -514,5 +514,5 @@ export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
     if (!user?.id) {
         throw Error('user missing');
     }
-    return files.filter((file) => file.isTrashed || file.ownerID !== user.id);
+    return files.filter((file) => file.isTrashed || file.ownerID === user.id);
 };
