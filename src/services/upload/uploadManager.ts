@@ -418,10 +418,11 @@ class UploadManager {
         }
     }
 
-    async retryFailedFiles() {
-        await this.queueFilesForUpload(this.failedFiles, [
-            ...this.collections.values(),
-        ]);
+    async getFailedFilesWithCollection() {
+        return {
+            files: this.failedFiles,
+            collections: [...this.collections.values()],
+        };
     }
 
     private async updateExistingFiles(decryptedFile: EnteFile) {
