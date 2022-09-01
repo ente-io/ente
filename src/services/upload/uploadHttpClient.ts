@@ -105,7 +105,9 @@ class UploadHttpClient {
             );
             return fileUploadURL.objectKey;
         } catch (e) {
-            logError(e, 'putFile to dataStore failed ');
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+                logError(e, 'putFile to dataStore failed ');
+            }
             throw e;
         }
     }
@@ -191,7 +193,9 @@ class UploadHttpClient {
             });
             return response.data.etag as string;
         } catch (e) {
-            logError(e, 'put filePart failed');
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+                logError(e, 'put filePart failed');
+            }
             throw e;
         }
     }
