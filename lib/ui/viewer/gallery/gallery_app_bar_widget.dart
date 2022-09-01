@@ -253,6 +253,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         collection == null) {
       return false;
     }
+    // collection is already shared
+    if (collection.sharees.isNotEmpty || collection.publicURLs.isNotEmpty) {
+      return false;
+    }
     final collectionIDsWithHiddenFiles =
         await FilesDB.instance.getCollectionIDsOfHiddenFiles(
       Configuration.instance.getUserID(),
