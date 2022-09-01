@@ -169,22 +169,42 @@ export function analyseUploadFiles(
         multipleFolders: firstFileFolder !== lastFileFolder,
     };
 }
-export function getCollectionWiseFiles(toUploadFiles: File[] | ElectronFile[]) {
-    const collectionWiseFiles = new Map<string, (File | ElectronFile)[]>();
+
+// This function groups files that are that have the same parent folder into collections
+// For Example, for user files have a directory structure like this
+//              a
+//            / |  \
+//           b  j   c
+//          /|\    /  \
+//         e f g   h  i
+//
+// The files will grouped into 3 collections.
+// [a => [j],
+// b => [e,f,g],
+// c => [h, i]]
+export function groupFilesBasedOnParentFolder(
+    toUploadFiles: File[] | ElectronFile[]
+) {
+    const collectionNameToFilesMap = new Map<string, (File | ElectronFile)[]>();
     for (const file of toUploadFiles) {
         const filePath = file['path'] as string;
 
         let folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        // If the parent folder of a file is "metadata"
+        // we consider it to be part of the parent folder
+        // For Eg,For FileList  -> [a/x.png, a/metadata/x.png.json]
+        // they will both we grouped into the collection "a"
+        // This is cluster the metadata json files in the same collection as the file it is for
         if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
             folderPath = folderPath.substring(0, folderPath.lastIndexOf('/'));
         }
         const folderName = folderPath.substring(
             folderPath.lastIndexOf('/') + 1
         );
-        if (!collectionWiseFiles.has(folderName)) {
-            collectionWiseFiles.set(folderName, []);
+        if (!collectionNameToFilesMap.has(folderName)) {
+            collectionNameToFilesMap.set(folderName, []);
         }
-        collectionWiseFiles.get(folderName).push(file);
+        collectionNameToFilesMap.get(folderName).push(file);
     }
-    return collectionWiseFiles;
+    return collectionNameToFilesMap;
 }

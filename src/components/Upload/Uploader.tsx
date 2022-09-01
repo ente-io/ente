@@ -38,7 +38,10 @@ import {
 import importService from 'services/importService';
 import { getDownloadAppMessage } from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
-import { analyseUploadFiles, getCollectionWiseFiles } from 'utils/upload';
+import {
+    analyseUploadFiles,
+    groupFilesBasedOnParentFolder,
+} from 'utils/upload';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -226,21 +229,27 @@ export default function Uploader(props: Props) {
             await preUploadAction();
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
-            let collectionWiseFiles = new Map<
+            let collectionNameToFilesMap = new Map<
                 string,
                 (File | ElectronFile)[]
             >();
             if (strategy === UPLOAD_STRATEGY.SINGLE_COLLECTION) {
-                collectionWiseFiles.set(collectionName, toUploadFiles.current);
+                collectionNameToFilesMap.set(
+                    collectionName,
+                    toUploadFiles.current
+                );
             } else {
-                collectionWiseFiles = getCollectionWiseFiles(
+                collectionNameToFilesMap = groupFilesBasedOnParentFolder(
                     toUploadFiles.current
                 );
             }
             try {
                 const existingCollection = await syncCollections();
                 let index = 0;
-                for (const [collectionName, files] of collectionWiseFiles) {
+                for (const [
+                    collectionName,
+                    files,
+                ] of collectionNameToFilesMap) {
                     const collection = await createAlbum(
                         collectionName,
                         existingCollection
