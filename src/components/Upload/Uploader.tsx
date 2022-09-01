@@ -46,6 +46,7 @@ import {
     getImportSuggestion,
     groupFilesBasedOnParentFolder,
 } from 'utils/upload';
+import { getUserOwnedCollections } from 'utils/collection';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -250,7 +251,9 @@ export default function Uploader(props: Props) {
                 );
             }
             try {
-                const existingCollection = await syncCollections();
+                const existingCollection = getUserOwnedCollections(
+                    await syncCollections()
+                );
                 let index = 0;
                 for (const [
                     collectionName,
