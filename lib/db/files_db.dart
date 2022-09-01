@@ -445,7 +445,7 @@ class FilesDB {
       whereArgs: [ownerID, visibility],
       distinct: true,
     );
-    Set<int> collectionIDsOfHiddenFiles = {};
+    final Set<int> collectionIDsOfHiddenFiles = {};
     for (var result in results) {
       collectionIDsOfHiddenFiles.add(result['collection_id']);
     }
