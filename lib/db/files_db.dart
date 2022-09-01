@@ -1142,9 +1142,6 @@ class FilesDB {
 
   Future<List<File>> getLatestCollectionFiles() async {
     debugPrint("Fetching latestCollectionFiles from db");
-
-    final db = await instance.database;
-
     String query;
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
       query = '''
@@ -1176,7 +1173,7 @@ class FilesDB {
 
   ''';
     }
-
+    final db = await instance.database;
     final rows = await db.rawQuery(
       query,
     );

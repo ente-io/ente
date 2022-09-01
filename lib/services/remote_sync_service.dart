@@ -223,8 +223,8 @@ class RemoteSyncService {
   }
 
   Future<void> _syncDeviceCollectionFilesForUpload() async {
-    final FilesDB fileDb = FilesDB.instance;
-    final deviceCollections = await fileDb.getDeviceCollections();
+    final FilesDB filesDB = FilesDB.instance;
+    final deviceCollections = await filesDB.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
     // Sort by count to ensure that photos in iOS are first inserted in
     // smallest album marked for backup. This is to ensure that photo is
@@ -232,13 +232,13 @@ class RemoteSyncService {
     deviceCollections.sort((a, b) => a.count.compareTo(b.count));
     await _createCollectionsForDevicePath(deviceCollections);
     final Map<String, Set<String>> pathIdToLocalIDs =
-        await fileDb.getDevicePathIDToLocalIDMap();
+        await filesDB.getDevicePathIDToLocalIDMap();
     for (final deviceCollection in deviceCollections) {
       _logger.fine("processing ${deviceCollection.name}");
       final Set<String> unSyncedLocalIDs =
           pathIdToLocalIDs[deviceCollection.id] ?? {};
       if (unSyncedLocalIDs.isNotEmpty && deviceCollection.collectionID != -1) {
-        await fileDb.setCollectionIDForUnMappedLocalFiles(
+        await filesDB.setCollectionIDForUnMappedLocalFiles(
           deviceCollection.collectionID,
           unSyncedLocalIDs,
         );
@@ -246,7 +246,7 @@ class RemoteSyncService {
         // mark IDs as already synced if corresponding entry is present in
         // the collection. This can happen when a user has marked a folder
         // for sync, then un-synced it and again tries to mark if for sync.
-        final Set<String> existingMapping = await fileDb
+        final Set<String> existingMapping = await filesDB
             .getLocalFileIDsForCollection(deviceCollection.collectionID);
         final Set<String> commonElements =
             unSyncedLocalIDs.intersection(existingMapping);
@@ -267,7 +267,7 @@ class RemoteSyncService {
             ' for ${deviceCollection.name}',
           );
           final filesWithCollectionID =
-              await fileDb.getLocalFiles(unSyncedLocalIDs.toList());
+              await filesDB.getLocalFiles(unSyncedLocalIDs.toList());
           final List<File> newFilesToInsert = [];
           final Set<String> fileFoundForLocalIDs = {};
           for (var existingFile in filesWithCollectionID) {
@@ -281,7 +281,7 @@ class RemoteSyncService {
               fileFoundForLocalIDs.add(localID);
             }
           }
-          await fileDb.insertMultiple(newFilesToInsert);
+          await filesDB.insertMultiple(newFilesToInsert);
           unSyncedLocalIDs.removeAll(fileFoundForLocalIDs);
         }
 

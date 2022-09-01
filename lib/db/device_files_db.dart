@@ -15,8 +15,9 @@ extension DeviceFiles on FilesDB {
   static const _sqlBoolFalse = 0;
 
   Future<void> insertPathIDToLocalIDMapping(
-      Map<String, Set<String>> mappingToAdd,
-      {ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore}) async {
+    Map<String, Set<String>> mappingToAdd, {
+    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.ignore,
+  }) async {
     debugPrint("Inserting missing PathIDToLocalIDMapping");
     final db = await database;
     var batch = db.batch();
@@ -156,11 +157,7 @@ extension DeviceFiles on FilesDB {
       }
       // add the mappings for localIDs
       if (pathIDToLocalIDsMap.isNotEmpty) {
-        debugPrint("Insert pathToLocalIDs mapping while importing localAssets");
-        await insertPathIDToLocalIDMapping(
-          pathIDToLocalIDsMap,
-          conflictAlgorithm: ConflictAlgorithm.ignore,
-        );
+        await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
       }
     } catch (e) {
       _logger.severe("failed to save path names", e);
