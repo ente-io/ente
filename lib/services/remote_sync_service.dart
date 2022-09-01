@@ -226,15 +226,15 @@ class RemoteSyncService {
     final FilesDB fileDb = FilesDB.instance;
     final deviceCollections = await fileDb.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
+    // Sort by count to ensure that photos in iOS are first inserted in
+    // smallest album marked for backup. This is to ensure that photo is
+    // first attempted to upload in a non-recent album.
+    deviceCollections.sort((a, b) => a.count.compareTo(b.count));
     await _createCollectionsForDevicePath(deviceCollections);
     final Map<String, Set<String>> pathIdToLocalIDs =
         await fileDb.getDevicePathIDToLocalIDMap();
-    /*
-       A) Check if mapping for localID already exist in the collection
-       B) Check if
-     */
     for (final deviceCollection in deviceCollections) {
-      debugPrint("Processing ${deviceCollection.name}");
+      _logger.fine("processing ${deviceCollection.name}");
       final Set<String> unSyncedLocalIDs =
           pathIdToLocalIDs[deviceCollection.id] ?? {};
       if (unSyncedLocalIDs.isNotEmpty && deviceCollection.collectionID != -1) {
