@@ -73,7 +73,7 @@ export default async function uploader(
                     `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
                 );
                 // any of the matching file can used to add a symlink
-                const resultFile = Object.assign({}, existingFiles[0]);
+                const resultFile = Object.assign({}, matchingExistingFiles[0]);
                 resultFile.collectionID = collection.id;
                 await addToCollection(collection, [resultFile]);
                 return {
