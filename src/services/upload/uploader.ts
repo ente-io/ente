@@ -68,7 +68,14 @@ export default async function uploader(
                 addLogLine(
                     `file already present in the collection , skipped upload for  ${fileNameSize}`
                 );
-                return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
+                const sameCollectionMatchingExistingFile =
+                    matchingExistingFiles.find(
+                        (f) => f.collectionID === collection.id
+                    );
+                return {
+                    fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
+                    uploadedFile: sameCollectionMatchingExistingFile,
+                };
             } else {
                 addLogLine(
                     `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
