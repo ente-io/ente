@@ -28,7 +28,7 @@ export const getLocalFiles = async () => {
     return files;
 };
 
-export const setLocalFiles = async (files: EnteFile[]) => {
+const setLocalFiles = async (files: EnteFile[]) => {
     try {
         await localForage.setItem(FILES_TABLE, files);
     } catch (e1) {

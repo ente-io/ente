@@ -671,6 +671,7 @@ export default function Gallery() {
                     uploadInProgress={uploadInProgress}
                     setUploadInProgress={setUploadInProgress}
                     setFiles={setFiles}
+                    setCollections={setCollections}
                     isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
                     webFileSelectorFiles={webFileSelectorFiles}
                     webFolderSelectorFiles={webFolderSelectorFiles}

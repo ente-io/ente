@@ -6,7 +6,7 @@ import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
 import { SetCollectionNamerAttributes } from '../Collections/CollectionNamer';
-import { SetCollectionSelectorAttributes } from 'types/gallery';
+import { SetCollections, SetCollectionSelectorAttributes } from 'types/gallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
@@ -61,6 +61,7 @@ interface Props {
     setUploadInProgress: (value: boolean) => void;
     showCollectionSelector: () => void;
     setFiles: SetFiles;
+    setCollections: SetCollections;
     isFirstUpload: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
@@ -291,7 +292,10 @@ export default function Uploader(props: Props) {
                         existingCollection
                     );
                     collections.push(collection);
-
+                    props.setCollections([
+                        ...existingCollection,
+                        ...collections,
+                    ]);
                     filesWithCollectionToUpload.push(
                         ...files.map((file) => ({
                             localID: index++,
