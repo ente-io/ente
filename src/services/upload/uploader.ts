@@ -8,7 +8,7 @@ import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
 import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
@@ -49,9 +49,20 @@ export default async function uploader(
             existingFiles,
             metadata
         );
-        if (matchingExistingFiles?.length > 0) {
+        addLocalLog(
+            () =>
+                `matchedFileList: ${matchingExistingFiles
+                    .map((f) => `${f.id}-${f.metadata.title}`)
+                    .join(',')}`
+        );
+        if (matchingExistingFiles?.length) {
             const matchingExistingFilesCollectionIDs =
                 matchingExistingFiles.map((e) => e.collectionID);
+            addLocalLog(
+                () =>
+                    `matched file collectionIDs:${matchingExistingFilesCollectionIDs}
+                       and collectionID:${collection.id}`
+            );
             if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
                 addLogLine(
                     `file already present in the collection , skipped upload for  ${fileNameSize}`
@@ -59,7 +70,7 @@ export default async function uploader(
                 return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
             } else {
                 addLogLine(
-                    `same file in other collection found for  ${fileNameSize}`
+                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
                 );
                 // any of the matching file can used to add a symlink
                 const resultFile = Object.assign({}, existingFiles[0]);
