@@ -438,6 +438,9 @@ class UploadManager {
                     );
                     break;
                 case UPLOAD_RESULT.ALREADY_UPLOADED:
+                case UPLOAD_RESULT.UNSUPPORTED:
+                case UPLOAD_RESULT.TOO_LARGE:
+                case UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE:
                     // no-op
                     break;
                 case UPLOAD_RESULT.CANCELLED:
