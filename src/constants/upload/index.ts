@@ -52,7 +52,7 @@ export enum UPLOAD_STRATEGY {
     COLLECTION_PER_FOLDER,
 }
 
-export enum UPLOAD_TYPE {
+export enum PICKED_UPLOAD_TYPE {
     FILES = 'files',
     FOLDERS = 'folders',
     ZIPS = 'zips',

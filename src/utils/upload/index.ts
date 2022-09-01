@@ -8,7 +8,7 @@ import { EnteFile } from 'types/file';
 import {
     A_SEC_IN_MICROSECONDS,
     DEFAULT_IMPORT_SUGGESTION,
-    UPLOAD_TYPE,
+    PICKED_UPLOAD_TYPE,
 } from 'constants/upload';
 import { FILE_TYPE } from 'constants/file';
 import { METADATA_FOLDER_NAME } from 'constants/export';
@@ -133,10 +133,10 @@ export function areFileWithCollectionsSame(
 }
 
 export function getImportSuggestion(
-    uploadType: UPLOAD_TYPE,
+    uploadType: PICKED_UPLOAD_TYPE,
     toUploadFiles: File[] | ElectronFile[]
 ): ImportSuggestion {
-    if (isElectron() && uploadType === UPLOAD_TYPE.FILES) {
+    if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
         return DEFAULT_IMPORT_SUGGESTION;
     }
 
