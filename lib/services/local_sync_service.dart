@@ -290,7 +290,7 @@ class LocalSyncService {
         await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
     FilesDB.instance.insertLocalAssets(
       result.item1,
-      autoSync: Configuration.instance.hasSelectedAllFoldersForBackup(),
+      shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
     final List<File> files = result.item2;
     if (files.isNotEmpty) {

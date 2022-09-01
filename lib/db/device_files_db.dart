@@ -129,7 +129,7 @@ extension DeviceFiles on FilesDB {
   // todo: covert it to batch
   Future<void> insertLocalAssets(
     List<LocalPathAsset> localPathAssets, {
-    bool autoSync = false,
+    bool shouldAutoBackup = false,
   }) async {
     final Database db = await database;
     final Map<String, Set<String>> pathIDToLocalIDsMap = {};
@@ -149,7 +149,7 @@ extension DeviceFiles on FilesDB {
             {
               "id": localPathAsset.pathID,
               "name": localPathAsset.pathName,
-              "should_backup": autoSync ? _sqlBoolTrue : _sqlBoolFalse
+              "should_backup": shouldAutoBackup ? _sqlBoolTrue : _sqlBoolFalse
             },
             conflictAlgorithm: ConflictAlgorithm.ignore,
           );
