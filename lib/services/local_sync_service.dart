@@ -288,7 +288,7 @@ class LocalSyncService {
     );
     final Tuple2<List<LocalPathAsset>, List<File>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
-    FilesDB.instance.insertLocalAssets(
+    await FilesDB.instance.insertLocalAssets(
       result.item1,
       shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );

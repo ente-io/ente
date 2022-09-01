@@ -156,8 +156,9 @@ extension DeviceFiles on FilesDB {
         }
       }
       // add the mappings for localIDs
-      debugPrint("Insert pathToLocalIDs mapping while importing localAssets");
-      await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
+      if (pathIDToLocalIDsMap.isNotEmpty) {
+        await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
+      }
     } catch (e) {
       _logger.severe("failed to save path names", e);
       rethrow;
