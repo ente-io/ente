@@ -1019,8 +1019,6 @@ class FilesDB {
     );
   }
 
-  // getLocalFiles is used in multiple places. Do not add dedupte logic
-  // while
   Future<List<File>> getLocalFiles(List<String> localIDs) async {
     String inParam = "";
     for (final localID in localIDs) {

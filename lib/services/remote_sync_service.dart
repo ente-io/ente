@@ -27,7 +27,6 @@ import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 class RemoteSyncService {
   final _logger = Logger("RemoteSyncService");
@@ -228,20 +227,19 @@ class RemoteSyncService {
     final deviceCollections = await fileDb.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
     await _createCollectionsForDevicePath(deviceCollections);
-    final Map<String, Set<String>> unSyncedPathIdToLocalIDs =
+    final Map<String, Set<String>> pathIdToLocalIDs =
         await fileDb.getDevicePathIDToLocalIDMap();
     /*
        A) Check if mapping for localID already exist in the collection
        B) Check if
      */
-    for (final eachDevicePath in deviceCollections) {
-      debugPrint("Processing ${eachDevicePath.name}");
-      final String pathID = eachDevicePath.id;
+    for (final deviceCollection in deviceCollections) {
+      debugPrint("Processing ${deviceCollection.name}");
       final Set<String> unSyncedLocalIDs =
-          unSyncedPathIdToLocalIDs[eachDevicePath.id] ?? {};
-      if (unSyncedLocalIDs.isNotEmpty && eachDevicePath.collectionID != -1) {
+          pathIdToLocalIDs[deviceCollection.id] ?? {};
+      if (unSyncedLocalIDs.isNotEmpty && deviceCollection.collectionID != -1) {
         await fileDb.setCollectionIDForUnMappedLocalFiles(
-          eachDevicePath.collectionID,
+          deviceCollection.collectionID,
           unSyncedLocalIDs,
         );
 
@@ -249,17 +247,13 @@ class RemoteSyncService {
         // the collection. This can happen when a user has marked a folder
         // for sync, then un-synced it and again tries to mark if for sync.
         final Set<String> existingMapping = await fileDb
-            .getLocalFileIDsForCollection(eachDevicePath.collectionID);
+            .getLocalFileIDsForCollection(deviceCollection.collectionID);
         final Set<String> commonElements =
             unSyncedLocalIDs.intersection(existingMapping);
         if (commonElements.isNotEmpty) {
           debugPrint(
             "${commonElements.length} files already existing in "
-            "collection ${eachDevicePath.collectionID} for ${eachDevicePath.name}",
-          );
-          await fileDb.insertPathIDToLocalIDMapping(
-            {pathID: commonElements},
-            conflictAlgorithm: ConflictAlgorithm.replace,
+            "collection ${deviceCollection.collectionID} for ${deviceCollection.name}",
           );
           unSyncedLocalIDs.removeAll(commonElements);
         }
@@ -270,28 +264,24 @@ class RemoteSyncService {
         if (unSyncedLocalIDs.isNotEmpty) {
           debugPrint(
             'Adding new entries for ${unSyncedLocalIDs.length} files'
-            ' for ${eachDevicePath.name}',
+            ' for ${deviceCollection.name}',
           );
-          final filesWithPotentialCollectionID =
+          final filesWithCollectionID =
               await fileDb.getLocalFiles(unSyncedLocalIDs.toList());
           final List<File> newFilesToInsert = [];
           final Set<String> fileFoundForLocalIDs = {};
-          for (var existingFile in filesWithPotentialCollectionID) {
+          for (var existingFile in filesWithCollectionID) {
             final String localID = existingFile.localID;
-            if (localID != null && !fileFoundForLocalIDs.contains(localID)) {
-              existingFile.collectionID = eachDevicePath.collectionID;
-              existingFile.uploadedFileID = -1;
-              existingFile.ownerID = null;
+            if (!fileFoundForLocalIDs.contains(localID)) {
               existingFile.generatedID = null;
+              existingFile.collectionID = deviceCollection.collectionID;
+              existingFile.uploadedFileID = null;
+              existingFile.ownerID = null;
               newFilesToInsert.add(existingFile);
               fileFoundForLocalIDs.add(localID);
             }
           }
           await fileDb.insertMultiple(newFilesToInsert);
-          await fileDb.insertPathIDToLocalIDMapping(
-            {pathID: fileFoundForLocalIDs},
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
           unSyncedLocalIDs.removeAll(fileFoundForLocalIDs);
         }
 
