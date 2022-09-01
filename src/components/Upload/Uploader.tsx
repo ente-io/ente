@@ -66,8 +66,8 @@ interface Props {
     showSessionExpiredMessage: () => void;
     showUploadFilesDialog: () => void;
     showUploadDirsDialog: () => void;
-    folderSelectorFiles: File[];
-    fileSelectorFiles: File[];
+    webFolderSelectorFiles: File[];
+    webFileSelectorFiles: File[];
     dragAndDropFiles: File[];
 }
 
@@ -131,21 +131,21 @@ export default function Uploader(props: Props) {
     useEffect(() => {
         if (
             pickedUploadType.current === PICKED_UPLOAD_TYPE.FOLDERS &&
-            props.folderSelectorFiles?.length > 0
+            props.webFolderSelectorFiles?.length > 0
         ) {
-            setWebFiles(props.folderSelectorFiles);
+            setWebFiles(props.webFolderSelectorFiles);
         } else if (
             pickedUploadType.current === PICKED_UPLOAD_TYPE.FILES &&
-            props.fileSelectorFiles?.length > 0
+            props.webFileSelectorFiles?.length > 0
         ) {
-            setWebFiles(props.fileSelectorFiles);
+            setWebFiles(props.webFileSelectorFiles);
         } else if (props.dragAndDropFiles?.length > 0) {
             setWebFiles(props.dragAndDropFiles);
         }
     }, [
         props.dragAndDropFiles,
-        props.fileSelectorFiles,
-        props.folderSelectorFiles,
+        props.webFileSelectorFiles,
+        props.webFolderSelectorFiles,
     ]);
 
     useEffect(() => {

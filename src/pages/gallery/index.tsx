@@ -160,14 +160,14 @@ export default function Gallery() {
         disabled: uploadInProgress,
     });
     const {
-        selectedFiles: fileSelectorFiles,
+        selectedFiles: webFileSelectorFiles,
         open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: folderSelectorFiles,
+        selectedFiles: webFolderSelectorFiles,
         open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
     } = useFileInput({
@@ -671,8 +671,8 @@ export default function Gallery() {
                     setUploadInProgress={setUploadInProgress}
                     setFiles={setFiles}
                     isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
-                    fileSelectorFiles={fileSelectorFiles}
-                    folderSelectorFiles={folderSelectorFiles}
+                    webFileSelectorFiles={webFileSelectorFiles}
+                    webFolderSelectorFiles={webFolderSelectorFiles}
                     dragAndDropFiles={dragAndDropFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
                     showUploadFilesDialog={openFileSelector}
