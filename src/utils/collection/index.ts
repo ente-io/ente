@@ -218,3 +218,11 @@ export const shouldShowOptions = (type: CollectionSummaryType) => {
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
 };
+
+export const getUserOwnedCollections = (collections: Collection[]) => {
+    const user: User = getData(LS_KEYS.USER);
+    if (!user?.id) {
+        throw Error('user missing');
+    }
+    return collections.filter((collection) => collection.owner.id === user.id);
+};

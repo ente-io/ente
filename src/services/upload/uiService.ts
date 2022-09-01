@@ -14,6 +14,7 @@ import {
 import { CustomError } from 'utils/error';
 import uploadCancelService from './uploadCancelService';
 
+const REQUEST_TIMEOUT_TIME = 30 * 1000; // 30 sec;
 class UIService {
     private perFileProgress: number;
     private filesUploaded: number;
@@ -75,7 +76,19 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    updateProgressBarUI() {
+    hasFilesInResultList() {
+        const finishedUploadsList = segregatedFinishedUploadsToList(
+            this.finishedUploads
+        );
+        for (const x of finishedUploadsList.values()) {
+            if (x.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private updateProgressBarUI() {
         const {
             setPercentComplete,
             setUploadCounter,
@@ -102,10 +115,10 @@ class UIService {
 
         setPercentComplete(percentComplete);
         setInProgressUploads(
-            this.convertInProgressUploadsToList(this.inProgressUploads)
+            convertInProgressUploadsToList(this.inProgressUploads)
         );
         setFinishedUploads(
-            this.segregatedFinishedUploadsToList(this.finishedUploads)
+            segregatedFinishedUploadsToList(this.finishedUploads)
         );
     }
 
@@ -115,20 +128,18 @@ class UIService {
         index = 0
     ) {
         const cancel: { exec: Canceler } = { exec: () => {} };
+        const cancelTimedOutRequest = () =>
+            cancel.exec(CustomError.REQUEST_TIMEOUT);
+
+        const cancelCancelledUploadRequest = () =>
+            cancel.exec(CustomError.UPLOAD_CANCELLED);
+
         let timeout = null;
         const resetTimeout = () => {
             if (timeout) {
                 clearTimeout(timeout);
             }
-            timeout = setTimeout(
-                () => cancel.exec(CustomError.REQUEST_TIMEOUT),
-                30 * 1000
-            );
-        };
-        const cancelIfUploadPaused = () => {
-            if (uploadCancelService.isUploadCancelationRequested()) {
-                cancel.exec(CustomError.UPLOAD_CANCELLED);
-            }
+            timeout = setTimeout(cancelTimedOutRequest, REQUEST_TIMEOUT_TIME);
         };
         return {
             cancel,
@@ -149,32 +160,33 @@ class UIService {
                 } else {
                     resetTimeout();
                 }
-                cancelIfUploadPaused();
+                if (uploadCancelService.isUploadCancelationRequested()) {
+                    cancelCancelledUploadRequest();
+                }
             },
         };
-    }
-
-    convertInProgressUploadsToList(inProgressUploads) {
-        return [...inProgressUploads.entries()].map(
-            ([localFileID, progress]) =>
-                ({
-                    localFileID,
-                    progress,
-                } as InProgressUpload)
-        );
-    }
-
-    segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
-        const segregatedFinishedUploads =
-            new Map() as SegregatedFinishedUploads;
-        for (const [localID, result] of finishedUploads) {
-            if (!segregatedFinishedUploads.has(result)) {
-                segregatedFinishedUploads.set(result, []);
-            }
-            segregatedFinishedUploads.get(result).push(localID);
-        }
-        return segregatedFinishedUploads;
     }
 }
 
 export default new UIService();
+
+function convertInProgressUploadsToList(inProgressUploads) {
+    return [...inProgressUploads.entries()].map(
+        ([localFileID, progress]) =>
+            ({
+                localFileID,
+                progress,
+            } as InProgressUpload)
+    );
+}
+
+function segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
+    const segregatedFinishedUploads = new Map() as SegregatedFinishedUploads;
+    for (const [localID, result] of finishedUploads) {
+        if (!segregatedFinishedUploads.has(result)) {
+            segregatedFinishedUploads.set(result, []);
+        }
+        segregatedFinishedUploads.get(result).push(localID);
+    }
+    return segregatedFinishedUploads;
+}

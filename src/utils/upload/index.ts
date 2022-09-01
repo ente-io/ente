@@ -1,5 +1,5 @@
 import {
-    AnalysisResult,
+    ImportSuggestion,
     ElectronFile,
     FileWithCollection,
     Metadata,
@@ -7,45 +7,27 @@ import {
 import { EnteFile } from 'types/file';
 import {
     A_SEC_IN_MICROSECONDS,
-    NULL_ANALYSIS_RESULT,
-    UPLOAD_TYPE,
+    DEFAULT_IMPORT_SUGGESTION,
+    PICKED_UPLOAD_TYPE,
 } from 'constants/upload';
 import { FILE_TYPE } from 'constants/file';
-import { METADATA_FOLDER_NAME } from 'constants/export';
+import { ENTE_METADATA_FOLDER } from 'constants/export';
 import isElectron from 'is-electron';
 
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 
-export function findMatchingExistingFile(
+export function findMatchingExistingFiles(
     existingFiles: EnteFile[],
     newFileMetadata: Metadata
-): EnteFile {
+): EnteFile[] {
+    const matchingFiles: EnteFile[] = [];
     for (const existingFile of existingFiles) {
         if (areFilesSame(existingFile.metadata, newFileMetadata)) {
-            return existingFile;
+            matchingFiles.push(existingFile);
         }
     }
-    return null;
-}
-
-export function findSameFileInOtherCollection(
-    existingFiles: EnteFile[],
-    newFileMetadata: Metadata
-) {
-    if (!hasFileHash(newFileMetadata)) {
-        return null;
-    }
-
-    for (const existingFile of existingFiles) {
-        if (
-            hasFileHash(existingFile.metadata) &&
-            areFilesWithFileHashSame(existingFile.metadata, newFileMetadata)
-        ) {
-            return existingFile;
-        }
-    }
-    return null;
+    return matchingFiles;
 }
 
 export function shouldDedupeAcrossCollection(collectionName: string): boolean {
@@ -128,12 +110,12 @@ export function areFileWithCollectionsSame(
     return firstFile.localID === secondFile.localID;
 }
 
-export function analyseUploadFiles(
-    uploadType: UPLOAD_TYPE,
+export function getImportSuggestion(
+    uploadType: PICKED_UPLOAD_TYPE,
     toUploadFiles: File[] | ElectronFile[]
-): AnalysisResult {
-    if (isElectron() && uploadType === UPLOAD_TYPE.FILES) {
-        return NULL_ANALYSIS_RESULT;
+): ImportSuggestion {
+    if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
+        return DEFAULT_IMPORT_SUGGESTION;
     }
 
     const paths: string[] = toUploadFiles.map((file) => file['path']);
@@ -161,27 +143,49 @@ export function analyseUploadFiles(
         }
     }
     return {
-        suggestedCollectionName: commonPathPrefix || null,
-        multipleFolders: firstFileFolder !== lastFileFolder,
+        rootFolderName: commonPathPrefix || null,
+        hasNestedFolders: firstFileFolder !== lastFileFolder,
     };
 }
 
-export function getCollectionWiseFiles(toUploadFiles: File[] | ElectronFile[]) {
-    const collectionWiseFiles = new Map<string, (File | ElectronFile)[]>();
+// This function groups files that are that have the same parent folder into collections
+// For Example, for user files have a directory structure like this
+//              a
+//            / |  \
+//           b  j   c
+//          /|\    /  \
+//         e f g   h  i
+//
+// The files will grouped into 3 collections.
+// [a => [j],
+// b => [e,f,g],
+// c => [h, i]]
+export function groupFilesBasedOnParentFolder(
+    toUploadFiles: File[] | ElectronFile[]
+) {
+    const collectionNameToFilesMap = new Map<string, (File | ElectronFile)[]>();
     for (const file of toUploadFiles) {
         const filePath = file['path'] as string;
 
         let folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
-        if (folderPath.endsWith(METADATA_FOLDER_NAME)) {
+        // If the parent folder of a file is "metadata"
+        // we consider it to be part of the parent folder
+        // For Eg,For FileList  -> [a/x.png, a/metadata/x.png.json]
+        // they will both we grouped into the collection "a"
+        // This is cluster the metadata json files in the same collection as the file it is for
+        if (folderPath.endsWith(ENTE_METADATA_FOLDER)) {
             folderPath = folderPath.substring(0, folderPath.lastIndexOf('/'));
         }
         const folderName = folderPath.substring(
             folderPath.lastIndexOf('/') + 1
         );
-        if (!collectionWiseFiles.has(folderName)) {
-            collectionWiseFiles.set(folderName, []);
+        if (!folderName?.length) {
+            throw Error("folderName can't be null");
         }
-        collectionWiseFiles.get(folderName).push(file);
+        if (!collectionNameToFilesMap.has(folderName)) {
+            collectionNameToFilesMap.set(folderName, []);
+        }
+        collectionNameToFilesMap.get(folderName).push(file);
     }
-    return collectionWiseFiles;
+    return collectionNameToFilesMap;
 }

@@ -83,6 +83,7 @@ export function handleUploadError(error): Error {
         case CustomError.SUBSCRIPTION_EXPIRED:
         case CustomError.STORAGE_QUOTA_EXCEEDED:
         case CustomError.SESSION_EXPIRED:
+        case CustomError.UPLOAD_CANCELLED:
             throw parsedError;
     }
     return parsedError;

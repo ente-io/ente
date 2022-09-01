@@ -1,22 +1,22 @@
 interface UploadCancelStatus {
-    val: boolean;
+    value: boolean;
 }
 
 class UploadCancelService {
     private shouldUploadBeCancelled: UploadCancelStatus = {
-        val: false,
+        value: false,
     };
 
     reset() {
-        this.shouldUploadBeCancelled.val = false;
+        this.shouldUploadBeCancelled.value = false;
     }
 
     requestUploadCancelation() {
-        this.shouldUploadBeCancelled.val = true;
+        this.shouldUploadBeCancelled.value = true;
     }
 
     isUploadCancelationRequested(): boolean {
-        return this.shouldUploadBeCancelled.val;
+        return this.shouldUploadBeCancelled.value;
     }
 }
 

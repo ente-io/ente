@@ -1,14 +1,14 @@
 import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
-import { findMatchingExistingFile } from 'utils/upload';
+import { findMatchingExistingFiles } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
 import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
@@ -21,7 +21,6 @@ interface UploadResponse {
 
 export default async function uploader(
     worker: any,
-    existingFilesInCollection: EnteFile[],
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
@@ -47,18 +46,35 @@ export default async function uploader(
             throw Error(CustomError.NO_METADATA);
         }
 
-        const existingFile = findMatchingExistingFile(existingFiles, metadata);
-        if (existingFile) {
-            if (existingFile.collectionID === collection.id) {
+        const matchingExistingFiles = findMatchingExistingFiles(
+            existingFiles,
+            metadata
+        );
+        addLocalLog(
+            () =>
+                `matchedFileList: ${matchingExistingFiles
+                    .map((f) => `${f.id}-${f.metadata.title}`)
+                    .join(',')}`
+        );
+        if (matchingExistingFiles?.length) {
+            const matchingExistingFilesCollectionIDs =
+                matchingExistingFiles.map((e) => e.collectionID);
+            addLocalLog(
+                () =>
+                    `matched file collectionIDs:${matchingExistingFilesCollectionIDs}
+                       and collectionID:${collection.id}`
+            );
+            if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
                 addLogLine(
                     `file already present in the collection , skipped upload for  ${fileNameSize}`
                 );
                 return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
             } else {
                 addLogLine(
-                    `same file in other collection found for  ${fileNameSize}`
+                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
                 );
-                const resultFile = Object.assign({}, existingFile);
+                // any of the matching file can used to add a symlink
+                const resultFile = Object.assign({}, matchingExistingFiles[0]);
                 resultFile.collectionID = collection.id;
                 await addToCollection(collection, [resultFile]);
                 return {
