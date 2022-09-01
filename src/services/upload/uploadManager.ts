@@ -6,6 +6,7 @@ import {
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
+    getUserOwnedNonTrashedFiles,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getMetadataJSONMapKey, parseMetadataJSON } from './metadataService';
@@ -82,7 +83,7 @@ class UploadManager {
     }
 
     async updateExistingFilesAndCollections(collections: Collection[]) {
-        this.existingFiles = await getLocalFiles();
+        this.existingFiles = getUserOwnedNonTrashedFiles(await getLocalFiles());
         this.collectionToExistingFilesMap = groupFilesBasedOnCollectionID(
             this.existingFiles
         );
