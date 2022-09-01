@@ -128,6 +128,9 @@ export default function Uploader(props: Props) {
         }
     }, []);
 
+    // this handles the change of selectorFiles changes on web when user selects
+    // files for upload through the opened file/folder selector or dragAndDrop them
+    //  the webFiles state is update which triggers the upload of those files
     useEffect(() => {
         if (
             pickedUploadType.current === PICKED_UPLOAD_TYPE.FOLDERS &&
