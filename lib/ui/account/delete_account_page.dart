@@ -2,17 +2,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/ui/tools/app_lock.dart';
-import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/email_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
@@ -145,18 +141,22 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
-    if (await LocalAuthentication().isDeviceSupported()) {
-      AppLock.of(context).setEnabled(false);
-      String reason = "Please authenticate to initiate account deletion";
-      final result = await requestAuthentication(reason);
-      AppLock.of(context).setEnabled(
-        Configuration.instance.shouldShowLockScreen(),
-      );
-      if (!result) {
-        showToast(context, reason);
-        return;
-      }
-    }
+    await UserService.instance.localAuthenticationService(
+      context,
+      "Please authenticate to initiate account deletion",
+    );
+    // if (await LocalAuthentication().isDeviceSupported()) {
+    //   AppLock.of(context).setEnabled(false);
+    //   String reason = "Please authenticate to initiate account deletion";
+    //   final result = await requestAuthentication(reason);
+    //   AppLock.of(context).setEnabled(
+    //     Configuration.instance.shouldShowLockScreen(),
+    //   );
+    //   if (!result) {
+    //     showToast(context, reason);
+    //     return;
+    //   }
+    // }
 
     final choice = await showChoiceDialog(
       context,

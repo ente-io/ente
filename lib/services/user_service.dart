@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -25,6 +26,8 @@ import 'package:photos/ui/account/password_reentry_page.dart';
 import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
+import 'package:photos/ui/tools/app_lock.dart';
+import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -843,6 +846,20 @@ class UserService {
     } catch (e, s) {
       _logger.severe("failed to fetch families token", e, s);
       rethrow;
+    }
+  }
+
+  localAuthenticationService(BuildContext context, String reason) async {
+    if (await LocalAuthentication().isDeviceSupported()) {
+      AppLock.of(context).setEnabled(false);
+      final result = await requestAuthentication(reason);
+      AppLock.of(context).setEnabled(
+        Configuration.instance.shouldShowLockScreen(),
+      );
+      if (!result) {
+        showToast(context, reason);
+        return;
+      }
     }
   }
 

@@ -18,7 +18,6 @@ import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key key}) : super(key: key);
@@ -28,7 +27,7 @@ class SecuritySectionWidget extends StatefulWidget {
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
-  static const kAuthToViewSessions =
+  static const authToViewSessions =
       "Please authenticate to view your active sessions";
 
   final _config = Configuration.instance;
@@ -84,19 +83,23 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch.adaptive(
                         value: snapshot.data,
                         onChanged: (value) async {
-                          if (await LocalAuthentication().isDeviceSupported()) {
-                            AppLock.of(context).setEnabled(false);
-                            const String reason =
-                                "Please authenticate to configure two-factor authentication";
-                            final result = await requestAuthentication(reason);
-                            AppLock.of(context).setEnabled(
-                              Configuration.instance.shouldShowLockScreen(),
-                            );
-                            if (!result) {
-                              showToast(context, reason);
-                              return;
-                            }
-                          }
+                          await UserService.instance.localAuthenticationService(
+                            context,
+                            "Please authenticate to configure two-factor authentication",
+                          );
+                          // if (await LocalAuthentication().isDeviceSupported()) {
+                          //   AppLock.of(context).setEnabled(false);
+                          //   const String reason =
+                          //       "Please authenticate to configure two-factor authentication";
+                          //   final result = await requestAuthentication(reason);
+                          //   AppLock.of(context).setEnabled(
+                          //     Configuration.instance.shouldShowLockScreen(),
+                          //   );
+                          //   if (!result) {
+                          //     showToast(context, reason);
+                          //     return;
+                          //   }
+                          // }
                           if (value) {
                             UserService.instance.setupTwoFactor(context);
                           } else {
@@ -261,16 +264,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
-          if (await LocalAuthentication().isDeviceSupported()) {
-            AppLock.of(context).setEnabled(false);
-            final result = await requestAuthentication(kAuthToViewSessions);
-            AppLock.of(context)
-                .setEnabled(Configuration.instance.shouldShowLockScreen());
-            if (!result) {
-              showToast(context, kAuthToViewSessions);
-              return;
-            }
-          }
+          await UserService.instance
+              .localAuthenticationService(context, authToViewSessions);
+          // AppLock.of(context).setEnabled(false);
+          // final result = await requestAuthentication(authToViewSessions);
+          // AppLock.of(context)
+          //     .setEnabled(Configuration.instance.shouldShowLockScreen());
+          // if (!result) {
+          //   showToast(context, authToViewSessions);
+          //   return;
+          // }
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (BuildContext context) {
