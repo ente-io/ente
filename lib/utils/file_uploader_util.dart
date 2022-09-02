@@ -103,7 +103,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
       _logger.severe(errMsg);
       throw InvalidFileUploadState(errMsg);
     }
-    String livePhotoVideoHash =
+    final String livePhotoVideoHash =
         Sodium.bin2base64(await CryptoUtil.getHash(videoUrl));
     // imgHash:vidHash
     fileHash = '$fileHash$kLivePhotoHashSeparator$livePhotoVideoHash';

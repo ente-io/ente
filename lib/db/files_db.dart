@@ -894,6 +894,16 @@ class FilesDB {
     );
   }
 
+  Future<int> updateLocalIDForUploaded(int uploadedID, String localID) async {
+    final db = await instance.database;
+    return await db.update(
+      table,
+      {columnLocalID: localID},
+      where: '$columnUploadedFileID = ? AND $columnLocalID IS NULL',
+      whereArgs: [uploadedID],
+    );
+  }
+
   Future<int> delete(int uploadedFileID) async {
     final db = await instance.database;
     return db.delete(
