@@ -6,7 +6,7 @@ import { uploadStatusStore } from '../stores/upload.store';
 import { ElectronFile, FILE_PATH_KEYS, FILE_PATH_TYPE } from '../types';
 import { logError } from '../utils/logging';
 import { ipcRenderer } from 'electron';
-import { getSavedFilePaths } from '../utils/upload';
+import { getSavedFilePaths } from '../services/upload';
 
 async function getZipEntryAsElectronFile(
     zip: StreamZip.StreamZipAsync,
