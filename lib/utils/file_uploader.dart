@@ -523,6 +523,13 @@ class FileUploader {
       );
       // should delete the fileToUploadEntry
       await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
+
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          [fileToUpload],
+          type: EventType.deletedFromEverywhere, //
+        ),
+      );
       return Tuple2(true, sameLocalSameCollection);
     }
 
@@ -546,6 +553,12 @@ class FileUploader {
         fileToUpload.localID,
       );
       await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          [fileToUpload],
+          type: EventType.deletedFromEverywhere, //
+        ),
+      );
       return Tuple2(true, fileMissingLocalButSameCollection);
     }
 
@@ -574,8 +587,10 @@ class FileUploader {
         )
         .map((e) => e.localID)
         .toSet();
-    _logger.fine("Found hashMatch but probably with diff localIDs "
-        "$matchLocalIDs");
+    _logger.fine(
+      "Found hashMatch but probably with diff localIDs "
+      "$matchLocalIDs",
+    );
     // case e
     return Tuple2(false, fileToUpload);
   }
