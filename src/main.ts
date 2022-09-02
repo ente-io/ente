@@ -74,4 +74,6 @@ if (!gotTheLock) {
         handleDownloads(mainWindow);
         addAllowOriginHeader(mainWindow);
     });
+
+    app.on('before-quit', () => setIsAppQuitting(true));
 }
