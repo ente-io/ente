@@ -67,6 +67,10 @@ class UploadManager {
         this.setFiles = setFiles;
     }
 
+    public isUploadRunning() {
+        return this.uploadInProgress;
+    }
+
     private resetState() {
         this.filesToBeUploaded = [];
         this.remainingFiles = [];
@@ -435,16 +439,7 @@ class UploadManager {
                     this.failedFiles.push(fileWithCollection);
                     break;
                 case UPLOAD_RESULT.ALREADY_UPLOADED:
-                    if (isElectron()) {
-                        await watchFolderService.onFileUpload(
-                            fileWithCollection,
-                            uploadedFile
-                        );
-                    }
-                    await this.updateFilePaths(
-                        uploadedFile,
-                        fileWithCollection
-                    );
+                    decryptedFile = uploadedFile;
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
                     decryptedFile = uploadedFile;
@@ -474,6 +469,10 @@ class UploadManager {
             ) {
                 this.updateExistingFiles(decryptedFile);
                 await this.updateFilePaths(decryptedFile, fileWithCollection);
+                await this.watchFolderCallback(
+                    fileWithCollection,
+                    uploadedFile
+                );
             }
             return fileUploadResult;
         } catch (e) {

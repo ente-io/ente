@@ -668,7 +668,6 @@ export default function Gallery() {
                     )}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    uploadInProgress={uploadInProgress}
                     setUploadInProgress={setUploadInProgress}
                     setFiles={setFiles}
                     setCollections={setCollections}

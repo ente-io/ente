@@ -57,7 +57,6 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
-    uploadInProgress: boolean;
     setUploadInProgress: (value: boolean) => void;
     showCollectionSelector: () => void;
     setFiles: SetFiles;
@@ -175,7 +174,7 @@ export default function Uploader(props: Props) {
             webFiles?.length > 0 ||
             appContext.sharedFiles?.length > 0
         ) {
-            if (props.uploadInProgress) {
+            if (uploadManager.isUploadRunning()) {
                 if (watchFolderService.isUploadRunning()) {
                     // pause watch folder service on user upload
                     watchFolderService.pauseRunningSync();
@@ -383,7 +382,7 @@ export default function Uploader(props: Props) {
                         filesWithCollectionToUploadIn,
                         collections
                     );
-                } else if (watchFolderService.isServicePaused()) {
+                } else if (watchFolderService.isSyncPaused()) {
                     // resume the service after user upload is done
                     watchFolderService.resumePausedSync();
                 }

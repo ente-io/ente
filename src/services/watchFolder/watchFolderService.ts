@@ -45,7 +45,7 @@ class watchFolderService {
         return this.uploadRunning;
     }
 
-    isServicePaused() {
+    isSyncPaused() {
         return this.isPaused;
     }
 
