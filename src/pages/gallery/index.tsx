@@ -564,9 +564,7 @@ export default function Gallery() {
     };
 
     const openUploader = () => {
-        if (!uploadInProgress) {
-            setUploadTypeSelectorView(true);
-        }
+        setUploadTypeSelectorView(true);
     };
 
     return (

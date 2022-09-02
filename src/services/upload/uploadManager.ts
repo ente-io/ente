@@ -545,6 +545,10 @@ class UploadManager {
         const updatedFile = await appendNewFilePath(decryptedFile, filePath);
         await updateFileMagicMetadata([updatedFile]);
     }
+
+    public shouldAllowNewUpload = () => {
+        return !this.uploadInProgress || watchFolderService.isUploadRunning();
+    };
 }
 
 export default new UploadManager();
