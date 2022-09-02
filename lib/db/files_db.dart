@@ -492,7 +492,7 @@ class FilesDB {
       whereArgs: [ownerID, visibility],
       distinct: true,
     );
-    Set<int> collectionIDsOfHiddenFiles = {};
+    final Set<int> collectionIDsOfHiddenFiles = {};
     for (var result in results) {
       collectionIDsOfHiddenFiles.add(result['collection_id']);
     }
@@ -937,6 +937,16 @@ class FilesDB {
       _getRowForFileWithoutCollection(file),
       where: '$columnUploadedFileID = ?',
       whereArgs: [file.uploadedFileID],
+    );
+  }
+
+  Future<int> updateLocalIDForUploaded(int uploadedID, String localID) async {
+    final db = await instance.database;
+    return await db.update(
+      table,
+      {columnLocalID: localID},
+      where: '$columnUploadedFileID = ? AND $columnLocalID IS NULL',
+      whereArgs: [uploadedID],
     );
   }
 

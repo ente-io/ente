@@ -268,9 +268,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       if (widget.type == GalleryType.localFolder ||
           widget.type == GalleryType.localAll) {
         msg = "Upload";
-        iconData = Platform.isAndroid
-            ? Icons.cloud_upload
-            : CupertinoIcons.cloud_upload;
+        iconData = Icons.cloud_upload_outlined;
       }
       actions.add(
         Tooltip(
