@@ -2,3 +2,7 @@
 	path = ui
 	url = https://github.com/ente-io/bada-frame
 	branch = main
+[submodule "thirdparty/next-electron-server"]
+	path = thirdparty/next-electron-server
+	url = https://github.com/ente-io/next-electron-server.git
+	branch = desktop
