@@ -1,6 +1,3 @@
-import 'dart:io' as io;
-
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -10,8 +7,8 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/feature_flag_service.dart';
-import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/exif_util.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 
 class File extends EnteFile {
   int generatedID;
@@ -56,7 +53,9 @@ class File extends EnteFile {
 
   set pubMagicMetadata(val) => _pubMmd = val;
 
-  static const kCurrentMetadataVersion = 1;
+  // in Version 1, live photo hash is stored as zip's hash.
+  // in V2: LivePhoto hash is stored as imgHash:vidHash
+  static const kCurrentMetadataVersion = 2;
 
   File();
 
@@ -136,10 +135,21 @@ class File extends EnteFile {
     duration = metadata["duration"] ?? 0;
     exif = metadata["exif"];
     hash = metadata["hash"];
+    // handle past live photos upload from web client
+    if (hash == null &&
+        fileType == FileType.livePhoto &&
+        metadata.containsKey('imgHash') &&
+        metadata.containsKey('vidHash')) {
+      // convert to imgHash:vidHash
+      hash =
+          '${metadata['imgHash']}$kLivePhotoHashSeparator${metadata['vidHash']}';
+    }
     metadataVersion = metadata["version"] ?? 0;
   }
 
-  Future<Map<String, dynamic>> getMetadataForUpload(io.File sourceFile) async {
+  Future<Map<String, dynamic>> getMetadataForUpload(
+    MediaUploadData mediaUploadData,
+  ) async {
     final asset = await getAsset();
     // asset can be null for files shared to app
     if (asset != null) {
@@ -149,12 +159,13 @@ class File extends EnteFile {
       }
     }
     if (fileType == FileType.image) {
-      final exifTime = await getCreationTimeFromEXIF(sourceFile);
+      final exifTime =
+          await getCreationTimeFromEXIF(mediaUploadData.sourceFile);
       if (exifTime != null) {
         creationTime = exifTime.microsecondsSinceEpoch;
       }
     }
-    hash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
+    hash = mediaUploadData.hashData?.fileHash;
     return getMetadata();
   }
 

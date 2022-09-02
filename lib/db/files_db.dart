@@ -10,6 +10,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -848,6 +849,31 @@ class FilesDB {
     }
   }
 
+  Future<List<File>> getUploadedFilesWithHashes(
+    FileHashData hashData,
+    FileType fileType,
+    int ownerID,
+  ) async {
+    String inParam = "'${hashData.fileHash}'";
+    if (fileType == FileType.livePhoto && hashData.zipHash != null) {
+      inParam += ",'${hashData.zipHash}'";
+    }
+
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '($columnUploadedFileID != NULL OR $columnUploadedFileID != -1) '
+          'AND $columnOwnerID = ? AND $columnFileType ='
+          ' ? '
+          'AND $columnHash IN ($inParam)',
+      whereArgs: [
+        ownerID,
+        getInt(fileType),
+      ],
+    );
+    return _convertToFiles(rows);
+  }
+
   Future<int> update(File file) async {
     final db = await instance.database;
     return await db.update(
@@ -874,6 +900,15 @@ class FilesDB {
       table,
       where: '$columnUploadedFileID =?',
       whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<int> deleteByGeneratedID(int genID) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnGeneratedID =?',
+      whereArgs: [genID],
     );
   }
 
@@ -1089,27 +1124,11 @@ class FilesDB {
     return collectionMap.values.toList();
   }
 
-  Future<File> getLastModifiedFileInCollection(int collectionID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnCollectionID = ?',
-      whereArgs: [collectionID],
-      orderBy: '$columnUpdationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      return null;
-    }
-  }
-
   Future<Map<String, int>> getFileCountInDeviceFolders() async {
     final db = await instance.database;
     final rows = await db.rawQuery(
       '''
-      SELECT COUNT($columnGeneratedID) as count, $columnDeviceFolder
+      SELECT COUNT(DISTINCT($columnLocalID)) as count, $columnDeviceFolder
       FROM $table
       WHERE $columnLocalID IS NOT NULL
       GROUP BY $columnDeviceFolder

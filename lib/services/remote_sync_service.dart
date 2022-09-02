@@ -16,9 +16,8 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/feature_flag_service.dart';
-import 'package:photos/services/file_migration_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
+import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
@@ -32,8 +31,8 @@ class RemoteSyncService {
   final _uploader = FileUploader.instance;
   final _collectionsService = CollectionsService.instance;
   final _diffFetcher = DiffFetcher();
-  final FileMigrationService _fileMigrationService =
-      FileMigrationService.instance;
+  final LocalFileUpdateService _localFileUpdateService =
+      LocalFileUpdateService.instance;
   int _completedUploads = 0;
   SharedPreferences _prefs;
   Completer<void> _existingSync;
@@ -134,10 +133,8 @@ class RemoteSyncService {
     if (!_hasReSynced()) {
       await _markReSyncAsDone();
     }
-    if (FeatureFlagService.instance.enableMissingLocationMigration() &&
-        !_fileMigrationService.isLocationMigrationCompleted()) {
-      _fileMigrationService.runMigration();
-    }
+
+    unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
   }
 
   Future<void> _syncUpdatedCollections(bool silently) async {

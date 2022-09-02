@@ -630,6 +630,51 @@ class CollectionsService {
     }
   }
 
+  Future<File> linkLocalFileToExistingUploadedFileInAnotherCollection(
+    int destCollectionID, {
+    @required File localFileToUpload,
+    @required File existingUploadedFile,
+  }) async {
+    final params = <String, dynamic>{};
+    params["collectionID"] = destCollectionID;
+    params["files"] = [];
+    final int uploadedFileID = existingUploadedFile.uploadedFileID;
+
+    // encrypt the fileKey with destination collection's key
+    final fileKey = decryptFileKey(existingUploadedFile);
+    final encryptedKeyData =
+        CryptoUtil.encryptSync(fileKey, getCollectionKey(destCollectionID));
+
+    localFileToUpload.encryptedKey =
+        Sodium.bin2base64(encryptedKeyData.encryptedData);
+    localFileToUpload.keyDecryptionNonce =
+        Sodium.bin2base64(encryptedKeyData.nonce);
+
+    params["files"].add(
+      CollectionFileItem(
+        uploadedFileID,
+        localFileToUpload.encryptedKey,
+        localFileToUpload.keyDecryptionNonce,
+      ).toMap(),
+    );
+
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+        data: params,
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
+      );
+      localFileToUpload.collectionID = destCollectionID;
+      localFileToUpload.uploadedFileID = uploadedFileID;
+      await _filesDB.insertMultiple([localFileToUpload]);
+      return localFileToUpload;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   Future<void> restore(int toCollectionID, List<File> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
