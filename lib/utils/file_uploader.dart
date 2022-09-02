@@ -508,9 +508,8 @@ class FileUploader {
     if (existingUploadedFiles?.isEmpty ?? true) {
       // continueUploading this file
       return Tuple2(false, fileToUpload);
-    } else {
-      debugPrint("Found some matches");
     }
+
     // case a
     final File sameLocalSameCollection = existingUploadedFiles.firstWhere(
       (e) =>
@@ -518,7 +517,7 @@ class FileUploader {
       orElse: () => null,
     );
     if (sameLocalSameCollection != null) {
-      debugPrint(
+      _logger.fine(
         "sameLocalSameCollection: \n toUpload  ${fileToUpload.tag()} "
         "\n existing: ${sameLocalSameCollection.tag()}",
       );
@@ -536,12 +535,16 @@ class FileUploader {
     if (fileMissingLocalButSameCollection != null) {
       // update the local id of the existing file and delete the fileToUpload
       // entry
-      debugPrint(
+      _logger.fine(
         "fileMissingLocalButSameCollection: \n toUpload  ${fileToUpload.tag()} "
         "\n existing: ${fileMissingLocalButSameCollection.tag()}",
       );
       fileMissingLocalButSameCollection.localID = fileToUpload.localID;
-      await FilesDB.instance.insert(fileMissingLocalButSameCollection);
+      // set localID for the given uploadedID across collections
+      await FilesDB.instance.updateLocalIDForUploaded(
+        fileMissingLocalButSameCollection.uploadedFileID,
+        fileToUpload.localID,
+      );
       await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
       return Tuple2(true, fileMissingLocalButSameCollection);
     }
@@ -565,6 +568,14 @@ class FileUploader {
       );
       return Tuple2(true, linkedFile);
     }
+    final Set<String> matchLocalIDs = existingUploadedFiles
+        .where(
+          (e) => e.localID != null,
+        )
+        .map((e) => e.localID)
+        .toSet();
+    _logger.fine("Found hashMatch but probably with diff localIDs "
+        "$matchLocalIDs");
     // case e
     return Tuple2(false, fileToUpload);
   }
