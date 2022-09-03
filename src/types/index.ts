@@ -20,7 +20,7 @@ export interface KeysStoreType {
     };
 }
 
-type FileMapping = {
+type WatchedMappingSyncedFile = {
     path: string;
     id: number;
 };
@@ -29,7 +29,8 @@ export interface WatchMapping {
     rootFolderName: string;
     uploadStrategy: number;
     folderPath: string;
-    files: FileMapping[];
+    syncedFiles: WatchedMappingSyncedFile[];
+    ignoredFiles: string[];
 }
 
 export interface WatchStoreType {

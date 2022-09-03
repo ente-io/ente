@@ -23,7 +23,8 @@ export async function addWatchMapping(
         rootFolderName,
         uploadStrategy,
         folderPath,
-        files: [],
+        syncedFiles: [],
+        ignoredFiles: [],
     });
 
     setWatchMappings(watchMappings);
@@ -50,9 +51,9 @@ export async function removeWatchMapping(folderPath: string) {
     setWatchMappings(watchMappings);
 }
 
-export function updateWatchMappingFiles(
+export function updateWatchMappingSyncedFiles(
     folderPath: string,
-    files: WatchMapping['files']
+    files: WatchMapping['syncedFiles']
 ): void {
     const watchMappings = getWatchMappings();
     const watchMapping = watchMappings.find(
@@ -63,7 +64,24 @@ export function updateWatchMappingFiles(
         throw Error(`Watch mapping not found for ${folderPath}`);
     }
 
-    watchMapping.files = files;
+    watchMapping.syncedFiles = files;
+    setWatchMappings(watchMappings);
+}
+
+export function updateWatchMappingIgnoredFiles(
+    folderPath: string,
+    files: WatchMapping['ignoredFiles']
+): void {
+    const watchMappings = getWatchMappings();
+    const watchMapping = watchMappings.find(
+        (mapping) => mapping.folderPath === folderPath
+    );
+
+    if (!watchMapping) {
+        throw Error(`Watch mapping not found for ${folderPath}`);
+    }
+
+    watchMapping.ignoredFiles = files;
     setWatchMappings(watchMappings);
 }
 

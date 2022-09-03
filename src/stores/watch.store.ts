@@ -16,7 +16,7 @@ const watchStoreSchema: Schema<WatchStoreType> = {
                 folderPath: {
                     type: 'string',
                 },
-                files: {
+                syncedFiles: {
                     type: 'array',
                     items: {
                         type: 'object',
@@ -28,6 +28,12 @@ const watchStoreSchema: Schema<WatchStoreType> = {
                                 type: 'number',
                             },
                         },
+                    },
+                },
+                ignoredFiles: {
+                    type: 'array',
+                    items: {
+                        type: 'string',
                     },
                 },
             },
