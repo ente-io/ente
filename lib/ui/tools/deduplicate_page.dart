@@ -163,7 +163,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 }
               }
               return Padding(
-                padding: const EdgeInsets.only(top: 10, bottom: 10),
+                padding: const EdgeInsets.symmetric(vertical: 8),
                 child: _getGridView(
                   _duplicates[index - kHeaderRowCount],
                   index - kHeaderRowCount,
@@ -457,8 +457,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             padding: const EdgeInsets.only(right: 2),
             child: Text(
               CollectionsService.instance
-                  .getCollectionByID(file.collectionID)
-                  .name,
+                  .getCollectionNameByID(file.collectionID),
               style: Theme.of(context).textTheme.caption.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
