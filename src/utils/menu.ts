@@ -5,11 +5,15 @@ import {
     BrowserWindow,
     MenuItemConstructorOptions,
 } from 'electron';
+import {
+    getHideDockIconPreference,
+    setHideDockIconPreference,
+} from '../services/userPreference';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
+import autoLauncher from '../services/autoLauncher';
+import { isPlatformMac } from './main';
 import { showUpdateDialog } from '../services/appUpdater';
 import { isDev } from './common';
-
-const isMac = process.platform === 'darwin';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -78,8 +82,6 @@ export function buildContextMenu(
             label: 'Open ente',
             click: function () {
                 mainWindow.show();
-                const isMac = process.platform === 'darwin';
-                isMac && app.dock.show();
             },
         },
         {
@@ -93,7 +95,10 @@ export function buildContextMenu(
     return contextMenu;
 }
 
-export function buildMenuBar(): Menu {
+export async function buildMenuBar(): Promise<Menu> {
+    let isAutoLaunchEnabled = await autoLauncher.isEnabled();
+    const isMac = isPlatformMac();
+    let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
         {
             label: 'ente',
@@ -106,6 +111,32 @@ export function buildMenuBar(): Menu {
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
+                { type: 'separator' },
+                {
+                    label: 'Preferences',
+                    submenu: [
+                        {
+                            label: 'Open ente on startup',
+                            type: 'checkbox',
+                            checked: isAutoLaunchEnabled,
+                            click: () => {
+                                autoLauncher.toggleAutoLaunch();
+                                isAutoLaunchEnabled = !isAutoLaunchEnabled;
+                            },
+                        },
+                        {
+                            label: 'Hide dock icon',
+                            type: 'checkbox',
+                            checked: shouldHideDockIcon,
+                            click: () => {
+                                setHideDockIconPreference(!shouldHideDockIcon);
+                                shouldHideDockIcon = !shouldHideDockIcon;
+                            },
+                        },
+                    ],
+                },
+
+                { type: 'separator' },
                 ...((isMac
                     ? [
                           {
@@ -122,11 +153,7 @@ export function buildMenuBar(): Menu {
                 { type: 'separator' },
                 {
                     label: 'Quit ente',
-                    accelerator: 'CommandOrControl+Q',
-                    click() {
-                        setIsAppQuitting(true);
-                        app.quit();
-                    },
+                    role: 'quit',
                 },
             ],
         },

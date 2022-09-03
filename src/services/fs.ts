@@ -2,7 +2,6 @@ import { FILE_STREAM_CHUNK_SIZE } from '../config';
 import path from 'path';
 import * as fs from 'promise-fs';
 import { ElectronFile } from '../types';
-import { logError } from '../utils/logging';
 import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
 
@@ -46,7 +45,6 @@ export const getFileStream = async (filePath: string) => {
                     controller.enqueue(buff);
                 }
             } catch (e) {
-                logError(e, 'stream pull failed');
                 await fs.close(file);
             }
         },
@@ -87,6 +85,7 @@ export const getValidPaths = (paths: string[]) => {
         }
     });
 };
+
 export const getZipFileStream = async (
     zip: StreamZip.StreamZipAsync,
     filePath: string
@@ -143,7 +142,6 @@ export const getZipFileStream = async (
                     controller.close();
                 }
             } catch (e) {
-                logError(e, 'stream reading failed');
                 controller.close();
             }
         },
@@ -178,12 +176,12 @@ export const convertBrowserStreamToNode = (fileStream: any) => {
     return rs;
 };
 
-export function writeStream(filePath: string, fileStream: ReadableStream<any>) {
+export function writeStream(filePath: string, fileStream: any) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);
     readable.pipe(writeable);
 }
 
 export async function readTextFile(filePath: string) {
-    await fs.readFile(filePath, 'utf-8');
+    return await fs.readFile(filePath, 'utf-8');
 }

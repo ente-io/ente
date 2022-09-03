@@ -51,3 +51,7 @@ export const FILE_PATH_KEYS: {
 export interface SafeStorageStoreType {
     encryptionKey: string;
 }
+
+export interface UserPreferencesType {
+    hideDockIcon: boolean;
+}
