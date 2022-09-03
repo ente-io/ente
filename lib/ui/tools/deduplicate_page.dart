@@ -328,10 +328,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 const Padding(padding: EdgeInsets.all(2)),
                 Text(
                   text,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.inverseTextColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -339,7 +339,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 Text(
                   formatBytes(size),
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.7),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .inverseTextColor
+                        .withOpacity(0.7),
                     fontSize: 12,
                   ),
                 ),
