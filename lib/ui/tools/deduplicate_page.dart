@@ -88,6 +88,48 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       appBar: AppBar(
         elevation: 0,
         title: const Text("Deduplicate Files"),
+        actions: <Widget>[
+          PopupMenuButton(
+            color: Theme.of(context).colorScheme.defaultBackgroundColor,
+            constraints: const BoxConstraints(minWidth: 180),
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(8),
+              ),
+            ),
+            onSelected: (value) {
+              setState(() {
+                _selectedFiles.clear();
+              });
+            },
+            offset: const Offset(0, 50),
+            itemBuilder: (BuildContext context) => [
+              PopupMenuItem(
+                value: true,
+                height: 32,
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.remove_circle_outline,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 1),
+                      child: Text(
+                        "Deselect all",
+                        style: Theme.of(context)
+                            .textTheme
+                            .subtitle1
+                            .copyWith(fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          )
+        ],
       ),
       body: _getBody(),
     );
@@ -141,7 +183,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             shrinkWrap: true,
           ),
         ),
-        _selectedFiles.isEmpty ? Container() : _getDeleteButton(),
+        _selectedFiles.isEmpty ? const SizedBox.shrink() : _getDeleteButton(),
       ],
     );
   }
