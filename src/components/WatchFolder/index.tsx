@@ -105,10 +105,9 @@ export default function WatchFolder({ open, onClose }: Iprops) {
     return (
         <>
             <Dialog
-                maxWidth="xs"
                 open={open}
                 onClose={onClose}
-                PaperProps={{ sx: { height: '450px' } }}>
+                PaperProps={{ sx: { height: '450px', maxWidth: '432px' } }}>
                 <DialogTitleWithCloseButton
                     onClose={onClose}
                     sx={{ '&&&': { padding: '32px 16px 16px 24px' } }}>
