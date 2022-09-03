@@ -748,7 +748,7 @@ const englishConstants = {
     FAMILY: 'Family',
     FREE: 'free',
     OF: 'of',
-    WATCHED_FOLDERS: 'Watched Folders',
+    WATCHED_FOLDERS: 'Watched folders',
     NO_FOLDERS_ADDED: 'No folders added yet!',
     FOLDERS_AUTOMATICALLY_MONITORED:
         'The folders you add here will monitored to automatically',
