@@ -469,19 +469,11 @@ class UploadManager {
             ) {
                 this.updateExistingFiles(decryptedFile);
             }
-            if (
-                [
-                    UPLOAD_RESULT.ADDED_SYMLINK,
-                    UPLOAD_RESULT.UPLOADED,
-                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
-                    UPLOAD_RESULT.ALREADY_UPLOADED,
-                ].includes(fileUploadResult)
-            ) {
-                await this.watchFolderCallback(
-                    fileWithCollection,
-                    uploadedFile
-                );
-            }
+            await this.watchFolderCallback(
+                fileUploadResult,
+                fileWithCollection,
+                uploadedFile
+            );
             return fileUploadResult;
         } catch (e) {
             logError(e, 'failed to do post file upload action');
@@ -494,11 +486,13 @@ class UploadManager {
     }
 
     private async watchFolderCallback(
+        fileUploadResult: UPLOAD_RESULT,
         fileWithCollection: FileWithCollection,
         uploadedFile: EnteFile
     ) {
         if (isElectron()) {
             await watchFolderService.onFileUpload(
+                fileUploadResult,
                 fileWithCollection,
                 uploadedFile
             );

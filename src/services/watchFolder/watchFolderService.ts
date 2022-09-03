@@ -17,7 +17,7 @@ import {
     diskFolderRemovedCallback,
 } from './watchFolderEventHandlers';
 import { getParentFolderName } from './utils';
-import { UPLOAD_STRATEGY } from 'constants/upload';
+import { UPLOAD_RESULT, UPLOAD_STRATEGY } from 'constants/upload';
 import uploadManager from 'services/upload/uploadManager';
 import { addLocalLog, addLogLine } from 'utils/logging';
 
@@ -26,10 +26,12 @@ class watchFolderService {
     private allElectronAPIsExist: boolean = false;
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
+    private currentlySyncedMapping: WatchMapping;
     private trashingDirQueue: string[] = [];
     private isEventRunning: boolean = false;
     private uploadRunning: boolean = false;
-    private pathToIDMap = new Map<string, number>();
+    private filePathToUploadedFileIDMap = new Map<string, number>();
+    private unUploadableFilePaths = new Set<string>();
     private isPaused = false;
     private setElectronFiles: (files: ElectronFile[]) => void;
     private setCollectionName: (collectionName: string) => void;
@@ -108,8 +110,10 @@ class watchFolderService {
         filesOnDisk: ElectronFile[]
     ) {
         const filesToUpload = filesOnDisk.filter((electronFile) => {
-            return !mapping.files.find(
-                (file) => file.path === electronFile.path
+            return (
+                !mapping.syncedFiles.find(
+                    (file) => file.path === electronFile.path
+                ) && !mapping.ignoredFiles.includes(electronFile.path)
             );
         });
 
@@ -133,7 +137,7 @@ class watchFolderService {
         mapping: WatchMapping,
         filesOnDisk: ElectronFile[]
     ) {
-        const filesToRemove = mapping.files.filter((file) => {
+        const filesToRemove = mapping.syncedFiles.filter((file) => {
             return !filesOnDisk.find(
                 (electronFile) => electronFile.path === file.path
             );
@@ -238,27 +242,40 @@ class watchFolderService {
     }
 
     private async runNextEvent() {
-        addLogLine(
-            `mappings,
+        try {
+            addLogLine(
+                `mappings,
             ${this.getWatchMappings().map((m) => JSON.stringify(m))}`
-        );
+            );
 
-        if (
-            this.eventQueue.length === 0 ||
-            this.isEventRunning ||
-            this.isPaused
-        ) {
-            return;
-        }
+            if (
+                this.eventQueue.length === 0 ||
+                this.isEventRunning ||
+                this.isPaused
+            ) {
+                return;
+            }
 
-        this.setIsEventRunning(true);
-        const event = this.clubSameCollectionEvents();
-        this.currentEvent = event;
-        addLogLine(`running event', ${JSON.stringify(event)}`);
-        if (event.type === 'upload') {
-            this.processUploadEvent();
-        } else {
-            await this.processTrashEvent();
+            this.setIsEventRunning(true);
+            const event = this.clubSameCollectionEvents();
+            this.currentEvent = event;
+            const mappings = this.getWatchMappings();
+            const mapping = mappings.find(
+                (mapping) => mapping.folderPath === this.currentEvent.folderPath
+            );
+            if (!mapping) {
+                throw Error('no Mapping found for event');
+            }
+            this.currentlySyncedMapping = mapping;
+            addLogLine(`running event', ${JSON.stringify(event)}`);
+            if (event.type === 'upload') {
+                this.processUploadEvent();
+            } else {
+                await this.processTrashEvent();
+            }
+        } catch (e) {
+            logError(e, 'runNextEvent failed');
+        } finally {
             this.setIsEventRunning(false);
             this.runNextEvent();
         }
@@ -275,25 +292,59 @@ class watchFolderService {
         }
     }
 
-    async onFileUpload(fileWithCollection: FileWithCollection, file: EnteFile) {
+    async onFileUpload(
+        fileUploadResult: UPLOAD_RESULT,
+        fileWithCollection: FileWithCollection,
+        file: EnteFile
+    ) {
         addLocalLog(() => `onFileUpload called`);
         if (!this.isUploadRunning) {
             return;
         }
-        if (fileWithCollection.isLivePhoto) {
-            this.pathToIDMap.set(
-                (fileWithCollection.livePhotoAssets.image as ElectronFile).path,
-                file.id
-            );
-            this.pathToIDMap.set(
-                (fileWithCollection.livePhotoAssets.video as ElectronFile).path,
-                file.id
-            );
-        } else {
-            this.pathToIDMap.set(
-                (fileWithCollection.file as ElectronFile).path,
-                file.id
-            );
+        if (
+            [
+                UPLOAD_RESULT.ADDED_SYMLINK,
+                UPLOAD_RESULT.UPLOADED,
+                UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
+                UPLOAD_RESULT.ALREADY_UPLOADED,
+            ].includes(fileUploadResult)
+        ) {
+            if (fileWithCollection.isLivePhoto) {
+                this.filePathToUploadedFileIDMap.set(
+                    (fileWithCollection.livePhotoAssets.image as ElectronFile)
+                        .path,
+                    file.id
+                );
+                this.filePathToUploadedFileIDMap.set(
+                    (fileWithCollection.livePhotoAssets.video as ElectronFile)
+                        .path,
+                    file.id
+                );
+            } else {
+                this.filePathToUploadedFileIDMap.set(
+                    (fileWithCollection.file as ElectronFile).path,
+                    file.id
+                );
+            }
+        } else if (
+            [UPLOAD_RESULT.UNSUPPORTED, UPLOAD_RESULT.TOO_LARGE].includes(
+                fileUploadResult
+            )
+        ) {
+            if (fileWithCollection.isLivePhoto) {
+                this.unUploadableFilePaths.add(
+                    (fileWithCollection.livePhotoAssets.image as ElectronFile)
+                        .path
+                );
+                this.unUploadableFilePaths.add(
+                    (fileWithCollection.livePhotoAssets.video as ElectronFile)
+                        .path
+                );
+            } else {
+                this.unUploadableFilePaths.add(
+                    (fileWithCollection.file as ElectronFile).path
+                );
+            }
         }
     }
 
@@ -321,29 +372,41 @@ class watchFolderService {
                     return;
                 }
 
-                const uploadedFiles: WatchMapping['files'] = [];
+                const syncedFiles: WatchMapping['syncedFiles'] = [];
+                const ignoredFiles: WatchMapping['ignoredFiles'] = [];
 
                 for (const fileWithCollection of filesWithCollection) {
-                    this.handleUploadedFile(fileWithCollection, uploadedFiles);
+                    this.handleUploadedFile(
+                        fileWithCollection,
+                        syncedFiles,
+                        ignoredFiles
+                    );
                 }
 
+                addLocalLog(() => `syncedFiles ${JSON.stringify(syncedFiles)}`);
                 addLocalLog(
-                    () => `uploadedFiles ${JSON.stringify(uploadedFiles)}`
+                    () => `ignoredFiles ${JSON.stringify(ignoredFiles)}`
                 );
 
-                if (uploadedFiles.length > 0) {
-                    const mappings = this.getWatchMappings();
-                    const mapping = mappings.find(
-                        (mapping) =>
-                            mapping.folderPath === this.currentEvent.folderPath
+                if (syncedFiles.length > 0) {
+                    this.currentlySyncedMapping.syncedFiles = [
+                        ...this.currentlySyncedMapping.syncedFiles,
+                        ...syncedFiles,
+                    ];
+                    this.ElectronAPIs.updateWatchMappingSyncedFiles(
+                        this.currentlySyncedMapping.folderPath,
+                        this.currentlySyncedMapping.syncedFiles
                     );
-                    if (mapping) {
-                        mapping.files = [...mapping.files, ...uploadedFiles];
-                        this.ElectronAPIs.updateWatchMappingFiles(
-                            mapping.folderPath,
-                            mapping.files
-                        );
-                    }
+                }
+                if (ignoredFiles.length > 0) {
+                    this.currentlySyncedMapping.ignoredFiles = [
+                        ...this.currentlySyncedMapping.ignoredFiles,
+                        ...ignoredFiles,
+                    ];
+                    this.ElectronAPIs.updateWatchMappingIgnoredFiles(
+                        this.currentlySyncedMapping.folderPath,
+                        this.currentlySyncedMapping.ignoredFiles
+                    );
                 }
 
                 this.runPostUploadsAction();
@@ -361,7 +424,8 @@ class watchFolderService {
 
     private handleUploadedFile(
         fileWithCollection: FileWithCollection,
-        uploadedFiles: { path: string; id: number }[]
+        syncedFiles: { path: string; id: number }[],
+        ignoredFiles: string[]
     ) {
         if (fileWithCollection.isLivePhoto) {
             const imagePath = (
@@ -372,40 +436,55 @@ class watchFolderService {
             ).path;
 
             if (
-                this.pathToIDMap.has(imagePath) &&
-                this.pathToIDMap.has(videoPath)
+                this.filePathToUploadedFileIDMap.has(imagePath) &&
+                this.filePathToUploadedFileIDMap.has(videoPath)
             ) {
                 const imageFile = {
                     path: imagePath,
-                    id: this.pathToIDMap.get(imagePath),
+                    id: this.filePathToUploadedFileIDMap.get(imagePath),
                 };
                 const videoFile = {
                     path: videoPath,
-                    id: this.pathToIDMap.get(videoPath),
+                    id: this.filePathToUploadedFileIDMap.get(videoPath),
                 };
-                uploadedFiles.push(imageFile);
-                uploadedFiles.push(videoFile);
+                syncedFiles.push(imageFile);
+                syncedFiles.push(videoFile);
                 addLocalLog(
                     () =>
                         `added image ${JSON.stringify(
                             imageFile
-                        )} and video file ${JSON.stringify(videoFile)}`
+                        )} and video file ${JSON.stringify(
+                            videoFile
+                        )} to uploadedFiles`
                 );
-                this.pathToIDMap.delete(imagePath);
-                this.pathToIDMap.delete(videoPath);
+            } else if (
+                this.unUploadableFilePaths.has(imagePath) &&
+                this.unUploadableFilePaths.has(videoPath)
+            ) {
+                ignoredFiles.push(imagePath);
+                ignoredFiles.push(videoPath);
+                addLocalLog(
+                    () =>
+                        `added image ${imagePath} and video file ${videoPath} to rejectedFiles`
+                );
             }
+            this.filePathToUploadedFileIDMap.delete(imagePath);
+            this.filePathToUploadedFileIDMap.delete(videoPath);
         } else {
             const filePath = (fileWithCollection.file as ElectronFile).path;
 
-            if (this.pathToIDMap.has(filePath)) {
+            if (this.filePathToUploadedFileIDMap.has(filePath)) {
                 const file = {
                     path: filePath,
-                    id: this.pathToIDMap.get(filePath),
+                    id: this.filePathToUploadedFileIDMap.get(filePath),
                 };
-                uploadedFiles.push(file);
+                syncedFiles.push(file);
                 addLocalLog(() => `added file ${JSON.stringify(file)} `);
-                this.pathToIDMap.delete(filePath);
+            } else if (this.unUploadableFilePaths.has(filePath)) {
+                ignoredFiles.push(filePath);
+                addLocalLog(() => `added file ${filePath} to rejectedFiles`);
             }
+            this.filePathToUploadedFileIDMap.delete(filePath);
         }
     }
 
@@ -415,29 +494,22 @@ class watchFolderService {
                 return;
             }
 
-            const { collectionName, folderPath, paths } = this.currentEvent;
+            const { collectionName, paths } = this.currentEvent;
             const filePathsToRemove = new Set(paths);
 
-            const mappings = this.getWatchMappings();
-            const mappingIdx = mappings.findIndex(
-                (mapping) => mapping.folderPath === folderPath
-            );
-            if (mappingIdx === -1) {
-                return;
-            }
-
-            const files = mappings[mappingIdx].files.filter((file) =>
-                filePathsToRemove.has(file.path)
+            const files = this.currentlySyncedMapping.syncedFiles.filter(
+                (file) => filePathsToRemove.has(file.path)
             );
 
             await this.trashByIDs(files, collectionName);
 
-            mappings[mappingIdx].files = mappings[mappingIdx].files.filter(
-                (file) => !filePathsToRemove.has(file.path)
-            );
-            this.ElectronAPIs.updateWatchMappingFiles(
-                mappings[mappingIdx].folderPath,
-                mappings[mappingIdx].files
+            this.currentlySyncedMapping.syncedFiles =
+                this.currentlySyncedMapping.syncedFiles.filter(
+                    (file) => !filePathsToRemove.has(file.path)
+                );
+            this.ElectronAPIs.updateWatchMappingSyncedFiles(
+                this.currentlySyncedMapping.folderPath,
+                this.currentlySyncedMapping.syncedFiles
             );
         } catch (e) {
             logError(e, 'error while running next trash');
@@ -445,7 +517,7 @@ class watchFolderService {
     }
 
     private async trashByIDs(
-        toTrashFiles: WatchMapping['files'],
+        toTrashFiles: WatchMapping['syncedFiles'],
         collectionName: string
     ) {
         try {
