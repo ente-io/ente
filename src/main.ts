@@ -1,3 +1,4 @@
+import { enableSharedArrayBufferSupport } from './utils/main';
 import { handleDockIconHideOnAutoLaunch } from './utils/main';
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
@@ -44,7 +45,7 @@ if (!gotTheLock) {
     app.quit();
 } else {
     handleDockIconHideOnAutoLaunch();
-    app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
+    enableSharedArrayBufferSupport();
     app.on('second-instance', () => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {

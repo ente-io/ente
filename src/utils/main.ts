@@ -95,3 +95,7 @@ export async function handleDockIconHideOnAutoLaunch() {
         app.dock.hide();
     }
 }
+
+export function enableSharedArrayBufferSupport() {
+    app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
+}
