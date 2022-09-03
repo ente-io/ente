@@ -15,10 +15,17 @@ class LinuxAutoLauncher implements AutoLauncherClient {
     }
     async toggleAutoLaunch() {
         if (await this.isEnabled()) {
-            await this.instance.disable();
+            await this.disableAutoLaunch();
         } else {
-            await this.instance.enable();
+            await this.enableAutoLaunch();
         }
+    }
+
+    private async disableAutoLaunch() {
+        await this.instance.disable();
+    }
+    private async enableAutoLaunch() {
+        await this.instance.enable();
     }
 }
 
