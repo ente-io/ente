@@ -468,7 +468,6 @@ class UploadManager {
                 ].includes(fileUploadResult)
             ) {
                 this.updateExistingFiles(decryptedFile);
-                await this.updateFilePaths(decryptedFile, fileWithCollection);
                 await this.watchFolderCallback(
                     fileWithCollection,
                     uploadedFile
@@ -534,6 +533,7 @@ class UploadManager {
         }
     }
 
+    // not used
     private async updateFilePaths(
         decryptedFile: EnteFile,
         fileWithCollection: FileWithCollection
