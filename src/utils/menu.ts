@@ -5,10 +5,13 @@ import {
     BrowserWindow,
     MenuItemConstructorOptions,
 } from 'electron';
+import {
+    getHideDockIconPreference,
+    setHideDockIconPreference,
+} from '../services/userPreference';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import { showUpdateDialog } from './appUpdater';
-
-const isMac = process.platform === 'darwin';
+import { isPlatformMac } from './main';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -77,8 +80,6 @@ export function buildContextMenu(
             label: 'Open ente',
             click: function () {
                 mainWindow.show();
-                const isMac = process.platform === 'darwin';
-                isMac && app.dock.show();
             },
         },
         {
@@ -93,6 +94,8 @@ export function buildContextMenu(
 }
 
 export function buildMenuBar(): Menu {
+    const isMac = isPlatformMac();
+    let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
         {
             label: 'ente',
@@ -105,6 +108,23 @@ export function buildMenuBar(): Menu {
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
+                { type: 'separator' },
+                {
+                    label: 'Preferences',
+                    submenu: [
+                        {
+                            label: 'Hide dock icon',
+                            type: 'checkbox',
+                            checked: shouldHideDockIcon,
+                            click: () => {
+                                setHideDockIconPreference(!shouldHideDockIcon);
+                                shouldHideDockIcon = !shouldHideDockIcon;
+                            },
+                        },
+                    ],
+                },
+
+                { type: 'separator' },
                 ...((isMac
                     ? [
                           {
