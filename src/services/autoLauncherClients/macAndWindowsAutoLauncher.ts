@@ -6,10 +6,10 @@ class MacAndWindowsAutoLauncher implements AutoLauncherClient {
         return app.getLoginItemSettings().openAtLogin;
     }
     async toggleAutoLaunch() {
-        if (this.isEnabled) {
-            this.enableAutoLogin();
-        } else {
+        if (await this.isEnabled()) {
             this.disableAutoLogin();
+        } else {
+            this.enableAutoLogin();
         }
     }
 
