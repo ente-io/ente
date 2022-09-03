@@ -6,6 +6,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -26,7 +27,7 @@ class DeduplicatePage extends StatefulWidget {
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
   static const kHeaderRowCount = 3;
-  static final kDeleteIconOverlay = Container(
+  static final selectedOverlay = Container(
     color: Colors.black.withOpacity(0.4),
     child: const Align(
       alignment: Alignment.bottomRight,
@@ -314,41 +315,44 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     return SizedBox(
       width: double.infinity,
       child: SafeArea(
-        child: TextButton(
-          style: OutlinedButton.styleFrom(
-            backgroundColor:
-                Theme.of(context).colorScheme.inverseBackgroundColor,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              const Padding(padding: EdgeInsets.all(2)),
-              Text(
-                text,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: TextButton(
+            style: OutlinedButton.styleFrom(
+              backgroundColor:
+                  Theme.of(context).colorScheme.inverseBackgroundColor,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Padding(padding: EdgeInsets.all(2)),
+                Text(
+                  text,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              const Padding(padding: EdgeInsets.all(2)),
-              Text(
-                formatBytes(size),
-                style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
-                  fontSize: 12,
+                const Padding(padding: EdgeInsets.all(2)),
+                Text(
+                  formatBytes(size),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 12,
+                  ),
                 ),
-              ),
-              const Padding(padding: EdgeInsets.all(2)),
-            ],
+                const Padding(padding: EdgeInsets.all(2)),
+              ],
+            ),
+            onPressed: () async {
+              await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
+              Bus.instance.fire(UserDetailsChangedEvent());
+              Navigator.of(context)
+                  .pop(DeduplicationResult(_selectedFiles.length, size));
+            },
           ),
-          onPressed: () async {
-            await deleteFilesFromRemoteOnly(context, _selectedFiles.toList());
-            Bus.instance.fire(UserDetailsChangedEvent());
-            Navigator.of(context)
-                .pop(DeduplicationResult(_selectedFiles.length, size));
-          },
         ),
       ),
     );
@@ -359,7 +363,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
+          padding: const EdgeInsets.fromLTRB(2, 4, 4, 12),
           child: Text(
             duplicates.files.length.toString() +
                 " files, " +
@@ -381,6 +385,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 4,
               crossAxisSpacing: 4,
+              childAspectRatio: 0.75,
             ),
             padding: const EdgeInsets.all(0),
           ),
@@ -417,8 +422,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         );
       },
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
+            //(screen width - (4px total horizontal padding for every thumbnail x 4 thumbnails)) / 4
             height: (MediaQuery.of(context).size.width - (4 * 4)) / 4,
             child: Stack(
               children: [
@@ -439,10 +446,21 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 _selectedFiles.contains(file)
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(4),
-                        child: kDeleteIconOverlay,
+                        child: selectedOverlay,
                       )
                     : const SizedBox.shrink(),
               ],
+            ),
+          ),
+          const SizedBox(height: 6),
+          Padding(
+            padding: const EdgeInsets.only(right: 2),
+            child: Text(
+              CollectionsService.instance
+                  .getCollectionByID(file.collectionID)
+                  .name,
+              style: Theme.of(context).textTheme.caption.copyWith(fontSize: 12),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
