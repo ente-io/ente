@@ -272,12 +272,11 @@ class watchFolderService {
                 this.processUploadEvent();
             } else {
                 await this.processTrashEvent();
+                this.setIsEventRunning(false);
+                this.runNextEvent();
             }
         } catch (e) {
             logError(e, 'runNextEvent failed');
-        } finally {
-            this.setIsEventRunning(false);
-            this.runNextEvent();
         }
     }
 
@@ -365,6 +364,10 @@ class watchFolderService {
                         collection.id === filesWithCollection[0].collectionID
                 );
                 addLocalLog(() => `got collection ${!!collection}`);
+                addLocalLog(
+                    () =>
+                        `${this.isEventRunning} ${this.currentEvent.collectionName} ${collection?.name}`
+                );
                 if (
                     !this.isEventRunning ||
                     this.currentEvent.collectionName !== collection?.name
