@@ -9,6 +9,8 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
 
@@ -95,7 +97,8 @@ class FilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabaseWithMigration(path, dbConfig);
@@ -430,6 +433,26 @@ class FilesDB {
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
+  Future<Set<int>> getCollectionIDsOfHiddenFiles(
+    int ownerID, {
+    int visibility = kVisibilityArchive,
+  }) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where:
+          '$columnOwnerID = ? AND $columnMMdVisibility = ? AND $columnCollectionID != -1',
+      columns: [columnCollectionID],
+      whereArgs: [ownerID, visibility],
+      distinct: true,
+    );
+    final Set<int> collectionIDsOfHiddenFiles = {};
+    for (var result in results) {
+      collectionIDsOfHiddenFiles.add(result['collection_id']);
+    }
+    return collectionIDsOfHiddenFiles;
+  }
+
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
     int startTime,
     int endTime,
@@ -529,14 +552,26 @@ class FilesDB {
     int endTime, {
     int limit,
     bool asc,
+    int visibility = kVisibilityVisible,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
+    String whereClause;
+    List<Object> whereArgs;
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      whereClause =
+          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnMMdVisibility = ?';
+      whereArgs = [collectionID, startTime, endTime, visibility];
+    } else {
+      whereClause =
+          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
+      whereArgs = [collectionID, startTime, endTime];
+    }
+
     final results = await db.query(
       table,
-      where:
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?',
-      whereArgs: [collectionID, startTime, endTime],
+      where: whereClause,
+      whereArgs: whereArgs,
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
       limit: limit,
@@ -814,6 +849,31 @@ class FilesDB {
     }
   }
 
+  Future<List<File>> getUploadedFilesWithHashes(
+    FileHashData hashData,
+    FileType fileType,
+    int ownerID,
+  ) async {
+    String inParam = "'${hashData.fileHash}'";
+    if (fileType == FileType.livePhoto && hashData.zipHash != null) {
+      inParam += ",'${hashData.zipHash}'";
+    }
+
+    final db = await instance.database;
+    final rows = await db.query(
+      table,
+      where: '($columnUploadedFileID != NULL OR $columnUploadedFileID != -1) '
+          'AND $columnOwnerID = ? AND $columnFileType ='
+          ' ? '
+          'AND $columnHash IN ($inParam)',
+      whereArgs: [
+        ownerID,
+        getInt(fileType),
+      ],
+    );
+    return _convertToFiles(rows);
+  }
+
   Future<int> update(File file) async {
     final db = await instance.database;
     return await db.update(
@@ -834,12 +894,31 @@ class FilesDB {
     );
   }
 
+  Future<int> updateLocalIDForUploaded(int uploadedID, String localID) async {
+    final db = await instance.database;
+    return await db.update(
+      table,
+      {columnLocalID: localID},
+      where: '$columnUploadedFileID = ? AND $columnLocalID IS NULL',
+      whereArgs: [uploadedID],
+    );
+  }
+
   Future<int> delete(int uploadedFileID) async {
     final db = await instance.database;
     return db.delete(
       table,
       where: '$columnUploadedFileID =?',
       whereArgs: [uploadedFileID],
+    );
+  }
+
+  Future<int> deleteByGeneratedID(int genID) async {
+    final db = await instance.database;
+    return db.delete(
+      table,
+      where: '$columnGeneratedID =?',
+      whereArgs: [genID],
     );
   }
 
@@ -1006,9 +1085,23 @@ class FilesDB {
   }
 
   Future<List<File>> getLatestCollectionFiles() async {
-    final db = await instance.database;
-    final rows = await db.rawQuery(
-      '''
+    String query;
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
+      query = '''
+      SELECT $table.*
+      FROM $table
+      INNER JOIN
+        (
+          SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
+          FROM $table
+          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1 AND $columnMMdVisibility = $kVisibilityVisible)
+          GROUP BY $columnCollectionID
+        ) latest_files
+        ON $table.$columnCollectionID = latest_files.$columnCollectionID
+        AND $table.$columnCreationTime = latest_files.max_creation_time;
+    ''';
+    } else {
+      query = '''
       SELECT $table.*
       FROM $table
       INNER JOIN
@@ -1020,7 +1113,12 @@ class FilesDB {
         ) latest_files
         ON $table.$columnCollectionID = latest_files.$columnCollectionID
         AND $table.$columnCreationTime = latest_files.max_creation_time;
-    ''',
+    ''';
+    }
+
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      query,
     );
     final files = _convertToFiles(rows);
     // TODO: Do this de-duplication within the SQL Query
@@ -1036,27 +1134,11 @@ class FilesDB {
     return collectionMap.values.toList();
   }
 
-  Future<File> getLastModifiedFileInCollection(int collectionID) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      where: '$columnCollectionID = ?',
-      whereArgs: [collectionID],
-      orderBy: '$columnUpdationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return _getFileFromRow(rows[0]);
-    } else {
-      return null;
-    }
-  }
-
   Future<Map<String, int>> getFileCountInDeviceFolders() async {
     final db = await instance.database;
     final rows = await db.rawQuery(
       '''
-      SELECT COUNT($columnGeneratedID) as count, $columnDeviceFolder
+      SELECT COUNT(DISTINCT($columnLocalID)) as count, $columnDeviceFolder
       FROM $table
       WHERE $columnLocalID IS NOT NULL
       GROUP BY $columnDeviceFolder
