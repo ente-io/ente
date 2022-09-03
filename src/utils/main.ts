@@ -61,3 +61,7 @@ export function setupMacWindowOnDockIconClick() {
 export function setupMainMenu() {
     Menu.setApplicationMenu(buildMenuBar());
 }
+
+export function isPlatformMac() {
+    return process.platform === 'darwin';
+}
