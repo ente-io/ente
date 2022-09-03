@@ -1,5 +1,6 @@
 import { ElectronFile } from 'types/upload';
 import { EventQueueItem } from 'types/watchFolder';
+import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 import watchFolderService from './watchFolderService';
 
@@ -14,8 +15,6 @@ export async function diskFileAddedCallback(file: ElectronFile) {
 
         const { collectionName, folderPath } = collectionNameAndFolderPath;
 
-        console.log('added (upload) to event queue', collectionName, file);
-
         const event: EventQueueItem = {
             type: 'upload',
             collectionName,
@@ -23,6 +22,7 @@ export async function diskFileAddedCallback(file: ElectronFile) {
             files: [file],
         };
         watchFolderService.pushEvent(event);
+        addLogLine(`added (upload) to event queue, ${JSON.stringify(event)}`);
     } catch (e) {
         logError(e, 'error while calling diskFileAddedCallback');
     }
@@ -39,8 +39,6 @@ export async function diskFileRemovedCallback(filePath: string) {
 
         const { collectionName, folderPath } = collectionNameAndFolderPath;
 
-        console.log('added (trash) to event queue', collectionName, filePath);
-
         const event: EventQueueItem = {
             type: 'trash',
             collectionName,
@@ -48,6 +46,7 @@ export async function diskFileRemovedCallback(filePath: string) {
             paths: [filePath],
         };
         watchFolderService.pushEvent(event);
+        addLogLine(`added (trash) to event queue, ${JSON.stringify(event)}`);
     } catch (e) {
         logError(e, 'error while calling diskFileRemovedCallback');
     }
@@ -66,6 +65,7 @@ export async function diskFolderRemovedCallback(folderPath: string) {
         if (mappedFolderPath === folderPath) {
             watchFolderService.pushTrashedDir(folderPath);
         }
+        addLogLine(`added trashedDir, ${folderPath}`);
     } catch (e) {
         logError(e, 'error while calling diskFolderRemovedCallback');
     }

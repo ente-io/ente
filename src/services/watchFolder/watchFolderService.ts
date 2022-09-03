@@ -19,6 +19,7 @@ import {
 import { getParentFolderName } from './utils';
 import { UPLOAD_STRATEGY } from 'constants/upload';
 import uploadManager from 'services/upload/uploadManager';
+import { addLogLine } from 'utils/logging';
 
 class watchFolderService {
     private ElectronAPIs: ElectronAPIs;
@@ -74,7 +75,7 @@ class watchFolderService {
         try {
             let mappings = this.getWatchMappings();
 
-            console.log('mappings', mappings);
+            addLogLine(`mappings, ${mappings.map((m) => JSON.stringify(m))}`);
 
             if (!mappings?.length) {
                 return;
@@ -237,7 +238,10 @@ class watchFolderService {
     }
 
     private async runNextEvent() {
-        console.log('mappings', this.getWatchMappings());
+        addLogLine(
+            `mappings,
+            ${this.getWatchMappings().map((m) => JSON.stringify(m))}`
+        );
 
         if (
             this.eventQueue.length === 0 ||
@@ -250,7 +254,7 @@ class watchFolderService {
         this.setIsEventRunning(true);
         const event = this.clubSameCollectionEvents();
         this.currentEvent = event;
-        console.log('running event', event);
+        addLogLine(`running event', ${JSON.stringify(event)}`);
         if (event.type === 'upload') {
             this.processUploadEvent();
         } else {
