@@ -468,6 +468,15 @@ class UploadManager {
                 ].includes(fileUploadResult)
             ) {
                 this.updateExistingFiles(decryptedFile);
+            }
+            if (
+                [
+                    UPLOAD_RESULT.ADDED_SYMLINK,
+                    UPLOAD_RESULT.UPLOADED,
+                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
+                    UPLOAD_RESULT.ALREADY_UPLOADED,
+                ].includes(fileUploadResult)
+            ) {
                 await this.watchFolderCallback(
                     fileWithCollection,
                     uploadedFile
