@@ -10,8 +10,9 @@ import {
     setHideDockIconPreference,
 } from '../services/userPreference';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
-import { showUpdateDialog } from '../services/appUpdater';
+import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
+import { showUpdateDialog } from '../services/appUpdater';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -93,7 +94,8 @@ export function buildContextMenu(
     return contextMenu;
 }
 
-export function buildMenuBar(): Menu {
+export async function buildMenuBar(): Promise<Menu> {
+    let isAutoLaunchEnabled = await autoLauncher.isEnabled();
     const isMac = isPlatformMac();
     let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
@@ -112,6 +114,15 @@ export function buildMenuBar(): Menu {
                 {
                     label: 'Preferences',
                     submenu: [
+                        {
+                            label: 'Open ente on startup',
+                            type: 'checkbox',
+                            checked: isAutoLaunchEnabled,
+                            click: () => {
+                                autoLauncher.toggleAutoLaunch();
+                                isAutoLaunchEnabled = !isAutoLaunchEnabled;
+                            },
+                        },
                         {
                             label: 'Hide dock icon',
                             type: 'checkbox',

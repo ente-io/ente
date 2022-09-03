@@ -5,8 +5,9 @@ import { isAppQuitting } from '../main';
 import { PROD_HOST_URL } from '../config';
 import { isPlatformMac } from './main';
 import { getHideDockIconPreference } from '../services/userPreference';
+import autoLauncher from '../services/autoLauncher';
 
-export function createWindow(): BrowserWindow {
+export async function createWindow(): Promise<BrowserWindow> {
     const appImgPath = isDev
         ? 'build/window-icon.png'
         : path.join(process.resourcesPath, 'window-icon.png');
@@ -24,10 +25,13 @@ export function createWindow(): BrowserWindow {
         show: false, // don't show the main window on load
     });
     mainWindow.maximize();
+    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+
     const splash = new BrowserWindow({
         height: 600,
         width: 800,
         transparent: true,
+        show: !wasAutoLaunched,
     });
     splash.maximize();
 
@@ -44,16 +48,17 @@ export function createWindow(): BrowserWindow {
     }
     mainWindow.webContents.on('did-fail-load', () => {
         splash.close();
-        mainWindow.show();
         isDev
             ? mainWindow.loadFile(`../../build/error.html`)
             : splash.loadURL(
                   `file://${path.join(process.resourcesPath, 'error.html')}`
               );
     });
-    mainWindow.once('ready-to-show', () => {
-        mainWindow.show();
+    mainWindow.once('ready-to-show', async () => {
         splash.destroy();
+        if (!wasAutoLaunched) {
+            mainWindow.show();
+        }
     });
     mainWindow.on('close', function (event) {
         if (!isAppQuitting()) {

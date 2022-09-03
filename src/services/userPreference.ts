@@ -1,4 +1,4 @@
-import { userPreferencesStore } from './store';
+import { userPreferencesStore } from '../stores/userPreferences.store';
 
 export function getHideDockIconPreference() {
     const shouldHideDockIcon = userPreferencesStore.get('hideDockIcon');

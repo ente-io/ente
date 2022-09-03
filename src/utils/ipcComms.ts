@@ -40,9 +40,8 @@ export default function setupIpcComs(
         };
         new Notification(notification).show();
     });
-
-    ipcMain.on('reload-window', () => {
-        const secondWindow = createWindow();
+    ipcMain.on('reload-window', async () => {
+        const secondWindow = await createWindow();
         mainWindow.destroy();
         mainWindow = secondWindow;
     });
