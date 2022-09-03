@@ -27,25 +27,15 @@ class DeduplicatePage extends StatefulWidget {
 class _DeduplicatePageState extends State<DeduplicatePage> {
   static const kHeaderRowCount = 3;
   static final kDeleteIconOverlay = Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-        colors: [
-          Colors.transparent,
-          Colors.black.withOpacity(0.6),
-        ],
-        stops: const [0.75, 1],
-      ),
-    ),
-    child: Align(
+    color: Colors.black.withOpacity(0.4),
+    child: const Align(
       alignment: Alignment.bottomRight,
       child: Padding(
-        padding: const EdgeInsets.only(right: 8, bottom: 4),
+        padding: EdgeInsets.only(right: 4, bottom: 4),
         child: Icon(
-          Icons.delete_forever,
-          size: 18,
-          color: Colors.red[700],
+          Icons.check_circle,
+          size: 24,
+          color: Colors.white,
         ),
       ),
     ),
@@ -326,7 +316,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       child: SafeArea(
         child: TextButton(
           style: OutlinedButton.styleFrom(
-            backgroundColor: Colors.red[700],
+            backgroundColor:
+                Theme.of(context).colorScheme.inverseBackgroundColor,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -377,18 +368,22 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             style: Theme.of(context).textTheme.subtitle2,
           ),
         ),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          // to disable GridView's scrolling
-          itemBuilder: (context, index) {
-            return _buildFile(context, duplicates.files[index], itemIndex);
-          },
-          itemCount: duplicates.files.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 4,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            // to disable GridView's scrolling
+            itemBuilder: (context, index) {
+              return _buildFile(context, duplicates.files[index], itemIndex);
+            },
+            itemCount: duplicates.files.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4,
+              crossAxisSpacing: 4,
+            ),
+            padding: const EdgeInsets.all(0),
           ),
-          padding: const EdgeInsets.all(0),
         ),
       ],
     );
@@ -421,31 +416,36 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           forceCustomPageRoute: true,
         );
       },
-      child: Container(
-        margin: const EdgeInsets.all(2.0),
-        decoration: BoxDecoration(
-          border: _selectedFiles.contains(file)
-              ? Border.all(
-                  width: 3,
-                  color: Colors.red[700],
-                )
-              : null,
-        ),
-        child: Stack(
-          children: [
-            Hero(
-              tag: "deduplicate_" + file.tag(),
-              child: ThumbnailWidget(
-                file,
-                diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-                serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
-                shouldShowLivePhotoOverlay: true,
-                key: Key("deduplicate_" + file.tag()),
-              ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: (MediaQuery.of(context).size.width - (4 * 4)) / 4,
+            child: Stack(
+              children: [
+                Hero(
+                  tag: "deduplicate_" + file.tag(),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: ThumbnailWidget(
+                      file,
+                      diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
+                      serverLoadDeferDuration:
+                          kThumbnailServerLoadDeferDuration,
+                      shouldShowLivePhotoOverlay: true,
+                      key: Key("deduplicate_" + file.tag()),
+                    ),
+                  ),
+                ),
+                _selectedFiles.contains(file)
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: kDeleteIconOverlay,
+                      )
+                    : const SizedBox.shrink(),
+              ],
             ),
-            _selectedFiles.contains(file) ? kDeleteIconOverlay : Container(),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
