@@ -14,10 +14,10 @@ class MacAndWindowsAutoLauncher implements AutoLauncherClient {
     }
 
     private disableAutoLogin() {
-        app.setLoginItemSettings({ openAsHidden: false, openAtLogin: false });
+        app.setLoginItemSettings({ openAsHidden: true, openAtLogin: false });
     }
     private enableAutoLogin() {
-        app.setLoginItemSettings({ openAsHidden: false, openAtLogin: true });
+        app.setLoginItemSettings({ openAsHidden: true, openAtLogin: true });
     }
 }
 
