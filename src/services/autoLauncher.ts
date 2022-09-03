@@ -24,6 +24,13 @@ class AutoLauncher {
         }
         await this.client.toggleAutoLaunch();
     }
+
+    wasOpenedAsHidden() {
+        if (!this.client) {
+            this.init();
+        }
+        return this.client.wasOpenedAsHidden();
+    }
 }
 
 export default new AutoLauncher();
