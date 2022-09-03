@@ -4,7 +4,7 @@ import electronReload from 'electron-reload';
 import serveNextAt from 'next-electron-server';
 import path from 'path';
 import { existsSync } from 'promise-fs';
-import appUpdater from './appUpdater';
+import appUpdater from '../services/appUpdater';
 import { isDev } from './common';
 import { buildContextMenu, buildMenuBar } from './menu';
 import autoLauncher from '../services/autoLauncher';

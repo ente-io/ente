@@ -3,7 +3,6 @@ import { handleDockIconHideOnAutoLaunch } from './utils/main';
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
-import initSentry from './utils/sentry';
 import { addAllowOriginHeader } from './utils/cors';
 import {
     setupTrayItem,
@@ -14,6 +13,7 @@ import {
     setupMainHotReload,
     setupNextElectronServe,
 } from './utils/main';
+import { initSentry } from './services/sentry';
 
 let mainWindow: BrowserWindow;
 

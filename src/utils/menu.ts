@@ -10,9 +10,9 @@ import {
     setHideDockIconPreference,
 } from '../services/userPreference';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
-import { showUpdateDialog } from './appUpdater';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
+import { showUpdateDialog } from '../services/appUpdater';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
