@@ -5,11 +5,14 @@ import {
     BrowserWindow,
     MenuItemConstructorOptions,
 } from 'electron';
+import {
+    getHideDockIconPreference,
+    setHideDockIconPreference,
+} from '../services/userPreference';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import { showUpdateDialog } from './appUpdater';
 import autoLauncher from '../services/autoLauncher';
-
-const isMac = process.platform === 'darwin';
+import { isPlatformMac } from './main';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -78,8 +81,6 @@ export function buildContextMenu(
             label: 'Open ente',
             click: function () {
                 mainWindow.show();
-                const isMac = process.platform === 'darwin';
-                isMac && app.dock.show();
             },
         },
         {
@@ -94,8 +95,9 @@ export function buildContextMenu(
 }
 
 export async function buildMenuBar(): Promise<Menu> {
-    const isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    let latestValue = isAutoLaunchEnabled;
+    let isAutoLaunchEnabled = await autoLauncher.isEnabled();
+    const isMac = isPlatformMac();
+    let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
         {
             label: 'ente',
@@ -115,14 +117,24 @@ export async function buildMenuBar(): Promise<Menu> {
                         {
                             label: 'Open ente on startup',
                             type: 'checkbox',
-                            checked: latestValue,
+                            checked: isAutoLaunchEnabled,
                             click: () => {
                                 autoLauncher.toggleAutoLaunch();
-                                latestValue = !latestValue;
+                                isAutoLaunchEnabled = !isAutoLaunchEnabled;
+                            },
+                        },
+                        {
+                            label: 'Hide dock icon',
+                            type: 'checkbox',
+                            checked: shouldHideDockIcon,
+                            click: () => {
+                                setHideDockIconPreference(!shouldHideDockIcon);
+                                shouldHideDockIcon = !shouldHideDockIcon;
                             },
                         },
                     ],
                 },
+
                 { type: 'separator' },
                 ...((isMac
                     ? [
@@ -140,11 +152,7 @@ export async function buildMenuBar(): Promise<Menu> {
                 { type: 'separator' },
                 {
                     label: 'Quit ente',
-                    accelerator: 'CommandOrControl+Q',
-                    click() {
-                        setIsAppQuitting(true);
-                        app.quit();
-                    },
+                    role: 'quit',
                 },
             ],
         },

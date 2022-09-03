@@ -1,5 +1,10 @@
 import Store, { Schema } from 'electron-store';
-import { KeysStoreType, SafeStorageStoreType, UploadStoreType } from '../types';
+import {
+    KeysStoreType,
+    SafeStorageStoreType,
+    UploadStoreType,
+    UserPreferencesType,
+} from '../types';
 
 export const uploadStoreSchema: Schema<UploadStoreType> = {
     filePaths: {
@@ -49,4 +54,15 @@ export const safeStorageSchema: Schema<SafeStorageStoreType> = {
 export const safeStorageStore = new Store({
     name: 'safeStorage',
     schema: safeStorageSchema,
+});
+
+export const userPreferencesSchema: Schema<UserPreferencesType> = {
+    hideDockIcon: {
+        type: 'boolean',
+    },
+};
+
+export const userPreferencesStore = new Store({
+    name: 'userPreferences',
+    schema: userPreferencesSchema,
 });

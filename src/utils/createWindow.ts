@@ -1,8 +1,10 @@
-import { BrowserWindow, nativeImage } from 'electron';
+import { app, BrowserWindow, nativeImage } from 'electron';
 import * as path from 'path';
 import { isDev } from './common';
 import { isAppQuitting } from '../main';
 import { PROD_HOST_URL } from '../config';
+import { isPlatformMac } from './main';
+import { getHideDockIconPreference } from '../services/userPreference';
 
 export function createWindow(): BrowserWindow {
     const appImgPath = isDev
@@ -59,6 +61,17 @@ export function createWindow(): BrowserWindow {
             mainWindow.hide();
         }
         return false;
+    });
+    mainWindow.on('hide', () => {
+        const shouldHideDockIcon = getHideDockIconPreference();
+        if (isPlatformMac() && shouldHideDockIcon) {
+            app.dock.hide();
+        }
+    });
+    mainWindow.on('show', () => {
+        if (isPlatformMac()) {
+            app.dock.show();
+        }
     });
     return mainWindow;
 }
