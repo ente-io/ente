@@ -7,6 +7,8 @@ import { existsSync } from 'promise-fs';
 import appUpdater from './appUpdater';
 import { isDev } from './common';
 import { buildContextMenu, buildMenuBar } from './menu';
+import autoLauncher from '../services/autoLauncher';
+import { getHideDockIconPreference } from '../services/userPreference';
 
 export function handleUpdates(mainWindow: BrowserWindow, tray: Tray) {
     if (!isDev) {
@@ -83,4 +85,13 @@ export function isPlatformMac() {
 
 export function isPlatformWindows() {
     return process.platform === 'win32';
+}
+
+export async function handleDockIconHideOnAutoLaunch() {
+    const shouldHideDockIcon = getHideDockIconPreference();
+    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+
+    if (isPlatformMac() && shouldHideDockIcon && wasAutoLaunched) {
+        app.dock.hide();
+    }
 }

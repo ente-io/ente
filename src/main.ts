@@ -1,3 +1,4 @@
+import { handleDockIconHideOnAutoLaunch } from './utils/main';
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
@@ -42,6 +43,7 @@ const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
 } else {
+    handleDockIconHideOnAutoLaunch();
     app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
     app.on('second-instance', () => {
         // Someone tried to run a second instance, we should focus our window.
