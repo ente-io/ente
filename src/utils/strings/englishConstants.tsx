@@ -739,7 +739,7 @@ const englishConstants = {
             </p>
         </>
     ),
-    WATCH_FOLDERS: 'Watch Folders',
+    WATCH_FOLDERS: 'Watch folders',
     UPGRADE_NOW: 'Upgrade now',
     RENEW_NOW: 'Renew now',
     STORAGE: 'Storage',

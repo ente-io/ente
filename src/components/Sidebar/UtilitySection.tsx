@@ -62,6 +62,9 @@ export default function UtilitySection({ closeSidebar }) {
 
     return (
         <>
+            <SidebarButton onClick={openWatchFolder}>
+                {constants.WATCH_FOLDERS}
+            </SidebarButton>
             <SidebarButton onClick={openRecoveryKeyModal}>
                 {constants.RECOVERY_KEY}
             </SidebarButton>
@@ -77,10 +80,6 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            <SidebarButton onClick={openWatchFolder}>
-                {constants.WATCH_FOLDERS}
-            </SidebarButton>
-
             {/* <SidebarButton onClick={openThumbnailCompressModal}>
                 {constants.COMPRESS_THUMBNAILS}
             </SidebarButton> */}
