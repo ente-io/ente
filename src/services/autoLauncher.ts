@@ -5,19 +5,23 @@ import macAndWindowsAutoLauncher from './autoLauncherClients/macAndWindowsAutoLa
 
 class AutoLauncher {
     private client: AutoLauncherClient;
-    constructor() {
+    init() {
         if (isPlatformMac() || isPlatformWindows()) {
             this.client = macAndWindowsAutoLauncher;
-            console.log('platform is Mac || windows');
         } else {
             this.client = linuxAutoLauncher;
-            console.log('platform is linux');
         }
     }
     async isEnabled() {
+        if (!this.client) {
+            this.init();
+        }
         return await this.client.isEnabled();
     }
     async toggleAutoLaunch() {
+        if (!this.client) {
+            this.init();
+        }
         await this.client.toggleAutoLaunch();
     }
 }
