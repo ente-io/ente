@@ -19,7 +19,7 @@ import {
 import { getParentFolderName } from './utils';
 import { UPLOAD_STRATEGY } from 'constants/upload';
 import uploadManager from 'services/upload/uploadManager';
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 
 class watchFolderService {
     private ElectronAPIs: ElectronAPIs;
@@ -276,6 +276,7 @@ class watchFolderService {
     }
 
     async onFileUpload(fileWithCollection: FileWithCollection, file: EnteFile) {
+        addLocalLog(() => `onFileUpload called`);
         if (!this.isUploadRunning) {
             return;
         }
@@ -302,10 +303,17 @@ class watchFolderService {
     ) {
         if (this.allElectronAPIsExist) {
             try {
+                addLocalLog(
+                    () =>
+                        `allFileUploadsDone,${JSON.stringify(
+                            filesWithCollection
+                        )} ${JSON.stringify(collections)}`
+                );
                 const collection = collections.find(
                     (collection) =>
                         collection.id === filesWithCollection[0].collectionID
                 );
+                addLocalLog(() => `got collection ${!!collection}`);
                 if (
                     !this.isEventRunning ||
                     this.currentEvent.collectionName !== collection?.name
@@ -318,6 +326,10 @@ class watchFolderService {
                 for (const fileWithCollection of filesWithCollection) {
                     this.handleUploadedFile(fileWithCollection, uploadedFiles);
                 }
+
+                addLocalLog(
+                    () => `uploadedFiles ${JSON.stringify(uploadedFiles)}`
+                );
 
                 if (uploadedFiles.length > 0) {
                     const mappings = this.getWatchMappings();
@@ -363,15 +375,22 @@ class watchFolderService {
                 this.pathToIDMap.has(imagePath) &&
                 this.pathToIDMap.has(videoPath)
             ) {
-                uploadedFiles.push({
+                const imageFile = {
                     path: imagePath,
                     id: this.pathToIDMap.get(imagePath),
-                });
-                uploadedFiles.push({
+                };
+                const videoFile = {
                     path: videoPath,
                     id: this.pathToIDMap.get(videoPath),
-                });
-
+                };
+                uploadedFiles.push(imageFile);
+                uploadedFiles.push(videoFile);
+                addLocalLog(
+                    () =>
+                        `added image ${JSON.stringify(
+                            imageFile
+                        )} and video file ${JSON.stringify(videoFile)}`
+                );
                 this.pathToIDMap.delete(imagePath);
                 this.pathToIDMap.delete(videoPath);
             }
@@ -379,11 +398,12 @@ class watchFolderService {
             const filePath = (fileWithCollection.file as ElectronFile).path;
 
             if (this.pathToIDMap.has(filePath)) {
-                uploadedFiles.push({
+                const file = {
                     path: filePath,
                     id: this.pathToIDMap.get(filePath),
-                });
-
+                };
+                uploadedFiles.push(file);
+                addLocalLog(() => `added file ${JSON.stringify(file)} `);
                 this.pathToIDMap.delete(filePath);
             }
         }
@@ -480,7 +500,7 @@ class watchFolderService {
             );
 
             if (!mapping) {
-                return null;
+                throw Error(`no mapping found for ${filePath}`);
             }
 
             return {
