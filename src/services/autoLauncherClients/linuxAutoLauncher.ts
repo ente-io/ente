@@ -1,6 +1,7 @@
 import AutoLaunch from 'auto-launch';
+import { AutoLauncherClient } from '../../types/autoLauncher';
 
-class AutoLauncher {
+class LinuxAutoLauncher implements AutoLauncherClient {
     private instance: AutoLaunch;
     constructor() {
         const autoLauncher = new AutoLaunch({
@@ -9,8 +10,8 @@ class AutoLauncher {
         });
         this.instance = autoLauncher;
     }
-    isEnabled() {
-        return this.instance.isEnabled();
+    async isEnabled() {
+        return await this.instance.isEnabled();
     }
     async toggleAutoLaunch() {
         if (await this.instance.isEnabled()) {
@@ -21,4 +22,4 @@ class AutoLauncher {
     }
 }
 
-export default new AutoLauncher();
+export default new LinuxAutoLauncher();

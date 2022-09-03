@@ -7,7 +7,7 @@ import {
 } from 'electron';
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import { showUpdateDialog } from './appUpdater';
-import autoLauncher from './autoLauncher';
+import autoLauncher from '../services/autoLauncher';
 
 const isMac = process.platform === 'darwin';
 

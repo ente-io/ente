@@ -76,3 +76,11 @@ export function setupNextElectronServe() {
         outputDir: RENDERER_OUTPUT_DIR,
     });
 }
+
+export function isPlatformMac() {
+    return process.platform === 'darwin';
+}
+
+export function isPlatformWindows() {
+    return process.platform === 'win32';
+}
