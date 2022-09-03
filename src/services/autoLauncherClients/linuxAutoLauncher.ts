@@ -22,6 +22,7 @@ class LinuxAutoLauncher implements AutoLauncherClient {
     }
 
     async wasAutoLaunched() {
+        // can't determine if it was auto launched
         return false;
     }
 
