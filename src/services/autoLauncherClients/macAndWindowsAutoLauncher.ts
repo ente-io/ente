@@ -12,8 +12,9 @@ class MacAndWindowsAutoLauncher implements AutoLauncherClient {
             this.enableAutoLogin();
         }
     }
-    async wasOpenedAsHidden() {
-        return app.getLoginItemSettings().wasOpenedAsHidden;
+
+    async wasAutoLaunched() {
+        return app.getLoginItemSettings().wasOpenedAtLogin;
     }
 
     private disableAutoLogin() {

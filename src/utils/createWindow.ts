@@ -29,7 +29,7 @@ export async function createWindow(): Promise<BrowserWindow> {
         height: 600,
         width: 800,
         transparent: true,
-        show: !(await autoLauncher.wasOpenedAsHidden()),
+        show: !(await autoLauncher.wasAutoLaunched()),
     });
     splash.maximize();
 
@@ -54,7 +54,7 @@ export async function createWindow(): Promise<BrowserWindow> {
     });
     mainWindow.once('ready-to-show', async () => {
         splash.destroy();
-        if (!(await autoLauncher.wasOpenedAsHidden())) {
+        if (!(await autoLauncher.wasAutoLaunched())) {
             mainWindow.show();
         }
     });

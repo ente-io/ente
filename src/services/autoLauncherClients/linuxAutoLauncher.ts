@@ -21,8 +21,8 @@ class LinuxAutoLauncher implements AutoLauncherClient {
         }
     }
 
-    async wasOpenedAsHidden() {
-        return this.isEnabled();
+    async wasAutoLaunched() {
+        return false;
     }
 
     private async disableAutoLaunch() {

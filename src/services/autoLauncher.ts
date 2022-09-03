@@ -25,11 +25,11 @@ class AutoLauncher {
         await this.client.toggleAutoLaunch();
     }
 
-    wasOpenedAsHidden() {
+    wasAutoLaunched() {
         if (!this.client) {
             this.init();
         }
-        return this.client.wasOpenedAsHidden();
+        return this.client.wasAutoLaunched();
     }
 }
 
