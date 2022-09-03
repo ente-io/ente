@@ -29,7 +29,7 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
             content: constants.STOP_WATCHING_DIALOG_MESSAGE,
             close: {
                 text: constants.CANCEL,
-                variant: 'primary',
+                variant: 'secondary',
             },
             proceed: {
                 action: stopWatching,
