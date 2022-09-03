@@ -1,11 +1,9 @@
+import { enableSharedArrayBufferSupport } from './utils/main';
+import { handleDockIconHideOnAutoLaunch } from './utils/main';
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
 import initSentry from './utils/sentry';
-import electronReload from 'electron-reload';
-import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from './config';
-import { isDev } from './utils/common';
-import serveNextAt from 'next-electron-server';
 import { addAllowOriginHeader } from './utils/cors';
 import {
     setupTrayItem,
@@ -13,11 +11,9 @@ import {
     handleDownloads,
     setupMacWindowOnDockIconClick,
     setupMainMenu,
+    setupMainHotReload,
+    setupNextElectronServe,
 } from './utils/main';
-
-if (isDev) {
-    electronReload(__dirname, {});
-}
 
 let mainWindow: BrowserWindow;
 
@@ -40,15 +36,16 @@ export const setIsUpdateAvailable = (value: boolean): void => {
     updateIsAvailable = value;
 };
 
-serveNextAt(PROD_HOST_URL, {
-    outputDir: RENDERER_OUTPUT_DIR,
-});
+setupMainHotReload();
+
+setupNextElectronServe();
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
 } else {
-    app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
+    handleDockIconHideOnAutoLaunch();
+    enableSharedArrayBufferSupport();
     app.on('second-instance', () => {
         // Someone tried to run a second instance, we should focus our window.
         if (mainWindow) {
@@ -63,8 +60,8 @@ if (!gotTheLock) {
     // This method will be called when Electron has finished
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
-    app.on('ready', () => {
-        mainWindow = createWindow();
+    app.on('ready', async () => {
+        mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
         setupMacWindowOnDockIconClick();
         initSentry();

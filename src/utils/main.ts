@@ -1,9 +1,14 @@
+import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
 import { nativeImage, Tray, app, BrowserWindow, Menu } from 'electron';
+import electronReload from 'electron-reload';
+import serveNextAt from 'next-electron-server';
 import path from 'path';
 import { existsSync } from 'promise-fs';
 import appUpdater from './appUpdater';
 import { isDev } from './common';
 import { buildContextMenu, buildMenuBar } from './menu';
+import autoLauncher from '../services/autoLauncher';
+import { getHideDockIconPreference } from '../services/userPreference';
 
 export function handleUpdates(mainWindow: BrowserWindow, tray: Tray) {
     if (!isDev) {
@@ -58,10 +63,39 @@ export function setupMacWindowOnDockIconClick() {
     });
 }
 
-export function setupMainMenu() {
-    Menu.setApplicationMenu(buildMenuBar());
+export async function setupMainMenu() {
+    Menu.setApplicationMenu(await buildMenuBar());
+}
+
+export function setupMainHotReload() {
+    if (isDev) {
+        electronReload(__dirname, {});
+    }
+}
+
+export function setupNextElectronServe() {
+    serveNextAt(PROD_HOST_URL, {
+        outputDir: RENDERER_OUTPUT_DIR,
+    });
 }
 
 export function isPlatformMac() {
     return process.platform === 'darwin';
+}
+
+export function isPlatformWindows() {
+    return process.platform === 'win32';
+}
+
+export async function handleDockIconHideOnAutoLaunch() {
+    const shouldHideDockIcon = getHideDockIconPreference();
+    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+
+    if (isPlatformMac() && shouldHideDockIcon && wasAutoLaunched) {
+        app.dock.hide();
+    }
+}
+
+export function enableSharedArrayBufferSupport() {
+    app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
 }
