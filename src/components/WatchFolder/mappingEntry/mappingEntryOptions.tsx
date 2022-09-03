@@ -12,6 +12,12 @@ interface Iprops {
 export default function MappingEntryOptions({ confirmStopWatching }: Iprops) {
     return (
         <OverflowMenu
+            menuPaperProps={{
+                sx: {
+                    backgroundColor: (theme) =>
+                        theme.palette.background.overPaper,
+                },
+            }}
             ariaControls={'watch-mapping-option'}
             triggerButtonIcon={<MoreHorizIcon />}>
             <OverflowMenuOption
