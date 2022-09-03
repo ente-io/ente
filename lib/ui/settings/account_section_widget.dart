@@ -35,39 +35,29 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            await UserService.instance.localAuthenticationService(
+            final hasAuthenticatedOrNoLocalAuth =
+                await UserService.instance.localAuthenticationService(
               context,
               "Please authenticate to view your recovery key",
             );
-            // if (await LocalAuthentication().isDeviceSupported()) {
-            //   AppLock.of(context).setEnabled(false);
-            //   const String reason =
-            //       "Please authenticate to view your recovery key";
-            //   final result = await requestAuthentication(reason);
-            //   AppLock.of(context)
-            //       .setEnabled(Configuration.instance.shouldShowLockScreen());
-            //   if (!result) {
-            //     showToast(context, reason);
-            //     return;
-            //   }
-            // }
-
-            String recoveryKey;
-            try {
-              recoveryKey = await _getOrCreateRecoveryKey();
-            } catch (e) {
-              showGenericErrorDialog(context);
-              return;
+            if (hasAuthenticatedOrNoLocalAuth) {
+              String recoveryKey;
+              try {
+                recoveryKey = await _getOrCreateRecoveryKey();
+              } catch (e) {
+                showGenericErrorDialog(context);
+                return;
+              }
+              routeToPage(
+                context,
+                RecoveryKeyPage(
+                  recoveryKey,
+                  "OK",
+                  showAppBar: true,
+                  onDone: () {},
+                ),
+              );
             }
-            routeToPage(
-              context,
-              RecoveryKeyPage(
-                recoveryKey,
-                "OK",
-                showAppBar: true,
-                onDone: () {},
-              ),
-            );
           },
           child: const SettingsTextItem(
             text: "Recovery key",
@@ -78,29 +68,21 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            await UserService.instance.localAuthenticationService(
+            final hasAuthenticatedOrNoLocalAuth =
+                await UserService.instance.localAuthenticationService(
               context,
               "Please authenticate to change your email",
             );
-            // if (await LocalAuthentication().isDeviceSupported()) {
-            //   AppLock.of(context).setEnabled(false);
-            //   const String reason = "Please authenticate to change your email";
-            //   final result = await requestAuthentication(reason);
-            //   AppLock.of(context)
-            //       .setEnabled(Configuration.instance.shouldShowLockScreen());
-            //   if (!result) {
-            //     showToast(context, reason);
-            //     return;
-            //   }
-            // }
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return const ChangeEmailDialog();
-              },
-              barrierColor: Colors.black.withOpacity(0.85),
-              barrierDismissible: false,
-            );
+            if (hasAuthenticatedOrNoLocalAuth) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return const ChangeEmailDialog();
+                },
+                barrierColor: Colors.black.withOpacity(0.85),
+                barrierDismissible: false,
+              );
+            }
           },
           child: const SettingsTextItem(
             text: "Change email",
@@ -111,31 +93,22 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            await UserService.instance.localAuthenticationService(
+            final hasAuthenticatedOrNoLocalAuth =
+                await UserService.instance.localAuthenticationService(
               context,
               "Please authenticate to change your password",
             );
-            // if (await LocalAuthentication().isDeviceSupported()) {
-            //   AppLock.of(context).setEnabled(false);
-            //   const String reason =
-            //       "Please authenticate to change your password";
-            //   final result = await requestAuthentication(reason);
-            //   AppLock.of(context)
-            //       .setEnabled(Configuration.instance.shouldShowLockScreen());
-            //   if (!result) {
-            //     showToast(context, reason);
-            //     return;
-            //   }
-            // }
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const PasswordEntryPage(
-                    mode: PasswordEntryMode.update,
-                  );
-                },
-              ),
-            );
+            if (hasAuthenticatedOrNoLocalAuth) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const PasswordEntryPage(
+                      mode: PasswordEntryMode.update,
+                    );
+                  },
+                ),
+              );
+            }
           },
           child: const SettingsTextItem(
             text: "Change password",

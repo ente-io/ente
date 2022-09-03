@@ -849,7 +849,10 @@ class UserService {
     }
   }
 
-  localAuthenticationService(BuildContext context, String reason) async {
+  Future<bool> localAuthenticationService(
+    BuildContext context,
+    String reason,
+  ) async {
     if (await LocalAuthentication().isDeviceSupported()) {
       AppLock.of(context).setEnabled(false);
       final result = await requestAuthentication(reason);
@@ -858,9 +861,12 @@ class UserService {
       );
       if (!result) {
         showToast(context, reason);
-        return;
+        return false;
+      } else {
+        return true;
       }
     }
+    return true;
   }
 
   Future<void> _saveConfiguration(Response response) async {

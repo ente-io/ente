@@ -141,43 +141,34 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
-    await UserService.instance.localAuthenticationService(
+    final hasAuthenticatedOrNoLocalAuth =
+        await UserService.instance.localAuthenticationService(
       context,
       "Please authenticate to initiate account deletion",
     );
-    // if (await LocalAuthentication().isDeviceSupported()) {
-    //   AppLock.of(context).setEnabled(false);
-    //   String reason = "Please authenticate to initiate account deletion";
-    //   final result = await requestAuthentication(reason);
-    //   AppLock.of(context).setEnabled(
-    //     Configuration.instance.shouldShowLockScreen(),
-    //   );
-    //   if (!result) {
-    //     showToast(context, reason);
-    //     return;
-    //   }
-    // }
 
-    final choice = await showChoiceDialog(
-      context,
-      'Are you sure you want to delete your account?',
-      'Your uploaded data will be scheduled for deletion, and your account '
-          'will be permanently deleted. \n\nThis action is not reversible.',
-      firstAction: 'Cancel',
-      secondAction: 'Delete',
-      firstActionColor: Theme.of(context).colorScheme.onSurface,
-      secondActionColor: Colors.red,
-    );
-    if (choice != DialogUserChoice.secondChoice) {
-      return;
+    if (hasAuthenticatedOrNoLocalAuth) {
+      final choice = await showChoiceDialog(
+        context,
+        'Are you sure you want to delete your account?',
+        'Your uploaded data will be scheduled for deletion, and your account '
+            'will be permanently deleted. \n\nThis action is not reversible.',
+        firstAction: 'Cancel',
+        secondAction: 'Delete',
+        firstActionColor: Theme.of(context).colorScheme.onSurface,
+        secondActionColor: Colors.red,
+      );
+      if (choice != DialogUserChoice.secondChoice) {
+        return;
+      }
+      final decryptChallenge = CryptoUtil.openSealSync(
+        Sodium.base642bin(response.encryptedChallenge),
+        Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
+        Configuration.instance.getSecretKey(),
+      );
+      final challengeResponseStr = utf8.decode(decryptChallenge);
+      await UserService.instance.deleteAccount(context, challengeResponseStr);
     }
-    final decryptChallenge = CryptoUtil.openSealSync(
-      Sodium.base642bin(response.encryptedChallenge),
-      Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
-      Configuration.instance.getSecretKey(),
-    );
-    final challengeResponseStr = utf8.decode(decryptChallenge);
-    await UserService.instance.deleteAccount(context, challengeResponseStr);
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {

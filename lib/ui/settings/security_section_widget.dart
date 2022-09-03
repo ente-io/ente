@@ -27,9 +27,6 @@ class SecuritySectionWidget extends StatefulWidget {
 }
 
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
-  static const authToViewSessions =
-      "Please authenticate to view your active sessions";
-
   final _config = Configuration.instance;
 
   StreamSubscription<TwoFactorStatusChangeEvent> _twoFactorStatusChangeEvent;
@@ -83,27 +80,18 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch.adaptive(
                         value: snapshot.data,
                         onChanged: (value) async {
-                          await UserService.instance.localAuthenticationService(
+                          final hasAuthenticatedOrNoLocalAuth =
+                              await UserService.instance
+                                  .localAuthenticationService(
                             context,
                             "Please authenticate to configure two-factor authentication",
                           );
-                          // if (await LocalAuthentication().isDeviceSupported()) {
-                          //   AppLock.of(context).setEnabled(false);
-                          //   const String reason =
-                          //       "Please authenticate to configure two-factor authentication";
-                          //   final result = await requestAuthentication(reason);
-                          //   AppLock.of(context).setEnabled(
-                          //     Configuration.instance.shouldShowLockScreen(),
-                          //   );
-                          //   if (!result) {
-                          //     showToast(context, reason);
-                          //     return;
-                          //   }
-                          // }
-                          if (value) {
-                            UserService.instance.setupTwoFactor(context);
-                          } else {
-                            _disableTwoFactor();
+                          if (hasAuthenticatedOrNoLocalAuth) {
+                            if (value) {
+                              UserService.instance.setupTwoFactor(context);
+                            } else {
+                              _disableTwoFactor();
+                            }
                           }
                         },
                       );
@@ -264,23 +252,20 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
-          await UserService.instance
-              .localAuthenticationService(context, authToViewSessions);
-          // AppLock.of(context).setEnabled(false);
-          // final result = await requestAuthentication(authToViewSessions);
-          // AppLock.of(context)
-          //     .setEnabled(Configuration.instance.shouldShowLockScreen());
-          // if (!result) {
-          //   showToast(context, authToViewSessions);
-          //   return;
-          // }
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return const SessionsPage();
-              },
-            ),
+          final hasAuthenticatedOrNoLocalAuth =
+              await UserService.instance.localAuthenticationService(
+            context,
+            "Please authenticate to view your active sessions",
           );
+          if (hasAuthenticatedOrNoLocalAuth) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const SessionsPage();
+                },
+              ),
+            );
+          }
         },
         child: const SettingsTextItem(
           text: "Active sessions",
