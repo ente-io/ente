@@ -25,11 +25,13 @@ export async function createWindow(): Promise<BrowserWindow> {
         show: false, // don't show the main window on load
     });
     mainWindow.maximize();
+    const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
+
     const splash = new BrowserWindow({
         height: 600,
         width: 800,
         transparent: true,
-        show: !(await autoLauncher.wasAutoLaunched()),
+        show: !wasAutoLaunched,
     });
     splash.maximize();
 
@@ -54,7 +56,7 @@ export async function createWindow(): Promise<BrowserWindow> {
     });
     mainWindow.once('ready-to-show', async () => {
         splash.destroy();
-        if (!(await autoLauncher.wasAutoLaunched())) {
+        if (!wasAutoLaunched) {
             mainWindow.show();
         }
     });
