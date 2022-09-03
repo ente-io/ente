@@ -141,11 +141,7 @@ export function buildMenuBar(): Menu {
                 { type: 'separator' },
                 {
                     label: 'Quit ente',
-                    accelerator: 'CommandOrControl+Q',
-                    click() {
-                        setIsAppQuitting(true);
-                        app.quit();
-                    },
+                    role: 'quit',
                 },
             ],
         },
