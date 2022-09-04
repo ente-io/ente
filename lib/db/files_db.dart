@@ -855,10 +855,8 @@ class FilesDB {
       title,
     ];
     if (Platform.isAndroid) {
-      whereClause =
-          '''($columnUploadedFileID != NULL OR $columnUploadedFileID != -1) 
-           AND ($columnOwnerID = ? OR $columnOwnerID IS NULL) AND $columnLocalID = ? AND 
-           $columnFileType = ? AND $columnTitle=? AND $columnDeviceFolder= ? 
+      whereClause = ''' ($columnOwnerID = ? OR $columnOwnerID IS NULL) AND 
+          $columnLocalID = ? AND $columnFileType = ? AND $columnTitle=? AND $columnDeviceFolder= ? 
            ''';
       whereArgs = [
         ownerID,
