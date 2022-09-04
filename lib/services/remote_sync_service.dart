@@ -6,6 +6,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
@@ -364,121 +365,166 @@ class RemoteSyncService {
     );
   }
 
+  /* _storeDiff maps each remoteDiff file to existing
+      entries in files table. When match is found, it compares both file to
+      perform relevant actions like
+      [1] Clear local cache when required (Both Shared and Owned files)
+      [2] Retain localID of remote file based on matching logic [Owned files]
+      [3] Refresh UI if visibility or creationTime has changed [Owned files]
+      [4] Schedule file update if the local file has changed since last time
+      [Owned files]
+    [Important Note: If given uploadedFileID and collectionID is already present
+     in files db, the generateID should already point to existing entry.
+     Known Issues:
+      [K1] Cached entry will not be cleared when if a file was edited and
+      moved to different collection as Vid/Image cache key is uploadedID.
+      [Existing]
+    ]
+   */
   Future _storeDiff(List<File> diff, int collectionID) async {
-    int existing = 0,
-        updated = 0,
-        remote = 0,
-        localButUpdatedOnRemote = 0,
-        localButAddedToNewCollectionOnRemote = 0;
-    bool hasAnyCreationTimeChanged = false;
-    final List<File> toBeInserted = [];
+    int sharedFileNew = 0,
+        sharedFileUpdated = 0,
+        localUploadedFromDevice = 0,
+        localButUpdatedOnDevice = 0,
+        remoteNewFile = 0;
     final int userID = Configuration.instance.getUserID();
-    for (File file in diff) {
-      final existingFiles = file.deviceFolder == null
-          ? null
-          : await _db.getMatchingFiles(file.title, file.deviceFolder);
-      if (existingFiles == null ||
-          existingFiles.isEmpty ||
-          userID != file.ownerID) {
-        // File uploaded from a different device or uploaded by different user
-        // Other rare possibilities : The local file is present on
-        // device but it's not imported in local db due to missing permission
-        // after reinstall (iOS selected file permissions or user revoking
-        // permissions, or issue/delay in importing devices files.
-        file.localID = null;
-        toBeInserted.add(file);
-        remote++;
-      } else {
-        // File exists in ente db with same title & device folder
-        // Note: The file.generatedID might be already set inside
-        // [DiffFetcher.getEncryptedFilesDiff]
-        // Try to find existing file with same localID as remote file with a fallback
-        // to finding any existing file with localID. This is needed to handle
-        // case when localID for a file changes and the file is uploaded again in
-        // the same collection
-        final fileWithLocalID = existingFiles.firstWhere(
-          (e) =>
-              file.localID != null &&
-              e.localID != null &&
-              e.localID == file.localID,
-          orElse: () => existingFiles.firstWhere(
-            (e) => e.localID != null,
-            orElse: () => null,
-          ),
-        );
-        if (fileWithLocalID != null) {
-          // File should ideally have the same localID
-          if (file.localID != null && file.localID != fileWithLocalID.localID) {
-            _logger.severe(
-              "unexpected mismatch in localIDs remote: ${file.toString()} and existing: ${fileWithLocalID.toString()}",
-            );
-          }
-          file.localID = fileWithLocalID.localID;
-        } else {
-          file.localID = null;
+    bool needsGalleryReload = false;
+    // this is required when same file is uploaded twice in the same
+    // collection. Without this check, if both remote files are part of same
+    // diff response, then we end up inserting one entry instead of two
+    // as we update the generatedID for remoteDiff to local file's genID
+    final Set<int> alreadyClaimedLocalFilesGenID = {};
+
+    final List<File> toBeInserted = [];
+    for (File remoteDiff in diff) {
+      // existingFile will be either set to existing collectionID+localID or
+      // to the unclaimed aka not already linked to any uploaded file.
+      File existingFile;
+      if (remoteDiff.generatedID != null) {
+        // Case [1] Check and clear local cache when uploadedFile already exist
+        existingFile = await _db.getFile(remoteDiff.generatedID);
+        if (_shouldClearCache(remoteDiff, existingFile)) {
+          await clearCache(remoteDiff);
         }
-        final bool wasUploadedOnAPreviousInstallation =
-            existingFiles.length == 1 && existingFiles[0].collectionID == null;
-        if (wasUploadedOnAPreviousInstallation) {
-          file.generatedID = existingFiles[0].generatedID;
-          if (file.modificationTime != existingFiles[0].modificationTime) {
-            // File was updated since the app was uninstalled
-            // mark it for re-upload
-            _logger.info(
-              "re-upload because file was updated since last installation: "
-              "remoteFile:  ${file.toString()}, localFile: ${existingFiles[0].toString()}",
-            );
-            file.modificationTime = existingFiles[0].modificationTime;
-            file.updationTime = null;
-            updated++;
-          } else {
-            existing++;
-          }
-          toBeInserted.add(file);
+      }
+
+      /* If file is not owned by the user, no further processing is required
+      as Case [2,3,4] are only relevant to files owned by user
+       */
+      if (userID != remoteDiff.ownerID) {
+        if (existingFile == null) {
+          sharedFileNew++;
+          remoteDiff.localID = null;
         } else {
-          bool foundMatchingCollection = false;
-          for (final existingFile in existingFiles) {
-            if (file.collectionID == existingFile.collectionID &&
-                file.uploadedFileID == existingFile.uploadedFileID) {
-              // File was updated on remote
-              if (file.creationTime != existingFile.creationTime) {
-                hasAnyCreationTimeChanged = true;
-              }
-              foundMatchingCollection = true;
-              file.generatedID = existingFile.generatedID;
-              toBeInserted.add(file);
-              await clearCache(file);
-              localButUpdatedOnRemote++;
-              break;
-            }
+          sharedFileUpdated++;
+          // if user has downloaded the file on the device, avoid removing the
+          // localID reference.
+          // [Todo-fix: Excluded shared file's localIDs during syncALL]
+          remoteDiff.localID = existingFile.localID;
+        }
+        toBeInserted.add(remoteDiff);
+        // end processing for file here, move to next file now
+        break;
+      }
+
+      // If remoteDiff is not already synced (i.e. existingFile is null), check
+      // if the remoteFile was uploaded from this device.
+      // Note: DeviceFolder is ignored for iOS during matching
+      if (existingFile == null && remoteDiff.localID != null) {
+        final localFileEntries = await _db.getUnlinkedLocalMatchesForRemoteFile(
+          userID,
+          remoteDiff.localID,
+          remoteDiff.fileType,
+          title: remoteDiff.title,
+          deviceFolder: remoteDiff.deviceFolder,
+        );
+        if (localFileEntries.isEmpty) {
+          // set remote file's localID as null because corresponding local file
+          // does not exist [Case 2, do not retain localID of the remote file]
+          remoteDiff.localID = null;
+        } else {
+          // case 4: Check and schedule the file for update
+          final int maxModificationTime = localFileEntries
+              .map(
+                (e) => e.modificationTime ?? 0,
+              )
+              .reduce(max);
+          if (maxModificationTime > remoteDiff.modificationTime) {
+            localButUpdatedOnDevice++;
+            await FileUpdationDB.instance.insertMultiple(
+              [remoteDiff.localID],
+              FileUpdationDB.modificationTimeUpdated,
+            );
           }
-          if (!foundMatchingCollection) {
-            // Added to a new collection
-            toBeInserted.add(file);
-            localButAddedToNewCollectionOnRemote++;
+
+          localFileEntries.removeWhere(
+            (e) =>
+                e.uploadedFileID != null ||
+                alreadyClaimedLocalFilesGenID.contains(e.generatedID),
+          );
+
+          if (localFileEntries.isNotEmpty) {
+            // file uploaded from same device, replace the local file row by
+            // setting the generated ID of remoteFile to localFile generatedID
+            existingFile = localFileEntries.first;
+            localUploadedFromDevice++;
+            alreadyClaimedLocalFilesGenID.add(existingFile.generatedID);
+            remoteDiff.generatedID = existingFile.generatedID;
           }
         }
       }
+      if (existingFile != null &&
+          _shouldReloadHomeGallery(remoteDiff, existingFile)) {
+        needsGalleryReload = true;
+      } else {
+        remoteNewFile++;
+      }
+      toBeInserted.add(remoteDiff);
     }
     await _db.insertMultiple(toBeInserted);
     _logger.info(
       "Diff to be deduplicated was: " +
           diff.length.toString() +
           " out of which \n" +
-          existing.toString() +
+          localUploadedFromDevice.toString() +
           " was uploaded from device, \n" +
-          updated.toString() +
+          localButUpdatedOnDevice.toString() +
           " was uploaded from device, but has been updated since and should be reuploaded, \n" +
-          remote.toString() +
-          " was uploaded from remote, \n" +
-          localButUpdatedOnRemote.toString() +
-          " was uploaded from device but updated on remote, and \n" +
-          localButAddedToNewCollectionOnRemote.toString() +
-          " was uploaded from device but added to a new collection on remote.",
+          sharedFileNew.toString() +
+          " new sharedFiles, \n" +
+          sharedFileUpdated.toString() +
+          " updatedSharedFiles, and \n" +
+          remoteNewFile.toString() +
+          " remoteFiles seen first time",
     );
-    if (hasAnyCreationTimeChanged) {
+    if (needsGalleryReload) {
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
     }
+  }
+
+  bool _shouldClearCache(File remoteFile, File existingFile) {
+    if (remoteFile.hash != null && existingFile.hash != null) {
+      return remoteFile.hash != existingFile.hash;
+    }
+    return remoteFile.updationTime != (existingFile.updationTime ?? 0);
+  }
+
+  bool _shouldReloadHomeGallery(File remoteFile, File existingFile) {
+    int remoteCreationTime = remoteFile.creationTime;
+    if (remoteFile.pubMmdVersion > 0 &&
+        (remoteFile.pubMagicMetadata.editedTime ?? 0) != 0) {
+      remoteCreationTime = remoteFile.pubMagicMetadata.editedTime;
+    }
+    if (remoteCreationTime != existingFile.creationTime) {
+      return true;
+    }
+    if (existingFile.mMdVersion > 0 &&
+        remoteFile.mMdVersion != existingFile.mMdVersion &&
+        remoteFile.magicMetadata.visibility !=
+            existingFile.magicMetadata.visibility) {
+      return false;
+    }
+    return false;
   }
 
   // return true if the client needs to re-sync the collections from previous
