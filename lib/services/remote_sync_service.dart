@@ -124,17 +124,16 @@ class RemoteSyncService {
   Future<void> _pullDiff(bool silently) async {
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
-
-    if (isFirstSync || _hasReSynced()) {
-      await _syncUpdatedCollections(silently);
-    } else {
-      final syncSinceTime = _getSinceTimeForReSync();
-      await _resyncAllCollectionsSinceTime(syncSinceTime);
-    }
-    if (!_hasReSynced()) {
+    // check and reset user's collection syncTime in past for older clients
+    if (isFirstSync) {
+      // not need reset syncTime, mark all flags as done if firstSync
+      await _markReSyncAsDone();
+    } else if (!_hasReSynced()) {
+      await _resetAllCollectionsSyncTime();
       await _markReSyncAsDone();
     }
 
+    await _syncUpdatedCollections(silently);
     unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
   }
 
@@ -154,15 +153,14 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
-    _logger.info('re-sync collections sinceTime: $sinceTime');
+  Future<void> _resetAllCollectionsSyncTime() async {
+    final reSyncTime = _getSinceTimeForReSync();
+    _logger.info('re-setting all collections syncTime to: $reSyncTime');
     final collections = _collectionsService.getActiveCollections();
     for (final c in collections) {
-      await _syncCollectionDiff(
-        c.id,
-        min(_collectionsService.getCollectionSyncTime(c.id), sinceTime),
-      );
-      await _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
+      final int newSyncTime =
+          min(_collectionsService.getCollectionSyncTime(c.id), reSyncTime);
+      await _collectionsService.setCollectionSyncTime(c.id, newSyncTime);
     }
   }
 
@@ -537,6 +535,10 @@ class RemoteSyncService {
   Future<void> _markReSyncAsDone() async {
     await _prefs.setBool(kHasSyncedArchiveKey, true);
     await _prefs.setBool(kHasSyncedEditTime, true);
+    // Check to avoid regression because of change or additions of keys
+    if (_hasReSynced() == false) {
+      throw Exception("Has sync should return true after markReSyncAsDone");
+    }
   }
 
   int _getSinceTimeForReSync() {
