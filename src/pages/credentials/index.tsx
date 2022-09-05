@@ -5,16 +5,13 @@ import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { PAGES } from 'constants/pages';
 import { SESSION_KEYS, getKey } from 'utils/storage/sessionStorage';
-import CryptoWorker, {
+import {
     decryptAndStoreToken,
     generateAndSaveIntermediateKeyAttributes,
     saveKeyInSessionStore,
 } from 'utils/crypto';
 import { logoutUser } from 'services/userService';
 import { isFirstLogin } from 'utils/storage';
-import SingleInputForm, {
-    SingleInputFormProps,
-} from 'components/SingleInputForm';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
@@ -23,18 +20,18 @@ import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import LinkButton from 'components/pages/gallery/LinkButton';
-import { CustomError } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
-import { Input } from '@mui/material';
+import VerifyMasterPasswordForm from 'components/VerifyMasterPasswordForm';
 
 export default function Credentials() {
     const router = useRouter();
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const appContext = useContext(AppContext);
     const [user, setUser] = useState<User>();
+
     useEffect(() => {
         router.prefetch(PAGES.GALLERY);
         const main = async () => {
@@ -70,58 +67,25 @@ export default function Credentials() {
         appContext.showNavBar(true);
     }, []);
 
-    const verifyPassphrase: SingleInputFormProps['callback'] = async (
-        passphrase,
-        setFieldError
-    ) => {
+    const useMasterPassword = async (success, passphrase, key) => {
         try {
-            const cryptoWorker = await new CryptoWorker();
-            let kek: string = null;
-            try {
-                kek = await cryptoWorker.deriveKey(
+            if (!success) {
+                throw Error('master password verification failed');
+            }
+            if (isFirstLogin()) {
+                await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
-                    keyAttributes.kekSalt,
-                    keyAttributes.opsLimit,
-                    keyAttributes.memLimit
+                    keyAttributes,
+                    key
                 );
-            } catch (e) {
-                logError(e, 'failed to derive key');
-                throw Error(CustomError.WEAK_DEVICE);
             }
-            try {
-                const key: string = await cryptoWorker.decryptB64(
-                    keyAttributes.encryptedKey,
-                    keyAttributes.keyDecryptionNonce,
-                    kek
-                );
-
-                if (isFirstLogin()) {
-                    await generateAndSaveIntermediateKeyAttributes(
-                        passphrase,
-                        keyAttributes,
-                        key
-                    );
-                }
-                await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
-                await decryptAndStoreToken(key);
-                const redirectURL = appContext.redirectURL;
-                appContext.setRedirectURL(null);
-                router.push(redirectURL ?? PAGES.GALLERY);
-            } catch (e) {
-                logError(e, 'user entered a wrong password');
-                throw Error(CustomError.INCORRECT_PASSWORD);
-            }
+            await saveKeyInSessionStore(SESSION_KEYS.ENCRYPTION_KEY, key);
+            await decryptAndStoreToken(key);
+            const redirectURL = appContext.redirectURL;
+            appContext.setRedirectURL(null);
+            router.push(redirectURL ?? PAGES.GALLERY);
         } catch (e) {
-            switch (e.message) {
-                case CustomError.WEAK_DEVICE:
-                    setFieldError(constants.WEAK_DEVICE);
-                    break;
-                case CustomError.INCORRECT_PASSWORD:
-                    setFieldError(constants.INCORRECT_PASSPHRASE);
-                    break;
-                default:
-                    setFieldError(`${constants.UNKNOWN_ERROR} ${e.message}`);
-            }
+            logError(e, 'useMasterPassword failed');
         }
     };
 
@@ -139,24 +103,12 @@ export default function Credentials() {
         <FormContainer>
             <FormPaper style={{ minWidth: '320px' }}>
                 <FormPaperTitle>{constants.PASSWORD}</FormPaperTitle>
-                <SingleInputForm
-                    callback={verifyPassphrase}
-                    placeholder={constants.RETURN_PASSPHRASE_HINT}
-                    buttonText={constants.VERIFY_PASSPHRASE}
-                    hiddenPreInput={
-                        <Input
-                            id="email"
-                            name="email"
-                            autoComplete="username"
-                            type="email"
-                            hidden
-                            value={user?.email}
-                        />
-                    }
-                    autoComplete={'current-password'}
-                    fieldType="password"
-                />
 
+                <VerifyMasterPasswordForm
+                    callback={useMasterPassword}
+                    user={user}
+                    keyAttributes={keyAttributes}
+                />
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
                     <LinkButton onClick={redirectToRecoverPage}>
                         {constants.FORGOT_PASSWORD}
