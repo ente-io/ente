@@ -37,6 +37,7 @@ class RemoteSyncService {
   int _completedUploads = 0;
   SharedPreferences _prefs;
   Completer<void> _existingSync;
+  bool _existingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
 
@@ -73,12 +74,18 @@ class RemoteSyncService {
     }
     if (_existingSync != null) {
       _logger.info("Remote sync already in progress, skipping");
+      // if current sync is silent but request sync is non-silent (demands UI
+      // updates), update the syncSilently flag
+      if (_existingSyncSilent == true && silently == false) {
+        _existingSyncSilent = false;
+      }
       return _existingSync.future;
     }
     _existingSync = Completer<void>();
+    _existingSyncSilent = silently;
 
     try {
-      await _pullDiff(silently);
+      await _pullDiff();
       // sync trash but consume error during initial launch.
       // this is to ensure that we don't pause upload due to any error during
       // the trash sync. Impact: We may end up re-uploading a file which was
@@ -89,7 +96,7 @@ class RemoteSyncService {
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
-        await _pullDiff(true);
+        await _pullDiff();
         _existingSync.complete();
         _existingSync = null;
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
@@ -118,33 +125,31 @@ class RemoteSyncService {
       } else {
         _logger.severe("Error executing remote sync ", e, s);
       }
+    } finally {
+      _existingSyncSilent = false;
     }
   }
 
-  Future<void> _pullDiff(bool silently) async {
+  Future<void> _pullDiff() async {
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
-
-    if (isFirstSync || _hasReSynced()) {
-      await _syncUpdatedCollections(silently);
-    } else {
-      final syncSinceTime = _getSinceTimeForReSync();
-      await _resyncAllCollectionsSinceTime(syncSinceTime);
+    // check and reset user's collection syncTime in past for older clients
+    if (isFirstSync) {
+      // not need reset syncTime, mark all flags as done if firstSync
+      await _markResetSyncTimeAsDone();
+    } else if (_shouldResetSyncTime()) {
+      _logger.warning('Resetting syncTime for for the client');
+      await _resetAllCollectionsSyncTime();
+      await _markResetSyncTimeAsDone();
     }
-    if (!_hasReSynced()) {
-      await _markReSyncAsDone();
-    }
 
+    await _syncUpdatedCollections();
     unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
   }
 
-  Future<void> _syncUpdatedCollections(bool silently) async {
+  Future<void> _syncUpdatedCollections() async {
     final updatedCollections =
         await _collectionsService.getCollectionsToBeSynced();
-
-    if (updatedCollections.isNotEmpty && !silently) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
-    }
     for (final c in updatedCollections) {
       await _syncCollectionDiff(
         c.id,
@@ -154,19 +159,21 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
-    _logger.info('re-sync collections sinceTime: $sinceTime');
+  Future<void> _resetAllCollectionsSyncTime() async {
+    final resetSyncTime = _getSinceTimeForReSync();
+    _logger.info('re-setting all collections syncTime to: $resetSyncTime');
     final collections = _collectionsService.getActiveCollections();
     for (final c in collections) {
-      await _syncCollectionDiff(
-        c.id,
-        min(_collectionsService.getCollectionSyncTime(c.id), sinceTime),
-      );
-      await _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
+      final int newSyncTime =
+          min(_collectionsService.getCollectionSyncTime(c.id), resetSyncTime);
+      await _collectionsService.setCollectionSyncTime(c.id, newSyncTime);
     }
   }
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
+    if (!_existingSyncSilent) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
+    }
     final diff =
         await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
@@ -529,14 +536,18 @@ class RemoteSyncService {
 
   // return true if the client needs to re-sync the collections from previous
   // version
-  bool _hasReSynced() {
-    return _prefs.containsKey(kHasSyncedEditTime) &&
-        _prefs.containsKey(kHasSyncedArchiveKey);
+  bool _shouldResetSyncTime() {
+    return !_prefs.containsKey(kHasSyncedEditTime) ||
+        !_prefs.containsKey(kHasSyncedArchiveKey);
   }
 
-  Future<void> _markReSyncAsDone() async {
+  Future<void> _markResetSyncTimeAsDone() async {
     await _prefs.setBool(kHasSyncedArchiveKey, true);
     await _prefs.setBool(kHasSyncedEditTime, true);
+    // Check to avoid regression because of change or additions of keys
+    if (_shouldResetSyncTime() == false) {
+      throw Exception("Has sync should return true after markReSyncAsDone");
+    }
   }
 
   int _getSinceTimeForReSync() {
