@@ -787,6 +787,10 @@ class CollectionsService {
     Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
   }
 
+  String getCollectionNameByID(int collectionID) {
+    return getCollectionByID(collectionID).name;
+  }
+
   void _validateMoveRequest(
     int toCollectionID,
     int fromCollectionID,
