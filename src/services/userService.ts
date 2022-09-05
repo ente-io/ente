@@ -16,6 +16,7 @@ import {
     TwoFactorVerificationResponse,
     TwoFactorRecoveryResponse,
     UserDetails,
+    DeleteChallengeResponse,
 } from 'types/user';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
@@ -321,6 +322,24 @@ export const getFamilyPortalRedirectURL = async () => {
         }/gallery`;
     } catch (e) {
         logError(e, 'unable to generate to family portal URL');
+        throw e;
+    }
+};
+
+export const getAccountDeleteChallenge = async () => {
+    try {
+        const token = getToken();
+
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/delete-challenge`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data as DeleteChallengeResponse;
+    } catch (e) {
+        logError(e, 'failed to get roadmap url');
         throw e;
     }
 };
