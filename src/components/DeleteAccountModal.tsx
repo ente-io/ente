@@ -13,12 +13,14 @@ import { preloadImage, initiateEmail } from 'utils/common';
 import constants from 'utils/strings/constants';
 import VerticallyCentered from './Container';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
-import { deleteAccount, getAccountDeleteChallenge } from 'services/userService';
+import {
+    deleteAccount,
+    getAccountDeleteChallenge,
+    logoutUser,
+} from 'services/userService';
 import AuthenticateUserModal from './AuthenticateUserModal';
 import { logError } from 'utils/sentry';
 import { decryptDeleteAccountChallenge } from 'utils/crypto';
-import { PAGES } from 'constants/pages';
-import { useRouter } from 'next/router';
 
 interface Iprops {
     onClose: () => void;
@@ -39,8 +41,13 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
 
     const sendFeedbackMail = () => initiateEmail('feedback@ente.io');
     const [deleteAccountChallenge, setDeleteAccountChallenge] = useState('');
-    const router = useRouter();
 
+    const somethingWentWrong = () =>
+        setDialogMessage({
+            title: constants.ERROR,
+            close: { variant: 'danger' },
+            content: constants.UNKNOWN_ERROR,
+        });
     const initiateDelete = async () => {
         try {
             const deleteChallengeResponse = await getAccountDeleteChallenge();
@@ -54,6 +61,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             }
         } catch (e) {
             logError(e, 'Error while initiating account deletion');
+            somethingWentWrong();
         }
     };
 
@@ -91,9 +99,10 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 deleteAccountChallenge
             );
             await deleteAccount(decryptedChallenge);
-            router.push(PAGES.ROOT);
+            logoutUser();
         } catch (e) {
             logError(e, 'solveChallengeAndDeleteAccount failed');
+            somethingWentWrong();
         }
     };
 
