@@ -26,9 +26,9 @@ ProgressDialog createProgressDialog(BuildContext context, String message) {
 
 Future<dynamic> showErrorDialog(
   BuildContext context,
-  String content, [
-  String title = '',
-]) {
+  String title,
+  String content,
+) {
   final AlertDialog alert = AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     title: title.isEmpty

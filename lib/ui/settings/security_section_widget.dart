@@ -140,6 +140,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 } else {
                   showErrorDialog(
                     context,
+                    "",
                     "To enable the ente lockscreen, please setup the device passcode or screen lock in the system settings.",
                   );
                 }
