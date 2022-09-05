@@ -26,7 +26,9 @@ class DeduplicatePage extends StatefulWidget {
 }
 
 class _DeduplicatePageState extends State<DeduplicatePage> {
-  static const kHeaderRowCount = 3;
+  static const crossAxisCount = 4;
+  static const crossAxisSpacing = 4.0;
+  static const headerRowCount = 3;
   static final selectedOverlay = Container(
     color: Colors.black.withOpacity(0.4),
     child: const Align(
@@ -165,12 +167,12 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: _getGridView(
-                  _duplicates[index - kHeaderRowCount],
-                  index - kHeaderRowCount,
+                  _duplicates[index - headerRowCount],
+                  index - headerRowCount,
                 ),
               );
             },
-            itemCount: _duplicates.length + kHeaderRowCount,
+            itemCount: _duplicates.length + headerRowCount,
             shrinkWrap: true,
           ),
         ),
@@ -376,7 +378,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
+          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -386,8 +388,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             },
             itemCount: duplicates.files.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              crossAxisSpacing: 4,
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: crossAxisSpacing,
               childAspectRatio: 0.75,
             ),
             padding: const EdgeInsets.all(0),
@@ -428,8 +430,10 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            //(screen width - (4px total horizontal padding for every thumbnail x 4 thumbnails)) / 4
-            height: (MediaQuery.of(context).size.width - (4 * 4)) / 4,
+            //the numerator will give the width of the screen excuding the whitespaces in the the grid row
+            height: (MediaQuery.of(context).size.width -
+                    (crossAxisSpacing * crossAxisCount)) /
+                crossAxisCount,
             child: Stack(
               children: [
                 Hero(
