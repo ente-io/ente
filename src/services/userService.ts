@@ -344,7 +344,7 @@ export const getAccountDeleteChallenge = async () => {
     }
 };
 
-export const deleteAccount = async (challenge) => {
+export const deleteAccount = async (challenge: string) => {
     try {
         const token = getToken();
         if (!token) {
@@ -354,11 +354,13 @@ export const deleteAccount = async (challenge) => {
         await HTTPService.delete(
             `${ENDPOINT}/users/delete`,
             { challenge },
+            null,
             {
                 'X-Auth-Token': token,
             }
         );
     } catch (e) {
         logError(e, 'deleteAccount api call failed');
+        throw e;
     }
 };
