@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/ui/common/small_gradient_button_widget.dart';
+import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 
@@ -36,13 +36,14 @@ class _LockScreenState extends State<LockScreen> {
                   child: Image.asset('assets/loading_photos_background.png'),
                 ),
                 SizedBox(
-                  width: 118,
-                  child: SmallGradientButton(
+                  width: 142,
+                  child: GradientButton(
+                    text: "Unlock",
+                    iconData: Icons.lock_open_outlined,
+                    paddingValue: 6,
                     onTap: () async {
                       _showLockScreen();
                     },
-                    text: "Unlock",
-                    iconData: Icons.lock_open_outlined,
                   ),
                 ),
               ],
