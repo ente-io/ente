@@ -37,7 +37,7 @@ class RemoteSyncService {
   int _completedUploads = 0;
   SharedPreferences _prefs;
   Completer<void> _existingSync;
-  bool existingSyncSilent = false;
+  bool _existingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
 
@@ -76,16 +76,16 @@ class RemoteSyncService {
       _logger.info("Remote sync already in progress, skipping");
       // if current sync is silent but request sync is non-silent (demands UI
       // updates), update the syncSilently flag
-      if (existingSyncSilent == true && silently == false) {
-        existingSyncSilent = false;
+      if (_existingSyncSilent == true && silently == false) {
+        _existingSyncSilent = false;
       }
       return _existingSync.future;
     }
     _existingSync = Completer<void>();
-    existingSyncSilent = silently;
+    _existingSyncSilent = silently;
 
     try {
-      await _pullDiff(silently);
+      await _pullDiff();
       // sync trash but consume error during initial launch.
       // this is to ensure that we don't pause upload due to any error during
       // the trash sync. Impact: We may end up re-uploading a file which was
@@ -96,7 +96,7 @@ class RemoteSyncService {
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
-        await _pullDiff(true);
+        await _pullDiff();
         _existingSync.complete();
         _existingSync = null;
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
@@ -126,7 +126,7 @@ class RemoteSyncService {
         _logger.severe("Error executing remote sync ", e, s);
       }
     } finally {
-      existingSyncSilent = false;
+      _existingSyncSilent = false;
     }
   }
 
@@ -171,7 +171,7 @@ class RemoteSyncService {
   }
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
-    if (!existingSyncSilent) {
+    if (!_existingSyncSilent) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
     }
     final diff =
