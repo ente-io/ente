@@ -22,7 +22,6 @@ import {
     ElectronFile,
     FileWithCollection,
 } from 'types/upload';
-import Router from 'next/router';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
 import { downloadApp } from 'utils/common';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
@@ -328,10 +327,14 @@ export default function Uploader(props: Props) {
                     )
                 );
             }
-            await uploadManager.queueFilesForUpload(
-                filesWithCollectionToUploadIn,
-                collections
-            );
+            const shouldCloseUploadProgress =
+                await uploadManager.queueFilesForUpload(
+                    filesWithCollectionToUploadIn,
+                    collections
+                );
+            if (shouldCloseUploadProgress) {
+                closeUploadProgress();
+            }
         } catch (err) {
             showUserFacingError(err.message);
             closeUploadProgress();
@@ -482,13 +485,8 @@ export default function Uploader(props: Props) {
         }
     };
 
-    const cancelUploads = async () => {
-        closeUploadProgress();
-        if (isElectron()) {
-            ImportService.cancelRemainingUploads();
-        }
-        props.setUploadInProgress(false);
-        Router.reload();
+    const cancelUploads = () => {
+        uploadManager.cancelRunningUpload();
     };
 
     const handleUpload = (type) => () => {

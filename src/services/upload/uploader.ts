@@ -12,6 +12,7 @@ import { addLocalLog, addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
+import uploadCancelService from './uploadCancelService';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -82,6 +83,9 @@ export default async function uploader(
                 };
             }
         }
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
 
         addLogLine(`reading asset ${fileNameSize}`);
 
@@ -96,6 +100,9 @@ export default async function uploader(
             thumbnail: file.thumbnail,
             metadata,
         };
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
 
         addLogLine(`encryptAsset ${fileNameSize}`);
         const encryptedFile = await UploadService.encryptAsset(
@@ -104,6 +111,9 @@ export default async function uploader(
             collection.key
         );
 
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
         addLogLine(`uploadToBucket ${fileNameSize}`);
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
@@ -130,12 +140,15 @@ export default async function uploader(
         };
     } catch (e) {
         addLogLine(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
-
-        logError(e, 'file upload failed', {
-            fileFormat: fileTypeInfo?.exactType,
-        });
+        if (e.message !== CustomError.UPLOAD_CANCELLED) {
+            logError(e, 'file upload failed', {
+                fileFormat: fileTypeInfo?.exactType,
+            });
+        }
         const error = handleUploadError(e);
         switch (error.message) {
+            case CustomError.UPLOAD_CANCELLED:
+                return { fileUploadResult: UPLOAD_RESULT.CANCELLED };
             case CustomError.ETAG_MISSING:
                 return { fileUploadResult: UPLOAD_RESULT.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:

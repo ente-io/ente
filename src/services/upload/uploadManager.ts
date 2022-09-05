@@ -40,6 +40,7 @@ import { addLogLine, getFileNameSize } from 'utils/logging';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
 import { ProgressUpdater } from 'types/upload/ui';
+import uploadCancelService from './uploadCancelService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -78,6 +79,7 @@ class UploadManager {
     prepareForNewUpload() {
         this.resetState();
         UIService.reset();
+        uploadCancelService.reset();
         UIService.setUploadStage(UPLOAD_STAGES.START);
     }
 
@@ -173,20 +175,36 @@ class UploadManager {
 
                 await this.uploadMediaFiles(allFiles);
             }
+        } catch (e) {
+            if (e.message === CustomError.UPLOAD_CANCELLED) {
+                if (isElectron()) {
+                    ImportService.cancelRemainingUploads();
+                }
+            } else {
+                logError(e, 'uploading failed with error');
+                addLogLine(
+                    `uploading failed with error -> ${e.message}
+                ${(e as Error).stack}`
+                );
+                throw e;
+            }
+        } finally {
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
-        } catch (e) {
-            logError(e, 'uploading failed with error');
-            addLogLine(
-                `uploading failed with error -> ${e.message}
-                ${(e as Error).stack}`
-            );
-            throw e;
-        } finally {
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
                 this.cryptoWorkers[i]?.worker.terminate();
             }
             this.uploadInProgress = false;
+        }
+        try {
+            if (!UIService.hasFilesInResultList()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (e) {
+            logError(e, ' failed to return shouldCloseProgressBar');
+            return false;
         }
     }
 
@@ -198,6 +216,9 @@ class UploadManager {
 
             for (const { file, collectionID } of metadataFiles) {
                 try {
+                    if (uploadCancelService.isUploadCancelationRequested()) {
+                        throw Error(CustomError.UPLOAD_CANCELLED);
+                    }
                     addLogLine(
                         `parsing metadata json file ${getFileNameSize(file)}`
                     );
@@ -220,7 +241,12 @@ class UploadManager {
                         )}`
                     );
                 } catch (e) {
-                    logError(e, 'parsing failed for a file');
+                    if (e.message === CustomError.UPLOAD_CANCELLED) {
+                        throw e;
+                    } else {
+                        // and don't break for subsequent files just log and move on
+                        logError(e, 'parsing failed for a file');
+                    }
                     addLogLine(
                         `failed to parse metadata json file ${getFileNameSize(
                             file
@@ -229,8 +255,10 @@ class UploadManager {
                 }
             }
         } catch (e) {
-            logError(e, 'error seeding MetadataMap');
-            // silently ignore the error
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+                logError(e, 'error seeding MetadataMap');
+            }
+            throw e;
         }
     }
 
@@ -239,6 +267,9 @@ class UploadManager {
             addLogLine(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
+                if (uploadCancelService.isUploadCancelationRequested()) {
+                    throw Error(CustomError.UPLOAD_CANCELLED);
+                }
                 let fileTypeInfo = null;
                 let metadata = null;
                 try {
@@ -257,7 +288,12 @@ class UploadManager {
                         )} `
                     );
                 } catch (e) {
-                    logError(e, 'extractFileTypeAndMetadata failed');
+                    if (e.message === CustomError.UPLOAD_CANCELLED) {
+                        throw e;
+                    } else {
+                        // and don't break for subsequent files just log and move on
+                        logError(e, 'extractFileTypeAndMetadata failed');
+                    }
                     addLogLine(
                         `metadata extraction failed ${getFileNameSize(
                             file
@@ -271,7 +307,9 @@ class UploadManager {
                 UIService.increaseFileUploaded();
             }
         } catch (e) {
-            logError(e, 'error extracting metadata');
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+                logError(e, 'error extracting metadata');
+            }
             throw e;
         }
     }
@@ -347,6 +385,9 @@ class UploadManager {
 
     private async uploadNextFileInQueue(worker: any) {
         while (this.filesToBeUploaded.length > 0) {
+            if (uploadCancelService.isUploadCancelationRequested()) {
+                throw Error(CustomError.UPLOAD_CANCELLED);
+            }
             let fileWithCollection = this.filesToBeUploaded.pop();
             const { collectionID } = fileWithCollection;
             const collection = this.collections.get(collectionID);
@@ -397,6 +438,9 @@ class UploadManager {
                     );
                     break;
                 case UPLOAD_RESULT.ALREADY_UPLOADED:
+                case UPLOAD_RESULT.UNSUPPORTED:
+                case UPLOAD_RESULT.TOO_LARGE:
+                case UPLOAD_RESULT.CANCELLED:
                     // no-op
                     break;
                 default:
@@ -420,6 +464,11 @@ class UploadManager {
             );
             return UPLOAD_RESULT.FAILED;
         }
+    }
+
+    public cancelRunningUpload() {
+        UIService.setUploadStage(UPLOAD_STAGES.CANCELLING);
+        uploadCancelService.requestUploadCancelation();
     }
 
     async getFailedFilesWithCollections() {
