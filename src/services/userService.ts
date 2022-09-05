@@ -339,7 +339,26 @@ export const getAccountDeleteChallenge = async () => {
         );
         return resp.data as DeleteChallengeResponse;
     } catch (e) {
-        logError(e, 'failed to get roadmap url');
+        logError(e, 'failed to get account delete challenge');
         throw e;
+    }
+};
+
+export const deleteAccount = async (challenge) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+
+        await HTTPService.delete(
+            `${ENDPOINT}/users/delete`,
+            { challenge },
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'deleteAccount api call failed');
     }
 };
