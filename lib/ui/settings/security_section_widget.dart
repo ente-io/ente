@@ -9,6 +9,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
+import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/sessions_page.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -81,8 +82,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         value: snapshot.data,
                         onChanged: (value) async {
                           final hasAuthenticatedOrNoLocalAuth =
-                              await UserService.instance
-                                  .localAuthenticationService(
+                              await LocalAuthenticationService.instance
+                                  .requestLocalAuthentication(
                             context,
                             "Please authenticate to configure two-factor authentication",
                           );
@@ -253,8 +254,9 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
-          final hasAuthenticatedOrNoLocalAuth =
-              await UserService.instance.localAuthenticationService(
+          final hasAuthenticatedOrNoLocalAuth = await LocalAuthenticationService
+              .instance
+              .requestLocalAuthentication(
             context,
             "Please authenticate to view your active sessions",
           );

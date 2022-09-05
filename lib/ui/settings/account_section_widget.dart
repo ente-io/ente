@@ -1,6 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/change_email_dialog.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
@@ -36,7 +37,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             final hasAuthenticatedOrNoLocalAuth =
-                await UserService.instance.localAuthenticationService(
+                await LocalAuthenticationService.instance.requestAuthentication(
               context,
               "Please authenticate to view your recovery key",
             );
@@ -69,7 +70,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             final hasAuthenticatedOrNoLocalAuth =
-                await UserService.instance.localAuthenticationService(
+                await LocalAuthenticationService.instance.requestAuthentication(
               context,
               "Please authenticate to change your email",
             );
@@ -94,7 +95,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             final hasAuthenticatedOrNoLocalAuth =
-                await UserService.instance.localAuthenticationService(
+                await LocalAuthenticationService.instance.requestAuthentication(
               context,
               "Please authenticate to change your password",
             );

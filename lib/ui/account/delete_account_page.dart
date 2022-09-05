@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
+import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
@@ -142,7 +143,7 @@ class DeleteAccountPage extends StatelessWidget {
     DeleteChallengeResponse response,
   ) async {
     final hasAuthenticatedOrNoLocalAuth =
-        await UserService.instance.localAuthenticationService(
+        await LocalAuthenticationService.instance.requestAuthentication(
       context,
       "Please authenticate to initiate account deletion",
     );
