@@ -124,17 +124,17 @@ class RemoteSyncService {
   Future<void> _pullDiff(bool silently) async {
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
-
-    if (isFirstSync || _hasReSynced()) {
-      await _syncUpdatedCollections(silently);
-    } else {
-      final syncSinceTime = _getSinceTimeForReSync();
-      await _resyncAllCollectionsSinceTime(syncSinceTime);
+    // check and reset user's collection syncTime in past for older clients
+    if (isFirstSync) {
+      // not need reset syncTime, mark all flags as done if firstSync
+      await _markResetSyncTimeAsDone();
+    } else if (_shouldResetSyncTime()) {
+      _logger.warning('Resetting syncTime for for the client');
+      await _resetAllCollectionsSyncTime();
+      await _markResetSyncTimeAsDone();
     }
-    if (!_hasReSynced()) {
-      await _markReSyncAsDone();
-    }
 
+    await _syncUpdatedCollections(silently);
     unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
   }
 
@@ -154,15 +154,14 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _resyncAllCollectionsSinceTime(int sinceTime) async {
-    _logger.info('re-sync collections sinceTime: $sinceTime');
+  Future<void> _resetAllCollectionsSyncTime() async {
+    final resetSyncTime = _getSinceTimeForReSync();
+    _logger.info('re-setting all collections syncTime to: $resetSyncTime');
     final collections = _collectionsService.getActiveCollections();
     for (final c in collections) {
-      await _syncCollectionDiff(
-        c.id,
-        min(_collectionsService.getCollectionSyncTime(c.id), sinceTime),
-      );
-      await _collectionsService.setCollectionSyncTime(c.id, c.updationTime);
+      final int newSyncTime =
+          min(_collectionsService.getCollectionSyncTime(c.id), resetSyncTime);
+      await _collectionsService.setCollectionSyncTime(c.id, newSyncTime);
     }
   }
 
@@ -529,14 +528,18 @@ class RemoteSyncService {
 
   // return true if the client needs to re-sync the collections from previous
   // version
-  bool _hasReSynced() {
-    return _prefs.containsKey(kHasSyncedEditTime) &&
-        _prefs.containsKey(kHasSyncedArchiveKey);
+  bool _shouldResetSyncTime() {
+    return !_prefs.containsKey(kHasSyncedEditTime) ||
+        !_prefs.containsKey(kHasSyncedArchiveKey);
   }
 
-  Future<void> _markReSyncAsDone() async {
+  Future<void> _markResetSyncTimeAsDone() async {
     await _prefs.setBool(kHasSyncedArchiveKey, true);
     await _prefs.setBool(kHasSyncedEditTime, true);
+    // Check to avoid regression because of change or additions of keys
+    if (_shouldResetSyncTime() == false) {
+      throw Exception("Has sync should return true after markReSyncAsDone");
+    }
   }
 
   int _getSinceTimeForReSync() {
