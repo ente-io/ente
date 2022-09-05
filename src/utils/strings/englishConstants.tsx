@@ -774,6 +774,30 @@ const englishConstants = {
     WEAK_DEVICE:
         "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
     DRAG_AND_DROP_HINT: 'Or drag and drop into the ente window',
+    ASK_FOR_FEEDBACK: (
+        <>
+            <p>We'll be sorry to see you go. Are you facing some issue?</p>
+            <p>
+                Please write to us at{' '}
+                <Link href="mailto:account-deletion@ente.io">
+                    feedback@ente.io
+                </Link>{' '}
+                , maybe there is a way we can help.
+            </p>
+        </>
+    ),
+    SEND_FEEDBACK: 'Yes, send feedback',
+    CONFIRM_ACCOUNT_DELETION_TITLE:
+        'Are you sure you want to delete your account?',
+    CONFIRM_ACCOUNT_DELETION_MESSAGE: (
+        <>
+            <p>
+                Your uploaded data will be scheduled for deletion, and your
+                account will be permanently deleted.
+            </p>
+            <p>This action is not reversible.</p>
+        </>
+    ),
 };
 
 export default englishConstants;
