@@ -24,7 +24,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
   Widget build(BuildContext context) {
     return ExpandablePanel(
       header: const SettingsSectionTitle("Account"),
-      collapsed: Container(),
+      collapsed: const SizedBox.shrink(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
     );
