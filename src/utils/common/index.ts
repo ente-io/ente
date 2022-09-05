@@ -93,11 +93,14 @@ export function openLink(href: string, newTab?: boolean) {
     a.click();
 }
 
-export async function waitAndRun(waitPromise: Promise<any>, task: () => void) {
+export async function waitAndRun(
+    waitPromise: Promise<void>,
+    task: () => Promise<void>
+) {
     if (waitPromise && isPromise(waitPromise)) {
         await waitPromise;
     }
-    task();
+    await task();
 }
 
 function isPromise(p: any) {

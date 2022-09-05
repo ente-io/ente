@@ -57,7 +57,7 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
-    setUploadInProgress: (value: boolean) => void;
+    setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector: () => void;
     setFiles: SetFiles;
     setCollections: SetCollections;
@@ -100,7 +100,7 @@ export default function Uploader(props: Props) {
     // This is set when the user choses a type to upload from the upload type selector dialog
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
-    const previousUploadPromise = useRef<Promise<void>>(null);
+    const currentUploadPromise = useRef<Promise<void>>(null);
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [webFiles, setWebFiles] = useState([]);
 
@@ -327,9 +327,11 @@ export default function Uploader(props: Props) {
         filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[]
     ) => {
-        const currentPromise = previousUploadPromise.current;
-        previousUploadPromise.current = waitAndRun(currentPromise, () =>
-            uploadFiles(filesWithCollectionToUploadIn, collections)
+        const currentPromise = currentUploadPromise.current;
+        currentUploadPromise.current = waitAndRun(
+            currentPromise,
+            async () =>
+                await uploadFiles(filesWithCollectionToUploadIn, collections)
         );
     };
 
@@ -338,12 +340,12 @@ export default function Uploader(props: Props) {
         props.closeUploadTypeSelector();
         uploadManager.prepareForNewUpload();
         setUploadProgressView(true);
-        props.setUploadInProgress(true);
+        props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
         await props.syncWithRemote(true, true);
     };
 
     function postUploadAction() {
-        props.setUploadInProgress(false);
+        props.setShouldDisableDropzone(false);
         props.syncWithRemote();
     }
 
