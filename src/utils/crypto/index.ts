@@ -213,11 +213,12 @@ export async function decryptDeleteAccountChallenge(
         keyAttributes.secretKeyDecryptionNonce,
         masterKey
     );
-    const decryptedChallenge = await cryptoWorker.boxSealOpen(
+    const b64DecryptedChallenge = await cryptoWorker.boxSealOpen(
         encryptedChallenge,
         keyAttributes.publicKey,
         secretKey
     );
-    return decryptedChallenge;
+    const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
+    return utf8DecryptedChallenge;
 }
 export default CryptoWorker;
