@@ -545,8 +545,8 @@ class RemoteSyncService {
     await _prefs.setBool(kHasSyncedArchiveKey, true);
     await _prefs.setBool(kHasSyncedEditTime, true);
     // Check to avoid regression because of change or additions of keys
-    if (_shouldResetSyncTime() == false) {
-      throw Exception("Has sync should return true after markReSyncAsDone");
+    if (_shouldResetSyncTime()) {
+      throw Exception("_shouldResetSyncTime should return false now");
     }
   }
 
