@@ -13,8 +13,12 @@ import { preloadImage, initiateEmail } from 'utils/common';
 import constants from 'utils/strings/constants';
 import VerticallyCentered from './Container';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
-import { getAccountDeleteChallenge } from 'services/userService';
+import { deleteAccount, getAccountDeleteChallenge } from 'services/userService';
 import AuthenticateUserModal from './AuthenticateUserModal';
+import { logError } from 'utils/sentry';
+import { decryptDeleteAccountChallenge } from 'utils/crypto';
+import { PAGES } from 'constants/pages';
+import { useRouter } from 'next/router';
 
 interface Iprops {
     onClose: () => void;
@@ -34,13 +38,22 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         setAuthenticateUserModalView(false);
 
     const sendFeedbackMail = () => initiateEmail('feedback@ente.io');
+    const [deleteAccountChallenge, setDeleteAccountChallenge] = useState('');
+    const router = useRouter();
 
     const initiateDelete = async () => {
-        const deleteChallengeResponse = await getAccountDeleteChallenge();
-        if (deleteChallengeResponse.allowDelete) {
-            confirmAccountDeletion();
-        } else {
-            askToMailForDeletion();
+        try {
+            const deleteChallengeResponse = await getAccountDeleteChallenge();
+            setDeleteAccountChallenge(
+                deleteChallengeResponse.encryptedChallenge
+            );
+            if (deleteChallengeResponse.allowDelete) {
+                confirmAccountDeletion();
+            } else {
+                askToMailForDeletion();
+            }
+        } catch (e) {
+            logError(e, 'Error while initiating account deletion');
         }
     };
 
@@ -72,7 +85,17 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
         });
     };
 
-    const deleteAccount = () => {};
+    const solveChallengeAndDeleteAccount = async () => {
+        try {
+            const decryptedChallenge = await decryptDeleteAccountChallenge(
+                deleteAccountChallenge
+            );
+            await deleteAccount(decryptedChallenge);
+            router.push(PAGES.ROOT);
+        } catch (e) {
+            logError(e, 'solveChallengeAndDeleteAccount failed');
+        }
+    };
 
     return (
         <>
@@ -123,7 +146,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             <AuthenticateUserModal
                 open={authenticateUserModalView}
                 onClose={closeAuthenticateUserModal}
-                callback={deleteAccount}
+                onAuthenticate={solveChallengeAndDeleteAccount}
             />
         </>
     );
