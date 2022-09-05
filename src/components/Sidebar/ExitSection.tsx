@@ -8,7 +8,7 @@ import DeleteAccountModal from 'components/DeleteAccountModal';
 export default function ExitSection() {
     const { setDialogMessage } = useContext(AppContext);
 
-    const [deleteAccountModalView, setDeleteAccountModalView] = useState(true);
+    const [deleteAccountModalView, setDeleteAccountModalView] = useState(false);
 
     const closeDeleteAccountModal = () => setDeleteAccountModalView(false);
     const openDeleteAccountModal = () => setDeleteAccountModalView(true);
