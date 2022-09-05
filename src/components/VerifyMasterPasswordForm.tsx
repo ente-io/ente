@@ -9,12 +9,21 @@ import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
 
 import { Input } from '@mui/material';
+import { KeyAttributes, User } from 'types/user';
+
+export interface VerifyMasterPasswordFormProps {
+    user: User;
+    keyAttributes: KeyAttributes;
+    callback: (key: string, passphrase: string) => void;
+    buttonText: string;
+}
 
 export default function VerifyMasterPasswordForm({
     user,
     keyAttributes,
     callback,
-}) {
+    buttonText,
+}: VerifyMasterPasswordFormProps) {
     const verifyPassphrase: SingleInputFormProps['callback'] = async (
         passphrase,
         setFieldError
@@ -39,7 +48,7 @@ export default function VerifyMasterPasswordForm({
                     keyAttributes.keyDecryptionNonce,
                     kek
                 );
-                callback(true, key, passphrase);
+                callback(key, passphrase);
             } catch (e) {
                 logError(e, 'user entered a wrong password');
                 throw Error(CustomError.INCORRECT_PASSWORD);
@@ -62,7 +71,7 @@ export default function VerifyMasterPasswordForm({
         <SingleInputForm
             callback={verifyPassphrase}
             placeholder={constants.RETURN_PASSPHRASE_HINT}
-            buttonText={constants.VERIFY_PASSPHRASE}
+            buttonText={buttonText}
             hiddenPreInput={
                 <Input
                     id="email"

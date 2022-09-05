@@ -3,14 +3,23 @@ import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { AppContext } from 'pages/_app';
-import { logError } from 'utils/sentry';
 import { KeyAttributes, User } from 'types/user';
-import VerticallyCentered from 'components/Container';
-import EnteSpinner from 'components/EnteSpinner';
-import VerifyMasterPasswordForm from 'components/VerifyMasterPasswordForm';
+import VerifyMasterPasswordForm, {
+    VerifyMasterPasswordFormProps,
+} from 'components/VerifyMasterPasswordForm';
 import { Dialog, Stack, Typography } from '@mui/material';
 
-export default function AuthenticateUserModal({ open, onClose, callback }) {
+interface Iprops {
+    open: boolean;
+    onClose: () => void;
+    onAuthenticate: () => void;
+}
+
+export default function AuthenticateUserModal({
+    open,
+    onClose,
+    onAuthenticate,
+}: Iprops) {
     const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const { setDialogMessage } = useContext(AppContext);
     const [user, setUser] = useState<User>();
@@ -21,11 +30,6 @@ export default function AuthenticateUserModal({ open, onClose, callback }) {
             close: { variant: 'danger' },
             content: constants.UNKNOWN_ERROR,
         });
-
-    const handleClose = () => {
-        onClose();
-        callback(false);
-    };
 
     useEffect(() => {
         const main = async () => {
@@ -47,30 +51,16 @@ export default function AuthenticateUserModal({ open, onClose, callback }) {
         main();
     }, []);
 
-    const useMasterPassword = async (success) => {
-        try {
-            if (!success) {
-                throw Error('master password verification failed');
-            }
-            callback(true);
-        } catch (e) {
-            logError(e, 'useMasterPassword failed');
-            callback(false);
-        }
-    };
-
-    if (!keyAttributes) {
-        return (
-            <VerticallyCentered>
-                <EnteSpinner />
-            </VerticallyCentered>
-        );
-    }
+    const useMasterPassword: VerifyMasterPasswordFormProps['callback'] =
+        async () => {
+            onClose();
+            onAuthenticate();
+        };
 
     return (
         <Dialog
             open={open}
-            onClose={handleClose}
+            onClose={onClose}
             sx={{ position: 'absolute' }}
             PaperProps={{ sx: { p: 1, maxWidth: '346px' } }}>
             <Stack spacing={3} p={1.5}>
@@ -78,6 +68,7 @@ export default function AuthenticateUserModal({ open, onClose, callback }) {
                     {constants.PASSWORD}
                 </Typography>
                 <VerifyMasterPasswordForm
+                    buttonText={constants.AUTHENTICATE}
                     callback={useMasterPassword}
                     user={user}
                     keyAttributes={keyAttributes}

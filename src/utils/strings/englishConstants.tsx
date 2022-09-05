@@ -798,6 +798,7 @@ const englishConstants = {
             <p>This action is not reversible.</p>
         </>
     ),
+    AUTHENTICATE: 'Authenticate',
 };
 
 export default englishConstants;

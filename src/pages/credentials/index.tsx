@@ -24,7 +24,9 @@ import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import VerticallyCentered from 'components/Container';
 import EnteSpinner from 'components/EnteSpinner';
-import VerifyMasterPasswordForm from 'components/VerifyMasterPasswordForm';
+import VerifyMasterPasswordForm, {
+    VerifyMasterPasswordFormProps,
+} from 'components/VerifyMasterPasswordForm';
 
 export default function Credentials() {
     const router = useRouter();
@@ -67,11 +69,11 @@ export default function Credentials() {
         appContext.showNavBar(true);
     }, []);
 
-    const useMasterPassword = async (success, passphrase, key) => {
+    const useMasterPassword: VerifyMasterPasswordFormProps['callback'] = async (
+        key,
+        passphrase
+    ) => {
         try {
-            if (!success) {
-                throw Error('master password verification failed');
-            }
             if (isFirstLogin()) {
                 await generateAndSaveIntermediateKeyAttributes(
                     passphrase,
@@ -105,6 +107,7 @@ export default function Credentials() {
                 <FormPaperTitle>{constants.PASSWORD}</FormPaperTitle>
 
                 <VerifyMasterPasswordForm
+                    buttonText={constants.VERIFY_PASSPHRASE}
                     callback={useMasterPassword}
                     user={user}
                     keyAttributes={keyAttributes}
