@@ -37,6 +37,7 @@ class RemoteSyncService {
   int _completedUploads = 0;
   SharedPreferences _prefs;
   Completer<void> _existingSync;
+  bool existingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
 
@@ -73,9 +74,15 @@ class RemoteSyncService {
     }
     if (_existingSync != null) {
       _logger.info("Remote sync already in progress, skipping");
+      // if current sync is silent but request sync is non-silent (demands UI
+      // updates), update the syncSilently flag
+      if (existingSyncSilent == true && silently == false) {
+        existingSyncSilent = false;
+      }
       return _existingSync.future;
     }
     _existingSync = Completer<void>();
+    existingSyncSilent = silently;
 
     try {
       await _pullDiff(silently);
@@ -118,10 +125,12 @@ class RemoteSyncService {
       } else {
         _logger.severe("Error executing remote sync ", e, s);
       }
+    } finally {
+      existingSyncSilent = false;
     }
   }
 
-  Future<void> _pullDiff(bool silently) async {
+  Future<void> _pullDiff() async {
     final isFirstSync = !_collectionsService.hasSyncedCollections();
     await _collectionsService.sync();
     // check and reset user's collection syncTime in past for older clients
@@ -134,17 +143,13 @@ class RemoteSyncService {
       await _markResetSyncTimeAsDone();
     }
 
-    await _syncUpdatedCollections(silently);
+    await _syncUpdatedCollections();
     unawaited(_localFileUpdateService.markUpdatedFilesForReUpload());
   }
 
-  Future<void> _syncUpdatedCollections(bool silently) async {
+  Future<void> _syncUpdatedCollections() async {
     final updatedCollections =
         await _collectionsService.getCollectionsToBeSynced();
-
-    if (updatedCollections.isNotEmpty && !silently) {
-      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
-    }
     for (final c in updatedCollections) {
       await _syncCollectionDiff(
         c.id,
@@ -166,6 +171,9 @@ class RemoteSyncService {
   }
 
   Future<void> _syncCollectionDiff(int collectionID, int sinceTime) async {
+    if (!existingSyncSilent) {
+      Bus.instance.fire(SyncStatusUpdate(SyncStatus.applyingRemoteDiff));
+    }
     final diff =
         await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
