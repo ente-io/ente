@@ -37,7 +37,8 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             final hasAuthenticatedOrNoLocalAuth =
-                await LocalAuthenticationService.instance.requestAuthentication(
+                await LocalAuthenticationService.instance
+                    .requestLocalAuthentication(
               context,
               "Please authenticate to view your recovery key",
             );
@@ -70,7 +71,8 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             final hasAuthenticatedOrNoLocalAuth =
-                await LocalAuthenticationService.instance.requestAuthentication(
+                await LocalAuthenticationService.instance
+                    .requestLocalAuthentication(
               context,
               "Please authenticate to change your email",
             );
@@ -95,7 +97,8 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
           behavior: HitTestBehavior.translucent,
           onTap: () async {
             final hasAuthenticatedOrNoLocalAuth =
-                await LocalAuthenticationService.instance.requestAuthentication(
+                await LocalAuthenticationService.instance
+                    .requestLocalAuthentication(
               context,
               "Please authenticate to change your password",
             );
