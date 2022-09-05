@@ -6,7 +6,7 @@ import { EnteFile } from 'types/file';
 
 import { Metadata } from 'types/upload';
 import { formatDate, splitFilenameAndExtension } from 'utils/file';
-import { METADATA_FOLDER_NAME } from 'constants/export';
+import { ENTE_METADATA_FOLDER } from 'constants/export';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -179,7 +179,7 @@ export const getUniqueCollectionFolderPath = (
 };
 
 export const getMetadataFolderPath = (collectionFolderPath: string) =>
-    `${collectionFolderPath}/${METADATA_FOLDER_NAME}`;
+    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}`;
 
 export const getUniqueFileSaveName = (
     collectionPath: string,
@@ -211,7 +211,7 @@ export const getOldFileSaveName = (filename: string, fileID: number) =>
 export const getFileMetadataSavePath = (
     collectionFolderPath: string,
     fileSaveName: string
-) => `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${fileSaveName}.json`;
+) => `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${fileSaveName}.json`;
 
 export const getFileSavePath = (
     collectionFolderPath: string,
@@ -235,6 +235,6 @@ export const getOldFileMetadataSavePath = (
     collectionFolderPath: string,
     file: EnteFile
 ) =>
-    `${collectionFolderPath}/${METADATA_FOLDER_NAME}/${
+    `${collectionFolderPath}/${ENTE_METADATA_FOLDER}/${
         file.id
     }_${oldSanitizeName(file.metadata.title)}.json`;

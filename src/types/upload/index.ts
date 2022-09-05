@@ -142,3 +142,9 @@ export interface ParsedExtractedMetadata {
     location: Location;
     creationTime: number;
 }
+
+// This is used to prompt the user the make upload strategy choice
+export interface ImportSuggestion {
+    rootFolderName: string;
+    hasNestedFolders: boolean;
+}
