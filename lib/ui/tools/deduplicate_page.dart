@@ -83,7 +83,6 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         title: const Text("Deduplicate Files"),
         actions: <Widget>[
           PopupMenuButton(
-            color: Theme.of(context).colorScheme.defaultBackgroundColor,
             constraints: const BoxConstraints(minWidth: 180),
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(
@@ -327,7 +326,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Padding(padding: EdgeInsets.all(2)),
+                const Padding(padding: EdgeInsets.all(crossAxisSpacing / 2)),
                 Text(
                   text,
                   style: TextStyle(
