@@ -23,12 +23,9 @@ export default function setupIpcComs(
         const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
         });
-        let dir =
-            result.filePaths &&
-            result.filePaths.length > 0 &&
-            result.filePaths[0];
-        dir = dir?.split(path.sep)?.join(path.posix.sep);
-        return dir;
+        if (result.filePaths && result.filePaths.length > 0) {
+            return result.filePaths[0]?.split(path.sep)?.join(path.posix.sep);
+        }
     });
 
     ipcMain.on('update-tray', (_, args) => {
