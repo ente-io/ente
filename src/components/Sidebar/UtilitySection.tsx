@@ -62,9 +62,11 @@ export default function UtilitySection({ closeSidebar }) {
 
     return (
         <>
-            <SidebarButton onClick={openWatchFolder}>
-                {constants.WATCH_FOLDERS}
-            </SidebarButton>
+            {isElectron() && (
+                <SidebarButton onClick={openWatchFolder}>
+                    {constants.WATCH_FOLDERS}
+                </SidebarButton>
+            )}
             <SidebarButton onClick={openRecoveryKeyModal}>
                 {constants.RECOVERY_KEY}
             </SidebarButton>
