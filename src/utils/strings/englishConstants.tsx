@@ -779,7 +779,7 @@ const englishConstants = {
             <p>We'll be sorry to see you go. Are you facing some issue?</p>
             <p>
                 Please write to us at{' '}
-                <Link href="mailto:feedback@ente.io">feedback@ente.io</Link> ,
+                <Link href="mailto:feedback@ente.io">feedback@ente.io</Link>,
                 maybe there is a way we can help.
             </p>
         </>
