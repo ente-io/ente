@@ -569,7 +569,7 @@ class FileUploader {
       orElse: () => null,
     );
     if (fileExistsButDifferentCollection != null) {
-      debugPrint(
+      _logger.fine(
         "fileExistsButDifferentCollection: \n toUpload  ${fileToUpload.tag()} "
         "\n existing: ${fileExistsButDifferentCollection.tag()}",
       );
