@@ -14,7 +14,7 @@ import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';

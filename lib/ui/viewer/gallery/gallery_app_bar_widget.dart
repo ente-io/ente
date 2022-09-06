@@ -8,7 +8,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';

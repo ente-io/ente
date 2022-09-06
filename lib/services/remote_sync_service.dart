@@ -15,7 +15,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/services/app_lifecycle_service.dart';

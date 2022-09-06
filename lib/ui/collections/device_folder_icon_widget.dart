@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 import 'package:photos/utils/navigation_util.dart';
