@@ -58,7 +58,7 @@ export async function diskFolderRemovedCallback(folderPath: string) {
         const mapping = mappings.find(
             (mapping) => mapping.folderPath === folderPath
         );
-        if (mapping) {
+        if (!mapping) {
             throw Error(`Watch mapping not found for ${folderPath}`);
         }
         watchFolderService.pushTrashedDir(folderPath);
