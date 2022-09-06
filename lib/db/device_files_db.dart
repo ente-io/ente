@@ -327,9 +327,8 @@ extension DeviceFiles on FilesDB {
             );
             continue;
           }
-        } else {
-          deviceCollections.add(deviceCollection);
         }
+        deviceCollections.add(deviceCollection);
       }
       return deviceCollections;
     } catch (e) {

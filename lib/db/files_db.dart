@@ -84,6 +84,7 @@ class FilesDB {
     initializationScript: initializationScript,
     migrationScripts: migrationScripts,
   );
+
   // make this a singleton class
   FilesDB._privateConstructor();
 
@@ -875,7 +876,54 @@ class FilesDB {
     );
   }
 
+  /*
+    This method should only return localIDs which are not uploaded yet
+    and can be mapped to incoming remote entry
+   */
+  Future<List<File>> getUnlinkedLocalMatchesForRemoteFile(
+    int ownerID,
+    String localID,
+    FileType fileType, {
+    @required String title,
+    @required String deviceFolder,
+  }) async {
+    final db = await instance.database;
+    // on iOS, match using localID and fileType. title can either match or
+    // might be null based on how the file was imported
+    String whereClause = ''' ($columnOwnerID = ? OR $columnOwnerID IS NULL) AND 
+        $columnLocalID = ? AND $columnFileType = ? AND 
+        ($columnTitle=? OR $columnTitle IS NULL) ''';
+    List<Object> whereArgs = [
+      ownerID,
+      localID,
+      getInt(fileType),
+      title,
+    ];
+    if (Platform.isAndroid) {
+      whereClause = ''' ($columnOwnerID = ? OR $columnOwnerID IS NULL) AND 
+          $columnLocalID = ? AND $columnFileType = ? AND $columnTitle=? AND $columnDeviceFolder= ? 
+           ''';
+      whereArgs = [
+        ownerID,
+        localID,
+        getInt(fileType),
+        title,
+        deviceFolder,
+      ];
+    }
+
+    final rows = await db.query(
+      filesTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+    );
+
+    return convertToFiles(rows);
+  }
+
   Future<List<File>> getMatchingFiles(
+    String localID,
+    FileType fileType,
     String title,
     String deviceFolder,
   ) async {
@@ -943,7 +991,7 @@ class FilesDB {
   Future<int> updateLocalIDForUploaded(int uploadedID, String localID) async {
     final db = await instance.database;
     return await db.update(
-      table,
+      filesTable,
       {columnLocalID: localID},
       where: '$columnUploadedFileID = ? AND $columnLocalID IS NULL',
       whereArgs: [uploadedID],

@@ -31,18 +31,19 @@ class _LockScreenState extends State<LockScreen> {
             Stack(
               alignment: Alignment.center,
               children: [
-                Image.asset(
-                  MediaQuery.of(context).platformBrightness == Brightness.light
-                      ? 'assets/loading_photos_background.png'
-                      : 'assets/loading_photos_background_dark.png',
+                Opacity(
+                  opacity: 0.2,
+                  child: Image.asset('assets/loading_photos_background.png'),
                 ),
                 SizedBox(
-                  width: 172,
+                  width: 142,
                   child: GradientButton(
+                    text: "Unlock",
+                    iconData: Icons.lock_open_outlined,
+                    paddingValue: 6,
                     onTap: () async {
                       _showLockScreen();
                     },
-                    text: 'Unlock',
                   ),
                 ),
               ],

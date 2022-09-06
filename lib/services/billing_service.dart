@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
@@ -111,6 +112,12 @@ class BillingService {
         ),
       );
       return Subscription.fromMap(response.data["subscription"]);
+    } on DioError catch (e) {
+      if (e.response != null && e.response.statusCode == 409) {
+        throw SubscriptionAlreadyClaimedError();
+      } else {
+        rethrow;
+      }
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;
