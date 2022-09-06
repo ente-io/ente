@@ -3,14 +3,15 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import "package:photos/core/configuration.dart";
+import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
-import "package:photos/services/collections_service.dart";
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/DividerWithPadding.dart';
-import 'package:photos/ui/viewer/file/RawExifButton.dart';
+import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/raw_exif_button.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
@@ -62,6 +63,10 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   @override
   Widget build(BuildContext context) {
     final file = widget.file;
+    final allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
+      file.uploadedFileID,
+      Configuration.instance.getUserID(),
+    );
     final dateTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
     final dateTimeForUpdationTime =
         DateTime.fromMicrosecondsSinceEpoch(file.updationTime);
@@ -198,29 +203,74 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       showExifListTile
           ? const DividerWithPadding(left: 70, right: 20)
           : const SizedBox.shrink(),
-      ListTile(
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 6),
-          child: Icon(Icons.folder_outlined),
-        ),
-        title: GestureDetector(
-          onTap: () {
-            if (file.collectionID != null) {
-              Navigator.pop(context); // info dialog
-              final Collection c = CollectionsService.instance
-                  .getCollectionByID(file.collectionID);
-              routeToPage(
-                context,
-                CollectionPage(CollectionWithThumbnail(c, null)),
-              );
-            }
-          },
-          child: Text(
-            file.collectionID != null
-                ? CollectionsService.instance
-                    .getCollectionByID(file.collectionID)
-                    .name
-                : file.deviceFolder,
+      SizedBox(
+        height: 62,
+        child: ListTile(
+          leading: const Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: Icon(Icons.folder_outlined),
+          ),
+          title: FutureBuilder(
+            future: allCollectionIDsOfFile,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final Set<int> collectionIDs = snapshot.data;
+                final collections = [];
+                for (var collectionID in collectionIDs) {
+                  collections.add(
+                    CollectionsService.instance.getCollectionByID(collectionID),
+                  );
+                }
+                return ListView.builder(
+                  itemCount: collections.length,
+                  scrollDirection: Axis.horizontal,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (file.collectionID != null) {
+                          routeToPage(
+                            context,
+                            CollectionPage(
+                              CollectionWithThumbnail(collections[index], null),
+                            ),
+                          );
+                        }
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.only(
+                          top: 10,
+                          bottom: 18,
+                          right: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .inverseBackgroundColor
+                              .withOpacity(0.08),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                        ),
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            child: Text(
+                              collections[index].name,
+                              style: Theme.of(context).textTheme.subtitle2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return const Text("Oops, Something went wrong.");
+              } else {
+                return const EnteLoadingWidget();
+              }
+            },
           ),
         ),
       ),
