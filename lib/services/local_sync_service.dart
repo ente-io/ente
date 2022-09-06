@@ -12,6 +12,7 @@ import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/ignored_files_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
@@ -136,10 +137,14 @@ class LocalSyncService {
   Future<bool> _refreshDeviceFolderCountAndCover() async {
     final List<Tuple2<AssetPathEntity, String>> result =
         await getDeviceFolderWithCountAndCoverID();
-    return await _db.updateDeviceCoverWithCount(
+    final bool hasUpdated = await _db.updateDeviceCoverWithCount(
       result,
       shouldBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
+    if (hasUpdated) {
+      Bus.instance.fire(BackupFoldersUpdatedEvent());
+    }
+    return hasUpdated;
   }
 
   Future<bool> syncAll() async {

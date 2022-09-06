@@ -16,6 +16,9 @@ class GrantPermissionsWidget extends StatelessWidget {
           padding: const EdgeInsets.only(top: 20, bottom: 120),
           child: Column(
             children: [
+              const SizedBox(
+                height: 24,
+              ),
               Center(
                 child: Stack(
                   alignment: Alignment.center,
@@ -43,6 +46,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(height: 36),
               Padding(
                 padding: const EdgeInsets.fromLTRB(40, 0, 40, 0),
                 child: RichText(

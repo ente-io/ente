@@ -1,5 +1,5 @@
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 
 class CollectionItems {

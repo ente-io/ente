@@ -4,14 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
+import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/ui/tools/app_lock.dart';
-import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/email_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
@@ -144,36 +142,34 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
-    AppLock.of(context).setEnabled(false);
-    const String reason = "Please authenticate to initiate account deletion";
-    final result = await requestAuthentication(reason);
-    AppLock.of(context).setEnabled(
-      Configuration.instance.shouldShowLockScreen(),
-    );
-    if (!result) {
-      showToast(context, reason);
-      return;
-    }
-    final choice = await showChoiceDialog(
+    final hasAuthenticated =
+        await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
-      'Are you sure you want to delete your account?',
-      'Your uploaded data will be scheduled for deletion, and your account '
-          'will be permanently deleted. \n\nThis action is not reversible.',
-      firstAction: 'Cancel',
-      secondAction: 'Delete',
-      firstActionColor: Theme.of(context).colorScheme.onSurface,
-      secondActionColor: Colors.red,
+      "Please authenticate to initiate account deletion",
     );
-    if (choice != DialogUserChoice.secondChoice) {
-      return;
+
+    if (hasAuthenticated) {
+      final choice = await showChoiceDialog(
+        context,
+        'Are you sure you want to delete your account?',
+        'Your uploaded data will be scheduled for deletion, and your account '
+            'will be permanently deleted. \n\nThis action is not reversible.',
+        firstAction: 'Cancel',
+        secondAction: 'Delete',
+        firstActionColor: Theme.of(context).colorScheme.onSurface,
+        secondActionColor: Colors.red,
+      );
+      if (choice != DialogUserChoice.secondChoice) {
+        return;
+      }
+      final decryptChallenge = CryptoUtil.openSealSync(
+        Sodium.base642bin(response.encryptedChallenge),
+        Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
+        Configuration.instance.getSecretKey(),
+      );
+      final challengeResponseStr = utf8.decode(decryptChallenge);
+      await UserService.instance.deleteAccount(context, challengeResponseStr);
     }
-    final decryptChallenge = CryptoUtil.openSealSync(
-      Sodium.base642bin(response.encryptedChallenge),
-      Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
-      Configuration.instance.getSecretKey(),
-    );
-    final challengeResponseStr = utf8.decode(decryptChallenge);
-    await UserService.instance.deleteAccount(context, challengeResponseStr);
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {

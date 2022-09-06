@@ -12,7 +12,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
 import 'package:photos/ui/collections/ente_section_title.dart';
@@ -91,18 +91,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final filesDB = FilesDB.instance;
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
-    final List<DeviceFolder> folders = [];
     final List<DeviceCollection> deviceCollections =
         await filesDB.getDeviceCollections(includeCoverThumbnail: true);
-    final latestLocalFiles = await filesDB.getLatestLocalFiles();
-    for (final file in latestLocalFiles) {
-      folders.add(DeviceFolder(file.deviceFolder, file.deviceFolder, file));
-    }
-    folders.sort(
-      (first, second) =>
-          second.thumbnail.creationTime.compareTo(first.thumbnail.creationTime),
-    );
-
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles =
         await collectionsService.getLatestCollectionFiles();
