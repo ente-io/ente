@@ -8,6 +8,7 @@ import VerifyMasterPasswordForm, {
     VerifyMasterPasswordFormProps,
 } from 'components/VerifyMasterPasswordForm';
 import { Dialog, Stack, Typography } from '@mui/material';
+import { logError } from 'utils/sentry';
 
 interface Iprops {
     open: boolean;
@@ -33,19 +34,27 @@ export default function AuthenticateUserModal({
 
     useEffect(() => {
         const main = async () => {
-            const user = getData(LS_KEYS.USER);
-            setUser(user);
-            const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-
-            if (
-                (!user?.token && !user?.encryptedToken) ||
-                (keyAttributes && !keyAttributes.memLimit)
-            ) {
+            try {
+                const user = getData(LS_KEYS.USER);
+                if (!user) {
+                    throw Error('User not found');
+                }
+                setUser(user);
+                const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+                if (
+                    (!user?.token && !user?.encryptedToken) ||
+                    (keyAttributes && !keyAttributes.memLimit)
+                ) {
+                    throw Error('User not logged in');
+                } else if (!keyAttributes) {
+                    throw Error('Key attributes not found');
+                } else {
+                    setKeyAttributes(keyAttributes);
+                }
+            } catch (e) {
+                logError(e, 'AuthenticateUserModal initialization failed');
+                onClose();
                 somethingWentWrong();
-            } else if (!keyAttributes) {
-                somethingWentWrong();
-            } else {
-                setKeyAttributes(keyAttributes);
             }
         };
         main();
