@@ -175,7 +175,14 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             shrinkWrap: true,
           ),
         ),
-        _selectedFiles.isEmpty ? const SizedBox.shrink() : _getDeleteButton(),
+        _selectedFiles.isEmpty
+            ? const SizedBox.shrink()
+            : Column(
+                children: [
+                  _getDeleteButton(),
+                  const SizedBox(height: crossAxisSpacing / 2),
+                ],
+              ),
       ],
     );
   }
@@ -317,7 +324,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       width: double.infinity,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2),
+          padding: const EdgeInsets.symmetric(horizontal: crossAxisSpacing / 2),
           child: TextButton(
             style: OutlinedButton.styleFrom(
               backgroundColor:
@@ -326,7 +333,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Padding(padding: EdgeInsets.all(crossAxisSpacing / 2)),
+                const Padding(padding: EdgeInsets.all(4)),
                 Text(
                   text,
                   style: TextStyle(

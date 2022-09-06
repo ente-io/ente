@@ -1,7 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
-import 'package:photos/core/configuration.dart';
+import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/change_email_dialog.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
@@ -9,11 +9,8 @@ import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
-import 'package:photos/ui/tools/app_lock.dart';
-import 'package:photos/utils/auth_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class AccountSectionWidget extends StatefulWidget {
   const AccountSectionWidget({Key key}) : super(key: key);
@@ -27,7 +24,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
   Widget build(BuildContext context) {
     return ExpandablePanel(
       header: const SettingsSectionTitle("Account"),
-      collapsed: Container(),
+      collapsed: const SizedBox.shrink(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
     );
@@ -39,32 +36,29 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            AppLock.of(context).setEnabled(false);
-            const String reason = "Please authenticate to view your recovery key";
-            final result = await requestAuthentication(reason);
-            AppLock.of(context)
-                .setEnabled(Configuration.instance.shouldShowLockScreen());
-            if (!result) {
-              showToast(context, reason);
-              return;
-            }
-
-            String recoveryKey;
-            try {
-              recoveryKey = await _getOrCreateRecoveryKey();
-            } catch (e) {
-              showGenericErrorDialog(context);
-              return;
-            }
-            routeToPage(
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
               context,
-              RecoveryKeyPage(
-                recoveryKey,
-                "OK",
-                showAppBar: true,
-                onDone: () {},
-              ),
+              "Please authenticate to view your recovery key",
             );
+            if (hasAuthenticated) {
+              String recoveryKey;
+              try {
+                recoveryKey = await _getOrCreateRecoveryKey();
+              } catch (e) {
+                showGenericErrorDialog(context);
+                return;
+              }
+              routeToPage(
+                context,
+                RecoveryKeyPage(
+                  recoveryKey,
+                  "OK",
+                  showAppBar: true,
+                  onDone: () {},
+                ),
+              );
+            }
           },
           child: const SettingsTextItem(
             text: "Recovery key",
@@ -75,23 +69,21 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            AppLock.of(context).setEnabled(false);
-            const String reason = "Please authenticate to change your email";
-            final result = await requestAuthentication(reason);
-            AppLock.of(context)
-                .setEnabled(Configuration.instance.shouldShowLockScreen());
-            if (!result) {
-              showToast(context, reason);
-              return;
-            }
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return const ChangeEmailDialog();
-              },
-              barrierColor: Colors.black.withOpacity(0.85),
-              barrierDismissible: false,
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              "Please authenticate to change your email",
             );
+            if (hasAuthenticated) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return const ChangeEmailDialog();
+                },
+                barrierColor: Colors.black.withOpacity(0.85),
+                barrierDismissible: false,
+              );
+            }
           },
           child: const SettingsTextItem(
             text: "Change email",
@@ -102,24 +94,22 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            AppLock.of(context).setEnabled(false);
-            const String reason = "Please authenticate to change your password";
-            final result = await requestAuthentication(reason);
-            AppLock.of(context)
-                .setEnabled(Configuration.instance.shouldShowLockScreen());
-            if (!result) {
-              showToast(context, reason);
-              return;
-            }
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const PasswordEntryPage(
-                    mode: PasswordEntryMode.update,
-                  );
-                },
-              ),
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
+              context,
+              "Please authenticate to change your password",
             );
+            if (hasAuthenticated) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const PasswordEntryPage(
+                      mode: PasswordEntryMode.update,
+                    );
+                  },
+                ),
+              );
+            }
           },
           child: const SettingsTextItem(
             text: "Change password",
