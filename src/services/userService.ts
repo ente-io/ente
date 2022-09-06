@@ -16,6 +16,7 @@ import {
     TwoFactorVerificationResponse,
     TwoFactorRecoveryResponse,
     UserDetails,
+    DeleteChallengeResponse,
 } from 'types/user';
 import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
@@ -321,6 +322,45 @@ export const getFamilyPortalRedirectURL = async () => {
         }/gallery`;
     } catch (e) {
         logError(e, 'unable to generate to family portal URL');
+        throw e;
+    }
+};
+
+export const getAccountDeleteChallenge = async () => {
+    try {
+        const token = getToken();
+
+        const resp = await HTTPService.get(
+            `${ENDPOINT}/users/delete-challenge`,
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+        return resp.data as DeleteChallengeResponse;
+    } catch (e) {
+        logError(e, 'failed to get account delete challenge');
+        throw e;
+    }
+};
+
+export const deleteAccount = async (challenge: string) => {
+    try {
+        const token = getToken();
+        if (!token) {
+            return;
+        }
+
+        await HTTPService.delete(
+            `${ENDPOINT}/users/delete`,
+            { challenge },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
+    } catch (e) {
+        logError(e, 'deleteAccount api call failed');
         throw e;
     }
 };

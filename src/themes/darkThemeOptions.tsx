@@ -130,11 +130,13 @@ const darkThemeOptions = createTheme({
         },
         MuiLink: {
             defaultProps: {
-                underline: 'always',
+                color: '#1dba54',
+                underline: 'none',
             },
             styleOverrides: {
                 root: {
                     '&:hover': {
+                        underline: 'always',
                         color: '#1dba54',
                     },
                 },

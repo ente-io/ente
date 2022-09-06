@@ -87,3 +87,8 @@ export interface UserDetails {
     subscription: Subscription;
     familyData?: FamilyData;
 }
+
+export interface DeleteChallengeResponse {
+    allowDelete: boolean;
+    encryptedChallenge: string;
+}
