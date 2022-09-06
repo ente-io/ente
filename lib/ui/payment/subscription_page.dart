@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/billing_plan.dart';
@@ -93,6 +94,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             if (widget.isOnboarding) {
               Navigator.of(context).popUntil((route) => route.isFirst);
             }
+          } on SubscriptionAlreadyClaimedError catch (e) {
+            _logger.warning("subscription is already claimed ", e);
+            await _dialog.hide();
+            final String title = "${Platform.isAndroid ? "Play" : "App"}"
+                " store subscription";
+            final String id =
+                Platform.isAndroid ? "Google Play ID" : "Apple ID";
+            final String message = '''Your $id is already linked to another
+             ente account.\nIf you would like to use your $id with this 
+             account, please contact our support''';
+            showErrorDialog(context, title, message);
+            return;
           } catch (e) {
             _logger.warning("Could not complete payment ", e);
             await _dialog.hide();
