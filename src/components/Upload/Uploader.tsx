@@ -354,7 +354,11 @@ export default function Uploader(props: Props) {
         collections: Collection[]
     ) => {
         try {
-            if (isElectron() && !isPendingDesktopUpload.current) {
+            if (
+                isElectron() &&
+                !isPendingDesktopUpload.current &&
+                !watchFolderService.isUploadRunning()
+            ) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
                     await ImportService.setToUploadFiles(
