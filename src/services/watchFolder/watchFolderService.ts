@@ -256,18 +256,28 @@ class watchFolderService {
                 return;
             }
 
-            this.setIsEventRunning(true);
             const event = this.clubSameCollectionEvents();
-            this.currentEvent = event;
             const mappings = this.getWatchMappings();
             const mapping = mappings.find(
-                (mapping) => mapping.folderPath === this.currentEvent.folderPath
+                (mapping) => mapping.folderPath === event.folderPath
             );
             if (!mapping) {
                 throw Error('no Mapping found for event');
             }
+            if (event.type === 'upload') {
+                event.files = event.files.filter(
+                    (file) =>
+                        !mapping.ignoredFiles.includes(file.path) &&
+                        !mapping.syncedFiles.find((f) => f.path === file.path)
+                );
+                if (event.files.length === 0) {
+                    return;
+                }
+            }
+            this.currentEvent = event;
             this.currentlySyncedMapping = mapping;
             addLogLine(`running event', ${JSON.stringify(event)}`);
+            this.setIsEventRunning(true);
             if (event.type === 'upload') {
                 this.processUploadEvent();
             } else {
