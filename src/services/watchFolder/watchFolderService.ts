@@ -580,8 +580,11 @@ class watchFolderService {
         try {
             const mappings = this.getWatchMappings();
 
-            const mapping = mappings.find((mapping) =>
-                filePath.startsWith(mapping.folderPath)
+            const mapping = mappings.find(
+                (mapping) =>
+                    filePath.length > mapping.folderPath.length &&
+                    filePath.startsWith(mapping.folderPath) &&
+                    filePath[filePath.length] === '/'
             );
 
             if (!mapping) {
