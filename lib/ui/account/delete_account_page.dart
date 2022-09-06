@@ -142,13 +142,13 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
-    final hasAuthenticatedOrNoLocalAuth =
+    final hasAuthenticated =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
       "Please authenticate to initiate account deletion",
     );
 
-    if (hasAuthenticatedOrNoLocalAuth) {
+    if (hasAuthenticated) {
       final choice = await showChoiceDialog(
         context,
         'Are you sure you want to delete your account?',

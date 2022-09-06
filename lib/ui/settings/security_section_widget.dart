@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -16,9 +15,6 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
-import 'package:photos/ui/tools/app_lock.dart';
-import 'package:photos/utils/auth_util.dart';
-import 'package:photos/utils/dialog_util.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key key}) : super(key: key);
@@ -81,13 +77,13 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       return Switch.adaptive(
                         value: snapshot.data,
                         onChanged: (value) async {
-                          final hasAuthenticatedOrNoLocalAuth =
+                          final hasAuthenticated =
                               await LocalAuthenticationService.instance
                                   .requestLocalAuthentication(
                             context,
                             "Please authenticate to configure two-factor authentication",
                           );
-                          if (hasAuthenticatedOrNoLocalAuth) {
+                          if (hasAuthenticated) {
                             if (value) {
                               UserService.instance.setupTwoFactor(context);
                             } else {
@@ -125,25 +121,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             Switch.adaptive(
               value: _config.shouldShowLockScreen(),
               onChanged: (value) async {
-                if (await LocalAuthentication().isDeviceSupported()) {
-                  AppLock.of(context).disable();
-                  final result = await requestAuthentication(
-                    "Please authenticate to change lockscreen setting",
-                  );
-                  if (result) {
-                    AppLock.of(context).setEnabled(value);
-                    _config.setShouldShowLockScreen(value);
-                    setState(() {});
-                  } else {
-                    AppLock.of(context)
-                        .setEnabled(_config.shouldShowLockScreen());
-                  }
-                } else {
-                  showErrorDialog(
-                    context,
-                    "",
-                    "To enable the ente lockscreen, please setup the device passcode or screen lock in the system settings.",
-                  );
+                final hasAuthenticated = await LocalAuthenticationService
+                    .instance
+                    .requestLocalAuthForLockScreen(
+                  context,
+                  value,
+                  "Please authenticate to change lockscreen setting",
+                  "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
+                );
+                if (hasAuthenticated) {
+                  setState(() {});
                 }
               },
             ),
@@ -254,13 +241,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
-          final hasAuthenticatedOrNoLocalAuth = await LocalAuthenticationService
-              .instance
+          final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
             context,
             "Please authenticate to view your active sessions",
           );
-          if (hasAuthenticatedOrNoLocalAuth) {
+          if (hasAuthenticated) {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (BuildContext context) {

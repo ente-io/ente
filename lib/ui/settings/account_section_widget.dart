@@ -36,13 +36,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final hasAuthenticatedOrNoLocalAuth =
-                await LocalAuthenticationService.instance
-                    .requestLocalAuthentication(
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
               context,
               "Please authenticate to view your recovery key",
             );
-            if (hasAuthenticatedOrNoLocalAuth) {
+            if (hasAuthenticated) {
               String recoveryKey;
               try {
                 recoveryKey = await _getOrCreateRecoveryKey();
@@ -70,13 +69,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final hasAuthenticatedOrNoLocalAuth =
-                await LocalAuthenticationService.instance
-                    .requestLocalAuthentication(
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
               context,
               "Please authenticate to change your email",
             );
-            if (hasAuthenticatedOrNoLocalAuth) {
+            if (hasAuthenticated) {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
@@ -96,13 +94,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            final hasAuthenticatedOrNoLocalAuth =
-                await LocalAuthenticationService.instance
-                    .requestLocalAuthentication(
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthentication(
               context,
               "Please authenticate to change your password",
             );
-            if (hasAuthenticatedOrNoLocalAuth) {
+            if (hasAuthenticated) {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {
