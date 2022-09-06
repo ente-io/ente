@@ -98,7 +98,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             _logger.warning("subscription is already claimed ", e);
             await _dialog.hide();
             final String title = "${Platform.isAndroid ? "Play" : "App"}"
-                " store subscription";
+                "Store subscription";
             final String id =
                 Platform.isAndroid ? "Google Play ID" : "Apple ID";
             final String message = '''Your $id is already linked to another
