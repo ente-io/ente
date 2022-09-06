@@ -54,17 +54,14 @@ export async function diskFileRemovedCallback(filePath: string) {
 
 export async function diskFolderRemovedCallback(folderPath: string) {
     try {
-        const collectionNameAndFolderPath =
-            await watchFolderService.getCollectionNameAndFolderPath(folderPath);
-        if (!collectionNameAndFolderPath) {
-            return;
+        const mappings = watchFolderService.getWatchMappings();
+        const mapping = mappings.find(
+            (mapping) => mapping.folderPath === folderPath
+        );
+        if (mapping) {
+            throw Error(`Watch mapping not found for ${folderPath}`);
         }
-
-        const { folderPath: mappedFolderPath } = collectionNameAndFolderPath;
-
-        if (mappedFolderPath === folderPath) {
-            watchFolderService.pushTrashedDir(folderPath);
-        }
+        watchFolderService.pushTrashedDir(folderPath);
         addLogLine(`added trashedDir, ${folderPath}`);
     } catch (e) {
         logError(e, 'error while calling diskFolderRemovedCallback');
