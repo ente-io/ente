@@ -246,8 +246,9 @@ export default function Uploader(props: Props) {
 
     const preCollectionCreationAction = async () => {
         props.closeCollectionSelector();
-        setUploadProgressView(true);
         props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
+        setUploadStage(UPLOAD_STAGES.START);
+        setUploadProgressView(true);
     };
 
     const uploadFilesToExistingCollection = async (collection: Collection) => {
