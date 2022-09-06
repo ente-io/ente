@@ -21,9 +21,9 @@ export default function AuthenticateUserModal({
     onClose,
     onAuthenticate,
 }: Iprops) {
-    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
     const { setDialogMessage } = useContext(AppContext);
     const [user, setUser] = useState<User>();
+    const [keyAttributes, setKeyAttributes] = useState<KeyAttributes>();
 
     const somethingWentWrong = () =>
         setDialogMessage({
