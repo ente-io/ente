@@ -30,17 +30,17 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
     const { setDialogMessage, isMobile } = useContext(AppContext);
     const [authenticateUserModalView, setAuthenticateUserModalView] =
         useState(false);
-
-    useEffect(() => {
-        preloadImage('/images/delete-account');
-    }, []);
+    const [deleteAccountChallenge, setDeleteAccountChallenge] = useState('');
 
     const openAuthenticateUserModal = () => setAuthenticateUserModalView(true);
     const closeAuthenticateUserModal = () =>
         setAuthenticateUserModalView(false);
 
+    useEffect(() => {
+        preloadImage('/images/delete-account');
+    }, []);
+
     const sendFeedbackMail = () => initiateEmail('feedback@ente.io');
-    const [deleteAccountChallenge, setDeleteAccountChallenge] = useState('');
 
     const somethingWentWrong = () =>
         setDialogMessage({
