@@ -48,6 +48,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             close: { variant: 'danger' },
             content: constants.UNKNOWN_ERROR,
         });
+
     const initiateDelete = async () => {
         try {
             const deleteChallengeResponse = await getAccountDeleteChallenge();
