@@ -73,7 +73,9 @@ interface Props {
 
 export default function Uploader(props: Props) {
     const [uploadProgressView, setUploadProgressView] = useState(false);
-    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>();
+    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
+        UPLOAD_STAGES.START
+    );
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
     const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
         finished: 0,
@@ -110,6 +112,8 @@ export default function Uploader(props: Props) {
         isPendingDesktopUpload.current = true;
         pendingDesktopUploadCollectionName.current = collectionName;
     };
+
+    const uploadRunning = useRef(false);
 
     useEffect(() => {
         UploadManager.init(
@@ -174,7 +178,7 @@ export default function Uploader(props: Props) {
             webFiles?.length > 0 ||
             appContext.sharedFiles?.length > 0
         ) {
-            if (uploadManager.isUploadRunning()) {
+            if (uploadRunning.current) {
                 if (watchFolderService.isUploadRunning()) {
                     // pause watch folder service on user upload
                     watchFolderService.pauseRunningSync();
@@ -198,6 +202,8 @@ export default function Uploader(props: Props) {
                 });
                 return;
             }
+            uploadRunning.current = true;
+            props.closeUploadTypeSelector();
             props.setLoading(true);
             if (webFiles?.length > 0) {
                 // File selection by drag and drop or selection of file.
@@ -238,9 +244,15 @@ export default function Uploader(props: Props) {
         }
     };
 
+    const preCollectionCreationAction = async () => {
+        props.closeCollectionSelector();
+        setUploadProgressView(true);
+        props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
+    };
+
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
-            await preUploadAction();
+            await preCollectionCreationAction();
             const filesWithCollectionToUpload: FileWithCollection[] =
                 toUploadFiles.current.map((file, index) => ({
                     file,
@@ -260,7 +272,7 @@ export default function Uploader(props: Props) {
         collectionName?: string
     ) => {
         try {
-            await preUploadAction();
+            await preCollectionCreationAction();
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionNameToFilesMap = new Map<
@@ -336,16 +348,14 @@ export default function Uploader(props: Props) {
     };
 
     const preUploadAction = async () => {
-        props.closeCollectionSelector();
-        props.closeUploadTypeSelector();
         uploadManager.prepareForNewUpload();
         setUploadProgressView(true);
-        props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
         await props.syncWithRemote(true, true);
     };
 
     function postUploadAction() {
         props.setShouldDisableDropzone(false);
+        uploadRunning.current = false;
         props.syncWithRemote();
     }
 
@@ -354,6 +364,7 @@ export default function Uploader(props: Props) {
         collections: Collection[]
     ) => {
         try {
+            preUploadAction();
             if (
                 isElectron() &&
                 !isPendingDesktopUpload.current &&
