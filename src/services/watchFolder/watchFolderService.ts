@@ -584,7 +584,7 @@ class watchFolderService {
                 (mapping) =>
                     filePath.length > mapping.folderPath.length &&
                     filePath.startsWith(mapping.folderPath) &&
-                    filePath[filePath.length] === '/'
+                    filePath[mapping.folderPath.length] === '/'
             );
 
             if (!mapping) {
