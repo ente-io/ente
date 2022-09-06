@@ -56,7 +56,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
                 deleteChallengeResponse.encryptedChallenge
             );
             if (deleteChallengeResponse.allowDelete) {
-                confirmAccountDeletion();
+                openAuthenticateUserModal();
             } else {
                 askToMailForDeletion();
             }
@@ -72,7 +72,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             content: constants.CONFIRM_ACCOUNT_DELETION_MESSAGE,
             proceed: {
                 text: constants.DELETE,
-                action: openAuthenticateUserModal,
+                action: solveChallengeAndDeleteAccount,
                 variant: 'danger',
             },
             close: { text: constants.CANCEL },
@@ -156,7 +156,7 @@ const DeleteAccountModal = ({ open, onClose }: Iprops) => {
             <AuthenticateUserModal
                 open={authenticateUserModalView}
                 onClose={closeAuthenticateUserModal}
-                onAuthenticate={solveChallengeAndDeleteAccount}
+                onAuthenticate={confirmAccountDeletion}
             />
         </>
     );
