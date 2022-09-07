@@ -7,7 +7,8 @@ class DeviceCollection {
   final String coverId;
   final int count;
   final bool shouldBackup;
-  final UploadStrategy uploadStrategy;
+  UploadStrategy uploadStrategy;
+
   int collectionID;
   File thumbnail;
 
@@ -18,7 +19,7 @@ class DeviceCollection {
     this.count,
     this.collectionID,
     this.thumbnail,
-    this.shouldBackup = false,
     this.uploadStrategy = UploadStrategy.ifMissing,
+    this.shouldBackup = false,
   });
 }

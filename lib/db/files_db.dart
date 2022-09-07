@@ -317,6 +317,7 @@ class FilesDB {
           should_backup INTEGER NOT NULL DEFAULT 0,
           count INTEGER NOT NULL DEFAULT 0,
           collection_id INTEGER DEFAULT -1,
+          upload_strategy INTEGER DEFAULT 0,
           cover_id TEXT
       );
       ''',
@@ -1355,6 +1356,24 @@ class FilesDB {
       result[file.uploadedFileID] = file;
     }
     return result;
+  }
+
+  Future<Set<int>> getAllCollectionIDsOfFile(
+    int uploadedFileID,
+  ) async {
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnUploadedFileID = ? AND $columnCollectionID != -1',
+      columns: [columnCollectionID],
+      whereArgs: [uploadedFileID],
+      distinct: true,
+    );
+    final collectionIDsOfFile = <int>{};
+    for (var result in results) {
+      collectionIDsOfFile.add(result['collection_id']);
+    }
+    return collectionIDsOfFile;
   }
 
   List<File> convertToFiles(List<Map<String, dynamic>> results) {

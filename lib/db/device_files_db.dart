@@ -5,6 +5,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:sqflite/sqlite_api.dart';
 import 'package:tuple/tuple.dart';
@@ -178,11 +179,23 @@ extension DeviceFiles on FilesDB {
         final String localID = tup.item2;
         final bool shouldUpdate = existingPathIds.contains(pathEntity.id);
         if (shouldUpdate) {
-          await db.rawUpdate(
+          final rowUpdated = await db.rawUpdate(
             "UPDATE device_collections SET name = ?, cover_id = ?, count"
-            " = ? where id = ?",
-            [pathEntity.name, localID, pathEntity.assetCount, pathEntity.id],
+            " = ? where id = ? AND (name != ? OR cover_id != ? OR count != ?)",
+            [
+              pathEntity.name,
+              localID,
+              pathEntity.assetCount,
+              pathEntity.id,
+              pathEntity.name,
+              localID,
+              pathEntity.assetCount,
+            ],
           );
+          if (rowUpdated > 0) {
+            _logger.fine("Updated $rowUpdated rows for ${pathEntity.name}");
+            hasUpdated = true;
+          }
         } else {
           hasUpdated = true;
           await db.insert(
@@ -290,7 +303,9 @@ extension DeviceFiles on FilesDB {
     bool includeCoverThumbnail = false,
   }) async {
     debugPrint(
-        "Fetching DeviceCollections From DB with thumnail = $includeCoverThumbnail");
+      "Fetching DeviceCollections From DB with thumbnail = "
+      "$includeCoverThumbnail",
+    );
     try {
       final db = await database;
       final coverFiles = <File>[];
@@ -314,6 +329,7 @@ extension DeviceFiles on FilesDB {
           collectionID: row["collection_id"],
           coverId: row["cover_id"],
           shouldBackup: (row["should_backup"] ?? _sqlBoolFalse) == _sqlBoolTrue,
+          uploadStrategy: getUploadType(row["upload_strategy"] ?? 0),
         );
         if (includeCoverThumbnail) {
           deviceCollection.thumbnail = coverFiles.firstWhere(
