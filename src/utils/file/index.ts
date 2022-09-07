@@ -416,26 +416,6 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return file;
 }
 
-export const appendNewFilePath = async (file: EnteFile, filePath: string) => {
-    let mergedMetadataFilePaths = [filePath];
-    if (file.magicMetadata?.data.filePaths?.length > 0) {
-        mergedMetadataFilePaths = [
-            ...new Set([
-                ...file.magicMetadata.data.filePaths,
-                ...mergedMetadataFilePaths,
-            ]),
-        ];
-    }
-    const updatedMagicMetadata = await updateMagicMetadataProps(
-        file.magicMetadata ?? NEW_FILE_MAGIC_METADATA,
-        file.key,
-        { filePaths: mergedMetadataFilePaths }
-    );
-    file.magicMetadata = updatedMagicMetadata;
-
-    return file;
-};
-
 export function isSharedFile(user: User, file: EnteFile) {
     if (!user?.id || !file?.ownerID) {
         return false;

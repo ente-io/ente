@@ -1,11 +1,10 @@
-import { getLocalFiles, updateFileMagicMetadata } from '../fileService';
+import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
 import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFiles,
     preservePhotoswipeProps,
     decryptFile,
-    appendNewFilePath,
     getUserOwnedNonTrashedFiles,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -534,19 +533,6 @@ class UploadManager {
             );
             ImportService.updatePendingUploads(this.remainingFiles);
         }
-    }
-
-    // not used
-    private async updateFilePaths(
-        decryptedFile: EnteFile,
-        fileWithCollection: FileWithCollection
-    ) {
-        const filePath = UploadService.getFileMetadataAndFileTypeInfo(
-            fileWithCollection.localID
-        ).filePath;
-
-        const updatedFile = await appendNewFilePath(decryptedFile, filePath);
-        await updateFileMagicMetadata([updatedFile]);
     }
 
     public shouldAllowNewUpload = () => {
