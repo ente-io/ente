@@ -287,8 +287,8 @@ const darkThemeOptions = createTheme({
         },
         background: {
             default: '#000000',
-            paper: '#141414',
-            overPaper: '#1b1b1b',
+            paper: '#1b1b1b',
+            overPaper: '#252525',
         },
         grey: {
             A100: '#ccc',
