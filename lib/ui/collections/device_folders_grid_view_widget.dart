@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/models/device_collection.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/collections/device_folder_icon_widget.dart';
 import 'package:photos/ui/viewer/gallery/empte_state.dart';
 
@@ -13,6 +14,8 @@ class DeviceFoldersGridViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMigrationDone =
+        LocalSyncService.instance.isDeviceFileMigrationDone();
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: SizedBox(
@@ -20,7 +23,11 @@ class DeviceFoldersGridViewWidget extends StatelessWidget {
         child: Align(
           alignment: Alignment.centerLeft,
           child: deviceCollections.isEmpty
-              ? const EmptyState()
+              ? (isMigrationDone
+                  ? const EmptyState()
+                  : const EmptyState(
+                      text: "Importing....",
+                    ))
               : ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,

@@ -147,7 +147,25 @@ class LocalSyncService {
     if (hasUpdated) {
       Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
+    // migrate the backed up folder settings
+    if (!_prefs.containsKey(hasImportedDeviceCollections)) {
+      final pathsToBackUp = Configuration.instance.getPathsToBackUp();
+      final entriesToBackUp = Map.fromEntries(
+        result
+            .where((element) => pathsToBackUp.contains(element.item1.name))
+            .map((e) => MapEntry(e.item1.id, true)),
+      );
+      if (entriesToBackUp.isNotEmpty) {
+        await _db.updateDevicePathSyncStatus(entriesToBackUp);
+        Bus.instance.fire(BackupFoldersUpdatedEvent());
+      }
+      await _prefs.setBool(hasImportedDeviceCollections, true);
+    }
     return hasUpdated;
+  }
+
+  bool isDeviceFileMigrationDone() {
+    return _prefs.containsKey(hasImportedDeviceCollections);
   }
 
   Future<bool> syncAll() async {
