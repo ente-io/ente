@@ -1,8 +1,7 @@
-import { enableSharedArrayBufferSupport } from './utils/main';
-import { handleDockIconHideOnAutoLaunch } from './utils/main';
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
+import { initWatcher } from './services/chokidar';
 import { addAllowOriginHeader } from './utils/cors';
 import {
     setupTrayItem,
@@ -12,6 +11,8 @@ import {
     setupMainMenu,
     setupMainHotReload,
     setupNextElectronServe,
+    enableSharedArrayBufferSupport,
+    handleDockIconHideOnAutoLaunch,
 } from './utils/main';
 import { initSentry } from './services/sentry';
 
@@ -63,10 +64,11 @@ if (!gotTheLock) {
     app.on('ready', async () => {
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
+        const watcher = initWatcher(mainWindow);
         setupMacWindowOnDockIconClick();
         initSentry();
         setupMainMenu();
-        setupIpcComs(tray, mainWindow);
+        setupIpcComs(tray, mainWindow, watcher);
         handleUpdates(mainWindow, tray);
         handleDownloads(mainWindow);
         addAllowOriginHeader(mainWindow);

@@ -10,23 +10,22 @@ import {
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
 import { logErrorSentry } from '../services/sentry';
+import chokidar from 'chokidar';
 import path from 'path';
-import { getFilesFromDir } from '../services/fs';
+import { getDirFilePaths } from '../services/fs';
 
 export default function setupIpcComs(
     tray: Tray,
-    mainWindow: BrowserWindow
+    mainWindow: BrowserWindow,
+    watcher: chokidar.FSWatcher
 ): void {
     ipcMain.handle('select-dir', async () => {
         const result = await dialog.showOpenDialog({
             properties: ['openDirectory'],
         });
-        let dir =
-            result.filePaths &&
-            result.filePaths.length > 0 &&
-            result.filePaths[0];
-        dir = dir?.split(path.sep)?.join(path.posix.sep);
-        return dir;
+        if (result.filePaths && result.filePaths.length > 0) {
+            return result.filePaths[0]?.split(path.sep)?.join(path.posix.sep);
+        }
     });
 
     ipcMain.on('update-tray', (_, args) => {
@@ -68,10 +67,18 @@ export default function setupIpcComs(
 
         let files: string[] = [];
         for (const dirPath of dir.filePaths) {
-            files = files.concat(await getFilesFromDir(dirPath));
+            files = files.concat(await getDirFilePaths(dirPath));
         }
 
         return files;
+    });
+
+    ipcMain.handle('add-watcher', async (_, args: { dir: string }) => {
+        watcher.add(args.dir);
+    });
+
+    ipcMain.handle('remove-watcher', async (_, args: { dir: string }) => {
+        watcher.unwatch(args.dir);
     });
 
     ipcMain.handle('log-error', (_, err, msg, info?) => {

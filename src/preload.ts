@@ -8,6 +8,14 @@ import {
     getElectronFilesFromGoogleZip,
     setToUploadCollection,
 } from './api/upload';
+import {
+    registerWatcherFunctions,
+    addWatchMapping,
+    removeWatchMapping,
+    updateWatchMappingSyncedFiles,
+    updateWatchMappingIgnoredFiles,
+    getWatchMappings,
+} from './api/watch';
 import { getEncryptionKey, setEncryptionKey } from './api/safeStorage';
 import { clearElectronStore } from './api/electronStore';
 import { openDiskCache, deleteDiskCache } from './api/cache';
@@ -25,8 +33,8 @@ import {
     exists,
 } from './api/export';
 import { selectRootDirectory } from './api/common';
-import { getElectronFile } from './services/fs';
 import { fixHotReloadNext12 } from './utils/preload';
+import { isFolder, getDirFiles } from './api/fs';
 
 fixHotReloadNext12();
 
@@ -39,6 +47,7 @@ windowObject['ElectronAPIs'] = {
     saveStreamToDisk,
     saveFileToDisk,
     selectRootDirectory,
+    clearElectronStore,
     sendNotification,
     showOnTray,
     reloadWindow,
@@ -48,7 +57,6 @@ windowObject['ElectronAPIs'] = {
     registerRetryFailedExportListener,
     getExportRecord,
     setExportRecord,
-    getElectronFile,
     showUploadFilesDialog,
     showUploadDirsDialog,
     getPendingUploads,
@@ -58,7 +66,14 @@ windowObject['ElectronAPIs'] = {
     setToUploadCollection,
     getEncryptionKey,
     setEncryptionKey,
-    clearElectronStore,
     openDiskCache,
     deleteDiskCache,
+    getDirFiles,
+    getWatchMappings,
+    addWatchMapping,
+    removeWatchMapping,
+    registerWatcherFunctions,
+    isFolder,
+    updateWatchMappingSyncedFiles,
+    updateWatchMappingIgnoredFiles,
 };

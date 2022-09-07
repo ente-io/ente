@@ -20,6 +20,23 @@ export interface KeysStoreType {
     };
 }
 
+type WatchedMappingSyncedFile = {
+    path: string;
+    id: number;
+};
+
+export interface WatchMapping {
+    rootFolderName: string;
+    uploadStrategy: number;
+    folderPath: string;
+    syncedFiles: WatchedMappingSyncedFile[];
+    ignoredFiles: string[];
+}
+
+export interface WatchStoreType {
+    mappings: WatchMapping[];
+}
+
 export enum FILE_PATH_TYPE {
     FILES = 'files',
     ZIPS = 'zips',
