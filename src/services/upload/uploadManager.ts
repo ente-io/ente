@@ -39,6 +39,7 @@ import uiService from './uiService';
 import { addLogLine, getFileNameSize } from 'utils/logging';
 import isElectron from 'is-electron';
 import ImportService from 'services/importService';
+import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
 
@@ -63,6 +64,10 @@ class UploadManager {
         this.setFiles = setFiles;
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
+    }
+
+    public isUploadRunning() {
+        return this.uploadInProgress;
     }
 
     private resetState() {
@@ -115,6 +120,7 @@ class UploadManager {
                     UPLOAD_STAGES.READING_GOOGLE_METADATA_FILES
                 );
                 await this.parseMetadataJSONFiles(metadataJSONFiles);
+
                 UploadService.setParsedMetadataJSONMap(
                     this.parsedMetadataJSONMap
                 );
@@ -122,6 +128,7 @@ class UploadManager {
             if (mediaFiles.length) {
                 UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
                 await this.extractMetadataFromFiles(mediaFiles);
+
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
@@ -272,6 +279,7 @@ class UploadManager {
                 }
                 let fileTypeInfo = null;
                 let metadata = null;
+                let filePath = null;
                 try {
                     addLogLine(
                         `metadata extraction started ${getFileNameSize(file)} `
@@ -282,6 +290,7 @@ class UploadManager {
                     );
                     fileTypeInfo = result.fileTypeInfo;
                     metadata = result.metadata;
+                    filePath = result.filePath;
                     addLogLine(
                         `metadata extraction successful${getFileNameSize(
                             file
@@ -303,6 +312,7 @@ class UploadManager {
                 this.metadataAndFileTypeInfoMap.set(localID, {
                     fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
                     metadata: metadata && { ...metadata },
+                    filePath: filePath,
                 });
                 UIService.increaseFileUploaded();
             }
@@ -342,11 +352,12 @@ class UploadManager {
                 collectionID,
                 fileTypeInfo
             );
+            const filePath = (file as any).path as string;
+            return { fileTypeInfo, metadata, filePath };
         } catch (e) {
             logError(e, 'failed to extract file metadata');
-            return { fileTypeInfo, metadata: null };
+            return { fileTypeInfo, metadata: null, filePath: null };
         }
-        return { fileTypeInfo, metadata };
     }
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
@@ -426,6 +437,9 @@ class UploadManager {
                 case UPLOAD_RESULT.BLOCKED:
                     this.failedFiles.push(fileWithCollection);
                     break;
+                case UPLOAD_RESULT.ALREADY_UPLOADED:
+                    decryptedFile = uploadedFile;
+                    break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
                     decryptedFile = uploadedFile;
                     fileUploadResult = UPLOAD_RESULT.UPLOADED;
@@ -437,7 +451,6 @@ class UploadManager {
                         fileWithCollection.collection.key
                     );
                     break;
-                case UPLOAD_RESULT.ALREADY_UPLOADED:
                 case UPLOAD_RESULT.UNSUPPORTED:
                 case UPLOAD_RESULT.TOO_LARGE:
                 case UPLOAD_RESULT.CANCELLED:
@@ -453,8 +466,13 @@ class UploadManager {
                     UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL,
                 ].includes(fileUploadResult)
             ) {
-                await this.updateExistingFiles(decryptedFile);
+                this.updateExistingFiles(decryptedFile);
             }
+            await this.watchFolderCallback(
+                fileUploadResult,
+                fileWithCollection,
+                uploadedFile
+            );
             return fileUploadResult;
         } catch (e) {
             logError(e, 'failed to do post file upload action');
@@ -463,6 +481,20 @@ class UploadManager {
                 ${(e as Error).stack}`
             );
             return UPLOAD_RESULT.FAILED;
+        }
+    }
+
+    private async watchFolderCallback(
+        fileUploadResult: UPLOAD_RESULT,
+        fileWithCollection: FileWithCollection,
+        uploadedFile: EnteFile
+    ) {
+        if (isElectron()) {
+            await watchFolderService.onFileUpload(
+                fileUploadResult,
+                fileWithCollection,
+                uploadedFile
+            );
         }
     }
 
@@ -478,15 +510,15 @@ class UploadManager {
         };
     }
 
-    private async updateExistingFiles(decryptedFile: EnteFile) {
+    private updateExistingFiles(decryptedFile: EnteFile) {
         if (!decryptedFile) {
             throw Error("decrypted file can't be undefined");
         }
         this.userOwnedNonTrashedExistingFiles.push(decryptedFile);
-        await this.updateUIFiles(decryptedFile);
+        this.updateUIFiles(decryptedFile);
     }
 
-    private async updateUIFiles(decryptedFile: EnteFile) {
+    private updateUIFiles(decryptedFile: EnteFile) {
         this.existingFiles.push(decryptedFile);
         this.existingFiles = sortFiles(this.existingFiles);
         this.setFiles(preservePhotoswipeProps(this.existingFiles));
@@ -502,6 +534,10 @@ class UploadManager {
             ImportService.updatePendingUploads(this.remainingFiles);
         }
     }
+
+    public shouldAllowNewUpload = () => {
+        return !this.uploadInProgress || watchFolderService.isUploadRunning();
+    };
 }
 
 export default new UploadManager();

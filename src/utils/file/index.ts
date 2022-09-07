@@ -222,14 +222,20 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
             encryptedMetadata.decryptionHeader,
             file.key
         );
-        if (file.magicMetadata?.data) {
+        if (
+            file.magicMetadata?.data &&
+            typeof file.magicMetadata.data === 'string'
+        ) {
             file.magicMetadata.data = await worker.decryptMetadata(
                 file.magicMetadata.data,
                 file.magicMetadata.header,
                 file.key
             );
         }
-        if (file.pubMagicMetadata?.data) {
+        if (
+            file.pubMagicMetadata?.data &&
+            typeof file.pubMagicMetadata.data === 'string'
+        ) {
             file.pubMagicMetadata.data = await worker.decryptMetadata(
                 file.pubMagicMetadata.data,
                 file.pubMagicMetadata.header,

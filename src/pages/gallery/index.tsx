@@ -149,7 +149,8 @@ export default function Gallery() {
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [search, setSearch] = useState<Search>(null);
-    const [uploadInProgress, setUploadInProgress] = useState(false);
+    const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+
     const {
         getRootProps: getDragAndDropRootProps,
         getInputProps: getDragAndDropInputProps,
@@ -157,7 +158,7 @@ export default function Gallery() {
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        disabled: uploadInProgress,
+        disabled: shouldDisableDropzone,
     });
     const {
         selectedFiles: webFileSelectorFiles,
@@ -563,9 +564,7 @@ export default function Gallery() {
     };
 
     const openUploader = () => {
-        if (!uploadInProgress) {
-            setUploadTypeSelectorView(true);
-        }
+        setUploadTypeSelectorView(true);
     };
 
     return (
@@ -667,9 +666,9 @@ export default function Gallery() {
                     )}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    uploadInProgress={uploadInProgress}
-                    setUploadInProgress={setUploadInProgress}
+                    setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
+                    setCollections={setCollections}
                     isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
                     webFileSelectorFiles={webFileSelectorFiles}
                     webFolderSelectorFiles={webFolderSelectorFiles}

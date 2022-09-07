@@ -94,10 +94,6 @@ export function segregateMetadataAndMediaFiles(
     const mediaFiles: FileWithCollection[] = [];
     filesWithCollectionToUpload.forEach((fileWithCollection) => {
         const file = fileWithCollection.file;
-        if (file.name.startsWith('.')) {
-            // ignore files with name starting with . (hidden files)
-            return;
-        }
         if (file.name.toLowerCase().endsWith(TYPE_JSON)) {
             metadataJSONFiles.push(fileWithCollection);
         } else {

@@ -52,6 +52,12 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
+    isFolderSyncRunning: boolean;
+    setIsFolderSyncRunning: (isRunning: boolean) => void;
+    watchFolderView: boolean;
+    setWatchFolderView: (isOpen: boolean) => void;
+    watchFolderFiles: FileList;
+    setWatchFolderFiles: (files: FileList) => void;
     isMobile: boolean;
 };
 
@@ -87,6 +93,9 @@ export default function App({ Component, err }) {
     const loadingBar = useRef(null);
     const [dialogMessage, setDialogMessage] = useState<DialogBoxAttributes>();
     const [messageDialogView, setMessageDialogView] = useState(false);
+    const [isFolderSyncRunning, setIsFolderSyncRunning] = useState(false);
+    const [watchFolderView, setWatchFolderView] = useState(false);
+    const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery('(max-width:428px)');
 
     useEffect(() => {
@@ -147,8 +156,7 @@ export default function App({ Component, err }) {
                 typeof redirectMap.get(redirect) === 'function'
             ) {
                 const redirectAction = redirectMap.get(redirect);
-                const url = await redirectAction();
-                window.location.href = url;
+                window.location.href = await redirectAction();
             } else {
                 logError(CustomError.BAD_REQUEST, 'invalid redirection', {
                     redirect,
@@ -275,6 +283,12 @@ export default function App({ Component, err }) {
                         finishLoading,
                         closeMessageDialog,
                         setDialogMessage,
+                        isFolderSyncRunning,
+                        setIsFolderSyncRunning,
+                        watchFolderView,
+                        setWatchFolderView,
+                        watchFolderFiles,
+                        setWatchFolderFiles,
                         isMobile,
                     }}>
                     {loading ? (

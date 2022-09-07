@@ -1,4 +1,5 @@
 import { ElectronFile } from 'types/upload';
+import { WatchMapping } from 'types/watchFolder';
 
 export interface ElectronAPIs {
     exists: (path: string) => boolean;
@@ -34,6 +35,28 @@ export interface ElectronAPIs {
         filePath: string
     ) => Promise<ElectronFile[]>;
     setToUploadCollection: (collectionName: string) => void;
+    getDirFiles: (dirPath: string) => Promise<ElectronFile[]>;
+    getWatchMappings: () => WatchMapping[];
+    updateWatchMappingSyncedFiles: (
+        folderPath: string,
+        files: WatchMapping['syncedFiles']
+    ) => void;
+    updateWatchMappingIgnoredFiles: (
+        folderPath: string,
+        files: WatchMapping['ignoredFiles']
+    ) => void;
+    addWatchMapping: (
+        collectionName: string,
+        folderPath: string,
+        uploadStrategy: number
+    ) => Promise<void>;
+    removeWatchMapping: (folderPath: string) => Promise<void>;
+    registerWatcherFunctions: (
+        addFile: (file: ElectronFile) => Promise<void>,
+        removeFile: (path: string) => Promise<void>,
+        removeFolder: (folderPath: string) => Promise<void>
+    ) => void;
+    isFolder: (dirPath: string) => Promise<boolean>;
     clearElectronStore: () => void;
     setEncryptionKey: (encryptionKey: string) => Promise<void>;
     getEncryptionKey: () => Promise<string>;

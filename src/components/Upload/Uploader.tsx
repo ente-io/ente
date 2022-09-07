@@ -6,7 +6,7 @@ import UploadProgress from './UploadProgress';
 
 import UploadStrategyChoiceModal from './UploadStrategyChoiceModal';
 import { SetCollectionNamerAttributes } from '../Collections/CollectionNamer';
-import { SetCollectionSelectorAttributes } from 'types/gallery';
+import { SetCollections, SetCollectionSelectorAttributes } from 'types/gallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
@@ -23,7 +23,8 @@ import {
     FileWithCollection,
 } from 'types/upload';
 import { isCanvasBlocked } from 'utils/upload/isCanvasBlocked';
-import { downloadApp } from 'utils/common';
+import { downloadApp, waitAndRun } from 'utils/common';
+import watchFolderService from 'services/watchFolder/watchFolderService';
 import DiscFullIcon from '@mui/icons-material/DiscFull';
 import { NotificationAttributes } from 'types/Notification';
 import {
@@ -56,10 +57,10 @@ interface Props {
     setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
     setLoading: SetLoading;
-    uploadInProgress: boolean;
-    setUploadInProgress: (value: boolean) => void;
+    setShouldDisableDropzone: (value: boolean) => void;
     showCollectionSelector: () => void;
     setFiles: SetFiles;
+    setCollections: SetCollections;
     isFirstUpload: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
@@ -72,7 +73,9 @@ interface Props {
 
 export default function Uploader(props: Props) {
     const [uploadProgressView, setUploadProgressView] = useState(false);
-    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>();
+    const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
+        UPLOAD_STAGES.START
+    );
     const [uploadFileNames, setUploadFileNames] = useState<UploadFileNames>();
     const [uploadCounter, setUploadCounter] = useState<UploadCounter>({
         finished: 0,
@@ -99,10 +102,18 @@ export default function Uploader(props: Props) {
     // This is set when the user choses a type to upload from the upload type selector dialog
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
+    const currentUploadPromise = useRef<Promise<void>>(null);
     const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
     const [webFiles, setWebFiles] = useState([]);
 
     const closeUploadProgress = () => setUploadProgressView(false);
+
+    const setCollectionName = (collectionName: string) => {
+        isPendingDesktopUpload.current = true;
+        pendingDesktopUploadCollectionName.current = collectionName;
+    };
+
+    const uploadRunning = useRef(false);
 
     useEffect(() => {
         UploadManager.init(
@@ -124,6 +135,12 @@ export default function Uploader(props: Props) {
                     resumeDesktopUpload(type, electronFiles, collectionName);
                 }
             );
+            watchFolderService.init(
+                setElectronFiles,
+                setCollectionName,
+                props.syncWithRemote,
+                appContext.setIsFolderSyncRunning
+            );
         }
     }, []);
 
@@ -131,6 +148,11 @@ export default function Uploader(props: Props) {
     // files for upload through the opened file/folder selector or dragAndDrop them
     //  the webFiles state is update which triggers the upload of those files
     useEffect(() => {
+        if (appContext.watchFolderView) {
+            // if watch folder dialog is open don't catch the dropped file
+            // as they are folder being dropped for watching
+            return;
+        }
         if (
             pickedUploadType.current === PICKED_UPLOAD_TYPE.FOLDERS &&
             props.webFolderSelectorFiles?.length > 0
@@ -156,10 +178,15 @@ export default function Uploader(props: Props) {
             webFiles?.length > 0 ||
             appContext.sharedFiles?.length > 0
         ) {
-            if (props.uploadInProgress) {
-                // no-op
-                // a upload is already in progress
-                return;
+            if (uploadRunning.current) {
+                if (watchFolderService.isUploadRunning()) {
+                    // pause watch folder service on user upload
+                    watchFolderService.pauseRunningSync();
+                } else {
+                    // no-op
+                    // a user upload is already in progress
+                    return;
+                }
             }
             if (isCanvasBlocked()) {
                 appContext.setDialogMessage({
@@ -175,6 +202,8 @@ export default function Uploader(props: Props) {
                 });
                 return;
             }
+            uploadRunning.current = true;
+            props.closeUploadTypeSelector();
             props.setLoading(true);
             if (webFiles?.length > 0) {
                 // File selection by drag and drop or selection of file.
@@ -215,16 +244,25 @@ export default function Uploader(props: Props) {
         }
     };
 
+    const preCollectionCreationAction = async () => {
+        props.closeCollectionSelector();
+        props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
+        setUploadStage(UPLOAD_STAGES.START);
+        setUploadProgressView(true);
+    };
+
     const uploadFilesToExistingCollection = async (collection: Collection) => {
         try {
-            await preUploadAction();
+            await preCollectionCreationAction();
             const filesWithCollectionToUpload: FileWithCollection[] =
                 toUploadFiles.current.map((file, index) => ({
                     file,
                     localID: index,
                     collectionID: collection.id,
                 }));
-            await uploadFiles(filesWithCollectionToUpload, [collection]);
+            await waitInQueueAndUploadFiles(filesWithCollectionToUpload, [
+                collection,
+            ]);
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
         }
@@ -235,7 +273,7 @@ export default function Uploader(props: Props) {
         collectionName?: string
     ) => {
         try {
-            await preUploadAction();
+            await preCollectionCreationAction();
             const filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionNameToFilesMap = new Map<
@@ -266,7 +304,10 @@ export default function Uploader(props: Props) {
                         existingCollection
                     );
                     collections.push(collection);
-
+                    props.setCollections([
+                        ...existingCollection,
+                        ...collections,
+                    ]);
                     filesWithCollectionToUpload.push(
                         ...files.map((file) => ({
                             localID: index++,
@@ -286,23 +327,36 @@ export default function Uploader(props: Props) {
                 });
                 throw e;
             }
-            await uploadFiles(filesWithCollectionToUpload, collections);
+            await waitInQueueAndUploadFiles(
+                filesWithCollectionToUpload,
+                collections
+            );
         } catch (e) {
             logError(e, 'Failed to upload files to new collections');
         }
     };
 
+    const waitInQueueAndUploadFiles = async (
+        filesWithCollectionToUploadIn: FileWithCollection[],
+        collections: Collection[]
+    ) => {
+        const currentPromise = currentUploadPromise.current;
+        currentUploadPromise.current = waitAndRun(
+            currentPromise,
+            async () =>
+                await uploadFiles(filesWithCollectionToUploadIn, collections)
+        );
+    };
+
     const preUploadAction = async () => {
-        props.closeCollectionSelector();
-        props.closeUploadTypeSelector();
         uploadManager.prepareForNewUpload();
         setUploadProgressView(true);
-        props.setUploadInProgress(true);
         await props.syncWithRemote(true, true);
     };
 
     function postUploadAction() {
-        props.setUploadInProgress(false);
+        props.setShouldDisableDropzone(false);
+        uploadRunning.current = false;
         props.syncWithRemote();
     }
 
@@ -311,7 +365,12 @@ export default function Uploader(props: Props) {
         collections: Collection[]
     ) => {
         try {
-            if (isElectron() && !isPendingDesktopUpload.current) {
+            preUploadAction();
+            if (
+                isElectron() &&
+                !isPendingDesktopUpload.current &&
+                !watchFolderService.isUploadRunning()
+            ) {
                 await ImportService.setToUploadCollection(collections);
                 if (zipPaths.current) {
                     await ImportService.setToUploadFiles(
@@ -334,6 +393,17 @@ export default function Uploader(props: Props) {
                 );
             if (shouldCloseUploadProgress) {
                 closeUploadProgress();
+            }
+            if (isElectron()) {
+                if (watchFolderService.isUploadRunning()) {
+                    await watchFolderService.allFileUploadsDone(
+                        filesWithCollectionToUploadIn,
+                        collections
+                    );
+                } else if (watchFolderService.isSyncPaused()) {
+                    // resume the service after user upload is done
+                    watchFolderService.resumePausedSync();
+                }
             }
         } catch (err) {
             showUserFacingError(err.message);

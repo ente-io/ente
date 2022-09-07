@@ -5,11 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "albums": "next dev -p 3002",
-    "lint":"eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
     "prebuild": "yarn lint",
     "build": "next build",
-    "build-analyze": "ANALYZE=true next build",
     "postbuild": "next export",
+    "build-analyze": "ANALYZE=true next build",
     "start": "next start",
     "prepare": "husky install"
   },

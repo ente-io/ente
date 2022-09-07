@@ -2,22 +2,22 @@ import { ElectronAPIs } from 'types/electron';
 import { runningInBrowser } from 'utils/common';
 
 class ElectronCacheService {
-    private ElectronAPIs: ElectronAPIs;
+    private electronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
 
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.openDiskCache;
+        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.allElectronAPIsExist = !!this.electronAPIs?.openDiskCache;
     }
     async open(cacheName: string): Promise<Cache> {
         if (this.allElectronAPIsExist) {
-            return await this.ElectronAPIs.openDiskCache(cacheName);
+            return await this.electronAPIs.openDiskCache(cacheName);
         }
     }
 
     async delete(cacheName: string): Promise<boolean> {
         if (this.allElectronAPIsExist) {
-            return await this.ElectronAPIs.deleteDiskCache(cacheName);
+            return await this.electronAPIs.deleteDiskCache(cacheName);
         }
     }
 }

@@ -73,3 +73,7 @@ export const Overlay = styled(Box)`
 export const IconButtonWithBG = styled(IconButton)(({ theme }) => ({
     backgroundColor: theme.palette.fill.dark,
 }));
+
+export const HorizontalFlex = styled(Box)({
+    display: 'flex',
+});

@@ -68,7 +68,14 @@ export default async function uploader(
                 addLogLine(
                     `file already present in the collection , skipped upload for  ${fileNameSize}`
                 );
-                return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
+                const sameCollectionMatchingExistingFile =
+                    matchingExistingFiles.find(
+                        (f) => f.collectionID === collection.id
+                    );
+                return {
+                    fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
+                    uploadedFile: sameCollectionMatchingExistingFile,
+                };
             } else {
                 addLogLine(
                     `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
@@ -86,7 +93,6 @@ export default async function uploader(
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-
         addLogLine(`reading asset ${fileNameSize}`);
 
         const file = await UploadService.readAsset(fileTypeInfo, uploadAsset);
@@ -100,10 +106,10 @@ export default async function uploader(
             thumbnail: file.thumbnail,
             metadata,
         };
+
         if (uploadCancelService.isUploadCancelationRequested()) {
             throw Error(CustomError.UPLOAD_CANCELLED);
         }
-
         addLogLine(`encryptAsset ${fileNameSize}`);
         const encryptedFile = await UploadService.encryptAsset(
             worker,

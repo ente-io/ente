@@ -363,7 +363,7 @@ export const removeFromFavorites = async (file: EnteFile) => {
         if (!favCollection) {
             throw Error(CustomError.FAV_COLLECTION_MISSING);
         }
-        await removeFromCollection(favCollection, [file]);
+        await removeFromCollection(favCollection.id, [file]);
     } catch (e) {
         logError(e, 'remove from favorite failed');
     }
@@ -474,13 +474,13 @@ const encryptWithNewCollectionKey = async (
     return fileKeysEncryptedWithNewCollection;
 };
 export const removeFromCollection = async (
-    collection: Collection,
+    collectionID: number,
     files: EnteFile[]
 ) => {
     try {
         const token = getToken();
         const request: RemoveFromCollectionRequest = {
-            collectionID: collection.id,
+            collectionID: collectionID,
             fileIDs: files.map((file) => file.id),
         };
 

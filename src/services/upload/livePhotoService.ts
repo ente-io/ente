@@ -61,6 +61,10 @@ export function getLivePhotoMetadata(
     };
 }
 
+export function getLivePhotoFilePath(imageAsset: Asset): string {
+    return getLivePhotoName((imageAsset.file as any).path);
+}
+
 export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
     return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
@@ -189,9 +193,11 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                     imageAsset.metadata,
                     videoAsset.metadata
                 );
+                const livePhotoPath = getLivePhotoFilePath(imageAsset);
                 uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
                     fileTypeInfo: { ...livePhotoFileTypeInfo },
                     metadata: { ...livePhotoMetadata },
+                    filePath: livePhotoPath,
                 });
                 index += 2;
             } else {

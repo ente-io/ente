@@ -3,6 +3,7 @@ import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
+import { CustomError, handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,
     BackupedFile,
@@ -32,7 +33,6 @@ import { encryptFile, getFileSize, readFile } from './fileService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { USE_CF_PROXY } from 'constants/upload';
-import { CustomError, handleUploadError } from 'utils/error';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -44,6 +44,7 @@ class UploadService {
         number,
         MetadataAndFileTypeInfo
     >();
+
     private pendingUploadCount: number = 0;
 
     async setFileCount(fileCount: number) {

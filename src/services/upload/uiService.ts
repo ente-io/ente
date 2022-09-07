@@ -1,3 +1,4 @@
+import { Canceler } from 'axios';
 import {
     UPLOAD_RESULT,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -10,7 +11,6 @@ import {
     ProgressUpdater,
     SegregatedFinishedUploads,
 } from 'types/upload/ui';
-import { Canceler } from 'axios';
 import { CustomError } from 'utils/error';
 import uploadCancelService from './uploadCancelService';
 

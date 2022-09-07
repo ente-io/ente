@@ -145,6 +145,9 @@ const englishConstants = {
     ),
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
+    WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
+    CONFIRM_DELETE: 'Confirm deletion',
+    DELETE_MESSAGE: `The selected files will be permanently deleted and can't be restored `,
     TRASH_FILES_TITLE: 'Delete files?',
     DELETE_FILES_TITLE: 'Delete immediately?',
     DELETE_FILES_MESSAGE:
@@ -736,6 +739,7 @@ const englishConstants = {
             </p>
         </>
     ),
+    WATCH_FOLDERS: 'Watch folders',
     UPGRADE_NOW: 'Upgrade now',
     RENEW_NOW: 'Renew now',
     STORAGE: 'Storage',
@@ -744,6 +748,18 @@ const englishConstants = {
     FAMILY: 'Family',
     FREE: 'free',
     OF: 'of',
+    WATCHED_FOLDERS: 'Watched folders',
+    NO_FOLDERS_ADDED: 'No folders added yet!',
+    FOLDERS_AUTOMATICALLY_MONITORED:
+        'The folders you add here will monitored to automatically',
+    UPLOAD_NEW_FILES_TO_ENTE: 'Upload new files to ente',
+    REMOVE_DELETED_FILES_FROM_ENTE: 'Remove deleted files from ente',
+    ADD_FOLDER: 'Add folder',
+    STOP_WATCHING: 'Stop watching',
+    STOP_WATCHING_FOLDER: 'Stop watching folder?',
+    STOP_WATCHING_DIALOG_MESSAGE:
+        'Your existing files will not be deleted, but ente will stop automatically updating the linked ente album on changes in this folder.',
+    YES_STOP: 'Yes, stop',
     MONTH_SHORT: 'mo',
     YEAR: 'year',
     FAMILY_PLAN: 'Family plan',
