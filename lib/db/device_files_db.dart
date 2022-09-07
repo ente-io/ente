@@ -5,6 +5,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/services/local/local_sync_util.dart';
 import 'package:sqflite/sqlite_api.dart';
 import 'package:tuple/tuple.dart';
@@ -313,6 +314,7 @@ extension DeviceFiles on FilesDB {
           collectionID: row["collection_id"],
           coverId: row["cover_id"],
           shouldBackup: (row["should_backup"] ?? _sqlBoolFalse) == _sqlBoolTrue,
+          uploadStrategy: getUploadType(row["upload_strategy"] ?? 0),
         );
         if (includeCoverThumbnail) {
           deviceCollection.thumbnail = coverFiles.firstWhere(

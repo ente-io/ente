@@ -1,4 +1,5 @@
 import 'package:photos/models/file.dart';
+import 'package:photos/models/upload_strategy.dart';
 
 class DeviceCollection {
   final String id;
@@ -6,6 +7,7 @@ class DeviceCollection {
   final String coverId;
   final int count;
   final bool shouldBackup;
+  UploadStrategy uploadStrategy;
   int collectionID;
   File thumbnail;
 
@@ -16,6 +18,7 @@ class DeviceCollection {
     this.count,
     this.collectionID,
     this.thumbnail,
+    this.uploadStrategy = UploadStrategy.ifMissing,
     this.shouldBackup = false,
   });
 }

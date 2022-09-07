@@ -317,6 +317,7 @@ class FilesDB {
           should_backup INTEGER NOT NULL DEFAULT 0,
           count INTEGER NOT NULL DEFAULT 0,
           collection_id INTEGER DEFAULT -1,
+          upload_strategy INTEGER DEFAULT 0,
           cover_id TEXT
       );
       ''',
