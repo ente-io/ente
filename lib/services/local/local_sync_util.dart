@@ -240,12 +240,13 @@ Future<List<AssetPathEntity>> _getGalleryList({
     type: RequestType.common,
     filterOption: filterOptionGroup,
   );
-
-  // todo: assetCount will be deprecated in the new version.
-  // disable sorting and either try to evaluate if it's required or yolo
   galleryList.sort((s1, s2) {
-    return s2.assetCount.compareTo(s1.assetCount);
+    if (s1.isAll) {
+      return 1;
+    }
+    return 0;
   });
+
   return galleryList;
 }
 

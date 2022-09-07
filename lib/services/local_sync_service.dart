@@ -279,7 +279,9 @@ class LocalSyncService {
       hasImportedDeviceCollections,
       kDbUpdationTimeKey,
       kDownloadedFileIDsKey,
-      kEditedFileIDsKey
+      kEditedFileIDsKey,
+      "has_synced_edit_time",
+      "has_selected_all_folders_for_backup",
     ]) {
       await _prefs.remove(element);
     }
