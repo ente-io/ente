@@ -3,9 +3,9 @@ import 'package:logging/logging.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/file_info_collection_widget.dart';
 
-class DeviceFoldersListOfFile extends StatelessWidget {
+class DeviceFoldersListOfFileWidget extends StatelessWidget {
   final Future<Set<String>> allDeviceFoldersOfFile;
-  const DeviceFoldersListOfFile(this.allDeviceFoldersOfFile, {Key key})
+  const DeviceFoldersListOfFileWidget(this.allDeviceFoldersOfFile, {Key key})
       : super(key: key);
 
   @override
@@ -19,7 +19,7 @@ class DeviceFoldersListOfFile extends StatelessWidget {
             itemCount: deviceFolders.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-              return FileInfoCollection(
+              return FileInfoCollectionWidget(
                 name: deviceFolders[index],
                 onTap: () {},
               );

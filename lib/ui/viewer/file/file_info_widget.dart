@@ -215,8 +215,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             child: Icon(Icons.folder_outlined),
           ),
           title: fileIsBackedup
-              ? CollectionsListOfFile(allCollectionIDsOfFile)
-              : DeviceFoldersListOfFile(allDeviceFoldersOfFile),
+              ? CollectionsListOfFileWidget(allCollectionIDsOfFile)
+              : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
         ),
       ),
       const DividerWithPadding(left: 70, right: 20),

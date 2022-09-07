@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
-class FileInfoCollection extends StatelessWidget {
+class FileInfoCollectionWidget extends StatelessWidget {
   final String name;
   final Function onTap;
-  const FileInfoCollection({this.name, this.onTap, Key key}) : super(key: key);
+  const FileInfoCollectionWidget({this.name, this.onTap, Key key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

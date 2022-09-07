@@ -7,9 +7,9 @@ import 'package:photos/ui/viewer/file/file_info_collection_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class CollectionsListOfFile extends StatelessWidget {
+class CollectionsListOfFileWidget extends StatelessWidget {
   final Future<Set<int>> allCollectionIDsOfFile;
-  const CollectionsListOfFile(this.allCollectionIDsOfFile, {Key key})
+  const CollectionsListOfFileWidget(this.allCollectionIDsOfFile, {Key key})
       : super(key: key);
 
   @override
@@ -29,7 +29,7 @@ class CollectionsListOfFile extends StatelessWidget {
             itemCount: collections.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-              return FileInfoCollection(
+              return FileInfoCollectionWidget(
                 name: collections[index].name,
                 onTap: () {
                   routeToPage(
