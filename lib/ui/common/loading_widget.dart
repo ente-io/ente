@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:flutter/cupertino.dart';
 
 class EnteLoadingWidget extends StatelessWidget {

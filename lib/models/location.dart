@@ -1,3 +1,5 @@
+// @dart=2.9
+
 class Location {
   final double latitude;
   final double longitude;
