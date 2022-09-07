@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:io' as io;
 
 import 'package:bip39/bip39.dart' as bip39;

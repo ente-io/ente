@@ -1,3 +1,4 @@
+// @dart = 2.9
 import 'package:photos/models/file.dart';
 import 'package:photos/models/upload_strategy.dart';
 

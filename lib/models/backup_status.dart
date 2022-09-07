@@ -1,3 +1,5 @@
+// @dart=2.9
+
 class BackupStatus {
   final List<String> localIDs;
   final int size;

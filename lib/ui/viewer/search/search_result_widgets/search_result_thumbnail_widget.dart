@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';

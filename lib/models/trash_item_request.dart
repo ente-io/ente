@@ -1,3 +1,5 @@
+// @dart=2.9
+
 class TrashRequest {
   final int fileID;
   final int collectionID;

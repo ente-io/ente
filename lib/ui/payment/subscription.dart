@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:flutter/cupertino.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/feature_flag_service.dart';

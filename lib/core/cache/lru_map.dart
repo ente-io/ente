@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:collection';
 
 typedef EvictionHandler<K, V> = Function(K key, V value);

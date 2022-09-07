@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
