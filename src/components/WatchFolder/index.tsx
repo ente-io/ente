@@ -33,6 +33,7 @@ export default function WatchFolder({ open, onClose }: Iprops) {
             appContext.watchFolderFiles.length > 0
         ) {
             handleFolderDrop(appContext.watchFolderFiles);
+            appContext.setWatchFolderFiles(null);
         }
     }, [appContext.watchFolderFiles]);
 
