@@ -29,6 +29,7 @@ class LocalSyncService {
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
+  static const hasImportedDeviceCollections = "has_imported_device_collections";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kPermissionStateKey = "permission_state";
   static const kEditedFileIDsKey = "edited_file_ids";
@@ -120,7 +121,9 @@ class LocalSyncService {
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
+      // mark device collection has imported on first import
       await _refreshDeviceFolderCountAndCover();
+      await _prefs.setBool(hasImportedDeviceCollections, true);
       _logger.fine("first gallery import finished");
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
@@ -270,6 +273,7 @@ class LocalSyncService {
     await FilesDB.instance.deleteDB();
     for (var element in [
       kHasCompletedFirstImportKey,
+      hasImportedDeviceCollections,
       kDbUpdationTimeKey,
       kDownloadedFileIDsKey,
       kEditedFileIDsKey
