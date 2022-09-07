@@ -20,8 +20,8 @@ class DeviceFoldersListOfFile extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               return FileInfoCollection(
-                deviceFolders[index],
-                () {},
+                name: deviceFolders[index],
+                onTap: () {},
               );
             },
           );

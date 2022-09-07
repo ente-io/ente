@@ -4,7 +4,7 @@ import 'package:photos/ente_theme_data.dart';
 class FileInfoCollection extends StatelessWidget {
   final String name;
   final Function onTap;
-  const FileInfoCollection(this.name, this.onTap, {Key key}) : super(key: key);
+  const FileInfoCollection({this.name, this.onTap, Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

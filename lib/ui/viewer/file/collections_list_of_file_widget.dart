@@ -30,8 +30,8 @@ class CollectionsListOfFile extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               return FileInfoCollection(
-                collections[index].name,
-                () {
+                name: collections[index].name,
+                onTap: () {
                   routeToPage(
                     context,
                     CollectionPage(
