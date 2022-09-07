@@ -1273,6 +1273,24 @@ class FilesDB {
     return result;
   }
 
+  Future<Set<int>> getAllCollectionIDsOfFile(
+    int uploadedFileID,
+  ) async {
+    final db = await instance.database;
+    final results = await db.query(
+      table,
+      where: '$columnUploadedFileID = ? AND $columnCollectionID != -1',
+      columns: [columnCollectionID],
+      whereArgs: [uploadedFileID],
+      distinct: true,
+    );
+    final collectionIDsOfFile = <int>{};
+    for (var result in results) {
+      collectionIDsOfFile.add(result['collection_id']);
+    }
+    return collectionIDsOfFile;
+  }
+
   List<File> _convertToFiles(List<Map<String, dynamic>> results) {
     final List<File> files = [];
     for (final result in results) {

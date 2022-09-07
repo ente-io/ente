@@ -3,20 +3,18 @@ import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import "package:photos/core/configuration.dart";
+import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
-import 'package:photos/models/collection.dart';
-import 'package:photos/models/collection_items.dart';
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
-import "package:photos/services/collections_service.dart";
 import 'package:photos/ui/common/DividerWithPadding.dart';
-import 'package:photos/ui/viewer/file/RawExifButton.dart';
-import 'package:photos/ui/viewer/gallery/collection_page.dart';
+import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
+import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
+import 'package:photos/ui/viewer/file/raw_exif_button.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
 import "package:photos/utils/magic_util.dart";
-import 'package:photos/utils/navigation_util.dart';
 
 class FileInfoWidget extends StatefulWidget {
   final File file;
@@ -62,6 +60,17 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   @override
   Widget build(BuildContext context) {
     final file = widget.file;
+    final fileIsBackedup = file.uploadedFileID == null ? false : true;
+    Future<Set<int>> allCollectionIDsOfFile;
+    Future<Set<String>>
+        allDeviceFoldersOfFile; //Typing this as Future<Set<T>> as it would be easier to implement showing multiple device folders for a file in the future
+    if (fileIsBackedup) {
+      allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
+        file.uploadedFileID,
+      );
+    } else {
+      allDeviceFoldersOfFile = Future.sync(() => {file.deviceFolder});
+    }
     final dateTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
     final dateTimeForUpdationTime =
         DateTime.fromMicrosecondsSinceEpoch(file.updationTime);
@@ -198,30 +207,16 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       showExifListTile
           ? const DividerWithPadding(left: 70, right: 20)
           : const SizedBox.shrink(),
-      ListTile(
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 6),
-          child: Icon(Icons.folder_outlined),
-        ),
-        title: GestureDetector(
-          onTap: () {
-            if (file.collectionID != null) {
-              Navigator.pop(context); // info dialog
-              final Collection c = CollectionsService.instance
-                  .getCollectionByID(file.collectionID);
-              routeToPage(
-                context,
-                CollectionPage(CollectionWithThumbnail(c, null)),
-              );
-            }
-          },
-          child: Text(
-            file.collectionID != null
-                ? CollectionsService.instance
-                    .getCollectionByID(file.collectionID)
-                    .name
-                : file.deviceFolder,
+      SizedBox(
+        height: 62,
+        child: ListTile(
+          leading: const Padding(
+            padding: EdgeInsets.only(left: 6),
+            child: Icon(Icons.folder_outlined),
           ),
+          title: fileIsBackedup
+              ? CollectionsListOfFileWidget(allCollectionIDsOfFile)
+              : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
         ),
       ),
       const DividerWithPadding(left: 70, right: 20),

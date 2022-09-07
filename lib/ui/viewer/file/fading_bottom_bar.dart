@@ -10,7 +10,7 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/ui/create_collection_page.dart';
-import 'package:photos/ui/viewer/file/file_info_dialog.dart';
+import 'package:photos/ui/viewer/file/file_info_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/share_util.dart';
