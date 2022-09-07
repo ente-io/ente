@@ -7,14 +7,9 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/feature_flag_service.dart';
@@ -32,10 +27,8 @@ import 'package:photos/utils/toast_util.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
-  final DeviceCollection deviceCollection;
 
-  const SharingDialog(this.collection, {Key key, this.deviceCollection})
-      : super(key: key);
+  const SharingDialog(this.collection, {Key key}) : super(key: key);
 
   @override
   State<SharingDialog> createState() => _SharingDialogState();
@@ -122,18 +115,6 @@ class _SharingDialogState extends State<SharingDialog> {
                     );
                     if (choice != DialogUserChoice.firstChoice) {
                       return;
-                    }
-                  } else {
-                    // Add local folder in backup patch before creating
-                    // sharable link
-                    if (widget.collection.type == CollectionType.folder) {
-                      if (widget.deviceCollection != null &&
-                          !widget.deviceCollection.shouldBackup) {
-                        await FilesDB.instance.updateDevicePathSyncStatus(
-                          {widget.deviceCollection.id: true},
-                        );
-                        Bus.instance.fire(BackupFoldersUpdatedEvent());
-                      }
                     }
                   }
                   final dialog = createProgressDialog(
@@ -410,17 +391,7 @@ class _SharingDialogState extends State<SharingDialog> {
     } else {
       final dialog = createProgressDialog(context, "Sharing...");
       await dialog.show();
-      final collection = widget.collection;
       try {
-        if (collection.type == CollectionType.folder) {
-          if (widget.deviceCollection != null &&
-              !widget.deviceCollection.shouldBackup) {
-            await FilesDB.instance.updateDevicePathSyncStatus(
-              {widget.deviceCollection.id: true},
-            );
-            Bus.instance.fire(BackupFoldersUpdatedEvent());
-          }
-        }
         await CollectionsService.instance
             .share(widget.collection.id, email, publicKey);
         await dialog.hide();
