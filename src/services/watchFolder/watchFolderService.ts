@@ -22,7 +22,7 @@ import uploadManager from 'services/upload/uploadManager';
 import { addLocalLog, addLogLine } from 'utils/logging';
 
 class watchFolderService {
-    private ElectronAPIs: ElectronAPIs;
+    private electronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
     private eventQueue: EventQueueItem[] = [];
     private currentEvent: EventQueueItem;
@@ -39,9 +39,9 @@ class watchFolderService {
     private setWatchFolderServiceIsRunning: (isRunning: boolean) => void;
 
     constructor() {
-        this.ElectronAPIs = (runningInBrowser() &&
+        this.electronAPIs = (runningInBrowser() &&
             window['ElectronAPIs']) as ElectronAPIs;
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.getWatchMappings;
+        this.allElectronAPIsExist = !!this.electronAPIs?.getWatchMappings;
     }
 
     isUploadRunning() {
@@ -89,7 +89,7 @@ class watchFolderService {
 
             for (const mapping of mappings) {
                 const filesOnDisk: ElectronFile[] =
-                    await this.ElectronAPIs.getDirFiles(mapping.folderPath);
+                    await this.electronAPIs.getDirFiles(mapping.folderPath);
 
                 this.uploadDiffOfFiles(mapping, filesOnDisk);
                 this.trashDiffOfFiles(mapping, filesOnDisk);
@@ -164,11 +164,11 @@ class watchFolderService {
     ): Promise<WatchMapping[]> {
         const notDeletedMappings = [];
         for (const mapping of mappings) {
-            const mappingExists = await this.ElectronAPIs.isFolder(
+            const mappingExists = await this.electronAPIs.isFolder(
                 mapping.folderPath
             );
             if (!mappingExists) {
-                this.ElectronAPIs.removeWatchMapping(mapping.folderPath);
+                this.electronAPIs.removeWatchMapping(mapping.folderPath);
             } else {
                 notDeletedMappings.push(mapping);
             }
@@ -187,7 +187,7 @@ class watchFolderService {
 
     private setupWatcherFunctions() {
         if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.registerWatcherFunctions(
+            this.electronAPIs.registerWatcherFunctions(
                 diskFileAddedCallback,
                 diskFileRemovedCallback,
                 diskFolderRemovedCallback
@@ -202,7 +202,7 @@ class watchFolderService {
     ) {
         if (this.allElectronAPIsExist) {
             try {
-                await this.ElectronAPIs.addWatchMapping(
+                await this.electronAPIs.addWatchMapping(
                     rootFolderName,
                     folderPath,
                     uploadStrategy
@@ -217,7 +217,7 @@ class watchFolderService {
     async removeWatchMapping(folderPath: string) {
         if (this.allElectronAPIsExist) {
             try {
-                await this.ElectronAPIs.removeWatchMapping(folderPath);
+                await this.electronAPIs.removeWatchMapping(folderPath);
             } catch (e) {
                 logError(e, 'error while removing watch mapping');
             }
@@ -227,7 +227,7 @@ class watchFolderService {
     getWatchMappings(): WatchMapping[] {
         if (this.allElectronAPIsExist) {
             try {
-                return this.ElectronAPIs.getWatchMappings() ?? [];
+                return this.electronAPIs.getWatchMappings() ?? [];
             } catch (e) {
                 logError(e, 'error while getting watch mappings');
                 return [];
@@ -406,7 +406,7 @@ class watchFolderService {
                         ...this.currentlySyncedMapping.syncedFiles,
                         ...syncedFiles,
                     ];
-                    this.ElectronAPIs.updateWatchMappingSyncedFiles(
+                    this.electronAPIs.updateWatchMappingSyncedFiles(
                         this.currentlySyncedMapping.folderPath,
                         this.currentlySyncedMapping.syncedFiles
                     );
@@ -416,7 +416,7 @@ class watchFolderService {
                         ...this.currentlySyncedMapping.ignoredFiles,
                         ...ignoredFiles,
                     ];
-                    this.ElectronAPIs.updateWatchMappingIgnoredFiles(
+                    this.electronAPIs.updateWatchMappingIgnoredFiles(
                         this.currentlySyncedMapping.folderPath,
                         this.currentlySyncedMapping.ignoredFiles
                     );
@@ -520,7 +520,7 @@ class watchFolderService {
                 this.currentlySyncedMapping.syncedFiles.filter(
                     (file) => !filePathsToRemove.has(file.path)
                 );
-            this.ElectronAPIs.updateWatchMappingSyncedFiles(
+            this.electronAPIs.updateWatchMappingSyncedFiles(
                 this.currentlySyncedMapping.folderPath,
                 this.currentlySyncedMapping.syncedFiles
             );
@@ -614,7 +614,7 @@ class watchFolderService {
 
     async selectFolder(): Promise<string> {
         try {
-            const folderPath = await this.ElectronAPIs.selectRootDirectory();
+            const folderPath = await this.electronAPIs.selectRootDirectory();
             return folderPath;
         } catch (e) {
             logError(e, 'error while selecting folder');
@@ -642,7 +642,7 @@ class watchFolderService {
 
     async isFolder(folderPath: string) {
         try {
-            const isFolder = await this.ElectronAPIs.isFolder(folderPath);
+            const isFolder = await this.electronAPIs.isFolder(folderPath);
             return isFolder;
         } catch (e) {
             logError(e, 'error while checking if folder exists');

@@ -3,21 +3,21 @@ import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
 
 class ElectronFSService {
-    private ElectronAPIs: ElectronAPIs;
+    private electronAPIs: ElectronAPIs;
 
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
     }
 
     getDirFiles(dirPath: string) {
-        if (this.ElectronAPIs.getDirFiles) {
-            return this.ElectronAPIs.getDirFiles(dirPath);
+        if (this.electronAPIs.getDirFiles) {
+            return this.electronAPIs.getDirFiles(dirPath);
         }
     }
 
     async isFolder(folderPath: string) {
         try {
-            const isFolder = await this.ElectronAPIs.isFolder(folderPath);
+            const isFolder = await this.electronAPIs.isFolder(folderPath);
             return isFolder;
         } catch (e) {
             logError(e, 'error while checking if is Folder');
