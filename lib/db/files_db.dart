@@ -819,6 +819,25 @@ class FilesDB {
     return result;
   }
 
+  Future<Set<String>> getLocalIDsMarkedForOrAlreadyUploaded(int ownerID) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnLocalID],
+      distinct: true,
+      where: '$columnLocalID IS NOT NULL AND ($columnCollectionID IS NOT NULL '
+          'AND '
+          '$columnCollectionID != -1) AND ($columnOwnerID = ? OR '
+          '$columnOwnerID IS NULL)',
+      whereArgs: [ownerID],
+    );
+    final result = <String>{};
+    for (final row in rows) {
+      result.add(row[columnLocalID]);
+    }
+    return result;
+  }
+
   Future<Set<String>> getLocalFileIDsForCollection(int collectionID) async {
     final db = await instance.database;
     final rows = await db.query(

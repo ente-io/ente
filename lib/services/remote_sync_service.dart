@@ -18,6 +18,7 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
@@ -231,6 +232,7 @@ class RemoteSyncService {
   }
 
   Future<void> _syncDeviceCollectionFilesForUpload() async {
+    final int ownerID = Configuration.instance.getUserID();
     final FilesDB filesDB = FilesDB.instance;
     final deviceCollections = await filesDB.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
@@ -243,12 +245,17 @@ class RemoteSyncService {
         await filesDB.getDevicePathIDToLocalIDMap();
     for (final deviceCollection in deviceCollections) {
       _logger.fine("processing ${deviceCollection.name}");
-      final Set<String> unSyncedLocalIDs =
+      final Set<String> localIDsToSync =
           pathIdToLocalIDs[deviceCollection.id] ?? {};
-      if (unSyncedLocalIDs.isNotEmpty && deviceCollection.collectionID != -1) {
+      if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
+        final Set<String> alreadyClaimedLocalIDs =
+            await filesDB.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
+        localIDsToSync.removeAll(alreadyClaimedLocalIDs);
+      }
+      if (localIDsToSync.isNotEmpty && deviceCollection.collectionID != -1) {
         await filesDB.setCollectionIDForUnMappedLocalFiles(
           deviceCollection.collectionID,
-          unSyncedLocalIDs,
+          localIDsToSync,
         );
 
         // mark IDs as already synced if corresponding entry is present in
@@ -257,25 +264,25 @@ class RemoteSyncService {
         final Set<String> existingMapping = await filesDB
             .getLocalFileIDsForCollection(deviceCollection.collectionID);
         final Set<String> commonElements =
-            unSyncedLocalIDs.intersection(existingMapping);
+            localIDsToSync.intersection(existingMapping);
         if (commonElements.isNotEmpty) {
           debugPrint(
             "${commonElements.length} files already existing in "
             "collection ${deviceCollection.collectionID} for ${deviceCollection.name}",
           );
-          unSyncedLocalIDs.removeAll(commonElements);
+          localIDsToSync.removeAll(commonElements);
         }
 
-        // At this point, the remaining unSyncedLocalIDs will need to create
+        // At this point, the remaining localIDsToSync will need to create
         // new file entries, where we can store mapping for localID and
         // corresponding collection ID
-        if (unSyncedLocalIDs.isNotEmpty) {
+        if (localIDsToSync.isNotEmpty) {
           debugPrint(
-            'Adding new entries for ${unSyncedLocalIDs.length} files'
+            'Adding new entries for ${localIDsToSync.length} files'
             ' for ${deviceCollection.name}',
           );
           final filesWithCollectionID =
-              await filesDB.getLocalFiles(unSyncedLocalIDs.toList());
+              await filesDB.getLocalFiles(localIDsToSync.toList());
           final List<File> newFilesToInsert = [];
           final Set<String> fileFoundForLocalIDs = {};
           for (var existingFile in filesWithCollectionID) {
@@ -290,13 +297,13 @@ class RemoteSyncService {
             }
           }
           await filesDB.insertMultiple(newFilesToInsert);
-          unSyncedLocalIDs.removeAll(fileFoundForLocalIDs);
+          localIDsToSync.removeAll(fileFoundForLocalIDs);
         }
 
-        if (unSyncedLocalIDs.isNotEmpty) {
+        if (localIDsToSync.isNotEmpty) {
           _logger.warning(
             "All localIDs should be synced, missed for "
-            "${unSyncedLocalIDs.length}",
+            "${localIDsToSync.length}",
           );
         }
       }
