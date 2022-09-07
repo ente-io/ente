@@ -1275,15 +1275,13 @@ class FilesDB {
 
   Future<Set<int>> getAllCollectionIDsOfFile(
     int uploadedFileID,
-    int ownerID,
   ) async {
     final db = await instance.database;
     final results = await db.query(
       table,
-      where:
-          '$columnUploadedFileID = ? AND $columnOwnerID = ? AND $columnCollectionID != -1',
+      where: '$columnUploadedFileID = ? AND $columnCollectionID != -1',
       columns: [columnCollectionID],
-      whereArgs: [uploadedFileID, ownerID],
+      whereArgs: [uploadedFileID],
       distinct: true,
     );
     final Set<int> collectionIDsOfFile = {};

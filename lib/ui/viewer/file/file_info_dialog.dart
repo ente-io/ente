@@ -66,7 +66,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     if (fileIsBackedup) {
       allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
         file.uploadedFileID,
-        Configuration.instance.getUserID(),
       );
     } else {
       allDeviceFoldersOfFile = Future.sync(() => {file.deviceFolder});
