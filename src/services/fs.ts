@@ -42,7 +42,7 @@ export const getFileStream = async (filePath: string) => {
                     controller.close();
                     await fs.close(file);
                 } else {
-                    controller.enqueue(buff);
+                    controller.enqueue(buff.slice(0, bytesRead));
                 }
             } catch (e) {
                 await fs.close(file);
