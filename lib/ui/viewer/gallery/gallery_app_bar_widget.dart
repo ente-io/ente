@@ -126,8 +126,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
-        (widget.type == GalleryType.localFolder ||
-            widget.type == GalleryType.ownedCollection)) {
+        widget.type == GalleryType.ownedCollection) {
       actions.add(
         Tooltip(
           message: "Share",
@@ -219,15 +218,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      if (collection == null) {
-        if (widget.type == GalleryType.localFolder) {
-          collection = await CollectionsService.instance
-              .getOrCreateForPath(widget.deviceCollection.name);
-        } else {
-          throw Exception(
-            "Cannot create a collection of type" + widget.type.toString(),
-          );
-        }
+      if (collection == null || widget.type != GalleryType.ownedCollection) {
+        throw Exception(
+          "Cannot share empty collection of type ${widget.type}",
+        );
       } else {
         final sharees =
             await CollectionsService.instance.getSharees(collection.id);
@@ -239,7 +233,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         builder: (BuildContext context) {
           return SharingDialog(
             collection,
-            deviceCollection: widget.deviceCollection,
           );
         },
       );
