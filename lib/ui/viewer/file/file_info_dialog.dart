@@ -9,6 +9,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import 'package:photos/ui/common/DividerWithPadding.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
+import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/raw_exif_button.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
@@ -59,10 +60,17 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   @override
   Widget build(BuildContext context) {
     final file = widget.file;
-    final allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
-      file.uploadedFileID,
-      Configuration.instance.getUserID(),
-    );
+    final fileIsBackedup = file.uploadedFileID == null ? false : true;
+    Future<Set<int>> allCollectionIDsOfFile;
+    Future<Set<String>> allDeviceFoldersOfFile;
+    if (fileIsBackedup) {
+      allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
+        file.uploadedFileID,
+        Configuration.instance.getUserID(),
+      );
+    } else {
+      allDeviceFoldersOfFile = Future.sync(() => {file.deviceFolder});
+    }
     final dateTime = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
     final dateTimeForUpdationTime =
         DateTime.fromMicrosecondsSinceEpoch(file.updationTime);
@@ -206,7 +214,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             padding: EdgeInsets.only(left: 6),
             child: Icon(Icons.folder_outlined),
           ),
-          title: CollectionsListOfFile(allCollectionIDsOfFile),
+          title: fileIsBackedup
+              ? CollectionsListOfFile(allCollectionIDsOfFile)
+              : DeviceFoldersListOfFile(allDeviceFoldersOfFile),
         ),
       ),
       const DividerWithPadding(left: 70, right: 20),
