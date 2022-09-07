@@ -530,7 +530,7 @@ class RemoteSyncService {
         }
         toBeInserted.add(remoteDiff);
         // end processing for file here, move to next file now
-        break;
+        continue;
       }
 
       // If remoteDiff is not already synced (i.e. existingFile is null), check
