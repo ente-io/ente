@@ -62,7 +62,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final file = widget.file;
     final fileIsBackedup = file.uploadedFileID == null ? false : true;
     Future<Set<int>> allCollectionIDsOfFile;
-    Future<Set<String>> allDeviceFoldersOfFile;
+    Future<Set<String>>
+        allDeviceFoldersOfFile; //Typing this as Future<Set<T>> as it would be easier to implement showing multiple device folders for a file in the future
     if (fileIsBackedup) {
       allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
         file.uploadedFileID,

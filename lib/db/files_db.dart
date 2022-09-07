@@ -1284,7 +1284,7 @@ class FilesDB {
       whereArgs: [uploadedFileID],
       distinct: true,
     );
-    final Set<int> collectionIDsOfFile = {};
+    final collectionIDsOfFile = <int>{};
     for (var result in results) {
       collectionIDsOfFile.add(result['collection_id']);
     }
