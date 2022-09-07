@@ -72,10 +72,10 @@ export default function ExportModal(props: Props) {
         }
         setExportFolder(getData(LS_KEYS.EXPORT)?.folder);
 
-        exportService.ElectronAPIs.registerStopExportListener(stopExport);
-        exportService.ElectronAPIs.registerPauseExportListener(pauseExport);
-        exportService.ElectronAPIs.registerResumeExportListener(resumeExport);
-        exportService.ElectronAPIs.registerRetryFailedExportListener(
+        exportService.electronAPIs.registerStopExportListener(stopExport);
+        exportService.electronAPIs.registerPauseExportListener(pauseExport);
+        exportService.electronAPIs.registerResumeExportListener(resumeExport);
+        exportService.electronAPIs.registerRetryFailedExportListener(
             retryFailedExport
         );
     }, []);

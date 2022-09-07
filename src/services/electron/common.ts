@@ -3,12 +3,12 @@ import { ElectronAPIs } from 'types/electron';
 import { runningInBrowser } from 'utils/common';
 
 class ElectronService {
-    private ElectronAPIs: ElectronAPIs;
+    private electronAPIs: ElectronAPIs;
     private isBundledApp: boolean = false;
 
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.isBundledApp = !!this.ElectronAPIs?.openDiskCache;
+        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.isBundledApp = !!this.electronAPIs?.openDiskCache;
     }
 
     checkIsBundledApp() {

@@ -16,19 +16,19 @@ interface selectZipResult {
     zipPaths: string[];
 }
 class ImportService {
-    ElectronAPIs: ElectronAPIs;
+    electronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
 
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.getPendingUploads;
+        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.allElectronAPIsExist = !!this.electronAPIs?.getPendingUploads;
     }
 
     async getElectronFilesFromGoogleZip(
         zipPath: string
     ): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.getElectronFilesFromGoogleZip(zipPath);
+            return this.electronAPIs.getElectronFilesFromGoogleZip(zipPath);
         }
     }
 
@@ -36,26 +36,26 @@ class ImportService {
 
     async showUploadFilesDialog(): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.showUploadFilesDialog();
+            return this.electronAPIs.showUploadFilesDialog();
         }
     }
 
     async showUploadDirsDialog(): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.showUploadDirsDialog();
+            return this.electronAPIs.showUploadDirsDialog();
         }
     }
 
     async showUploadZipDialog(): Promise<selectZipResult> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.showUploadZipDialog();
+            return this.electronAPIs.showUploadZipDialog();
         }
     }
     async getPendingUploads(): Promise<PendingUploads> {
         try {
             if (this.allElectronAPIsExist) {
                 const pendingUploads =
-                    (await this.ElectronAPIs.getPendingUploads()) as PendingUploads;
+                    (await this.electronAPIs.getPendingUploads()) as PendingUploads;
                 return pendingUploads;
             }
         } catch (e) {
@@ -83,7 +83,7 @@ class ImportService {
             if (collections.length === 1) {
                 collectionName = collections[0].name;
             }
-            this.ElectronAPIs.setToUploadCollection(collectionName);
+            this.electronAPIs.setToUploadCollection(collectionName);
         }
     }
 
@@ -92,7 +92,7 @@ class ImportService {
         filePaths: string[]
     ) {
         if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.setToUploadFiles(type, filePaths);
+            this.electronAPIs.setToUploadFiles(type, filePaths);
         }
     }
 
@@ -122,9 +122,9 @@ class ImportService {
     }
     cancelRemainingUploads() {
         if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.setToUploadCollection(null);
-            this.ElectronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.ZIPS, []);
-            this.ElectronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, []);
+            this.electronAPIs.setToUploadCollection(null);
+            this.electronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.ZIPS, []);
+            this.electronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, []);
         }
     }
 }
