@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_folder.dart';
 import 'package:photos/models/file.dart';

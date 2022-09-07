@@ -1,3 +1,5 @@
+// @dart=2.9
+
 const int kThumbnailSmallSize = 256;
 const int kThumbnailQuality = 50;
 const int kThumbnailLargeSize = 512;

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 library super_logging;
 
 import 'dart:async';

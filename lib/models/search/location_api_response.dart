@@ -1,3 +1,5 @@
+// @dart=2.9
+
 class LocationApiResponse {
   final List<LocationDataFromResponse> results;
   LocationApiResponse({

@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
