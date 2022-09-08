@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:io' as io;
 
 import 'package:photos/core/cache/lru_map.dart';

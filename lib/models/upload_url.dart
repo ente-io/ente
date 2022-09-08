@@ -13,8 +13,6 @@ class UploadURL {
   }
 
   factory UploadURL.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return UploadURL(
       map['url'],
       map['objectKey'],

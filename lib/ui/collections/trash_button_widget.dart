@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:flutter/material.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/ui/viewer/gallery/trash_page.dart';

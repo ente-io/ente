@@ -1,5 +1,6 @@
+// @dart=2.9
+
 import 'dart:io' as io;
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
@@ -101,7 +102,7 @@ class FilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory =
+    final io.Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
@@ -900,7 +901,7 @@ class FilesDB {
       getInt(fileType),
       title,
     ];
-    if (Platform.isAndroid) {
+    if (io.Platform.isAndroid) {
       whereClause = ''' ($columnOwnerID = ? OR $columnOwnerID IS NULL) AND 
           $columnLocalID = ? AND $columnFileType = ? AND $columnTitle=? AND $columnDeviceFolder= ? 
            ''';

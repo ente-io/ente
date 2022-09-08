@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/collection_items.dart';
