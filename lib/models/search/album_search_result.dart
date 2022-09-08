@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/search/search_results.dart';
 

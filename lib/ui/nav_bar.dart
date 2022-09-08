@@ -1,3 +1,5 @@
+// @dart=2.9
+
 library google_nav_bar;
 
 import 'dart:async';

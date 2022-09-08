@@ -1,3 +1,5 @@
+// @dart=2.9
+
 import 'dart:ui';
 
 import 'package:fast_base58/fast_base58.dart';
