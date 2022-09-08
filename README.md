@@ -27,9 +27,9 @@ If you are running into issues with this app, please drop a mail to [support@ent
 
 ## Building from source
 
-You'll need to have node installed on your machine. e.g. on macOS you can do
-`brew install node`. After that, you can run the following commands to fetch and
-build from source.
+You'll need to have node (and yarn) installed on your machine. e.g. on macOS you
+can do `brew install node`. After that, you can run the following commands to
+fetch and build from source.
 
 ```bash
 # Clone this repository
