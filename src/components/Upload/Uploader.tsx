@@ -225,8 +225,10 @@ export default function Uploader(props: Props) {
 
             handleCollectionCreationAndUpload(
                 importSuggestion,
-                props.isFirstUpload
+                props.isFirstUpload,
+                pickedUploadType.current
             );
+            pickedUploadType.current = null;
             props.setLoading(false);
         }
     }, [webFiles, appContext.sharedFiles, electronFiles]);
@@ -260,9 +262,10 @@ export default function Uploader(props: Props) {
                     localID: index,
                     collectionID: collection.id,
                 }));
-            await waitInQueueAndUploadFiles(filesWithCollectionToUpload, [
+            waitInQueueAndUploadFiles(filesWithCollectionToUpload, [
                 collection,
             ]);
+            toUploadFiles.current = null;
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
         }
@@ -327,16 +330,14 @@ export default function Uploader(props: Props) {
                 });
                 throw e;
             }
-            await waitInQueueAndUploadFiles(
-                filesWithCollectionToUpload,
-                collections
-            );
+            waitInQueueAndUploadFiles(filesWithCollectionToUpload, collections);
+            toUploadFiles.current = null;
         } catch (e) {
             logError(e, 'Failed to upload files to new collections');
         }
     };
 
-    const waitInQueueAndUploadFiles = async (
+    const waitInQueueAndUploadFiles = (
         filesWithCollectionToUploadIn: FileWithCollection[],
         collections: Collection[]
     ) => {
@@ -487,7 +488,8 @@ export default function Uploader(props: Props) {
 
     const handleCollectionCreationAndUpload = (
         importSuggestion: ImportSuggestion,
-        isFirstUpload: boolean
+        isFirstUpload: boolean,
+        pickedUploadType: PICKED_UPLOAD_TYPE
     ) => {
         if (isPendingDesktopUpload.current) {
             isPendingDesktopUpload.current = false;
@@ -503,10 +505,7 @@ export default function Uploader(props: Props) {
             }
             return;
         }
-        if (
-            isElectron() &&
-            pickedUploadType.current === PICKED_UPLOAD_TYPE.ZIPS
-        ) {
+        if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
             uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
             return;
         }
