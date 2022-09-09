@@ -126,12 +126,8 @@ Future<LocalDiffResult> getDiffWithLocal(
   args['pathToLocalIDs'] = pathToLocalIDs;
   final LocalDiffResult diffResult =
       await computer.compute(_getLocalAssetsDiff, param: args);
-  if (diffResult.localPathAssets.isEmpty) {
-    return diffResult;
-  }
-  final unSyncedFiles =
+  diffResult.uniqueLocalFiles =
       await _convertLocalAssetsToUniqueFiles(diffResult.localPathAssets);
-  diffResult.uniqueLocalFiles = unSyncedFiles;
   return diffResult;
 }
 
