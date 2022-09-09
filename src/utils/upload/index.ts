@@ -17,15 +17,6 @@ import isElectron from 'is-electron';
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 
-const SYSTEM_FILES = [
-    '.DS_Store',
-    'Thumbs.db',
-    'desktop.ini',
-    '._.DS_Store',
-    '._.Thumbs.db',
-    '._.desktop.ini',
-];
-
 export function findMatchingExistingFiles(
     existingFiles: EnteFile[],
     newFileMetadata: Metadata
@@ -214,5 +205,5 @@ export function filterOutSystemFiles(files: File[] | ElectronFile[]) {
 }
 
 export function isSystemFile(file: File | ElectronFile) {
-    return SYSTEM_FILES.includes(file.name);
+    return file.name.startsWith('.');
 }
