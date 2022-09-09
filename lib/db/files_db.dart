@@ -850,10 +850,6 @@ class FilesDB {
     );
     final result = <String>{};
     for (final row in rows) {
-      if (kDebugMode && result.contains(row[columnLocalID])) {
-        debugPrint(
-            "Two mappings existing for same localID ${row[columnLocalID]} ");
-      }
       result.add(row[columnLocalID]);
     }
     return result;
