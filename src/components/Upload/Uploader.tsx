@@ -221,6 +221,7 @@ export default function Uploader(props: Props) {
 
             toUploadFiles.current = filterOutSystemFiles(toUploadFiles.current);
             if (toUploadFiles.current.length === 0) {
+                props.setLoading(false);
                 return;
             }
 
