@@ -455,7 +455,7 @@ class FilesDB {
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
-  Future<FileLoadResult> getAllUploadedFiles(
+  Future<FileLoadResult> getAllPendingOrUploadedFiles(
     int startTime,
     int endTime,
     int ownerID, {
@@ -469,7 +469,7 @@ class FilesDB {
     final results = await db.query(
       filesTable,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
           ' AND $columnMMdVisibility = ?',
       whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
