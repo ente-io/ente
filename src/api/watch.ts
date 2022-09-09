@@ -13,7 +13,7 @@ export async function addWatchMapping(
     folderPath = path.normalize(folderPath);
     const watchMappings = getWatchMappings();
     if (isMappingPresent(watchMappings, folderPath)) {
-        throw new Error(`Watch mapping for ${folderPath} already exists`);
+        throw new Error(`Watch mapping already exists`);
     }
 
     await ipcRenderer.invoke('add-watcher', {
@@ -38,7 +38,7 @@ export async function removeWatchMapping(folderPath: string) {
     );
 
     if (!watchMapping) {
-        throw new Error(`Watch mapping for ${folderPath} does not exist`);
+        throw new Error(`Watch mapping does not exist`);
     }
 
     await ipcRenderer.invoke('remove-watcher', {
@@ -62,7 +62,7 @@ export function updateWatchMappingSyncedFiles(
     );
 
     if (!watchMapping) {
-        throw Error(`Watch mapping not found for ${folderPath}`);
+        throw Error(`Watch mapping not found`);
     }
 
     watchMapping.syncedFiles = files;
@@ -79,7 +79,7 @@ export function updateWatchMappingIgnoredFiles(
     );
 
     if (!watchMapping) {
-        throw Error(`Watch mapping not found for ${folderPath}`);
+        throw Error(`Watch mapping not found`);
     }
 
     watchMapping.ignoredFiles = files;
@@ -98,13 +98,6 @@ export function registerWatcherFunctions(
         filePath = path.normalize(
             filePath.split(path.sep).join(path.posix.sep)
         );
-        await addFile(await getElectronFile(filePath));
-    });
-    ipcRenderer.on('watch-change', async (_, filePath: string) => {
-        filePath = path.normalize(
-            filePath.split(path.sep).join(path.posix.sep)
-        );
-        await removeFile(filePath);
         await addFile(await getElectronFile(filePath));
     });
     ipcRenderer.on('watch-unlink', async (_, filePath: string) => {
