@@ -16,11 +16,14 @@ class LocationApiResponse {
 
   factory LocationApiResponse.fromMap(Map<String, dynamic> map) {
     return LocationApiResponse(
-      results: List<LocationDataFromResponse>.from(
-        (map['results']).map(
-          (x) => LocationDataFromResponse.fromMap(x as Map<String, dynamic>),
-        ),
-      ),
+      results: (map['results']) == null
+          ? []
+          : List<LocationDataFromResponse>.from(
+              (map['results']).map(
+                (x) =>
+                    LocationDataFromResponse.fromMap(x as Map<String, dynamic>),
+              ),
+            ),
     );
   }
 }
