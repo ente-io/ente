@@ -1064,6 +1064,17 @@ class FilesDB {
     );
   }
 
+  Future<int> deleteMultipleByGeneratedIDs(List<int> generatedIDs) async {
+    if (generatedIDs.isEmpty) {
+      return 0;
+    }
+    final db = await instance.database;
+    return await db.delete(
+      filesTable,
+      where: '$columnGeneratedID IN (${generatedIDs.join(', ')})',
+    );
+  }
+
   Future<int> deleteLocalFile(File file) async {
     final db = await instance.database;
     if (file.localID != null) {
@@ -1185,6 +1196,42 @@ class FilesDB {
           '$columnCollectionID =? AND $columnUploadedFileID IN (${fileIDs.join(', ')})',
       whereArgs: [collectionID],
     );
+  }
+
+  Future<List<File>> getPendingUploadForCollection(int collectionID) async {
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnCollectionID = ? AND ($columnUploadedFileID IS NULL OR '
+          '$columnUploadedFileID = -1)',
+      whereArgs: [collectionID],
+    );
+    return convertToFiles(results);
+  }
+
+  Future<Set<String>> getLocalIDsPresentInEntries(
+    List<File> existingFiles,
+    int collectionID,
+  ) async {
+    String inParam = "";
+    for (final existingFile in existingFiles) {
+      inParam += "'" + existingFile.localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT $columnLocalID
+      FROM $filesTable
+      WHERE $columnLocalID IN ($inParam) AND $columnCollectionID != 
+      $collectionID AND $columnLocalID IS NOT NULL;
+    ''',
+    );
+    final result = <String>{};
+    for (final row in rows) {
+      result.add(row[columnLocalID]);
+    }
+    return result;
   }
 
   Future<List<File>> getLatestLocalFiles() async {

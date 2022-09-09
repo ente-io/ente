@@ -16,6 +16,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
@@ -181,8 +182,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                               syncStatus[pathID] =
                                   _selectedDevicePathIDs.contains(pathID);
                             }
-                            await FilesDB.instance
-                                .updateDevicePathSyncStatus(syncStatus);
+                            await RemoteSyncService.instance
+                                .updateDeviceFolderSyncStatus(syncStatus);
                             await Configuration.instance
                                 .setSelectAllFoldersForBackup(
                               _allDevicePathIDs.length ==
