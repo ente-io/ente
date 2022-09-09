@@ -20,6 +20,7 @@ import { getParentFolderName } from './utils';
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from 'constants/upload';
 import uploadManager from 'services/upload/uploadManager';
 import { addLocalLog, addLogLine } from 'utils/logging';
+import { filterOutSystemFiles } from 'utils/upload';
 
 class watchFolderService {
     private electronAPIs: ElectronAPIs;
@@ -107,13 +108,15 @@ class watchFolderService {
         mapping: WatchMapping,
         filesOnDisk: ElectronFile[]
     ) {
-        const filesToUpload = filesOnDisk.filter((electronFile) => {
-            return (
-                !mapping.syncedFiles.find(
-                    (file) => file.path === electronFile.path
-                ) && !mapping.ignoredFiles.includes(electronFile.path)
-            );
-        });
+        const filesToUpload = filterOutSystemFiles(
+            filesOnDisk.filter((electronFile) => {
+                return (
+                    !mapping.syncedFiles.find(
+                        (file) => file.path === electronFile.path
+                    ) && !mapping.ignoredFiles.includes(electronFile.path)
+                );
+            })
+        ) as ElectronFile[];
 
         if (filesToUpload.length > 0) {
             for (const file of filesToUpload) {
@@ -263,11 +266,15 @@ class watchFolderService {
                 throw Error('no Mapping found for event');
             }
             if (event.type === 'upload') {
-                event.files = event.files.filter(
-                    (file) =>
-                        !mapping.ignoredFiles.includes(file.path) &&
-                        !mapping.syncedFiles.find((f) => f.path === file.path)
-                );
+                event.files = filterOutSystemFiles(
+                    event.files.filter(
+                        (file) =>
+                            !mapping.ignoredFiles.includes(file.path) &&
+                            !mapping.syncedFiles.find(
+                                (f) => f.path === file.path
+                            )
+                    )
+                ) as ElectronFile[];
                 if (event.files.length === 0) {
                     return;
                 }
