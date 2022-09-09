@@ -577,7 +577,7 @@ class watchFolderService {
             );
 
             if (!mapping) {
-                throw Error(`no mapping found for ${filePath}`);
+                throw Error(`no mapping found`);
             }
 
             return {
