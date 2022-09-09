@@ -1,9 +1,10 @@
 import { UPLOAD_STRATEGY } from 'constants/upload';
 import { ElectronFile } from 'types/upload';
 
-interface WatchMappingSyncedFile {
+export interface WatchMappingSyncedFile {
     path: string;
-    id: number;
+    uploadedFileID: number;
+    collectionID: number;
 }
 
 export interface WatchMapping {
