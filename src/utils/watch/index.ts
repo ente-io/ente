@@ -14,10 +14,13 @@ export function getValidFilesToUpload(
     mapping: WatchMapping
 ) {
     const uniqueFilePaths = new Set<string>();
-    return files.filter(
-        (file) =>
-            !isSystemFile(file) &&
-            !isSyncedOrIgnoredFile(file, mapping) &&
-            !uniqueFilePaths.has(file.path)
-    );
+    return files.filter((file) => {
+        if (!isSystemFile(file) && !isSyncedOrIgnoredFile(file, mapping)) {
+            if (!uniqueFilePaths.has(file.path)) {
+                uniqueFilePaths.add(file.path);
+                return true;
+            }
+        }
+        return false;
+    });
 }
