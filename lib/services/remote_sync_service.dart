@@ -299,14 +299,12 @@ class RemoteSyncService {
             }
           }
           await filesDB.insertMultiple(newFilesToInsert);
-          localIDsToSync.removeAll(fileFoundForLocalIDs);
-        }
-
-        if (localIDsToSync.isNotEmpty) {
-          _logger.warning(
-            "All localIDs should be synced, missed for "
-            "${localIDsToSync.length}",
-          );
+          if (fileFoundForLocalIDs.length != localIDsToSync.length) {
+            _logger.warning(
+              "mismatch in num of filesToSync ${localIDsToSync.length} to "
+              "fileSynced ${fileFoundForLocalIDs.length}",
+            );
+          }
         }
       }
     }
