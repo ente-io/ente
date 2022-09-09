@@ -1,7 +1,7 @@
 [submodule "bada-frame"]
 	path = ui
 	url = https://github.com/ente-io/bada-frame
-	branch = main
+	branch = fix-watch-folder-issues
 [submodule "thirdparty/next-electron-server"]
 	path = thirdparty/next-electron-server
 	url = https://github.com/ente-io/next-electron-server.git
