@@ -455,7 +455,7 @@ class FilesDB {
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
-  Future<FileLoadResult> getAllUploadedFiles(
+  Future<FileLoadResult> getAllPendingOrUploadedFiles(
     int startTime,
     int endTime,
     int ownerID, {
@@ -469,7 +469,7 @@ class FilesDB {
     final results = await db.query(
       filesTable,
       where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  $columnOwnerID = ? AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
+          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)'
           ' AND $columnMMdVisibility = ?',
       whereArgs: [startTime, endTime, ownerID, visibility],
       orderBy:
@@ -517,38 +517,6 @@ class FilesDB {
       where:
           '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?)  AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
           ' AND ($columnLocalID IS NOT NULL OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
-      whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      limit: limit,
-    );
-    final files = convertToFiles(results);
-    final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-    return FileLoadResult(deduplicatedFiles, files.length == limit);
-  }
-
-  Future<FileLoadResult> getImportantFiles(
-    int startTime,
-    int endTime,
-    int ownerID,
-    List<String> paths, {
-    int limit,
-    bool asc,
-    Set<int> ignoredCollectionIDs,
-  }) async {
-    final db = await instance.database;
-    String inParam = "";
-    for (final path in paths) {
-      inParam += "'" + path.replaceAll("'", "''") + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      filesTable,
-      where:
-          '$columnCreationTime >= ? AND $columnCreationTime <= ? AND ($columnOwnerID IS NULL OR $columnOwnerID = ?) AND ($columnMMdVisibility IS NULL OR $columnMMdVisibility = ?)'
-          'AND (($columnLocalID IS NOT NULL AND $columnDeviceFolder IN ($inParam)) OR ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1))',
       whereArgs: [startTime, endTime, ownerID, kVisibilityVisible],
       orderBy:
           '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
@@ -630,29 +598,6 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
-  Future<FileLoadResult> getFilesInPath(
-    String path,
-    int startTime,
-    int endTime, {
-    int limit,
-    bool asc,
-  }) async {
-    final db = await instance.database;
-    final order = (asc ?? false ? 'ASC' : 'DESC');
-    final results = await db.query(
-      filesTable,
-      where:
-          '$columnDeviceFolder = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnLocalID IS NOT NULL',
-      whereArgs: [path, startTime, endTime],
-      orderBy:
-          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
-      groupBy: columnLocalID,
-      limit: limit,
-    );
-    final files = convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
-  }
-
   Future<FileLoadResult> getLocalDeviceFiles(
     int startTime,
     int endTime, {
@@ -673,16 +618,6 @@ class FilesDB {
     final files = convertToFiles(results);
     final result = deduplicateByLocalID(files);
     return FileLoadResult(result, files.length == limit);
-  }
-
-  Future<List<File>> getAllVideos() async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where: '$columnLocalID IS NOT NULL AND $columnFileType = 1',
-      orderBy: '$columnCreationTime DESC',
-    );
-    return convertToFiles(results);
   }
 
   Future<List<File>> getFilesCreatedWithinDurations(
@@ -710,28 +645,6 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
-  }
-
-  Future<List<File>> getFilesToBeUploadedWithinFolders(
-    Set<String> folders,
-  ) async {
-    if (folders.isEmpty) {
-      return [];
-    }
-    final db = await instance.database;
-    String inParam = "";
-    for (final folder in folders) {
-      inParam += "'" + folder.replaceAll("'", "''") + "',";
-    }
-    inParam = inParam.substring(0, inParam.length - 1);
-    final results = await db.query(
-      filesTable,
-      where:
-          '($columnUploadedFileID IS NULL OR $columnUploadedFileID IS -1) AND $columnDeviceFolder IN ($inParam)',
-      orderBy: '$columnCreationTime DESC',
-      groupBy: columnLocalID,
-    );
-    return convertToFiles(results);
   }
 
   // Files which user added to a collection manually but they are not uploaded yet.
@@ -850,10 +763,6 @@ class FilesDB {
     );
     final result = <String>{};
     for (final row in rows) {
-      if (kDebugMode && result.contains(row[columnLocalID])) {
-        debugPrint(
-            "Two mappings existing for same localID ${row[columnLocalID]} ");
-      }
       result.add(row[columnLocalID]);
     }
     return result;
@@ -1064,6 +973,17 @@ class FilesDB {
     );
   }
 
+  Future<int> deleteMultipleByGeneratedIDs(List<int> generatedIDs) async {
+    if (generatedIDs.isEmpty) {
+      return 0;
+    }
+    final db = await instance.database;
+    return await db.delete(
+      filesTable,
+      where: '$columnGeneratedID IN (${generatedIDs.join(', ')})',
+    );
+  }
+
   Future<int> deleteLocalFile(File file) async {
     final db = await instance.database;
     if (file.localID != null) {
@@ -1185,6 +1105,42 @@ class FilesDB {
           '$columnCollectionID =? AND $columnUploadedFileID IN (${fileIDs.join(', ')})',
       whereArgs: [collectionID],
     );
+  }
+
+  Future<List<File>> getPendingUploadForCollection(int collectionID) async {
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnCollectionID = ? AND ($columnUploadedFileID IS NULL OR '
+          '$columnUploadedFileID = -1)',
+      whereArgs: [collectionID],
+    );
+    return convertToFiles(results);
+  }
+
+  Future<Set<String>> getLocalIDsPresentInEntries(
+    List<File> existingFiles,
+    int collectionID,
+  ) async {
+    String inParam = "";
+    for (final existingFile in existingFiles) {
+      inParam += "'" + existingFile.localID + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT $columnLocalID
+      FROM $filesTable
+      WHERE $columnLocalID IN ($inParam) AND $columnCollectionID != 
+      $collectionID AND $columnLocalID IS NOT NULL;
+    ''',
+    );
+    final result = <String>{};
+    for (final row in rows) {
+      result.add(row[columnLocalID]);
+    }
+    return result;
   }
 
   Future<List<File>> getLatestLocalFiles() async {

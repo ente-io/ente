@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
@@ -26,6 +27,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
 import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -254,59 +256,111 @@ class RemoteSyncService {
             await filesDB.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
       }
-      if (localIDsToSync.isNotEmpty && deviceCollection.collectionID != -1) {
-        await filesDB.setCollectionIDForUnMappedLocalFiles(
-          deviceCollection.collectionID,
-          localIDsToSync,
+
+      if (localIDsToSync.isEmpty || deviceCollection.collectionID == -1) {
+        continue;
+      }
+
+      await filesDB.setCollectionIDForUnMappedLocalFiles(
+        deviceCollection.collectionID,
+        localIDsToSync,
+      );
+
+      // mark IDs as already synced if corresponding entry is present in
+      // the collection. This can happen when a user has marked a folder
+      // for sync, then un-synced it and again tries to mark if for sync.
+      final Set<String> existingMapping = await filesDB
+          .getLocalFileIDsForCollection(deviceCollection.collectionID);
+      final Set<String> commonElements =
+          localIDsToSync.intersection(existingMapping);
+      if (commonElements.isNotEmpty) {
+        debugPrint(
+          "${commonElements.length} files already existing in "
+          "collection ${deviceCollection.collectionID} for ${deviceCollection.name}",
         );
+        localIDsToSync.removeAll(commonElements);
+      }
 
-        // mark IDs as already synced if corresponding entry is present in
-        // the collection. This can happen when a user has marked a folder
-        // for sync, then un-synced it and again tries to mark if for sync.
-        final Set<String> existingMapping = await filesDB
-            .getLocalFileIDsForCollection(deviceCollection.collectionID);
-        final Set<String> commonElements =
-            localIDsToSync.intersection(existingMapping);
-        if (commonElements.isNotEmpty) {
-          debugPrint(
-            "${commonElements.length} files already existing in "
-            "collection ${deviceCollection.collectionID} for ${deviceCollection.name}",
-          );
-          localIDsToSync.removeAll(commonElements);
+      // At this point, the remaining localIDsToSync will need to create
+      // new file entries, where we can store mapping for localID and
+      // corresponding collection ID
+      if (localIDsToSync.isNotEmpty) {
+        debugPrint(
+          'Adding new entries for ${localIDsToSync.length} files'
+          ' for ${deviceCollection.name}',
+        );
+        final filesWithCollectionID =
+            await filesDB.getLocalFiles(localIDsToSync.toList());
+        final List<File> newFilesToInsert = [];
+        final Set<String> fileFoundForLocalIDs = {};
+        for (var existingFile in filesWithCollectionID) {
+          final String localID = existingFile.localID;
+          if (!fileFoundForLocalIDs.contains(localID)) {
+            existingFile.generatedID = null;
+            existingFile.collectionID = deviceCollection.collectionID;
+            existingFile.uploadedFileID = null;
+            existingFile.ownerID = null;
+            newFilesToInsert.add(existingFile);
+            fileFoundForLocalIDs.add(localID);
+          }
         }
-
-        // At this point, the remaining localIDsToSync will need to create
-        // new file entries, where we can store mapping for localID and
-        // corresponding collection ID
-        if (localIDsToSync.isNotEmpty) {
-          debugPrint(
-            'Adding new entries for ${localIDsToSync.length} files'
-            ' for ${deviceCollection.name}',
+        await filesDB.insertMultiple(newFilesToInsert);
+        if (fileFoundForLocalIDs.length != localIDsToSync.length) {
+          _logger.warning(
+            "mismatch in num of filesToSync ${localIDsToSync.length} to "
+            "fileSynced ${fileFoundForLocalIDs.length}",
           );
-          final filesWithCollectionID =
-              await filesDB.getLocalFiles(localIDsToSync.toList());
-          final List<File> newFilesToInsert = [];
-          final Set<String> fileFoundForLocalIDs = {};
-          for (var existingFile in filesWithCollectionID) {
-            final String localID = existingFile.localID;
-            if (!fileFoundForLocalIDs.contains(localID)) {
-              existingFile.generatedID = null;
-              existingFile.collectionID = deviceCollection.collectionID;
-              existingFile.uploadedFileID = null;
-              existingFile.ownerID = null;
-              newFilesToInsert.add(existingFile);
-              fileFoundForLocalIDs.add(localID);
-            }
-          }
-          await filesDB.insertMultiple(newFilesToInsert);
-          if (fileFoundForLocalIDs.length != localIDsToSync.length) {
-            _logger.warning(
-              "mismatch in num of filesToSync ${localIDsToSync.length} to "
-              "fileSynced ${fileFoundForLocalIDs.length}",
-            );
-          }
         }
       }
+    }
+  }
+
+  Future<void> updateDeviceFolderSyncStatus(
+    Map<String, bool> syncStatusUpdate,
+  ) async {
+    final Set<int> oldCollectionIDsForAutoSync =
+        await _db.getDeviceSyncCollectionIDs();
+    await _db.updateDevicePathSyncStatus(syncStatusUpdate);
+    final Set<int> newCollectionIDsForAutoSync =
+        await _db.getDeviceSyncCollectionIDs();
+    SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
+    // remove all collectionIDs which are still marked for backup
+    oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
+    await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
+    Bus.instance.fire(LocalPhotosUpdatedEvent(<File>[]));
+  }
+
+  Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
+    /*
+      For each collection, perform following action
+      1) Get List of all files not uploaded yet
+      2) Delete files who localIDs is also present in other collections.
+      3) For Remaining files, set the collectionID as -1
+     */
+    debugPrint("Removing files for collections $collectionIDs");
+    for (int collectionID in collectionIDs) {
+      final List<File> pendingUploads =
+          await _db.getPendingUploadForCollection(collectionID);
+      if (pendingUploads.isEmpty) {
+        continue;
+      }
+      final Set<String> localIDsInOtherFileEntries =
+          await _db.getLocalIDsPresentInEntries(
+        pendingUploads,
+        collectionID,
+      );
+      final List<File> entriesToUpdate = [];
+      final List<int> entriesToDelete = [];
+      for (File pendingUpload in pendingUploads) {
+        if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
+          entriesToDelete.add(pendingUpload.generatedID);
+        } else {
+          pendingUpload.collectionID = -1;
+          entriesToUpdate.add(pendingUpload);
+        }
+      }
+      await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
+      await _db.insertMultiple(entriesToUpdate);
     }
   }
 
@@ -339,7 +393,6 @@ class RemoteSyncService {
   Future<List<File>> _getFilesToBeUploaded() async {
     final deviceCollections = await FilesDB.instance.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
-    final foldersToBackUp = Configuration.instance.getPathsToBackUp();
     List<File> filesToBeUploaded;
     if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
         deviceCollections.isEmpty) {
