@@ -203,12 +203,16 @@ export function filterOutSystemFiles(files: File[] | ElectronFile[]) {
     if (files[0] instanceof File) {
         const browserFiles = files as File[];
         return browserFiles.filter((file) => {
-            return !SYSTEM_FILES.includes(file.name);
+            return !isSystemFile(file);
         });
     } else {
         const electronFiles = files as ElectronFile[];
         return electronFiles.filter((file) => {
-            return !SYSTEM_FILES.includes(file.name);
+            return !isSystemFile(file);
         });
     }
+}
+
+export function isSystemFile(file: File | ElectronFile) {
+    return SYSTEM_FILES.includes(file.name);
 }

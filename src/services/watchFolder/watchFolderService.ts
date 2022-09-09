@@ -20,7 +20,7 @@ import { getParentFolderName } from './utils';
 import { UPLOAD_RESULT, UPLOAD_STRATEGY } from 'constants/upload';
 import uploadManager from 'services/upload/uploadManager';
 import { addLocalLog, addLogLine } from 'utils/logging';
-import { filterOutSystemFiles } from 'utils/upload';
+import { getValidFilesToUpload } from 'utils/watch';
 
 class watchFolderService {
     private electronAPIs: ElectronAPIs;
@@ -108,15 +108,7 @@ class watchFolderService {
         mapping: WatchMapping,
         filesOnDisk: ElectronFile[]
     ) {
-        const filesToUpload = filterOutSystemFiles(
-            filesOnDisk.filter((electronFile) => {
-                return (
-                    !mapping.syncedFiles.find(
-                        (file) => file.path === electronFile.path
-                    ) && !mapping.ignoredFiles.includes(electronFile.path)
-                );
-            })
-        ) as ElectronFile[];
+        const filesToUpload = getValidFilesToUpload(filesOnDisk, mapping);
 
         if (filesToUpload.length > 0) {
             for (const file of filesToUpload) {
@@ -266,15 +258,7 @@ class watchFolderService {
                 throw Error('no Mapping found for event');
             }
             if (event.type === 'upload') {
-                event.files = filterOutSystemFiles(
-                    event.files.filter(
-                        (file) =>
-                            !mapping.ignoredFiles.includes(file.path) &&
-                            !mapping.syncedFiles.find(
-                                (f) => f.path === file.path
-                            )
-                    )
-                ) as ElectronFile[];
+                event.files = getValidFilesToUpload(event.files, mapping);
                 if (event.files.length === 0) {
                     return;
                 }
