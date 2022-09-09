@@ -1,16 +1,14 @@
-// @dart=2.9
-
 class LocationApiResponse {
   final List<LocationDataFromResponse> results;
   LocationApiResponse({
-    this.results,
+    required this.results,
   });
 
   LocationApiResponse copyWith({
-    List<LocationDataFromResponse> results,
+    required List<LocationDataFromResponse> results,
   }) {
     return LocationApiResponse(
-      results: results ?? this.results,
+      results: results,
     );
   }
 
@@ -32,17 +30,17 @@ class LocationDataFromResponse {
   final String place;
   final List<double> bbox;
   LocationDataFromResponse({
-    this.place,
-    this.bbox,
+    required this.place,
+    required this.bbox,
   });
 
   LocationDataFromResponse copyWith({
-    String place,
-    List<double> bbox,
+    required String place,
+    required List<double> bbox,
   }) {
     return LocationDataFromResponse(
-      place: place ?? this.place,
-      bbox: bbox ?? this.bbox,
+      place: place,
+      bbox: bbox,
     );
   }
 
