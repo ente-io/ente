@@ -100,13 +100,6 @@ export function registerWatcherFunctions(
         );
         await addFile(await getElectronFile(filePath));
     });
-    ipcRenderer.on('watch-change', async (_, filePath: string) => {
-        filePath = path.normalize(
-            filePath.split(path.sep).join(path.posix.sep)
-        );
-        await removeFile(filePath);
-        await addFile(await getElectronFile(filePath));
-    });
     ipcRenderer.on('watch-unlink', async (_, filePath: string) => {
         filePath = path.normalize(
             filePath.split(path.sep).join(path.posix.sep)
