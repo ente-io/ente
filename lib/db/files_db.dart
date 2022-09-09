@@ -841,7 +841,7 @@ class FilesDB {
     // on iOS, match using localID and fileType. title can either match or
     // might be null based on how the file was imported
     String whereClause = ''' ($columnOwnerID = ? OR $columnOwnerID IS NULL) AND 
-        $columnLocalID = ? AND $columnFileType = ? AND ß
+        $columnLocalID = ? AND $columnFileType = ? AND
         ($columnTitle=? OR $columnTitle IS NULL) ''';
     List<Object> whereArgs = [
       ownerID,
