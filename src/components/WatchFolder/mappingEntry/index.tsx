@@ -1,6 +1,6 @@
 import { EntryContainer } from '../styledComponents';
 import React from 'react';
-import { Typography } from '@mui/material';
+import { Tooltip, Typography } from '@mui/material';
 import { HorizontalFlex, SpaceBetweenFlex } from 'components/Container';
 import { WatchMapping } from 'types/watchFolder';
 import { AppContext } from 'pages/_app';
@@ -44,9 +44,13 @@ export function MappingEntry({ mapping, handleRemoveMapping }: Iprops) {
             <HorizontalFlex>
                 {mapping &&
                 mapping.uploadStrategy === UPLOAD_STRATEGY.SINGLE_COLLECTION ? (
-                    <FolderOpenIcon />
+                    <Tooltip title={constants.UPLOADED_TO_SINGLE_COLLECTION}>
+                        <FolderOpenIcon />
+                    </Tooltip>
                 ) : (
-                    <FolderCopyOutlinedIcon />
+                    <Tooltip title={constants.UPLOADED_TO_SEPARATE_COLLECTIONS}>
+                        <FolderCopyOutlinedIcon />
+                    </Tooltip>
                 )}
                 <EntryContainer>
                     <EntryHeading mapping={mapping} />

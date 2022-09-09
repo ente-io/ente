@@ -813,6 +813,8 @@ const englishConstants = {
         </>
     ),
     AUTHENTICATE: 'Authenticate',
+    UPLOADED_TO_SINGLE_COLLECTION: 'Uploaded to single collection',
+    UPLOADED_TO_SEPARATE_COLLECTIONS: 'Uploaded to separate collections',
 };
 
 export default englishConstants;

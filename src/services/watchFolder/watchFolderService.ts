@@ -94,8 +94,6 @@ class watchFolderService {
                 this.uploadDiffOfFiles(mapping, filesOnDisk);
                 this.trashDiffOfFiles(mapping, filesOnDisk);
             }
-
-            await this.runNextEvent();
         } catch (e) {
             logError(e, 'error while getting and syncing diff of files');
         }
@@ -128,7 +126,7 @@ class watchFolderService {
                     folderPath: mapping.folderPath,
                     files: [file],
                 };
-                this.eventQueue.push(event);
+                this.pushEvent(event);
             }
         }
     }
@@ -154,7 +152,7 @@ class watchFolderService {
                     folderPath: mapping.folderPath,
                     paths: [file.path],
                 };
-                this.eventQueue.push(event);
+                this.pushEvent(event);
             }
         }
     }
@@ -176,7 +174,7 @@ class watchFolderService {
         return notDeletedMappings;
     }
 
-    async pushEvent(event: EventQueueItem) {
+    pushEvent(event: EventQueueItem) {
         this.eventQueue.push(event);
         debounce(this.runNextEvent.bind(this), 300)();
     }

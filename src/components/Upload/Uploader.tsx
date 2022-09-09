@@ -43,6 +43,7 @@ import importService from 'services/importService';
 import { getDownloadAppMessage } from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
 import {
+    filterOutSystemFiles,
     getImportSuggestion,
     groupFilesBasedOnParentFolder,
 } from 'utils/upload';
@@ -217,6 +218,12 @@ export default function Uploader(props: Props) {
                 toUploadFiles.current = electronFiles;
                 setElectronFiles([]);
             }
+
+            toUploadFiles.current = filterOutSystemFiles(toUploadFiles.current);
+            if (toUploadFiles.current.length === 0) {
+                return;
+            }
+
             const importSuggestion = getImportSuggestion(
                 pickedUploadType.current,
                 toUploadFiles.current
