@@ -26,7 +26,6 @@ import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
-import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
@@ -103,10 +102,6 @@ class RemoteSyncService {
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
       await _syncDeviceCollectionFilesForUpload();
       final filesToBeUploaded = await _getFilesToBeUploaded();
-      if (kDebugMode) {
-        debugPrint("Skip upload for testing");
-        // filesToBeUploaded.clear();
-      }
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
         await _pullDiff();
@@ -393,13 +388,7 @@ class RemoteSyncService {
   Future<List<File>> _getFilesToBeUploaded() async {
     final deviceCollections = await FilesDB.instance.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
-    List<File> filesToBeUploaded;
-    if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
-        deviceCollections.isEmpty) {
-      filesToBeUploaded = await _db.getUnUploadedLocalFiles();
-    } else {
-      filesToBeUploaded = await _db.getPendingManualUploads();
-    }
+    final List<File> filesToBeUploaded = await _db.getFilesPendingForUpload();
     if (!Configuration.instance.shouldBackupVideos() || _shouldThrottleSync()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
