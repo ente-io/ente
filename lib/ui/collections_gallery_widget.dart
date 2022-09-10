@@ -1,7 +1,6 @@
 // @dart=2.9
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -23,10 +22,8 @@ import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/viewer/gallery/device_all_page.dart';
 import 'package:photos/ui/viewer/gallery/empte_state.dart';
 import 'package:photos/utils/local_settings.dart';
-import 'package:photos/utils/navigation_util.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
@@ -135,22 +132,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const SectionTitle("On device"),
-                Platform.isAndroid
-                    ? const SizedBox.shrink()
-                    : GestureDetector(
-                        child: const Padding(
-                          padding: EdgeInsets.only(right: 12.0),
-                          child: Text("View all"),
-                        ),
-                        onTap: () => routeToPage(context, DeviceAllPage()),
-                      ),
-              ],
-            ),
+            const SectionTitle("On device"),
             const SizedBox(height: 12),
             items.deviceCollections.isEmpty
                 ? const Padding(
