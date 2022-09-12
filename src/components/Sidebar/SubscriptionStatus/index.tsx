@@ -45,11 +45,22 @@ export default function SubscriptionStatus({
         return <></>;
     }
 
+    const handleClick = useMemo(
+        () =>
+            isSubscriptionActive(userDetails.subscription)
+                ? hasExceededStorageQuota(userDetails)
+                    ? showPlanSelectorModal
+                    : () => null
+                : billingService.redirectToCustomerPortal,
+        [userDetails]
+    );
+
     return (
         <Box px={1} pt={0.5}>
             <Typography
                 variant="body2"
                 color={'text.secondary'}
+                onClick={handleClick}
                 sx={{ cursor: 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription)
                     ? isOnFreePlan(userDetails.subscription)
