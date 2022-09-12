@@ -646,6 +646,7 @@ class RemoteSyncService {
           " remoteFiles seen first time",
     );
     if (needsGalleryReload) {
+      _logger.fine('force reload home gallery');
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
     }
   }
