@@ -11,7 +11,7 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/collections/device_folder_icon_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/viewer/gallery/empte_state.dart';
+import 'package:photos/ui/viewer/gallery/empty_state.dart';
 
 class DeviceFoldersGridViewWidget extends StatefulWidget {
   const DeviceFoldersGridViewWidget({
