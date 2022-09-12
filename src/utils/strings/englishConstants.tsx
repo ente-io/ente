@@ -284,7 +284,12 @@ const englishConstants = {
         <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
-    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: `You have exceeded your storage quota, please upgrade your plan.`,
+    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: (onClick) => (
+        <>
+            You have exceeded your storage quota,, please{' '}
+            <LinkButton onClick={onClick}> upgrade </LinkButton>
+        </>
+    ),
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>We've received your payment</p>

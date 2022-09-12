@@ -8,11 +8,13 @@ import {
     hasExceededStorageQuota,
     isSubscriptionActive,
     isSubscriptionCancelled,
+    hasStripeSubscription,
 } from 'utils/billing';
 import Box from '@mui/material/Box';
 import { UserDetails } from 'types/user';
 import constants from 'utils/strings/constants';
 import { Typography } from '@mui/material';
+import billingService from 'services/billingService';
 
 export default function SubscriptionStatus({
     userDetails,
@@ -40,6 +42,22 @@ export default function SubscriptionStatus({
         return true;
     }, [userDetails]);
 
+    const handleClick = useMemo(() => {
+        if (userDetails) {
+            if (isSubscriptionActive(userDetails.subscription)) {
+                if (hasExceededStorageQuota(userDetails)) {
+                    return showPlanSelectorModal;
+                }
+            } else {
+                if (hasStripeSubscription(userDetails.subscription)) {
+                    return billingService.redirectToCustomerPortal;
+                } else {
+                    return showPlanSelectorModal;
+                }
+            }
+        }
+    }, [userDetails]);
+
     if (!hasAMessage) {
         return <></>;
     }
@@ -49,8 +67,8 @@ export default function SubscriptionStatus({
             <Typography
                 variant="body2"
                 color={'text.secondary'}
-                onClick={showPlanSelectorModal}
-                sx={{ cursor: 'pointer' }}>
+                onClick={handleClick && handleClick}
+                sx={{ cursor: handleClick && 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription)
                     ? isOnFreePlan(userDetails.subscription)
                         ? constants.FREE_SUBSCRIPTION_INFO(
@@ -61,9 +79,13 @@ export default function SubscriptionStatus({
                               userDetails.subscription?.expiryTime
                           )
                         : hasExceededStorageQuota(userDetails) &&
-                          constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO
+                          constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO(
+                              showPlanSelectorModal
+                          )
                     : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
-                          showPlanSelectorModal
+                          hasStripeSubscription(userDetails.subscription)
+                              ? billingService.redirectToCustomerPortal
+                              : showPlanSelectorModal
                       )}
             </Typography>
         </Box>
