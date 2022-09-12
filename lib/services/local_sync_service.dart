@@ -400,7 +400,7 @@ class LocalSyncService {
       if (hasGrantedLimitedPermissions()) {
         syncAll();
       } else {
-        sync();
+        sync().then((value) => _refreshDeviceFolderCountAndCover());
       }
     });
     PhotoManager.startChangeNotify();
