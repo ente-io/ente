@@ -297,7 +297,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     final bool showBackupFolderHook =
-        Configuration.instance.getPathsToBackUp().isEmpty &&
+        !Configuration.instance.hasSelectedAnyBackupFolder() &&
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
     return Stack(

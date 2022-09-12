@@ -56,8 +56,8 @@ class Configuration {
   static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
   static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
-  static const keyHasSkippedBackupFolderSelection =
-      "has_skipped_backup_folder_selection";
+  static const keyHasSelectedAnyBackupFolder =
+      "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const nameKey = "name";
   static const secretKeyKey = "secret_key";
@@ -576,12 +576,12 @@ class Configuration {
     return _volatilePassword;
   }
 
-  Future<void> skipBackupFolderSelection() async {
-    await _preferences.setBool(keyHasSkippedBackupFolderSelection, true);
+  Future<void> setHasSelectedAnyBackupFolder(bool val) async {
+    await _preferences.setBool(keyHasSelectedAnyBackupFolder, val);
   }
 
-  bool hasSkippedBackupFolderSelection() {
-    return _preferences.getBool(keyHasSkippedBackupFolderSelection) ?? false;
+  bool hasSelectedAnyBackupFolder() {
+    return _preferences.getBool(keyHasSelectedAnyBackupFolder) ?? false;
   }
 
   bool hasSelectedAllFoldersForBackup() {
