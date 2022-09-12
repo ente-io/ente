@@ -451,7 +451,7 @@ export default function Uploader(props: Props) {
                     variant: 'danger',
                     message: constants.SUBSCRIPTION_EXPIRED,
                     action: {
-                        text: constants.UPGRADE_NOW,
+                        text: constants.RENEW_NOW,
                         callback: billingService.redirectToCustomerPortal,
                     },
                 };
@@ -461,7 +461,7 @@ export default function Uploader(props: Props) {
                     variant: 'danger',
                     message: constants.STORAGE_QUOTA_EXCEEDED,
                     action: {
-                        text: constants.RENEW_NOW,
+                        text: constants.UPGRADE_NOW,
                         callback: galleryContext.showPlanSelectorModal,
                     },
                     icon: <DiscFullIcon fontSize="large" />,
