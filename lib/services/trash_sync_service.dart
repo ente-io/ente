@@ -10,6 +10,7 @@ import 'package:photos/core/network.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
+import 'package:photos/events/trash_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
@@ -38,26 +39,35 @@ class TrashSyncService {
 
   Future<void> syncTrash() async {
     final lastSyncTime = _getSyncTime();
+    bool isLocalTrashUpdated = false;
     _logger.fine('sync trash sinceTime : $lastSyncTime');
     final diff = await _diffFetcher.getTrashFilesDiff(lastSyncTime);
     if (diff.trashedFiles.isNotEmpty) {
+      isLocalTrashUpdated = true;
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
       await _trashDB.insertMultiple(diff.trashedFiles);
     }
     if (diff.deletedUploadIDs.isNotEmpty) {
       _logger.fine("discard ${diff.deletedUploadIDs.length} deleted items");
-      await _trashDB.delete(diff.deletedUploadIDs);
+      final itemsDeleted = await _trashDB.delete(diff.deletedUploadIDs);
+      isLocalTrashUpdated = isLocalTrashUpdated || itemsDeleted > 0;
     }
     if (diff.restoredFiles.isNotEmpty) {
       _logger.fine("discard ${diff.restoredFiles.length} restored items");
-      await _trashDB
+      final itemsDeleted = await _trashDB
           .delete(diff.restoredFiles.map((e) => e.uploadedFileID).toList());
+      isLocalTrashUpdated = isLocalTrashUpdated || itemsDeleted > 0;
     }
 
     await _updateIgnoredFiles(diff);
 
     if (diff.lastSyncedTimeStamp != 0) {
       await _setSyncTime(diff.lastSyncedTimeStamp);
+    }
+    if (isLocalTrashUpdated) {
+      _logger
+          .fine('local trash updated, fire ${(TrashUpdatedEvent).toString()}');
+      Bus.instance.fire(TrashUpdatedEvent());
     }
     if (diff.hasMore) {
       return await syncTrash();
@@ -148,6 +158,7 @@ class TrashSyncService {
         data: params,
       );
       await _trashDB.delete(uniqueFileIds);
+      Bus.instance.fire(TrashUpdatedEvent());
       // no need to await on syncing trash from remote
       unawaited(syncTrash());
     } catch (e, s) {
@@ -170,6 +181,7 @@ class TrashSyncService {
         data: params,
       );
       await _trashDB.clearTable();
+      Bus.instance.fire(TrashUpdatedEvent());
       Bus.instance.fire(ForceReloadTrashPageEvent());
     } catch (e, s) {
       _logger.severe("failed to empty trash", e, s);
