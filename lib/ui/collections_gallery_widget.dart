@@ -65,7 +65,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Widget build(BuildContext context) {
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
-    return FutureBuilder<CollectionItems>(
+    return FutureBuilder<List<CollectionWithThumbnail>>(
       future: _getCollections(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -79,12 +79,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
   }
 
-  Future<CollectionItems> _getCollections() async {
-    final filesDB = FilesDB.instance;
+  Future<List<CollectionWithThumbnail>> _getCollections() async {
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
-    final List<DeviceCollection> deviceCollections =
-        await filesDB.getDeviceCollections(includeCoverThumbnail: true);
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles =
         await collectionsService.getLatestCollectionFiles();
@@ -108,10 +105,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         }
       },
     );
-    return CollectionItems(deviceCollections, collectionsWithThumbnail);
+    return collectionsWithThumbnail;
   }
 
-  Widget _getCollectionsGalleryWidget(CollectionItems items) {
+  Widget _getCollectionsGalleryWidget(
+    List<CollectionWithThumbnail> collections,
+  ) {
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
         .subtitle1
@@ -127,12 +126,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             const SizedBox(height: 12),
             const SectionTitle("On device"),
             const SizedBox(height: 12),
-            items.deviceCollections.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.all(22),
-                    child: EmptyState(),
-                  )
-                : DeviceFoldersGridViewWidget(items.deviceCollections),
+            const DeviceFoldersGridViewWidget(),
             const Padding(padding: EdgeInsets.all(4)),
             const Divider(),
             Row(
@@ -145,7 +139,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ),
             const SizedBox(height: 12),
             Configuration.instance.hasConfiguredAccount()
-                ? RemoteCollectionsGridViewWidget(items.collections)
+                ? RemoteCollectionsGridViewWidget(collections)
                 : const EmptyState(),
             const SizedBox(height: 10),
             const Divider(),
