@@ -50,7 +50,6 @@ export default function SubscriptionStatus({
             <Typography
                 variant="body2"
                 color={'text.secondary'}
-                onClick={showPlanSelectorModal}
                 sx={{ cursor: 'pointer' }}>
                 {isSubscriptionActive(userDetails.subscription)
                     ? isOnFreePlan(userDetails.subscription)
@@ -62,7 +61,9 @@ export default function SubscriptionStatus({
                               userDetails.subscription?.expiryTime
                           )
                         : hasExceededStorageQuota(userDetails) &&
-                          constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO
+                          constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO(
+                              showPlanSelectorModal
+                          )
                     : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
                           billingService.redirectToCustomerPortal
                       )}
