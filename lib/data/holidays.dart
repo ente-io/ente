@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:photos/models/search/holiday_search_result.dart';
 
 const List<HolidayData> allHolidays = [
