@@ -13,6 +13,7 @@ import Box from '@mui/material/Box';
 import { UserDetails } from 'types/user';
 import constants from 'utils/strings/constants';
 import { Typography } from '@mui/material';
+import billingService from 'services/billingService';
 
 export default function SubscriptionStatus({
     userDetails,
@@ -63,7 +64,7 @@ export default function SubscriptionStatus({
                         : hasExceededStorageQuota(userDetails) &&
                           constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO
                     : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
-                          showPlanSelectorModal
+                          billingService.redirectToCustomerPortal
                       )}
             </Typography>
         </Box>

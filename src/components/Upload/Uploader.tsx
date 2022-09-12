@@ -48,6 +48,7 @@ import {
     groupFilesBasedOnParentFolder,
 } from 'utils/upload';
 import { getUserOwnedCollections } from 'utils/collection';
+import billingService from 'services/billingService';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -451,7 +452,7 @@ export default function Uploader(props: Props) {
                     message: constants.SUBSCRIPTION_EXPIRED,
                     action: {
                         text: constants.UPGRADE_NOW,
-                        callback: galleryContext.showPlanSelectorModal,
+                        callback: billingService.redirectToCustomerPortal,
                     },
                 };
                 break;
