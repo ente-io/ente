@@ -149,23 +149,29 @@ class LocalSyncService {
     if (hasUpdated) {
       Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
-    // migrate the backed up folder settings. remove after 6 months?
     if (!_prefs.containsKey(hasImportedDeviceCollections)) {
-      final pathsToBackUp = Configuration.instance.getPathsToBackUp();
-      final entriesToBackUp = Map.fromEntries(
-        result
-            .where((element) => pathsToBackUp.contains(element.item1.name))
-            .map((e) => MapEntry(e.item1.id, true)),
-      );
-      if (entriesToBackUp.isNotEmpty) {
-        await _db.updateDevicePathSyncStatus(entriesToBackUp);
-        Bus.instance.fire(BackupFoldersUpdatedEvent());
-      }
-      await Configuration.instance
-          .setHasSelectedAnyBackupFolder(pathsToBackUp.isNotEmpty);
-      await _prefs.setBool(hasImportedDeviceCollections, true);
+      await _migrateOldSettings(result);
     }
     return hasUpdated;
+  }
+
+  // migrate the backed up folder settings. remove after 6 months?
+  Future<void> _migrateOldSettings(
+    List<Tuple2<AssetPathEntity, String>> result,
+  ) async {
+    final pathsToBackUp = Configuration.instance.getPathsToBackUp();
+    final entriesToBackUp = Map.fromEntries(
+      result
+          .where((element) => pathsToBackUp.contains(element.item1.name))
+          .map((e) => MapEntry(e.item1.id, true)),
+    );
+    if (entriesToBackUp.isNotEmpty) {
+      await _db.updateDevicePathSyncStatus(entriesToBackUp);
+      Bus.instance.fire(BackupFoldersUpdatedEvent());
+    }
+    await Configuration.instance
+        .setHasSelectedAnyBackupFolder(pathsToBackUp.isNotEmpty);
+    await _prefs.setBool(hasImportedDeviceCollections, true);
   }
 
   bool isDeviceFileMigrationDone() {
