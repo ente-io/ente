@@ -8,7 +8,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
@@ -38,7 +37,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   final _logger = Logger("CollectionsGallery");
   StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
-  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   AlbumSortKey sortKey;
   String _loadReason = "init";
@@ -57,11 +55,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       _loadReason = (UserLoggedOutEvent).toString();
-      setState(() {});
-    });
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
-      _loadReason = (BackupFoldersUpdatedEvent).toString();
       setState(() {});
     });
     sortKey = LocalSettings.instance.albumSortKey();
@@ -247,7 +240,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
-    _backupFoldersUpdatedEvent.cancel();
     super.dispose();
   }
 
