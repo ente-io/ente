@@ -42,15 +42,21 @@ export default function SubscriptionStatus({
         return true;
     }, [userDetails]);
 
-    const handleClick = useMemo(
-        () =>
-            userDetails && isSubscriptionActive(userDetails.subscription)
-                ? hasExceededStorageQuota(userDetails) && showPlanSelectorModal
-                : hasStripeSubscription(userDetails.subscription)
-                ? billingService.redirectToCustomerPortal
-                : showPlanSelectorModal,
-        [userDetails]
-    );
+    const handleClick = useMemo(() => {
+        if (userDetails) {
+            if (isSubscriptionActive(userDetails.subscription)) {
+                if (hasExceededStorageQuota(userDetails)) {
+                    return showPlanSelectorModal;
+                }
+            } else {
+                if (hasStripeSubscription(userDetails.subscription)) {
+                    return billingService.redirectToCustomerPortal;
+                } else {
+                    return showPlanSelectorModal;
+                }
+            }
+        }
+    }, [userDetails]);
 
     if (!hasAMessage) {
         return <></>;
