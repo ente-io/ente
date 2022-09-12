@@ -1,5 +1,7 @@
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -145,8 +147,9 @@ class TrashSyncService {
         ),
         data: params,
       );
-      _trashDB.delete(uniqueFileIds);
-      syncTrash();
+      await _trashDB.delete(uniqueFileIds);
+      // no need to await on syncing trash from remote
+      unawaited(syncTrash());
     } catch (e, s) {
       _logger.severe("failed to delete from trash", e, s);
       rethrow;
