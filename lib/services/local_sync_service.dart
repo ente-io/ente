@@ -149,13 +149,15 @@ class LocalSyncService {
     if (hasUpdated) {
       Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
-    if (!_prefs.containsKey(hasImportedDeviceCollections)) {
+    // migrate the backed up folder settings after first import is done remove
+    // after 6 months?
+    if (!_prefs.containsKey(hasImportedDeviceCollections) &&
+        _prefs.containsKey(kHasCompletedFirstImportKey)) {
       await _migrateOldSettings(result);
     }
     return hasUpdated;
   }
 
-  // migrate the backed up folder settings. remove after 6 months?
   Future<void> _migrateOldSettings(
     List<Tuple2<AssetPathEntity, String>> result,
   ) async {
