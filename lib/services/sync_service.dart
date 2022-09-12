@@ -179,6 +179,15 @@ class SyncService {
     );
   }
 
+  void onDeviceCollectionSet(Set<int> collectionIDs) {
+    _uploader.removeFromQueueWhere(
+      (file) {
+        return !collectionIDs.contains(file.collectionID);
+      },
+      UserCancelledUploadError(),
+    );
+  }
+
   void onVideoBackupPaused() {
     _uploader.removeFromQueueWhere(
       (file) {

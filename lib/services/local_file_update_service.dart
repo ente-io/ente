@@ -100,7 +100,7 @@ class LocalFileUpdateService {
   ) async {
     _logger.info("files to process ${localIDsToProcess.length} for reupload");
     final List<ente.File> localFiles =
-        (await FilesDB.instance.getLocalFiles(localIDsToProcess));
+        await FilesDB.instance.getLocalFiles(localIDsToProcess);
     final Set<String> processedIDs = {};
     for (ente.File file in localFiles) {
       if (processedIDs.contains(file.localID)) {

@@ -236,6 +236,24 @@ extension DeviceFiles on FilesDB {
     }
   }
 
+  // getDeviceSyncCollectionIDs returns the collectionIDs for the
+  // deviceCollections which are marked for auto-backup
+  Future<Set<int>> getDeviceSyncCollectionIDs() async {
+    final Database db = await database;
+    final rows = await db.rawQuery(
+      '''
+      SELECT collection_id FROM device_collections where should_backup = 
+      $_sqlBoolTrue 
+      and collection_id != -1;
+      ''',
+    );
+    final Set<int> result = <int>{};
+    for (final row in rows) {
+      result.add(row['collection_id']);
+    }
+    return result;
+  }
+
   Future<void> updateDevicePathSyncStatus(Map<String, bool> syncStatus) async {
     final db = await database;
     var batch = db.batch();
@@ -296,7 +314,8 @@ extension DeviceFiles on FilesDB {
         (limit != null ? ' limit $limit;' : ';');
     final results = await db.rawQuery(rawQuery);
     final files = convertToFiles(results);
-    return FileLoadResult(files, files.length == limit);
+    final dedupe = deduplicateByLocalID(files);
+    return FileLoadResult(dedupe, files.length == limit);
   }
 
   Future<List<DeviceCollection>> getDeviceCollections({

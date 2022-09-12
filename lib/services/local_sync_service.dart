@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -12,6 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
@@ -147,7 +149,25 @@ class LocalSyncService {
     if (hasUpdated) {
       Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
+    // migrate the backed up folder settings
+    if (!_prefs.containsKey(hasImportedDeviceCollections)) {
+      final pathsToBackUp = Configuration.instance.getPathsToBackUp();
+      final entriesToBackUp = Map.fromEntries(
+        result
+            .where((element) => pathsToBackUp.contains(element.item1.name))
+            .map((e) => MapEntry(e.item1.id, true)),
+      );
+      if (entriesToBackUp.isNotEmpty) {
+        await _db.updateDevicePathSyncStatus(entriesToBackUp);
+        Bus.instance.fire(BackupFoldersUpdatedEvent());
+      }
+      await _prefs.setBool(hasImportedDeviceCollections, true);
+    }
     return hasUpdated;
+  }
+
+  bool isDeviceFileMigrationDone() {
+    return _prefs.containsKey(hasImportedDeviceCollections);
   }
 
   Future<bool> syncAll() async {
@@ -273,12 +293,15 @@ class LocalSyncService {
   Future<void> resetLocalSync() async {
     assert(kDebugMode, "only available in debug mode");
     await FilesDB.instance.deleteDB();
+    await IgnoredFilesDB.instance.clearTable();
     for (var element in [
       kHasCompletedFirstImportKey,
       hasImportedDeviceCollections,
       kDbUpdationTimeKey,
       kDownloadedFileIDsKey,
-      kEditedFileIDsKey
+      kEditedFileIDsKey,
+      "has_synced_edit_time",
+      "has_selected_all_folders_for_backup",
     ]) {
       await _prefs.remove(element);
     }
