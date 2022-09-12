@@ -128,7 +128,6 @@ extension DeviceFiles on FilesDB {
     return result;
   }
 
-  // todo: covert it to batch
   Future<void> insertLocalAssets(
     List<LocalPathAsset> localPathAssets, {
     bool shouldAutoBackup = false,
@@ -136,17 +135,18 @@ extension DeviceFiles on FilesDB {
     final Database db = await database;
     final Map<String, Set<String>> pathIDToLocalIDsMap = {};
     try {
+      final batch = db.batch();
       final Set<String> existingPathIds = await getDevicePathIDs();
       for (LocalPathAsset localPathAsset in localPathAssets) {
         pathIDToLocalIDsMap[localPathAsset.pathID] = localPathAsset.localIDs;
         if (existingPathIds.contains(localPathAsset.pathID)) {
-          await db.rawUpdate(
+          batch.rawUpdate(
             "UPDATE device_collections SET name = ? where id = "
             "?",
             [localPathAsset.pathName, localPathAsset.pathID],
           );
         } else {
-          await db.insert(
+          batch.insert(
             "device_collections",
             {
               "id": localPathAsset.pathID,
@@ -157,6 +157,7 @@ extension DeviceFiles on FilesDB {
           );
         }
       }
+      await batch.commit(noResult: true);
       // add the mappings for localIDs
       if (pathIDToLocalIDsMap.isNotEmpty) {
         await insertPathIDToLocalIDMapping(pathIDToLocalIDsMap);
