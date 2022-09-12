@@ -8,6 +8,7 @@ import {
     hasExceededStorageQuota,
     isSubscriptionActive,
     isSubscriptionCancelled,
+    hasStripeSubscription,
 } from 'utils/billing';
 import Box from '@mui/material/Box';
 import { UserDetails } from 'types/user';
@@ -45,7 +46,9 @@ export default function SubscriptionStatus({
         () =>
             userDetails && isSubscriptionActive(userDetails.subscription)
                 ? hasExceededStorageQuota(userDetails) && showPlanSelectorModal
-                : billingService.redirectToCustomerPortal,
+                : hasStripeSubscription(userDetails.subscription)
+                ? billingService.redirectToCustomerPortal
+                : showPlanSelectorModal,
         [userDetails]
     );
 
@@ -74,7 +77,9 @@ export default function SubscriptionStatus({
                               showPlanSelectorModal
                           )
                     : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
-                          billingService.redirectToCustomerPortal
+                          hasStripeSubscription(userDetails.subscription)
+                              ? billingService.redirectToCustomerPortal
+                              : showPlanSelectorModal
                       )}
             </Typography>
         </Box>
