@@ -185,6 +185,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                             await RemoteSyncService.instance
                                 .updateDeviceFolderSyncStatus(syncStatus);
                             await Configuration.instance
+                                .setHasSelectedAnyBackupFolder(
+                              _selectedDevicePathIDs.isNotEmpty,
+                            );
+                            await Configuration.instance
                                 .setSelectAllFoldersForBackup(
                               _allDevicePathIDs.length ==
                                   _selectedDevicePathIDs.length,

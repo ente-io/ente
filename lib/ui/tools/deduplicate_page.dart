@@ -12,7 +12,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
-import 'package:photos/ui/viewer/gallery/empte_state.dart';
+import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/navigation_util.dart';

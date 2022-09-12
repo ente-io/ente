@@ -149,21 +149,31 @@ class LocalSyncService {
     if (hasUpdated) {
       Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
-    // migrate the backed up folder settings
-    if (!_prefs.containsKey(hasImportedDeviceCollections)) {
-      final pathsToBackUp = Configuration.instance.getPathsToBackUp();
-      final entriesToBackUp = Map.fromEntries(
-        result
-            .where((element) => pathsToBackUp.contains(element.item1.name))
-            .map((e) => MapEntry(e.item1.id, true)),
-      );
-      if (entriesToBackUp.isNotEmpty) {
-        await _db.updateDevicePathSyncStatus(entriesToBackUp);
-        Bus.instance.fire(BackupFoldersUpdatedEvent());
-      }
-      await _prefs.setBool(hasImportedDeviceCollections, true);
+    // migrate the backed up folder settings after first import is done remove
+    // after 6 months?
+    if (!_prefs.containsKey(hasImportedDeviceCollections) &&
+        _prefs.containsKey(kHasCompletedFirstImportKey)) {
+      await _migrateOldSettings(result);
     }
     return hasUpdated;
+  }
+
+  Future<void> _migrateOldSettings(
+    List<Tuple2<AssetPathEntity, String>> result,
+  ) async {
+    final pathsToBackUp = Configuration.instance.getPathsToBackUp();
+    final entriesToBackUp = Map.fromEntries(
+      result
+          .where((element) => pathsToBackUp.contains(element.item1.name))
+          .map((e) => MapEntry(e.item1.id, true)),
+    );
+    if (entriesToBackUp.isNotEmpty) {
+      await _db.updateDevicePathSyncStatus(entriesToBackUp);
+      Bus.instance.fire(BackupFoldersUpdatedEvent());
+    }
+    await Configuration.instance
+        .setHasSelectedAnyBackupFolder(pathsToBackUp.isNotEmpty);
+    await _prefs.setBool(hasImportedDeviceCollections, true);
   }
 
   bool isDeviceFileMigrationDone() {
@@ -392,7 +402,7 @@ class LocalSyncService {
       if (hasGrantedLimitedPermissions()) {
         syncAll();
       } else {
-        sync();
+        sync().then((value) => _refreshDeviceFolderCountAndCover());
       }
     });
     PhotoManager.startChangeNotify();

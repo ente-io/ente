@@ -6,14 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/device_files_db.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/device_collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
 import 'package:photos/ui/collections/ente_section_title.dart';
@@ -22,7 +18,7 @@ import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
-import 'package:photos/ui/viewer/gallery/empte_state.dart';
+import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
@@ -38,7 +34,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   final _logger = Logger("CollectionsGallery");
   StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
-  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   AlbumSortKey sortKey;
   String _loadReason = "init";
@@ -59,11 +54,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       _loadReason = (UserLoggedOutEvent).toString();
       setState(() {});
     });
-    _backupFoldersUpdatedEvent =
-        Bus.instance.on<BackupFoldersUpdatedEvent>().listen((event) {
-      _loadReason = (BackupFoldersUpdatedEvent).toString();
-      setState(() {});
-    });
     sortKey = LocalSettings.instance.albumSortKey();
     super.initState();
   }
@@ -72,7 +62,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Widget build(BuildContext context) {
     super.build(context);
     _logger.info("Building, trigger: $_loadReason");
-    return FutureBuilder<CollectionItems>(
+    return FutureBuilder<List<CollectionWithThumbnail>>(
       future: _getCollections(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -86,12 +76,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
   }
 
-  Future<CollectionItems> _getCollections() async {
-    final filesDB = FilesDB.instance;
+  Future<List<CollectionWithThumbnail>> _getCollections() async {
     final collectionsService = CollectionsService.instance;
     final userID = Configuration.instance.getUserID();
-    final List<DeviceCollection> deviceCollections =
-        await filesDB.getDeviceCollections(includeCoverThumbnail: true);
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles =
         await collectionsService.getLatestCollectionFiles();
@@ -115,10 +102,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         }
       },
     );
-    return CollectionItems(deviceCollections, collectionsWithThumbnail);
+    return collectionsWithThumbnail;
   }
 
-  Widget _getCollectionsGalleryWidget(CollectionItems items) {
+  Widget _getCollectionsGalleryWidget(
+    List<CollectionWithThumbnail> collections,
+  ) {
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
         .subtitle1
@@ -134,12 +123,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             const SizedBox(height: 12),
             const SectionTitle("On device"),
             const SizedBox(height: 12),
-            items.deviceCollections.isEmpty
-                ? const Padding(
-                    padding: EdgeInsets.all(22),
-                    child: EmptyState(),
-                  )
-                : DeviceFoldersGridViewWidget(items.deviceCollections),
+            const DeviceFoldersGridViewWidget(),
             const Padding(padding: EdgeInsets.all(4)),
             const Divider(),
             Row(
@@ -152,7 +136,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             ),
             const SizedBox(height: 12),
             Configuration.instance.hasConfiguredAccount()
-                ? RemoteCollectionsGridViewWidget(items.collections)
+                ? RemoteCollectionsGridViewWidget(collections)
                 : const EmptyState(),
             const SizedBox(height: 10),
             const Divider(),
@@ -247,7 +231,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     _localFilesSubscription.cancel();
     _collectionUpdatesSubscription.cancel();
     _loggedOutEvent.cancel();
-    _backupFoldersUpdatedEvent.cancel();
     super.dispose();
   }
 

@@ -350,7 +350,7 @@ class RemoteSyncService {
         if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
           entriesToDelete.add(pendingUpload.generatedID);
         } else {
-          pendingUpload.collectionID = -1;
+          pendingUpload.collectionID = null;
           entriesToUpdate.add(pendingUpload);
         }
       }
@@ -646,6 +646,7 @@ class RemoteSyncService {
           " remoteFiles seen first time",
     );
     if (needsGalleryReload) {
+      _logger.fine('force reload home gallery');
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
     }
   }

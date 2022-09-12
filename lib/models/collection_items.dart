@@ -1,15 +1,7 @@
 // @dart=2.9
 
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
-
-class CollectionItems {
-  final List<DeviceCollection> deviceCollections;
-  final List<CollectionWithThumbnail> collections;
-
-  CollectionItems(this.deviceCollections, this.collections);
-}
 
 class CollectionWithThumbnail {
   final Collection collection;
