@@ -34,7 +34,7 @@ Future<void> deleteFilesFromEverywhere(
 ) async {
   final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
-  _logger.info("Trying to delete files " + files.toString());
+  _logger.info("Trying to deleteFilesFromEverywhere " + files.toString());
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
@@ -151,7 +151,8 @@ Future<void> deleteFilesFromRemoteOnly(
   final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
   _logger.info(
-    "Trying to delete files " + files.map((f) => f.uploadedFileID).toString(),
+    "Trying to deleteFilesFromRemoteOnly " +
+        files.map((f) => f.uploadedFileID).toString(),
   );
   final updatedCollectionIDs = <int>{};
   final List<int> uploadedFileIDs = [];
@@ -192,7 +193,7 @@ Future<void> deleteFilesOnDeviceOnly(
 ) async {
   final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
-  _logger.info("Trying to delete files " + files.toString());
+  _logger.info("Trying to deleteFilesOnDeviceOnly" + files.toString());
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
