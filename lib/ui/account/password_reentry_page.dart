@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/key_attributes.dart';
@@ -77,6 +78,31 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
               _passwordController.text,
               Configuration.instance.getKeyAttributes(),
             );
+          } on KeyDerivationError catch (e, s) {
+            _logger.severe("Password verification failed", e, s);
+            await dialog.hide();
+            final dialogUserChoice = await showChoiceDialog(
+              context,
+              "Recreate password",
+              "The current device is not powerful enough to verify your "
+                  "password, so we need to regenerate it once in a way that "
+                  "works with all devices. \n\nPlease login using your "
+                  "recovery key and regenerate your password (you can use the same one again if you wish).",
+              firstAction: "Cancel",
+              firstActionColor: Theme.of(context).colorScheme.primary,
+              secondAction: "Use recovery key",
+              secondActionColor: Theme.of(context).colorScheme.primary,
+            );
+            if (dialogUserChoice == DialogUserChoice.secondChoice) {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const RecoveryPage();
+                  },
+                ),
+              );
+            }
+            return;
           } catch (e, s) {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();

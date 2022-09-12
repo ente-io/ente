@@ -11,6 +11,7 @@ import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -257,7 +258,10 @@ class Configuration {
       Sodium.base642bin(attributes.kekSalt),
       attributes.memLimit,
       attributes.opsLimit,
-    );
+    ).onError((e, s) {
+      _logger.severe('deriveKey failed', e, s);
+      throw KeyDerivationError();
+    });
 
     _logger.info('user-key done');
     Uint8List key;
