@@ -625,8 +625,9 @@ class FilesDB {
     return _deduplicatedAndFilterIgnoredFiles(files, ignoredCollectionIDs);
   }
 
-  // Files which user added to a collection manually but they are not uploaded yet.
-  Future<List<File>> getPendingManualUploads() async {
+  // Files which user added to a collection manually but they are not
+  // uploaded yet or files belonging to a collection which is marked for backup
+  Future<List<File>> getFilesPendingForUpload() async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,

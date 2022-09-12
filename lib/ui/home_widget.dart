@@ -393,10 +393,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
+        final hasSelectedAllForBackup =
+            Configuration.instance.hasSelectedAllFoldersForBackup();
         final archivedCollectionIds =
             CollectionsService.instance.getArchivedCollections();
         FileLoadResult result;
-        if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
+        if (hasSelectedAllForBackup) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
             creationEndTime,

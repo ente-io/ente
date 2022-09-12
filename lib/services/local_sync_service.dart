@@ -281,6 +281,11 @@ class LocalSyncService {
   Future<void> onPermissionGranted(PermissionState state) async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
     await _prefs.setString(kPermissionStateKey, state.toString());
+    if (state == PermissionState.limited) {
+      // when limited permission is granted, by default mark all folders for
+      // backup
+      await Configuration.instance.setSelectAllFoldersForBackup(true);
+    }
     _registerChangeCallback();
   }
 
