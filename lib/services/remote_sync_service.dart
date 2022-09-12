@@ -350,7 +350,7 @@ class RemoteSyncService {
         if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
           entriesToDelete.add(pendingUpload.generatedID);
         } else {
-          pendingUpload.collectionID = -1;
+          pendingUpload.collectionID = null;
           entriesToUpdate.add(pendingUpload);
         }
       }
