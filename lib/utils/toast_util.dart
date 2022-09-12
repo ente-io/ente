@@ -11,6 +11,7 @@ Future<void> showToast(
   BuildContext context,
   String message, {
   toastLength = Toast.LENGTH_LONG,
+  iOSDismissOnTap = true,
 }) async {
   if (Platform.isAndroid) {
     await Fluttertoast.cancel();
@@ -34,6 +35,7 @@ Future<void> showToast(
       message,
       duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 5 : 2)),
       toastPosition: EasyLoadingToastPosition.bottom,
+      dismissOnTap: iOSDismissOnTap,
     );
   }
 }
