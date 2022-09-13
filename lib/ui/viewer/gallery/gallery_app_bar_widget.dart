@@ -236,7 +236,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       context,
       "Delete album?",
       "Files that are unique to this album "
-          "will be moved to trash, and this album would be deleted.",
+          "will be moved to trash, and this album will be deleted.",
       firstAction: "Cancel",
       secondAction: "Delete album",
       secondActionColor: Colors.red,
