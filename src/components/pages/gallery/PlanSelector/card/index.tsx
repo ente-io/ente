@@ -9,7 +9,6 @@ import {
     isOnFreePlan,
     planForSubscription,
     hasMobileSubscription,
-    hasPaypalSubscription,
     getLocalUserSubscription,
     hasPaidSubscription,
     getTotalFamilyUsage,
@@ -114,13 +113,15 @@ function PlanSelectorCard(props: Props) {
                 close: { variant: 'danger' },
             });
         } else if (
-            hasPaypalSubscription(subscription) &&
+            hasPaidSubscription(subscription) &&
             !isSubscriptionCancelled(subscription)
         ) {
             appContext.setDialogMessage({
                 title: constants.MANAGE_PLAN,
-                content: constants.PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE(),
-                close: { variant: 'danger' },
+                content: constants.MANAGE_NOT_SUPPORTED_MESSAGE(
+                    subscription.paymentProvider
+                ),
+                close: { variant: 'secondary' },
             });
         } else if (hasStripeSubscription(subscription)) {
             appContext.setDialogMessage({
