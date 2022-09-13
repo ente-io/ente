@@ -104,25 +104,20 @@ function PlanSelectorCard(props: Props) {
 
     async function onPlanSelect(plan: Plan) {
         if (
-            hasMobileSubscription(subscription) &&
-            !isSubscriptionCancelled(subscription)
+            !hasPaidSubscription(subscription) ||
+            isSubscriptionCancelled(subscription)
         ) {
-            appContext.setDialogMessage({
-                title: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
-                content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE,
-                close: { variant: 'secondary' },
-            });
-        } else if (
-            hasPaidSubscription(subscription) &&
-            !isSubscriptionCancelled(subscription)
-        ) {
-            appContext.setDialogMessage({
-                title: constants.MANAGE_PLAN,
-                content: constants.MANAGE_NOT_SUPPORTED_MESSAGE(
-                    subscription.paymentProvider
-                ),
-                close: { variant: 'secondary' },
-            });
+            try {
+                props.setLoading(true);
+                await billingService.buySubscription(plan.stripeID);
+            } catch (e) {
+                props.setLoading(false);
+                appContext.setDialogMessage({
+                    title: constants.ERROR,
+                    content: constants.SUBSCRIPTION_PURCHASE_FAILED,
+                    close: { variant: 'danger' },
+                });
+            }
         } else if (hasStripeSubscription(subscription)) {
             appContext.setDialogMessage({
                 title: `${constants.CONFIRM} ${reverseString(
@@ -142,18 +137,20 @@ function PlanSelectorCard(props: Props) {
                 },
                 close: { text: constants.CANCEL },
             });
+        } else if (hasMobileSubscription(subscription)) {
+            appContext.setDialogMessage({
+                title: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
+                content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE,
+                close: { variant: 'secondary' },
+            });
         } else {
-            try {
-                props.setLoading(true);
-                await billingService.buySubscription(plan.stripeID);
-            } catch (e) {
-                props.setLoading(false);
-                appContext.setDialogMessage({
-                    title: constants.ERROR,
-                    content: constants.SUBSCRIPTION_PURCHASE_FAILED,
-                    close: { variant: 'danger' },
-                });
-            }
+            appContext.setDialogMessage({
+                title: constants.MANAGE_PLAN,
+                content: constants.MANAGE_NOT_SUPPORTED_MESSAGE(
+                    subscription.paymentProvider
+                ),
+                close: { variant: 'secondary' },
+            });
         }
     }
 
