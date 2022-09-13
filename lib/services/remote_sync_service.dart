@@ -13,6 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
@@ -36,9 +37,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RemoteSyncService {
   final _logger = Logger("RemoteSyncService");
   final _db = FilesDB.instance;
-  final _uploader = FileUploader.instance;
-  final _collectionsService = CollectionsService.instance;
-  final _diffFetcher = DiffFetcher();
+  final FileUploader _uploader = FileUploader.instance;
+  final Configuration _config = Configuration.instance;
+  final CollectionsService _collectionsService = CollectionsService.instance;
+  final DiffFetcher _diffFetcher = DiffFetcher();
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
@@ -75,7 +77,7 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
-    if (!Configuration.instance.hasConfiguredAccount()) {
+    if (!_config.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
     }
@@ -186,9 +188,8 @@ class RemoteSyncService {
         await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
       final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID).toList();
-      final deletedFiles =
-          (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
-      await FilesDB.instance.deleteFilesFromCollection(collectionID, fileIDs);
+      final deletedFiles = (await _db.getFilesFromIDs(fileIDs)).values.toList();
+      await _db.deleteFilesFromCollection(collectionID, fileIDs);
       Bus.instance.fire(
         CollectionUpdatedEvent(
           collectionID,
@@ -231,9 +232,8 @@ class RemoteSyncService {
   }
 
   Future<void> _syncDeviceCollectionFilesForUpload() async {
-    final int ownerID = Configuration.instance.getUserID();
-    final FilesDB filesDB = FilesDB.instance;
-    final deviceCollections = await filesDB.getDeviceCollections();
+    final int ownerID = _config.getUserID();
+    final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
     // Sort by count to ensure that photos in iOS are first inserted in
     // smallest album marked for backup. This is to ensure that photo is
@@ -241,14 +241,14 @@ class RemoteSyncService {
     deviceCollections.sort((a, b) => a.count.compareTo(b.count));
     await _createCollectionsForDevicePath(deviceCollections);
     final Map<String, Set<String>> pathIdToLocalIDs =
-        await filesDB.getDevicePathIDToLocalIDMap();
+        await _db.getDevicePathIDToLocalIDMap();
     for (final deviceCollection in deviceCollections) {
       _logger.fine("processing ${deviceCollection.name}");
       final Set<String> localIDsToSync =
           pathIdToLocalIDs[deviceCollection.id] ?? {};
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
         final Set<String> alreadyClaimedLocalIDs =
-            await filesDB.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
+            await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
       }
 
@@ -256,7 +256,7 @@ class RemoteSyncService {
         continue;
       }
 
-      await filesDB.setCollectionIDForUnMappedLocalFiles(
+      await _db.setCollectionIDForUnMappedLocalFiles(
         deviceCollection.collectionID,
         localIDsToSync,
       );
@@ -264,8 +264,8 @@ class RemoteSyncService {
       // mark IDs as already synced if corresponding entry is present in
       // the collection. This can happen when a user has marked a folder
       // for sync, then un-synced it and again tries to mark if for sync.
-      final Set<String> existingMapping = await filesDB
-          .getLocalFileIDsForCollection(deviceCollection.collectionID);
+      final Set<String> existingMapping =
+          await _db.getLocalFileIDsForCollection(deviceCollection.collectionID);
       final Set<String> commonElements =
           localIDsToSync.intersection(existingMapping);
       if (commonElements.isNotEmpty) {
@@ -285,7 +285,7 @@ class RemoteSyncService {
           ' for ${deviceCollection.name}',
         );
         final filesWithCollectionID =
-            await filesDB.getLocalFiles(localIDsToSync.toList());
+            await _db.getLocalFiles(localIDsToSync.toList());
         final List<File> newFilesToInsert = [];
         final Set<String> fileFoundForLocalIDs = {};
         for (var existingFile in filesWithCollectionID) {
@@ -299,7 +299,7 @@ class RemoteSyncService {
             fileFoundForLocalIDs.add(localID);
           }
         }
-        await filesDB.insertMultiple(newFilesToInsert);
+        await _db.insertMultiple(newFilesToInsert);
         if (fileFoundForLocalIDs.length != localIDsToSync.length) {
           _logger.warning(
             "mismatch in num of filesToSync ${localIDsToSync.length} to "
@@ -323,6 +323,7 @@ class RemoteSyncService {
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
     Bus.instance.fire(LocalPhotosUpdatedEvent(<File>[]));
+    Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
@@ -366,7 +367,7 @@ class RemoteSyncService {
       int deviceCollectionID = deviceCollection.collectionID;
       if (deviceCollectionID != -1) {
         final collectionByID =
-            CollectionsService.instance.getCollectionByID(deviceCollectionID);
+            _collectionsService.getCollectionByID(deviceCollectionID);
         if (collectionByID == null || collectionByID.isDeleted) {
           _logger.info(
             "Collection $deviceCollectionID either deleted or missing "
@@ -376,20 +377,19 @@ class RemoteSyncService {
         }
       }
       if (deviceCollectionID == -1) {
-        final collection = await CollectionsService.instance
-            .getOrCreateForPath(deviceCollection.name);
-        await FilesDB.instance
-            .updateDeviceCollection(deviceCollection.id, collection.id);
+        final collection =
+            await _collectionsService.getOrCreateForPath(deviceCollection.name);
+        await _db.updateDeviceCollection(deviceCollection.id, collection.id);
         deviceCollection.collectionID = collection.id;
       }
     }
   }
 
   Future<List<File>> _getFilesToBeUploaded() async {
-    final deviceCollections = await FilesDB.instance.getDeviceCollections();
+    final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
     final List<File> filesToBeUploaded = await _db.getFilesPendingForUpload();
-    if (!Configuration.instance.shouldBackupVideos() || _shouldThrottleSync()) {
+    if (!_config.shouldBackupVideos() || _shouldThrottleSync()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
@@ -415,7 +415,7 @@ class RemoteSyncService {
   }
 
   Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
-    final int ownerID = Configuration.instance.getUserID();
+    final int ownerID = _config.getUserID();
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
     if (updatedFileIDs.isNotEmpty) {
       _logger.info("Identified ${updatedFileIDs.length} files for reupload");
@@ -451,9 +451,7 @@ class RemoteSyncService {
       // prefer existing collection ID for manually uploaded files.
       // See https://github.com/ente-io/frame/pull/187
       final collectionID = file.collectionID ??
-          (await CollectionsService.instance
-                  .getOrCreateForPath(file.deviceFolder))
-              .id;
+          (await _collectionsService.getOrCreateForPath(file.deviceFolder)).id;
       _uploadFile(file, collectionID, futures);
     }
 
@@ -487,8 +485,7 @@ class RemoteSyncService {
   Future<void> _onFileUploaded(File file) async {
     Bus.instance.fire(CollectionUpdatedEvent(file.collectionID, [file]));
     _completedUploads++;
-    final toBeUploadedInThisSession =
-        FileUploader.instance.getCurrentSessionUploadCount();
+    final toBeUploadedInThisSession = _uploader.getCurrentSessionUploadCount();
     if (toBeUploadedInThisSession == 0) {
       return;
     }
@@ -535,7 +532,7 @@ class RemoteSyncService {
         localUploadedFromDevice = 0,
         localButUpdatedOnDevice = 0,
         remoteNewFile = 0;
-    final int userID = Configuration.instance.getUserID();
+    final int userID = _config.getUserID();
     bool needsGalleryReload = false;
     // this is required when same file is uploaded twice in the same
     // collection. Without this check, if both remote files are part of same

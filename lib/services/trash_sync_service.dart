@@ -1,5 +1,7 @@
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -167,6 +169,7 @@ class TrashSyncService {
         data: params,
       );
       await _trashDB.clearTable();
+      unawaited(syncTrash());
       Bus.instance.fire(ForceReloadTrashPageEvent());
     } catch (e, s) {
       _logger.severe("failed to empty trash", e, s);

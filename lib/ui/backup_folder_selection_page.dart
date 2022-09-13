@@ -9,11 +9,9 @@ import 'package:implicitly_animated_reorderable_list/implicitly_animated_reorder
 import 'package:implicitly_animated_reorderable_list/transitions.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -193,7 +191,6 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                               _allDevicePathIDs.length ==
                                   _selectedDevicePathIDs.length,
                             );
-                            Bus.instance.fire(BackupFoldersUpdatedEvent());
                             Navigator.of(context).pop();
                           },
                     child: Text(widget.buttonText),

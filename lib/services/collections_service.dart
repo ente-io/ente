@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -13,6 +14,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -25,6 +27,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/file_magic_service.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -239,6 +242,40 @@ class CollectionsService {
       rethrow;
     }
     RemoteSyncService.instance.sync(silently: true);
+  }
+
+  Future<void> trashCollection(Collection collection) async {
+    try {
+      final deviceCollections = await _filesDB.getDeviceCollections();
+      final Map<String, bool> deivcePathIDsToUnsync = Map.fromEntries(
+        deviceCollections
+            .where((e) => e.shouldBackup && e.collectionID == collection.id)
+            .map((e) => MapEntry(e.id, false)),
+      );
+
+      if (deivcePathIDsToUnsync.isNotEmpty) {
+        _logger.info(
+          'turning off backup status for folders $deivcePathIDsToUnsync',
+        );
+        await RemoteSyncService.instance
+            .updateDeviceFolderSyncStatus(deivcePathIDsToUnsync);
+      }
+      await _dio.delete(
+        Configuration.instance.getHttpEndpoint() +
+            "/collections/v2/${collection.id}",
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
+      );
+      await _filesDB.deleteCollection(collection.id);
+      final deletedCollection = collection.copyWith(isDeleted: true);
+      _collectionIDToCollections[collection.id] = deletedCollection;
+      _db.insert([deletedCollection]);
+      unawaited(LocalSyncService.instance.syncAll());
+    } catch (e) {
+      _logger.severe('failed to trash collection', e);
+      rethrow;
+    }
   }
 
   Uint8List getCollectionKey(int collectionID) {

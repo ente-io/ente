@@ -6,7 +6,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_collection.dart';
@@ -120,7 +119,6 @@ class _BackupConfigurationHeaderWidgetState
               );
               _isBackedUp = value;
               setState(() {});
-              Bus.instance.fire(BackupFoldersUpdatedEvent());
             },
           ),
         ],
