@@ -1,17 +1,45 @@
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
+import 'package:photos/events/trash_updated_event.dart';
 import 'package:photos/ui/viewer/gallery/trash_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class TrashButtonWidget extends StatelessWidget {
+class TrashButtonWidget extends StatefulWidget {
   const TrashButtonWidget(
     this.textStyle, {
     Key key,
   }) : super(key: key);
 
   final TextStyle textStyle;
+
+  @override
+  State<TrashButtonWidget> createState() => _TrashButtonWidgetState();
+}
+
+class _TrashButtonWidgetState extends State<TrashButtonWidget> {
+  StreamSubscription<TrashUpdatedEvent> _trashUpdatedEventSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _trashUpdatedEventSubscription =
+        Bus.instance.on<TrashUpdatedEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _trashUpdatedEventSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +76,7 @@ class TrashButtonWidget extends StatelessWidget {
                       if (snapshot.hasData && snapshot.data > 0) {
                         return RichText(
                           text: TextSpan(
-                            style: textStyle,
+                            style: widget.textStyle,
                             children: [
                               TextSpan(
                                 text: "Trash",
@@ -65,7 +93,7 @@ class TrashButtonWidget extends StatelessWidget {
                       } else {
                         return RichText(
                           text: TextSpan(
-                            style: textStyle,
+                            style: widget.textStyle,
                             children: [
                               TextSpan(
                                 text: "Trash",

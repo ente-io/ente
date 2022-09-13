@@ -40,3 +40,5 @@ class UnauthorizedEditError extends AssertionError {}
 class InvalidStateError extends AssertionError {
   InvalidStateError(String message) : super(message);
 }
+
+class KeyDerivationError extends Error {}
