@@ -338,7 +338,8 @@ const englishConstants = {
     SUBSCRIPTION_ACTIVATE_FAILED: 'Failed to reactivate subscription renewals',
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'Thank you',
-    CANCEL_SUBSCRIPTION_ON_MOBILE:
+    CANCEL_SUBSCRIPTION_ON_MOBILE: 'Cancel mobile subscription',
+    CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE:
         'Please cancel your subscription from the mobile app to activate a subscription here',
     MANAGE_NOT_SUPPORTED_MESSAGE: (provider) => (
         <>

@@ -108,9 +108,9 @@ function PlanSelectorCard(props: Props) {
             !isSubscriptionCancelled(subscription)
         ) {
             appContext.setDialogMessage({
-                title: constants.ERROR,
-                content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
-                close: { variant: 'danger' },
+                title: constants.CANCEL_SUBSCRIPTION_ON_MOBILE,
+                content: constants.CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE,
+                close: { variant: 'secondary' },
             });
         } else if (
             hasPaidSubscription(subscription) &&
