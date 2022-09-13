@@ -338,16 +338,16 @@ const englishConstants = {
     SUBSCRIPTION_ACTIVATE_FAILED: 'Failed to reactivate subscription renewals',
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'Thank you',
-    CANCEL_SUBSCRIPTION_ON_MOBILE:
+    CANCEL_SUBSCRIPTION_ON_MOBILE: 'Cancel mobile subscription',
+    CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE:
         'Please cancel your subscription from the mobile app to activate a subscription here',
-    PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE: () => (
+    MAIL_TO_MANAGE_SUBSCRIPTION: (
         <>
             Please contact us at{' '}
-            <a href="mailto:paypal@ente.io">paypal@ente.io</a> to manage your
-            subscription
+            <Link href={`mailto:support@ente.io`}>support@ente.io</Link> to
+            manage your subscription
         </>
     ),
-    PAYPAL_MANAGE_NOT_SUPPORTED: 'Manage paypal plan',
     RENAME: 'Rename',
     RENAME_COLLECTION: 'Rename album',
     DELETE_COLLECTION_TITLE: 'Delete album?',
