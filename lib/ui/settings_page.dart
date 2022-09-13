@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
@@ -104,7 +105,8 @@ class SettingsPage extends StatelessWidget {
       ]);
     }
 
-    if (kDebugMode && hasLoggedIn) {
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
+        hasLoggedIn) {
       contents.addAll([sectionDivider, const DebugSectionWidget()]);
     }
     contents.add(const AppVersionWidget());
