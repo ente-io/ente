@@ -13,6 +13,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
@@ -322,6 +323,7 @@ class RemoteSyncService {
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
     Bus.instance.fire(LocalPhotosUpdatedEvent(<File>[]));
+    Bus.instance.fire(BackupFoldersUpdatedEvent());
   }
 
   Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {

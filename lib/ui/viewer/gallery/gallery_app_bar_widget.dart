@@ -21,6 +21,7 @@ import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/sharing/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class GalleryAppBarWidget extends StatefulWidget {
   final GalleryType type;
@@ -193,13 +194,26 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ),
               ),
             );
+            items.add(
+              PopupMenuItem(
+                value: 3,
+                child: Row(
+                  children: const [
+                    Icon(Icons.delete_sweep_outlined),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Text("Delete Album"),
+                  ],
+                ),
+              ),
+            );
             return items;
           },
           onSelected: (value) async {
             if (value == 1) {
               await _renameAlbum(context);
-            }
-            if (value == 2) {
+            } else if (value == 2) {
               await changeCollectionVisibility(
                 context,
                 widget.collection,
@@ -207,12 +221,46 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     ? kVisibilityVisible
                     : kVisibilityArchive,
               );
+            } else if (value == 3) {
+              await _trashCollection();
             }
           },
         ),
       );
     }
     return actions;
+  }
+
+  Future<void> _trashCollection() async {
+    final result = await showChoiceDialog(
+      context,
+      "Delete album?",
+      "Files that are unique to this album "
+          "will be moved to trash, and this album would be deleted.",
+      firstAction: "Cancel",
+      secondAction: "Delete album",
+      secondActionColor: Colors.red,
+    );
+    if (result != DialogUserChoice.secondChoice) {
+      return;
+    }
+    final dialog = createProgressDialog(
+      context,
+      "Please wait, deleting album",
+    );
+    await dialog.show();
+    try {
+      await CollectionsService.instance.trashCollection(widget.collection);
+
+      showShortToast(context, "Successfully deleted album");
+      await dialog.hide();
+      Navigator.of(context).pop();
+    } catch (e, s) {
+      _logger.severe("failed to trash collection", e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+      rethrow;
+    }
   }
 
   Future<void> _showShareCollectionDialog() async {
