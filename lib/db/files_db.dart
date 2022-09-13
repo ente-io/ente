@@ -1164,7 +1164,9 @@ class FilesDB {
         (
           SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
           FROM $filesTable
-          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1 AND $columnMMdVisibility = $kVisibilityVisible)
+          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS 
+          NOT -1 AND $columnMMdVisibility = $kVisibilityVisible AND 
+          $columnUploadedFileID IS NOT -1)
           GROUP BY $columnCollectionID
         ) latest_files
         ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
