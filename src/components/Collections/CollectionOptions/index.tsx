@@ -119,9 +119,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         };
     };
 
-    const renameCollection = (newName: string) => {
+    const renameCollection = async (newName: string) => {
         if (activeCollection.name !== newName) {
-            CollectionAPI.renameCollection(activeCollection, newName);
+            await CollectionAPI.renameCollection(activeCollection, newName);
         }
     };
 
