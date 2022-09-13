@@ -29,13 +29,13 @@ export async function updateCreationTimeWithExif(
         setProgressTracker({ current: 0, total: filesToBeUpdated.length });
         for (const [index, file] of filesToBeUpdated.entries()) {
             try {
-                if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
-                    continue;
-                }
                 let correctCreationTime: number;
                 if (fixOption === FIX_OPTIONS.CUSTOM_TIME) {
                     correctCreationTime = getUnixTimeInMicroSeconds(customTime);
                 } else {
+                    if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
+                        continue;
+                    }
                     const fileURL = await downloadManager.getFile(file)[0];
                     const fileObject = await getFileFromURL(fileURL);
                     const fileTypeInfo = await getFileType(fileObject);
