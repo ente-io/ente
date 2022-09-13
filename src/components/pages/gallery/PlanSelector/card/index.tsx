@@ -146,9 +146,7 @@ function PlanSelectorCard(props: Props) {
         } else {
             appContext.setDialogMessage({
                 title: constants.MANAGE_PLAN,
-                content: constants.MANAGE_NOT_SUPPORTED_MESSAGE(
-                    subscription.paymentProvider
-                ),
+                content: constants.MAIL_TO_MANAGE_SUBSCRIPTION,
                 close: { variant: 'secondary' },
             });
         }

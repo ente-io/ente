@@ -341,11 +341,11 @@ const englishConstants = {
     CANCEL_SUBSCRIPTION_ON_MOBILE: 'Cancel mobile subscription',
     CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE:
         'Please cancel your subscription from the mobile app to activate a subscription here',
-    MANAGE_NOT_SUPPORTED_MESSAGE: (provider) => (
+    MAIL_TO_MANAGE_SUBSCRIPTION: (
         <>
             Please contact us at{' '}
-            <Link href={`mailto:${provider}@ente.io`}>{provider}@ente.io</Link>{' '}
-            to manage your subscription
+            <Link href={`mailto:support@ente.io`}>support@ente.io</Link> to
+            manage your subscription
         </>
     ),
     RENAME: 'Rename',
