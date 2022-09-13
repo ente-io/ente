@@ -6,7 +6,8 @@ We have open-source apps across [Android](https://github.com/ente-io/frame), [iO
 
 This repository contains the code for our web app, built with a lot of ❤️, and a little bit of JavaScript.
 <br/><br/><br/>
-![App Screenshots](https://user-images.githubusercontent.com/1161789/154797467-a2c14f13-6b04-4282-ab61-f6a9f60c2026.png)
+
+![App Screenshots](https://user-images.githubusercontent.com/24503581/189914045-9d4e9c44-37c6-4ac6-9e17-d8c37aee1e08.png)
 
 ## ✨ Features
 
@@ -19,9 +20,13 @@ This repository contains the code for our web app, built with a lot of ❤️, a
 - EXIF viewer
 - Zero third-party tracking / analytics
 
+<br/>
+
 ## 💻 Deployed Application
 
 The deployed application is accessible @ [web.ente.io](https://web.ente.io).
+
+<br/>
 
 ## 🧑‍💻 Building from source
 
@@ -32,13 +37,19 @@ The deployed application is accessible @ [web.ente.io](https://web.ente.io).
 
 Open [http://localhost:3000](http://localhost:3000) on your browser to see the live application.
 
+<br/>
+
 ## 🙋 Help
 
 We provide human support to our customers. Please write to [support@ente.io](mailto:support@ente.io) sharing as many details as possible about whatever it is that you need help with, and we will get back to you as soon as possible.
 
+<br/>
+
 ## 🧭 Roadmap
 
 We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io](https://roadmap.ente.io).
+
+<br/>
 
 ## 🤗 Support
 
@@ -46,11 +57,15 @@ If you like this project, please consider upgrading to a paid subscription.
 
 If you would like to motivate us to keep building, you can do so by [starring](https://github.com/ente-io/bada-frame/stargazers) this project.
 
+<br/>
+
 ## ❤️ Join the Community
 
 Follow us on [Twitter](https://twitter.com/enteio) and join [r/enteio](https://reddit.com/r/enteio) to get regular updates, connect with other customers, and discuss your ideas.
 
 An important part of our journey is to build better software by consistently listening to community feedback. Please feel free to [share your thoughts](mailto:feedback@ente.io) with us at any time.
+
+<br/>
 
 ---
 
