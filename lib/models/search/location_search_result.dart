@@ -6,4 +6,24 @@ class LocationSearchResult extends SearchResult {
   final List<File> files;
 
   LocationSearchResult(this.location, this.files);
+
+  @override
+  String name() {
+    return location;
+  }
+
+  @override
+  ResultType type() {
+    return ResultType.location;
+  }
+
+  @override
+  File previewThumbnail() {
+    return files.first;
+  }
+
+  @override
+  List<File> resultFiles() {
+   return files;
+  }
 }

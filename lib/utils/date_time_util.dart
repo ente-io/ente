@@ -45,7 +45,7 @@ final currentYear = int.parse(DateTime.now().year.toString());
 
 //Jun 2022
 String getMonthAndYear(DateTime dateTime) {
-  return _months[dateTime.month] + " " + dateTime.year.toString();
+  return _months[dateTime.month]! + " " + dateTime.year.toString();
 }
 
 //Thu, 30 Jun

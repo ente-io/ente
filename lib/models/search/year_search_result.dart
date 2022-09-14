@@ -6,4 +6,24 @@ class YearSearchResult extends SearchResult {
   final List<File> files;
 
   YearSearchResult(this.year, this.files);
+
+  @override
+  String name() {
+    return year;
+  }
+
+  @override
+  ResultType type() {
+    return ResultType.year;
+  }
+
+  @override
+  File previewThumbnail() {
+    return files.first;
+  }
+
+  @override
+  List<File> resultFiles() {
+    return files;
+  }
 }
