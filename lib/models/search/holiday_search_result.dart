@@ -19,7 +19,7 @@ class HolidaySearchResult extends SearchResult {
 
   @override
   File previewThumbnail() {
-    return files[0];
+    return files.first;
   }
 
   @override
