@@ -38,7 +38,7 @@ class MonthSearchResultWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Date',
+                    'Month',
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.subTextColor,
