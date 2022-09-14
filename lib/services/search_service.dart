@@ -40,27 +40,28 @@ class SearchService {
       /* In case home screen loads before 5 seconds and user starts search,
        future will not be null.So here getAllFiles won't run again in that case. */
       if (_cachedFilesFuture == null) {
-        getAllFiles();
+        _getAllFiles();
       }
     });
 
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       _cachedFilesFuture = null;
-      getAllFiles();
+      _getAllFiles();
     });
   }
 
-  Future<List<File>> getAllFiles() async {
+  Future<List<File>> _getAllFiles() async {
     if (_cachedFilesFuture != null) {
       return _cachedFilesFuture;
     }
+    _logger.fine("Reading all files from db");
     _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB();
     return _cachedFilesFuture;
   }
 
   Future<List<File>> getFileSearchResults(String query) async {
     final List<File> fileSearchResults = [];
-    final List<File> files = await getAllFiles();
+    final List<File> files = await _getAllFiles();
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
     for (var file in files) {
       if (fileSearchResults.length >= _maximumResultsLimit) {
@@ -82,7 +83,7 @@ class SearchService {
   ) async {
     final List<LocationSearchResult> locationSearchResults = [];
     try {
-      final List<File> allFiles = await SearchService.instance.getAllFiles();
+      final List<File> allFiles = await _getAllFiles();
 
       final response = await _dio.get(
         _config.getHttpEndpoint() + "/search/location",
