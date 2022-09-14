@@ -9,7 +9,7 @@ import 'package:photos/models/search/file_search_result.dart';
 import 'package:photos/models/search/holiday_search_result.dart';
 import 'package:photos/models/search/location_search_result.dart';
 import 'package:photos/models/search/month_search_result.dart';
-import 'package:photos/models/search/search_results.dart';
+import 'package:photos/models/search/search_result.dart';
 import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/ui/viewer/search/result/file_result_widget.dart';

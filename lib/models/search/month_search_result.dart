@@ -1,5 +1,5 @@
 import 'package:photos/models/file.dart';
-import 'package:photos/models/search/search_results.dart';
+import 'package:photos/models/search/search_result.dart';
 
 class MonthSearchResult extends SearchResult {
   final String month;
@@ -24,7 +24,7 @@ class MonthSearchResult extends SearchResult {
 
   @override
   List<File> resultFiles() {
-   return files;
+    return files;
   }
 }
 

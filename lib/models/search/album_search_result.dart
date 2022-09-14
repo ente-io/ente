@@ -1,6 +1,6 @@
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/search/search_results.dart';
+import 'package:photos/models/search/search_result.dart';
 
 class AlbumSearchResult extends SearchResult {
   final CollectionWithThumbnail collectionWithThumbnail;
