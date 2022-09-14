@@ -185,7 +185,7 @@ class SearchService {
           null,
           order: 'DESC',
         );
-        if (matchedFiles.\\isNotEmpty) {
+        if (matchedFiles.isNotEmpty) {
           searchResults.add(
             GenericSearchResult(ResultType.event, holiday.name, matchedFiles),
           );
