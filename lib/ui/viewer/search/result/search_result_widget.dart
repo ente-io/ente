@@ -40,7 +40,7 @@ class SearchResultWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    searchResult.type().name,
+                    _resultTypeName(searchResult.type()),
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.subTextColor,
@@ -105,5 +105,24 @@ class SearchResultWidget extends StatelessWidget {
         }
       },
     );
+  }
+
+  String _resultTypeName(ResultType type) {
+    switch (type) {
+      case ResultType.collection:
+        return "Album";
+      case ResultType.year:
+        return "Year";
+      case ResultType.month:
+        return "Month";
+      case ResultType.file:
+        return "Memory";
+      case ResultType.event:
+        return "Day";
+      case ResultType.location:
+        return "Day";
+      default:
+        return type.name.toUpperCase();
+    }
   }
 }
