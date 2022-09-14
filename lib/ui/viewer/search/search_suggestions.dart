@@ -6,11 +6,8 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
-import 'package:photos/models/search/holiday_search_result.dart';
-import 'package:photos/models/search/location_search_result.dart';
-import 'package:photos/models/search/month_search_result.dart';
+import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/search_result.dart';
-import 'package:photos/models/search/year_search_result.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/ui/viewer/search/result/file_result_widget.dart';
 import 'package:photos/ui/viewer/search/result/search_result_widget.dart';
@@ -78,10 +75,7 @@ class SearchSuggestionsWidget extends StatelessWidget {
                     );
                   } else if (result is FileSearchResult) {
                     return FileSearchResultWidget(result);
-                  } else if (result is YearSearchResult ||
-                      result is MonthSearchResult ||
-                      result is LocationSearchResult ||
-                      result is HolidaySearchResult) {
+                  } else if (result is GenericSearchResult) {
                     return SearchResultWidget(result);
                   } else {
                     Logger('SearchSuggestionsWidget')

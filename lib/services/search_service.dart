@@ -15,11 +15,9 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/search/album_search_result.dart';
-import 'package:photos/models/search/holiday_search_result.dart';
+import 'package:photos/models/search/generic_search_result.dart';
 import 'package:photos/models/search/location_api_response.dart';
-import 'package:photos/models/search/location_search_result.dart';
-import 'package:photos/models/search/month_search_result.dart';
-import 'package:photos/models/search/year_search_result.dart';
+import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
 
@@ -78,10 +76,10 @@ class SearchService {
     _cachedFilesFuture = null;
   }
 
-  Future<List<LocationSearchResult>> getLocationSearchResults(
+  Future<List<GenericSearchResult>> getLocationSearchResults(
     String query,
   ) async {
-    final List<LocationSearchResult> locationSearchResults = [];
+    final List<GenericSearchResult> searchResults = [];
     try {
       final List<File> allFiles = await _getAllFiles();
 
@@ -109,15 +107,16 @@ class SearchService {
           (first, second) => second.creationTime.compareTo(first.creationTime),
         );
         if (filesInLocation.isNotEmpty) {
-          locationSearchResults.add(
-            LocationSearchResult(locationData.place, filesInLocation),
+          searchResults.add(
+            GenericSearchResult(
+                ResultType.location, locationData.place, filesInLocation),
           );
         }
       }
     } catch (e) {
       _logger.severe(e);
     }
-    return locationSearchResults;
+    return searchResults;
   }
 
   // getFilteredCollectionsWithThumbnail removes deleted or archived or
@@ -150,16 +149,17 @@ class SearchService {
     return collectionSearchResults;
   }
 
-  Future<List<YearSearchResult>> getYearSearchResults(
+  Future<List<GenericSearchResult>> getYearSearchResults(
     String yearFromQuery,
   ) async {
-    final List<YearSearchResult> yearSearchResults = [];
+    final List<GenericSearchResult> searchResults = [];
     for (var yearData in YearsData.instance.yearsData) {
       if (yearData.year.startsWith(yearFromQuery)) {
         final List<File> filesInYear = await _getFilesInYear(yearData.duration);
         if (filesInYear.isNotEmpty) {
-          yearSearchResults.add(
-            YearSearchResult(
+          searchResults.add(
+            GenericSearchResult(
+              ResultType.year,
               yearData.year,
               filesInYear,
             ),
@@ -167,13 +167,13 @@ class SearchService {
         }
       }
     }
-    return yearSearchResults;
+    return searchResults;
   }
 
-  Future<List<HolidaySearchResult>> getHolidaySearchResults(
+  Future<List<GenericSearchResult>> getHolidaySearchResults(
     String query,
   ) async {
-    final List<HolidaySearchResult> holidaySearchResults = [];
+    final List<GenericSearchResult> searchResults = [];
 
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
 
@@ -185,18 +185,18 @@ class SearchService {
           null,
           order: 'DESC',
         );
-        if (matchedFiles.isNotEmpty) {
-          holidaySearchResults.add(
-            HolidaySearchResult(holiday.name, matchedFiles),
+        if (matchedFiles.\\isNotEmpty) {
+          searchResults.add(
+            GenericSearchResult(ResultType.event, holiday.name, matchedFiles),
           );
         }
       }
     }
-    return holidaySearchResults;
+    return searchResults;
   }
 
-  Future<List<MonthSearchResult>> getMonthSearchResults(String query) async {
-    final List<MonthSearchResult> monthSearchResults = [];
+  Future<List<GenericSearchResult>> getMonthSearchResults(String query) async {
+    final List<GenericSearchResult> searchResults = [];
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
 
     for (var month in allMonths) {
@@ -208,8 +208,9 @@ class SearchService {
           order: 'DESC',
         );
         if (matchedFiles.isNotEmpty) {
-          monthSearchResults.add(
-            MonthSearchResult(
+          searchResults.add(
+            GenericSearchResult(
+              ResultType.month,
               month.name,
               matchedFiles,
             ),
@@ -218,7 +219,7 @@ class SearchService {
       }
     }
 
-    return monthSearchResults;
+    return searchResults;
   }
 
   Future<List<File>> _getFilesInYear(List<int> durationOfYear) async {
