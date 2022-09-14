@@ -133,7 +133,7 @@ class billingService {
                 {
                     paymentProvider: 'stripe',
                     productID: null,
-                    VerificationData: sessionID,
+                    verificationData: sessionID,
                 },
                 null,
                 {
