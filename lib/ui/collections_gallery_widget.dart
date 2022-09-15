@@ -115,7 +115,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           // alphabetical ASC order
-          return first.collection.name.compareTo(second.collection.name);
+          return first.collection.name
+              .toLowerCase()
+              .compareTo(second.collection.name.toLowerCase());
         } else if (sortKey == AlbumSortKey.newestPhoto) {
           return second.thumbnail.creationTime
               .compareTo(first.thumbnail.creationTime);
