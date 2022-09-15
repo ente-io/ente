@@ -22,7 +22,9 @@ class FFmpegClient {
 
     async generateThumbnail(file: File) {
         await this.ready;
-        const inputFileName = `${Date.now().toString()}-${file.name}`;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [name, ext] = splitFilenameAndExtension(file.name);
+        const inputFileName = `${Date.now().toString()}-input.${ext}`;
         const thumbFileName = `${Date.now().toString()}-thumb.jpeg`;
         this.ffmpeg.FS(
             'writeFile',
@@ -57,7 +59,9 @@ class FFmpegClient {
 
     async extractVideoMetadata(file: File) {
         await this.ready;
-        const inputFileName = `${Date.now().toString()}-${file.name}`;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [name, ext] = splitFilenameAndExtension(file.name);
+        const inputFileName = `${Date.now().toString()}-input.${ext}`;
         const outFileName = `${Date.now().toString()}-metadata.txt`;
         this.ffmpeg.FS(
             'writeFile',
@@ -105,3 +109,13 @@ class FFmpegClient {
 }
 
 export default FFmpegClient;
+
+export function splitFilenameAndExtension(filename: string): [string, string] {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return [filename, null];
+    else
+        return [
+            filename.slice(0, lastDotPosition),
+            filename.slice(lastDotPosition + 1),
+        ];
+}
