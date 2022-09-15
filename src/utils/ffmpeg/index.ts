@@ -61,3 +61,13 @@ function parseCreationTime(creationTime: string) {
     }
     return dateTime;
 }
+
+export function splitFilenameAndExtension(filename: string): [string, string] {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return [filename, null];
+    else
+        return [
+            filename.slice(0, lastDotPosition),
+            filename.slice(lastDotPosition + 1),
+        ];
+}
