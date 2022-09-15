@@ -84,14 +84,12 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             Positioned(
               right: 0,
               top: 0,
-              child: FeatureFlagService.instance.enableSearch()
-                  ? Container(
+              child: Container(
                       color:
                           Theme.of(context).colorScheme.defaultBackgroundColor,
                       height: kContainerHeight,
                       child: const SearchIconWidget(),
-                    )
-                  : const SizedBox(height: 36, width: 48),
+                    ),
             ),
           ],
         ),
