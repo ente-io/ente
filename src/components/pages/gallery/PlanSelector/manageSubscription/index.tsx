@@ -77,7 +77,7 @@ function StripeSubscriptionOptions({
             title: constants.CANCEL_SUBSCRIPTION,
             content: constants.CANCEL_SUBSCRIPTION_MESSAGE(),
             proceed: {
-                text: constants.CANCEL_SUBSCRIPTION,
+                text: constants.CANCEL,
                 action: cancelSubscription.bind(
                     null,
                     appContext.setDialogMessage,
@@ -87,7 +87,7 @@ function StripeSubscriptionOptions({
                 variant: 'danger',
             },
             close: {
-                text: constants.CANCEL,
+                text: constants.NEVERMIND,
             },
         });
     const openManagementPortal = updatePaymentMethod.bind(

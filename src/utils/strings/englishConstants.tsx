@@ -216,7 +216,7 @@ const englishConstants = {
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
     OK: 'Ok',
-    SUCCESS: 'success',
+    SUCCESS: 'Success',
     ERROR: 'Error',
     MESSAGE: 'Message',
     INSTALL_MOBILE_APP: () => (
@@ -820,6 +820,7 @@ const englishConstants = {
     AUTHENTICATE: 'Authenticate',
     UPLOADED_TO_SINGLE_COLLECTION: 'Uploaded to single collection',
     UPLOADED_TO_SEPARATE_COLLECTIONS: 'Uploaded to separate collections',
+    NEVERMIND: 'Nevermind',
 };
 
 export default englishConstants;
