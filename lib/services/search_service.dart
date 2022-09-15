@@ -220,6 +220,40 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getFileExtensionResults(
+    String query,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    if (!query.startsWith(".")) {
+      return searchResults;
+    }
+    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
+
+    final List<File> allFiles = await _getAllFiles();
+    final Map<String, List<File>> resultMap = <String, List<File>>{};
+
+    for (File eachFile in allFiles) {
+      final String fileName = eachFile.getDisplayName();
+      if (fileName.contains(nonCaseSensitiveRegexForQuery)) {
+        final String exnType = fileName.split(".").last.toUpperCase();
+        if (!resultMap.containsKey(exnType)) {
+          resultMap[exnType] = <File>[];
+        }
+        resultMap[exnType].add(eachFile);
+      }
+    }
+    for (MapEntry<String, List<File>> entry in resultMap.entries) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.fileExtension,
+          entry.key.toUpperCase(),
+          entry.value,
+        ),
+      );
+    }
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> getMonthSearchResults(String query) async {
     final List<GenericSearchResult> searchResults = [];
     final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);

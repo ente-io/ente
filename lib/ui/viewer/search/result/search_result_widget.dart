@@ -120,9 +120,11 @@ class SearchResultWidget extends StatelessWidget {
       case ResultType.event:
         return "Day";
       case ResultType.location:
-        return "Day";
+        return "Location";
       case ResultType.fileType:
         return "Type";
+      case ResultType.fileExtension:
+        return "File Extension";
       default:
         return type.name.toUpperCase();
     }
