@@ -472,7 +472,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             padding: const EdgeInsets.only(right: 2),
             child: Text(
               CollectionsService.instance
-                  .getCollectionNameByID(file.collectionID),
+                  .getCollectionByID(file.collectionID)
+                  .name,
               style: Theme.of(context).textTheme.caption.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
