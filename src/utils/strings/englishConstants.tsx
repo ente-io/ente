@@ -324,7 +324,7 @@ const englishConstants = {
                 All of your data will be deleted from our servers at the end of
                 this billing period.
             </p>
-            <p>are you sure that you want to cancel your subscription?</p>
+            <p>Are you sure that you want to cancel your subscription?</p>
         </>
     ),
     SUBSCRIPTION_CANCEL_FAILED: 'Failed to cancel subscription',
