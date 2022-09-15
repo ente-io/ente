@@ -216,7 +216,7 @@ const englishConstants = {
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
     OK: 'Ok',
-    SUCCESS: 'success',
+    SUCCESS: 'Success',
     ERROR: 'Error',
     MESSAGE: 'Message',
     INSTALL_MOBILE_APP: () => (
@@ -294,7 +294,7 @@ const englishConstants = {
         <>
             <p>We've received your payment</p>
             <p>
-                your subscription is valid till{' '}
+                Your subscription is valid till{' '}
                 <strong>{dateString(expiryTime)}</strong>
             </p>
         </>
@@ -324,15 +324,14 @@ const englishConstants = {
                 All of your data will be deleted from our servers at the end of
                 this billing period.
             </p>
-            <p>are you sure that you want to cancel your subscription?</p>
+            <p>Are you sure that you want to cancel your subscription?</p>
         </>
     ),
     SUBSCRIPTION_CANCEL_FAILED: 'Failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'Subscription canceled successfully',
 
-    ACTIVATE_SUBSCRIPTION: 'Reactivate subscription',
-    CONFIRM_ACTIVATE_SUBSCRIPTION: 'Activate subscription ',
-    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
+    REACTIVATE_SUBSCRIPTION: 'Reactivate subscription',
+    REACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
         `Once reactivated, you will be billed on ${dateString(expiryTime)}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'Subscription activated successfully ',
     SUBSCRIPTION_ACTIVATE_FAILED: 'Failed to reactivate subscription renewals',
@@ -820,6 +819,7 @@ const englishConstants = {
     AUTHENTICATE: 'Authenticate',
     UPLOADED_TO_SINGLE_COLLECTION: 'Uploaded to single collection',
     UPLOADED_TO_SEPARATE_COLLECTIONS: 'Uploaded to separate collections',
+    NEVERMIND: 'Nevermind',
 };
 
 export default englishConstants;
