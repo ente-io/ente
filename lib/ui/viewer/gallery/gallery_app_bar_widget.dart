@@ -163,7 +163,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         PopupMenuButton(
           itemBuilder: (context) {
             final List<PopupMenuItem> items = [];
-            if (widget.collection.type == CollectionType.album) {
+            if (widget.collection.type != CollectionType.favorites) {
               items.add(
                 PopupMenuItem(
                   value: 1,
@@ -173,7 +173,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                       Padding(
                         padding: EdgeInsets.all(8),
                       ),
-                      Text("Rename"),
+                      Text("Rename album"),
                     ],
                   ),
                 ),
@@ -189,7 +189,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text(isArchived ? "Unhide" : "Hide"),
+                    Text(isArchived ? "Unhide album" : "Hide album"),
                   ],
                 ),
               ),
@@ -200,11 +200,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                   value: 3,
                   child: Row(
                     children: const [
-                      Icon(Icons.delete_sweep_outlined),
+                      Icon(Icons.delete_outline),
                       Padding(
                         padding: EdgeInsets.all(8),
                       ),
-                      Text("Delete Album"),
+                      Text("Delete album"),
                     ],
                   ),
                 ),
