@@ -1,4 +1,10 @@
-import 'package:photos/models/search/holiday_search_result.dart';
+class HolidayData {
+  final String name;
+  final int month;
+  final int day;
+
+  const HolidayData(this.name, {required this.month, required this.day});
+}
 
 const List<HolidayData> allHolidays = [
   HolidayData('New Year', month: 1, day: 1),
