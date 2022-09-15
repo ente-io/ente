@@ -18,6 +18,12 @@ const DialogBoxBase = styled(Dialog)(({ theme }) => ({
     '.MuiDialogTitle-root + .MuiDialogActions-root': {
         paddingTop: theme.spacing(3),
     },
+    '& .MuiDialogActions-root': {
+        flexWrap: 'wrap-reverse',
+    },
+    '& .MuiButton-root': {
+        margin: theme.spacing(0.5, 0),
+    },
 }));
 
 export default DialogBoxBase;
