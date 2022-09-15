@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 class SetKeysRequest {
@@ -10,11 +8,11 @@ class SetKeysRequest {
   final int opsLimit;
 
   SetKeysRequest({
-    this.kekSalt,
-    this.encryptedKey,
-    this.keyDecryptionNonce,
-    this.memLimit,
-    this.opsLimit,
+    required this.kekSalt,
+    required this.encryptedKey,
+    required this.keyDecryptionNonce,
+    required this.memLimit,
+    required this.opsLimit,
   });
 
   Map<String, dynamic> toMap() {
