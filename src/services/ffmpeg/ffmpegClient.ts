@@ -1,6 +1,9 @@
 import { createFFmpeg, FFmpeg } from 'ffmpeg-wasm';
 import { getUint8ArrayView } from 'services/readerService';
-import { parseFFmpegExtractedMetadata } from 'utils/ffmpeg';
+import {
+    parseFFmpegExtractedMetadata,
+    splitFilenameAndExtension,
+} from 'utils/ffmpeg';
 
 class FFmpegClient {
     private ffmpeg: FFmpeg;
@@ -109,13 +112,3 @@ class FFmpegClient {
 }
 
 export default FFmpegClient;
-
-export function splitFilenameAndExtension(filename: string): [string, string] {
-    const lastDotPosition = filename.lastIndexOf('.');
-    if (lastDotPosition === -1) return [filename, null];
-    else
-        return [
-            filename.slice(0, lastDotPosition),
-            filename.slice(lastDotPosition + 1),
-        ];
-}
