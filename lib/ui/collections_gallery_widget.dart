@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
@@ -90,6 +91,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     }
     collectionsWithThumbnail.sort(
       (first, second) {
+        if (second.collection.type == CollectionType.favorites &&
+            first.collection.type != CollectionType.favorites) {
+          return 1;
+        }
         if (sortKey == AlbumSortKey.albumName) {
           // alphabetical ASC order
           return first.collection.name.compareTo(second.collection.name);
