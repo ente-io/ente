@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 class SetRecoveryKeyRequest {
   final String masterKeyEncryptedWithRecoveryKey;
   final String masterKeyDecryptionNonce;
@@ -21,18 +19,4 @@ class SetRecoveryKeyRequest {
       'recoveryKeyDecryptionNonce': recoveryKeyDecryptionNonce,
     };
   }
-
-  factory SetRecoveryKeyRequest.fromMap(Map<String, dynamic> map) {
-    return SetRecoveryKeyRequest(
-      map['masterKeyEncryptedWithRecoveryKey'],
-      map['masterKeyDecryptionNonce'],
-      map['recoveryKeyEncryptedWithMasterKey'],
-      map['recoveryKeyDecryptionNonce'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory SetRecoveryKeyRequest.fromJson(String source) =>
-      SetRecoveryKeyRequest.fromMap(json.decode(source));
 }
