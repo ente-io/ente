@@ -194,20 +194,22 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ),
               ),
             );
-            items.add(
-              PopupMenuItem(
-                value: 3,
-                child: Row(
-                  children: const [
-                    Icon(Icons.delete_sweep_outlined),
-                    Padding(
-                      padding: EdgeInsets.all(8),
-                    ),
-                    Text("Delete Album"),
-                  ],
+            if (widget.collection.type != CollectionType.favorites) {
+              items.add(
+                PopupMenuItem(
+                  value: 3,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.delete_sweep_outlined),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      Text("Delete Album"),
+                    ],
+                  ),
                 ),
-              ),
-            );
+              );
+            }
             return items;
           },
           onSelected: (value) async {
