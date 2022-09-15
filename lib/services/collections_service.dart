@@ -47,7 +47,7 @@ class CollectionsService {
   SharedPreferences _prefs;
   Future<List<File>> _cachedLatestFiles;
   final _dio = Network.instance.getDio();
-  final _localCollections = <String, Collection>{};
+  final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
 
@@ -120,7 +120,7 @@ class CollectionsService {
   }
 
   void clearCache() {
-    _localCollections.clear();
+    _localPathToCollectionID.clear();
     _collectionIDToCollections.clear();
     _cachedKeys.clear();
   }
@@ -578,9 +578,14 @@ class CollectionsService {
   }
 
   Future<Collection> getOrCreateForPath(String path) async {
-    if (_localCollections.containsKey(path) &&
-        _localCollections[path].owner.id == _config.getUserID()) {
-      return _localCollections[path];
+    if (_localPathToCollectionID.containsKey(path)) {
+      final Collection cachedCollection =
+          _collectionIDToCollections[_localPathToCollectionID[path]];
+      if (cachedCollection != null &&
+          !cachedCollection.isDeleted &&
+          cachedCollection.owner.id == _config.getUserID()) {
+        return cachedCollection;
+      }
     }
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
@@ -882,9 +887,10 @@ class CollectionsService {
     final collectionWithDecryptedName =
         _getCollectionWithDecryptedName(collection);
     if (collection.attributes.encryptedPath != null &&
-        !(collection.isDeleted)) {
-      _localCollections[decryptCollectionPath(collection)] =
-          collectionWithDecryptedName;
+        !collection.isDeleted &&
+        collection.owner.id == _config.getUserID()) {
+      _localPathToCollectionID[decryptCollectionPath(collection)] =
+          collection.id;
     }
     _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
     return collectionWithDecryptedName;
