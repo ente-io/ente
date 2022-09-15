@@ -294,7 +294,7 @@ const englishConstants = {
         <>
             <p>We've received your payment</p>
             <p>
-                your subscription is valid till{' '}
+                Your subscription is valid till{' '}
                 <strong>{dateString(expiryTime)}</strong>
             </p>
         </>
