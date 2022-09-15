@@ -14,4 +14,13 @@ abstract class SearchResult {
   List<File> resultFiles();
 }
 
-enum ResultType { collection, file, location, month, year, fileType, event }
+enum ResultType {
+  collection,
+  file,
+  location,
+  month,
+  year,
+  fileType,
+  fileExtension,
+  event
+}
