@@ -58,9 +58,9 @@ class DuplicateFiles {
   sortByCollectionName() {
     files.sort((first, second) {
       final firstName =
-          collectionsService.getCollectionNameByID(first.collectionID);
+          collectionsService.getCollectionByID(first.collectionID).name;
       final secondName =
-          collectionsService.getCollectionNameByID(second.collectionID);
+          collectionsService.getCollectionByID(second.collectionID).name;
       return firstName.compareTo(secondName);
     });
   }
