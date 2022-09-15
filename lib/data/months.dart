@@ -1,5 +1,3 @@
-import 'package:photos/models/search/month_search_result.dart';
-
 List<MonthData> allMonths = [
   MonthData('January', 1),
   MonthData('February', 2),
@@ -14,3 +12,10 @@ List<MonthData> allMonths = [
   MonthData('November', 11),
   MonthData('December', 12),
 ];
+
+class MonthData {
+  final String name;
+  final int monthNumber;
+
+  MonthData(this.name, this.monthNumber);
+}

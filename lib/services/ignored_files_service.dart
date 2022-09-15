@@ -74,6 +74,11 @@ class IgnoredFilesService {
     }
   }
 
+  Future<void> reset() async {
+    await _db.clearTable();
+    _ignoredIDs = null;
+  }
+
   Future<Set<String>> _loadExistingIDs() async {
     _logger.fine('loading existing IDs');
     final result = await _db.getAll();

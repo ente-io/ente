@@ -4,9 +4,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/search/search_results.dart';
+import 'package:photos/models/search/search_result.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/search_service.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/no_result_widget.dart';
+import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -185,13 +186,23 @@ class _SearchWidgetState extends State<SearchWidget> {
     final holidayResults = await _searchService.getHolidaySearchResults(query);
     allResults.addAll(holidayResults);
 
+    final fileTypeSearchResults =
+        await _searchService.getFileTypeResults(query);
+    allResults.addAll(fileTypeSearchResults);
+
+    final fileExtnResult = await _searchService.getFileExtensionResults(query);
+    allResults.addAll(fileExtnResult);
+
     final collectionResults =
         await _searchService.getCollectionSearchResults(query);
     allResults.addAll(collectionResults);
 
-    final locationResults =
-        await _searchService.getLocationSearchResults(query);
-    allResults.addAll(locationResults);
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
+        query.startsWith("l:")) {
+      final locationResults = await _searchService
+          .getLocationSearchResults(query.replaceAll("l:", ""));
+      allResults.addAll(locationResults);
+    }
 
     final monthResults = await _searchService.getMonthSearchResults(query);
     allResults.addAll(monthResults);

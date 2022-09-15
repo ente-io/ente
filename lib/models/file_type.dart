@@ -32,3 +32,16 @@ FileType getFileType(int fileType) {
       return FileType.other;
   }
 }
+
+String getHumanReadableString(FileType fileType) {
+  switch (fileType) {
+    case FileType.image:
+      return "Image";
+    case FileType.video:
+      return "Video";
+    case FileType.livePhoto:
+      return "Live Photo";
+    default:
+      return fileType.name.toUpperCase();
+  }
+}
