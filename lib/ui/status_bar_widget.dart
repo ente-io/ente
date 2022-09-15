@@ -85,11 +85,10 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               right: 0,
               top: 0,
               child: Container(
-                      color:
-                          Theme.of(context).colorScheme.defaultBackgroundColor,
-                      height: kContainerHeight,
-                      child: const SearchIconWidget(),
-                    ),
+                color: Theme.of(context).colorScheme.defaultBackgroundColor,
+                height: kContainerHeight,
+                child: const SearchIconWidget(),
+              ),
             ),
           ],
         ),
