@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:typed_data';
 
 class EncryptionResult {
@@ -8,5 +6,10 @@ class EncryptionResult {
   final Uint8List header;
   final Uint8List nonce;
 
-  EncryptionResult({this.encryptedData, this.key, this.header, this.nonce});
+  EncryptionResult({
+    required this.encryptedData,
+    required this.key,
+    required this.header,
+    required this.nonce,
+  });
 }

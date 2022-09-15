@@ -6,6 +6,7 @@ import 'dart:typed_data';
 import 'package:computer/computer.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/models/derived_key_result.dart';
 import 'package:photos/models/encryption_result.dart';
 
 const int encryptionChunkSize = 4 * 1024 * 1024;
@@ -329,12 +330,4 @@ class CryptoUtil {
       },
     );
   }
-}
-
-class DerivedKeyResult {
-  final Uint8List key;
-  final int memLimit;
-  final int opsLimit;
-
-  DerivedKeyResult(this.key, this.memLimit, this.opsLimit);
 }

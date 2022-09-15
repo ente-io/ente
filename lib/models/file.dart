@@ -277,11 +277,6 @@ class File extends EnteFile {
   @override
   String cacheKey() {
     // todo: Neeraj: 19thJuly'22: evaluate and add fileHash as the key?
-    return localID ?? uploadedFileID?.toString() ?? generatedID?.toString();
-  }
-
-  @override
-  String localIdentifier() {
-    return localID;
+    return localID ?? uploadedFileID?.toString() ?? generatedID.toString();
   }
 }
