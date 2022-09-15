@@ -59,7 +59,7 @@ function StripeSubscriptionOptions({
                 subscription.expiryTime
             ),
             proceed: {
-                text: constants.REACTIVATE,
+                text: constants.REACTIVATE_SUBSCRIPTION,
                 action: activateSubscription.bind(
                     null,
                     appContext.setDialogMessage,
@@ -77,7 +77,7 @@ function StripeSubscriptionOptions({
             title: constants.CANCEL_SUBSCRIPTION,
             content: constants.CANCEL_SUBSCRIPTION_MESSAGE(),
             proceed: {
-                text: constants.CANCEL,
+                text: constants.CANCEL_SUBSCRIPTION,
                 action: cancelSubscription.bind(
                     null,
                     appContext.setDialogMessage,
