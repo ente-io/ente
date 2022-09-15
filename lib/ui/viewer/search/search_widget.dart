@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_result.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
@@ -196,9 +197,12 @@ class _SearchWidgetState extends State<SearchWidget> {
         await _searchService.getCollectionSearchResults(query);
     allResults.addAll(collectionResults);
 
-    final locationResults =
-        await _searchService.getLocationSearchResults(query);
-    allResults.addAll(locationResults);
+    if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
+        query.startsWith("l:")) {
+      final locationResults = await _searchService
+          .getLocationSearchResults(query.replaceAll("l:", ""));
+      allResults.addAll(locationResults);
+    }
 
     final monthResults = await _searchService.getMonthSearchResults(query);
     allResults.addAll(monthResults);
