@@ -163,10 +163,6 @@ class CollectionsService {
     return _prefs.setInt(key, time);
   }
 
-  Collection getCollectionForPath(String path) {
-    return _localCollections[path];
-  }
-
   // getActiveCollections returns list of collections which are not deleted yet
   List<Collection> getActiveCollections() {
     return _collectionIDToCollections.values
