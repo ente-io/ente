@@ -330,9 +330,9 @@ const englishConstants = {
     SUBSCRIPTION_CANCEL_FAILED: 'Failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'Subscription canceled successfully',
 
-    ACTIVATE_SUBSCRIPTION: 'Reactivate subscription',
-    CONFIRM_ACTIVATE_SUBSCRIPTION: 'Activate subscription ',
-    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
+    REACTIVATE_SUBSCRIPTION: 'Reactivate subscription',
+    REACTIVATE: 'Reactivate ',
+    REACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
         `Once reactivated, you will be billed on ${dateString(expiryTime)}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'Subscription activated successfully ',
     SUBSCRIPTION_ACTIVATE_FAILED: 'Failed to reactivate subscription renewals',

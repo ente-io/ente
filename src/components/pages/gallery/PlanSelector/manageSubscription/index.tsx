@@ -52,14 +52,14 @@ function StripeSubscriptionOptions({
 }: Iprops) {
     const appContext = useContext(AppContext);
 
-    const confirmActivation = () =>
+    const confirmReactivation = () =>
         appContext.setDialogMessage({
-            title: constants.CONFIRM_ACTIVATE_SUBSCRIPTION,
-            content: constants.ACTIVATE_SUBSCRIPTION_MESSAGE(
+            title: constants.REACTIVATE_SUBSCRIPTION,
+            content: constants.REACTIVATE_SUBSCRIPTION_MESSAGE(
                 subscription.expiryTime
             ),
             proceed: {
-                text: constants.ACTIVATE_SUBSCRIPTION,
+                text: constants.REACTIVATE,
                 action: activateSubscription.bind(
                     null,
                     appContext.setDialogMessage,
@@ -100,8 +100,8 @@ function StripeSubscriptionOptions({
             {isSubscriptionCancelled(subscription) ? (
                 <ManageSubscriptionButton
                     color="secondary"
-                    onClick={confirmActivation}>
-                    {constants.ACTIVATE_SUBSCRIPTION}
+                    onClick={confirmReactivation}>
+                    {constants.REACTIVATE_SUBSCRIPTION}
                 </ManageSubscriptionButton>
             ) : (
                 <ManageSubscriptionButton
