@@ -13,6 +13,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/generic_search_result.dart';
@@ -188,6 +189,30 @@ class SearchService {
         if (matchedFiles.isNotEmpty) {
           searchResults.add(
             GenericSearchResult(ResultType.event, holiday.name, matchedFiles),
+          );
+        }
+      }
+    }
+    return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getFileTypeResults(
+    String query,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final List<File> allFiles = await _getAllFiles();
+    for (var fileType in FileType.values) {
+      final String fileTypeString = getHumanReadableString(fileType);
+      if (fileTypeString.toLowerCase().startsWith(query.toLowerCase())) {
+        final matchedFiles =
+            allFiles.where((e) => e.fileType == fileType).toList();
+        if (matchedFiles.isNotEmpty) {
+          searchResults.add(
+            GenericSearchResult(
+              ResultType.fileType,
+              fileTypeString,
+              matchedFiles,
+            ),
           );
         }
       }
