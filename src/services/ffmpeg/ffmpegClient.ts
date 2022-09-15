@@ -26,7 +26,7 @@ class FFmpegClient {
     async generateThumbnail(file: File) {
         await this.ready;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [name, ext] = splitFilenameAndExtension(file.name);
+        const [_, ext] = splitFilenameAndExtension(file.name);
         const inputFileName = `${Date.now().toString()}-input.${ext}`;
         const thumbFileName = `${Date.now().toString()}-thumb.jpeg`;
         this.ffmpeg.FS(
@@ -63,7 +63,7 @@ class FFmpegClient {
     async extractVideoMetadata(file: File) {
         await this.ready;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const [name, ext] = splitFilenameAndExtension(file.name);
+        const [_, ext] = splitFilenameAndExtension(file.name);
         const inputFileName = `${Date.now().toString()}-input.${ext}`;
         const outFileName = `${Date.now().toString()}-metadata.txt`;
         this.ffmpeg.FS(
