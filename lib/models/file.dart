@@ -275,9 +275,8 @@ class File extends EnteFile {
   }
 
   @override
-  //add nullable return type when migrating to null safety
   String cacheKey() {
     // todo: Neeraj: 19thJuly'22: evaluate and add fileHash as the key?
-    return localID ?? uploadedFileID?.toString() ?? generatedID?.toString();
+    return localID ?? uploadedFileID?.toString() ?? generatedID.toString();
   }
 }
