@@ -133,12 +133,15 @@ class Configuration {
         key: secretKeyKey,
         iOptions: _secureStorageOptionsIOS,
       );
+      if (_key == null) {
+        await logout(autoLogout: true);
+      }
       await _migrateSecurityStorageToFirstUnlock();
     }
     SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool autoLogout = false}) async {
     if (SyncService.instance.isSyncInProgress()) {
       SyncService.instance.stopSync();
       try {
@@ -161,12 +164,24 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesDB.instance.clearTable();
     await TrashDB.instance.clearTable();
-    CollectionsService.instance.clearCache();
-    FavoritesService.instance.clearCache();
-    MemoriesService.instance.clearCache();
-    BillingService.instance.clearCache();
-    SearchService.instance.clearCache();
-    Bus.instance.fire(UserLoggedOutEvent());
+    if (!autoLogout) {
+      CollectionsService.instance.clearCache();
+      FavoritesService.instance.clearCache();
+      MemoriesService.instance.clearCache();
+      BillingService.instance.clearCache();
+      SearchService.instance.clearCache();
+      Bus.instance.fire(UserLoggedOutEvent());
+    } else {
+      _preferences.setBool("auto_logout", true);
+    }
+  }
+
+  bool showAutoLogoutDialog() {
+    return _preferences.containsKey("auto_logout");
+  }
+
+  Future<bool> clearAutoLogoutFlag() {
+    return _preferences.remove("auto_logout");
   }
 
   Future<KeyGenResult> generateKey(String password) async {
