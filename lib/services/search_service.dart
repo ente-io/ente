@@ -61,12 +61,11 @@ class SearchService {
   Future<List<File>> getFileSearchResults(String query) async {
     final List<File> fileSearchResults = [];
     final List<File> files = await _getAllFiles();
-    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
     for (var file in files) {
       if (fileSearchResults.length >= _maximumResultsLimit) {
         break;
       }
-      if (file.title.contains(nonCaseSensitiveRegexForQuery)) {
+      if (file.title.toLowerCase().contains(query.toLowerCase())) {
         fileSearchResults.add(file);
       }
     }
@@ -110,7 +109,10 @@ class SearchService {
         if (filesInLocation.isNotEmpty) {
           searchResults.add(
             GenericSearchResult(
-                ResultType.location, locationData.place, filesInLocation),
+              ResultType.location,
+              locationData.place,
+              filesInLocation,
+            ),
           );
         }
       }
@@ -125,8 +127,6 @@ class SearchService {
   Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
-    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
-
     /*latestCollectionFiles is to identify collections which have at least one file as we don't display
      empty collections and to get the file to pass for tumbnail */
     final List<File> latestCollectionFiles =
@@ -141,7 +141,7 @@ class SearchService {
       final Collection collection =
           CollectionsService.instance.getCollectionByID(file.collectionID);
       if (!collection.isArchived() &&
-          collection.name.contains(nonCaseSensitiveRegexForQuery)) {
+          collection.name.toLowerCase().contains(query.toLowerCase())) {
         collectionSearchResults
             .add(AlbumSearchResult(CollectionWithThumbnail(collection, file)));
       }
@@ -176,10 +176,8 @@ class SearchService {
   ) async {
     final List<GenericSearchResult> searchResults = [];
 
-    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
-
     for (var holiday in allHolidays) {
-      if (holiday.name.contains(nonCaseSensitiveRegexForQuery)) {
+      if (holiday.name.toLowerCase().contains(query.toLowerCase())) {
         final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
           _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
@@ -227,14 +225,13 @@ class SearchService {
     if (!query.startsWith(".")) {
       return searchResults;
     }
-    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
 
     final List<File> allFiles = await _getAllFiles();
     final Map<String, List<File>> resultMap = <String, List<File>>{};
 
     for (File eachFile in allFiles) {
       final String fileName = eachFile.getDisplayName();
-      if (fileName.contains(nonCaseSensitiveRegexForQuery)) {
+      if (fileName.contains(query)) {
         final String exnType = fileName.split(".").last.toUpperCase();
         if (!resultMap.containsKey(exnType)) {
           resultMap[exnType] = <File>[];
@@ -256,10 +253,9 @@ class SearchService {
 
   Future<List<GenericSearchResult>> getMonthSearchResults(String query) async {
     final List<GenericSearchResult> searchResults = [];
-    final nonCaseSensitiveRegexForQuery = RegExp(query, caseSensitive: false);
 
     for (var month in allMonths) {
-      if (month.name.startsWith(nonCaseSensitiveRegexForQuery)) {
+      if (month.name.toLowerCase().startsWith(query.toLowerCase())) {
         final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
           _getDurationsOfMonthInEveryYear(month.monthNumber),
