@@ -1,7 +1,3 @@
-// @dart=2.9
-
-import 'dart:convert';
-
 class SetKeysRequest {
   final String kekSalt;
   final String encryptedKey;
@@ -10,11 +6,11 @@ class SetKeysRequest {
   final int opsLimit;
 
   SetKeysRequest({
-    this.kekSalt,
-    this.encryptedKey,
-    this.keyDecryptionNonce,
-    this.memLimit,
-    this.opsLimit,
+    required this.kekSalt,
+    required this.encryptedKey,
+    required this.keyDecryptionNonce,
+    required this.memLimit,
+    required this.opsLimit,
   });
 
   Map<String, dynamic> toMap() {
@@ -26,19 +22,4 @@ class SetKeysRequest {
       'opsLimit': opsLimit,
     };
   }
-
-  factory SetKeysRequest.fromMap(Map<String, dynamic> map) {
-    return SetKeysRequest(
-      kekSalt: map['kekSalt'],
-      encryptedKey: map['encryptedKey'],
-      keyDecryptionNonce: map['keyDecryptionNonce'],
-      memLimit: map['memLimit'],
-      opsLimit: map['opsLimit'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory SetKeysRequest.fromJson(String source) =>
-      SetKeysRequest.fromMap(json.decode(source));
 }
