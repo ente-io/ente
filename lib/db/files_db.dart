@@ -603,6 +603,9 @@ class FilesDB {
     Set<int> ignoredCollectionIDs, {
     String order = 'ASC',
   }) async {
+    if (durations.isEmpty) {
+      return <File>[];
+    }
     final db = await instance.database;
     String whereClause = "( ";
     for (int index = 0; index < durations.length; index++) {
