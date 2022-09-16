@@ -218,7 +218,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         await Configuration.instance.clearAutoLogoutFlag();
       }
       if (result == DialogUserChoice.secondChoice) {
-        _navigateToSignUpPage();
+        _navigateToSignInPage();
       }
     }
   }
