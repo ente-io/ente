@@ -34,16 +34,6 @@ class LocationDataFromResponse {
     required this.bbox,
   });
 
-  LocationDataFromResponse copyWith({
-    required String place,
-    required List<double> bbox,
-  }) {
-    return LocationDataFromResponse(
-      place: place,
-      bbox: bbox,
-    );
-  }
-
   factory LocationDataFromResponse.fromMap(Map<String, dynamic> map) {
     return LocationDataFromResponse(
       place: map['place'] as String,
