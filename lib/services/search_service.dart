@@ -1,7 +1,6 @@
 // @dart=2.9
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -334,8 +333,6 @@ class SearchService {
           DateTime(yr, month, day).microsecondsSinceEpoch,
           DateTime(yr, month, day + 1).microsecondsSinceEpoch,
         ]);
-      } else {
-        debugPrint("Invalid date $day : m: $month : y: $yr");
       }
     }
     return durationsOfHolidayInEveryYear;
