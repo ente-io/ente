@@ -220,7 +220,7 @@ export function PhotoList({
         if (!skipMerge) {
             timeStampList = mergeTimeStampList(timeStampList, columns);
         }
-        if (timeStampList.length === 0) {
+        if (timeStampList.length === 1) {
             timeStampList.push(getEmptyListItem());
         }
         if (
@@ -573,9 +573,6 @@ export function PhotoList({
                 return listItem.item;
         }
     };
-    if (!timeStampList?.length) {
-        return <></>;
-    }
 
     return (
         <List
