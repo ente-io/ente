@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -198,8 +199,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       }
     }
     collectionsWithThumbnail.sort((first, second) {
-      return (first.collection.name ?? "")
-          .compareTo((second.collection.name ?? ""));
+      return compareAsciiLowerCaseNatural(
+        first.collection.name ?? "",
+        second.collection.name ?? "",
+      );
     });
     return collectionsWithThumbnail;
   }
