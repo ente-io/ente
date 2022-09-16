@@ -197,10 +197,10 @@ export const getArchivedCollections = (collections: Collection[]) => {
     );
 };
 
-export const hasNonEmptyCollections = (
+export const hasNonSystemCollections = (
     collectionSummaries: CollectionSummaries
 ) => {
-    return collectionSummaries?.size <= 3;
+    return collectionSummaries?.size > 3;
 };
 
 export const isUploadAllowedCollection = (type: CollectionSummaryType) => {

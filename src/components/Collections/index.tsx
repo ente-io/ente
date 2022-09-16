@@ -8,7 +8,7 @@ import CollectionShare from 'components/Collections/CollectionShare';
 import { SetCollectionNamerAttributes } from 'components/Collections/CollectionNamer';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import {
-    hasNonEmptyCollections,
+    hasNonSystemCollections,
     isSystemCollection,
     shouldBeShownOnCollectionBar,
 } from 'utils/collection';
@@ -50,7 +50,7 @@ export default function Collections(props: Iprops) {
     const activeCollection = useRef<Collection>(null);
 
     const shouldBeHidden =
-        isInSearchMode || hasNonEmptyCollections(collectionSummaries);
+        isInSearchMode || !hasNonSystemCollections(collectionSummaries);
 
     useEffect(() => {
         collectionsMap.current = new Map(

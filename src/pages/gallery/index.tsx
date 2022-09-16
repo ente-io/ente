@@ -73,7 +73,7 @@ import {
     getSelectedCollection,
     isFavoriteCollection,
     getArchivedCollections,
-    hasNonEmptyCollections,
+    hasNonSystemCollections,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
@@ -669,7 +669,9 @@ export default function Gallery() {
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
                     setCollections={setCollections}
-                    isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
+                    isFirstUpload={
+                        !hasNonSystemCollections(collectionSummaries)
+                    }
                     webFileSelectorFiles={webFileSelectorFiles}
                     webFolderSelectorFiles={webFolderSelectorFiles}
                     dragAndDropFiles={dragAndDropFiles}
