@@ -285,7 +285,6 @@ class SearchService {
       final int day = potentialDate.item1;
       final int month = potentialDate.item2.monthNumber;
       final int year = potentialDate.item3; // nullable
-
       final matchedFiles =
           await FilesDB.instance.getFilesCreatedWithinDurations(
         _getDurationsForCalendarDateInEveryYear(day, month, year: year),
@@ -340,7 +339,7 @@ class SearchService {
 
   List<List<int>> _getDurationsOfMonthInEveryYear(int month) {
     final List<List<int>> durationsOfMonthInEveryYear = [];
-    for (var year = searchStartYear; year < currentYear; year++) {
+    for (var year = searchStartYear; year <= currentYear; year++) {
       durationsOfMonthInEveryYear.add([
         DateTime.utc(year, month, 1).microsecondsSinceEpoch,
         month == 12
@@ -396,13 +395,13 @@ class SearchService {
     final List<int> matchingYears = [];
     if (parsedYear != null) {
       bool foundMatch = false;
-      for (int i = searchStartYear; i < currentYear; i++) {
+      for (int i = searchStartYear; i <= currentYear; i++) {
         if (i.toString().startsWith(parsedYear.toString())) {
           matchingYears.add(i);
           foundMatch = foundMatch || (i == parsedYear);
         }
       }
-      if (!foundMatch && parsedYear > 1000 && parsedYear < currentYear) {
+      if (!foundMatch && parsedYear > 1000 && parsedYear <= currentYear) {
         matchingYears.add(parsedYear);
       }
     }

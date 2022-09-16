@@ -609,7 +609,7 @@ class FilesDB {
     final db = await instance.database;
     String whereClause = "( ";
     for (int index = 0; index < durations.length; index++) {
-      whereClause += "($columnCreationTime > " +
+      whereClause += "($columnCreationTime >= " +
           durations[index][0].toString() +
           " AND $columnCreationTime < " +
           durations[index][1].toString() +
