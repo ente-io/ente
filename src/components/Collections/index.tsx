@@ -49,8 +49,10 @@ export default function Collections(props: Iprops) {
     const collectionsMap = useRef<Map<number, Collection>>(new Map());
     const activeCollection = useRef<Collection>(null);
 
-    const shouldBeHidden =
-        isInSearchMode || !hasNonSystemCollections(collectionSummaries);
+    const shouldBeHidden = useMemo(
+        () => isInSearchMode || !hasNonSystemCollections(collectionSummaries),
+        [isInSearchMode, collectionSummaries]
+    );
 
     useEffect(() => {
         collectionsMap.current = new Map(
@@ -72,31 +74,26 @@ export default function Collections(props: Iprops) {
         [collectionSortBy, collectionSummaries]
     );
 
-    useEffect(
-        () =>
-            !shouldBeHidden &&
-            setPhotoListHeader({
-                item: (
-                    <CollectionInfoWithOptions
-                        collectionSummary={collectionSummaries.get(
-                            activeCollectionID
-                        )}
-                        activeCollection={activeCollection.current}
-                        activeCollectionID={activeCollectionID}
-                        setCollectionNamerAttributes={
-                            setCollectionNamerAttributes
-                        }
-                        redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
-                        showCollectionShareModal={() =>
-                            setCollectionShareModalView(true)
-                        }
-                    />
-                ),
-                itemType: ITEM_TYPE.OTHER,
-                height: 68,
-            }),
-        [collectionSummaries, activeCollectionID, shouldBeHidden]
-    );
+    useEffect(() => {
+        setPhotoListHeader({
+            item: (
+                <CollectionInfoWithOptions
+                    collectionSummary={collectionSummaries.get(
+                        activeCollectionID
+                    )}
+                    activeCollection={activeCollection.current}
+                    activeCollectionID={activeCollectionID}
+                    setCollectionNamerAttributes={setCollectionNamerAttributes}
+                    redirectToAll={() => setActiveCollectionID(ALL_SECTION)}
+                    showCollectionShareModal={() =>
+                        setCollectionShareModalView(true)
+                    }
+                />
+            ),
+            itemType: ITEM_TYPE.OTHER,
+            height: 68,
+        });
+    }, [collectionSummaries, activeCollectionID, shouldBeHidden]);
 
     if (shouldBeHidden) {
         return <></>;
