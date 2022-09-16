@@ -1,8 +1,5 @@
-// @dart=2.9
-
+// @dart = 2.9
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 
 class BillingPlans {
   final List<BillingPlan> plans;
@@ -12,16 +9,6 @@ class BillingPlans {
     this.plans,
     this.freePlan,
   });
-
-  BillingPlans copyWith({
-    List<BillingPlan> plans,
-    FreePlan freePlan,
-  }) {
-    return BillingPlans(
-      plans: plans ?? this.plans,
-      freePlan: freePlan ?? this.freePlan,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -41,25 +28,8 @@ class BillingPlans {
     );
   }
 
-  String toJson() => json.encode(toMap());
-
   factory BillingPlans.fromJson(String source) =>
       BillingPlans.fromMap(json.decode(source));
-
-  @override
-  String toString() => 'BillingPlans(plans: $plans, freePlan: $freePlan)';
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is BillingPlans &&
-        listEquals(o.plans, plans) &&
-        o.freePlan == freePlan;
-  }
-
-  @override
-  int get hashCode => plans.hashCode ^ freePlan.hashCode;
 }
 
 class FreePlan {
@@ -71,18 +41,6 @@ class FreePlan {
     this.duration,
     this.period,
   });
-
-  FreePlan copyWith({
-    int storage,
-    int duration,
-    String period,
-  }) {
-    return FreePlan(
-      storage: storage ?? this.storage,
-      duration: duration ?? this.duration,
-      period: period ?? this.period,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -101,28 +59,6 @@ class FreePlan {
       period: map['period'],
     );
   }
-
-  String toJson() => json.encode(toMap());
-
-  factory FreePlan.fromJson(String source) =>
-      FreePlan.fromMap(json.decode(source));
-
-  @override
-  String toString() =>
-      'FreePlan(storage: $storage, duration: $duration, period: $period)';
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is FreePlan &&
-        o.storage == storage &&
-        o.duration == duration &&
-        o.period == period;
-  }
-
-  @override
-  int get hashCode => storage.hashCode ^ duration.hashCode ^ period.hashCode;
 }
 
 class BillingPlan {
@@ -143,26 +79,6 @@ class BillingPlan {
     this.price,
     this.period,
   });
-
-  BillingPlan copyWith({
-    String id,
-    String androidID,
-    String iosID,
-    String stripeID,
-    int storage,
-    String price,
-    String period,
-  }) {
-    return BillingPlan(
-      id: id ?? this.id,
-      androidID: androidID ?? this.androidID,
-      iosID: iosID ?? this.iosID,
-      stripeID: stripeID ?? this.stripeID,
-      storage: storage ?? this.storage,
-      price: price ?? this.price,
-      period: period ?? this.period,
-    );
-  }
 
   Map<String, dynamic> toMap() {
     return {
@@ -188,40 +104,5 @@ class BillingPlan {
       price: map['price'],
       period: map['period'],
     );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory BillingPlan.fromJson(String source) =>
-      BillingPlan.fromMap(json.decode(source));
-
-  @override
-  String toString() {
-    return 'BillingPlan(id: $id, androidID: $androidID, iosID: $iosID, stripeID: $stripeID, storage: $storage, price: $price, period: $period)';
-  }
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is BillingPlan &&
-        o.id == id &&
-        o.androidID == androidID &&
-        o.iosID == iosID &&
-        o.stripeID == stripeID &&
-        o.storage == storage &&
-        o.price == price &&
-        o.period == period;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        androidID.hashCode ^
-        iosID.hashCode ^
-        stripeID.hashCode ^
-        storage.hashCode ^
-        price.hashCode ^
-        period.hashCode;
   }
 }
