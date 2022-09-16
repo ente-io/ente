@@ -1,4 +1,3 @@
-// @dart = 2.9
 import 'dart:convert';
 
 class BillingPlans {
@@ -17,8 +16,10 @@ class BillingPlans {
     };
   }
 
-  factory BillingPlans.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+  factory BillingPlans.fromMap(Map<String, dynamic>? map) {
+    if (map == null) {
+      throw ArgumentError('argument is null');
+    }
 
     return BillingPlans(
       plans: List<BillingPlan>.from(
@@ -50,8 +51,10 @@ class FreePlan {
     };
   }
 
-  factory FreePlan.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+  factory FreePlan.fromMap(Map<String, dynamic>? map) {
+    if (map == null) {
+      throw ArgumentError('argument is null');
+    }
 
     return FreePlan(
       storage: map['storage'],
@@ -92,8 +95,10 @@ class BillingPlan {
     };
   }
 
-  factory BillingPlan.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+  factory BillingPlan.fromMap(Map<String, dynamic>? map) {
+    if (map == null) {
+      throw ArgumentError('argument is null');
+    }
 
     return BillingPlan(
       id: map['id'],
