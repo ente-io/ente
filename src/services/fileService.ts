@@ -13,7 +13,7 @@ import {
     sortFiles,
 } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
-import { DeleteFilesRequest, EnteFile, TrashRequest } from 'types/file';
+import { EnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
@@ -205,17 +205,15 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
         if (!token) {
             return;
         }
-        const deleteBatch: DeleteFilesRequest = {
-            fileIDs: [],
-        };
+        let deleteBatch: number[];
         for (const fileID of filesToDelete) {
-            deleteBatch.fileIDs.push(fileID);
-            if (deleteBatch.fileIDs.length >= MAX_TRASH_BATCH_SIZE) {
+            deleteBatch.push(fileID);
+            if (deleteBatch.length >= MAX_TRASH_BATCH_SIZE) {
                 await deleteBatchFromTrash(token, deleteBatch);
-                deleteBatch.fileIDs = [];
+                deleteBatch = [];
             }
         }
-        if (deleteBatch.fileIDs.length > 0) {
+        if (deleteBatch.length > 0) {
             await deleteBatchFromTrash(token, deleteBatch);
         }
     } catch (e) {
@@ -224,14 +222,16 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
     }
 };
 
-const deleteBatchFromTrash = async (
-    token: string,
-    deleteBatch: DeleteFilesRequest
-) => {
+const deleteBatchFromTrash = async (token: string, deleteBatch: number[]) => {
     try {
-        await HTTPService.post(`${ENDPOINT}/trash/delete`, deleteBatch, null, {
-            'X-Auth-Token': token,
-        });
+        await HTTPService.post(
+            `${ENDPOINT}/trash/delete`,
+            { fileIDs: deleteBatch },
+            null,
+            {
+                'X-Auth-Token': token,
+            }
+        );
     } catch (e) {
         logError(e, 'deleteBatchFromTrash failed');
         throw e;
