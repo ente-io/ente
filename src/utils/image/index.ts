@@ -12,8 +12,8 @@ export function resizeToSquare(img: ImageBitmap, size: number) {
     const ctx = offscreen.getContext('2d');
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, width, height);
-
-    return { image: offscreen.transferToImageBitmap(), width, height };
+    const resizedImage = offscreen.transferToImageBitmap();
+    return { image: resizedImage, width, height };
 }
 
 export function transform(

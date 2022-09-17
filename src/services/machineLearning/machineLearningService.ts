@@ -42,6 +42,7 @@ class MachineLearningService {
     // private clusteringService: ClusteringService;
 
     private localSyncContext: Promise<MLSyncContext>;
+    private syncContext: Promise<MLSyncContext>;
 
     public constructor() {
         // setWasmPaths('/js/tfjs/');
@@ -64,12 +65,7 @@ class MachineLearningService {
         // needs to be cleaned using tf.dispose or tf.tidy
         // tf.engine().startScope();
 
-        const mlSyncConfig = await getMLSyncConfig();
-        const syncContext = MLFactory.getMLSyncContext(
-            token,
-            mlSyncConfig,
-            true
-        );
+        const syncContext = await this.getSyncContext(token);
 
         await this.syncLocalFiles(syncContext);
 
@@ -109,7 +105,7 @@ class MachineLearningService {
         };
         // console.log('[MLService] sync results: ', mlSyncResult);
 
-        await syncContext.dispose();
+        // await syncContext.dispose();
         console.log('Final TF Memory stats: ', tf.memory());
 
         return mlSyncResult;
@@ -295,14 +291,28 @@ class MachineLearningService {
         // await this.disposeMLModels();
     }
 
+    private async getSyncContext(token: string) {
+        if (!this.syncContext) {
+            console.log('Creating syncContext');
+
+            this.syncContext = getMLSyncConfig().then((mlSyncConfig) =>
+                MLFactory.getMLSyncContext(token, mlSyncConfig, true)
+            );
+        } else {
+            console.log('reusing existing syncContext');
+        }
+        return this.syncContext;
+    }
+
     private async getLocalSyncContext(token: string) {
         if (!this.localSyncContext) {
             console.log('Creating localSyncContext');
             this.localSyncContext = getMLSyncConfig().then((mlSyncConfig) =>
                 MLFactory.getMLSyncContext(token, mlSyncConfig, false)
             );
+        } else {
+            console.log('reusing existing localSyncContext');
         }
-
         return this.localSyncContext;
     }
 
@@ -416,6 +426,11 @@ class MachineLearningService {
 
         try {
             await ReaderService.getImageBitmap(syncContext, fileContext);
+            // await this.syncFaceDetections(syncContext, fileContext);
+            // await ObjectService.syncFileObjectDetections(
+            //     syncContext,
+            //     fileContext
+            // );
             await Promise.all([
                 this.syncFaceDetections(syncContext, fileContext),
                 ObjectService.syncFileObjectDetections(

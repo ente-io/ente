@@ -8,6 +8,7 @@ import { pipeConsoleLogsToDebugLogs } from 'utils/logging';
 
 export class DedicatedMLWorker implements MachineLearningWorker {
     constructor() {
+        console.log('DedicatedMLWorker constructor called');
         pipeConsoleLogsToDebugLogs();
         // this.init();
     }

@@ -214,7 +214,7 @@ class MLWorkManager {
 
         const mlSyncResult = await jobWorkerProxy.sync(token);
 
-        this.terminateSyncJobWorker();
+        // this.terminateSyncJobWorker();
         const jobResult: MLSyncJobResult = {
             shouldBackoff:
                 !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
