@@ -8,15 +8,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
-  alice:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "42c97aebbea93d1944a199b453b41bbed1f3013a"
-      url: "https://github.com/jhomlala/alice.git"
-    source: git
-    version: "0.2.5"
   animate_do:
     dependency: "direct main"
     description:
@@ -52,13 +43,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
-  better_player:
-    dependency: transitive
-    description:
-      name: better_player
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.81"
   bip39:
     dependency: "direct main"
     description:
@@ -115,13 +99,6 @@ packages:
       relative: true
     source: path
     version: "1.2.2"
-  chopper:
-    dependency: transitive
-    description:
-      name: chopper
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.0.5"
   clock:
     dependency: transitive
     description:
@@ -562,13 +539,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_widget_from_html_core:
-    dependency: transitive
-    description:
-      name: flutter_widget_from_html_core
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.8.5+3"
   flutter_windowmanager:
     dependency: "direct main"
     description:
@@ -590,13 +560,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "8.0.9"
-  fwfh_text_style:
-    dependency: transitive
-    description:
-      name: fwfh_text_style
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.7.3+2"
   google_nav_bar:
     dependency: "direct main"
     description:
@@ -795,13 +758,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
-  open_file:
-    dependency: transitive
-    description:
-      name: open_file
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.2.1"
   open_mail_app:
     dependency: "direct main"
     description:
@@ -942,20 +898,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.11.1"
-  permission_handler:
-    dependency: transitive
-    description:
-      name: permission_handler
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "8.3.0"
-  permission_handler_platform_interface:
-    dependency: transitive
-    description:
-      name: permission_handler_platform_interface
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.7.0"
   petitparser:
     dependency: transitive
     description:
@@ -1047,13 +989,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
-  sensors:
-    dependency: transitive
-    description:
-      name: sensors
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.3"
   sentry:
     dependency: "direct main"
     description:
@@ -1068,13 +1003,6 @@ packages:
       relative: true
     source: path
     version: "6.5.1"
-  share:
-    dependency: transitive
-    description:
-      name: share
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "2.0.4"
   share_plus:
     dependency: "direct main"
     description:

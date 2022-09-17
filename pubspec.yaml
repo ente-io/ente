@@ -18,8 +18,6 @@ environment:
 
 dependencies:
   adaptive_theme: ^3.1.0
-  alice:
-    git: "https://github.com/jhomlala/alice.git"
   animate_do: ^2.0.0
   archive: ^3.1.2
   background_fetch: ^1.0.1
