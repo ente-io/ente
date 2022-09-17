@@ -205,20 +205,16 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
         if (!token) {
             return;
         }
-
         const deleteBatch: DeleteFilesRequest = {
             fileIDs: [],
         };
-
         for (const fileID of filesToDelete) {
             deleteBatch.fileIDs.push(fileID);
-
             if (deleteBatch.fileIDs.length >= MAX_TRASH_BATCH_SIZE) {
                 await deleteBatchFromTrash(token, deleteBatch);
                 deleteBatch.fileIDs = [];
             }
         }
-
         if (deleteBatch.fileIDs.length > 0) {
             await deleteBatchFromTrash(token, deleteBatch);
         }
