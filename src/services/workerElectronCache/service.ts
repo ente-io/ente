@@ -33,6 +33,7 @@ export class WorkerElectronCacheStorageService implements LimitedCacheStorage {
     }
 
     async delete(cacheName: string) {
+        await this.ready;
         return await this.proxiedElectronCacheService.delete(cacheName);
     }
 }
