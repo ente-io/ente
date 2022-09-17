@@ -58,3 +58,7 @@ export interface TrashRequestItems {
     fileID: number;
     collectionID: number;
 }
+
+export interface DeleteFilesRequest {
+    fileIDs: number[];
+}
