@@ -5,7 +5,10 @@ import {
     ProxiedLimitedCacheStorage,
     ProxiedWorkerLimitedCache,
 } from 'types/cache';
-import { serializeResponse, deserializeToResponse } from 'utils/comlink/proxy';
+import {
+    serializeResponse,
+    deserializeToResponse,
+} from 'utils/workerElectronCache/proxy';
 
 export class WorkerElectronCacheStorageClient
     implements ProxiedLimitedCacheStorage
