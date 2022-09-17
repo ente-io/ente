@@ -130,11 +130,13 @@ const darkThemeOptions = createTheme({
         },
         MuiLink: {
             defaultProps: {
-                underline: 'always',
+                color: '#1dba54',
+                underline: 'none',
             },
             styleOverrides: {
                 root: {
                     '&:hover': {
+                        underline: 'always',
                         color: '#1dba54',
                     },
                 },
@@ -285,13 +287,14 @@ const darkThemeOptions = createTheme({
         },
         background: {
             default: '#000000',
-            paper: '#141414',
-            overPaper: '#1b1b1b',
+            paper: '#1b1b1b',
+            overPaper: '#252525',
         },
         grey: {
             A100: '#ccc',
             A200: 'rgba(256, 256, 256, 0.24)',
             A400: '#434343',
+            500: 'rgba(256, 256, 256, 0.5)',
         },
         divider: 'rgba(256, 256, 256, 0.16)',
     },

@@ -29,7 +29,7 @@ export const getLocalFiles = async () => {
     return files;
 };
 
-export const setLocalFiles = async (files: EnteFile[]) => {
+const setLocalFiles = async (files: EnteFile[]) => {
     try {
         await localForage.setItem(FILES_TABLE, files);
         try {
@@ -211,16 +211,35 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
         if (!token) {
             return;
         }
+        let deleteBatch: number[] = [];
+        for (const fileID of filesToDelete) {
+            deleteBatch.push(fileID);
+            if (deleteBatch.length >= MAX_TRASH_BATCH_SIZE) {
+                await deleteBatchFromTrash(token, deleteBatch);
+                deleteBatch = [];
+            }
+        }
+        if (deleteBatch.length > 0) {
+            await deleteBatchFromTrash(token, deleteBatch);
+        }
+    } catch (e) {
+        logError(e, 'deleteFromTrash failed');
+        throw e;
+    }
+};
+
+const deleteBatchFromTrash = async (token: string, deleteBatch: number[]) => {
+    try {
         await HTTPService.post(
             `${ENDPOINT}/trash/delete`,
-            { fileIDs: filesToDelete },
+            { fileIDs: deleteBatch },
             null,
             {
                 'X-Auth-Token': token,
             }
         );
     } catch (e) {
-        logError(e, 'delete from trash failed');
+        logError(e, 'deleteBatchFromTrash failed');
         throw e;
     }
 };

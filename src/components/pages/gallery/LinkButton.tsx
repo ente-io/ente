@@ -39,8 +39,12 @@ const LinkButton: FC<LinkProps<'button', { color?: ButtonProps['color'] }>> = ({
         <Link
             component="button"
             sx={{
+                color: 'text.primary',
+                textDecoration: 'underline rgba(255, 255, 255, 0.4)',
                 '&:hover': {
                     color: `${color}.main`,
+                    textDecoration: `underline `,
+                    textDecorationColor: `${color}.main`,
                 },
                 ...sx,
             }}

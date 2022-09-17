@@ -92,6 +92,7 @@ export interface FileWithCollection extends UploadAsset {
 export interface MetadataAndFileTypeInfo {
     metadata: Metadata;
     fileTypeInfo: FileTypeInfo;
+    filePath: string;
 }
 
 export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;
@@ -141,4 +142,10 @@ export interface UploadFile extends BackupedFile {
 export interface ParsedExtractedMetadata {
     location: Location;
     creationTime: number;
+}
+
+// This is used to prompt the user the make upload strategy choice
+export interface ImportSuggestion {
+    rootFolderName: string;
+    hasNestedFolders: boolean;
 }

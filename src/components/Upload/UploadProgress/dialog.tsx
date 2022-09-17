@@ -19,19 +19,18 @@ export function UploadProgressDialog() {
     const [hasUnUploadedFiles, setHasUnUploadedFiles] = useState(false);
 
     useEffect(() => {
-        if (!hasUnUploadedFiles) {
-            if (
-                finishedUploads.get(UPLOAD_RESULT.ALREADY_UPLOADED)?.length >
-                    0 ||
-                finishedUploads.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ||
-                finishedUploads.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
-                finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
-                    ?.length > 0 ||
-                finishedUploads.get(UPLOAD_RESULT.TOO_LARGE)?.length > 0 ||
-                finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0
-            ) {
-                setHasUnUploadedFiles(true);
-            }
+        if (
+            finishedUploads.get(UPLOAD_RESULT.ALREADY_UPLOADED)?.length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.BLOCKED)?.length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.FAILED)?.length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
+                ?.length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.TOO_LARGE)?.length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0
+        ) {
+            setHasUnUploadedFiles(true);
+        } else {
+            setHasUnUploadedFiles(false);
         }
     }, [finishedUploads]);
 

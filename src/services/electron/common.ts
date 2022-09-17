@@ -1,12 +1,13 @@
 import isElectron from 'is-electron';
+import { ElectronAPIs } from 'types/electron';
 
 class ElectronService {
-    private ElectronAPIs: any;
+    private electronAPIs: ElectronAPIs;
     private isBundledApp: boolean = false;
 
     constructor() {
-        this.ElectronAPIs = globalThis['ElectronAPIs'];
-        this.isBundledApp = !!this.ElectronAPIs?.openDiskCache;
+        this.electronAPIs = globalThis['ElectronAPIs'];
+        this.isBundledApp = !!this.electronAPIs?.openDiskCache;
     }
 
     checkIsBundledApp() {

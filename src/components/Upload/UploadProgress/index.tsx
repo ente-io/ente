@@ -1,6 +1,6 @@
 import { UploadProgressDialog } from './dialog';
 import { MinimizedUploadProgress } from './minimized';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import constants from 'utils/strings/constants';
 import { UPLOAD_STAGES } from 'constants/upload';
@@ -12,6 +12,7 @@ import {
     InProgressUpload,
 } from 'types/upload/ui';
 import UploadProgressContext from 'contexts/uploadProgress';
+import watchFolderService from 'services/watchFolder/watchFolderService';
 
 interface Props {
     open: boolean;
@@ -41,6 +42,16 @@ export default function UploadProgress({
 }: Props) {
     const appContext = useContext(AppContext);
     const [expanded, setExpanded] = useState(true);
+
+    // run watch folder minimized by default
+    useEffect(() => {
+        if (
+            appContext.isFolderSyncRunning &&
+            watchFolderService.isUploadRunning()
+        ) {
+            setExpanded(false);
+        }
+    }, [appContext.isFolderSyncRunning]);
 
     function confirmCancelUpload() {
         appContext.setDialogMessage({

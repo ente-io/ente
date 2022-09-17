@@ -1,3 +1,4 @@
+import { Canceler } from 'axios';
 import {
     UPLOAD_RESULT,
     RANDOM_PERCENTAGE_PROGRESS_FOR_PUT,
@@ -10,7 +11,10 @@ import {
     ProgressUpdater,
     SegregatedFinishedUploads,
 } from 'types/upload/ui';
+import { CustomError } from 'utils/error';
+import uploadCancelService from './uploadCancelService';
 
+const REQUEST_TIMEOUT_TIME = 30 * 1000; // 30 sec;
 class UIService {
     private perFileProgress: number;
     private filesUploaded: number;
@@ -23,7 +27,7 @@ class UIService {
         this.progressUpdater = progressUpdater;
     }
 
-    reset(count: number) {
+    reset(count = 0) {
         this.setTotalFileCount(count);
         this.filesUploaded = 0;
         this.inProgressUploads = new Map<number, number>();
@@ -33,7 +37,11 @@ class UIService {
 
     setTotalFileCount(count: number) {
         this.totalFileCount = count;
-        this.perFileProgress = 100 / this.totalFileCount;
+        if (count > 0) {
+            this.perFileProgress = 100 / this.totalFileCount;
+        } else {
+            this.perFileProgress = 0;
+        }
     }
 
     setFileProgress(key: number, progress: number) {
@@ -68,14 +76,26 @@ class UIService {
         this.updateProgressBarUI();
     }
 
-    updateProgressBarUI() {
+    hasFilesInResultList() {
+        const finishedUploadsList = segregatedFinishedUploadsToList(
+            this.finishedUploads
+        );
+        for (const x of finishedUploadsList.values()) {
+            if (x.length > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private updateProgressBarUI() {
         const {
             setPercentComplete,
-            setUploadCounter: setFileCounter,
+            setUploadCounter,
             setInProgressUploads,
             setFinishedUploads,
         } = this.progressUpdater;
-        setFileCounter({
+        setUploadCounter({
             finished: this.filesUploaded,
             total: this.totalFileCount,
         });
@@ -95,10 +115,10 @@ class UIService {
 
         setPercentComplete(percentComplete);
         setInProgressUploads(
-            this.convertInProgressUploadsToList(this.inProgressUploads)
+            convertInProgressUploadsToList(this.inProgressUploads)
         );
         setFinishedUploads(
-            this.segregatedFinishedUploadsToList(this.finishedUploads)
+            segregatedFinishedUploadsToList(this.finishedUploads)
         );
     }
 
@@ -107,13 +127,19 @@ class UIService {
         percentPerPart = RANDOM_PERCENTAGE_PROGRESS_FOR_PUT(),
         index = 0
     ) {
-        const cancel = { exec: null };
+        const cancel: { exec: Canceler } = { exec: () => {} };
+        const cancelTimedOutRequest = () =>
+            cancel.exec(CustomError.REQUEST_TIMEOUT);
+
+        const cancelCancelledUploadRequest = () =>
+            cancel.exec(CustomError.UPLOAD_CANCELLED);
+
         let timeout = null;
         const resetTimeout = () => {
             if (timeout) {
                 clearTimeout(timeout);
             }
-            timeout = setTimeout(() => cancel.exec(), 30 * 1000);
+            timeout = setTimeout(cancelTimedOutRequest, REQUEST_TIMEOUT_TIME);
         };
         return {
             cancel,
@@ -134,31 +160,33 @@ class UIService {
                 } else {
                     resetTimeout();
                 }
+                if (uploadCancelService.isUploadCancelationRequested()) {
+                    cancelCancelledUploadRequest();
+                }
             },
         };
-    }
-
-    convertInProgressUploadsToList(inProgressUploads) {
-        return [...inProgressUploads.entries()].map(
-            ([localFileID, progress]) =>
-                ({
-                    localFileID,
-                    progress,
-                } as InProgressUpload)
-        );
-    }
-
-    segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
-        const segregatedFinishedUploads =
-            new Map() as SegregatedFinishedUploads;
-        for (const [localID, result] of finishedUploads) {
-            if (!segregatedFinishedUploads.has(result)) {
-                segregatedFinishedUploads.set(result, []);
-            }
-            segregatedFinishedUploads.get(result).push(localID);
-        }
-        return segregatedFinishedUploads;
     }
 }
 
 export default new UIService();
+
+function convertInProgressUploadsToList(inProgressUploads) {
+    return [...inProgressUploads.entries()].map(
+        ([localFileID, progress]) =>
+            ({
+                localFileID,
+                progress,
+            } as InProgressUpload)
+    );
+}
+
+function segregatedFinishedUploadsToList(finishedUploads: FinishedUploads) {
+    const segregatedFinishedUploads = new Map() as SegregatedFinishedUploads;
+    for (const [localID, result] of finishedUploads) {
+        if (!segregatedFinishedUploads.has(result)) {
+            segregatedFinishedUploads.set(result, []);
+        }
+        segregatedFinishedUploads.get(result).push(localID);
+    }
+    return segregatedFinishedUploads;
+}

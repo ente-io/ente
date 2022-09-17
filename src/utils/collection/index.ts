@@ -58,7 +58,7 @@ export async function handleCollectionOps(
             );
             break;
         case COLLECTION_OPS_TYPE.REMOVE:
-            await removeFromCollection(collection, selectedFiles);
+            await removeFromCollection(collection.id, selectedFiles);
             break;
         case COLLECTION_OPS_TYPE.RESTORE:
             await restoreToCollection(collection, selectedFiles);
@@ -197,10 +197,10 @@ export const getArchivedCollections = (collections: Collection[]) => {
     );
 };
 
-export const hasNonEmptyCollections = (
+export const hasNonSystemCollections = (
     collectionSummaries: CollectionSummaries
 ) => {
-    return collectionSummaries?.size <= 3;
+    return collectionSummaries?.size > 3;
 };
 
 export const isUploadAllowedCollection = (type: CollectionSummaryType) => {
@@ -217,4 +217,12 @@ export const shouldShowOptions = (type: CollectionSummaryType) => {
 
 export const shouldBeShownOnCollectionBar = (type: CollectionSummaryType) => {
     return !HIDE_FROM_COLLECTION_BAR_TYPES.has(type);
+};
+
+export const getUserOwnedCollections = (collections: Collection[]) => {
+    const user: User = getData(LS_KEYS.USER);
+    if (!user?.id) {
+        throw Error('user missing');
+    }
+    return collections.filter((collection) => collection.owner.id === user.id);
 };

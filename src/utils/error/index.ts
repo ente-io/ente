@@ -47,6 +47,8 @@ export enum CustomError {
     FILE_ID_NOT_FOUND = 'file with id not found',
     WEAK_DEVICE = 'password decryption failed on the device',
     INCORRECT_PASSWORD = 'incorrect password',
+    UPLOAD_CANCELLED = 'upload cancelled',
+    REQUEST_TIMEOUT = 'request taking too long',
 }
 
 export function parseServerError(error: AxiosResponse): string {
@@ -106,6 +108,7 @@ export function handleUploadError(error): Error {
         case CustomError.SUBSCRIPTION_EXPIRED:
         case CustomError.STORAGE_QUOTA_EXCEEDED:
         case CustomError.SESSION_EXPIRED:
+        case CustomError.UPLOAD_CANCELLED:
             throw parsedError;
     }
     return parsedError;

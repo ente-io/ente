@@ -73,7 +73,7 @@ import {
     getSelectedCollection,
     isFavoriteCollection,
     getArchivedCollections,
-    hasNonEmptyCollections,
+    hasNonSystemCollections,
 } from 'utils/collection';
 import { logError } from 'utils/sentry';
 import {
@@ -90,7 +90,6 @@ import { EnteFile } from 'types/file';
 import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Notification from 'components/Notification';
-import { ElectronFile } from 'types/upload';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
@@ -150,7 +149,8 @@ export default function Gallery() {
         useState<CollectionNamerAttributes>(null);
     const [collectionNamerView, setCollectionNamerView] = useState(false);
     const [search, setSearch] = useState<Search>(null);
-    const [uploadInProgress, setUploadInProgress] = useState(false);
+    const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+
     const {
         getRootProps: getDragAndDropRootProps,
         getInputProps: getDragAndDropInputProps,
@@ -158,17 +158,17 @@ export default function Gallery() {
     } = useDropzone({
         noClick: true,
         noKeyboard: true,
-        disabled: uploadInProgress,
+        disabled: shouldDisableDropzone,
     });
     const {
-        selectedFiles: fileSelectorFiles,
+        selectedFiles: webFileSelectorFiles,
         open: openFileSelector,
         getInputProps: getFileSelectorInputProps,
     } = useFileInput({
         directory: false,
     });
     const {
-        selectedFiles: folderSelectorFiles,
+        selectedFiles: webFolderSelectorFiles,
         open: openFolderSelector,
         getInputProps: getFolderSelectorInputProps,
     } = useFileInput({
@@ -202,8 +202,6 @@ export default function Gallery() {
 
     const showPlanSelectorModal = () => setPlanModalView(true);
 
-    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [webFiles, setWebFiles] = useState([]);
     const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
 
     const [sidebarView, setSidebarView] = useState(false);
@@ -284,16 +282,6 @@ export default function Gallery() {
         () => notificationAttributes && setNotificationView(true),
         [notificationAttributes]
     );
-
-    useEffect(() => {
-        if (dragAndDropFiles?.length > 0) {
-            setWebFiles(dragAndDropFiles);
-        } else if (folderSelectorFiles?.length > 0) {
-            setWebFiles(folderSelectorFiles);
-        } else if (fileSelectorFiles?.length > 0) {
-            setWebFiles(fileSelectorFiles);
-        }
-    }, [dragAndDropFiles, fileSelectorFiles, folderSelectorFiles]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -575,7 +563,9 @@ export default function Gallery() {
         setSetSearchResultSummary(null);
     };
 
-    const openUploader = () => setUploadTypeSelectorView(true);
+    const openUploader = () => {
+        setUploadTypeSelectorView(true);
+    };
 
     return (
         <GalleryContext.Provider
@@ -663,6 +653,10 @@ export default function Gallery() {
                         null,
                         true
                     )}
+                    closeUploadTypeSelector={setUploadTypeSelectorView.bind(
+                        null,
+                        false
+                    )}
                     setCollectionSelectorAttributes={
                         setCollectionSelectorAttributes
                     }
@@ -672,16 +666,16 @@ export default function Gallery() {
                     )}
                     setLoading={setBlockingLoad}
                     setCollectionNamerAttributes={setCollectionNamerAttributes}
-                    uploadInProgress={uploadInProgress}
-                    setUploadInProgress={setUploadInProgress}
+                    setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setFiles}
-                    isFirstUpload={hasNonEmptyCollections(collectionSummaries)}
-                    electronFiles={electronFiles}
-                    setElectronFiles={setElectronFiles}
-                    webFiles={webFiles}
-                    setWebFiles={setWebFiles}
+                    setCollections={setCollections}
+                    isFirstUpload={
+                        !hasNonSystemCollections(collectionSummaries)
+                    }
+                    webFileSelectorFiles={webFileSelectorFiles}
+                    webFolderSelectorFiles={webFolderSelectorFiles}
+                    dragAndDropFiles={dragAndDropFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
-                    setUploadTypeSelectorView={setUploadTypeSelectorView}
                     showUploadFilesDialog={openFileSelector}
                     showUploadDirsDialog={openFolderSelector}
                     showSessionExpiredMessage={showSessionExpiredMessage}

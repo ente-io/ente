@@ -1,6 +1,9 @@
 import { createFFmpeg, FFmpeg } from 'ffmpeg-wasm';
 import { getUint8ArrayView } from 'services/readerService';
-import { parseFFmpegExtractedMetadata } from 'utils/ffmpeg';
+import {
+    parseFFmpegExtractedMetadata,
+    splitFilenameAndExtension,
+} from 'utils/ffmpeg';
 
 class FFmpegClient {
     private ffmpeg: FFmpeg;
@@ -22,7 +25,9 @@ class FFmpegClient {
 
     async generateThumbnail(file: File) {
         await this.ready;
-        const inputFileName = `${Date.now().toString()}-${file.name}`;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_, ext] = splitFilenameAndExtension(file.name);
+        const inputFileName = `${Date.now().toString()}-input.${ext}`;
         const thumbFileName = `${Date.now().toString()}-thumb.jpeg`;
         this.ffmpeg.FS(
             'writeFile',
@@ -57,7 +62,9 @@ class FFmpegClient {
 
     async extractVideoMetadata(file: File) {
         await this.ready;
-        const inputFileName = `${Date.now().toString()}-${file.name}`;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const [_, ext] = splitFilenameAndExtension(file.name);
+        const inputFileName = `${Date.now().toString()}-input.${ext}`;
         const outFileName = `${Date.now().toString()}-metadata.txt`;
         this.ffmpeg.FS(
             'writeFile',

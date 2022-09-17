@@ -3,6 +3,7 @@ import { Button, styled, Typography } from '@mui/material';
 import constants from 'utils/strings/constants';
 import { DeduplicateContext } from 'pages/deduplicate';
 import VerticallyCentered from './Container';
+import uploadManager from 'services/upload/uploadManager';
 
 const Wrapper = styled(VerticallyCentered)`
     & > svg {
@@ -34,12 +35,20 @@ export default function EmptyScreen({ openUploader }) {
                         {constants.UPLOAD_FIRST_PHOTO_DESCRIPTION()}
                     </Typography>
 
-                    <Button
-                        color="accent"
-                        onClick={openUploader}
-                        sx={{ mt: 4 }}>
-                        {constants.UPLOAD_FIRST_PHOTO}
-                    </Button>
+                    <span
+                        style={{
+                            cursor:
+                                !uploadManager.shouldAllowNewUpload() &&
+                                'not-allowed',
+                        }}>
+                        <Button
+                            color="accent"
+                            onClick={openUploader}
+                            disabled={!uploadManager.shouldAllowNewUpload()}
+                            sx={{ mt: 4 }}>
+                            {constants.UPLOAD_FIRST_PHOTO}
+                        </Button>
+                    </span>
                 </>
             )}
         </Wrapper>

@@ -49,12 +49,13 @@ import {
 import { User } from 'types/user';
 import { FILE_TYPE, TYPE_JPEG, TYPE_JPG } from 'constants/file';
 import { ExportType, ExportNotification, RecordType } from 'constants/export';
+import { ElectronAPIs } from 'types/electron';
 
 const LATEST_EXPORT_VERSION = 1;
 const EXPORT_RECORD_FILE_NAME = 'export_status.json';
 
 class ExportService {
-    ElectronAPIs: any;
+    electronAPIs: ElectronAPIs;
 
     private exportInProgress: Promise<{ paused: boolean }> = null;
     private exportRecordUpdater = new QueueProcessor<void>(1);
@@ -64,12 +65,12 @@ class ExportService {
     private fileReader: FileReader = null;
 
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.exists;
+        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.allElectronAPIsExist = !!this.electronAPIs?.exists;
     }
     async selectExportDirectory() {
         try {
-            return await this.ElectronAPIs.selectRootDirectory();
+            return await this.electronAPIs.selectRootDirectory();
         } catch (e) {
             logError(e, 'failed to selectExportDirectory ');
             throw e;
@@ -88,12 +89,12 @@ class ExportService {
     ) {
         try {
             if (this.exportInProgress) {
-                this.ElectronAPIs.sendNotification(
+                this.electronAPIs.sendNotification(
                     ExportNotification.IN_PROGRESS
                 );
                 return await this.exportInProgress;
             }
-            this.ElectronAPIs.showOnTray('starting export');
+            this.electronAPIs.showOnTray('starting export');
             const exportDir = getData(LS_KEYS.EXPORT)?.folder;
             if (!exportDir) {
                 // no-export folder set
@@ -198,7 +199,7 @@ class ExportService {
                 );
             }
             if (!files?.length) {
-                this.ElectronAPIs.sendNotification(
+                this.electronAPIs.sendNotification(
                     ExportNotification.UP_TO_DATE
                 );
                 return { paused: false };
@@ -208,19 +209,19 @@ class ExportService {
             this.addFilesQueuedRecord(exportDir, files);
             const failedFileCount = 0;
 
-            this.ElectronAPIs.showOnTray({
+            this.electronAPIs.showOnTray({
                 export_progress: `0 / ${files.length} files exported`,
             });
             updateProgress({
                 current: 0,
                 total: files.length,
             });
-            this.ElectronAPIs.sendNotification(ExportNotification.START);
+            this.electronAPIs.sendNotification(ExportNotification.START);
 
             for (const [index, file] of files.entries()) {
                 if (this.stopExport || this.pauseExport) {
                     if (this.pauseExport) {
-                        this.ElectronAPIs.showOnTray({
+                        this.electronAPIs.showOnTray({
                             export_progress: `${index} / ${files.length} files exported (paused)`,
                             paused: true,
                         });
@@ -252,7 +253,7 @@ class ExportService {
                         'download and save failed for file during export'
                     );
                 }
-                this.ElectronAPIs.showOnTray({
+                this.electronAPIs.showOnTray({
                     export_progress: `${index + 1} / ${
                         files.length
                     } files exported`,
@@ -260,19 +261,19 @@ class ExportService {
                 updateProgress({ current: index + 1, total: files.length });
             }
             if (this.stopExport) {
-                this.ElectronAPIs.sendNotification(ExportNotification.ABORT);
-                this.ElectronAPIs.showOnTray();
+                this.electronAPIs.sendNotification(ExportNotification.ABORT);
+                this.electronAPIs.showOnTray();
             } else if (this.pauseExport) {
-                this.ElectronAPIs.sendNotification(ExportNotification.PAUSE);
+                this.electronAPIs.sendNotification(ExportNotification.PAUSE);
                 return { paused: true };
             } else if (failedFileCount > 0) {
-                this.ElectronAPIs.sendNotification(ExportNotification.FAILED);
-                this.ElectronAPIs.showOnTray({
+                this.electronAPIs.sendNotification(ExportNotification.FAILED);
+                this.electronAPIs.showOnTray({
                     retry_export: `export failed - retry export`,
                 });
             } else {
-                this.ElectronAPIs.sendNotification(ExportNotification.FINISH);
-                this.ElectronAPIs.showOnTray();
+                this.electronAPIs.sendNotification(ExportNotification.FINISH);
+                this.electronAPIs.showOnTray();
             }
             return { paused: false };
         } catch (e) {
@@ -349,7 +350,7 @@ class ExportService {
             }
             const exportRecord = await this.getExportRecord(folder);
             const newRecord = { ...exportRecord, ...newData };
-            await this.ElectronAPIs.setExportRecord(
+            await this.electronAPIs.setExportRecord(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`,
                 JSON.stringify(newRecord, null, 2)
             );
@@ -363,7 +364,7 @@ class ExportService {
             if (!folder) {
                 folder = getData(LS_KEYS.EXPORT)?.folder;
             }
-            const recordFile = await this.ElectronAPIs.getExportRecord(
+            const recordFile = await this.electronAPIs.getExportRecord(
                 `${folder}/${EXPORT_RECORD_FILE_NAME}`
             );
             if (recordFile) {
@@ -386,10 +387,10 @@ class ExportService {
                 exportFolder,
                 collection
             );
-            await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
+            await this.electronAPIs.checkExistsAndCreateCollectionDir(
                 collectionFolderPath
             );
-            await this.ElectronAPIs.checkExistsAndCreateCollectionDir(
+            await this.electronAPIs.checkExistsAndCreateCollectionDir(
                 getMetadataFolderPath(collectionFolderPath)
             );
             await this.addCollectionExportedRecord(
@@ -414,7 +415,7 @@ class ExportService {
                 exportFolder,
                 collection
             );
-            await this.ElectronAPIs.checkExistsAndRename(
+            await this.electronAPIs.checkExistsAndRename(
                 oldCollectionFolderPath,
                 newCollectionFolderPath
             );
@@ -505,7 +506,7 @@ class ExportService {
         fileSaveName: string,
         fileStream: ReadableStream<any>
     ) {
-        this.ElectronAPIs.saveStreamToDisk(
+        this.electronAPIs.saveStreamToDisk(
             getFileSavePath(collectionFolderPath, fileSaveName),
             fileStream
         );
@@ -515,7 +516,7 @@ class ExportService {
         fileSaveName: string,
         metadata: Metadata
     ) {
-        await this.ElectronAPIs.saveFileToDisk(
+        await this.electronAPIs.saveFileToDisk(
             getFileMetadataSavePath(collectionFolderPath, fileSaveName),
             getGoogleLikeMetadataFile(fileSaveName, metadata)
         );
@@ -526,7 +527,7 @@ class ExportService {
     };
 
     exists = (path: string) => {
-        return this.ElectronAPIs.exists(path);
+        return this.electronAPIs.exists(path);
     };
 
     checkAllElectronAPIsExists = () => this.allElectronAPIsExist;
@@ -583,8 +584,8 @@ class ExportService {
                 collection
             );
             collectionIDPathMap.set(collection.id, newCollectionFolderPath);
-            if (this.ElectronAPIs.exists(oldCollectionFolderPath)) {
-                await this.ElectronAPIs.checkExistsAndRename(
+            if (this.electronAPIs.exists(oldCollectionFolderPath)) {
+                await this.electronAPIs.checkExistsAndRename(
                     oldCollectionFolderPath,
                     newCollectionFolderPath
                 );
@@ -630,12 +631,12 @@ class ExportService {
                 collectionIDPathMap.get(file.collectionID),
                 newFileSaveName
             );
-            await this.ElectronAPIs.checkExistsAndRename(
+            await this.electronAPIs.checkExistsAndRename(
                 oldFileSavePath,
                 newFileSavePath
             );
             console.log(oldFileMetadataSavePath, newFileMetadataSavePath);
-            await this.ElectronAPIs.checkExistsAndRename(
+            await this.electronAPIs.checkExistsAndRename(
                 oldFileMetadataSavePath,
                 newFileMetadataSavePath
             );

@@ -16,16 +16,6 @@ interface DuplicatesResponse {
     }>;
 }
 
-const DuplicateItemSortingOrderDescBasedOnCollectionName = Object.fromEntries([
-    ['icloud library', 0],
-    ['icloudlibrary', 1],
-    ['recents', 2],
-    ['recently added', 3],
-    ['my photo stream', 4],
-]);
-
-const OtherCollectionNameRanking = 5;
-
 interface DuplicateFiles {
     files: EnteFile[];
     size: number;
@@ -228,15 +218,7 @@ async function sortDuplicateFiles(
         const secondCollectionName = collectionNameMap
             .get(secondFile.collectionID)
             .toLocaleLowerCase();
-        const firstFileRanking =
-            DuplicateItemSortingOrderDescBasedOnCollectionName[
-                firstCollectionName
-            ] ?? OtherCollectionNameRanking;
-        const secondFileRanking =
-            DuplicateItemSortingOrderDescBasedOnCollectionName[
-                secondCollectionName
-            ] ?? OtherCollectionNameRanking;
-        return secondFileRanking - firstFileRanking;
+        return firstCollectionName.localeCompare(secondCollectionName);
     });
 }
 

@@ -111,8 +111,8 @@ const englishConstants = {
         2: 'Reading file metadata',
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
-        4: 'Backup complete',
-        5: 'Cancelling remaining uploads',
+        4: 'Cancelling remaining uploads',
+        5: 'Backup complete',
     },
     UPLOADING_FILES: 'File upload',
     FILE_NOT_UPLOADED_LIST: 'The following files were not uploaded',
@@ -146,6 +146,9 @@ const englishConstants = {
     ),
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
+    WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
+    CONFIRM_DELETE: 'Confirm deletion',
+    DELETE_MESSAGE: `The selected files will be permanently deleted and can't be restored `,
     TRASH_FILES_TITLE: 'Delete files?',
     DELETE_FILES_TITLE: 'Delete immediately?',
     DELETE_FILES_MESSAGE:
@@ -227,7 +230,7 @@ const englishConstants = {
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
     OK: 'Ok',
-    SUCCESS: 'success',
+    SUCCESS: 'Success',
     ERROR: 'Error',
     MESSAGE: 'Message',
     INSTALL_MOBILE_APP: () => (
@@ -284,20 +287,28 @@ const englishConstants = {
 
     FAMILY_SUBSCRIPTION_INFO: 'You are on a family plan managed by',
 
-    RENEWAL_ACTIVE_SUBSCRIPTION_INFO: (expiryTime) => (
+    RENEWAL_ACTIVE_SUBSCRIPTION_STATUS: (expiryTime) => (
         <>Renews on {dateString(expiryTime)}</>
+    ),
+    RENEWAL_CANCELLED_SUBSCRIPTION_STATUS: (expiryTime) => (
+        <>Ends on {dateString(expiryTime)}</>
     ),
 
     RENEWAL_CANCELLED_SUBSCRIPTION_INFO: (expiryTime) => (
         <>Your subscription will be cancelled on {dateString(expiryTime)}</>
     ),
 
-    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: `You have exceeded your storage quota, please upgrade your plan.`,
+    STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO: (onClick) => (
+        <>
+            You have exceeded your storage quota,, please{' '}
+            <LinkButton onClick={onClick}> upgrade </LinkButton>
+        </>
+    ),
     SUBSCRIPTION_PURCHASE_SUCCESS: (expiryTime) => (
         <>
             <p>We've received your payment</p>
             <p>
-                your subscription is valid till{' '}
+                Your subscription is valid till{' '}
                 <strong>{dateString(expiryTime)}</strong>
             </p>
         </>
@@ -327,30 +338,29 @@ const englishConstants = {
                 All of your data will be deleted from our servers at the end of
                 this billing period.
             </p>
-            <p>are you sure that you want to cancel your subscription?</p>
+            <p>Are you sure that you want to cancel your subscription?</p>
         </>
     ),
     SUBSCRIPTION_CANCEL_FAILED: 'Failed to cancel subscription',
     SUBSCRIPTION_CANCEL_SUCCESS: 'Subscription canceled successfully',
 
-    ACTIVATE_SUBSCRIPTION: 'Reactivate subscription',
-    CONFIRM_ACTIVATE_SUBSCRIPTION: 'Activate subscription ',
-    ACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
+    REACTIVATE_SUBSCRIPTION: 'Reactivate subscription',
+    REACTIVATE_SUBSCRIPTION_MESSAGE: (expiryTime) =>
         `Once reactivated, you will be billed on ${dateString(expiryTime)}`,
     SUBSCRIPTION_ACTIVATE_SUCCESS: 'Subscription activated successfully ',
     SUBSCRIPTION_ACTIVATE_FAILED: 'Failed to reactivate subscription renewals',
 
     SUBSCRIPTION_PURCHASE_SUCCESS_TITLE: 'Thank you',
-    CANCEL_SUBSCRIPTION_ON_MOBILE:
+    CANCEL_SUBSCRIPTION_ON_MOBILE: 'Cancel mobile subscription',
+    CANCEL_SUBSCRIPTION_ON_MOBILE_MESSAGE:
         'Please cancel your subscription from the mobile app to activate a subscription here',
-    PAYPAL_MANAGE_NOT_SUPPORTED_MESSAGE: () => (
+    MAIL_TO_MANAGE_SUBSCRIPTION: (
         <>
             Please contact us at{' '}
-            <a href="mailto:paypal@ente.io">paypal@ente.io</a> to manage your
-            subscription
+            <Link href={`mailto:support@ente.io`}>support@ente.io</Link> to
+            manage your subscription
         </>
     ),
-    PAYPAL_MANAGE_NOT_SUPPORTED: 'Manage paypal plan',
     RENAME: 'Rename',
     RENAME_COLLECTION: 'Rename album',
     DELETE_COLLECTION_TITLE: 'Delete album?',
@@ -517,7 +527,7 @@ const englishConstants = {
     SUCCESSFULLY_EXPORTED_FILES: 'Successful exports',
     FAILED_EXPORTED_FILES: 'Failed exports',
     EXPORT_AGAIN: 'Resync',
-    RETRY_EXPORT_: 'Tetry failed exports',
+    RETRY_EXPORT_: 'Retry failed exports',
     LOCAL_STORAGE_NOT_ACCESSIBLE: 'Local storage not accessible',
     LOCAL_STORAGE_NOT_ACCESSIBLE_MESSAGE:
         'Your browser or an addon is blocking ente from saving data into local storage. please try loading this page after switching your browsing mode.',
@@ -760,6 +770,7 @@ const englishConstants = {
             </p>
         </>
     ),
+    WATCH_FOLDERS: 'Watch folders',
     UPGRADE_NOW: 'Upgrade now',
     RENEW_NOW: 'Renew now',
     STORAGE: 'Storage',
@@ -768,6 +779,18 @@ const englishConstants = {
     FAMILY: 'Family',
     FREE: 'free',
     OF: 'of',
+    WATCHED_FOLDERS: 'Watched folders',
+    NO_FOLDERS_ADDED: 'No folders added yet!',
+    FOLDERS_AUTOMATICALLY_MONITORED:
+        'The folders you add here will monitored to automatically',
+    UPLOAD_NEW_FILES_TO_ENTE: 'Upload new files to ente',
+    REMOVE_DELETED_FILES_FROM_ENTE: 'Remove deleted files from ente',
+    ADD_FOLDER: 'Add folder',
+    STOP_WATCHING: 'Stop watching',
+    STOP_WATCHING_FOLDER: 'Stop watching folder?',
+    STOP_WATCHING_DIALOG_MESSAGE:
+        'Your existing files will not be deleted, but ente will stop automatically updating the linked ente album on changes in this folder.',
+    YES_STOP: 'Yes, stop',
     MONTH_SHORT: 'mo',
     YEAR: 'year',
     FAMILY_PLAN: 'Family plan',
@@ -798,6 +821,32 @@ const englishConstants = {
     WEAK_DEVICE:
         "The web browser you're using is not powerful enough to encrypt your photos. Please try to log in to ente on your computer, or download the ente mobile/desktop app.",
     DRAG_AND_DROP_HINT: 'Or drag and drop into the ente window',
+    ASK_FOR_FEEDBACK: (
+        <>
+            <p>We'll be sorry to see you go. Are you facing some issue?</p>
+            <p>
+                Please write to us at{' '}
+                <Link href="mailto:feedback@ente.io">feedback@ente.io</Link>,
+                maybe there is a way we can help.
+            </p>
+        </>
+    ),
+    SEND_FEEDBACK: 'Yes, send feedback',
+    CONFIRM_ACCOUNT_DELETION_TITLE:
+        'Are you sure you want to delete your account?',
+    CONFIRM_ACCOUNT_DELETION_MESSAGE: (
+        <>
+            <p>
+                Your uploaded data will be scheduled for deletion, and your
+                account will be permanently deleted.
+            </p>
+            <p>This action is not reversible.</p>
+        </>
+    ),
+    AUTHENTICATE: 'Authenticate',
+    UPLOADED_TO_SINGLE_COLLECTION: 'Uploaded to single collection',
+    UPLOADED_TO_SEPARATE_COLLECTIONS: 'Uploaded to separate collections',
+    NEVERMIND: 'Nevermind',
 };
 
 export default englishConstants;

@@ -1,5 +1,6 @@
-import { UPLOAD_TYPE } from 'components/Upload/Uploader';
+import { PICKED_UPLOAD_TYPE } from 'constants/upload';
 import { Collection } from 'types/collection';
+import { ElectronAPIs } from 'types/electron';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 import { logError } from 'utils/sentry';
@@ -7,7 +8,7 @@ import { logError } from 'utils/sentry';
 interface PendingUploads {
     files: ElectronFile[];
     collectionName: string;
-    type: UPLOAD_TYPE;
+    type: PICKED_UPLOAD_TYPE;
 }
 
 interface selectZipResult {
@@ -15,19 +16,19 @@ interface selectZipResult {
     zipPaths: string[];
 }
 class ImportService {
-    ElectronAPIs: any;
+    electronAPIs: ElectronAPIs;
     private allElectronAPIsExist: boolean = false;
 
     constructor() {
-        this.ElectronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.allElectronAPIsExist = !!this.ElectronAPIs?.getPendingUploads;
+        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
+        this.allElectronAPIsExist = !!this.electronAPIs?.getPendingUploads;
     }
 
     async getElectronFilesFromGoogleZip(
         zipPath: string
     ): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.getElectronFilesFromGoogleZip(zipPath);
+            return this.electronAPIs.getElectronFilesFromGoogleZip(zipPath);
         }
     }
 
@@ -35,26 +36,26 @@ class ImportService {
 
     async showUploadFilesDialog(): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.showUploadFilesDialog();
+            return this.electronAPIs.showUploadFilesDialog();
         }
     }
 
     async showUploadDirsDialog(): Promise<ElectronFile[]> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.showUploadDirsDialog();
+            return this.electronAPIs.showUploadDirsDialog();
         }
     }
 
     async showUploadZipDialog(): Promise<selectZipResult> {
         if (this.allElectronAPIsExist) {
-            return this.ElectronAPIs.showUploadZipDialog();
+            return this.electronAPIs.showUploadZipDialog();
         }
     }
     async getPendingUploads(): Promise<PendingUploads> {
         try {
             if (this.allElectronAPIsExist) {
                 const pendingUploads =
-                    (await this.ElectronAPIs.getPendingUploads()) as PendingUploads;
+                    (await this.electronAPIs.getPendingUploads()) as PendingUploads;
                 return pendingUploads;
             }
         } catch (e) {
@@ -82,16 +83,16 @@ class ImportService {
             if (collections.length === 1) {
                 collectionName = collections[0].name;
             }
-            this.ElectronAPIs.setToUploadCollection(collectionName);
+            this.electronAPIs.setToUploadCollection(collectionName);
         }
     }
 
     async setToUploadFiles(
-        type: UPLOAD_TYPE.FILES | UPLOAD_TYPE.ZIPS,
+        type: PICKED_UPLOAD_TYPE.FILES | PICKED_UPLOAD_TYPE.ZIPS,
         filePaths: string[]
     ) {
         if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.setToUploadFiles(type, filePaths);
+            this.electronAPIs.setToUploadFiles(type, filePaths);
         }
     }
 
@@ -116,14 +117,14 @@ class ImportService {
                     );
                 }
             }
-            this.setToUploadFiles(UPLOAD_TYPE.FILES, filePaths);
+            this.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, filePaths);
         }
     }
     cancelRemainingUploads() {
         if (this.allElectronAPIsExist) {
-            this.ElectronAPIs.setToUploadCollection(null);
-            this.ElectronAPIs.setToUploadFiles(UPLOAD_TYPE.ZIPS, []);
-            this.ElectronAPIs.setToUploadFiles(UPLOAD_TYPE.FILES, []);
+            this.electronAPIs.setToUploadCollection(null);
+            this.electronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.ZIPS, []);
+            this.electronAPIs.setToUploadFiles(PICKED_UPLOAD_TYPE.FILES, []);
         }
     }
 }

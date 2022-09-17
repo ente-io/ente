@@ -5,6 +5,8 @@ import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
 import { Plan, Subscription } from 'types/billing';
+import isElectron from 'is-electron';
+import { DESKTOP_REDIRECT_URL } from 'constants/billing';
 
 const ENDPOINT = getEndpoint();
 
@@ -131,7 +133,7 @@ class billingService {
                 {
                     paymentProvider: 'stripe',
                     productID: null,
-                    VerificationData: sessionID,
+                    verificationData: sessionID,
                 },
                 null,
                 {
@@ -168,9 +170,13 @@ class billingService {
         action: string
     ) {
         try {
-            window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${
-                window.location.origin
-            }/gallery`;
+            let redirectURL;
+            if (isElectron()) {
+                redirectURL = DESKTOP_REDIRECT_URL;
+            } else {
+                redirectURL = `${window.location.origin}/gallery`;
+            }
+            window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
         } catch (e) {
             logError(e, 'unable to get payments url');
             throw e;

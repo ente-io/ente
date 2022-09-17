@@ -1,40 +1,33 @@
-import { FileWithCollection, Metadata } from 'types/upload';
+import {
+    ImportSuggestion,
+    ElectronFile,
+    FileWithCollection,
+    Metadata,
+} from 'types/upload';
 import { EnteFile } from 'types/file';
-import { A_SEC_IN_MICROSECONDS } from 'constants/upload';
+import {
+    A_SEC_IN_MICROSECONDS,
+    DEFAULT_IMPORT_SUGGESTION,
+    PICKED_UPLOAD_TYPE,
+} from 'constants/upload';
 import { FILE_TYPE } from 'constants/file';
+import { ENTE_METADATA_FOLDER } from 'constants/export';
+import isElectron from 'is-electron';
 
 const TYPE_JSON = 'json';
 const DEDUPE_COLLECTION = new Set(['icloud library', 'icloudlibrary']);
 
-export function fileAlreadyInCollection(
-    existingFilesInCollection: EnteFile[],
-    newFileMetadata: Metadata
-): boolean {
-    for (const existingFile of existingFilesInCollection) {
-        if (areFilesSame(existingFile.metadata, newFileMetadata)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-export function findSameFileInOtherCollection(
+export function findMatchingExistingFiles(
     existingFiles: EnteFile[],
     newFileMetadata: Metadata
-) {
-    if (!hasFileHash(newFileMetadata)) {
-        return null;
-    }
-
+): EnteFile[] {
+    const matchingFiles: EnteFile[] = [];
     for (const existingFile of existingFiles) {
-        if (
-            hasFileHash(existingFile.metadata) &&
-            areFilesWithFileHashSame(existingFile.metadata, newFileMetadata)
-        ) {
-            return existingFile;
+        if (areFilesSame(existingFile.metadata, newFileMetadata)) {
+            matchingFiles.push(existingFile);
         }
     }
-    return null;
+    return matchingFiles;
 }
 
 export function shouldDedupeAcrossCollection(collectionName: string): boolean {
@@ -101,10 +94,6 @@ export function segregateMetadataAndMediaFiles(
     const mediaFiles: FileWithCollection[] = [];
     filesWithCollectionToUpload.forEach((fileWithCollection) => {
         const file = fileWithCollection.file;
-        if (file.name.startsWith('.')) {
-            // ignore files with name starting with . (hidden files)
-            return;
-        }
         if (file.name.toLowerCase().endsWith(TYPE_JSON)) {
             metadataJSONFiles.push(fileWithCollection);
         } else {
@@ -119,4 +108,102 @@ export function areFileWithCollectionsSame(
     secondFile: FileWithCollection
 ): boolean {
     return firstFile.localID === secondFile.localID;
+}
+
+export function getImportSuggestion(
+    uploadType: PICKED_UPLOAD_TYPE,
+    toUploadFiles: File[] | ElectronFile[]
+): ImportSuggestion {
+    if (isElectron() && uploadType === PICKED_UPLOAD_TYPE.FILES) {
+        return DEFAULT_IMPORT_SUGGESTION;
+    }
+
+    const paths: string[] = toUploadFiles.map((file) => file['path']);
+    const getCharCount = (str: string) => (str.match(/\//g) ?? []).length;
+    paths.sort((path1, path2) => getCharCount(path1) - getCharCount(path2));
+    const firstPath = paths[0];
+    const lastPath = paths[paths.length - 1];
+
+    const L = firstPath.length;
+    let i = 0;
+    const firstFileFolder = firstPath.substring(0, firstPath.lastIndexOf('/'));
+    const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf('/'));
+    while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
+    let commonPathPrefix = firstPath.substring(0, i);
+
+    if (commonPathPrefix) {
+        commonPathPrefix = commonPathPrefix.substring(
+            0,
+            commonPathPrefix.lastIndexOf('/')
+        );
+        if (commonPathPrefix) {
+            commonPathPrefix = commonPathPrefix.substring(
+                commonPathPrefix.lastIndexOf('/') + 1
+            );
+        }
+    }
+    return {
+        rootFolderName: commonPathPrefix || null,
+        hasNestedFolders: firstFileFolder !== lastFileFolder,
+    };
+}
+
+// This function groups files that are that have the same parent folder into collections
+// For Example, for user files have a directory structure like this
+//              a
+//            / |  \
+//           b  j   c
+//          /|\    /  \
+//         e f g   h  i
+//
+// The files will grouped into 3 collections.
+// [a => [j],
+// b => [e,f,g],
+// c => [h, i]]
+export function groupFilesBasedOnParentFolder(
+    toUploadFiles: File[] | ElectronFile[]
+) {
+    const collectionNameToFilesMap = new Map<string, (File | ElectronFile)[]>();
+    for (const file of toUploadFiles) {
+        const filePath = file['path'] as string;
+
+        let folderPath = filePath.substring(0, filePath.lastIndexOf('/'));
+        // If the parent folder of a file is "metadata"
+        // we consider it to be part of the parent folder
+        // For Eg,For FileList  -> [a/x.png, a/metadata/x.png.json]
+        // they will both we grouped into the collection "a"
+        // This is cluster the metadata json files in the same collection as the file it is for
+        if (folderPath.endsWith(ENTE_METADATA_FOLDER)) {
+            folderPath = folderPath.substring(0, folderPath.lastIndexOf('/'));
+        }
+        const folderName = folderPath.substring(
+            folderPath.lastIndexOf('/') + 1
+        );
+        if (!folderName?.length) {
+            throw Error("folderName can't be null");
+        }
+        if (!collectionNameToFilesMap.has(folderName)) {
+            collectionNameToFilesMap.set(folderName, []);
+        }
+        collectionNameToFilesMap.get(folderName).push(file);
+    }
+    return collectionNameToFilesMap;
+}
+
+export function filterOutSystemFiles(files: File[] | ElectronFile[]) {
+    if (files[0] instanceof File) {
+        const browserFiles = files as File[];
+        return browserFiles.filter((file) => {
+            return !isSystemFile(file);
+        });
+    } else {
+        const electronFiles = files as ElectronFile[];
+        return electronFiles.filter((file) => {
+            return !isSystemFile(file);
+        });
+    }
+}
+
+export function isSystemFile(file: File | ElectronFile) {
+    return file.name.startsWith('.');
 }

@@ -10,7 +10,11 @@ import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
-import { sortFiles, sortFilesIntoCollections } from 'utils/file';
+import {
+    isSharedFile,
+    sortFiles,
+    groupFilesBasedOnCollectionID,
+} from 'utils/file';
 import {
     Collection,
     CollectionLatestFiles,
@@ -359,7 +363,7 @@ export const removeFromFavorites = async (file: EnteFile) => {
         if (!favCollection) {
             throw Error(CustomError.FAV_COLLECTION_MISSING);
         }
-        await removeFromCollection(favCollection, [file]);
+        await removeFromCollection(favCollection.id, [file]);
     } catch (e) {
         logError(e, 'remove from favorite failed');
     }
@@ -470,13 +474,13 @@ const encryptWithNewCollectionKey = async (
     return fileKeysEncryptedWithNewCollection;
 };
 export const removeFromCollection = async (
-    collection: Collection,
+    collectionID: number,
     files: EnteFile[]
 ) => {
     try {
         const token = getToken();
         const request: RemoveFromCollectionRequest = {
-            collectionID: collection.id,
+            collectionID: collectionID,
             fileIDs: files.map((file) => file.id),
         };
 
@@ -780,8 +784,10 @@ export function getCollectionSummaries(
         files,
         archivedCollections
     );
-    const collectionFilesCount = getCollectionsFileCount(files);
-    const uniqueFileCount = new Set(files.map((file) => file.id)).size;
+    const collectionFilesCount = getCollectionsFileCount(
+        files,
+        archivedCollections
+    );
 
     for (const collection of collections) {
         if (collectionFilesCount.get(collection.id)) {
@@ -802,12 +808,7 @@ export function getCollectionSummaries(
     }
     collectionSummaries.set(
         ALL_SECTION,
-        getAllCollectionSummaries(
-            collectionFilesCount,
-            collectionLatestFiles,
-            uniqueFileCount,
-            archivedCollections
-        )
+        getAllCollectionSummaries(collectionFilesCount, collectionLatestFiles)
     );
     collectionSummaries.set(
         ARCHIVE_SECTION,
@@ -827,44 +828,47 @@ export function getCollectionSummaries(
     return collectionSummaries;
 }
 
-function getCollectionsFileCount(files: EnteFile[]): CollectionFilesCount {
-    const collectionWiseFiles = sortFilesIntoCollections(files);
+function getCollectionsFileCount(
+    files: EnteFile[],
+    archivedCollections: Set<number>
+): CollectionFilesCount {
+    const collectionIDToFileMap = groupFilesBasedOnCollectionID(files);
     const collectionFilesCount = new Map<number, number>();
-    for (const [id, files] of collectionWiseFiles) {
+    for (const [id, files] of collectionIDToFileMap) {
         collectionFilesCount.set(id, files.length);
     }
+    const user: User = getData(LS_KEYS.USER);
+    const uniqueTrashedFileIDs = new Set<number>();
+    const uniqueArchivedFileIDs = new Set<number>();
+    const uniqueAllSectionFileIDs = new Set<number>();
+    for (const file of files) {
+        if (isSharedFile(user, file)) {
+            continue;
+        }
+        if (file.isTrashed) {
+            uniqueTrashedFileIDs.add(file.id);
+        } else if (IsArchived(file)) {
+            uniqueArchivedFileIDs.add(file.id);
+        } else if (!archivedCollections.has(file.collectionID)) {
+            uniqueAllSectionFileIDs.add(file.id);
+        }
+    }
+    collectionFilesCount.set(TRASH_SECTION, uniqueTrashedFileIDs.size);
+    collectionFilesCount.set(ARCHIVE_SECTION, uniqueArchivedFileIDs.size);
+    collectionFilesCount.set(ALL_SECTION, uniqueAllSectionFileIDs.size);
     return collectionFilesCount;
 }
 
 function getAllCollectionSummaries(
     collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFiles,
-    uniqueFileCount: number,
-    archivedCollections: Set<number>
+    collectionsLatestFile: CollectionLatestFiles
 ): CollectionSummary {
-    const archivedSectionFileCount =
-        collectionFilesCount.get(ARCHIVE_SECTION) ?? 0;
-    const trashSectionFileCount = collectionFilesCount.get(TRASH_SECTION) ?? 0;
-
-    const archivedCollectionsFileCount = 0;
-    for (const [id, fileCount] of collectionFilesCount.entries()) {
-        if (archivedCollections.has(id)) {
-            archivedCollectionsFileCount + fileCount;
-        }
-    }
-
-    const allSectionFileCount =
-        uniqueFileCount -
-        (archivedSectionFileCount +
-            trashSectionFileCount +
-            archivedCollectionsFileCount);
-
     return {
         id: ALL_SECTION,
         name: constants.ALL_SECTION_NAME,
         type: CollectionSummaryType.all,
         latestFile: collectionsLatestFile.get(ALL_SECTION),
-        fileCount: allSectionFileCount,
+        fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
         updationTime: collectionsLatestFile.get(ALL_SECTION)?.updationTime,
     };
 }

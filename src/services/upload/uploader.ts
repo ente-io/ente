@@ -1,30 +1,26 @@
 import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
-import {
-    fileAlreadyInCollection,
-    findSameFileInOtherCollection,
-    shouldDedupeAcrossCollection,
-} from 'utils/upload';
+import { findMatchingExistingFiles } from 'utils/upload';
 import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
 import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
 import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
-import { addLogLine } from 'utils/logging';
+import { addLocalLog, addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
+import uploadCancelService from './uploadCancelService';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
     uploadedFile?: EnteFile;
-    skipDecryption?: boolean;
 }
+
 export default async function uploader(
     worker: any,
-    existingFilesInCollection: EnteFile[],
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {
@@ -50,39 +46,52 @@ export default async function uploader(
             throw Error(CustomError.NO_METADATA);
         }
 
-        if (fileAlreadyInCollection(existingFilesInCollection, metadata)) {
-            addLogLine(`skipped upload for  ${fileNameSize}`);
-            return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
-        }
-
-        const sameFileInOtherCollection = findSameFileInOtherCollection(
+        const matchingExistingFiles = findMatchingExistingFiles(
             existingFiles,
             metadata
         );
-
-        if (sameFileInOtherCollection) {
-            addLogLine(
-                `same file in other collection found for  ${fileNameSize}`
+        addLocalLog(
+            () =>
+                `matchedFileList: ${matchingExistingFiles
+                    .map((f) => `${f.id}-${f.metadata.title}`)
+                    .join(',')}`
+        );
+        if (matchingExistingFiles?.length) {
+            const matchingExistingFilesCollectionIDs =
+                matchingExistingFiles.map((e) => e.collectionID);
+            addLocalLog(
+                () =>
+                    `matched file collectionIDs:${matchingExistingFilesCollectionIDs}
+                       and collectionID:${collection.id}`
             );
-            const resultFile = Object.assign({}, sameFileInOtherCollection);
-            resultFile.collectionID = collection.id;
-            await addToCollection(collection, [resultFile]);
-            return {
-                fileUploadResult: UPLOAD_RESULT.UPLOADED,
-                uploadedFile: resultFile,
-                skipDecryption: true,
-            };
+            if (matchingExistingFilesCollectionIDs.includes(collection.id)) {
+                addLogLine(
+                    `file already present in the collection , skipped upload for  ${fileNameSize}`
+                );
+                const sameCollectionMatchingExistingFile =
+                    matchingExistingFiles.find(
+                        (f) => f.collectionID === collection.id
+                    );
+                return {
+                    fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED,
+                    uploadedFile: sameCollectionMatchingExistingFile,
+                };
+            } else {
+                addLogLine(
+                    `same file in ${matchingExistingFilesCollectionIDs.length} collection found for  ${fileNameSize}`
+                );
+                // any of the matching file can used to add a symlink
+                const resultFile = Object.assign({}, matchingExistingFiles[0]);
+                resultFile.collectionID = collection.id;
+                await addToCollection(collection, [resultFile]);
+                return {
+                    fileUploadResult: UPLOAD_RESULT.ADDED_SYMLINK,
+                    uploadedFile: resultFile,
+                };
+            }
         }
-
-        // iOS exports via album doesn't export files without collection and if user exports all photos, album info is not preserved.
-        // This change allow users to export by albums, upload to ente. And export all photos -> upload files which are not already uploaded
-        // as part of the albums
-        if (
-            shouldDedupeAcrossCollection(fileWithCollection.collection.name) &&
-            fileAlreadyInCollection(existingFiles, metadata)
-        ) {
-            addLogLine(`deduped upload for  ${fileNameSize}`);
-            return { fileUploadResult: UPLOAD_RESULT.ALREADY_UPLOADED };
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
         }
         addLogLine(`reading asset ${fileNameSize}`);
 
@@ -98,6 +107,9 @@ export default async function uploader(
             metadata,
         };
 
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
         addLogLine(`encryptAsset ${fileNameSize}`);
         const encryptedFile = await UploadService.encryptAsset(
             worker,
@@ -105,6 +117,9 @@ export default async function uploader(
             collection.key
         );
 
+        if (uploadCancelService.isUploadCancelationRequested()) {
+            throw Error(CustomError.UPLOAD_CANCELLED);
+        }
         addLogLine(`uploadToBucket ${fileNameSize}`);
 
         const backupedFile: BackupedFile = await UploadService.uploadToBucket(
@@ -131,12 +146,15 @@ export default async function uploader(
         };
     } catch (e) {
         addLogLine(`upload failed for  ${fileNameSize} ,error: ${e.message}`);
-
-        logError(e, 'file upload failed', {
-            fileFormat: fileTypeInfo?.exactType,
-        });
+        if (e.message !== CustomError.UPLOAD_CANCELLED) {
+            logError(e, 'file upload failed', {
+                fileFormat: fileTypeInfo?.exactType,
+            });
+        }
         const error = handleUploadError(e);
         switch (error.message) {
+            case CustomError.UPLOAD_CANCELLED:
+                return { fileUploadResult: UPLOAD_RESULT.CANCELLED };
             case CustomError.ETAG_MISSING:
                 return { fileUploadResult: UPLOAD_RESULT.BLOCKED };
             case CustomError.UNSUPPORTED_FILE_FORMAT:

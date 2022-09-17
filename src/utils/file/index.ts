@@ -25,7 +25,7 @@ import HEICConverter from 'services/heicConverter/heicConverterService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
-import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
+
 import { addLogLine } from 'utils/logging';
 import { makeHumanReadableStorage } from 'utils/billing';
 export function downloadAsFile(filename: string, content: string) {
@@ -131,22 +131,14 @@ function downloadUsingAnchor(link: string, name: string) {
     a.remove();
 }
 
-export function sortFilesIntoCollections(files: EnteFile[]) {
-    const collectionWiseFiles = new Map<number, EnteFile[]>([
-        [ARCHIVE_SECTION, []],
-        [TRASH_SECTION, []],
-    ]);
+export function groupFilesBasedOnCollectionID(files: EnteFile[]) {
+    const collectionWiseFiles = new Map<number, EnteFile[]>();
     for (const file of files) {
         if (!collectionWiseFiles.has(file.collectionID)) {
             collectionWiseFiles.set(file.collectionID, []);
         }
-        if (file.isTrashed) {
-            collectionWiseFiles.get(TRASH_SECTION).push(file);
-        } else {
+        if (!file.isTrashed) {
             collectionWiseFiles.get(file.collectionID).push(file);
-            if (IsArchived(file)) {
-                collectionWiseFiles.get(ARCHIVE_SECTION).push(file);
-            }
         }
     }
     return collectionWiseFiles;
@@ -229,14 +221,20 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
             encryptedMetadata.decryptionHeader,
             file.key
         );
-        if (file.magicMetadata?.data) {
+        if (
+            file.magicMetadata?.data &&
+            typeof file.magicMetadata.data === 'string'
+        ) {
             file.magicMetadata.data = await worker.decryptMetadata(
                 file.magicMetadata.data,
                 file.magicMetadata.header,
                 file.key
             );
         }
-        if (file.pubMagicMetadata?.data) {
+        if (
+            file.pubMagicMetadata?.data &&
+            typeof file.pubMagicMetadata.data === 'string'
+        ) {
             file.pubMagicMetadata.data = await worker.decryptMetadata(
                 file.pubMagicMetadata.data,
                 file.pubMagicMetadata.header,
@@ -416,9 +414,7 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return file;
 }
 
-export function isSharedFile(file: EnteFile) {
-    const user: User = getData(LS_KEYS.USER);
-
+export function isSharedFile(user: User, file: EnteFile) {
     if (!user?.id || !file?.ownerID) {
         return false;
     }
@@ -515,4 +511,12 @@ export const getArchivedFiles = (files: EnteFile[]) => {
 export const createTypedObjectURL = async (blob: Blob, fileName: string) => {
     const type = await getFileType(new File([blob], fileName));
     return URL.createObjectURL(new Blob([blob], { type: type.mimeType }));
+};
+
+export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
+    const user: User = getData(LS_KEYS.USER);
+    if (!user?.id) {
+        throw Error('user missing');
+    }
+    return files.filter((file) => file.isTrashed || file.ownerID === user.id);
 };

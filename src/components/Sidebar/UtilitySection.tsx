@@ -9,6 +9,9 @@ import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import { canEnableMlSearch } from 'utils/machineLearning/compatibility';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import isElectron from 'is-electron';
+import WatchFolder from 'components/WatchFolder';
+import { getDownloadAppMessage } from 'utils/ui';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -17,6 +20,8 @@ export default function UtilitySection({ closeSidebar }) {
         startLoading,
         mlSearchEnabled,
         updateMlSearchEnabled,
+        watchFolderView,
+        setWatchFolderView,
     } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -26,8 +31,17 @@ export default function UtilitySection({ closeSidebar }) {
     const openRecoveryKeyModal = () => setRecoveryModalView(true);
     const closeRecoveryKeyModal = () => setRecoveryModalView(false);
 
-    const openTwoFactorModalView = () => setTwoFactorModalView(true);
-    const closeTwoFactorModalView = () => setTwoFactorModalView(false);
+    const openTwoFactorModal = () => setTwoFactorModalView(true);
+    const closeTwoFactorModal = () => setTwoFactorModalView(false);
+
+    const openWatchFolder = () => {
+        if (isElectron()) {
+            setWatchFolderView(true);
+        } else {
+            setDialogMessage(getDownloadAppMessage());
+        }
+    };
+    const closeWatchFolder = () => setWatchFolderView(false);
 
     const redirectToChangePasswordPage = () => {
         closeSidebar();
@@ -92,10 +106,15 @@ export default function UtilitySection({ closeSidebar }) {
     };
     return (
         <>
+            {isElectron() && (
+                <SidebarButton onClick={openWatchFolder}>
+                    {constants.WATCH_FOLDERS}
+                </SidebarButton>
+            )}
             <SidebarButton onClick={openRecoveryKeyModal}>
                 {constants.RECOVERY_KEY}
             </SidebarButton>
-            <SidebarButton onClick={openTwoFactorModalView}>
+            <SidebarButton onClick={openTwoFactorModal}>
                 {constants.TWO_FACTOR}
             </SidebarButton>
             <SidebarButton onClick={redirectToChangePasswordPage}>
@@ -157,10 +176,11 @@ export default function UtilitySection({ closeSidebar }) {
             />
             <TwoFactorModal
                 show={twoFactorModalView}
-                onHide={closeTwoFactorModalView}
+                onHide={closeTwoFactorModal}
                 closeSidebar={closeSidebar}
                 setLoading={startLoading}
             />
+            <WatchFolder open={watchFolderView} onClose={closeWatchFolder} />
 
             {/* <FixLargeThumbnails
                 isOpen={fixLargeThumbsView}

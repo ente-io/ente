@@ -129,3 +129,21 @@ export function openLink(href: string, newTab?: boolean) {
     a.rel = 'noreferrer noopener';
     a.click();
 }
+
+export async function waitAndRun(
+    waitPromise: Promise<void>,
+    task: () => Promise<void>
+) {
+    if (waitPromise && isPromise(waitPromise)) {
+        await waitPromise;
+    }
+    await task();
+}
+
+function isPromise(p: any) {
+    if (typeof p === 'object' && typeof p.then === 'function') {
+        return true;
+    }
+
+    return false;
+}

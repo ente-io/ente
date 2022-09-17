@@ -3,7 +3,7 @@ import { logError } from 'utils/sentry';
 import UploadHttpClient from './uploadHttpClient';
 import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
-import { handleUploadError } from 'utils/error';
+import { CustomError, handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,
     BackupedFile,
@@ -44,6 +44,7 @@ class UploadService {
         number,
         MetadataAndFileTypeInfo
     >();
+
     private pendingUploadCount: number = 0;
 
     async setFileCount(fileCount: number) {
@@ -185,7 +186,9 @@ class UploadService {
             };
             return backupedFile;
         } catch (e) {
-            logError(e, 'error uploading to bucket');
+            if (e.message !== CustomError.UPLOAD_CANCELLED) {
+                logError(e, 'error uploading to bucket');
+            }
             throw e;
         }
     }
