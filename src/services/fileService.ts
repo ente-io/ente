@@ -199,7 +199,7 @@ export const trashFiles = async (filesToTrash: EnteFile[]) => {
     }
 };
 
-export const batchAndDeleteFromTrash = async (filesToDelete: number[]) => {
+export const deleteFromTrash = async (filesToDelete: number[]) => {
     try {
         const token = getToken();
         if (!token) {
@@ -214,13 +214,13 @@ export const batchAndDeleteFromTrash = async (filesToDelete: number[]) => {
             deleteBatch.fileIDs.push(fileID);
 
             if (deleteBatch.fileIDs.length >= MAX_TRASH_BATCH_SIZE) {
-                await deleteFromTrash(token, deleteBatch);
+                await deleteBatchFromTrash(token, deleteBatch);
                 deleteBatch.fileIDs = [];
             }
         }
 
         if (deleteBatch.fileIDs.length > 0) {
-            await deleteFromTrash(token, deleteBatch);
+            await deleteBatchFromTrash(token, deleteBatch);
         }
     } catch (e) {
         logError(e, 'batchAndDeleteFromTrash failed');
@@ -228,7 +228,7 @@ export const batchAndDeleteFromTrash = async (filesToDelete: number[]) => {
     }
 };
 
-export const deleteFromTrash = async (
+const deleteBatchFromTrash = async (
     token: string,
     deleteBatch: DeleteFilesRequest
 ) => {
