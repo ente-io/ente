@@ -1,5 +1,5 @@
-import { FACE_CROPS_CACHE, THUMB_CACHE } from 'constants/cache';
-import { getCacheStorage } from 'services/cache/cacheStorageFactory';
+import { FACE_CROPS_CACHE, FILE_CACHE, THUMB_CACHE } from 'constants/cache';
+import { CacheStorageService } from 'services/cache/cacheStorageService';
 import { logError } from 'utils/sentry';
 
 export async function cached(
@@ -7,7 +7,7 @@ export async function cached(
     id: string,
     get: () => Promise<Blob>
 ): Promise<Blob> {
-    const cache = await openCache(cacheName);
+    const cache = await CacheStorageService.open(cacheName);
     const cacheResponse = await cache.match(id);
 
     let result: Blob;
@@ -31,31 +31,17 @@ export async function getBlobFromCache(
     cacheName: string,
     url: string
 ): Promise<Blob> {
-    const cache = await openCache(cacheName);
+    const cache = await CacheStorageService.open(cacheName);
     const response = await cache.match(url);
 
     return response.blob();
 }
 
-export async function openCache(cacheName: string) {
-    try {
-        return await getCacheStorage().open(cacheName);
-    } catch (e) {
-        logError(e, 'openCache failed'); // log and ignore
-    }
-}
-export async function deleteCache(cacheName: string) {
-    try {
-        return await getCacheStorage().delete(cacheName);
-    } catch (e) {
-        logError(e, 'deleteCache failed'); // log and ignore
-    }
-}
-
 export async function deleteAllCache() {
     try {
-        await deleteCache(THUMB_CACHE);
-        await deleteCache(FACE_CROPS_CACHE);
+        await CacheStorageService.delete(THUMB_CACHE);
+        await CacheStorageService.delete(FACE_CROPS_CACHE);
+        await CacheStorageService.delete(FILE_CACHE);
     } catch (e) {
         logError(e, 'deleteAllCache failed'); // log and ignore
     }
