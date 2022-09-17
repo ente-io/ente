@@ -574,6 +574,10 @@ export function PhotoList({
         }
     };
 
+    if (!timeStampList?.length) {
+        return <></>;
+    }
+
     return (
         <List
             key={`${activeCollection}`}
