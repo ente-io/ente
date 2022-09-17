@@ -796,7 +796,7 @@ packages:
     source: hosted
     version: "1.0.2"
   open_file:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: open_file
       url: "https://pub.dartlang.org"

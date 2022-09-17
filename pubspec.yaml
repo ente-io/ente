@@ -82,7 +82,7 @@ dependencies:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
 
-  open_file: ^3.2.1
+  # open_file: ^3.2.1
   open_mail_app: ^0.4.5
   package_info_plus: ^1.0.1
   page_transition: ^2.0.2
