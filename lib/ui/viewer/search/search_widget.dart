@@ -87,7 +87,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
-                        hintText: "Places, moments, albums...",
+                        hintText: "Albums, months, days, years, ...",
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
