@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -94,10 +95,15 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         if (second.collection.type == CollectionType.favorites &&
             first.collection.type != CollectionType.favorites) {
           return 1;
+        } else if (first.collection.type == CollectionType.favorites &&
+            second.collection.type != CollectionType.favorites) {
+          return 0;
         }
         if (sortKey == AlbumSortKey.albumName) {
-          // alphabetical ASC order
-          return first.collection.name.compareTo(second.collection.name);
+          return compareAsciiLowerCaseNatural(
+            first.collection.name,
+            second.collection.name,
+          );
         } else if (sortKey == AlbumSortKey.newestPhoto) {
           return second.thumbnail.creationTime
               .compareTo(first.thumbnail.creationTime);
