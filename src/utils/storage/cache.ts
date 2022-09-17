@@ -1,4 +1,4 @@
-import { FACE_CROPS_CACHE, THUMB_CACHE_NAME } from 'constants/cache';
+import { FACE_CROPS_CACHE, THUMB_CACHE } from 'constants/cache';
 import { getCacheStorage } from 'services/cache/cacheStorageFactory';
 import { logError } from 'utils/sentry';
 
@@ -54,7 +54,7 @@ export async function deleteCache(cacheName: string) {
 
 export async function deleteAllCache() {
     try {
-        await deleteCache(THUMB_CACHE_NAME);
+        await deleteCache(THUMB_CACHE);
         await deleteCache(FACE_CROPS_CACHE);
     } catch (e) {
         logError(e, 'deleteAllCache failed'); // log and ignore
