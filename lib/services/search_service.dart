@@ -21,6 +21,7 @@ import 'package:photos/models/search/location_api_response.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<File>> _cachedFilesFuture;
@@ -31,6 +32,7 @@ class SearchService {
   static const _maximumResultsLimit = 20;
 
   SearchService._privateConstructor();
+
   static final SearchService instance = SearchService._privateConstructor();
 
   Future<void> init() async {
@@ -180,7 +182,7 @@ class SearchService {
       if (holiday.name.toLowerCase().contains(query.toLowerCase())) {
         final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
-          _getDurationsOfHolidayInEveryYear(holiday.day, holiday.month),
+          _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
           null,
           order: 'DESC',
         );
@@ -253,28 +255,59 @@ class SearchService {
 
   Future<List<GenericSearchResult>> getMonthSearchResults(String query) async {
     final List<GenericSearchResult> searchResults = [];
-
-    for (var month in allMonths) {
-      if (month.name.toLowerCase().startsWith(query.toLowerCase())) {
-        final matchedFiles =
-            await FilesDB.instance.getFilesCreatedWithinDurations(
-          _getDurationsOfMonthInEveryYear(month.monthNumber),
-          null,
-          order: 'DESC',
+    for (var month in _getMatchingMonths(query)) {
+      final matchedFiles =
+          await FilesDB.instance.getFilesCreatedWithinDurations(
+        _getDurationsOfMonthInEveryYear(month.monthNumber),
+        null,
+        order: 'DESC',
+      );
+      if (matchedFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(
+            ResultType.month,
+            month.name,
+            matchedFiles,
+          ),
         );
-        if (matchedFiles.isNotEmpty) {
-          searchResults.add(
-            GenericSearchResult(
-              ResultType.month,
-              month.name,
-              matchedFiles,
-            ),
-          );
-        }
       }
     }
-
     return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getDateResults(
+    String query,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    final potentialDates = _getPossibleEventDate(query);
+
+    for (var potentialDate in potentialDates) {
+      final int day = potentialDate.item1;
+      final int month = potentialDate.item2.monthNumber;
+      final int year = potentialDate.item3; // nullable
+      final matchedFiles =
+          await FilesDB.instance.getFilesCreatedWithinDurations(
+        _getDurationsForCalendarDateInEveryYear(day, month, year: year),
+        null,
+        order: 'DESC',
+      );
+      if (matchedFiles.isNotEmpty) {
+        searchResults.add(
+          GenericSearchResult(ResultType.event,
+              '$day ${potentialDate.item2.name} ${year ?? ''}', matchedFiles),
+        );
+      }
+    }
+    return searchResults;
+  }
+
+  List<MonthData> _getMatchingMonths(String query) {
+    return allMonths
+        .where(
+          (monthData) =>
+              monthData.name.toLowerCase().startsWith(query.toLowerCase()),
+        )
+        .toList();
   }
 
   Future<List<File>> _getFilesInYear(List<int> durationOfYear) async {
@@ -285,20 +318,28 @@ class SearchService {
     );
   }
 
-  List<List<int>> _getDurationsOfHolidayInEveryYear(int day, int month) {
+  List<List<int>> _getDurationsForCalendarDateInEveryYear(
+    int day,
+    int month, {
+    int year,
+  }) {
     final List<List<int>> durationsOfHolidayInEveryYear = [];
-    for (var year = 1970; year <= currentYear; year++) {
-      durationsOfHolidayInEveryYear.add([
-        DateTime(year, month, day).microsecondsSinceEpoch,
-        DateTime(year, month, day + 1).microsecondsSinceEpoch,
-      ]);
+    final int startYear = year ?? searchStartYear;
+    final int endYear = year ?? currentYear;
+    for (var yr = startYear; yr <= endYear; yr++) {
+      if (isValidDate(day: day, month: month, year: yr)) {
+        durationsOfHolidayInEveryYear.add([
+          DateTime(yr, month, day).microsecondsSinceEpoch,
+          DateTime(yr, month, day + 1).microsecondsSinceEpoch,
+        ]);
+      }
     }
     return durationsOfHolidayInEveryYear;
   }
 
   List<List<int>> _getDurationsOfMonthInEveryYear(int month) {
     final List<List<int>> durationsOfMonthInEveryYear = [];
-    for (var year = 1970; year < currentYear; year++) {
+    for (var year = searchStartYear; year <= currentYear; year++) {
       durationsOfMonthInEveryYear.add([
         DateTime.utc(year, month, 1).microsecondsSinceEpoch,
         month == 12
@@ -326,5 +367,53 @@ class SearchService {
         location.latitude > locationData.bbox[1] &&
         location.longitude < locationData.bbox[2] &&
         location.latitude < locationData.bbox[3];
+  }
+
+  List<Tuple3<int, MonthData, int>> _getPossibleEventDate(String query) {
+    final List<Tuple3<int, MonthData, int>> possibleEvents = [];
+    if (query.trim().isEmpty) {
+      return possibleEvents;
+    }
+    final result = query
+        .trim()
+        .split(RegExp('[ ,-/]+'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+    final resultCount = result.length;
+    if (resultCount < 1 || resultCount > 4) {
+      return possibleEvents;
+    }
+
+    final int day = int.tryParse(result[0]);
+    if (day == null || day < 1 || day > 31) {
+      return possibleEvents;
+    }
+    final List<MonthData> potentialMonth =
+        resultCount > 1 ? _getMatchingMonths(result[1]) : allMonths;
+    final int parsedYear = resultCount >= 3 ? int.tryParse(result[2]) : null;
+    final List<int> matchingYears = [];
+    if (parsedYear != null) {
+      bool foundMatch = false;
+      for (int i = searchStartYear; i <= currentYear; i++) {
+        if (i.toString().startsWith(parsedYear.toString())) {
+          matchingYears.add(i);
+          foundMatch = foundMatch || (i == parsedYear);
+        }
+      }
+      if (!foundMatch && parsedYear > 1000 && parsedYear <= currentYear) {
+        matchingYears.add(parsedYear);
+      }
+    }
+    for (var element in potentialMonth) {
+      if (matchingYears.isEmpty) {
+        possibleEvents.add(Tuple3(day, element, null));
+      } else {
+        for (int yr in matchingYears) {
+          possibleEvents.add(Tuple3(day, element, yr));
+        }
+      }
+    }
+    return possibleEvents;
   }
 }

@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/feature_flag_service.dart';
@@ -48,6 +49,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 
 class SearchWidget extends StatefulWidget {
   const SearchWidget({Key key}) : super(key: key);
+
   @override
   State<SearchWidget> createState() => _SearchWidgetState();
 }
@@ -57,6 +59,7 @@ class _SearchWidgetState extends State<SearchWidget> {
   final List<SearchResult> _results = [];
   final _searchService = SearchService.instance;
   final _debouncer = Debouncer(const Duration(milliseconds: 100));
+  final Logger _logger = Logger((_SearchWidgetState).toString());
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +87,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                       keyboardType: TextInputType.visiblePassword,
                       // Above parameters are to disable auto-suggestion
                       decoration: InputDecoration(
-                        hintText: "Places, moments, albums...",
+                        hintText: "Albums, months, days, years, ...",
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -125,7 +128,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                         _query = value;
                         final List<SearchResult> allResults =
                             await getSearchResultsForQuery(value);
-                        /*checking if _query == value to make sure that the results are from the current query 
+                        /*checking if _query == value to make sure that the results are from the current query
                         and not from the previous query (race condition).*/
                         if (mounted && _query == value) {
                           setState(() {
@@ -178,34 +181,43 @@ class _SearchWidgetState extends State<SearchWidget> {
       completer.complete(allResults);
       return;
     }
-    if (_isYearValid(query)) {
-      final yearResults = await _searchService.getYearSearchResults(query);
-      allResults.addAll(yearResults);
+    try {
+      if (_isYearValid(query)) {
+        final yearResults = await _searchService.getYearSearchResults(query);
+        allResults.addAll(yearResults);
+      }
+
+      final holidayResults =
+          await _searchService.getHolidaySearchResults(query);
+      allResults.addAll(holidayResults);
+
+      final fileTypeSearchResults =
+          await _searchService.getFileTypeResults(query);
+      allResults.addAll(fileTypeSearchResults);
+
+      final fileExtnResult =
+          await _searchService.getFileExtensionResults(query);
+      allResults.addAll(fileExtnResult);
+
+      final collectionResults =
+          await _searchService.getCollectionSearchResults(query);
+      allResults.addAll(collectionResults);
+
+      if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
+          query.startsWith("l:")) {
+        final locationResults = await _searchService
+            .getLocationSearchResults(query.replaceAll("l:", ""));
+        allResults.addAll(locationResults);
+      }
+
+      final monthResults = await _searchService.getMonthSearchResults(query);
+      allResults.addAll(monthResults);
+
+      final possibleEvents = await _searchService.getDateResults(query);
+      allResults.addAll(possibleEvents);
+    } catch (e, s) {
+      _logger.severe("error during search", e, s);
     }
-
-    final holidayResults = await _searchService.getHolidaySearchResults(query);
-    allResults.addAll(holidayResults);
-
-    final fileTypeSearchResults =
-        await _searchService.getFileTypeResults(query);
-    allResults.addAll(fileTypeSearchResults);
-
-    final fileExtnResult = await _searchService.getFileExtensionResults(query);
-    allResults.addAll(fileExtnResult);
-
-    final collectionResults =
-        await _searchService.getCollectionSearchResults(query);
-    allResults.addAll(collectionResults);
-
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
-        query.startsWith("l:")) {
-      final locationResults = await _searchService
-          .getLocationSearchResults(query.replaceAll("l:", ""));
-      allResults.addAll(locationResults);
-    }
-
-    final monthResults = await _searchService.getMonthSearchResults(query);
-    allResults.addAll(monthResults);
     completer.complete(allResults);
   }
 

@@ -209,8 +209,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       final result = await showChoiceDialog(
         context,
         "Please login again",
-        '''Unfortunately, the ente app had to log you out because of some 
-        technical issues. Sorry!\n\nPlease login again.''',
+        '''Unfortunately, the ente app had to log you out because of some technical issues. Sorry!\n\nPlease login again.''',
         firstAction: "Cancel",
         secondAction: "Login",
       );
