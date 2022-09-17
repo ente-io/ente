@@ -10,8 +10,6 @@ import { MLWorkerWithProxy } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
-import { deleteCache } from 'utils/storage/cache';
-import { FACE_CROPS_CACHE } from 'constants/cache';
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
@@ -106,7 +104,6 @@ class MLWorkManager {
             this.mlSyncJob = undefined;
             await this.terminateLiveSyncWorker();
             await mlIDbStorage.clearMLDB();
-            await deleteCache(FACE_CROPS_CACHE);
         } catch (e) {
             logError(e, 'Failed in ML logout Handler');
         }
