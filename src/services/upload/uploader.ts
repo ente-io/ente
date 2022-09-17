@@ -13,6 +13,8 @@ import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
 import uploadCancelService from './uploadCancelService';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -20,7 +22,7 @@ interface UploadResponse {
 }
 
 export default async function uploader(
-    worker: any,
+    worker: Remote<DedicatedCryptoWorker>,
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection
 ): Promise<UploadResponse> {

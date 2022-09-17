@@ -5,7 +5,6 @@ import localForage from 'utils/storage/localForage';
 import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
 import { getPublicKey } from './userService';
-import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
@@ -82,7 +81,10 @@ const getCollectionWithSecrets = async (
             decryptedKey
         ));
 
-    if (collection.magicMetadata?.data) {
+    if (
+        collection.magicMetadata?.data &&
+        typeof collection.magicMetadata?.data === 'string'
+    ) {
         collection.magicMetadata.data = await worker.decryptMetadata(
             collection.magicMetadata.data,
             collection.magicMetadata.header,
@@ -277,20 +279,10 @@ export const createCollection = async (
         const encryptionKey = await getActualKey();
         const token = getToken();
         const collectionKey: string = await worker.generateEncryptionKey();
-        const {
-            encryptedData: encryptedKey,
-            nonce: keyDecryptionNonce,
-        }: B64EncryptionResult = await worker.encryptToB64(
-            collectionKey,
-            encryptionKey
-        );
-        const {
-            encryptedData: encryptedName,
-            nonce: nameDecryptionNonce,
-        }: B64EncryptionResult = await worker.encryptUTF8(
-            collectionName,
-            collectionKey
-        );
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+            await worker.encryptToB64(collectionKey, encryptionKey);
+        const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+            await worker.encryptUTF8(collectionName, collectionKey);
         const newCollection: Collection = {
             id: null,
             owner: null,
@@ -458,7 +450,7 @@ const encryptWithNewCollectionKey = async (
     const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(
+        const newEncryptedKey = await worker.encryptToB64(
             file.key,
             newCollection.key
         );
@@ -560,13 +552,8 @@ export const renameCollection = async (
 ) => {
     const token = getToken();
     const worker = await new CryptoWorker();
-    const {
-        encryptedData: encryptedName,
-        nonce: nameDecryptionNonce,
-    }: B64EncryptionResult = await worker.encryptUTF8(
-        newCollectionName,
-        collection.key
-    );
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+        await worker.encryptUTF8(newCollectionName, collection.key);
     const collectionRenameRequest = {
         collectionID: collection.id,
         encryptedName,

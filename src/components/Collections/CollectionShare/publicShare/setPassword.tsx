@@ -29,7 +29,7 @@ export function PublicLinkSetPassword({
 
     const enablePublicUrlPassword = async (password: string) => {
         const cryptoWorker = await new CryptoWorker();
-        const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
         const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
 
         return updatePublicShareURLHelper({

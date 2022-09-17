@@ -33,6 +33,8 @@ import { encryptFile, getFileSize, readFile } from './fileService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { USE_CF_PROXY } from 'constants/upload';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -123,7 +125,7 @@ class UploadService {
     }
 
     async encryptAsset(
-        worker: any,
+        worker: Remote<DedicatedCryptoWorker>,
         file: FileWithMetadata,
         encryptionKey: string
     ): Promise<EncryptedFile> {
@@ -146,13 +148,13 @@ class UploadService {
                 if (USE_CF_PROXY) {
                     fileObjectKey = await UploadHttpClient.putFileV2(
                         fileUploadURL,
-                        file.file.encryptedData,
+                        file.file.encryptedData as Uint8Array,
                         progressTracker
                     );
                 } else {
                     fileObjectKey = await UploadHttpClient.putFile(
                         fileUploadURL,
-                        file.file.encryptedData,
+                        file.file.encryptedData as Uint8Array,
                         progressTracker
                     );
                 }

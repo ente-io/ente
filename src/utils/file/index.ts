@@ -218,7 +218,7 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
         );
         const encryptedMetadata = file.metadata as unknown as fileAttribute;
         file.metadata = await worker.decryptMetadata(
-            encryptedMetadata.encryptedData,
+            encryptedMetadata.encryptedData as string,
             encryptedMetadata.decryptionHeader,
             file.key
         );

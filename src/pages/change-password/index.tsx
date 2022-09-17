@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import CryptoWorker, {
     saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
-    B64EncryptionResult,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
 import { setKeys } from 'services/userService';
@@ -14,7 +13,7 @@ import SetPasswordForm, {
 } from 'components/SetPasswordForm';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
-import { KEK, UpdatedKey, User } from 'types/user';
+import { KEK, KeyAttributes, UpdatedKey, User } from 'types/user';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import VerticallyCentered from 'components/Container';
 import FormPaper from 'components/Form/FormPaper';
@@ -41,9 +40,9 @@ export default function ChangePassword() {
         setFieldError
     ) => {
         const cryptoWorker = await new CryptoWorker();
-        const key: string = await getActualKey();
-        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+        const key = await getActualKey();
+        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
         let kek: KEK;
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
@@ -51,8 +50,10 @@ export default function ChangePassword() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const encryptedKeyAttributes: B64EncryptionResult =
-            await cryptoWorker.encryptToB64(key, kek.key);
+        const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
+            key,
+            kek.key
+        );
         const updatedKey: UpdatedKey = {
             kekSalt,
             encryptedKey: encryptedKeyAttributes.encryptedData,

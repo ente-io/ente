@@ -2,7 +2,7 @@ import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import { DataStream, Metadata } from 'types/upload';
 
 export interface fileAttribute {
-    encryptedData?: DataStream | Uint8Array;
+    encryptedData?: DataStream | Uint8Array | string;
     objectKey?: string;
     decryptionHeader: string;
 }
