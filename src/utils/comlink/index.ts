@@ -1,6 +1,7 @@
 import * as Comlink from 'comlink';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { runningInBrowser } from 'utils/common';
+import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 const getDedicatedFFmpegWorker = (): ComlinkWorker => {
@@ -25,3 +26,12 @@ export const getDedicatedCryptoWorker = () => {
     }
 };
 export const CryptoWorker = getDedicatedCryptoWorker()?.remote;
+
+export const getDedicatedConvertWorker = () => {
+    if (runningInBrowser()) {
+        const cryptoComlinkWorker = new ComlinkWorker<
+            typeof DedicatedConvertWorker
+        >('ente-convert-worker', 'worker/convert.worker.ts');
+        return cryptoComlinkWorker;
+    }
+};
