@@ -223,7 +223,7 @@ export const deleteFromTrash = async (filesToDelete: number[]) => {
             await deleteBatchFromTrash(token, deleteBatch);
         }
     } catch (e) {
-        logError(e, 'batchAndDeleteFromTrash failed');
+        logError(e, 'deleteFromTrash failed');
         throw e;
     }
 };
@@ -237,7 +237,7 @@ const deleteBatchFromTrash = async (
             'X-Auth-Token': token,
         });
     } catch (e) {
-        logError(e, 'delete from trash failed');
+        logError(e, 'deleteBatchFromTrash failed');
         throw e;
     }
 };
