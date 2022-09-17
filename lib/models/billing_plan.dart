@@ -5,14 +5,14 @@ class BillingPlans {
   final FreePlan freePlan;
 
   BillingPlans({
-    this.plans,
-    this.freePlan,
+    required this.plans,
+    required this.freePlan,
   });
 
   Map<String, dynamic> toMap() {
     return {
-      'plans': plans?.map((x) => x?.toMap())?.toList(),
-      'freePlan': freePlan?.toMap(),
+      'plans': plans.map((x) => x.toMap()).toList(),
+      'freePlan': freePlan.toMap(),
     };
   }
 
@@ -38,9 +38,9 @@ class FreePlan {
   final int duration;
   final String period;
   FreePlan({
-    this.storage,
-    this.duration,
-    this.period,
+    required this.storage,
+    required this.duration,
+    required this.period,
   });
 
   Map<String, dynamic> toMap() {
@@ -74,13 +74,13 @@ class BillingPlan {
   final String period;
 
   BillingPlan({
-    this.id,
-    this.androidID,
-    this.iosID,
-    this.stripeID,
-    this.storage,
-    this.price,
-    this.period,
+    required this.id,
+    required this.androidID,
+    required this.iosID,
+    required this.stripeID,
+    required this.storage,
+    required this.price,
+    required this.period,
   });
 
   Map<String, dynamic> toMap() {
