@@ -1,21 +1,19 @@
-import * as Comlink from 'comlink';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { runningInBrowser } from 'utils/common';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { DedicatedFFmpegWorker } from 'worker/ffmpeg.worker';
 
-const getDedicatedFFmpegWorker = (): ComlinkWorker => {
+const getDedicatedFFmpegWorker = () => {
     if (runningInBrowser()) {
-        const worker = new Worker(
-            new URL('worker/ffmpeg.worker.js', import.meta.url),
-            { name: 'ente-ffmpeg-worker' }
-        );
-        const comlink = Comlink.wrap(worker);
-        return { comlink, worker };
+        const cryptoComlinkWorker = new ComlinkWorker<
+            typeof DedicatedFFmpegWorker
+        >('ente-ffmpeg-worker', 'worker/ffmpeg.worker.ts');
+        return cryptoComlinkWorker;
     }
 };
 
-export const FFmpegWorker: any = getDedicatedFFmpegWorker()?.comlink;
+export const FFmpegWorker = getDedicatedFFmpegWorker()?.remote;
 
 export const getDedicatedCryptoWorker = () => {
     if (runningInBrowser()) {
