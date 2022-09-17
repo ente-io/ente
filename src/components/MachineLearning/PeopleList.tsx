@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Face, FACE_CROPS_CACHE_NAME, Person } from 'types/machineLearning';
+import { Face, Person } from 'types/machineLearning';
 import {
     getAllPeople,
     getPeopleList,
@@ -8,6 +8,7 @@ import {
 import styled from 'styled-components';
 import { EnteFile } from 'types/file';
 import { ImageCacheView } from './ImageViews';
+import { FACE_CROPS_CACHE } from 'constants/cache';
 
 const FaceChipContainer = styled.div`
     display: flex;
@@ -59,7 +60,7 @@ export function PeopleList(props: PeopleListProps) {
                     }>
                     <ImageCacheView
                         url={person.displayImageUrl}
-                        cacheName={FACE_CROPS_CACHE_NAME}
+                        cacheName={FACE_CROPS_CACHE}
                     />
                 </FaceChip>
             ))}
@@ -153,7 +154,7 @@ export function UnidentifiedFaces(props: {
                     <FaceChip key={index}>
                         <ImageCacheView
                             url={face.crop?.imageUrl}
-                            cacheName={FACE_CROPS_CACHE_NAME}
+                            cacheName={FACE_CROPS_CACHE}
                         />
                     </FaceChip>
                 ))}

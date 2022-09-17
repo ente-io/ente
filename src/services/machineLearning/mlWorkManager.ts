@@ -3,7 +3,6 @@ import PQueue from 'p-queue';
 import { eventBus, Events } from 'services/events';
 import { EnteFile } from 'types/file';
 import { FILE_TYPE } from 'constants/file';
-import { FACE_CROPS_CACHE_NAME } from 'types/machineLearning';
 import { getToken } from 'utils/common/key';
 import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
@@ -11,7 +10,6 @@ import { MLWorkerWithProxy } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
-import { getCacheProvider } from 'services/cacheService';
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
@@ -106,7 +104,6 @@ class MLWorkManager {
             this.mlSyncJob = undefined;
             await this.terminateLiveSyncWorker();
             await mlIDbStorage.clearMLDB();
-            await getCacheProvider().delete(FACE_CROPS_CACHE_NAME);
         } catch (e) {
             logError(e, 'Failed in ML logout Handler');
         }

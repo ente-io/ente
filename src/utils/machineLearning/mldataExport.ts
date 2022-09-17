@@ -1,7 +1,8 @@
-import { FACE_CROPS_CACHE_NAME, MlFileData } from 'types/machineLearning';
+import { MlFileData } from 'types/machineLearning';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import * as zip from '@zip.js/zip.js';
-import { getCacheProvider } from 'services/cacheService';
+import { FACE_CROPS_CACHE } from 'constants/cache';
+import { CacheStorageService } from 'services/cache/cacheStorageService';
 
 class FileSystemWriter extends zip.Writer {
     writableStream: FileSystemWritableFileStream;
@@ -83,7 +84,7 @@ async function exportMlDataToZipWriter(zipWriter: zip.ZipWriter) {
         new zip.TextReader(JSON.stringify(mlDbData))
     );
 
-    const faceCropCache = await getCacheProvider().open(FACE_CROPS_CACHE_NAME);
+    const faceCropCache = await CacheStorageService.open(FACE_CROPS_CACHE);
     const files =
         mlDbData['files'] && (Object.values(mlDbData['files']) as MlFileData[]);
     for (const fileData of files || []) {
@@ -97,7 +98,7 @@ async function exportMlDataToZipWriter(zipWriter: zip.ZipWriter) {
             if (response && response.ok) {
                 const blob = await response.blob();
                 await zipWriter.add(
-                    `caches/${FACE_CROPS_CACHE_NAME}${faceCropUrl}`,
+                    `caches/${FACE_CROPS_CACHE}${faceCropUrl}`,
                     new zip.BlobReader(blob),
                     { level: 0 }
                 );
@@ -126,8 +127,8 @@ async function importMlDataFromZipReader(zipReader: zip.ZipReader) {
     const zipEntries = await zipReader.getEntries();
     // console.log(zipEntries);
 
-    const faceCropPath = `caches/${FACE_CROPS_CACHE_NAME}`;
-    const faceCropCache = await getCacheProvider().open(FACE_CROPS_CACHE_NAME);
+    const faceCropPath = `caches/${FACE_CROPS_CACHE}`;
+    const faceCropCache = await CacheStorageService.open(FACE_CROPS_CACHE);
     let mldataEntry;
     for (const entry of zipEntries) {
         if (entry.filename === 'indexeddb/mldata.json') {

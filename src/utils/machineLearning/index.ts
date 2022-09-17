@@ -37,6 +37,9 @@ import {
     getFaceCropBlobFromStorage,
     ibExtractFaceImagesFromCrops,
 } from './faceCrop';
+import { FILE_CACHE } from 'constants/cache';
+import { FILE_TYPE } from 'constants/file';
+import { decodeMotionPhoto } from 'services/motionPhotoService';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -321,7 +324,7 @@ export async function getImageBlobBitmap(blob: Blob): Promise<ImageBitmap> {
 //     return new TFImageBitmap(undefined, tfImage);
 // }
 
-async function getOriginalImageFile(
+async function getOriginalFile(
     file: EnteFile,
     token: string,
     enteWorker?: any,
@@ -353,10 +356,16 @@ async function getOriginalConvertedFile(
     enteWorker?: any,
     queue?: PQueue
 ) {
-    let fileBlob = await getOriginalImageFile(file, token, enteWorker, queue);
-    fileBlob = await getRenderableImage(file.metadata.title, fileBlob);
-
-    return fileBlob;
+    const fileBlob = await getOriginalFile(file, token, enteWorker, queue);
+    if (file.metadata.fileType === FILE_TYPE.IMAGE) {
+        return await getRenderableImage(file.metadata.title, fileBlob);
+    } else {
+        const motionPhoto = await decodeMotionPhoto(file, fileBlob);
+        return await getRenderableImage(
+            motionPhoto.imageNameTitle,
+            new Blob([motionPhoto.image])
+        );
+    }
 }
 
 export async function getOriginalImageBitmap(
@@ -369,7 +378,7 @@ export async function getOriginalImageBitmap(
     let fileBlob;
 
     if (useCache) {
-        fileBlob = await cached('files', '/' + file.id.toString(), () => {
+        fileBlob = await cached(FILE_CACHE, file.id.toString(), () => {
             return getOriginalConvertedFile(file, token, enteWorker, queue);
         });
     } else {

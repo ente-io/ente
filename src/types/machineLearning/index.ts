@@ -142,8 +142,6 @@ export interface FaceCrop {
     imageBox: Box;
 }
 
-export const FACE_CROPS_CACHE_NAME = 'face-crops';
-
 export interface StoredFaceCrop {
     imageUrl: string;
     imageBox: Box;
