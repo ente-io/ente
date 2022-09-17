@@ -5,10 +5,15 @@ import {
     BrowserWindow,
     MenuItemConstructorOptions,
 } from 'electron';
-import { isUpdateAvailable, setIsAppQuitting } from '..';
-import { showUpdateDialog } from './appUpdater';
-
-const isMac = process.platform === 'darwin';
+import {
+    getHideDockIconPreference,
+    setHideDockIconPreference,
+} from '../services/userPreference';
+import { isUpdateAvailable, setIsAppQuitting } from '../main';
+import autoLauncher from '../services/autoLauncher';
+import { isPlatformMac } from './main';
+import { showUpdateDialog } from '../services/appUpdater';
+import { isDev } from './common';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -77,8 +82,6 @@ export function buildContextMenu(
             label: 'Open ente',
             click: function () {
                 mainWindow.show();
-                const isMac = process.platform === 'darwin';
-                isMac && app.dock.show();
             },
         },
         {
@@ -92,34 +95,65 @@ export function buildContextMenu(
     return contextMenu;
 }
 
-export function buildMenuBar(): Menu {
+export async function buildMenuBar(): Promise<Menu> {
+    let isAutoLaunchEnabled = await autoLauncher.isEnabled();
+    const isMac = isPlatformMac();
+    let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
         {
-            label: app.name,
+            label: 'ente',
             submenu: [
                 ...((isMac
                     ? [
                           {
-                              label: 'About',
+                              label: 'About ente',
                               role: 'about',
                           },
                       ]
                     : []) as MenuItemConstructorOptions[]),
+                { type: 'separator' },
                 {
-                    label: 'FAQ',
-                    click: () => shell.openExternal('https://ente.io/faq/'),
+                    label: 'Preferences',
+                    submenu: [
+                        {
+                            label: 'Open ente on startup',
+                            type: 'checkbox',
+                            checked: isAutoLaunchEnabled,
+                            click: () => {
+                                autoLauncher.toggleAutoLaunch();
+                                isAutoLaunchEnabled = !isAutoLaunchEnabled;
+                            },
+                        },
+                        {
+                            label: 'Hide dock icon',
+                            type: 'checkbox',
+                            checked: shouldHideDockIcon,
+                            click: () => {
+                                setHideDockIconPreference(!shouldHideDockIcon);
+                                shouldHideDockIcon = !shouldHideDockIcon;
+                            },
+                        },
+                    ],
                 },
+
+                { type: 'separator' },
+                ...((isMac
+                    ? [
+                          {
+                              label: 'Hide ente',
+                              role: 'hide',
+                          },
+                          {
+                              label: 'Hide others',
+                              role: 'hideOthers',
+                          },
+                      ]
+                    : []) as MenuItemConstructorOptions[]),
+
+                { type: 'separator' },
                 {
-                    label: 'Support',
-                    click: () => shell.openExternal('mailto:support@ente.io'),
-                },
-                {
-                    label: 'Quit',
-                    accelerator: 'CommandOrControl+Q',
-                    click() {
-                        setIsAppQuitting(true);
-                        app.quit();
-                    },
+                    label: 'Quit ente',
+                    role: 'quit',
                 },
             ],
         },
@@ -161,14 +195,17 @@ export function buildMenuBar(): Menu {
                       ]) as MenuItemConstructorOptions[]),
             ],
         },
-        // { role: 'viewMenu' }
         {
             label: 'View',
             submenu: [
-                { role: 'reload', label: 'Reload' },
-                { role: 'forceReload', label: 'Force reload' },
-                { role: 'toggleDevTools', label: 'Toggle dev tools' },
-                { type: 'separator' },
+                ...((isDev
+                    ? [
+                          { role: 'reload', label: 'Reload' },
+                          { role: 'forceReload', label: 'Force reload' },
+                          { role: 'toggleDevTools', label: 'Toggle dev tools' },
+                          { type: 'separator' },
+                      ]
+                    : []) as MenuItemConstructorOptions[]),
                 { role: 'resetZoom', label: 'Reset zoom' },
                 { role: 'zoomIn', label: 'Zoom in' },
                 { role: 'zoomOut', label: 'Zoom out' },
@@ -176,7 +213,6 @@ export function buildMenuBar(): Menu {
                 { role: 'togglefullscreen', label: 'Toggle fullscreen' },
             ],
         },
-        // { role: 'windowMenu' }
         {
             label: 'Window',
             submenu: [
@@ -184,13 +220,31 @@ export function buildMenuBar(): Menu {
                 ...((isMac
                     ? [
                           { type: 'separator' },
-                          { role: 'front', label: 'Front' },
+                          { role: 'front', label: 'Bring to front' },
                           { type: 'separator' },
-                          { role: 'window', label: 'Window' },
+                          { role: 'window', label: 'ente' },
                       ]
                     : [
-                          { role: 'close', label: 'Close' },
+                          { role: 'close', label: 'Close ente' },
                       ]) as MenuItemConstructorOptions[]),
+            ],
+        },
+        {
+            label: 'Help',
+            submenu: [
+                {
+                    label: 'FAQ',
+                    click: () => shell.openExternal('https://ente.io/faq/'),
+                },
+                { type: 'separator' },
+                {
+                    label: 'Support',
+                    click: () => shell.openExternal('mailto:support@ente.io'),
+                },
+                {
+                    label: 'Product updates',
+                    click: () => shell.openExternal('https://ente.io/blog/'),
+                },
             ],
         },
     ];

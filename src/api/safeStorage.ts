@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
-import { safeStorageStore } from '../services/store';
-import { logError } from './logging';
+import { safeStorageStore } from '../stores/safeStorage.store';
+import { logError } from '../utils/logging';
 
 export async function setEncryptionKey(encryptionKey: string) {
     try {
@@ -16,7 +16,7 @@ export async function setEncryptionKey(encryptionKey: string) {
     }
 }
 
-export async function getEncryptionKey() {
+export async function getEncryptionKey(): Promise<string> {
     try {
         const b64EncryptedKey = safeStorageStore.get('encryptionKey');
         if (b64EncryptedKey) {

@@ -9,7 +9,7 @@ We are aware that electron is a sub-optimal choice for building desktop applicat
 The goal of this app was to
 1. provide a stable environment for customers to back up large amounts of data reliably
 2. export uploaded data from our servers to their local hard drives.
- 
+
 Electron was the best way to reuse our battle tested code from [bada-frame](https://github.com/ente-io/bada-frame) that powers [web.ente.io](https://web.ente.io).
 
 As an archival solution built by a small team, we are hopeful that this project will help us keep our stack lean, while ensuring a painfree life for our customers.
@@ -25,27 +25,35 @@ If you are running into issues with this app, please drop a mail to [support@ent
 - [AUR](https://aur.archlinux.org/packages/ente-desktop-appimage):
   `yay -S ente-desktop-appimage`
 
-## Develop
+## Building from source
 
-To clone and run this repository you'll need [Git](https://git-scm.com) and [Node.js](https://nodejs.org/en/download/) (which comes with [npm](http://npmjs.com)) installed on your computer. From your command line:
+You'll need to have node (and yarn) installed on your machine. e.g. on macOS you
+can do `brew install node`. After that, you can run the following commands to
+fetch and build from source.
 
 ```bash
 # Clone this repository
 git clone https://github.com/ente-io/bhari-frame
+
 # Go into the repository
 cd bhari-frame
-# Install dependencies
-npm install
-# Run the app
-npm start
-```
 
-Note: If you're using Linux Bash for Windows, [see this guide](https://www.howtogeek.com/261575/how-to-run-graphical-linux-desktop-applications-from-windows-10s-bash-shell/) or use `node` from the command prompt.
+# Clone submodules (recursively)
+git submodule update --init --recursive
+
+# Install packages
+yarn
+
+# Run the app
+yarn start
+```
 
 ### Re-compile automatically
 
-To recompile automatically and to allow using [electron-reload](https://github.com/yan-foto/electron-reload), run this in a separate terminal:
+To recompile automatically and to allow using
+[electron-reload](https://github.com/yan-foto/electron-reload), run this in a
+separate terminal:
 
 ```bash
-npm run watch
+yarn watch
 ```

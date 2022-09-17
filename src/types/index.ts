@@ -20,6 +20,24 @@ export interface KeysStoreType {
     };
 }
 
+interface WatchMappingSyncedFile {
+    path: string;
+    uploadedFileID: number;
+    collectionID: number;
+}
+
+export interface WatchMapping {
+    rootFolderName: string;
+    uploadStrategy: number;
+    folderPath: string;
+    syncedFiles: WatchMappingSyncedFile[];
+    ignoredFiles: string[];
+}
+
+export interface WatchStoreType {
+    mappings: WatchMapping[];
+}
+
 export enum FILE_PATH_TYPE {
     FILES = 'files',
     ZIPS = 'zips',
@@ -34,4 +52,8 @@ export const FILE_PATH_KEYS: {
 
 export interface SafeStorageStoreType {
     encryptionKey: string;
+}
+
+export interface UserPreferencesType {
+    hideDockIcon: boolean;
 }
