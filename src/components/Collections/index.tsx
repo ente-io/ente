@@ -50,8 +50,11 @@ export default function Collections(props: Iprops) {
     const activeCollection = useRef<Collection>(null);
 
     const shouldBeHidden = useMemo(
-        () => isInSearchMode || !hasNonSystemCollections(collectionSummaries),
-        [isInSearchMode, collectionSummaries]
+        () =>
+            isInSearchMode ||
+            (!hasNonSystemCollections(collectionSummaries) &&
+                activeCollectionID === ALL_SECTION),
+        [isInSearchMode, collectionSummaries, activeCollectionID]
     );
 
     useEffect(() => {
@@ -93,7 +96,7 @@ export default function Collections(props: Iprops) {
             itemType: ITEM_TYPE.OTHER,
             height: 68,
         });
-    }, [collectionSummaries, activeCollectionID, shouldBeHidden]);
+    }, [collectionSummaries, activeCollectionID]);
 
     if (shouldBeHidden) {
         return <></>;
