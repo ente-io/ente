@@ -1,5 +1,3 @@
-// @dart=2.9
-
 const freeProductID = "free";
 const stripe = "stripe";
 const appStore = "appstore";
@@ -13,16 +11,16 @@ class Subscription {
   final int expiryTime;
   final String price;
   final String period;
-  final Attributes attributes;
+  final Attributes? attributes;
 
   Subscription({
-    this.productID,
-    this.storage,
-    this.originalTransactionID,
-    this.paymentProvider,
-    this.expiryTime,
-    this.price,
-    this.period,
+    required this.productID,
+    required this.storage,
+    required this.originalTransactionID,
+    required this.paymentProvider,
+    required this.expiryTime,
+    required this.price,
+    required this.period,
     this.attributes,
   });
 
@@ -34,7 +32,7 @@ class Subscription {
     return 'year' == period;
   }
 
-  factory Subscription.fromMap(Map<String, dynamic> map) {
+  factory Subscription.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw ArgumentError("argument is null");
     }
@@ -54,8 +52,8 @@ class Subscription {
 }
 
 class Attributes {
-  bool isCancelled;
-  String customerID;
+  bool? isCancelled;
+  String? customerID;
 
   Attributes({
     this.isCancelled,
