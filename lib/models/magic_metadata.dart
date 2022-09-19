@@ -23,7 +23,7 @@ class MagicMetadata {
 
   factory MagicMetadata.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
-      throw Exception('argument is null');
+      throw Exception('Argument is null');
     }
     return MagicMetadata(
       visibility: map[magicKeyVisibility] ?? visibilityVisible,
@@ -45,7 +45,7 @@ class PubMagicMetadata {
 
   factory PubMagicMetadata.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
-      throw Exception('argument is null');
+      throw Exception('Argument is null');
     }
     return PubMagicMetadata(
       editedTime: map[pubMagicKeyEditedTime],
@@ -70,7 +70,7 @@ class CollectionMagicMetadata {
 
   factory CollectionMagicMetadata.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
-      throw Exception('argument is null');
+      throw Exception('Argument is null');
     }
     return CollectionMagicMetadata(
       visibility: map[magicKeyVisibility] ?? visibilityVisible,

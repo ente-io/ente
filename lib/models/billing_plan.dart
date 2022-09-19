@@ -18,7 +18,7 @@ class BillingPlans {
 
   factory BillingPlans.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
-      throw ArgumentError('argument is null');
+      throw Exception('Argument is null');
     }
 
     return BillingPlans(
@@ -53,7 +53,7 @@ class FreePlan {
 
   factory FreePlan.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
-      throw ArgumentError('argument is null');
+      throw Exception('Argument is null');
     }
 
     return FreePlan(
@@ -97,7 +97,7 @@ class BillingPlan {
 
   factory BillingPlan.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
-      throw ArgumentError('argument is null');
+      throw Exception('Argument is null');
     }
 
     return BillingPlan(
