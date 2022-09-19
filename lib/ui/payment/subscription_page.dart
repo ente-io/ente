@@ -160,7 +160,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       _hasActiveSubscription = _currentSubscription.isValid();
       final billingPlans = await _billingService.getBillingPlans();
       _isActiveStripeSubscriber =
-          _currentSubscription.paymentProvider == kStripe &&
+          _currentSubscription.paymentProvider == stripe &&
               _currentSubscription.isValid();
       _plans = billingPlans.plans.where((plan) {
         final productID = _isActiveStripeSubscriber
@@ -210,7 +210,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if (_currentSubscription.productID == kFreeProductID) {
+    if (_currentSubscription.productID == freeProductID) {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
@@ -218,7 +218,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
 
     if (_hasActiveSubscription &&
-        _currentSubscription.productID != kFreeProductID) {
+        _currentSubscription.productID != freeProductID) {
       widgets.addAll([
         Align(
           alignment: Alignment.center,
@@ -345,7 +345,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     bool foundActivePlan = false;
     final List<Widget> planWidgets = [];
     if (_hasActiveSubscription &&
-        _currentSubscription.productID == kFreeProductID) {
+        _currentSubscription.productID == freeProductID) {
       foundActivePlan = true;
       planWidgets.add(
         SubscriptionPlanWidget(
@@ -392,7 +392,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
               final isCrossGradingOnAndroid = Platform.isAndroid &&
                   _hasActiveSubscription &&
-                  _currentSubscription.productID != kFreeProductID &&
+                  _currentSubscription.productID != freeProductID &&
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 final existingProductDetailsResponse =
@@ -470,7 +470,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
   // todo: refactor manage family in common widget
   Future<void> _launchFamilyPortal() async {
-    if (_userDetails.subscription.productID == kFreeProductID) {
+    if (_userDetails.subscription.productID == freeProductID) {
       await showErrorDialog(
         context,
         "Share your storage plan with your family members!",

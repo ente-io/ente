@@ -218,7 +218,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       final response = await billingService.verifySubscription(
         widget.planId,
         checkoutSessionID,
-        paymentProvider: kStripe,
+        paymentProvider: stripe,
       );
       await _dialog.hide();
       if (response != null) {
