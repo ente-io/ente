@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 const visibilityVisible = 0;
@@ -16,14 +14,14 @@ class MagicMetadata {
   // 2 -> hidden etc?
   int visibility;
 
-  MagicMetadata({this.visibility});
+  MagicMetadata({required this.visibility});
 
   factory MagicMetadata.fromEncodedJson(String encodedJson) =>
       MagicMetadata.fromJson(jsonDecode(encodedJson));
 
   factory MagicMetadata.fromJson(dynamic json) => MagicMetadata.fromMap(json);
 
-  factory MagicMetadata.fromMap(Map<String, dynamic> map) {
+  factory MagicMetadata.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw Exception('argument is null');
     }
@@ -37,7 +35,7 @@ class PubMagicMetadata {
   int editedTime;
   String editedName;
 
-  PubMagicMetadata({this.editedTime, this.editedName});
+  PubMagicMetadata({required this.editedTime, required this.editedName});
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
       PubMagicMetadata.fromJson(jsonDecode(encodedJson));
@@ -45,7 +43,7 @@ class PubMagicMetadata {
   factory PubMagicMetadata.fromJson(dynamic json) =>
       PubMagicMetadata.fromMap(json);
 
-  factory PubMagicMetadata.fromMap(Map<String, dynamic> map) {
+  factory PubMagicMetadata.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw Exception('argument is null');
     }
@@ -62,7 +60,7 @@ class CollectionMagicMetadata {
   // 2 -> hidden etc?
   int visibility;
 
-  CollectionMagicMetadata({this.visibility});
+  CollectionMagicMetadata({required this.visibility});
 
   factory CollectionMagicMetadata.fromEncodedJson(String encodedJson) =>
       CollectionMagicMetadata.fromJson(jsonDecode(encodedJson));
@@ -70,7 +68,7 @@ class CollectionMagicMetadata {
   factory CollectionMagicMetadata.fromJson(dynamic json) =>
       CollectionMagicMetadata.fromMap(json);
 
-  factory CollectionMagicMetadata.fromMap(Map<String, dynamic> map) {
+  factory CollectionMagicMetadata.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw Exception('argument is null');
     }
