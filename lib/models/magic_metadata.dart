@@ -24,7 +24,9 @@ class MagicMetadata {
   factory MagicMetadata.fromJson(dynamic json) => MagicMetadata.fromMap(json);
 
   factory MagicMetadata.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+    if (map == null) {
+      throw Exception('argument is null');
+    }
     return MagicMetadata(
       visibility: map[kMagicKeyVisibility] ?? kVisibilityVisible,
     );
@@ -44,7 +46,9 @@ class PubMagicMetadata {
       PubMagicMetadata.fromMap(json);
 
   factory PubMagicMetadata.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+    if (map == null) {
+      throw Exception('argument is null');
+    }
     return PubMagicMetadata(
       editedTime: map[kPubMagicKeyEditedTime],
       editedName: map[kPubMagicKeyEditedName],
@@ -67,7 +71,9 @@ class CollectionMagicMetadata {
       CollectionMagicMetadata.fromMap(json);
 
   factory CollectionMagicMetadata.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+    if (map == null) {
+      throw Exception('argument is null');
+    }
     return CollectionMagicMetadata(
       visibility: map[kMagicKeyVisibility] ?? kVisibilityVisible,
     );
