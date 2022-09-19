@@ -2,13 +2,13 @@
 
 import 'dart:convert';
 
-const kVisibilityVisible = 0;
-const kVisibilityArchive = 1;
+const visibilityVisible = 0;
+const visibilityArchive = 1;
 
-const kMagicKeyVisibility = 'visibility';
+const magicKeyVisibility = 'visibility';
 
-const kPubMagicKeyEditedTime = 'editedTime';
-const kPubMagicKeyEditedName = 'editedName';
+const pubMagicKeyEditedTime = 'editedTime';
+const pubMagicKeyEditedName = 'editedName';
 
 class MagicMetadata {
   // 0 -> visible
@@ -28,7 +28,7 @@ class MagicMetadata {
       throw Exception('argument is null');
     }
     return MagicMetadata(
-      visibility: map[kMagicKeyVisibility] ?? kVisibilityVisible,
+      visibility: map[magicKeyVisibility] ?? visibilityVisible,
     );
   }
 }
@@ -50,8 +50,8 @@ class PubMagicMetadata {
       throw Exception('argument is null');
     }
     return PubMagicMetadata(
-      editedTime: map[kPubMagicKeyEditedTime],
-      editedName: map[kPubMagicKeyEditedName],
+      editedTime: map[pubMagicKeyEditedTime],
+      editedName: map[pubMagicKeyEditedName],
     );
   }
 }
@@ -75,7 +75,7 @@ class CollectionMagicMetadata {
       throw Exception('argument is null');
     }
     return CollectionMagicMetadata(
-      visibility: map[kMagicKeyVisibility] ?? kVisibilityVisible,
+      visibility: map[magicKeyVisibility] ?? visibilityVisible,
     );
   }
 }

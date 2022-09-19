@@ -46,7 +46,7 @@ class Collection {
   });
 
   bool isArchived() {
-    return mMdVersion > 0 && magicMetadata.visibility == kVisibilityArchive;
+    return mMdVersion > 0 && magicMetadata.visibility == visibilityArchive;
   }
 
   static CollectionType typeFromString(String type) {
