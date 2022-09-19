@@ -6,7 +6,6 @@ const appStore = "appstore";
 const playStore = "playstore";
 
 class Subscription {
-  final int id;
   final String productID;
   final int storage;
   final String originalTransactionID;
@@ -17,7 +16,6 @@ class Subscription {
   final Attributes attributes;
 
   Subscription({
-    this.id,
     this.productID,
     this.storage,
     this.originalTransactionID,
@@ -41,7 +39,6 @@ class Subscription {
       throw ArgumentError("argument is null");
     }
     return Subscription(
-      id: map['id'],
       productID: map['productID'],
       storage: map['storage'],
       originalTransactionID: map['originalTransactionID'],
