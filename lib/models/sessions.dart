@@ -1,5 +1,3 @@
-// @dart=2.9
-
 class Sessions {
   final List<Session> sessions;
 
