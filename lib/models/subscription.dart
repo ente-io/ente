@@ -2,10 +2,10 @@
 
 import 'dart:convert';
 
-const kFreeProductID = "free";
-const kStripe = "stripe";
-const kAppStore = "appstore";
-const kPlayStore = "playstore";
+const freeProductID = "free";
+const stripe = "stripe";
+const appStore = "appstore";
+const playStore = "playstore";
 
 class Subscription {
   final int id;
