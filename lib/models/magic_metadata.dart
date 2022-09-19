@@ -23,12 +23,6 @@ class MagicMetadata {
 
   factory MagicMetadata.fromJson(dynamic json) => MagicMetadata.fromMap(json);
 
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map[kMagicKeyVisibility] = visibility;
-    return map;
-  }
-
   factory MagicMetadata.fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
     return MagicMetadata(
@@ -48,13 +42,6 @@ class PubMagicMetadata {
 
   factory PubMagicMetadata.fromJson(dynamic json) =>
       PubMagicMetadata.fromMap(json);
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map[kPubMagicKeyEditedTime] = editedTime;
-    map[kPubMagicKeyEditedName] = editedName;
-    return map;
-  }
 
   factory PubMagicMetadata.fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
@@ -78,12 +65,6 @@ class CollectionMagicMetadata {
 
   factory CollectionMagicMetadata.fromJson(dynamic json) =>
       CollectionMagicMetadata.fromMap(json);
-
-  Map<String, dynamic> toJson() {
-    final map = <String, dynamic>{};
-    map[kMagicKeyVisibility] = visibility;
-    return map;
-  }
 
   factory CollectionMagicMetadata.fromMap(Map<String, dynamic> map) {
     if (map == null) return null;
