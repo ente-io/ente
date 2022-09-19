@@ -37,7 +37,9 @@ class Subscription {
   }
 
   factory Subscription.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
+    if (map == null) {
+      throw ArgumentError("argument is null");
+    }
     return Subscription(
       id: map['id'],
       productID: map['productID'],
