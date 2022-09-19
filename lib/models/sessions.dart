@@ -6,6 +6,9 @@ class Sessions {
   );
 
   factory Sessions.fromMap(Map<String, dynamic> map) {
+    if (map["sessions"] == null) {
+      throw Exception('\'map["sessions"]\' must not be null');
+    }
     return Sessions(
       List<Session>.from(map['sessions']?.map((x) => Session.fromMap(x))),
     );
