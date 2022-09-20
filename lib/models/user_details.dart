@@ -53,10 +53,6 @@ class UserDetails {
     return isPartOfFamily() ? familyData.storage : subscription.storage;
   }
 
-  int getPersonalUsage() {
-    return usage;
-  }
-
   factory UserDetails.fromMap(Map<String, dynamic> map) {
     return UserDetails(
       map['email'] as String,
@@ -66,17 +62,6 @@ class UserDetails {
       Subscription.fromMap(map['subscription']),
       FamilyData.fromMap(map['familyData']),
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'email': email,
-      'usage': usage,
-      'fileCount': fileCount,
-      'sharedCollectionsCount': sharedCollectionsCount,
-      'subscription': subscription,
-      'familyData': familyData
-    };
   }
 }
 
@@ -128,13 +113,5 @@ class FamilyData {
       map['storage'] as int,
       map['expiryTime'] as int,
     );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'members': members.map((x) => x?.toMap())?.toList(),
-      'storage': storage,
-      'expiryTime': expiryTime
-    };
   }
 }
