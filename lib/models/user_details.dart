@@ -1,5 +1,4 @@
-// @dart=2.9
-
+// @dart = 2.9
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -100,10 +99,8 @@ class FamilyData {
     return members.map((e) => e.usage).toList().sum;
   }
 
-  factory FamilyData.fromMap(Map<String, dynamic> map) {
-    if (map == null) {
-      return null;
-    }
+  static fromMap(Map<String, dynamic> map) {
+    if (map == null) return null;
     assert(map['members'] != null && map['members'].length >= 0);
     final members = List<FamilyMember>.from(
       map['members'].map((x) => FamilyMember.fromMap(x)),
