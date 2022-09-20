@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -55,11 +56,10 @@ class UserRemoteFlagService {
       final activeSessions = await UserService.instance.getActiveSessions();
       final int microSecondsInADay = const Duration(days: 1).inMicroseconds;
       final bool anyActiveSessionOlderThanADay =
-          activeSessions.sessions.firstWhere(
+          activeSessions.sessions.firstWhereOrNull(
                 (e) =>
                     (e.creationTime + microSecondsInADay) <
                     DateTime.now().microsecondsSinceEpoch,
-                orElse: () => null,
               ) !=
               null;
       if (anyActiveSessionOlderThanADay) {
