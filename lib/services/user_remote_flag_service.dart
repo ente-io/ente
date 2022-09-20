@@ -40,13 +40,14 @@ class UserRemoteFlagService {
   // recovery key in the past or not. This helps in avoid showing the same
   // prompt to the user on re-install or signing into a different device
   Future<void> markRecoveryVerificationAsDone() async {
-    await _setBooleanFlag(recoveryVerificationFlag, true);
+    await _updateKeyValue(recoveryVerificationFlag, true.toString());
     await _prefs.setBool(needRecoveryKeyVerification, false);
   }
 
   Future<void> _refreshRecoveryVerificationFlag() async {
-    final remoteStatusValue = await _getBooleanFlag(recoveryVerificationFlag);
-    if (remoteStatusValue) {
+    final remoteStatusValue =
+        await _getValue(recoveryVerificationFlag, "false");
+    if (remoteStatusValue.toLowerCase() == "true") {
       await _prefs.setBool(needRecoveryKeyVerification, false);
     } else {
       // check the session creationTime. If any active session is older than
@@ -70,10 +71,15 @@ class UserRemoteFlagService {
     }
   }
 
-  Future<bool> _getBooleanFlag(String key, {bool defaultVal = false}) async {
+  Future<String> _getValue(String key, String? defaultValue) async {
     try {
+      final Map<String, dynamic> queryParams = {"key": key};
+      if (defaultValue != null) {
+        queryParams["defaultValue"] = defaultValue;
+      }
       final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/remote-store/bool/$key",
+        _config.getHttpEndpoint() + "/remote-store",
+        queryParameters: queryParams,
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
@@ -81,23 +87,25 @@ class UserRemoteFlagService {
         ),
       );
       if (response.statusCode != HttpStatus.ok) {
-        throw Exception("Unexpected status code");
+        throw Exception("Unexpected status code ${response.statusCode}");
       }
-      return response.data["status"] ?? defaultVal;
+      return response.data["value"];
     } catch (e) {
-      _logger.info(
-        "Error while fetching bool status for $key",
-      );
+      _logger.info("Error while fetching bool status for $key", e);
       rethrow;
     }
   }
 
   // _setBooleanFlag sets the corresponding flag on remote
   // to mark recovery as completed
-  Future<void> _setBooleanFlag(String key, bool value) async {
+  Future<void> _updateKeyValue(String key, String value) async {
     try {
       final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/remote-store/bool/$key/$value",
+        _config.getHttpEndpoint() + "/remote-store/update",
+        data: {
+          "key": key,
+          "value": value,
+        },
         options: Options(
           headers: {
             "X-Auth-Token": _config.getToken(),
