@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:math';
 
 double convertBytesToGBs(final int bytes, {int precision = 2}) {
