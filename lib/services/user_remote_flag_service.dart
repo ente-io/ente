@@ -53,7 +53,7 @@ class UserRemoteFlagService {
       // check the session creationTime. If any active session is older than
       // 1 day, set the need to verification as true
       final activeSessions = await UserService.instance.getActiveSessions();
-      final int microSecondsInADay = const Duration(minutes: 1).inMicroseconds;
+      final int microSecondsInADay = const Duration(days: 1).inMicroseconds;
       final bool anyActiveSessionOlderThanADay =
           activeSessions.sessions.firstWhere(
                 (e) =>
