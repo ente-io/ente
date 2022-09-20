@@ -5,7 +5,9 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/notification_event.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -52,6 +54,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           }
           return;
         }
+        Bus.instance.fire(NotificationEvent());
         showToast(context, "Verification successful!");
         await dialog.hide();
         Navigator.of(context).pop();
@@ -150,7 +153,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                         "you have safely backed up your 24 word recovery key by re-entering it.",
                         style: Theme.of(context).textTheme.subtitle2,
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       TextFormField(
                         decoration: InputDecoration(
                           filled: true,
@@ -175,7 +178,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                           setState(() {});
                         },
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 12),
                       Text(
                         "If you saved the recovery key from older app versions, you might have a 64 character recovery code instead of 24 words. You can enter that too.",
                         style: Theme.of(context).textTheme.caption,

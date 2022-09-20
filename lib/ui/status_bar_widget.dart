@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -26,6 +27,7 @@ class StatusBarWidget extends StatefulWidget {
 
 class _StatusBarWidgetState extends State<StatusBarWidget> {
   StreamSubscription<SyncStatusUpdate> _subscription;
+  StreamSubscription<NotificationEvent> _notificationSubscription;
   bool _showStatus = false;
   bool _showErrorBanner = false;
 
@@ -56,12 +58,19 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         });
       }
     });
+    _notificationSubscription =
+        Bus.instance.on<NotificationEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     super.initState();
   }
 
   @override
   void dispose() {
     _subscription.cancel();
+    _notificationSubscription.cancel();
     super.dispose();
   }
 
