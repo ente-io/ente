@@ -59,7 +59,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
         await showErrorDialog(
           context,
           "Recovery key verified",
-          "Great! Your recovery key is valid. Thank you for verifying.\n Please"
+          "Great! Your recovery key is valid. Thank you for verifying.\n"
+              "\nPlease"
               " remember to keep your recovery key safely backed up.",
         );
         Navigator.of(context).pop();
