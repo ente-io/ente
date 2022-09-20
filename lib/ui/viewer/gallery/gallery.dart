@@ -118,8 +118,8 @@ class _GalleryState extends State<Gallery> {
     try {
       final startTime = DateTime.now().microsecondsSinceEpoch;
       final result = await widget.asyncLoader(
-        kGalleryLoadStartTime,
-        kGalleryLoadEndTime,
+        galleryLoadStartTime,
+        galleryLoadEndTime,
         limit: limit,
       );
       final endTime = DateTime.now().microsecondsSinceEpoch;

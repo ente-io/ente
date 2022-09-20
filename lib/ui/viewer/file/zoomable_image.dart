@@ -93,7 +93,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     final GestureDragUpdateCallback verticalDragCallback = _isZooming
         ? null
         : (d) => {
-              if (!_isZooming && d.delta.dy > kDragSensitivity)
+              if (!_isZooming && d.delta.dy > dragSensitivity)
                 {Navigator.of(context).pop()}
             };
     return GestureDetector(
@@ -143,8 +143,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (!_loadedSmallThumbnail &&
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
-      final cachedThumbnail =
-          ThumbnailLruCache.get(_photo, kThumbnailSmallSize);
+      final cachedThumbnail = ThumbnailLruCache.get(_photo, thumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
@@ -155,7 +154,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
       _loadingLargeThumbnail = true;
-      getThumbnailFromLocal(_photo, size: kThumbnailLargeSize, quality: 100)
+      getThumbnailFromLocal(_photo, size: thumbnailLargeSize, quality: 100)
           .then((cachedThumbnail) {
         if (cachedThumbnail != null) {
           _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);

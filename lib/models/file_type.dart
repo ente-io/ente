@@ -1,5 +1,3 @@
-// @dart=2.9
-
 enum FileType {
   image,
   video,

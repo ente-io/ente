@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
+const Set<int> monthWith30Days = {4, 6, 9, 11};
 Map<int, String> _months = {
   1: "Jan",
   2: "Feb",
@@ -42,6 +44,7 @@ Map<int, String> _days = {
 };
 
 final currentYear = int.parse(DateTime.now().year.toString());
+const searchStartYear = 1970;
 
 //Jun 2022
 String getMonthAndYear(DateTime dateTime) {
@@ -242,4 +245,26 @@ String secondsToHHMMSS(int value) {
   final String result = "$hourLeft:$minuteLeft:$secondsLeft";
 
   return result;
+}
+
+bool isValidDate({
+  required int day,
+  required int month,
+  required int year,
+}) {
+  if (day < 0 || day > 31 || month < 0 || month > 12 || year < 0) {
+    return false;
+  }
+  if (monthWith30Days.contains(month) && day > 30) {
+    return false;
+  }
+  if (month == 2) {
+    if (day > 29) {
+      return false;
+    }
+    if (day == 29 && year % 4 != 0) {
+      return false;
+    }
+  }
+  return true;
 }
