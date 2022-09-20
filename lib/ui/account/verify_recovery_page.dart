@@ -47,7 +47,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
               "No internet connection",
               "Please check your internet connection and try again.",
             );
-          } else {
+            // } else {
             await showGenericErrorDialog(context);
           }
           return;

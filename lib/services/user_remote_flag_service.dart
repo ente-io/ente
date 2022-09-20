@@ -52,7 +52,7 @@ class UserRemoteFlagService {
       // check the session creationTime. If any active session is older than
       // 1 day, set the need to verification as true
       final activeSessions = await UserService.instance.getActiveSessions();
-      final int microSecondsInADay = const Duration(days: 1).inMicroseconds;
+      final int microSecondsInADay = const Duration(minutes: 1).inMicroseconds;
       final bool anyActiveSessionOlderThanADay =
           activeSessions.sessions.firstWhere(
                 (e) =>
@@ -65,6 +65,7 @@ class UserRemoteFlagService {
         await _prefs.setBool(needRecoveryKeyVerification, true);
       } else {
         // continue defaulting to no verification prompt
+        _logger.finest('No active session older than 1 day');
       }
     }
   }
@@ -83,18 +84,17 @@ class UserRemoteFlagService {
         throw Exception("Unexpected status code");
       }
       return response.data["status"] ?? defaultVal;
-    } on DioError catch (e) {
-      _logger.info(e);
-      rethrow;
     } catch (e) {
-      _logger.warning("marking recovery key status failed", e);
+      _logger.info(
+        "Error while fetching bool status for $key",
+      );
       rethrow;
     }
   }
 
-  // markRecoveryVerificationAsCompleted sets the corresponding flag on remote
+  // _setBooleanFlag sets the corresponding flag on remote
   // to mark recovery as completed
-  Future<bool> _setBooleanFlag(String key, bool value) async {
+  Future<void> _setBooleanFlag(String key, bool value) async {
     try {
       final response = await _dio.post(
         _config.getHttpEndpoint() + "/users/remote-store/bool/$key/$value",
@@ -107,12 +107,8 @@ class UserRemoteFlagService {
       if (response.statusCode != HttpStatus.ok) {
         throw Exception("Unexpected state");
       }
-      return true;
-    } on DioError catch (e) {
-      _logger.info(e);
-      rethrow;
     } catch (e) {
-      _logger.warning("marking recovery key status failed", e);
+      _logger.warning("Failed to set flag for $key", e);
       rethrow;
     }
   }
