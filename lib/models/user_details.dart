@@ -1,4 +1,3 @@
-// @dart = 2.9
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -10,7 +9,7 @@ class UserDetails {
   final int fileCount;
   final int sharedCollectionsCount;
   final Subscription subscription;
-  final FamilyData familyData;
+  final FamilyData? familyData;
 
   UserDetails(
     this.email,
@@ -27,8 +26,8 @@ class UserDetails {
 
   bool isFamilyAdmin() {
     assert(isPartOfFamily(), "verify user is part of family before calling");
-    final FamilyMember currentUserMember = familyData?.members
-        ?.firstWhere((element) => element.email.trim() == email.trim());
+    final FamilyMember currentUserMember = familyData!.members!
+        .firstWhere((element) => element.email.trim() == email.trim());
     return currentUserMember.isAdmin;
   }
 
@@ -36,20 +35,20 @@ class UserDetails {
   // belong to family group. Otherwise, it will return storage consumed by
   // current user
   int getFamilyOrPersonalUsage() {
-    return isPartOfFamily() ? familyData.getTotalUsage() : usage;
+    return isPartOfFamily() ? familyData!.getTotalUsage() : usage;
   }
 
   int getFreeStorage() {
     return max(
       isPartOfFamily()
-          ? (familyData.storage - familyData.getTotalUsage())
+          ? (familyData!.storage - familyData!.getTotalUsage())
           : (subscription.storage - (usage)),
       0,
     );
   }
 
   int getTotalStorage() {
-    return isPartOfFamily() ? familyData.storage : subscription.storage;
+    return isPartOfFamily() ? familyData!.storage : subscription.storage;
   }
 
   factory UserDetails.fromMap(Map<String, dynamic> map) {
@@ -80,14 +79,10 @@ class FamilyMember {
       map['isAdmin'] as bool,
     );
   }
-
-  Map<String, dynamic> toMap() {
-    return {'email': email, 'usage': usage, 'id': id, 'isAdmin': isAdmin};
-  }
 }
 
 class FamilyData {
-  final List<FamilyMember> members;
+  final List<FamilyMember>? members;
 
   // Storage available based on the family plan
   final int storage;
@@ -96,10 +91,10 @@ class FamilyData {
   FamilyData(this.members, this.storage, this.expiryTime);
 
   int getTotalUsage() {
-    return members.map((e) => e.usage).toList().sum;
+    return members!.map((e) => e.usage).toList().sum;
   }
 
-  static fromMap(Map<String, dynamic> map) {
+  static fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
     assert(map['members'] != null && map['members'].length >= 0);
     final members = List<FamilyMember>.from(
