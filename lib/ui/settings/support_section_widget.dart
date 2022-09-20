@@ -33,7 +33,7 @@ class SupportSectionWidget extends StatelessWidget {
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {
-            await sendEmail(context, to: kSupportEmail);
+            await sendEmail(context, to: supportEmail);
           },
           child:
               const SettingsTextItem(text: "Email", icon: Icons.navigate_next),
@@ -50,7 +50,7 @@ class SupportSectionWidget extends StatelessWidget {
                   final isLoggedIn = Configuration.instance.getToken() != null;
                   final url = isLoggedIn
                       ? endpoint + "?token=" + Configuration.instance.getToken()
-                      : kRoadmapURL;
+                      : roadmapURL;
                   return WebPage("Roadmap", url);
                 },
               ),

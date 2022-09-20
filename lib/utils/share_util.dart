@@ -46,7 +46,8 @@ Future<void> share(
 
 Rect shareButtonRect(BuildContext context, GlobalKey shareButtonKey) {
   Size size = MediaQuery.of(context).size;
-  final RenderBox renderBox = shareButtonKey?.currentContext?.findRenderObject();
+  final RenderBox renderBox =
+      shareButtonKey?.currentContext?.findRenderObject();
   if (renderBox == null) {
     return Rect.fromLTWH(0, 0, size.width, size.height / 2);
   }
@@ -83,7 +84,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     ioFile = ioFile.renameSync(
       Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title,
     );
-    enteFile.localID = kSharedMediaIdentifier + enteFile.title;
+    enteFile.localID = sharedMediaIdentifier + enteFile.title;
     enteFile.collectionID = collectionID;
     enteFile.fileType =
         media.type == SharedMediaType.IMAGE ? FileType.image : FileType.video;
