@@ -15,8 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PushService {
   static const kFCMPushToken = "fcm_push_token";
   static const kLastFCMTokenUpdationTime = "fcm_push_token_updation_time";
-  static const kFCMTokenUpdationIntervalInMicroSeconds =
-      30 * kMicroSecondsInDay;
+  static const kFCMTokenUpdationIntervalInMicroSeconds = 30 * microSecondsInDay;
   static const kPushAction = "action";
   static const kSync = "sync";
 

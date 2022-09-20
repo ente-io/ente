@@ -128,14 +128,14 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   }
 
   thumbnailData = await asset.thumbnailDataWithSize(
-    const ThumbnailSize(kThumbnailLargeSize, kThumbnailLargeSize),
-    quality: kThumbnailQuality,
+    const ThumbnailSize(thumbnailLargeSize, thumbnailLargeSize),
+    quality: thumbnailQuality,
   );
   if (thumbnailData == null) {
     throw InvalidFileError("unable to get asset thumbData");
   }
   int compressionAttempts = 0;
-  while (thumbnailData.length > kThumbnailDataLimit &&
+  while (thumbnailData.length > thumbnailDataLimit &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {
     _logger.info("Thumbnail size " + thumbnailData.length.toString());
     thumbnailData = await compressThumbnail(thumbnailData);
@@ -204,14 +204,14 @@ Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
       video: localFile.path,
       imageFormat: ImageFormat.JPEG,
       thumbnailPath: (await getTemporaryDirectory()).path,
-      maxWidth: kThumbnailLargeSize,
+      maxWidth: thumbnailLargeSize,
       quality: 80,
     );
     localFile = io.File(thumbnailFilePath);
   }
   var thumbnailData = await localFile.readAsBytes();
   int compressionAttempts = 0;
-  while (thumbnailData.length > kThumbnailDataLimit &&
+  while (thumbnailData.length > thumbnailDataLimit &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {
     _logger.info("Thumbnail size " + thumbnailData.length.toString());
     thumbnailData = await compressThumbnail(thumbnailData);

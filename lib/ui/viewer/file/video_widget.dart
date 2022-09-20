@@ -123,7 +123,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     final contentWithDetector = GestureDetector(
       child: content,
       onVerticalDragUpdate: (d) => {
-        if (d.delta.dy > kDragSensitivity) {Navigator.of(context).pop()}
+        if (d.delta.dy > dragSensitivity) {Navigator.of(context).pop()}
       },
     );
     return VisibilityDetector(

@@ -334,9 +334,9 @@ class Configuration {
   Future<void> recover(String recoveryKey) async {
     // check if user has entered mnemonic code
     if (recoveryKey.contains(' ')) {
-      if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
+      if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
         throw AssertionError(
-          'recovery code should have $kMnemonicKeyWordCount words',
+          'recovery code should have $mnemonicKeyWordCount words',
         );
       }
       recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
