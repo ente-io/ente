@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:core';
 
@@ -7,21 +5,21 @@ import 'package:photos/models/magic_metadata.dart';
 
 class Collection {
   final int id;
-  final User owner;
+  final User? owner;
   final String encryptedKey;
-  final String keyDecryptionNonce;
+  final String? keyDecryptionNonce;
   final String name;
   final String encryptedName;
   final String nameDecryptionNonce;
   final CollectionType type;
-  final CollectionAttributes attributes;
-  final List<User> sharees;
-  final List<PublicURL> publicURLs;
+  final CollectionAttributes? attributes;
+  final List<User?>? sharees;
+  final List<PublicURL?>? publicURLs;
   final int updationTime;
   final bool isDeleted;
-  String mMdEncodedJson;
+  String? mMdEncodedJson;
   int mMdVersion = 0;
-  CollectionMagicMetadata _mmd;
+  CollectionMagicMetadata? _mmd;
 
   CollectionMagicMetadata get magicMetadata =>
       _mmd ?? CollectionMagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
@@ -70,21 +68,21 @@ class Collection {
   }
 
   Collection copyWith({
-    int id,
-    User owner,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String name,
-    String encryptedName,
-    String nameDecryptionNonce,
-    CollectionType type,
-    CollectionAttributes attributes,
-    List<User> sharees,
-    List<PublicURL> publicURLs,
-    int updationTime,
-    bool isDeleted,
-    String mMdEncodedJson,
-    int mMdVersion,
+    int? id,
+    User? owner,
+    String? encryptedKey,
+    String? keyDecryptionNonce,
+    String? name,
+    String? encryptedName,
+    String? nameDecryptionNonce,
+    CollectionType? type,
+    CollectionAttributes? attributes,
+    List<User>? sharees,
+    List<PublicURL>? publicURLs,
+    int? updationTime,
+    bool? isDeleted,
+    String? mMdEncodedJson,
+    int? mMdVersion,
   }) {
     final Collection result = Collection(
       id ?? this.id,
@@ -117,14 +115,14 @@ class Collection {
       'nameDecryptionNonce': nameDecryptionNonce,
       'type': typeToString(type),
       'attributes': attributes?.toMap(),
-      'sharees': sharees?.map((x) => x?.toMap())?.toList(),
-      'publicURLs': publicURLs?.map((x) => x?.toMap())?.toList(),
+      'sharees': sharees?.map((x) => x?.toMap()).toList(),
+      'publicURLs': publicURLs?.map((x) => x?.toMap()).toList(),
       'updationTime': updationTime,
       'isDeleted': isDeleted,
     };
   }
 
-  factory Collection.fromMap(Map<String, dynamic> map) {
+  factory Collection.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw Exception('Argument is null');
     }
@@ -162,9 +160,9 @@ enum CollectionType {
 }
 
 class CollectionAttributes {
-  final String encryptedPath;
-  final String pathDecryptionNonce;
-  final int version;
+  final String? encryptedPath;
+  final String? pathDecryptionNonce;
+  final int? version;
 
   CollectionAttributes({
     this.encryptedPath,
@@ -184,7 +182,7 @@ class CollectionAttributes {
     return map;
   }
 
-  factory CollectionAttributes.fromMap(Map<String, dynamic> map) {
+  factory CollectionAttributes.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw Exception('Argument is null');
     }
@@ -198,13 +196,13 @@ class CollectionAttributes {
 }
 
 class User {
-  int id;
+  int? id;
   String email;
-  String name;
+  String? name;
 
   User({
     this.id,
-    this.email,
+    required this.email,
     this.name,
   });
 
@@ -216,7 +214,7 @@ class User {
     };
   }
 
-  factory User.fromMap(Map<String, dynamic> map) {
+  factory User.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw Exception('Argument is null');
     }
@@ -237,15 +235,15 @@ class PublicURL {
   String url;
   int deviceLimit;
   int validTill;
-  bool enableDownload = true;
-  bool passwordEnabled = false;
+  bool enableDownload;
+  bool passwordEnabled;
 
   PublicURL({
-    this.url,
-    this.deviceLimit,
-    this.validTill,
-    this.enableDownload,
-    this.passwordEnabled,
+    required this.url,
+    required this.deviceLimit,
+    required this.validTill,
+    this.enableDownload = true,
+    this.passwordEnabled = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -258,7 +256,7 @@ class PublicURL {
     };
   }
 
-  factory PublicURL.fromMap(Map<String, dynamic> map) {
+  factory PublicURL.fromMap(Map<String, dynamic>? map) {
     if (map == null) {
       throw Exception('Argument is null');
     }
