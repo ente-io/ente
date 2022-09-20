@@ -16,7 +16,6 @@ import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class VerifyRecoveryPage extends StatefulWidget {
   const VerifyRecoveryPage({Key? key}) : super(key: key);
@@ -55,8 +54,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           return;
         }
         Bus.instance.fire(NotificationEvent());
-        showToast(context, "Verification successful!");
         await dialog.hide();
+        // todo: change this as per figma once the component is ready
+        await showErrorDialog(
+          context,
+          "Recovery key verified",
+          "Great! Your recovery key is valid. Thank you for verifying.\n Please"
+              " remember to keep your recovery key safely backed up.",
+        );
         Navigator.of(context).pop();
       } else {
         throw Exception("recovery key didn't match");
