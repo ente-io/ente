@@ -363,6 +363,29 @@ extension CustomColorScheme on ColorScheme {
   Color get searchResultsBackgroundColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.32)
       : Colors.black.withOpacity(0.64);
+
+  Color get fillFaint => brightness == Brightness.light
+      ? Colors.white.withOpacity(0.04)
+      : Colors.black.withOpacity(0.12);
+  Color get warning500 => const Color.fromRGBO(255, 101, 101, 1);
+
+  List<BoxShadow> get shadowMenu => brightness == Brightness.light
+      ? [
+          BoxShadow(blurRadius: 6, color: Colors.white.withOpacity(0.16)),
+          BoxShadow(
+            blurRadius: 6,
+            color: Colors.white.withOpacity(0.12),
+            offset: const Offset(0, 3),
+          ),
+        ]
+      : [
+          BoxShadow(blurRadius: 6, color: Colors.black.withOpacity(0.50)),
+          BoxShadow(
+            blurRadius: 6,
+            color: Colors.black.withOpacity(0.25),
+            offset: const Offset(0, 3),
+          ),
+        ];
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({
