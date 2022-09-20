@@ -36,6 +36,9 @@ class UserRemoteFlagService {
     return _prefs.getBool(needRecoveryKeyVerification)!;
   }
 
+  // markRecoveryVerificationAsDone is used to track if user has verified their
+  // recovery key in the past or not. This helps in avoid showing the same
+  // prompt to the user on re-install or signing into a different device
   Future<void> markRecoveryVerificationAsDone() async {
     await _setBooleanFlag(recoveryVerificationFlag, true);
     await _prefs.setBool(needRecoveryKeyVerification, false);
@@ -107,10 +110,10 @@ class UserRemoteFlagService {
       return true;
     } on DioError catch (e) {
       _logger.info(e);
-      return false;
+      rethrow;
     } catch (e) {
       _logger.warning("marking recovery key status failed", e);
-      return false;
+      rethrow;
     }
   }
 }
