@@ -220,8 +220,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 context,
                 widget.collection,
                 widget.collection.isArchived()
-                    ? kVisibilityVisible
-                    : kVisibilityArchive,
+                    ? visibilityVisible
+                    : visibilityArchive,
               );
             } else if (value == 3) {
               await _trashCollection();

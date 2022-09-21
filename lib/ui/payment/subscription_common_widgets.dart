@@ -87,7 +87,7 @@ class ValidityWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (currentSubscription == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     final endDate = getDateAndMonthAndYear(
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime),
