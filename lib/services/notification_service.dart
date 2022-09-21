@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -28,7 +26,7 @@ class NotificationService {
     );
   }
 
-  Future selectNotification(String payload) async {}
+  Future selectNotification(String? payload) async {}
 
   Future<void> showNotification(String title, String message) async {
     if (!Platform.isAndroid) {
