@@ -26,7 +26,7 @@ void validatePreVerificationStateCheck(
   );
   nullOrEmptyArgCheck(keyAttr.publicKey, "publicKey");
   if (keyAttr.memLimit <= 0 || keyAttr.opsLimit <= 0) {
-    throw ArgumentError("Key mem/OpsLimit can not be null or <0");
+    throw ArgumentError("Key mem/OpsLimit can not be <0");
   }
   // check password encoding issues
   try {
