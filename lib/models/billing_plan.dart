@@ -16,10 +16,8 @@ class BillingPlans {
     };
   }
 
-  factory BillingPlans.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw ArgumentError('argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
 
     return BillingPlans(
       plans: List<BillingPlan>.from(
@@ -51,10 +49,8 @@ class FreePlan {
     };
   }
 
-  factory FreePlan.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw ArgumentError('argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
 
     return FreePlan(
       storage: map['storage'],
@@ -95,10 +91,8 @@ class BillingPlan {
     };
   }
 
-  factory BillingPlan.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw ArgumentError('argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
 
     return BillingPlan(
       id: map['id'],

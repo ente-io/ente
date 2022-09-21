@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/theme/colors.dart';
 
 class NotificationWarningWidget extends StatelessWidget {
   final IconData warningIcon;
@@ -28,7 +29,7 @@ class NotificationWarningWidget extends StatelessWidget {
                 Radius.circular(8),
               ),
               boxShadow: Theme.of(context).colorScheme.shadowMenu,
-              color: Theme.of(context).colorScheme.warning500,
+              color: warning500,
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

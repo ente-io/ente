@@ -31,10 +31,8 @@ class CollectionFileItem {
     };
   }
 
-  factory CollectionFileItem.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw ArgumentError('argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
 
     return CollectionFileItem(
       map['id'],

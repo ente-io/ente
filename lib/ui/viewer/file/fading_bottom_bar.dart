@@ -106,7 +106,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       if (widget.file.uploadedFileID != null &&
           widget.file.ownerID == Configuration.instance.getUserID()) {
         final bool isArchived =
-            widget.file.magicMetadata.visibility == kVisibilityArchive;
+            widget.file.magicMetadata.visibility == visibilityArchive;
         children.add(
           Tooltip(
             message: isArchived ? "Unhide" : "Hide",
@@ -123,7 +123,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
                   await changeVisibility(
                     context,
                     [widget.file],
-                    isArchived ? kVisibilityVisible : kVisibilityArchive,
+                    isArchived ? visibilityVisible : visibilityArchive,
                   );
                   safeRefresh();
                 },

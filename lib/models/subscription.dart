@@ -32,10 +32,8 @@ class Subscription {
     return 'year' == period;
   }
 
-  factory Subscription.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw ArgumentError("argument is null");
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
     return Subscription(
       productID: map['productID'],
       storage: map['storage'],

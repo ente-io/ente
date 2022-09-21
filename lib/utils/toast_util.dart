@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,7 +5,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/ente_theme_data.dart';
 
-Future<void> showToast(
+Future showToast(
   BuildContext context,
   String message, {
   toastLength = Toast.LENGTH_LONG,
