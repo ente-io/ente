@@ -234,8 +234,8 @@ class File extends EnteFile {
 
   bool isSharedMediaToAppSandbox() {
     return localID != null &&
-        (localID.startsWith(kOldSharedMediaIdentifier) ||
-            localID.startsWith(kSharedMediaIdentifier));
+        (localID.startsWith(oldSharedMediaIdentifier) ||
+            localID.startsWith(sharedMediaIdentifier));
   }
 
   bool hasLocation() {

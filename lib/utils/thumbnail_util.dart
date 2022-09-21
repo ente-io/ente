@@ -62,8 +62,8 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
 
 Future<Uint8List> getThumbnailFromLocal(
   File file, {
-  int size = kThumbnailSmallSize,
-  int quality = kThumbnailQuality,
+  int size = thumbnailSmallSize,
+  int quality = thumbnailQuality,
 }) async {
   final lruCachedThumbnail = ThumbnailLruCache.get(file, size);
   if (lruCachedThumbnail != null) {
@@ -154,7 +154,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     Sodium.base642bin(file.thumbnailDecryptionHeader),
   );
   final thumbnailSize = data.length;
-  if (thumbnailSize > kThumbnailDataLimit) {
+  if (thumbnailSize > thumbnailDataLimit) {
     data = await compressThumbnail(data);
   }
   ThumbnailLruCache.put(item.file, data);

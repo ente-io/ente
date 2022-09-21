@@ -292,6 +292,9 @@ class CollectionsService {
   Uint8List _getDecryptedKey(Collection collection) {
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
     if (collection.owner.id == _config.getUserID()) {
+      if(_config.getKey() == null) {
+        throw Exception("key can not be null");
+      }
       return CryptoUtil.decryptSync(
         encryptedKey,
         _config.getKey(),

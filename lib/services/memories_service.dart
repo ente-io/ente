@@ -33,7 +33,7 @@ class MemoriesService extends ChangeNotifier {
     // Intention of delay is to give more CPU cycles to other tasks
     Future.delayed(const Duration(seconds: 5), () {
       _memoriesDB.clearMemoriesSeenBeforeTime(
-        DateTime.now().microsecondsSinceEpoch - (7 * kMicroSecondsInDay),
+        DateTime.now().microsecondsSinceEpoch - (7 * microSecondsInDay),
       );
     });
   }
