@@ -8,7 +8,7 @@ class Collection {
   final User? owner;
   final String encryptedKey;
   final String? keyDecryptionNonce;
-  final String name;
+  final String? name;
   final String encryptedName;
   final String nameDecryptionNonce;
   final CollectionType type;

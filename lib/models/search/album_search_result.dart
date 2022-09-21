@@ -14,7 +14,7 @@ class AlbumSearchResult extends SearchResult {
 
   @override
   String name() {
-    return collectionWithThumbnail.collection.name;
+    return collectionWithThumbnail.collection.name!;
   }
 
   @override
