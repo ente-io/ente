@@ -33,7 +33,7 @@ class ArchivePage extends StatelessWidget {
           creationStartTime,
           creationEndTime,
           Configuration.instance.getUserID(),
-          visibility: kVisibilityArchive,
+          visibility: visibilityArchive,
           limit: limit,
           asc: asc,
         );
