@@ -122,10 +122,8 @@ class Collection {
     };
   }
 
-  factory Collection.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw Exception('Argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
     final sharees = (map['sharees'] == null || map['sharees'].length == 0)
         ? <User>[]
         : List<User>.from(map['sharees'].map((x) => User.fromMap(x)));
@@ -182,10 +180,8 @@ class CollectionAttributes {
     return map;
   }
 
-  factory CollectionAttributes.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw Exception('Argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
 
     return CollectionAttributes(
       encryptedPath: map['encryptedPath'],
@@ -214,10 +210,8 @@ class User {
     };
   }
 
-  factory User.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw Exception('Argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
 
     return User(
       id: map['id'],
@@ -256,10 +250,8 @@ class PublicURL {
     };
   }
 
-  factory PublicURL.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw Exception('Argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
 
     return PublicURL(
       url: map['url'],
