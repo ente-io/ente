@@ -62,7 +62,8 @@ class CollectionsDB {
   }
 
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     return await openDatabaseWithMigration(path, dbConfig);
   }
@@ -178,20 +179,6 @@ class CollectionsDB {
       collections.add(_convertToCollection(row));
     }
     return collections;
-  }
-
-  Future<int> getLastCollectionUpdationTime() async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      orderBy: '$columnUpdationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return int.parse(rows[0][columnUpdationTime]);
-    } else {
-      return null;
-    }
   }
 
   Future<int> deleteCollection(int collectionID) async {
