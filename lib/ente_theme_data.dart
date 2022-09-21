@@ -5,8 +5,8 @@ final lightThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.light,
   hintColor: const Color.fromRGBO(158, 158, 158, 1),
-  primaryColor: Color.fromRGBO(255, 110, 64, 1),
-  primaryColorLight: Color.fromRGBO(0, 0, 0, 0.541),
+  primaryColor: const Color.fromRGBO(255, 110, 64, 1),
+  primaryColorLight: const Color.fromRGBO(0, 0, 0, 0.541),
   iconTheme: const IconThemeData(color: Colors.black),
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
