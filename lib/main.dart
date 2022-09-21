@@ -31,6 +31,7 @@ import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/services/update_service.dart';
+import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/ui/tools/lock_screen.dart';
@@ -133,6 +134,7 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   await Network.instance.init();
   await Configuration.instance.init();
   await UserService.instance.init();
+  await UserRemoteFlagService.instance.init();
   await UpdateService.instance.init();
   await BillingService.instance.init();
   await CollectionsService.instance.init();
@@ -175,8 +177,8 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
       body: function,
       logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
       maxLogFiles: 5,
-      sentryDsn: kDebugMode ? kSentryDebugDSN : kSentryDSN,
-      tunnel: kSentryTunnel,
+      sentryDsn: kDebugMode ? sentryDebugDSN : sentryDSN,
+      tunnel: sentryTunnel,
       enableInDebugMode: true,
       prefix: prefix,
     ),

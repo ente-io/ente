@@ -311,8 +311,8 @@ Future<bool> deleteLocalFiles(
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   for (String id in localIDs) {
-    if (id.startsWith(kOldSharedMediaIdentifier) ||
-        id.startsWith(kSharedMediaIdentifier)) {
+    if (id.startsWith(oldSharedMediaIdentifier) ||
+        id.startsWith(sharedMediaIdentifier)) {
       localSharedMediaIDs.add(id);
     } else {
       localAssetIDs.add(id);
@@ -322,7 +322,7 @@ Future<bool> deleteLocalFiles(
 
   if (Platform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
-    if (androidInfo.version.sdkInt < kAndroid11SDKINT) {
+    if (androidInfo.version.sdkInt < android11SDKINT) {
       deletedIDs
           .addAll(await _deleteLocalFilesInBatches(context, localAssetIDs));
     } else {

@@ -138,7 +138,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailLruCache.get(widget.file, kThumbnailSmallSize);
+          ThumbnailLruCache.get(widget.file, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
@@ -187,7 +187,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         final imageProvider = Image.memory(thumbData).image;
         _cacheAndRender(imageProvider);
       }
-      ThumbnailLruCache.put(widget.file, thumbData, kThumbnailSmallSize);
+      ThumbnailLruCache.put(widget.file, thumbData, thumbnailSmallSize);
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _errorLoadingLocalThumbnail = true;
