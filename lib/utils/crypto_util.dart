@@ -204,6 +204,7 @@ class CryptoUtil {
     Uint8List key,
     Uint8List nonce,
   ) {
+    assert(key != null, "key can not be null");
     final args = <String, dynamic>{};
     args["cipher"] = cipher;
     args["nonce"] = nonce;

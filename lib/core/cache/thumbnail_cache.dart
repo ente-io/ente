@@ -13,7 +13,7 @@ class ThumbnailLruCache {
     return _map.get(
       enteFile.cacheKey() +
           "_" +
-          (size != null ? size.toString() : kThumbnailLargeSize.toString()),
+          (size != null ? size.toString() : thumbnailLargeSize.toString()),
     );
   }
 
@@ -25,17 +25,17 @@ class ThumbnailLruCache {
     _map.put(
       enteFile.cacheKey() +
           "_" +
-          (size != null ? size.toString() : kThumbnailLargeSize.toString()),
+          (size != null ? size.toString() : thumbnailLargeSize.toString()),
       imageData,
     );
   }
 
   static void clearCache(EnteFile enteFile) {
     _map.remove(
-      enteFile.cacheKey() + "_" + kThumbnailLargeSize.toString(),
+      enteFile.cacheKey() + "_" + thumbnailLargeSize.toString(),
     );
     _map.remove(
-      enteFile.cacheKey() + "_" + kThumbnailSmallSize.toString(),
+      enteFile.cacheKey() + "_" + thumbnailSmallSize.toString(),
     );
   }
 }

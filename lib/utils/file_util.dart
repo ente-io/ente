@@ -92,14 +92,14 @@ String getSharedMediaFilePath(ente.File file) {
 }
 
 String getSharedMediaPathFromLocalID(String localID) {
-  if (localID.startsWith(kOldSharedMediaIdentifier)) {
+  if (localID.startsWith(oldSharedMediaIdentifier)) {
     return Configuration.instance.getOldSharedMediaCacheDirectory() +
         "/" +
-        localID.replaceAll(kOldSharedMediaIdentifier, '');
+        localID.replaceAll(oldSharedMediaIdentifier, '');
   } else {
     return Configuration.instance.getSharedMediaDirectory() +
         "/" +
-        localID.replaceAll(kSharedMediaIdentifier, '');
+        localID.replaceAll(sharedMediaIdentifier, '');
   }
 }
 
@@ -301,8 +301,8 @@ String getExtension(String nameOrPath) {
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
   return FlutterImageCompress.compressWithList(
     thumbnail,
-    minHeight: kCompressedThumbnailResolution,
-    minWidth: kCompressedThumbnailResolution,
+    minHeight: compressedThumbnailResolution,
+    minWidth: compressedThumbnailResolution,
     quality: 25,
   );
 }
