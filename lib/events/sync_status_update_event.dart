@@ -21,11 +21,6 @@ class SyncStatusUpdate extends Event {
   }) {
     timestamp = DateTime.now().microsecondsSinceEpoch;
   }
-
-  @override
-  String toString() {
-    return 'SyncStatusUpdate(completed: $completed, total: $total, wasStopped: $wasStopped, status: $status, reason: $reason, error: $error)';
-  }
 }
 
 enum SyncStatus {
