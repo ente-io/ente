@@ -125,7 +125,7 @@ class LocalSyncService {
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
       // mark device collection has imported on first import
-      await _refreshDeviceFolderCountAndCover();
+      await _refreshDeviceFolderCountAndCover(isFirstSync: true);
       await _prefs.setBool(hasImportedDeviceCollections, true);
       _logger.fine("first gallery import finished");
       Bus.instance
@@ -138,14 +138,18 @@ class LocalSyncService {
     _existingSync = null;
   }
 
-  Future<bool> _refreshDeviceFolderCountAndCover() async {
+  Future<bool> _refreshDeviceFolderCountAndCover({
+    bool isFirstSync = false,
+  }) async {
     final List<Tuple2<AssetPathEntity, String>> result =
         await getDeviceFolderWithCountAndCoverID();
     final bool hasUpdated = await _db.updateDeviceCoverWithCount(
       result,
       shouldBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
-    if (hasUpdated) {
+    // do not fire UI update event during first sync. Otherwise the next screen
+    // to shop the backup folder is skipped
+    if (hasUpdated && !isFirstSync) {
       Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
     // migrate the backed up folder settings after first import is done remove
