@@ -222,6 +222,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           alignment: Alignment.center,
           child: GestureDetector(
             onTap: () async {
+              final String paymentProvider =
+                  _currentSubscription.paymentProvider;
               switch (_currentSubscription.paymentProvider) {
                 case kStripe:
                   await _launchStripePortal();
@@ -237,9 +239,14 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   launchUrlString("https://apps.apple.com/account/billing");
                   break;
                 default:
-                  _logger.severe(
-                    "unexpected payment provider ",
-                    _currentSubscription,
+                  final String capitalizedWord = paymentProvider.isNotEmpty
+                      ? '${paymentProvider[0].toUpperCase()}${paymentProvider.substring(1).toLowerCase()}'
+                      : '';
+                  showErrorDialog(
+                    context,
+                    "Sorry",
+                    "Please contact us at support@ente.io to manage your "
+                        "$capitalizedWord subscription.",
                   );
               }
             },
@@ -249,16 +256,12 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 children: [
                   RichText(
                     text: TextSpan(
-                      text: !_isStripeSubscriber
-                          ? "visit ${_currentSubscription.paymentProvider} to manage your subscription"
-                          : "Payment details",
+                      text: "Payment details",
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontFamily: 'Inter-Medium',
                         fontSize: 14,
-                        decoration: _isStripeSubscriber
-                            ? TextDecoration.underline
-                            : TextDecoration.none,
+                        decoration: TextDecoration.underline,
                       ),
                     ),
                     textAlign: TextAlign.center,
@@ -442,7 +445,8 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 showErrorDialog(
                   context,
                   "Sorry",
-                  "please cancel your existing subscription from ${_currentSubscription.paymentProvider} first",
+                  "Please cancel your existing subscription from "
+                      "${_currentSubscription.paymentProvider} first",
                 );
                 return;
               }
@@ -450,7 +454,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                 showErrorDialog(
                   context,
                   "Sorry",
-                  "you cannot downgrade to this plan",
+                  "You cannot downgrade to this plan",
                 );
                 return;
               }
