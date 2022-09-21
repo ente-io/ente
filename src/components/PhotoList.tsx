@@ -24,7 +24,7 @@ import { GalleryContext } from 'pages/gallery';
 import { SpecialPadding } from 'styles/SpecialPadding';
 
 const A_DAY = 24 * 60 * 60 * 1000;
-const NO_OF_PAGES = 2;
+// const NO_OF_PAGES = 2;
 const FOOTER_HEIGHT = 90;
 
 export enum ITEM_TYPE {
@@ -512,9 +512,9 @@ export function PhotoList({
         }
     };
 
-    const extraRowsToRender = Math.ceil(
-        (NO_OF_PAGES * height) / IMAGE_CONTAINER_MAX_HEIGHT
-    );
+    // const extraRowsToRender = Math.ceil(
+    //     (NO_OF_PAGES * height) / IMAGE_CONTAINER_MAX_HEIGHT
+    // );
 
     const generateKey = (index) => {
         switch (timeStampList[index].itemType) {
@@ -587,7 +587,7 @@ export function PhotoList({
             width={width}
             itemCount={timeStampList.length}
             itemKey={generateKey}
-            overscanCount={extraRowsToRender}>
+            overscanCount={0}>
             {({ index, style }) => (
                 <ListItem style={style}>
                     <ListContainer
