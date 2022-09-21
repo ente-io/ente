@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
@@ -244,13 +242,14 @@ extension CustomColorScheme on ColorScheme {
 
   Color get greenAlternative => const Color.fromRGBO(45, 194, 98, 1.0);
 
-  Color get dynamicFABBackgroundColor =>
-      brightness == Brightness.light ? Colors.black : Colors.grey[850];
+  Color get dynamicFABBackgroundColor => brightness == Brightness.light
+      ? const Color.fromRGBO(0, 0, 0, 1)
+      : const Color.fromRGBO(48, 48, 48, 1);
 
   Color get dynamicFABTextColor => Colors.white; //same for both themes
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
-  ButtonStyle get optionalActionButtonStyle => buildElevatedButtonThemeData(
+  ButtonStyle? get optionalActionButtonStyle => buildElevatedButtonThemeData(
         onPrimary: const Color(0xFF777777),
         primary: const Color(0xFFF0F0F0),
         elevation: 0,
@@ -366,10 +365,10 @@ extension CustomColorScheme on ColorScheme {
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({
-  Color bgDisabled,
-  Color bgEnabled,
-  Color fgDisabled,
-  Color fgEnabled,
+  required Color bgDisabled,
+  required Color bgEnabled,
+  required Color fgDisabled,
+  required Color fgEnabled,
 }) {
   return OutlinedButtonThemeData(
     style: OutlinedButton.styleFrom(
@@ -406,8 +405,8 @@ OutlinedButtonThemeData buildOutlinedButtonThemeData({
 }
 
 ElevatedButtonThemeData buildElevatedButtonThemeData({
-  @required Color onPrimary, // text button color
-  @required Color primary,
+  required Color onPrimary, // text button color
+  required Color primary,
   double elevation = 2, // background color of button
 }) {
   return ElevatedButtonThemeData(
