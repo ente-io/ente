@@ -533,15 +533,29 @@ class FilesDB {
     List<File> files,
     Set<int> ignoredCollectionIDs,
   ) {
-    final uploadedFileIDs = <int>{};
+    final Set<int> uploadedFileIDs = <int>{};
+    // ignoredFileUploadIDs is to keep a track of files which are part of
+    // archived collection
+    final Set<int> ignoredFileUploadIDs = <int>{};
     final List<File> deduplicatedFiles = [];
     for (final file in files) {
       final id = file.uploadedFileID;
-      if (ignoredCollectionIDs != null &&
-          ignoredCollectionIDs.contains(file.collectionID)) {
+      final bool isFileUploaded = id != null && id != -1;
+      final bool isCollectionIgnored = ignoredCollectionIDs != null &&
+          ignoredCollectionIDs.contains(file.collectionID);
+      if (isCollectionIgnored || ignoredFileUploadIDs.contains(id)) {
+        if (isFileUploaded) {
+          ignoredFileUploadIDs.add(id);
+          // remove the file from the list of deduplicated files
+          if (uploadedFileIDs.contains(id)) {
+            deduplicatedFiles
+                .removeWhere((element) => element.uploadedFileID == id);
+            uploadedFileIDs.remove(id);
+          }
+        }
         continue;
       }
-      if (id != null && id != -1 && uploadedFileIDs.contains(id)) {
+      if (isFileUploaded && uploadedFileIDs.contains(id)) {
         continue;
       }
       uploadedFileIDs.add(id);
