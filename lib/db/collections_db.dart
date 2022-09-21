@@ -1,10 +1,9 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/models/collection.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -54,11 +53,11 @@ class CollectionsDB {
 
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
 
-  static Future<Database> _dbFuture;
+  static Future<Database>? _dbFuture;
 
   Future<Database> get database async {
     _dbFuture ??= _initDatabase();
-    return _dbFuture;
+    return _dbFuture!;
   }
 
   Future<Database> _initDatabase() async {
