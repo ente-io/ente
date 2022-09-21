@@ -21,7 +21,7 @@ class GradientButton extends StatelessWidget {
       Color(0xFF1DB954),
     ],
     this.onTap,
-    this.text,
+    this.text = '',
     this.iconData,
     this.paddingValue = 0.0,
   }) : super(key: key);
