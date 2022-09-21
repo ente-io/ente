@@ -14,10 +14,13 @@ import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
+import QueueProcessor from './queueProcessor';
 
 class PublicCollectionDownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
+
+    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(5);
 
     public async getThumbnail(
         file: EnteFile,
@@ -46,11 +49,10 @@ class PublicCollectionDownloadManager {
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    const thumb = await this.downloadThumb(
-                        token,
-                        passwordToken,
-                        file
-                    );
+                    const thumb =
+                        await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
+                            () => this.downloadThumb(token, passwordToken, file)
+                        ).promise;
                     const thumbBlob = new Blob([thumb]);
                     try {
                         await thumbnailCache?.put(

@@ -19,10 +19,7 @@ class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
-    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(
-        5,
-        true
-    );
+    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(5);
 
     public async getThumbnail(file: EnteFile) {
         try {
