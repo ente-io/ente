@@ -17,7 +17,10 @@ export default class QueueProcessor<T> {
 
     private requestInProcessing = 0;
 
-    constructor(private maxParallelProcesses: number) {}
+    constructor(
+        private maxParallelProcesses: number,
+        private lifoProcessing = false
+    ) {}
 
     public queueUpRequest(
         request: (canceller?: RequestCanceller) => Promise<T>
@@ -52,7 +55,9 @@ export default class QueueProcessor<T> {
 
     private async processQueue() {
         while (this.requestQueue.length > 0) {
-            const queueItem = this.requestQueue.shift();
+            const queueItem = this.lifoProcessing
+                ? this.requestQueue.pop()
+                : this.requestQueue.shift();
             let response = null;
 
             if (queueItem.isCanceled.status) {
