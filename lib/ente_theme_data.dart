@@ -4,9 +4,9 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 final lightThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.light,
-  hintColor: Colors.grey,
-  primaryColor: Colors.deepOrangeAccent,
-  primaryColorLight: Colors.black54,
+  hintColor: const Color.fromRGBO(158, 158, 158, 1),
+  primaryColor: const Color.fromRGBO(255, 110, 64, 1),
+  primaryColorLight: const Color.fromRGBO(0, 0, 0, 0.541),
   iconTheme: const IconThemeData(color: Colors.black),
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
@@ -16,18 +16,18 @@ final lightThemeData = ThemeData(
   ),
   accentColor: const Color.fromRGBO(0, 0, 0, 0.6),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
-    bgDisabled: Colors.grey.shade500,
-    bgEnabled: Colors.black,
-    fgDisabled: Colors.white,
-    fgEnabled: Colors.white,
+    bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
+    bgEnabled: const Color.fromRGBO(0, 0, 0, 1),
+    fgDisabled: const Color.fromRGBO(255, 255, 255, 1),
+    fgEnabled: const Color.fromRGBO(255, 255, 255, 1),
   ),
   elevatedButtonTheme: buildElevatedButtonThemeData(
-    onPrimary: Colors.white,
-    primary: Colors.black,
+    onPrimary: const Color.fromRGBO(255, 255, 255, 1),
+    primary: const Color.fromRGBO(0, 0, 0, 1),
   ),
-  toggleableActiveColor: Colors.green[400],
-  scaffoldBackgroundColor: Colors.white,
-  backgroundColor: Colors.white,
+  toggleableActiveColor: const Color.fromRGBO(102, 187, 106, 1),
+  scaffoldBackgroundColor: const Color.fromRGBO(255, 255, 255, 1),
+  backgroundColor: const Color.fromRGBO(255, 255, 255, 1),
   appBarTheme: const AppBarTheme().copyWith(
     backgroundColor: Colors.white,
     foregroundColor: Colors.black,
@@ -35,7 +35,7 @@ final lightThemeData = ThemeData(
     elevation: 0,
   ),
   //https://api.flutter.dev/flutter/material/TextTheme-class.html
-  textTheme: _buildTextTheme(Colors.black),
+  textTheme: _buildTextTheme(const Color.fromRGBO(0, 0, 0, 1)),
   primaryTextTheme: const TextTheme().copyWith(
     bodyText2: const TextStyle(color: Colors.yellow),
     bodyText1: const TextStyle(color: Colors.orange),
@@ -70,13 +70,13 @@ final lightThemeData = ThemeData(
     ),
     fillColor: MaterialStateProperty.resolveWith((states) {
       return states.contains(MaterialState.selected)
-          ? Colors.black
-          : Colors.white;
+          ? const Color.fromRGBO(0, 0, 0, 1)
+          : const Color.fromRGBO(255, 255, 255, 1);
     }),
     checkColor: MaterialStateProperty.resolveWith((states) {
       return states.contains(MaterialState.selected)
-          ? Colors.white
-          : Colors.black;
+          ? const Color.fromRGBO(255, 255, 255, 1)
+          : const Color.fromRGBO(0, 0, 0, 1);
     }),
   ),
 );
@@ -84,30 +84,30 @@ final lightThemeData = ThemeData(
 final darkThemeData = ThemeData(
   fontFamily: 'Inter',
   brightness: Brightness.dark,
-  primaryColorLight: Colors.white70,
+  primaryColorLight: const Color.fromRGBO(255, 255, 255, 0.702),
   iconTheme: const IconThemeData(color: Colors.white),
   primaryIconTheme:
       const IconThemeData(color: Colors.red, opacity: 1.0, size: 50.0),
-  hintColor: Colors.grey,
+  hintColor: const Color.fromRGBO(158, 158, 158, 1),
   colorScheme: const ColorScheme.dark(primary: Colors.white),
   accentColor: const Color.fromRGBO(45, 194, 98, 0.2),
   buttonTheme: const ButtonThemeData().copyWith(
     buttonColor: const Color.fromRGBO(45, 194, 98, 1.0),
   ),
-  textTheme: _buildTextTheme(Colors.white),
-  toggleableActiveColor: Colors.green[400],
+  textTheme: _buildTextTheme(const Color.fromRGBO(255, 255, 255, 1)),
+  toggleableActiveColor: const Color.fromRGBO(102, 187, 106, 1),
   outlinedButtonTheme: buildOutlinedButtonThemeData(
-    bgDisabled: Colors.grey.shade500,
-    bgEnabled: Colors.white,
-    fgDisabled: Colors.white,
-    fgEnabled: Colors.black,
+    bgDisabled: const Color.fromRGBO(158, 158, 158, 1),
+    bgEnabled: const Color.fromRGBO(255, 255, 255, 1),
+    fgDisabled: const Color.fromRGBO(255, 255, 255, 1),
+    fgEnabled: const Color.fromRGBO(0, 0, 0, 1),
   ),
   elevatedButtonTheme: buildElevatedButtonThemeData(
-    onPrimary: Colors.black,
-    primary: Colors.white,
+    onPrimary: const Color.fromRGBO(0, 0, 0, 1),
+    primary: const Color.fromRGBO(255, 255, 255, 1),
   ),
-  scaffoldBackgroundColor: Colors.black,
-  backgroundColor: Colors.black,
+  scaffoldBackgroundColor: const Color.fromRGBO(0, 0, 0, 1),
+  backgroundColor: const Color.fromRGBO(0, 0, 0, 1),
   appBarTheme: const AppBarTheme().copyWith(
     color: Colors.black,
     elevation: 0,
@@ -142,16 +142,16 @@ final darkThemeData = ThemeData(
     ),
     fillColor: MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
-        return Colors.grey;
+        return const Color.fromRGBO(158, 158, 158, 1);
       } else {
-        return Colors.black;
+        return const Color.fromRGBO(0, 0, 0, 1);
       }
     }),
     checkColor: MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
-        return Colors.black;
+        return const Color.fromRGBO(0, 0, 0, 1);
       } else {
-        return Colors.grey;
+        return const Color.fromRGBO(158, 158, 158, 1);
       }
     }),
   ),
@@ -217,20 +217,25 @@ TextTheme _buildTextTheme(Color textColor) {
 }
 
 extension CustomColorScheme on ColorScheme {
-  Color get defaultBackgroundColor =>
-      brightness == Brightness.light ? Colors.white : Colors.black;
+  Color get defaultBackgroundColor => brightness == Brightness.light
+      ? const Color.fromRGBO(255, 255, 255, 1)
+      : const Color.fromRGBO(0, 0, 0, 1);
 
-  Color get defaultTextColor =>
-      brightness == Brightness.light ? Colors.black : Colors.white;
+  Color get defaultTextColor => brightness == Brightness.light
+      ? const Color.fromRGBO(0, 0, 0, 1)
+      : const Color.fromRGBO(255, 255, 255, 1);
 
-  Color get inverseTextColor =>
-      brightness == Brightness.light ? Colors.white : Colors.black;
+  Color get inverseTextColor => brightness == Brightness.light
+      ? const Color.fromRGBO(255, 255, 255, 1)
+      : const Color.fromRGBO(0, 0, 0, 1);
 
-  Color get inverseIconColor =>
-      brightness == Brightness.light ? Colors.white : Colors.black;
+  Color get inverseIconColor => brightness == Brightness.light
+      ? const Color.fromRGBO(255, 255, 255, 1)
+      : const Color.fromRGBO(0, 0, 0, 1);
 
-  Color get inverseBackgroundColor =>
-      brightness == Brightness.light ? Colors.black : Colors.white;
+  Color get inverseBackgroundColor => brightness == Brightness.light
+      ? const Color.fromRGBO(0, 0, 0, 1)
+      : const Color.fromRGBO(255, 255, 255, 1);
 
   Color get boxSelectColor => brightness == Brightness.light
       ? const Color.fromRGBO(67, 186, 108, 1)
@@ -246,7 +251,8 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(0, 0, 0, 1)
       : const Color.fromRGBO(48, 48, 48, 1);
 
-  Color get dynamicFABTextColor => Colors.white; //same for both themes
+  Color get dynamicFABTextColor =>
+      const Color.fromRGBO(255, 255, 255, 1); //same for both themes
 
   // todo: use brightness == Brightness.light for changing color for dark/light theme
   ButtonStyle? get optionalActionButtonStyle => buildElevatedButtonThemeData(
@@ -264,18 +270,18 @@ extension CustomColorScheme on ColorScheme {
       : const Color.fromRGBO(48, 48, 48, 0.5);
 
   Color get iconColor => brightness == Brightness.light
-      ? Colors.black.withOpacity(0.75)
-      : Colors.white;
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.75)
+      : const Color.fromRGBO(255, 255, 255, 1);
 
   Color get bgColorForQuestions => brightness == Brightness.light
-      ? Colors.white
+      ? const Color.fromRGBO(255, 255, 255, 1)
       : const Color.fromRGBO(10, 15, 15, 1.0);
 
   Color get greenText => const Color.fromARGB(255, 40, 190, 113);
 
   Color get cupertinoPickerTopColor => brightness == Brightness.light
       ? const Color.fromARGB(255, 238, 238, 238)
-      : Colors.white.withOpacity(0.1);
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.1);
 
   DatePickerTheme get dateTimePickertheme => brightness == Brightness.light
       ? const DatePickerTheme(
@@ -314,23 +320,24 @@ extension CustomColorScheme on ColorScheme {
       : const Color.fromRGBO(20, 20, 20, 1);
 
   Color get galleryThumbDrawColor => brightness == Brightness.light
-      ? Colors.black.withOpacity(0.8)
-      : Colors.white.withOpacity(0.5);
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.8)
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.5);
 
   Color get backupEnabledBgColor => brightness == Brightness.light
       ? const Color.fromRGBO(230, 230, 230, 0.95)
       : const Color.fromRGBO(10, 40, 40, 0.3);
 
   Color get dotsIndicatorActiveColor => brightness == Brightness.light
-      ? Colors.black.withOpacity(0.5)
-      : Colors.white.withOpacity(0.5);
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.5)
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.5);
 
   Color get dotsIndicatorInactiveColor => brightness == Brightness.light
-      ? Colors.black.withOpacity(0.12)
-      : Colors.white.withOpacity(0.12);
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.12)
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.12);
 
-  Color get toastTextColor =>
-      brightness == Brightness.light ? Colors.white : Colors.black;
+  Color get toastTextColor => brightness == Brightness.light
+      ? const Color.fromRGBO(255, 255, 255, 1)
+      : const Color.fromRGBO(0, 0, 0, 1);
 
   Color get toastBackgroundColor => brightness == Brightness.light
       ? const Color.fromRGBO(24, 24, 24, 0.95)
@@ -341,15 +348,16 @@ extension CustomColorScheme on ColorScheme {
       : const Color.fromRGBO(100, 100, 100, 1);
 
   Color get themeSwitchIndicatorColor => brightness == Brightness.light
-      ? Colors.black.withOpacity(0.75)
-      : Colors.white;
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.75)
+      : const Color.fromRGBO(255, 255, 255, 1);
 
-  Color get themeSwitchActiveIconColor =>
-      brightness == Brightness.light ? Colors.white : Colors.black;
+  Color get themeSwitchActiveIconColor => brightness == Brightness.light
+      ? const Color.fromRGBO(255, 255, 255, 1)
+      : const Color.fromRGBO(0, 0, 0, 1);
 
   Color get themeSwitchInactiveIconColor => brightness == Brightness.light
-      ? Colors.black.withOpacity(0.5)
-      : Colors.white.withOpacity(0.5);
+      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.5)
+      : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.5);
 
   Color get searchResultsColor => brightness == Brightness.light
       ? const Color.fromRGBO(245, 245, 245, 1.0)
