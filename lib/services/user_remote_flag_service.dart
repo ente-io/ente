@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/events/notification_event.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -32,8 +35,14 @@ class UserRemoteFlagService {
       // fetch the status from remote
       unawaited(_refreshRecoveryVerificationFlag());
       return false;
+    } else {
+      final bool shouldShow = _prefs.getBool(needRecoveryKeyVerification)!;
+      if (shouldShow) {
+        // refresh the status to check if user marked it as done on another device
+        unawaited(_refreshRecoveryVerificationFlag());
+      }
+      return shouldShow;
     }
-    return _prefs.getBool(needRecoveryKeyVerification)!;
   }
 
   // markRecoveryVerificationAsDone is used to track if user has verified their
@@ -45,25 +54,34 @@ class UserRemoteFlagService {
   }
 
   Future<void> _refreshRecoveryVerificationFlag() async {
+    _logger.finest('refresh recovery key verification flag');
     final remoteStatusValue =
         await _getValue(recoveryVerificationFlag, "false");
+    final bool isNeedVerificationFlagSet =
+        _prefs.containsKey(needRecoveryKeyVerification);
     if (remoteStatusValue.toLowerCase() == "true") {
       await _prefs.setBool(needRecoveryKeyVerification, false);
-    } else {
-      // check the session creationTime. If any active session is older than
-      // 1 day, set the need to verification as true
+      // If the user verified on different device, then we should refresh
+      // the UI to dismiss the Notification.
+      if (isNeedVerificationFlagSet) {
+        Bus.instance.fire(NotificationEvent());
+      }
+    } else if (!isNeedVerificationFlagSet) {
+      // Verification is not done yet as remoteStatus is false and local flag to
+      // show notification isn't set. Set the flag to true if any active
+      // session is older than 1 day.
       final activeSessions = await UserService.instance.getActiveSessions();
       final int microSecondsInADay = const Duration(days: 1).inMicroseconds;
       final bool anyActiveSessionOlderThanADay =
-          activeSessions.sessions.firstWhere(
+          activeSessions.sessions.firstWhereOrNull(
                 (e) =>
                     (e.creationTime + microSecondsInADay) <
                     DateTime.now().microsecondsSinceEpoch,
-                orElse: () => null,
               ) !=
               null;
       if (anyActiveSessionOlderThanADay) {
         await _prefs.setBool(needRecoveryKeyVerification, true);
+        Bus.instance.fire(NotificationEvent());
       } else {
         // continue defaulting to no verification prompt
         _logger.finest('No active session older than 1 day');
