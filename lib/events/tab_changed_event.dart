@@ -10,11 +10,6 @@ class TabChangedEvent extends Event {
     this.selectedIndex,
     this.source,
   );
-
-  @override
-  String toString() {
-    return 'TabChangedEvent{selectedIndex: $selectedIndex, source: $source}';
-  }
 }
 
 enum TabChangedEventSource {
