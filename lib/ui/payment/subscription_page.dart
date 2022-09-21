@@ -224,17 +224,32 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           alignment: Alignment.center,
           child: GestureDetector(
             onTap: () {
-              if (_isActiveStripeSubscriber) {
-                return;
-              }
-              if (Platform.isAndroid) {
+              final String paymentProvider =
+                  _currentSubscription.paymentProvider;
+              if (paymentProvider == kAppStore && !Platform.isAndroid) {
+                launchUrlString("https://apps.apple.com/account/billing");
+              } else if (paymentProvider == kPlayStore && Platform.isAndroid) {
                 launchUrlString(
                   "https://play.google.com/store/account/subscriptions?sku=" +
                       _currentSubscription.productID +
                       "&package=io.ente.photos",
                 );
+              } else if (paymentProvider == kStripe) {
+                showErrorDialog(
+                  context,
+                  "Sorry",
+                  "Visit web.ente.io to manage your subscription",
+                );
               } else {
-                launchUrlString("https://apps.apple.com/account/billing");
+                final String capitalizedWord = paymentProvider.isNotEmpty
+                    ? '${paymentProvider[0].toUpperCase()}${paymentProvider.substring(1).toLowerCase()}'
+                    : '';
+                showErrorDialog(
+                  context,
+                  "Sorry",
+                  "Please contact us at support@ente.io to manage your "
+                      "$capitalizedWord subscription.",
+                );
               }
             },
             child: Container(
