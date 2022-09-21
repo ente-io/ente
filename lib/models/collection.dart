@@ -12,7 +12,7 @@ class Collection {
   final String encryptedName;
   final String nameDecryptionNonce;
   final CollectionType type;
-  final CollectionAttributes? attributes;
+  final CollectionAttributes attributes;
   final List<User?>? sharees;
   final List<PublicURL?>? publicURLs;
   final int updationTime;
@@ -114,7 +114,7 @@ class Collection {
       'encryptedName': encryptedName,
       'nameDecryptionNonce': nameDecryptionNonce,
       'type': typeToString(type),
-      'attributes': attributes?.toMap(),
+      'attributes': attributes.toMap(),
       'sharees': sharees?.map((x) => x?.toMap()).toList(),
       'publicURLs': publicURLs?.map((x) => x?.toMap()).toList(),
       'updationTime': updationTime,
