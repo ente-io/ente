@@ -226,15 +226,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             onTap: () {
               final String paymentProvider =
                   _currentSubscription.paymentProvider;
-              if (paymentProvider == kAppStore && !Platform.isAndroid) {
+              if (paymentProvider == appStore && !Platform.isAndroid) {
                 launchUrlString("https://apps.apple.com/account/billing");
-              } else if (paymentProvider == kPlayStore && Platform.isAndroid) {
+              } else if (paymentProvider == playStore && Platform.isAndroid) {
                 launchUrlString(
                   "https://play.google.com/store/account/subscriptions?sku=" +
                       _currentSubscription.productID +
                       "&package=io.ente.photos",
                 );
-              } else if (paymentProvider == kStripe) {
+              } else if (paymentProvider == stripe) {
                 showErrorDialog(
                   context,
                   "Sorry",
