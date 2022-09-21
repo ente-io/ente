@@ -21,10 +21,8 @@ class MagicMetadata {
 
   factory MagicMetadata.fromJson(dynamic json) => MagicMetadata.fromMap(json);
 
-  factory MagicMetadata.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw Exception('Argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
     return MagicMetadata(
       visibility: map[magicKeyVisibility] ?? visibilityVisible,
     );
@@ -43,10 +41,8 @@ class PubMagicMetadata {
   factory PubMagicMetadata.fromJson(dynamic json) =>
       PubMagicMetadata.fromMap(json);
 
-  factory PubMagicMetadata.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw Exception('Argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
     return PubMagicMetadata(
       editedTime: map[pubMagicKeyEditedTime],
       editedName: map[pubMagicKeyEditedName],
@@ -68,10 +64,8 @@ class CollectionMagicMetadata {
   factory CollectionMagicMetadata.fromJson(dynamic json) =>
       CollectionMagicMetadata.fromMap(json);
 
-  factory CollectionMagicMetadata.fromMap(Map<String, dynamic>? map) {
-    if (map == null) {
-      throw Exception('Argument is null');
-    }
+  static fromMap(Map<String, dynamic>? map) {
+    if (map == null) return null;
     return CollectionMagicMetadata(
       visibility: map[magicKeyVisibility] ?? visibilityVisible,
     );
