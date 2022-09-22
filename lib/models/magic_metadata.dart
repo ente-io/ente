@@ -31,7 +31,7 @@ class MagicMetadata {
 
 class PubMagicMetadata {
   int editedTime;
-  String editedName;
+  String? editedName;
 
   PubMagicMetadata({required this.editedTime, required this.editedName});
 
