@@ -577,11 +577,7 @@ class Configuration {
   }
 
   bool shouldHideFromRecents() {
-    if (_preferences.containsKey(keyShouldHideFromRecents)) {
-      return _preferences.getBool(keyShouldHideFromRecents)!;
-    } else {
-      return false;
-    }
+    return _preferences.getBool(keyShouldHideFromRecents) ?? false;
   }
 
   Future<void> setShouldHideFromRecents(bool value) {
