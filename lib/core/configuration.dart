@@ -439,17 +439,6 @@ class Configuration {
     }
   }
 
-  Future<void> setPathsToBackUp(Set<String> newPaths) async {
-    //unused code - remove
-    await _preferences.setStringList(foldersToBackUpKey, newPaths.toList());
-    final allFolders = (await FilesDB.instance.getLatestLocalFiles())
-        .map((file) => file.deviceFolder)
-        .toList();
-    await setSelectAllFoldersForBackup(newPaths.length == allFolders.length);
-    SyncService.instance.onFoldersSet(newPaths);
-    SyncService.instance.sync();
-  }
-
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
     await _preferences.setString(keyAttributesKey, attributes.toJson());
   }
@@ -510,11 +499,6 @@ class Configuration {
       getKey(),
       Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce),
     );
-  }
-
-  String getDocumentsDirectory() {
-    //unused code - remove
-    return _documentsDirectory;
   }
 
   // Caution: This directory is cleared on app start
