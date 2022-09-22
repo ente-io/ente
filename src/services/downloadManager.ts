@@ -15,12 +15,14 @@ import { CustomError } from 'utils/error';
 import { openThumbnailCache } from './cacheService';
 import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 
+const MAX_PARALLEL_DOWNLOADS = 10;
+
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
     private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(
-        5,
+        MAX_PARALLEL_DOWNLOADS,
         PROCESSING_STRATEGY.LIFO
     );
 
