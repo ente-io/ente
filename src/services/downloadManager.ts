@@ -13,10 +13,18 @@ import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 import { openThumbnailCache } from './cacheService';
+import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
+
+const MAX_PARALLEL_DOWNLOADS = 10;
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
+
+    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(
+        MAX_PARALLEL_DOWNLOADS,
+        PROCESSING_STRATEGY.LIFO
+    );
 
     public async getThumbnail(file: EnteFile) {
         try {
@@ -34,7 +42,10 @@ class DownloadManager {
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    const thumb = await this.downloadThumb(token, file);
+                    const thumb =
+                        await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
+                            () => this.downloadThumb(token, file)
+                        ).promise;
                     const thumbBlob = new Blob([thumb]);
 
                     thumbnailCache
