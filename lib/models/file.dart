@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -8,37 +6,40 @@ import 'package:photos/models/ente_file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/feature_flag_service.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/exif_util.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/file_uploader_util.dart';
 
 class File extends EnteFile {
-  int generatedID;
-  int uploadedFileID;
-  int ownerID;
-  int collectionID;
-  String localID;
-  String title;
-  String deviceFolder;
-  int creationTime;
-  int modificationTime;
-  int updationTime;
-  Location location;
-  FileType fileType;
-  int fileSubType;
-  int duration;
-  String exif;
-  String hash;
-  int metadataVersion;
-  String encryptedKey;
-  String keyDecryptionNonce;
-  String fileDecryptionHeader;
-  String thumbnailDecryptionHeader;
-  String metadataDecryptionHeader;
+  int? generatedID;
+  int? uploadedFileID;
+  int? ownerID;
+  int? collectionID;
+  String? localID;
+  String? title;
+  String? deviceFolder;
+  int? creationTime;
+  int? modificationTime;
+  int? updationTime;
+  Location? location;
+  late FileType fileType;
+  int? fileSubType;
+  int? duration;
+  String? exif;
+  String? hash;
+  int? metadataVersion;
+  String? encryptedKey;
+  String? keyDecryptionNonce;
+  String? fileDecryptionHeader;
+  String? thumbnailDecryptionHeader;
+  String? metadataDecryptionHeader;
 
-  String mMdEncodedJson;
+  String? mMdEncodedJson;
   int mMdVersion = 0;
-  MagicMetadata _mmd;
+  MagicMetadata? _mmd;
 
   MagicMetadata get magicMetadata =>
       _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
@@ -46,11 +47,11 @@ class File extends EnteFile {
   set magicMetadata(val) => _mmd = val;
 
   // public magic metadata is shared if during file/album sharing
-  String pubMmdEncodedJson;
+  String? pubMmdEncodedJson;
   int pubMmdVersion = 0;
-  PubMagicMetadata _pubMmd;
+  PubMagicMetadata? _pubMmd;
 
-  PubMagicMetadata get pubMagicMetadata =>
+  PubMagicMetadata? get pubMagicMetadata =>
       _pubMmd ?? PubMagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
 
   set pubMagicMetadata(val) => _pubMmd = val;
@@ -72,7 +73,7 @@ class File extends EnteFile {
     if (file.creationTime == 0) {
       try {
         final parsedDateTime = DateTime.parse(
-          basenameWithoutExtension(file.title)
+          basenameWithoutExtension(file.title!)
               .replaceAll("IMG_", "")
               .replaceAll("VID_", "")
               .replaceAll("DCIM_", "")
@@ -112,11 +113,11 @@ class File extends EnteFile {
     return type;
   }
 
-  Future<AssetEntity> getAsset() {
+  Future<AssetEntity?> getAsset() {
     if (localID == null) {
       return Future.value(null);
     }
-    return AssetEntity.fromId(localID);
+    return AssetEntity.fromId(localID!);
   }
 
   void applyMetadata(Map<String, dynamic> metadata) {
@@ -180,10 +181,10 @@ class File extends EnteFile {
     metadata["modificationTime"] = modificationTime;
     metadata["fileType"] = fileType.index;
     if (location != null &&
-        location.latitude != null &&
-        location.longitude != null) {
-      metadata["latitude"] = location.latitude;
-      metadata["longitude"] = location.longitude;
+        location!.latitude != null &&
+        location!.longitude != null) {
+      metadata["latitude"] = location!.latitude;
+      metadata["longitude"] = location!.longitude;
     }
     if (fileSubType != null) {
       metadata["subType"] = fileSubType;
@@ -221,10 +222,10 @@ class File extends EnteFile {
   }
 
   String getDisplayName() {
-    if (pubMagicMetadata != null && pubMagicMetadata.editedName != null) {
-      return pubMagicMetadata.editedName;
+    if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
+      return pubMagicMetadata!.editedName!;
     }
-    return title;
+    return title!;
   }
 
   // returns true if the file isn't available in the user's gallery
@@ -234,13 +235,13 @@ class File extends EnteFile {
 
   bool isSharedMediaToAppSandbox() {
     return localID != null &&
-        (localID.startsWith(oldSharedMediaIdentifier) ||
-            localID.startsWith(sharedMediaIdentifier));
+        (localID!.startsWith(oldSharedMediaIdentifier) ||
+            localID!.startsWith(sharedMediaIdentifier));
   }
 
   bool hasLocation() {
     return location != null &&
-        (location.longitude != 0 || location.latitude != 0);
+        (location!.longitude != 0 || location!.latitude != 0);
   }
 
   @override
