@@ -26,8 +26,9 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
     initialPage: 0,
   );
   final List<String> _messages = [
+    "You can share your plan with your family",
+    "We have preserved over 5 million memories so far",
     "web.ente.io has a slick uploader",
-    "We have preserved over 3 million memories so far",
     "All our apps are open source",
     "Our encryption protocols have been reviewed by engineers at Google, Apple, Amazon, and Facebook",
     "You can share links to your albums with your loved ones",
