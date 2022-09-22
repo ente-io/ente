@@ -13,13 +13,16 @@ import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 import { openThumbnailCache } from './cacheService';
-import QueueProcessor from './queueProcessor';
+import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
 
 class DownloadManager {
     private fileObjectURLPromise = new Map<string, Promise<string[]>>();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
-    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(5);
+    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(
+        5,
+        PROCESSING_STRATEGY.LIFO
+    );
 
     public async getThumbnail(file: EnteFile) {
         try {
