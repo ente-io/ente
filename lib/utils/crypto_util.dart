@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io' as io;
 import 'dart:typed_data';
 
@@ -201,7 +199,7 @@ class CryptoUtil {
 
   static Uint8List decryptSync(
     Uint8List cipher,
-    Uint8List key,
+    Uint8List? key,
     Uint8List nonce,
   ) {
     assert(key != null, "key can not be null");
@@ -237,7 +235,7 @@ class CryptoUtil {
   static Future<EncryptionResult> encryptFile(
     String sourceFilePath,
     String destinationFilePath, {
-    Uint8List key,
+    Uint8List? key,
   }) {
     final args = <String, dynamic>{};
     args["sourceFilePath"] = sourceFilePath;

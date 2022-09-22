@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:logging/logging.dart';
 
 class AppLifecycleService {

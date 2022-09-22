@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:fk_user_agent/fk_user_agent.dart';
@@ -9,7 +7,7 @@ import 'package:uuid/uuid.dart';
 int kConnectTimeout = 15000;
 
 class Network {
-  Dio _dio;
+  late Dio _dio;
 
   Future<void> init() async {
     await FkUserAgent.init();
