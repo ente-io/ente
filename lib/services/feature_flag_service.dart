@@ -13,7 +13,7 @@ class FeatureFlagService {
 
   static final FeatureFlagService instance =
       FeatureFlagService._privateConstructor();
-  static const booleanFeatureFlagsKey = "feature_flags_key";
+  static const _featureFlagsKey = "feature_flags_key";
 
   final _logger = Logger("FeatureFlagService");
   FeatureFlags? _featureFlags;
@@ -33,7 +33,7 @@ class FeatureFlagService {
 
   FeatureFlags _getFeatureFlags() {
     _featureFlags ??=
-        FeatureFlags.fromJson(_prefs.getString(booleanFeatureFlagsKey)!);
+        FeatureFlags.fromJson(_prefs.getString(_featureFlagsKey)!);
     // if nothing is cached, use defaults as temporary fallback
     if (_featureFlags == null) {
       return FeatureFlags.defaultFlags;
@@ -74,7 +74,7 @@ class FeatureFlagService {
           .get("https://static.ente.io/feature_flags.json");
       final flagsResponse = FeatureFlags.fromMap(response.data);
       if (flagsResponse != null) {
-        _prefs.setString(booleanFeatureFlagsKey, flagsResponse.toJson());
+        _prefs.setString(_featureFlagsKey, flagsResponse.toJson());
         _featureFlags = flagsResponse;
       }
     } catch (e) {
