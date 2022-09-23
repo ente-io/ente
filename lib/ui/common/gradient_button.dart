@@ -6,10 +6,13 @@ class GradientButton extends StatelessWidget {
   final List<Color> linearGradientColors;
   final Function onTap;
   final Widget child;
+
   // text is ignored if child is specified
   final String text;
+
   // nullable
   final IconData iconData;
+
   // padding between the text and icon
   final double paddingValue;
 
@@ -48,9 +51,10 @@ class GradientButton extends StatelessWidget {
         children: [
           Icon(
             iconData,
+            size: 20,
             color: Colors.white,
           ),
-          Padding(padding: EdgeInsets.all(paddingValue)),
+          const Padding(padding: EdgeInsets.symmetric(horizontal: 6)),
           Text(
             text,
             style: const TextStyle(

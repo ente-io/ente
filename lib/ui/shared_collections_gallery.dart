@@ -191,7 +191,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 shareText("Check out https://ente.io");
               },
               iconData: Icons.outgoing_mail,
-              paddingValue: 2,
               text: "Invite",
             ),
           ),
@@ -227,7 +226,6 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                 );
               },
               iconData: Icons.person_add,
-              paddingValue: 2,
               text: "Share",
             ),
           ),

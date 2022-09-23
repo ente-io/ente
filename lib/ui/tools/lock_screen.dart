@@ -42,7 +42,6 @@ class _LockScreenState extends State<LockScreen> {
                   child: GradientButton(
                     text: "Unlock",
                     iconData: Icons.lock_open_outlined,
-                    paddingValue: 6,
                     onTap: () async {
                       _showLockScreen();
                     },
