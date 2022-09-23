@@ -1,5 +1,3 @@
-// @dart = 2.7
-
 const int thumbnailSmallSize = 256;
 const int thumbnailQuality = 50;
 const int thumbnailLargeSize = 512;
