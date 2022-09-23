@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -18,8 +16,8 @@ class FeatureFlagService {
   static const kBooleanFeatureFlagsKey = "feature_flags_key";
 
   final _logger = Logger("FeatureFlagService");
-  FeatureFlags _featureFlags;
-  SharedPreferences _prefs;
+  FeatureFlags? _featureFlags;
+  late SharedPreferences _prefs;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -35,12 +33,12 @@ class FeatureFlagService {
 
   FeatureFlags _getFeatureFlags() {
     _featureFlags ??=
-        FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
+        FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey)!);
     // if nothing is cached, use defaults as temporary fallback
     if (_featureFlags == null) {
       return FeatureFlags.defaultFlags;
     }
-    return _featureFlags;
+    return _featureFlags!;
   }
 
   bool disableCFWorker() {
@@ -65,7 +63,7 @@ class FeatureFlagService {
   }
 
   bool isInternalUserOrDebugBuild() {
-    final String email = Configuration.instance.getEmail();
+    final String? email = Configuration.instance.getEmail();
     return (email != null && email.endsWith("@ente.io")) || kDebugMode;
   }
 
@@ -95,8 +93,8 @@ class FeatureFlags {
   final bool enableStripe;
 
   FeatureFlags({
-    @required this.disableCFWorker,
-    @required this.enableStripe,
+    required this.disableCFWorker,
+    required this.enableStripe,
   });
 
   Map<String, dynamic> toMap() {
@@ -116,10 +114,5 @@ class FeatureFlags {
       disableCFWorker: json["disableCFWorker"] ?? FFDefault.disableCFWorker,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
     );
-  }
-
-  @override
-  String toString() {
-    return toMap().toString();
   }
 }
