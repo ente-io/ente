@@ -6,7 +6,7 @@ import { logError } from 'utils/sentry';
 import { getPaymentToken } from './userService';
 import { Plan, Subscription } from 'types/billing';
 import isElectron from 'is-electron';
-import { DESKTOP_REDIRECT_URL } from 'constants/billing';
+import { getDesktopRedirectURL } from 'constants/billing';
 
 const ENDPOINT = getEndpoint();
 
@@ -197,7 +197,7 @@ class billingService {
 
     public getRedirectURL() {
         if (isElectron()) {
-            return DESKTOP_REDIRECT_URL;
+            return getDesktopRedirectURL();
         } else {
             return `${window.location.origin}/gallery`;
         }
