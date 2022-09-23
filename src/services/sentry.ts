@@ -22,7 +22,7 @@ export function logErrorSentry(
     info?: Record<string, unknown>
 ) {
     const err = errorWithContext(error, msg);
-    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+    if (process.env.NEXT_PUBLIC_SENTRY_ENV === 'development') {
         console.log(error, { msg, info });
     }
     Sentry.captureException(err, {
