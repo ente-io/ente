@@ -4,7 +4,7 @@ import { formatDateTime } from 'utils/time';
 import { saveLogLine, getLogs } from 'utils/storage';
 
 export function addLogLine(log: string) {
-    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+    if (process.env.NEXT_PUBLIC_SENTRY_ENV === 'development') {
         console.log(log);
     }
     saveLogLine({
@@ -14,7 +14,7 @@ export function addLogLine(log: string) {
 }
 
 export const addLocalLog = (getLog: () => string) => {
-    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+    if (process.env.NEXT_PUBLIC_SENTRY_ENV === 'development') {
         console.log(getLog());
     }
 };

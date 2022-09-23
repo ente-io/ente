@@ -16,7 +16,7 @@ export const logError = (
             error?.stack
         } msg: ${msg} info: ${JSON.stringify(info)}`
     );
-    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+    if (process.env.NEXT_PUBLIC_SENTRY_ENV === 'development') {
         console.log(error, { msg, info });
     }
     Sentry.captureException(err, {
