@@ -3,7 +3,7 @@ export const getSentryDSN = () =>
     'https://60abb33b597c42f6a3fb27cd82c55101@sentry.ente.io/2';
 
 export const getSentryENV = () =>
-    process.env.NEXT_PUBLIC_SENTRY_ENV ?? 'development';
+    process.env.NEXT_PUBLIC_SENTRY_ENV ?? 'production';
 
 export const getSentryRelease = () => process.env.SENTRY_RELEASE;
 
