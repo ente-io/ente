@@ -232,7 +232,7 @@ class SearchService {
     final Map<String, List<File>> resultMap = <String, List<File>>{};
 
     for (File eachFile in allFiles) {
-      final String fileName = eachFile.getDisplayName();
+      final String fileName = eachFile.displayName;
       if (fileName.contains(query)) {
         final String exnType = fileName.split(".").last.toUpperCase();
         if (!resultMap.containsKey(exnType)) {

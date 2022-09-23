@@ -75,7 +75,7 @@ Future<Uint8List> getThumbnailFromLocal(
     ThumbnailLruCache.put(file, data);
     return data;
   }
-  if (file.isSharedMediaToAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox) {
     //todo:neeraj support specifying size/quality
     return getThumbnailFromInAppCacheFile(file).then((data) {
       if (data != null) {
@@ -84,7 +84,7 @@ Future<Uint8List> getThumbnailFromLocal(
       return data;
     });
   } else {
-    return file.getAsset().then((asset) async {
+    return file.getAsset.then((asset) async {
       if (asset == null || !(await asset.exists)) {
         return null;
       }
@@ -130,7 +130,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   Uint8List encryptedThumbnail;
   try {
     encryptedThumbnail = (await Network.instance.getDio().get(
-              file.getThumbnailUrl(),
+              file.thumbnailUrl,
               options: Options(
                 headers: {"X-Auth-Token": Configuration.instance.getToken()},
                 responseType: ResponseType.bytes,

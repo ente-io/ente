@@ -150,11 +150,11 @@ class _MemoryWidgetState extends State<MemoryWidget> {
           width: isSeen ? 60 : 56,
           height: isSeen ? 60 : 56,
           child: Hero(
-            tag: "memories" + memory.file.tag(),
+            tag: "memories" + memory.file.tag,
             child: ThumbnailWidget(
               memory.file,
               shouldShowSyncStatus: false,
-              key: Key("memories" + memory.file.tag()),
+              key: Key("memories" + memory.file.tag),
             ),
           ),
         ),

@@ -136,7 +136,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ),
               ),
         title: Text(
-          file.getDisplayName(),
+          file.displayName,
         ),
         subtitle: Row(
           children: [
@@ -358,7 +358,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       );
     }
     return FutureBuilder(
-      future: widget.file.getAsset(),
+      future: widget.file.getAsset,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(

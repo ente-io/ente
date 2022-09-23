@@ -27,7 +27,7 @@ Future<io.File> downloadAndDecrypt(
   return Network.instance
       .getDio()
       .download(
-        file.getDownloadUrl(),
+        file.downloadUrl,
         encryptedFilePath,
         options: Options(
           headers: {"X-Auth-Token": Configuration.instance.getToken()},

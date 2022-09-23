@@ -294,10 +294,10 @@ class OutgoingCollectionItem extends StatelessWidget {
                 height: 60,
                 width: 60,
                 child: Hero(
-                  tag: "outgoing_collection" + c.thumbnail.tag(),
+                  tag: "outgoing_collection" + c.thumbnail.tag,
                   child: ThumbnailWidget(
                     c.thumbnail,
-                    key: Key("outgoing_collection" + c.thumbnail.tag()),
+                    key: Key("outgoing_collection" + c.thumbnail.tag),
                   ),
                 ),
               ),
@@ -385,10 +385,10 @@ class IncomingCollectionItem extends StatelessWidget {
               child: Stack(
                 children: [
                   Hero(
-                    tag: "shared_collection" + c.thumbnail.tag(),
+                    tag: "shared_collection" + c.thumbnail.tag,
                     child: ThumbnailWidget(
                       c.thumbnail,
-                      key: Key("shared_collection" + c.thumbnail.tag()),
+                      key: Key("shared_collection" + c.thumbnail.tag),
                     ),
                   ),
                   Align(

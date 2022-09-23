@@ -116,7 +116,7 @@ class File extends EnteFile {
     return type;
   }
 
-  Future<AssetEntity?> getAsset() {
+  Future<AssetEntity?> get getAsset {
     if (localID == null) {
       return Future.value(null);
     }
@@ -156,7 +156,7 @@ class File extends EnteFile {
   Future<Map<String, dynamic>> getMetadataForUpload(
     MediaUploadData mediaUploadData,
   ) async {
-    final asset = await getAsset();
+    final asset = await getAsset;
     // asset can be null for files shared to app
     if (asset != null) {
       fileSubType = asset.subtype;
@@ -172,12 +172,12 @@ class File extends EnteFile {
       }
     }
     hash = mediaUploadData.hashData?.fileHash;
-    return getMetadata();
+    return metadata;
   }
 
-  Map<String, dynamic> getMetadata() {
+  Map<String, dynamic> get metadata {
     final metadata = <String, dynamic>{};
-    metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
+    metadata["localID"] = isSharedMediaToAppSandbox ? null : localID;
     metadata["title"] = title;
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
@@ -204,7 +204,7 @@ class File extends EnteFile {
     return metadata;
   }
 
-  String getDownloadUrl() {
+  String get downloadUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
@@ -214,7 +214,7 @@ class File extends EnteFile {
     }
   }
 
-  String getThumbnailUrl() {
+  String get thumbnailUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
@@ -224,7 +224,7 @@ class File extends EnteFile {
     }
   }
 
-  String getDisplayName() {
+  String get displayName {
     if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
       return pubMagicMetadata!.editedName!;
     }
@@ -233,17 +233,17 @@ class File extends EnteFile {
   }
 
   // returns true if the file isn't available in the user's gallery
-  bool isRemoteFile() {
+  bool get isRemoteFile {
     return localID == null && uploadedFileID != null;
   }
 
-  bool isSharedMediaToAppSandbox() {
+  bool get isSharedMediaToAppSandbox {
     return localID != null &&
         (localID!.startsWith(oldSharedMediaIdentifier) ||
             localID!.startsWith(sharedMediaIdentifier));
   }
 
-  bool hasLocation() {
+  bool get hasLocation {
     return location != null &&
         (location!.longitude != 0 || location!.latitude != 0);
   }
@@ -270,7 +270,7 @@ class File extends EnteFile {
     return generatedID.hashCode ^ uploadedFileID.hashCode ^ localID.hashCode;
   }
 
-  String tag() {
+  String get tag {
     return "local_" +
         localID.toString() +
         ":remote_" +
