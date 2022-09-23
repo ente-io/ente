@@ -349,14 +349,6 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(180, 180, 180, 1)
       : const Color.fromRGBO(100, 100, 100, 1);
 
-  Color get themeSwitchIndicatorColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.75)
-      : const Color.fromRGBO(255, 255, 255, 1);
-
-  Color get themeSwitchActiveIconColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
-
   Color get themeSwitchInactiveIconColor => brightness == Brightness.light
       ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.5)
       : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.5);

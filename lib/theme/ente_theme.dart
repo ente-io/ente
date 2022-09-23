@@ -20,7 +20,7 @@ class EnteTheme {
 }
 
 EnteTheme lightTheme = EnteTheme(
-  lightTextStyle,
+  lightTextTheme,
   lightScheme,
   shadowFloat: shadowFloatLight,
   shadowMenu: shadowMenuLight,
@@ -28,7 +28,7 @@ EnteTheme lightTheme = EnteTheme(
 );
 
 EnteTheme darkTheme = EnteTheme(
-  darkTextStyle,
+  darkTextTheme,
   darkScheme,
   shadowFloat: shadowFloatDark,
   shadowMenu: shadowMenuDark,

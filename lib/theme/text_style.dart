@@ -92,8 +92,8 @@ class EnteTextTheme {
   });
 }
 
-EnteTextTheme lightTextStyle = _buildEnteTextStyle(textBaseLight);
-EnteTextTheme darkTextStyle = _buildEnteTextStyle(textBaseDark);
+EnteTextTheme lightTextTheme = _buildEnteTextStyle(textBaseLight);
+EnteTextTheme darkTextTheme = _buildEnteTextStyle(textBaseDark);
 
 EnteTextTheme _buildEnteTextStyle(Color color) {
   return EnteTextTheme(

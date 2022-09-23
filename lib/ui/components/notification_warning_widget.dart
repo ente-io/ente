@@ -45,7 +45,7 @@ class NotificationWarningWidget extends StatelessWidget {
                   Flexible(
                     child: Text(
                       text,
-                      style: darkTextStyle.bodyBold,
+                      style: darkTextTheme.bodyBold,
                       textAlign: TextAlign.left,
                     ),
                   ),
