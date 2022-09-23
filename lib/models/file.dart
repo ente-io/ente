@@ -1,3 +1,4 @@
+import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -59,6 +60,8 @@ class File extends EnteFile {
   // in Version 1, live photo hash is stored as zip's hash.
   // in V2: LivePhoto hash is stored as imgHash:vidHash
   static const kCurrentMetadataVersion = 2;
+
+  static final _logger = Logger('File');
 
   File();
 
@@ -225,7 +228,8 @@ class File extends EnteFile {
     if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
       return pubMagicMetadata!.editedName!;
     }
-    return title!;
+    if (title == null) _logger.severe('File title is null');
+    return title ?? '';
   }
 
   // returns true if the file isn't available in the user's gallery
