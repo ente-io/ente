@@ -291,7 +291,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     try {
       final int fromCollectionID =
-          widget.selectedFiles.files?.first?.collectionID;
+          widget.selectedFiles.files.first?.collectionID;
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,

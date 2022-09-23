@@ -1,11 +1,9 @@
-// @dart=2.9
-
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 
 class CollectionWithThumbnail {
   final Collection collection;
-  final File thumbnail;
+  final File? thumbnail;
 
   CollectionWithThumbnail(
     this.collection,
