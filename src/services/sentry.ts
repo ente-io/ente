@@ -8,6 +8,11 @@ const SENTRY_DSN = 'https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const version = require('../../package.json').version;
 
+const ENV_DEVELOPMENT = 'development';
+
+const isDEVSentryENV = () =>
+    process.env.NEXT_PUBLIC_SENTRY_ENV === ENV_DEVELOPMENT;
+
 export function initSentry(): void {
     Sentry.init({
         dsn: SENTRY_DSN,
@@ -22,7 +27,7 @@ export function logErrorSentry(
     info?: Record<string, unknown>
 ) {
     const err = errorWithContext(error, msg);
-    if (process.env.NEXT_PUBLIC_SENTRY_ENV === 'development') {
+    if (isDEVSentryENV()) {
         console.log(error, { msg, info });
     }
     Sentry.captureException(err, {
