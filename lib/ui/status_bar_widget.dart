@@ -113,7 +113,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             ? NotificationWarningWidget(
                 warningIcon: Icons.gpp_maybe,
                 actionIcon: Icons.arrow_forward,
-                text: "Please ensure that you have your 24 word recovery key",
+                text: "Please ensure you have your 24 word recovery key",
                 onTap: () async => {
                   await routeToPage(
                     context,
