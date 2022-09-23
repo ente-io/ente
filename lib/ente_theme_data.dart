@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:photos/theme/effects.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 final lightThemeData = ThemeData(
@@ -219,25 +219,17 @@ TextTheme _buildTextTheme(Color textColor) {
 }
 
 extension CustomColorScheme on ColorScheme {
-  Color get defaultBackgroundColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
+  Color get defaultBackgroundColor =>
+      brightness == Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
-  Color get defaultTextColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1)
-      : const Color.fromRGBO(255, 255, 255, 1);
+  Color get inverseBackgroundColor =>
+      brightness != Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
-  Color get inverseTextColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
+  Color get defaultTextColor =>
+      brightness == Brightness.light ? textBaseLight : textBaseDark;
 
-  Color get inverseIconColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
-
-  Color get inverseBackgroundColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1)
-      : const Color.fromRGBO(255, 255, 255, 1);
+  Color get inverseTextColor =>
+      brightness != Brightness.light ? textBaseLight : textBaseDark;
 
   Color get boxSelectColor => brightness == Brightness.light
       ? const Color.fromRGBO(67, 186, 108, 1)
@@ -364,9 +356,6 @@ extension CustomColorScheme on ColorScheme {
   Color get searchResultsBackgroundColor => brightness == Brightness.light
       ? Colors.black.withOpacity(0.32)
       : Colors.black.withOpacity(0.64);
-
-  List<BoxShadow> get shadowMenu =>
-      brightness == Brightness.light ? shadowMenuLight : shadowMenuDark;
 
   EnteTheme get enteTheme =>
       brightness == Brightness.light ? lightTheme : darkTheme;
