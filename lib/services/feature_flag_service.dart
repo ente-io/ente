@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,11 +13,11 @@ class FeatureFlagService {
 
   static final FeatureFlagService instance =
       FeatureFlagService._privateConstructor();
-  static const kBooleanFeatureFlagsKey = "feature_flags_key";
+  static const _featureFlagsKey = "feature_flags_key";
 
   final _logger = Logger("FeatureFlagService");
-  FeatureFlags _featureFlags;
-  SharedPreferences _prefs;
+  FeatureFlags? _featureFlags;
+  late SharedPreferences _prefs;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -35,12 +33,12 @@ class FeatureFlagService {
 
   FeatureFlags _getFeatureFlags() {
     _featureFlags ??=
-        FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
+        FeatureFlags.fromJson(_prefs.getString(_featureFlagsKey)!);
     // if nothing is cached, use defaults as temporary fallback
     if (_featureFlags == null) {
       return FeatureFlags.defaultFlags;
     }
-    return _featureFlags;
+    return _featureFlags!;
   }
 
   bool disableCFWorker() {
@@ -49,19 +47,6 @@ class FeatureFlagService {
     } catch (e) {
       _logger.severe(e);
       return FFDefault.disableCFWorker;
-    }
-  }
-
-  bool enableMissingLocationMigration() {
-    // only needs to be enabled for android
-    if (!Platform.isAndroid) {
-      return false;
-    }
-    try {
-      return _getFeatureFlags().enableMissingLocationMigration;
-    } catch (e) {
-      _logger.severe(e);
-      return FFDefault.enableMissingLocationMigration;
     }
   }
 
@@ -78,7 +63,7 @@ class FeatureFlagService {
   }
 
   bool isInternalUserOrDebugBuild() {
-    final String email = Configuration.instance.getEmail();
+    final String? email = Configuration.instance.getEmail();
     return (email != null && email.endsWith("@ente.io")) || kDebugMode;
   }
 
@@ -89,7 +74,7 @@ class FeatureFlagService {
           .get("https://static.ente.io/feature_flags.json");
       final flagsResponse = FeatureFlags.fromMap(response.data);
       if (flagsResponse != null) {
-        _prefs.setString(kBooleanFeatureFlagsKey, flagsResponse.toJson());
+        _prefs.setString(_featureFlagsKey, flagsResponse.toJson());
         _featureFlags = flagsResponse;
       }
     } catch (e) {
@@ -102,24 +87,20 @@ class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
     disableCFWorker: FFDefault.disableCFWorker,
     enableStripe: FFDefault.enableStripe,
-    enableMissingLocationMigration: FFDefault.enableMissingLocationMigration,
   );
 
   final bool disableCFWorker;
   final bool enableStripe;
-  final bool enableMissingLocationMigration;
 
   FeatureFlags({
-    @required this.disableCFWorker,
-    @required this.enableStripe,
-    @required this.enableMissingLocationMigration,
+    required this.disableCFWorker,
+    required this.enableStripe,
   });
 
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
       "enableStripe": enableStripe,
-      "enableMissingLocationMigration": enableMissingLocationMigration,
     };
   }
 
@@ -132,13 +113,6 @@ class FeatureFlags {
     return FeatureFlags(
       disableCFWorker: json["disableCFWorker"] ?? FFDefault.disableCFWorker,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
-      enableMissingLocationMigration: json["enableMissingLocationMigration"] ??
-          FFDefault.enableMissingLocationMigration,
     );
-  }
-
-  @override
-  String toString() {
-    return toMap().toString();
   }
 }

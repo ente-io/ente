@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -18,6 +16,7 @@ import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/utils/crypto_util.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/file_util.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -26,10 +25,10 @@ const kMaximumThumbnailCompressionAttempts = 2;
 const kLivePhotoHashSeparator = ':';
 
 class MediaUploadData {
-  final io.File sourceFile;
-  final Uint8List thumbnail;
+  final io.File? sourceFile;
+  final Uint8List? thumbnail;
   final bool isDeleted;
-  final FileHashData hashData;
+  final FileHashData? hashData;
 
   MediaUploadData(
     this.sourceFile,
@@ -41,11 +40,11 @@ class MediaUploadData {
 
 class FileHashData {
   // For livePhotos, the fileHash value will be imageHash:videoHash
-  final String fileHash;
+  final String? fileHash;
 
   // zipHash is used to take care of existing live photo uploads from older
   // mobile clients
-  String zipHash;
+  String? zipHash;
 
   FileHashData(this.fileHash, {this.zipHash});
 }
@@ -59,10 +58,11 @@ Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
 }
 
 Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
-  io.File sourceFile;
-  Uint8List thumbnailData;
+  io.File? sourceFile;
+  Uint8List? thumbnailData;
   bool isDeleted;
-  String fileHash, zipHash;
+  String? zipHash;
+  String fileHash;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
   final asset = await file.getAsset
@@ -97,7 +97,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   fileHash = Sodium.bin2base64(await CryptoUtil.getHash(sourceFile));
 
   if (file.fileType == FileType.livePhoto && io.Platform.isIOS) {
-    final io.File videoUrl = await Motionphoto.getLivePhotoFile(file.localID);
+    final io.File? videoUrl = await Motionphoto.getLivePhotoFile(file.localID!);
     if (videoUrl == null || !videoUrl.existsSync()) {
       final String errMsg =
           "missing livePhoto url for  ${file.toString()} with subType ${file.fileSubType}";
@@ -134,7 +134,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     throw InvalidFileError("unable to get asset thumbData");
   }
   int compressionAttempts = 0;
-  while (thumbnailData.length > thumbnailDataLimit &&
+  while (thumbnailData!.length > thumbnailDataLimit &&
       compressionAttempts < kMaximumThumbnailCompressionAttempts) {
     _logger.info("Thumbnail size " + thumbnailData.length.toString());
     thumbnailData = await compressThumbnail(thumbnailData);
@@ -143,7 +143,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
     compressionAttempts++;
   }
 
-  isDeleted = asset == null || !(await asset.exists);
+  isDeleted = !(await asset.exists);
   return MediaUploadData(
     sourceFile,
     thumbnailData,
@@ -155,12 +155,12 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
 Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
   // h4ck to fetch location data if missing (thank you Android Q+) lazily only during uploads
   if (file.location == null ||
-      (file.location.latitude == 0 && file.location.longitude == 0)) {
+      (file.location!.latitude == 0 && file.location!.longitude == 0)) {
     final latLong = await asset.latlngAsync();
     file.location = Location(latLong.latitude, latLong.longitude);
   }
 
-  if (file.title == null || file.title.isEmpty) {
+  if (file.title == null || file.title!.isEmpty) {
     _logger.warning("Title was missing ${file.tag}");
     file.title = await asset.titleAsync;
   }
@@ -168,7 +168,7 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
 
 Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   io.File sourceFile;
-  Uint8List thumbnailData;
+  Uint8List? thumbnailData;
   const bool isDeleted = false;
   final localPath = getSharedMediaFilePath(file);
   sourceFile = io.File(localPath);
@@ -193,7 +193,7 @@ Future<MediaUploadData> _getMediaUploadDataFromAppCache(ente.File file) async {
   }
 }
 
-Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
+Future<Uint8List?> getThumbnailFromInAppCacheFile(ente.File file) async {
   var localFile = io.File(getSharedMediaFilePath(file));
   if (!localFile.existsSync()) {
     return null;
@@ -206,7 +206,7 @@ Future<Uint8List> getThumbnailFromInAppCacheFile(ente.File file) async {
       maxWidth: thumbnailLargeSize,
       quality: 80,
     );
-    localFile = io.File(thumbnailFilePath);
+    localFile = io.File(thumbnailFilePath!);
   }
   var thumbnailData = await localFile.readAsBytes();
   int compressionAttempts = 0;
