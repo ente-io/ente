@@ -2,9 +2,10 @@ import { ElectronFile } from 'types/upload';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { formatDateTime } from 'utils/time';
 import { saveLogLine, getLogs } from 'utils/storage';
+import { isDEVSentryENV } from 'constants/sentry';
 
 export function addLogLine(log: string) {
-    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+    if (isDEVSentryENV()) {
         console.log(log);
     }
     saveLogLine({
@@ -14,7 +15,7 @@ export function addLogLine(log: string) {
 }
 
 export const addLocalLog = (getLog: () => string) => {
-    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+    if (isDEVSentryENV()) {
         console.log(getLog());
     }
 };

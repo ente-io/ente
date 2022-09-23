@@ -1,10 +1,11 @@
+const ENV_DEVELOPMENT = 'development';
+
 module.exports.getIsSentryEnabled = () => {
-    if (process.env.NEXT_PUBLIC_IS_SENTRY_ENABLED) {
-        return process.env.NEXT_PUBLIC_IS_SENTRY_ENABLED === 'yes';
+    if (process.env.NEXT_PUBLIC_SENTRY_ENV === ENV_DEVELOPMENT) {
+        return false;
+    } else if (process.env.DISABLE_SENTRY === 'true') {
+        return false;
     } else {
-        if (process.env.NEXT_PUBLIC_SENTRY_ENV) {
-            return process.env.NEXT_PUBLIC_SENTRY_ENV !== 'development';
-        }
+        return true;
     }
-    return false;
 };
