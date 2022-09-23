@@ -109,6 +109,7 @@ class RemoteSyncService {
         await _pullDiff();
         _existingSync.complete();
         _existingSync = null;
+        await _syncDeviceCollectionFilesForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
