@@ -1,1 +1,4 @@
-export const DESKTOP_REDIRECT_URL = 'https://payments.ente.io/desktop-redirect';
+import { getPaymentsURL } from 'utils/common/apiUtil';
+
+export const getDesktopRedirectURL = () =>
+    `${getPaymentsURL()}/desktop-redirect`;
