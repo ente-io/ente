@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 class GradientButton extends StatelessWidget {
   final List<Color> linearGradientColors;
   final Function onTap;
-  final Widget child;
 
   // text is ignored if child is specified
   final String text;
@@ -18,7 +17,6 @@ class GradientButton extends StatelessWidget {
 
   const GradientButton({
     Key key,
-    this.child,
     this.linearGradientColors = const [
       Color(0xFF2CD267),
       Color(0xFF1DB954),
@@ -32,9 +30,7 @@ class GradientButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget buttonContent;
-    if (child != null) {
-      buttonContent = child;
-    } else if (iconData == null) {
+    if (iconData == null) {
       buttonContent = Text(
         text,
         style: const TextStyle(
