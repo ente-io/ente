@@ -52,19 +52,6 @@ class FeatureFlagService {
     }
   }
 
-  bool enableMissingLocationMigration() {
-    // only needs to be enabled for android
-    if (!Platform.isAndroid) {
-      return false;
-    }
-    try {
-      return _getFeatureFlags().enableMissingLocationMigration;
-    } catch (e) {
-      _logger.severe(e);
-      return FFDefault.enableMissingLocationMigration;
-    }
-  }
-
   bool enableStripe() {
     if (Platform.isIOS) {
       return false;
@@ -102,24 +89,20 @@ class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
     disableCFWorker: FFDefault.disableCFWorker,
     enableStripe: FFDefault.enableStripe,
-    enableMissingLocationMigration: FFDefault.enableMissingLocationMigration,
   );
 
   final bool disableCFWorker;
   final bool enableStripe;
-  final bool enableMissingLocationMigration;
 
   FeatureFlags({
     @required this.disableCFWorker,
     @required this.enableStripe,
-    @required this.enableMissingLocationMigration,
   });
 
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
       "enableStripe": enableStripe,
-      "enableMissingLocationMigration": enableMissingLocationMigration,
     };
   }
 
@@ -132,8 +115,6 @@ class FeatureFlags {
     return FeatureFlags(
       disableCFWorker: json["disableCFWorker"] ?? FFDefault.disableCFWorker,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
-      enableMissingLocationMigration: json["enableMissingLocationMigration"] ??
-          FFDefault.enableMissingLocationMigration,
     );
   }
 
