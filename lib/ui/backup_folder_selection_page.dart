@@ -409,7 +409,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             ThumbnailWidget(
               file,
               shouldShowSyncStatus: false,
-              key: Key("backup_selection_widget" + file.tag()),
+              key: Key("backup_selection_widget" + file.tag),
             ),
             Padding(
               padding: const EdgeInsets.all(9),

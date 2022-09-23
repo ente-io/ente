@@ -65,7 +65,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   @override
   Widget build(BuildContext context) {
-    if (_photo.isRemoteFile()) {
+    if (_photo.isRemoteFile) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);
@@ -81,7 +81,7 @@ class _ZoomableImageState extends State<ZoomableImage>
           minScale: PhotoViewComputedScale.contained,
           gaplessPlayback: true,
           heroAttributes: PhotoViewHeroAttributes(
-            tag: widget.tagPrefix + _photo.tag(),
+            tag: widget.tagPrefix + _photo.tag,
           ),
           backgroundDecoration: widget.backgroundDecoration,
         ),
@@ -220,5 +220,5 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  bool _isGIF() => _photo.getDisplayName().toLowerCase().endsWith(".gif");
+  bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
 }

@@ -321,7 +321,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
           child: Stack(
             children: [
               Hero(
-                tag: widget.tag + file.tag(),
+                tag: widget.tag + file.tag,
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
                     Colors.black.withOpacity(
@@ -334,7 +334,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                     diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
                     serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                     shouldShowLivePhotoOverlay: true,
-                    key: Key(widget.tag + file.tag()),
+                    key: Key(widget.tag + file.tag),
                   ),
                 ),
               ),

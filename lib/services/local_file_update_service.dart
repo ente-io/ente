@@ -114,10 +114,10 @@ class LocalFileUpdateService {
             file.hash != null &&
             (file.hash == uploadData.hashData.fileHash ||
                 file.hash == uploadData.hashData.zipHash)) {
-          _logger.info("Skip file update as hash matched ${file.tag()}");
+          _logger.info("Skip file update as hash matched ${file.tag}");
         } else {
           _logger.info(
-            "Marking for file update as hash did not match ${file.tag()}",
+            "Marking for file update as hash did not match ${file.tag}",
           );
           await FilesDB.instance.updateUploadedFile(
             file.localID,

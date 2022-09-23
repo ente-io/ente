@@ -109,7 +109,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       PopupMenuButton(
         itemBuilder: (context) {
           final List<PopupMenuItem> items = [];
-          if (widget.file.isRemoteFile()) {
+          if (widget.file.isRemoteFile) {
             items.add(
               PopupMenuItem(
                 value: 1,
@@ -317,7 +317,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     if (type == FileType.livePhoto) {
       final io.File liveVideo = await getFileFromServer(file, liveVideo: true);
       if (liveVideo == null) {
-        _logger.warning("Failed to find live video" + file.tag());
+        _logger.warning("Failed to find live video" + file.tag);
       } else {
         final videoTitle = file_path.basenameWithoutExtension(file.title) +
             file_path.extension(liveVideo.path);
