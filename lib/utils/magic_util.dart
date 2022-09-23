@@ -97,7 +97,7 @@ Future<bool> editFilename(
   File file,
 ) async {
   try {
-    final fileName = file.getDisplayName();
+    final fileName = file.displayName;
     final nameWithoutExt = basenameWithoutExtension(fileName);
     final extName = extension(fileName);
     var result = await showDialog<String>(

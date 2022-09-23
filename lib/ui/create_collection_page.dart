@@ -157,7 +157,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               child: SizedBox(
                 height: 64,
                 width: 64,
-                key: Key("collection_item:" + item.thumbnail.tag()),
+                key: Key("collection_item:" + item.thumbnail.tag),
                 child: ThumbnailWidget(item.thumbnail),
               ),
             ),

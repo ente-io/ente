@@ -445,7 +445,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Stack(
               children: [
                 Hero(
-                  tag: "deduplicate_" + file.tag(),
+                  tag: "deduplicate_" + file.tag,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: ThumbnailWidget(
@@ -453,7 +453,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                       diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
                       serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                       shouldShowLivePhotoOverlay: true,
-                      key: Key("deduplicate_" + file.tag()),
+                      key: Key("deduplicate_" + file.tag),
                     ),
                   ),
                 ),

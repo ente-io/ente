@@ -17,7 +17,7 @@ class SearchThumbnailWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Hero(
-      tag: tagPrefix + file.tag(),
+      tag: tagPrefix + file.tag,
       child: SizedBox(
         height: 58,
         width: 58,

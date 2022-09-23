@@ -8,7 +8,7 @@ class FileSearchResult extends SearchResult {
 
   @override
   String name() {
-    return file.getDisplayName();
+    return file.displayName;
   }
 
   @override

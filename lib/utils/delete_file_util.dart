@@ -44,7 +44,7 @@ Future<void> deleteFilesFromEverywhere(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
-      } else if (file.isSharedMediaToAppSandbox()) {
+      } else if (file.isSharedMediaToAppSandbox) {
         localSharedMediaIDs.add(file.localID);
       } else {
         localAssetIDs.add(file.localID);
@@ -203,7 +203,7 @@ Future<void> deleteFilesOnDeviceOnly(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
-      } else if (file.isSharedMediaToAppSandbox()) {
+      } else if (file.isSharedMediaToAppSandbox) {
         localSharedMediaIDs.add(file.localID);
       } else {
         localAssetIDs.add(file.localID);
@@ -420,11 +420,11 @@ Future<List<String>> _deleteLocalFilesInBatches(
 }
 
 Future<bool> _localFileExist(File file) {
-  if (file.isSharedMediaToAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox) {
     final localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists();
   } else {
-    return file.getAsset().then((asset) {
+    return file.getAsset.then((asset) {
       if (asset == null) {
         return false;
       }

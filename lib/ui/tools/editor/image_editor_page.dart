@@ -115,7 +115,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
 
   Widget _buildImage() {
     return Hero(
-      tag: widget.detailPageConfig.tagPrefix + widget.originalFile.tag(),
+      tag: widget.detailPageConfig.tagPrefix + widget.originalFile.tag,
       child: ExtendedImage(
         image: widget.imageProvider,
         extendedImageEditorKey: editorKey,
@@ -350,8 +350,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
-      if (!newFile.hasLocation() && widget.originalFile.localID != null) {
-        final assetEntity = await widget.originalFile.getAsset();
+      if (!newFile.hasLocation && widget.originalFile.localID != null) {
+        final assetEntity = await widget.originalFile.getAsset;
         if (assetEntity != null) {
           final latLong = await assetEntity.latlngAsync();
           newFile.location = Location(latLong.latitude, latLong.longitude);
