@@ -170,12 +170,7 @@ class billingService {
         action: string
     ) {
         try {
-            let redirectURL;
-            if (isElectron()) {
-                redirectURL = DESKTOP_REDIRECT_URL;
-            } else {
-                redirectURL = `${window.location.origin}/gallery`;
-            }
+            const redirectURL = this.getRedirectURL();
             window.location.href = `${getPaymentsURL()}?productID=${productID}&paymentToken=${paymentToken}&action=${action}&redirectURL=${redirectURL}`;
         } catch (e) {
             logError(e, 'unable to get payments url');
@@ -185,9 +180,10 @@ class billingService {
 
     public async redirectToCustomerPortal() {
         try {
+            const redirectURL = this.getRedirectURL();
             const response = await HTTPService.get(
                 `${ENDPOINT}/billing/stripe/customer-portal`,
-                { redirectURL: `${window.location.origin}/gallery` },
+                { redirectURL },
                 {
                     'X-Auth-Token': getToken(),
                 }
@@ -196,6 +192,14 @@ class billingService {
         } catch (e) {
             logError(e, 'unable to get customer portal url');
             throw e;
+        }
+    }
+
+    public getRedirectURL() {
+        if (isElectron()) {
+            return DESKTOP_REDIRECT_URL;
+        } else {
+            return `${window.location.origin}/gallery`;
         }
     }
 }
