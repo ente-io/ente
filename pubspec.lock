@@ -733,7 +733,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "669388e102cfc832c06e2f3085a5b15d8620dde3"
+      resolved-ref: "18a50c3a7e7a36d61f09a93733ef7c4f0516392e"
       url: "https://github.com/ente-io/motionphoto.git"
     source: git
     version: "0.0.1"
