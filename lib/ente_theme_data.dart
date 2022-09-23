@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 final lightThemeData = ThemeData(
   fontFamily: 'Inter',
@@ -373,11 +373,11 @@ extension CustomColorScheme on ColorScheme {
       ? Colors.black.withOpacity(0.32)
       : Colors.black.withOpacity(0.64);
 
-  Color get fillFaint =>
-      brightness == Brightness.light ? fillFaintLight : fillFaintDark;
-
   List<BoxShadow> get shadowMenu =>
       brightness == Brightness.light ? shadowMenuLight : shadowMenuDark;
+
+  EnteTheme get enteTheme =>
+      brightness == Brightness.light ? lightTheme : darkTheme;
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({
