@@ -43,9 +43,9 @@ class _VideoWidgetState extends State<VideoWidget> {
   @override
   void initState() {
     super.initState();
-    if (widget.file.isRemoteFile()) {
+    if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
-    } else if (widget.file.isSharedMediaToAppSandbox()) {
+    } else if (widget.file.isSharedMediaToAppSandbox) {
       final localFile = io.File(getSharedMediaFilePath(widget.file));
       if (localFile.existsSync()) {
         _logger.fine("loading from app cache");
@@ -54,7 +54,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         _loadNetworkVideo();
       }
     } else {
-      widget.file.getAsset().then((asset) async {
+      widget.file.getAsset.then((asset) async {
         if (asset == null || !(await asset.exists)) {
           if (widget.file.uploadedFileID != null) {
             _loadNetworkVideo();
@@ -127,7 +127,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       },
     );
     return VisibilityDetector(
-      key: Key(widget.file.tag()),
+      key: Key(widget.file.tag),
       onVisibilityChanged: (info) {
         if (info.visibleFraction < 1) {
           if (mounted && _chewieController != null) {
@@ -136,7 +136,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         }
       },
       child: Hero(
-        tag: widget.tagPrefix + widget.file.tag(),
+        tag: widget.tagPrefix + widget.file.tag,
         child: contentWithDetector,
       ),
     );

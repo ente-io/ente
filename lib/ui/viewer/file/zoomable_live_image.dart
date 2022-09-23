@@ -121,14 +121,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    if (_file.isRemoteFile() && !(await isFileCached(_file, liveVideo: true))) {
+    if (_file.isRemoteFile && !(await isFileCached(_file, liveVideo: true))) {
       showToast(context, "Downloading...", toastLength: Toast.LENGTH_LONG);
     }
 
     var videoFile = await getFile(widget.file, liveVideo: true)
         .timeout(const Duration(seconds: 15))
         .onError((e, s) {
-      _logger.info("getFile failed ${_file.tag()}", e);
+      _logger.info("getFile failed ${_file.tag}", e);
       return null;
     });
 
@@ -140,7 +140,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       videoFile = await getFileFromServer(widget.file, liveVideo: true)
           .timeout(const Duration(seconds: 15))
           .onError((e, s) {
-        _logger.info("getRemoteFile failed ${_file.tag()}", e);
+        _logger.info("getRemoteFile failed ${_file.tag}", e);
         return null;
       });
     }

@@ -87,7 +87,8 @@ class TrashDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     _logger.info("DB path " + path);
     return await openDatabase(
@@ -263,7 +264,7 @@ class TrashDB {
 
     row[columnLocalID] = trash.localID;
     row[columnCreationTime] = trash.creationTime;
-    row[columnFileMetadata] = jsonEncode(trash.getMetadata());
+    row[columnFileMetadata] = jsonEncode(trash.metadata);
 
     row[columnMMdVersion] = trash.mMdVersion ?? 0;
     row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';

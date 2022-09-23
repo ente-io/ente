@@ -30,10 +30,10 @@ class MagicMetadata {
 }
 
 class PubMagicMetadata {
-  int editedTime;
-  String editedName;
+  int? editedTime;
+  String? editedName;
 
-  PubMagicMetadata({required this.editedTime, required this.editedName});
+  PubMagicMetadata({this.editedTime, this.editedName});
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
       PubMagicMetadata.fromJson(jsonDecode(encodedJson));

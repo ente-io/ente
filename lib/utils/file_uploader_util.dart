@@ -51,7 +51,7 @@ class FileHashData {
 }
 
 Future<MediaUploadData> getUploadDataFromEnteFile(ente.File file) async {
-  if (file.isSharedMediaToAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox) {
     return await _getMediaUploadDataFromAppCache(file);
   } else {
     return await _getMediaUploadDataFromAssetFile(file);
@@ -65,13 +65,12 @@ Future<MediaUploadData> _getMediaUploadDataFromAssetFile(ente.File file) async {
   String fileHash, zipHash;
 
   // The timeouts are to safeguard against https://github.com/CaiJingLong/flutter_photo_manager/issues/467
-  final asset = await file
-      .getAsset()
+  final asset = await file.getAsset
       .timeout(const Duration(seconds: 3))
       .catchError((e) async {
     if (e is TimeoutException) {
       _logger.info("Asset fetch timed out for " + file.toString());
-      return await file.getAsset();
+      return await file.getAsset;
     } else {
       throw e;
     }
@@ -162,7 +161,7 @@ Future<void> _decorateEnteFileData(ente.File file, AssetEntity asset) async {
   }
 
   if (file.title == null || file.title.isEmpty) {
-    _logger.warning("Title was missing ${file.tag()}");
+    _logger.warning("Title was missing ${file.tag}");
     file.title = await asset.titleAsync;
   }
 }
