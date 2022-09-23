@@ -426,7 +426,11 @@ const PhotoFrame = ({
             handleSelect(filteredData[index].id, index)(!checked);
         }
     };
-    const getThumbnail = (files: EnteFile[], index: number) =>
+    const getThumbnail = (
+        files: EnteFile[],
+        index: number,
+        isScrolling: boolean
+    ) =>
         files[index] ? (
             <PreviewCard
                 key={`tile-${files[index].id}-selected-${
@@ -450,6 +454,7 @@ const PhotoFrame = ({
                     (index >= currentHover && index <= rangeStart)
                 }
                 activeCollection={activeCollection}
+                showPlaceholder={isScrolling}
             />
         ) : (
             <></>

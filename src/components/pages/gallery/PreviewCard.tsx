@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect, useRef, useState } from 'react';
+import React, { useContext, useLayoutEffect, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import PlayCircleOutlineOutlinedIcon from '@mui/icons-material/PlayCircleOutlineOutlined';
@@ -18,18 +18,18 @@ import { formatDateRelative } from 'utils/time';
 
 interface IProps {
     file: EnteFile;
-    updateURL?: (url: string) => EnteFile;
-    onClick?: () => void;
-    forcedEnable?: boolean;
-    selectable?: boolean;
-    selected?: boolean;
-    onSelect?: (checked: boolean) => void;
-    onHover?: () => void;
-    onRangeSelect?: () => void;
-    isRangeSelectActive?: boolean;
-    selectOnClick?: boolean;
-    isInsSelectRange?: boolean;
-    activeCollection?: number;
+    updateURL: (url: string) => EnteFile;
+    onClick: () => void;
+    selectable: boolean;
+    selected: boolean;
+    onSelect: (checked: boolean) => void;
+    onHover: () => void;
+    onRangeSelect: () => void;
+    isRangeSelectActive: boolean;
+    selectOnClick: boolean;
+    isInsSelectRange: boolean;
+    activeCollection: number;
+    showPlaceholder: boolean;
 }
 
 const Check = styled('input')<{ active: boolean }>`
@@ -203,7 +203,6 @@ export default function PreviewCard(props: IProps) {
         file,
         onClick,
         updateURL,
-        forcedEnable,
         selectable,
         selected,
         onSelect,
@@ -213,14 +212,13 @@ export default function PreviewCard(props: IProps) {
         isRangeSelectActive,
         isInsSelectRange,
     } = props;
-    const isMounted = useRef(true);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
     const deduplicateContext = useContext(DeduplicateContext);
 
     useLayoutEffect(() => {
-        if (file && !file.msrc) {
+        if (file && !file.msrc && !props.showPlaceholder) {
             const main = async () => {
                 try {
                     let url;
@@ -236,18 +234,14 @@ export default function PreviewCard(props: IProps) {
                     } else {
                         url = await DownloadManager.getThumbnail(file);
                     }
-                    if (isMounted.current) {
-                        setImgSrc(url);
-                        thumbs.set(file.id, url);
-                        if (updateURL) {
-                            const newFile = updateURL(url);
-                            file.msrc = newFile.msrc;
-                            file.html = newFile.html;
-                            file.src = newFile.src;
-                            file.w = newFile.w;
-                            file.h = newFile.h;
-                        }
-                    }
+                    setImgSrc(url);
+                    thumbs.set(file.id, url);
+                    const newFile = updateURL(url);
+                    file.msrc = newFile.msrc;
+                    file.html = newFile.html;
+                    file.src = newFile.src;
+                    file.w = newFile.w;
+                    file.h = newFile.h;
                 } catch (e) {
                     logError(e, 'preview card useEffect failed');
                     // no-op
@@ -262,12 +256,7 @@ export default function PreviewCard(props: IProps) {
                 main();
             }
         }
-
-        return () => {
-            // cool cool cool
-            isMounted.current = false;
-        };
-    }, [file]);
+    }, [file, props.showPlaceholder]);
 
     const handleClick = () => {
         if (selectOnClick) {
@@ -300,10 +289,10 @@ export default function PreviewCard(props: IProps) {
 
     return (
         <Cont
-            id={`thumb-${file?.id}`}
+            id={`thumb-${file?.id}-${props.showPlaceholder}`}
             onClick={handleClick}
             onMouseEnter={handleHover}
-            disabled={!forcedEnable && !file?.msrc && !imgSrc}
+            disabled={!file?.msrc && !imgSrc}
             {...(selectable ? useLongPress(longPressCallback, 500) : {})}>
             {selectable && (
                 <Check
