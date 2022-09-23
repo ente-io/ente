@@ -29,7 +29,7 @@ class NotificationWarningWidget extends StatelessWidget {
               borderRadius: const BorderRadius.all(
                 Radius.circular(8),
               ),
-              boxShadow: Theme.of(context).colorScheme.shadowMenu,
+              boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
               color: warning500,
             ),
             child: Padding(
@@ -45,7 +45,7 @@ class NotificationWarningWidget extends StatelessWidget {
                   Flexible(
                     child: Text(
                       text,
-                      style: darkTextStyle.bodyBold,
+                      style: darkTextTheme.bodyBold,
                       textAlign: TextAlign.left,
                     ),
                   ),

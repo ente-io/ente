@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+const blurBase = 96;
+const blurMuted = 48;
+const blurFaint = 24;
+
 List<BoxShadow> shadowFloatLight = const [
   BoxShadow(blurRadius: 10, color: Color.fromRGBO(0, 0, 0, 0.25)),
 ];
@@ -45,7 +49,3 @@ List<BoxShadow> shadowButtonDark = const [
     offset: Offset(0, 4),
   ),
 ];
-
-const blurBase = 96;
-const blurMuted = 48;
-const blurFaint = 24;

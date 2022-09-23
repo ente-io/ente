@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/effects.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 final lightThemeData = ThemeData(
   fontFamily: 'Inter',
@@ -219,25 +219,17 @@ TextTheme _buildTextTheme(Color textColor) {
 }
 
 extension CustomColorScheme on ColorScheme {
-  Color get defaultBackgroundColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
+  Color get defaultBackgroundColor =>
+      brightness == Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
-  Color get defaultTextColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1)
-      : const Color.fromRGBO(255, 255, 255, 1);
+  Color get inverseBackgroundColor =>
+      brightness != Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
-  Color get inverseTextColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
+  Color get defaultTextColor =>
+      brightness == Brightness.light ? textBaseLight : textBaseDark;
 
-  Color get inverseIconColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
-
-  Color get inverseBackgroundColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1)
-      : const Color.fromRGBO(255, 255, 255, 1);
+  Color get inverseTextColor =>
+      brightness != Brightness.light ? textBaseLight : textBaseDark;
 
   Color get boxSelectColor => brightness == Brightness.light
       ? const Color.fromRGBO(67, 186, 108, 1)
@@ -349,14 +341,6 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(180, 180, 180, 1)
       : const Color.fromRGBO(100, 100, 100, 1);
 
-  Color get themeSwitchIndicatorColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.75)
-      : const Color.fromRGBO(255, 255, 255, 1);
-
-  Color get themeSwitchActiveIconColor => brightness == Brightness.light
-      ? const Color.fromRGBO(255, 255, 255, 1)
-      : const Color.fromRGBO(0, 0, 0, 1);
-
   Color get themeSwitchInactiveIconColor => brightness == Brightness.light
       ? const Color.fromRGBO(0, 0, 0, 1).withOpacity(0.5)
       : const Color.fromRGBO(255, 255, 255, 1).withOpacity(0.5);
@@ -373,11 +357,8 @@ extension CustomColorScheme on ColorScheme {
       ? Colors.black.withOpacity(0.32)
       : Colors.black.withOpacity(0.64);
 
-  Color get fillFaint =>
-      brightness == Brightness.light ? fillFaintLight : fillFaintDark;
-
-  List<BoxShadow> get shadowMenu =>
-      brightness == Brightness.light ? shadowMenuLight : shadowMenuDark;
+  EnteTheme get enteTheme =>
+      brightness == Brightness.light ? lightTheme : darkTheme;
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({
