@@ -201,7 +201,6 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                               GradientButton(
                                 onTap: _verifyRecoveryKey,
                                 text: "Verify",
-                                paddingValue: 6,
                                 iconData: Icons.shield_outlined,
                               ),
                               const SizedBox(height: 8),

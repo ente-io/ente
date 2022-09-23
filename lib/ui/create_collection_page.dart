@@ -95,7 +95,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                       _showNameAlbumDialog();
                     },
                     iconData: Icons.create_new_folder_outlined,
-                    paddingValue: 6,
                     text: "To a new album",
                   ),
                 ),

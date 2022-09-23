@@ -27,7 +27,6 @@ class GalleryFooterWidget extends StatelessWidget {
             );
           }
         },
-        paddingValue: 6,
         text: "Preserve more",
         iconData: Icons.cloud_upload_outlined,
       ),
