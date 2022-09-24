@@ -3,6 +3,8 @@ import { convertBytesToHumanReadable } from 'utils/file/size';
 import { formatDateTime } from 'utils/time';
 import { saveLogLine, getLogs } from 'utils/storage';
 import { isDEVSentryENV } from 'constants/sentry';
+import isElectron from 'is-electron';
+import ElectronService from 'services/electron/common';
 
 export function addLogLine(log: string) {
     if (isDEVSentryENV()) {
@@ -12,6 +14,9 @@ export function addLogLine(log: string) {
         timestamp: Date.now(),
         logLine: log,
     });
+    if (isElectron()) {
+        ElectronService.logToDisk(log);
+    }
 }
 
 export const addLocalLog = (getLog: () => string) => {
