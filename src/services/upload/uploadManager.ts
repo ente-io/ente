@@ -133,8 +133,6 @@ class UploadManager {
                     this.metadataAndFileTypeInfoMap
                 );
 
-                addLogLine(`clusterLivePhotoFiles called`);
-
                 // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
                 // as they will be rejected during upload and are not valid upload files which we need to clustering
                 const rejectedFileLocalIDs = new Set(
@@ -159,11 +157,16 @@ class UploadManager {
                     }
                 });
 
+                addLogLine(`clusterLivePhotoFiles started`);
+
                 const analysedMediaFiles =
                     UploadService.clusterLivePhotoFiles(filesWithMetadata);
 
+                addLogLine(`clusterLivePhotoFiles ended`);
                 const allFiles = [...rejectedFiles, ...analysedMediaFiles];
-
+                addLogLine(
+                    `got live photos: ${mediaFiles.length !== allFiles.length}`
+                );
                 uiService.setFilenames(
                     new Map<number, string>(
                         allFiles.map((mediaFile) => [
@@ -175,9 +178,6 @@ class UploadManager {
 
                 UIService.setHasLivePhoto(
                     mediaFiles.length !== allFiles.length
-                );
-                addLogLine(
-                    `got live photos: ${mediaFiles.length !== allFiles.length}`
                 );
 
                 await this.uploadMediaFiles(allFiles);
@@ -253,12 +253,12 @@ class UploadManager {
                     } else {
                         // and don't break for subsequent files just log and move on
                         logError(e, 'parsing failed for a file');
+                        addLogLine(
+                            `failed to parse metadata json file ${getFileNameSize(
+                                file
+                            )} error: ${e.message}`
+                        );
                     }
-                    addLogLine(
-                        `failed to parse metadata json file ${getFileNameSize(
-                            file
-                        )} error: ${e.message}`
-                    );
                 }
             }
         } catch (e) {
@@ -302,12 +302,12 @@ class UploadManager {
                     } else {
                         // and don't break for subsequent files just log and move on
                         logError(e, 'extractFileTypeAndMetadata failed');
+                        addLogLine(
+                            `metadata extraction failed ${getFileNameSize(
+                                file
+                            )} error: ${e.message}`
+                        );
                     }
-                    addLogLine(
-                        `metadata extraction failed ${getFileNameSize(
-                            file
-                        )} error: ${e.message}`
-                    );
                 }
                 this.metadataAndFileTypeInfoMap.set(localID, {
                     fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
@@ -499,6 +499,7 @@ class UploadManager {
     }
 
     public cancelRunningUpload() {
+        addLogLine('user cancelled running upload');
         UIService.setUploadStage(UPLOAD_STAGES.CANCELLING);
         uploadCancelService.requestUploadCancelation();
     }
