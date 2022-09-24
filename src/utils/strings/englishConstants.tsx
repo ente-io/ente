@@ -544,7 +544,8 @@ const englishConstants = {
         'Skipped these as there are files with matching names in the same album',
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'Blocked uploads',
-    INPROGRESS_UPLOADS: 'In progress',
+    INPROGRESS_METADATA_EXTRACTION: 'In progress',
+    INPROGRESS_UPLOADS: 'Uploads in progress',
     TOO_LARGE_UPLOADS: 'Large files',
     LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'Insufficient storage',
     LARGER_THAN_AVAILABLE_STORAGE_INFO:

@@ -20,7 +20,9 @@ export const InProgressSection = () => {
     return (
         <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
-                {constants.INPROGRESS_UPLOADS}
+                {uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
+                    ? constants.INPROGRESS_METADATA_EXTRACTION
+                    : constants.INPROGRESS_UPLOADS}
             </UploadProgressSectionTitle>
             <UploadProgressSectionContent>
                 {hasLivePhotos && (
