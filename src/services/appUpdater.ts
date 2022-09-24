@@ -3,10 +3,11 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import { buildContextMenu } from '../utils/menu';
+import { LOG_FILENAME } from '../config';
 
 class AppUpdater {
     constructor() {
-        log.transports.file.level = 'debug';
+        log.transports.file.fileName = LOG_FILENAME;
         autoUpdater.logger = log;
     }
 
