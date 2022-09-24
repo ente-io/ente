@@ -37,6 +37,7 @@ class File extends EnteFile {
   String? fileDecryptionHeader;
   String? thumbnailDecryptionHeader;
   String? metadataDecryptionHeader;
+  int? fileSize;
 
   String? mMdEncodedJson;
   int mMdVersion = 0;
