@@ -55,11 +55,25 @@ export async function createWindow(): Promise<BrowserWindow> {
               );
     });
     mainWindow.once('ready-to-show', async () => {
-        splash.destroy();
-        if (!wasAutoLaunched) {
-            mainWindow.show();
+        try {
+            splash.destroy();
+            if (!wasAutoLaunched) {
+                mainWindow.show();
+            }
+        } catch (e) {
+            // ignore
         }
     });
+    setTimeout(() => {
+        try {
+            splash.destroy();
+            if (!wasAutoLaunched) {
+                mainWindow.show();
+            }
+        } catch (e) {
+            // ignore
+        }
+    }, 2000);
     mainWindow.on('close', function (event) {
         if (!isAppQuitting()) {
             event.preventDefault();
