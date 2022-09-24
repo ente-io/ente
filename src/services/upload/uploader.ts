@@ -131,7 +131,6 @@ export default async function uploader(
             backupedFile,
             encryptedFile.fileKey
         );
-        addLogLine(`uploadFile ${fileNameSize}`);
 
         const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
 

@@ -49,6 +49,7 @@ import {
 } from 'utils/upload';
 import { getUserOwnedCollections } from 'utils/collection';
 import billingService from 'services/billingService';
+import { addLogLine } from 'utils/logging';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -426,6 +427,7 @@ export default function Uploader(props: Props) {
 
     const retryFailed = async () => {
         try {
+            addLogLine('user retrying failed  upload');
             const filesWithCollections =
                 await uploadManager.getFailedFilesWithCollections();
             await preUploadAction();

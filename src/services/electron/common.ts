@@ -14,6 +14,12 @@ class ElectronService {
     checkIsBundledApp() {
         return isElectron() && this.isBundledApp;
     }
+
+    logToDisk(msg: string) {
+        if (this.electronAPIs?.logToDisk) {
+            this.electronAPIs?.logToDisk(msg);
+        }
+    }
 }
 
 export default new ElectronService();
