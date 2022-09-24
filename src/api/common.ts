@@ -8,3 +8,5 @@ export const selectRootDirectory = async (): Promise<string> => {
         logError(e, 'error while selecting root directory');
     }
 };
+
+export { logToDisk } from '../services/logging';

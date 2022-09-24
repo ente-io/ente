@@ -32,7 +32,7 @@ import {
     setExportRecord,
     exists,
 } from './api/export';
-import { selectRootDirectory } from './api/common';
+import { selectRootDirectory, logToDisk } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
 
@@ -76,4 +76,5 @@ windowObject['ElectronAPIs'] = {
     isFolder,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
+    logToDisk,
 };

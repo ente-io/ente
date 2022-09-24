@@ -240,6 +240,12 @@ export async function buildMenuBar(): Promise<Menu> {
                     label: 'Product updates',
                     click: () => shell.openExternal('https://ente.io/blog/'),
                 },
+                {
+                    label: 'View logs',
+                    click: () => {
+                        shell.openPath(app.getPath('logs'));
+                    },
+                },
             ],
         },
     ];
