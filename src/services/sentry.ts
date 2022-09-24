@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/electron/dist/main';
 import { keysStore } from '../stores/keys.store';
 
 import { isDev } from '../utils/common';
+import { logToDisk } from './logging';
 
 const SENTRY_DSN = 'https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5';
 
@@ -27,6 +28,11 @@ export function logErrorSentry(
     info?: Record<string, unknown>
 ) {
     const err = errorWithContext(error, msg);
+    logToDisk(
+        `error: ${error?.name} ${error?.message} ${
+            error?.stack
+        } msg: ${msg} info: ${JSON.stringify(info)}`
+    );
     if (isDEVSentryENV()) {
         console.log(error, { msg, info });
     }
