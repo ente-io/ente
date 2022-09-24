@@ -3,11 +3,12 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import { buildContextMenu } from '../utils/menu';
-import { LOG_FILENAME } from '../config';
+import { LOG_FILENAME, MAX_LOG_SIZE } from '../config';
 
 class AppUpdater {
     constructor() {
         log.transports.file.fileName = LOG_FILENAME;
+        log.transports.file.maxSize = MAX_LOG_SIZE;
         autoUpdater.logger = log;
     }
 
