@@ -107,7 +107,8 @@ const englishConstants = {
     UPLOAD_STAGE_MESSAGE: {
         0: 'Preparing to upload',
         1: 'Reading google metadata files',
-        2: 'Reading file metadata',
+        2: (fileCounter) =>
+            `${fileCounter.finished} / ${fileCounter.total} files metadata extracted`,
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'Cancelling remaining uploads',
@@ -543,7 +544,7 @@ const englishConstants = {
         'Skipped these as there are files with matching names in the same album',
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'Blocked uploads',
-    INPROGRESS_UPLOADS: 'Uploads in progress',
+    INPROGRESS_UPLOADS: 'In progress',
     TOO_LARGE_UPLOADS: 'Large files',
     LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'Insufficient storage',
     LARGER_THAN_AVAILABLE_STORAGE_INFO:

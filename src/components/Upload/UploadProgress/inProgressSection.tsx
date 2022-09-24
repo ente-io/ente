@@ -10,15 +10,16 @@ import {
 } from './section';
 import UploadProgressContext from 'contexts/uploadProgress';
 import constants from 'utils/strings/constants';
+import { UPLOAD_STAGES } from 'constants/upload';
 
 export const InProgressSection = () => {
-    const { inProgressUploads, hasLivePhotos, uploadFileNames } = useContext(
-        UploadProgressContext
-    );
+    const { inProgressUploads, hasLivePhotos, uploadFileNames, uploadStage } =
+        useContext(UploadProgressContext);
     const fileList = inProgressUploads ?? [];
 
     return (
-        <UploadProgressSection defaultExpanded>
+        <UploadProgressSection
+            defaultExpanded={uploadStage === UPLOAD_STAGES.UPLOADING}>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 {constants.INPROGRESS_UPLOADS}
             </UploadProgressSectionTitle>
@@ -30,8 +31,13 @@ export const InProgressSection = () => {
                     fileList={fileList.map(({ localFileID, progress }) => (
                         <InProgressItemContainer key={localFileID}>
                             <span>{uploadFileNames.get(localFileID)}</span>
-                            <span className="separator">{`-`}</span>
-                            <span>{`${progress}%`}</span>
+                            {uploadStage === UPLOAD_STAGES.UPLOADING && (
+                                <>
+                                    {' '}
+                                    <span className="separator">{`-`}</span>
+                                    <span>{`${progress}%`}</span>
+                                </>
+                            )}
                         </InProgressItemContainer>
                     ))}
                 />

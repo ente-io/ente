@@ -40,70 +40,78 @@ export function UploadProgressDialog() {
         <Dialog maxWidth="xs" open={open} onClose={handleClose}>
             <UploadProgressHeader />
             {(uploadStage === UPLOAD_STAGES.UPLOADING ||
-                uploadStage === UPLOAD_STAGES.FINISH) && (
+                uploadStage === UPLOAD_STAGES.FINISH ||
+                uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA) && (
                 <DialogContent sx={{ '&&&': { px: 0 } }}>
-                    {uploadStage === UPLOAD_STAGES.UPLOADING && (
+                    {(uploadStage === UPLOAD_STAGES.UPLOADING ||
+                        uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA) && (
                         <InProgressSection />
                     )}
+                    {(uploadStage === UPLOAD_STAGES.UPLOADING ||
+                        uploadStage === UPLOAD_STAGES.FINISH) && (
+                        <>
+                            <ResultSection
+                                uploadResult={UPLOAD_RESULT.UPLOADED}
+                                sectionTitle={constants.SUCCESSFUL_UPLOADS}
+                            />
+                            <ResultSection
+                                uploadResult={
+                                    UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
+                                }
+                                sectionTitle={
+                                    constants.THUMBNAIL_GENERATION_FAILED_UPLOADS
+                                }
+                                sectionInfo={
+                                    constants.THUMBNAIL_GENERATION_FAILED_INFO
+                                }
+                            />
 
-                    <ResultSection
-                        uploadResult={UPLOAD_RESULT.UPLOADED}
-                        sectionTitle={constants.SUCCESSFUL_UPLOADS}
-                    />
-                    <ResultSection
-                        uploadResult={
-                            UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL
-                        }
-                        sectionTitle={
-                            constants.THUMBNAIL_GENERATION_FAILED_UPLOADS
-                        }
-                        sectionInfo={constants.THUMBNAIL_GENERATION_FAILED_INFO}
-                    />
+                            {uploadStage === UPLOAD_STAGES.FINISH &&
+                                hasUnUploadedFiles && (
+                                    <NotUploadSectionHeader>
+                                        {constants.FILE_NOT_UPLOADED_LIST}
+                                    </NotUploadSectionHeader>
+                                )}
 
-                    {uploadStage === UPLOAD_STAGES.FINISH &&
-                        hasUnUploadedFiles && (
-                            <NotUploadSectionHeader>
-                                {constants.FILE_NOT_UPLOADED_LIST}
-                            </NotUploadSectionHeader>
-                        )}
-
-                    <ResultSection
-                        uploadResult={UPLOAD_RESULT.BLOCKED}
-                        sectionTitle={constants.BLOCKED_UPLOADS}
-                        sectionInfo={constants.ETAGS_BLOCKED(
-                            getOSSpecificDesktopAppDownloadLink()
-                        )}
-                    />
-                    <ResultSection
-                        uploadResult={UPLOAD_RESULT.FAILED}
-                        sectionTitle={constants.FAILED_UPLOADS}
-                    />
-                    <ResultSection
-                        uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
-                        sectionTitle={constants.SKIPPED_FILES}
-                        sectionInfo={constants.SKIPPED_INFO}
-                    />
-                    <ResultSection
-                        uploadResult={
-                            UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
-                        }
-                        sectionTitle={
-                            constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
-                        }
-                        sectionInfo={
-                            constants.LARGER_THAN_AVAILABLE_STORAGE_INFO
-                        }
-                    />
-                    <ResultSection
-                        uploadResult={UPLOAD_RESULT.UNSUPPORTED}
-                        sectionTitle={constants.UNSUPPORTED_FILES}
-                        sectionInfo={constants.UNSUPPORTED_INFO}
-                    />
-                    <ResultSection
-                        uploadResult={UPLOAD_RESULT.TOO_LARGE}
-                        sectionTitle={constants.TOO_LARGE_UPLOADS}
-                        sectionInfo={constants.TOO_LARGE_INFO}
-                    />
+                            <ResultSection
+                                uploadResult={UPLOAD_RESULT.BLOCKED}
+                                sectionTitle={constants.BLOCKED_UPLOADS}
+                                sectionInfo={constants.ETAGS_BLOCKED(
+                                    getOSSpecificDesktopAppDownloadLink()
+                                )}
+                            />
+                            <ResultSection
+                                uploadResult={UPLOAD_RESULT.FAILED}
+                                sectionTitle={constants.FAILED_UPLOADS}
+                            />
+                            <ResultSection
+                                uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}
+                                sectionTitle={constants.SKIPPED_FILES}
+                                sectionInfo={constants.SKIPPED_INFO}
+                            />
+                            <ResultSection
+                                uploadResult={
+                                    UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE
+                                }
+                                sectionTitle={
+                                    constants.LARGER_THAN_AVAILABLE_STORAGE_UPLOADS
+                                }
+                                sectionInfo={
+                                    constants.LARGER_THAN_AVAILABLE_STORAGE_INFO
+                                }
+                            />
+                            <ResultSection
+                                uploadResult={UPLOAD_RESULT.UNSUPPORTED}
+                                sectionTitle={constants.UNSUPPORTED_FILES}
+                                sectionInfo={constants.UNSUPPORTED_INFO}
+                            />
+                            <ResultSection
+                                uploadResult={UPLOAD_RESULT.TOO_LARGE}
+                                sectionTitle={constants.TOO_LARGE_UPLOADS}
+                                sectionInfo={constants.TOO_LARGE_INFO}
+                            />
+                        </>
+                    )}
                 </DialogContent>
             )}
             {uploadStage === UPLOAD_STAGES.FINISH && <UploadProgressFooter />}
