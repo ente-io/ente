@@ -13,7 +13,6 @@ import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
 import { showUpdateDialog } from '../services/appUpdater';
-import { getLogFolderPath } from './logging';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -244,7 +243,7 @@ export async function buildMenuBar(): Promise<Menu> {
                 {
                     label: 'Report Bug',
                     click: () => {
-                        shell.showItemInFolder(getLogFolderPath());
+                        shell.openPath(app.getPath('logs'));
                     },
                 },
             ],
