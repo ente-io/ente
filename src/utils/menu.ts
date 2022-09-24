@@ -241,7 +241,7 @@ export async function buildMenuBar(): Promise<Menu> {
                     click: () => shell.openExternal('https://ente.io/blog/'),
                 },
                 {
-                    label: 'Report Bug',
+                    label: 'View logs',
                     click: () => {
                         shell.openPath(app.getPath('logs'));
                     },
