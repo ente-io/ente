@@ -74,7 +74,7 @@ class _VideoWidgetState extends State<VideoWidget> {
       progressCallback: (count, total) {
         if (mounted) {
           setState(() {
-            _progress = count / total;
+            _progress = count / (widget.file.fileSize ?? total);
             if (_progress == 1) {
               showShortToast(context, "Decrypting video...");
             }
