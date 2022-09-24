@@ -111,6 +111,14 @@ class UploadManager {
             addLogLine(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
+            uiService.setFilenames(
+                new Map<number, string>(
+                    filesWithCollectionToUploadIn.map((mediaFile) => [
+                        mediaFile.localID,
+                        UploadService.getAssetName(mediaFile),
+                    ])
+                )
+            );
             const { metadataJSONFiles, mediaFiles } =
                 segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
             addLogLine(`has ${metadataJSONFiles.length} metadata json files`);
@@ -274,6 +282,7 @@ class UploadManager {
             addLogLine(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
+                UIService.setFileProgress(localID, 0);
                 if (uploadCancelService.isUploadCancelationRequested()) {
                     throw Error(CustomError.UPLOAD_CANCELLED);
                 }
@@ -314,6 +323,7 @@ class UploadManager {
                     metadata: metadata && { ...metadata },
                     filePath: filePath,
                 });
+                UIService.removeFromInProgressList(localID);
                 UIService.increaseFileUploaded();
             }
         } catch (e) {

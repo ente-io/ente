@@ -70,6 +70,10 @@ class UIService {
         this.updateProgressBarUI();
     }
 
+    removeFromInProgressList(key: number) {
+        this.inProgressUploads.delete(key);
+    }
+
     moveFileToResultList(key: number, uploadResult: UPLOAD_RESULT) {
         this.finishedUploads.set(key, uploadResult);
         this.inProgressUploads.delete(key);
