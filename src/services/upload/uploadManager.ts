@@ -305,10 +305,6 @@ class UploadManager {
                             file
                         )} `
                     );
-                    UIService.moveFileToResultList(
-                        localID,
-                        UPLOAD_RESULT.UPLOADED
-                    );
                 } catch (e) {
                     if (e.message === CustomError.UPLOAD_CANCELLED) {
                         throw e;
@@ -327,6 +323,7 @@ class UploadManager {
                     metadata: metadata && { ...metadata },
                     filePath: filePath,
                 });
+                UIService.removeFromInProgressList(localID);
                 UIService.increaseFileUploaded();
             }
         } catch (e) {
