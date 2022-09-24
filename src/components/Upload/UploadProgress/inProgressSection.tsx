@@ -18,7 +18,7 @@ export const InProgressSection = () => {
     const fileList = inProgressUploads ?? [];
 
     return (
-        <UploadProgressSection defaultExpanded>
+        <UploadProgressSection>
             <UploadProgressSectionTitle expandIcon={<ExpandMoreIcon />}>
                 {constants.INPROGRESS_UPLOADS}
             </UploadProgressSectionTitle>
