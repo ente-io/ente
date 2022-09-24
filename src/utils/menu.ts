@@ -13,7 +13,6 @@ import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
 import { showUpdateDialog } from '../services/appUpdater';
-import { isDev } from './common';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -198,14 +197,10 @@ export async function buildMenuBar(): Promise<Menu> {
         {
             label: 'View',
             submenu: [
-                ...((isDev
-                    ? [
-                          { role: 'reload', label: 'Reload' },
-                          { role: 'forceReload', label: 'Force reload' },
-                          { role: 'toggleDevTools', label: 'Toggle dev tools' },
-                          { type: 'separator' },
-                      ]
-                    : []) as MenuItemConstructorOptions[]),
+                { role: 'reload', label: 'Reload' },
+                { role: 'forceReload', label: 'Force reload' },
+                { role: 'toggleDevTools', label: 'Toggle dev tools' },
+                { type: 'separator' },
                 { role: 'resetZoom', label: 'Reset zoom' },
                 { role: 'zoomIn', label: 'Zoom in' },
                 { role: 'zoomOut', label: 'Zoom out' },
