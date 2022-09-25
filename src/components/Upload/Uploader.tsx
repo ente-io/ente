@@ -454,7 +454,8 @@ export default function Uploader(props: Props) {
                     message: constants.SUBSCRIPTION_EXPIRED,
                     action: {
                         text: constants.RENEW_NOW,
-                        callback: billingService.redirectToCustomerPortal,
+                        callback: () =>
+                            billingService.redirectToCustomerPortal(),
                     },
                 };
                 break;
