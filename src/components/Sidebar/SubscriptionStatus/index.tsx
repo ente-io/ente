@@ -1,5 +1,5 @@
 import { GalleryContext } from 'pages/gallery';
-import React, { useContext, useMemo } from 'react';
+import React, { MouseEventHandler, useContext, useMemo } from 'react';
 import {
     hasPaidSubscription,
     isFamilyAdmin,
@@ -43,19 +43,23 @@ export default function SubscriptionStatus({
     }, [userDetails]);
 
     const handleClick = useMemo(() => {
-        if (userDetails) {
-            if (isSubscriptionActive(userDetails.subscription)) {
-                if (hasExceededStorageQuota(userDetails)) {
-                    return showPlanSelectorModal;
-                }
-            } else {
-                if (hasStripeSubscription(userDetails.subscription)) {
-                    return billingService.redirectToCustomerPortal;
+        const eventHandler: MouseEventHandler<HTMLSpanElement> = (e) => {
+            e.stopPropagation();
+            if (userDetails) {
+                if (isSubscriptionActive(userDetails.subscription)) {
+                    if (hasExceededStorageQuota(userDetails)) {
+                        showPlanSelectorModal();
+                    }
                 } else {
-                    return showPlanSelectorModal;
+                    if (hasStripeSubscription(userDetails.subscription)) {
+                        billingService.redirectToCustomerPortal();
+                    } else {
+                        showPlanSelectorModal();
+                    }
                 }
             }
-        }
+        };
+        return eventHandler;
     }, [userDetails]);
 
     if (!hasAMessage) {
@@ -80,13 +84,9 @@ export default function SubscriptionStatus({
                           )
                         : hasExceededStorageQuota(userDetails) &&
                           constants.STORAGE_QUOTA_EXCEEDED_SUBSCRIPTION_INFO(
-                              showPlanSelectorModal
+                              handleClick
                           )
-                    : constants.SUBSCRIPTION_EXPIRED_MESSAGE(
-                          hasStripeSubscription(userDetails.subscription)
-                              ? billingService.redirectToCustomerPortal
-                              : showPlanSelectorModal
-                      )}
+                    : constants.SUBSCRIPTION_EXPIRED_MESSAGE(handleClick)}
             </Typography>
         </Box>
     );

@@ -153,7 +153,6 @@ export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
 }
 export function hasStripeSubscription(subscription: Subscription) {
     return (
-        hasPaidSubscription(subscription) &&
         subscription.paymentProvider.length > 0 &&
         subscription.paymentProvider === PAYMENT_PROVIDER_STRIPE
     );
