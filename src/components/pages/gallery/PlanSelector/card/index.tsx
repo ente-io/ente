@@ -13,6 +13,7 @@ import {
     hasPaidSubscription,
     getTotalFamilyUsage,
     isPartOfFamily,
+    isSubscriptionActive,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
 import { GalleryContext } from 'pages/gallery';
@@ -69,17 +70,18 @@ function PlanSelectorCard(props: Props) {
             try {
                 props.setLoading(true);
                 let plans = await billingService.getPlans();
-
-                const planNotListed =
-                    plans.filter((plan) =>
-                        isUserSubscribedPlan(plan, subscription)
-                    ).length === 0;
-                if (
-                    subscription &&
-                    !isOnFreePlan(subscription) &&
-                    planNotListed
-                ) {
-                    plans = [planForSubscription(subscription), ...plans];
+                if (isSubscriptionActive(subscription)) {
+                    const planNotListed =
+                        plans.filter((plan) =>
+                            isUserSubscribedPlan(plan, subscription)
+                        ).length === 0;
+                    if (
+                        subscription &&
+                        !isOnFreePlan(subscription) &&
+                        planNotListed
+                    ) {
+                        plans = [planForSubscription(subscription), ...plans];
+                    }
                 }
                 setPlans(plans);
             } catch (e) {

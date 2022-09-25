@@ -145,10 +145,9 @@ export function getLocalFamilyData(): FamilyData {
 
 export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
     return (
-        isSubscriptionActive(subscription) &&
-        (plan.stripeID === subscription.productID ||
-            plan.iosID === subscription.productID ||
-            plan.androidID === subscription.productID)
+        plan.stripeID === subscription.productID ||
+        plan.iosID === subscription.productID ||
+        plan.androidID === subscription.productID
     );
 }
 export function hasStripeSubscription(subscription: Subscription) {
