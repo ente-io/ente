@@ -733,7 +733,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "18a50c3a7e7a36d61f09a93733ef7c4f0516392e"
+      resolved-ref: "669388e102cfc832c06e2f3085a5b15d8620dde3"
       url: "https://github.com/ente-io/motionphoto.git"
     source: git
     version: "0.0.1"
@@ -911,7 +911,7 @@ packages:
       name: photo_manager
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.1.1"
   photo_view:
     dependency: "direct main"
     description:
