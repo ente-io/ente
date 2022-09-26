@@ -66,7 +66,7 @@ class UpdateService {
         _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
     final now = DateTime.now().microsecondsSinceEpoch;
     final hasBeen3DaysSinceLastNotification =
-        (now - lastNotificationShownTime) > (3 * kMicroSecondsInDay);
+        (now - lastNotificationShownTime) > (3 * microSecondsInDay);
     if (shouldUpdate &&
         hasBeen3DaysSinceLastNotification &&
         _latestVersion.shouldNotify) {

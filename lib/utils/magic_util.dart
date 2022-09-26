@@ -23,14 +23,14 @@ Future<void> changeVisibility(
 ) async {
   final dialog = createProgressDialog(
     context,
-    newVisibility == kVisibilityArchive ? "Hiding..." : "Unhiding...",
+    newVisibility == visibilityArchive ? "Hiding..." : "Unhiding...",
   );
   await dialog.show();
   try {
     await FileMagicService.instance.changeVisibility(files, newVisibility);
     showShortToast(
       context,
-      newVisibility == kVisibilityArchive
+      newVisibility == visibilityArchive
           ? "Successfully hidden"
           : "Successfully unhidden",
     );
@@ -50,17 +50,17 @@ Future<void> changeCollectionVisibility(
 ) async {
   final dialog = createProgressDialog(
     context,
-    newVisibility == kVisibilityArchive ? "Hiding..." : "Unhiding...",
+    newVisibility == visibilityArchive ? "Hiding..." : "Unhiding...",
   );
   await dialog.show();
   try {
-    final Map<String, dynamic> update = {kMagicKeyVisibility: newVisibility};
+    final Map<String, dynamic> update = {magicKeyVisibility: newVisibility};
     await CollectionsService.instance.updateMagicMetadata(collection, update);
     // Force reload home gallery to pull in the now unarchived files
     Bus.instance.fire(ForceReloadHomeGalleryEvent());
     showShortToast(
       context,
-      newVisibility == kVisibilityArchive
+      newVisibility == visibilityArchive
           ? "Successfully hidden"
           : "Successfully unhidden",
     );
@@ -82,7 +82,7 @@ Future<bool> editTime(
     await _updatePublicMetadata(
       context,
       files,
-      kPubMagicKeyEditedTime,
+      pubMagicKeyEditedTime,
       editedTime,
     );
     return true;
@@ -97,7 +97,7 @@ Future<bool> editFilename(
   File file,
 ) async {
   try {
-    final fileName = file.getDisplayName();
+    final fileName = file.displayName;
     final nameWithoutExt = basenameWithoutExtension(fileName);
     final extName = extension(fileName);
     var result = await showDialog<String>(
@@ -115,7 +115,7 @@ Future<bool> editFilename(
     await _updatePublicMetadata(
       context,
       List.of([file]),
-      kPubMagicKeyEditedName,
+      pubMagicKeyEditedName,
       result,
     );
     return true;
@@ -152,5 +152,5 @@ Future<void> _updatePublicMetadata(
 }
 
 bool _shouldReloadGallery(String key) {
-  return key == kPubMagicKeyEditedTime;
+  return key == pubMagicKeyEditedTime;
 }

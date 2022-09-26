@@ -1,5 +1,3 @@
-// @dart=2.9
-
 class InvalidFileError extends ArgumentError {
   InvalidFileError(String message) : super(message);
 }

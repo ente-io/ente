@@ -87,13 +87,13 @@ class ValidityWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (currentSubscription == null) {
-      return Container();
+      return const SizedBox.shrink();
     }
     final endDate = getDateAndMonthAndYear(
       DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime),
     );
     var message = "Renews on $endDate";
-    if (currentSubscription.productID == kFreeProductID) {
+    if (currentSubscription.productID == freeProductID) {
       message = "Free plan valid till $endDate";
     } else if (currentSubscription.attributes?.isCancelled ?? false) {
       message = "Your subscription will be cancelled on $endDate";

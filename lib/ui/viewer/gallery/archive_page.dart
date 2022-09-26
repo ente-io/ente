@@ -29,11 +29,11 @@ class ArchivePage extends StatelessWidget {
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getAllUploadedFiles(
+        return FilesDB.instance.getAllPendingOrUploadedFiles(
           creationStartTime,
           creationEndTime,
           Configuration.instance.getUserID(),
-          visibility: kVisibilityArchive,
+          visibility: visibilityArchive,
           limit: limit,
           asc: asc,
         );

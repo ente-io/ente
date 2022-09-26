@@ -46,7 +46,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
                     future: FilesDB.instance.fileCountWithVisibility(
-                      kVisibilityArchive,
+                      visibilityArchive,
                       Configuration.instance.getUserID(),
                     ),
                     builder: (context, snapshot) {

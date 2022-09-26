@@ -51,9 +51,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   @override
   Widget build(BuildContext context) {
     final String recoveryKey = bip39.entropyToMnemonic(widget.recoveryKey);
-    if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
+    if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
       throw AssertionError(
-        'recovery code should have $kMnemonicKeyWordCount words',
+        'recovery code should have $mnemonicKeyWordCount words',
       );
     }
     final double topPadding = widget.showAppBar

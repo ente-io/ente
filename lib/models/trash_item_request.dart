@@ -1,12 +1,8 @@
-// @dart=2.9
-
 class TrashRequest {
   final int fileID;
   final int collectionID;
 
-  TrashRequest(this.fileID, this.collectionID)
-      : assert(fileID != null),
-        assert(collectionID != null);
+  TrashRequest(this.fileID, this.collectionID);
 
   factory TrashRequest.fromJson(Map<String, dynamic> json) {
     return TrashRequest(json['fileID'], json['collectionID']);

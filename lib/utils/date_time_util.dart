@@ -1,8 +1,8 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
+const Set<int> monthWith30Days = {4, 6, 9, 11};
 Map<int, String> _months = {
   1: "Jan",
   2: "Feb",
@@ -44,40 +44,41 @@ Map<int, String> _days = {
 };
 
 final currentYear = int.parse(DateTime.now().year.toString());
+const searchStartYear = 1970;
 
 //Jun 2022
 String getMonthAndYear(DateTime dateTime) {
-  return _months[dateTime.month] + " " + dateTime.year.toString();
+  return _months[dateTime.month]! + " " + dateTime.year.toString();
 }
 
 //Thu, 30 Jun
 String getDayAndMonth(DateTime dateTime) {
-  return _days[dateTime.weekday] +
+  return _days[dateTime.weekday]! +
       ", " +
       dateTime.day.toString() +
       " " +
-      _months[dateTime.month];
+      _months[dateTime.month]!;
 }
 
 //30 Jun, 2022
 String getDateAndMonthAndYear(DateTime dateTime) {
   return dateTime.day.toString() +
       " " +
-      _months[dateTime.month] +
+      _months[dateTime.month]! +
       ", " +
       dateTime.year.toString();
 }
 
 String getDay(DateTime dateTime) {
-  return _days[dateTime.weekday];
+  return _days[dateTime.weekday]!;
 }
 
 String getMonth(DateTime dateTime) {
-  return _months[dateTime.month];
+  return _months[dateTime.month]!;
 }
 
 String getFullMonth(DateTime dateTime) {
-  return _fullMonths[dateTime.month];
+  return _fullMonths[dateTime.month]!;
 }
 
 String getAbbreviationOfYear(DateTime dateTime) {
@@ -201,7 +202,7 @@ Widget getDayWidget(
       getDayTitle(timestamp),
       style: (getDayTitle(timestamp) == "Today" && !smallerTodayFont)
           ? Theme.of(context).textTheme.headline5
-          : Theme.of(context).textTheme.caption.copyWith(
+          : Theme.of(context).textTheme.caption?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Inter-SemiBold',
@@ -232,7 +233,8 @@ String secondsToHHMMSS(int value) {
   h = value ~/ 3600;
   m = ((value - h * 3600)) ~/ 60;
   s = value - (h * 3600) - (m * 60);
-  final String hourLeft = h.toString().length < 2 ? "0" + h.toString() : h.toString();
+  final String hourLeft =
+      h.toString().length < 2 ? "0" + h.toString() : h.toString();
 
   final String minuteLeft =
       m.toString().length < 2 ? "0" + m.toString() : m.toString();
@@ -243,4 +245,26 @@ String secondsToHHMMSS(int value) {
   final String result = "$hourLeft:$minuteLeft:$secondsLeft";
 
   return result;
+}
+
+bool isValidDate({
+  required int day,
+  required int month,
+  required int year,
+}) {
+  if (day < 0 || day > 31 || month < 0 || month > 12 || year < 0) {
+    return false;
+  }
+  if (monthWith30Days.contains(month) && day > 30) {
+    return false;
+  }
+  if (month == 2) {
+    if (day > 29) {
+      return false;
+    }
+    if (day == 29 && year % 4 != 0) {
+      return false;
+    }
+  }
+  return true;
 }

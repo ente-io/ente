@@ -3,30 +3,31 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
 class DeviceFolderPage extends StatelessWidget {
-  final DeviceFolder folder;
+  final DeviceCollection deviceCollection;
   final _selectedFiles = SelectedFiles();
 
-  DeviceFolderPage(this.folder, {Key key}) : super(key: key);
+  DeviceFolderPage(this.deviceCollection, {Key key}) : super(key: key);
 
   @override
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInPath(
-          folder.path,
+        return FilesDB.instance.getFilesInDeviceCollection(
+          deviceCollection,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -38,21 +39,21 @@ class DeviceFolderPage extends StatelessWidget {
         EventType.deletedFromDevice,
         EventType.deletedFromEverywhere,
       },
-      tagPrefix: "device_folder:" + folder.path,
+      tagPrefix: "device_folder:" + deviceCollection.name,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
-          ? _getHeaderWidget()
-          : Container(),
-      initialFiles: [folder.thumbnail],
+          ? BackupConfigurationHeaderWidget(deviceCollection)
+          : const SizedBox.shrink(),
+      initialFiles: [deviceCollection.thumbnail],
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           GalleryType.localFolder,
-          folder.name,
+          deviceCollection.name,
           _selectedFiles,
-          path: folder.thumbnail.deviceFolder,
+          deviceCollection: deviceCollection,
         ),
       ),
       body: Stack(
@@ -67,16 +68,13 @@ class DeviceFolderPage extends StatelessWidget {
       ),
     );
   }
-
-  Widget _getHeaderWidget() {
-    return BackupConfigurationHeaderWidget(folder.path);
-  }
 }
 
 class BackupConfigurationHeaderWidget extends StatefulWidget {
-  final String path;
+  final DeviceCollection deviceCollection;
 
-  const BackupConfigurationHeaderWidget(this.path, {Key key}) : super(key: key);
+  const BackupConfigurationHeaderWidget(this.deviceCollection, {Key key})
+      : super(key: key);
 
   @override
   State<BackupConfigurationHeaderWidget> createState() =>
@@ -85,10 +83,16 @@ class BackupConfigurationHeaderWidget extends StatefulWidget {
 
 class _BackupConfigurationHeaderWidgetState
     extends State<BackupConfigurationHeaderWidget> {
+  bool _isBackedUp;
+
+  @override
+  void initState() {
+    _isBackedUp = widget.deviceCollection.shouldBackup;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(widget.path);
     return Container(
       padding: const EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
       margin: const EdgeInsets.only(bottom: 12),
@@ -96,7 +100,7 @@ class _BackupConfigurationHeaderWidgetState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          isBackedUp
+          _isBackedUp
               ? const Text("Backup enabled")
               : Text(
                   "Backup disabled",
@@ -108,17 +112,13 @@ class _BackupConfigurationHeaderWidgetState
                   ),
                 ),
           Switch(
-            value: isBackedUp,
+            value: _isBackedUp,
             onChanged: (value) async {
-              final current = Configuration.instance.getPathsToBackUp();
-              if (value) {
-                current.add(widget.path);
-              } else {
-                current.remove(widget.path);
-              }
-              await Configuration.instance.setPathsToBackUp(current);
+              await RemoteSyncService.instance.updateDeviceFolderSyncStatus(
+                {widget.deviceCollection.id: value},
+              );
+              _isBackedUp = value;
               setState(() {});
-              Bus.instance.fire(BackupFoldersUpdatedEvent());
             },
           ),
         ],

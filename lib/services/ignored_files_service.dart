@@ -49,6 +49,36 @@ class IgnoredFilesService {
     return false;
   }
 
+  // removeIgnoredMappings is used to remove the ignore mapping for the given
+  // set of files so that they can be uploaded.
+  Future<void> removeIgnoredMappings(List<File> files) async {
+    final List<IgnoredFile> ignoredFiles = [];
+    final Set<String> idsToRemoveFromCache = {};
+    final Set<String> currentlyIgnoredIDs = await ignoredIDs;
+    for (final file in files) {
+      // check if upload is not skipped for file. If not, no need to remove
+      // any mapping
+      if (!shouldSkipUpload(currentlyIgnoredIDs, file)) {
+        continue;
+      }
+      final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
+      idsToRemoveFromCache.add(id);
+      ignoredFiles.add(
+        IgnoredFile(file.localID, file.title, file.deviceFolder, ""),
+      );
+    }
+
+    if (ignoredFiles.isNotEmpty) {
+      await _db.removeIgnoredEntries(ignoredFiles);
+      currentlyIgnoredIDs.removeAll(idsToRemoveFromCache);
+    }
+  }
+
+  Future<void> reset() async {
+    await _db.clearTable();
+    _ignoredIDs = null;
+  }
+
   Future<Set<String>> _loadExistingIDs() async {
     _logger.fine('loading existing IDs');
     final result = await _db.getAll();
@@ -66,7 +96,7 @@ class IgnoredFilesService {
     );
   }
 
-  // _computeIgnoreID will return null if don't have sufficient information
+  // _getIgnoreID will return null if don't have sufficient information
   // to ignore the file based on the platform. Uploads from web or files shared to
   // end usually don't have local id.
   // For Android: It returns deviceFolder-title as ID for Android.

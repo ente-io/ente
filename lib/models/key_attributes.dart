@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 class KeyAttributes {
@@ -71,18 +69,18 @@ class KeyAttributes {
       KeyAttributes.fromMap(json.decode(source));
 
   KeyAttributes copyWith({
-    String kekSalt,
-    String encryptedKey,
-    String keyDecryptionNonce,
-    String publicKey,
-    String encryptedSecretKey,
-    String secretKeyDecryptionNonce,
-    int memLimit,
-    int opsLimit,
-    String masterKeyEncryptedWithRecoveryKey,
-    String masterKeyDecryptionNonce,
-    String recoveryKeyEncryptedWithMasterKey,
-    String recoveryKeyDecryptionNonce,
+    String? kekSalt,
+    String? encryptedKey,
+    String? keyDecryptionNonce,
+    String? publicKey,
+    String? encryptedSecretKey,
+    String? secretKeyDecryptionNonce,
+    int? memLimit,
+    int? opsLimit,
+    String? masterKeyEncryptedWithRecoveryKey,
+    String? masterKeyDecryptionNonce,
+    String? recoveryKeyEncryptedWithMasterKey,
+    String? recoveryKeyDecryptionNonce,
   }) {
     return KeyAttributes(
       kekSalt ?? this.kekSalt,

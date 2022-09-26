@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/private_key_attributes.dart';
 

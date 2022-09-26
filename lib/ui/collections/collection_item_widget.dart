@@ -39,12 +39,12 @@ class CollectionItem extends StatelessWidget {
               height: sideOfThumbnail,
               width: sideOfThumbnail,
               child: Hero(
-                tag: "collection" + c.thumbnail.tag(),
+                tag: "collection" + c.thumbnail.tag,
                 child: ThumbnailWidget(
                   c.thumbnail,
                   shouldShowArchiveStatus: c.collection.isArchived(),
                   key: Key(
-                    "collection" + c.thumbnail.tag(),
+                    "collection" + c.thumbnail.tag,
                   ),
                 ),
               ),

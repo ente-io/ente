@@ -1,11 +1,10 @@
-// @dart=2.9
-
 import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:computer/computer.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/models/derived_key_result.dart';
 import 'package:photos/models/encryption_result.dart';
 
 const int encryptionChunkSize = 4 * 1024 * 1024;
@@ -200,9 +199,10 @@ class CryptoUtil {
 
   static Uint8List decryptSync(
     Uint8List cipher,
-    Uint8List key,
+    Uint8List? key,
     Uint8List nonce,
   ) {
+    assert(key != null, "key can not be null");
     final args = <String, dynamic>{};
     args["cipher"] = cipher;
     args["nonce"] = nonce;
@@ -235,7 +235,7 @@ class CryptoUtil {
   static Future<EncryptionResult> encryptFile(
     String sourceFilePath,
     String destinationFilePath, {
-    Uint8List key,
+    Uint8List? key,
   }) {
     final args = <String, dynamic>{};
     args["sourceFilePath"] = sourceFilePath;
@@ -329,12 +329,4 @@ class CryptoUtil {
       },
     );
   }
-}
-
-class DerivedKeyResult {
-  final Uint8List key;
-  final int memLimit;
-  final int opsLimit;
-
-  DerivedKeyResult(this.key, this.memLimit, this.opsLimit);
 }

@@ -7,7 +7,6 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
-import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
@@ -97,14 +96,11 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             Positioned(
               right: 0,
               top: 0,
-              child: FeatureFlagService.instance.enableSearch()
-                  ? Container(
-                      color:
-                          Theme.of(context).colorScheme.defaultBackgroundColor,
-                      height: kContainerHeight,
-                      child: const SearchIconWidget(),
-                    )
-                  : const SizedBox(height: 36, width: 48),
+              child: Container(
+                color: Theme.of(context).colorScheme.defaultBackgroundColor,
+                height: kContainerHeight,
+                child: const SearchIconWidget(),
+              ),
             ),
           ],
         ),
@@ -117,7 +113,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             ? NotificationWarningWidget(
                 warningIcon: Icons.gpp_maybe,
                 actionIcon: Icons.arrow_forward,
-                text: "Please ensure that you have your 24 word recovery key",
+                text: "Please ensure you have your 24 word recovery key",
                 onTap: () async => {
                   await routeToPage(
                     context,

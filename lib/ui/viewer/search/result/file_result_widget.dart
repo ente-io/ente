@@ -2,23 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/search/location_search_result.dart';
-import 'package:photos/ui/viewer/search/collections/files_in_location_page.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/models/search/file_search_result.dart';
+import 'package:photos/ui/viewer/file/detail_page.dart';
+import 'package:photos/ui/viewer/search/result/search_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class LocationSearchResultWidget extends StatelessWidget {
-  static const String _tagPrefix = "location_search";
+class FileSearchResultWidget extends StatelessWidget {
+  final FileSearchResult matchedFile;
 
-  final LocationSearchResult locationSearchResult;
-  const LocationSearchResultWidget(this.locationSearchResult, {Key key})
-      : super(key: key);
+  const FileSearchResultWidget(this.matchedFile, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final noOfMemories = locationSearchResult.files.length;
-    final heroTagPrefix = _tagPrefix + locationSearchResult.location;
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -29,16 +25,16 @@ class LocationSearchResultWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SearchResultThumbnailWidget(
-                locationSearchResult.files[0],
-                heroTagPrefix,
+              SearchThumbnailWidget(
+                matchedFile.file,
+                "file_details",
               ),
               const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Location',
+                    'File',
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.subTextColor,
@@ -48,25 +44,9 @@ class LocationSearchResultWidget extends StatelessWidget {
                   SizedBox(
                     width: 220,
                     child: Text(
-                      locationSearchResult.location,
+                      matchedFile.file.title,
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  RichText(
-                    text: TextSpan(
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .searchResultsCountTextColor,
-                      ),
-                      children: [
-                        TextSpan(text: noOfMemories.toString()),
-                        TextSpan(
-                          text: noOfMemories != 1 ? ' memories' : ' memory',
-                        ),
-                      ],
                     ),
                   ),
                 ],
@@ -81,11 +61,20 @@ class LocationSearchResultWidget extends StatelessWidget {
         ),
       ),
       onTap: () {
-        routeToPage(
-          context,
-          FilesInLocationPage(locationSearchResult, heroTagPrefix),
-        );
+        _routeToDetailPage(matchedFile.file, context);
       },
     );
+  }
+
+  void _routeToDetailPage(File file, BuildContext context) {
+    final page = DetailPage(
+      DetailPageConfiguration(
+        List.unmodifiable([file]),
+        null,
+        0,
+        "file_details",
+      ),
+    );
+    routeToPage(context, page);
   }
 }

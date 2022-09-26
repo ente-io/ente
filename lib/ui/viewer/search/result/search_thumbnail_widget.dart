@@ -4,11 +4,11 @@ import 'package:flutter/widgets.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
-class SearchResultThumbnailWidget extends StatelessWidget {
+class SearchThumbnailWidget extends StatelessWidget {
   final File file;
   final String tagPrefix;
 
-  const SearchResultThumbnailWidget(
+  const SearchThumbnailWidget(
     this.file,
     this.tagPrefix, {
     Key key,
@@ -17,7 +17,7 @@ class SearchResultThumbnailWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Hero(
-      tag: tagPrefix + file.tag(),
+      tag: tagPrefix + file.tag,
       child: SizedBox(
         height: 58,
         width: 58,

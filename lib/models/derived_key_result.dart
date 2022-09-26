@@ -1,10 +1,9 @@
-// @dart=2.9
-
 import 'dart:typed_data';
 
 class DerivedKeyResult {
   final Uint8List key;
-  final Uint8List salt;
+  final int memLimit;
+  final int opsLimit;
 
-  DerivedKeyResult(this.key, this.salt);
+  DerivedKeyResult(this.key, this.memLimit, this.opsLimit);
 }

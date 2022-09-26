@@ -4,9 +4,13 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/services/ignored_files_service.dart';
+import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatelessWidget {
   const DebugSectionWidget({Key key}) : super(key: key);
@@ -30,6 +34,29 @@ class DebugSectionWidget extends StatelessWidget {
           },
           child: const SettingsTextItem(
             text: "Key attributes",
+            icon: Icons.navigate_next,
+          ),
+        ),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            await LocalSyncService.instance.resetLocalSync();
+            showToast(context, "Done");
+          },
+          child: const SettingsTextItem(
+            text: "Delete Local Import DB",
+            icon: Icons.navigate_next,
+          ),
+        ),
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            await IgnoredFilesService.instance.reset();
+            SyncService.instance.sync();
+            showToast(context, "Done");
+          },
+          child: const SettingsTextItem(
+            text: "Allow auto-upload for ignored files",
             icon: Icons.navigate_next,
           ),
         ),

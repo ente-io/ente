@@ -67,7 +67,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       _currentSubscription = userDetails.subscription;
       _showYearlyPlan = _currentSubscription.isYearlyPlan();
       _hasActiveSubscription = _currentSubscription.isValid();
-      _isStripeSubscriber = _currentSubscription.paymentProvider == kStripe;
+      _isStripeSubscriber = _currentSubscription.paymentProvider == stripe;
       return _filterStripeForUI().then((value) {
         _hasLoadedData = true;
         setState(() {});
@@ -103,7 +103,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     if (widget.isOnboarding &&
         _currentSubscription != null &&
         _currentSubscription.isValid() &&
-        _currentSubscription.productID != kFreeProductID) {
+        _currentSubscription.productID != freeProductID) {
       Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
@@ -204,7 +204,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if (_currentSubscription.productID == kFreeProductID) {
+    if (_currentSubscription.productID == freeProductID) {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
@@ -216,7 +216,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       widgets.add(_stripeRenewOrCancelButton());
     }
 
-    if (_currentSubscription.productID != kFreeProductID) {
+    if (_currentSubscription.productID != freeProductID) {
       widgets.addAll([
         Align(
           alignment: Alignment.center,
@@ -225,17 +225,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               final String paymentProvider =
                   _currentSubscription.paymentProvider;
               switch (_currentSubscription.paymentProvider) {
-                case kStripe:
+                case stripe:
                   await _launchStripePortal();
                   break;
-                case kPlayStore:
+                case playStore:
                   launchUrlString(
                     "https://play.google.com/store/account/subscriptions?sku=" +
                         _currentSubscription.productID +
                         "&package=io.ente.photos",
                   );
                   break;
-                case kAppStore:
+                case appStore:
                   launchUrlString("https://apps.apple.com/account/billing");
                   break;
                 default:
@@ -328,7 +328,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
   }
 
   Future<void> _launchFamilyPortal() async {
-    if (_userDetails.subscription.productID == kFreeProductID) {
+    if (_userDetails.subscription.productID == freeProductID) {
       await showErrorDialog(
         context,
         "Now you can share your storage plan with your family members!",
@@ -441,7 +441,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               // payment providers
               if (!_isStripeSubscriber &&
                   _hasActiveSubscription &&
-                  _currentSubscription.productID != kFreeProductID) {
+                  _currentSubscription.productID != freeProductID) {
                 showErrorDialog(
                   context,
                   "Sorry",
@@ -544,7 +544,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     // don't add current plan if it's monthly plan but UI is showing yearly plans
     // and vice versa.
     if (_showYearlyPlan != _currentSubscription.isYearlyPlan() &&
-        _currentSubscription.productID != kFreeProductID) {
+        _currentSubscription.productID != freeProductID) {
       return;
     }
     int activePlanIndex = 0;

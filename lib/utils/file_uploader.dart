@@ -285,7 +285,7 @@ class FileUploader {
         fileOnDisk.updationTime != -1 &&
         fileOnDisk.collectionID == collectionID;
     if (wasAlreadyUploaded) {
-      debugPrint("File is already uploaded ${fileOnDisk.tag()}");
+      debugPrint("File is already uploaded ${fileOnDisk.tag}");
       return fileOnDisk;
     }
 
@@ -520,8 +520,8 @@ class FileUploader {
     );
     if (sameLocalSameCollection != null) {
       _logger.fine(
-        "sameLocalSameCollection: \n toUpload  ${fileToUpload.tag()} "
-        "\n existing: ${sameLocalSameCollection.tag()}",
+        "sameLocalSameCollection: \n toUpload  ${fileToUpload.tag} "
+        "\n existing: ${sameLocalSameCollection.tag}",
       );
       // should delete the fileToUploadEntry
       await FilesDB.instance.deleteByGeneratedID(fileToUpload.generatedID);
@@ -545,8 +545,8 @@ class FileUploader {
       // update the local id of the existing file and delete the fileToUpload
       // entry
       _logger.fine(
-        "fileMissingLocalButSameCollection: \n toUpload  ${fileToUpload.tag()} "
-        "\n existing: ${fileMissingLocalButSameCollection.tag()}",
+        "fileMissingLocalButSameCollection: \n toUpload  ${fileToUpload.tag} "
+        "\n existing: ${fileMissingLocalButSameCollection.tag}",
       );
       fileMissingLocalButSameCollection.localID = fileToUpload.localID;
       // set localID for the given uploadedID across collections
@@ -571,9 +571,9 @@ class FileUploader {
       orElse: () => null,
     );
     if (fileExistsButDifferentCollection != null) {
-      debugPrint(
-        "fileExistsButDifferentCollection: \n toUpload  ${fileToUpload.tag()} "
-        "\n existing: ${fileExistsButDifferentCollection.tag()}",
+      _logger.fine(
+        "fileExistsButDifferentCollection: \n toUpload  ${fileToUpload.tag} "
+        "\n existing: ${fileExistsButDifferentCollection.tag}",
       );
       final linkedFile = await CollectionsService.instance
           .linkLocalFileToExistingUploadedFileInAnotherCollection(
@@ -609,7 +609,7 @@ class FileUploader {
       // for upload. Shared Media should only be cleared when the upload
       // succeeds.
       if (io.Platform.isIOS ||
-          (uploadCompleted && file.isSharedMediaToAppSandbox())) {
+          (uploadCompleted && file.isSharedMediaToAppSandbox)) {
         await mediaUploadData.sourceFile.delete();
       }
     }

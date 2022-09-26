@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/notification_event.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
@@ -118,6 +119,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final enteTheme = Theme.of(context).colorScheme.enteTheme;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -147,16 +149,17 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                         width: double.infinity,
                         child: Text(
                           'Verify recovery key',
-                          style: Theme.of(context).textTheme.headline5,
+                          style: enteTheme.textTheme.h3Bold,
                           textAlign: TextAlign.left,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 18),
                       Text(
                         "If you forget your password, your recovery key is the "
                         "only way to recover your photos.\n\nPlease verify that "
                         "you have safely backed up your 24 word recovery key by re-entering it.",
-                        style: Theme.of(context).textTheme.subtitle2,
+                        style: enteTheme.textTheme.small
+                            .copyWith(color: enteTheme.colorScheme.textMuted),
                       ),
                       const SizedBox(height: 12),
                       TextFormField(
@@ -186,7 +189,8 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       const SizedBox(height: 12),
                       Text(
                         "If you saved the recovery key from older app versions, you might have a 64 character recovery code instead of 24 words. You can enter that too.",
-                        style: Theme.of(context).textTheme.caption,
+                        style: enteTheme.textTheme.mini
+                            .copyWith(color: enteTheme.colorScheme.textMuted),
                       ),
                       const SizedBox(height: 8),
                       Expanded(
@@ -201,7 +205,6 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                               GradientButton(
                                 onTap: _verifyRecoveryKey,
                                 text: "Verify",
-                                paddingValue: 6,
                                 iconData: Icons.shield_outlined,
                               ),
                               const SizedBox(height: 8),
