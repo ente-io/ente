@@ -360,7 +360,6 @@ class LocalSyncService {
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
       _logger.info("Inserted " + files.length.toString() + " files.");
-      // _updatePathsToBackup(files);
       Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);

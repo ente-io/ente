@@ -49,6 +49,7 @@ class RemoteSyncService {
   bool _existingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
+  final String _isFirstRemoteSyncDone = "isFirstRemoteSyncDone";
 
   // 28 Sept, 2021 9:03:20 AM IST
   static const kArchiveFeatureReleaseTime = 1632800000000000;
@@ -94,6 +95,15 @@ class RemoteSyncService {
     _existingSyncSilent = silently;
 
     try {
+      // use flag to decide if we should start marking files for upload before
+      // remote-sync is done. This is done to avoid adding existing files to
+      // the same or different collection when user had already uploaded them
+      // before.
+      final bool hasSyncedBefore =
+          _prefs.containsKey(_isFirstRemoteSyncDone) ?? false;
+      if (hasSyncedBefore) {
+        await syncDeviceCollectionFilesForUpload();
+      }
       await _pullDiff();
       // sync trash but consume error during initial launch.
       // this is to ensure that we don't pause upload due to any error during
@@ -102,14 +112,17 @@ class RemoteSyncService {
       await TrashSyncService.instance
           .syncTrash()
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
-      await _syncDeviceCollectionFilesForUpload();
+      if (!hasSyncedBefore) {
+        await _prefs.setBool(_isFirstRemoteSyncDone, true);
+        await syncDeviceCollectionFilesForUpload();
+      }
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
         await _pullDiff();
         _existingSync.complete();
         _existingSync = null;
-        await _syncDeviceCollectionFilesForUpload();
+        await syncDeviceCollectionFilesForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
@@ -232,7 +245,7 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _syncDeviceCollectionFilesForUpload() async {
+  Future<void> syncDeviceCollectionFilesForUpload() async {
     final int ownerID = _config.getUserID();
     final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);

@@ -293,8 +293,11 @@ class SearchService {
       );
       if (matchedFiles.isNotEmpty) {
         searchResults.add(
-          GenericSearchResult(ResultType.event,
-              '$day ${potentialDate.item2.name} ${year ?? ''}', matchedFiles),
+          GenericSearchResult(
+            ResultType.event,
+            '$day ${potentialDate.item2.name} ${year ?? ''}',
+            matchedFiles,
+          ),
         );
       }
     }
