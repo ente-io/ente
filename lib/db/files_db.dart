@@ -56,6 +56,7 @@ class FilesDB {
   static const columnFileDecryptionHeader = 'file_decryption_header';
   static const columnThumbnailDecryptionHeader = 'thumbnail_decryption_header';
   static const columnMetadataDecryptionHeader = 'metadata_decryption_header';
+  static const columnFileSize = 'file_size';
 
   // MMD -> Magic Metadata
   static const columnMMdEncodedJson = 'mmd_encoded_json';
@@ -79,6 +80,7 @@ class FilesDB {
     ...addUniqueConstraintOnCollectionFiles(),
     ...addPubMagicMetadataColumns(),
     ...createOnDeviceFilesAndPathCollection(),
+    ...addFileSizeColumn(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -327,6 +329,14 @@ class FilesDB {
       ''',
       '''
       CREATE INDEX IF NOT EXISTS df_path_id_idx ON device_files (path_id);
+      ''',
+    ];
+  }
+
+  static List<String> addFileSizeColumn() {
+    return [
+      '''
+      ALTER TABLE $filesTable ADD COLUMN $columnFileSize INTEGER;
       ''',
     ];
   }
@@ -1377,6 +1387,7 @@ class FilesDB {
     row[columnExif] = file.exif;
     row[columnHash] = file.hash;
     row[columnMetadataVersion] = file.metadataVersion;
+    row[columnFileSize] = file.fileSize;
     row[columnMMdVersion] = file.mMdVersion ?? 0;
     row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
     row[columnMMdVisibility] =
@@ -1460,6 +1471,7 @@ class FilesDB {
     file.exif = row[columnExif];
     file.hash = row[columnHash];
     file.metadataVersion = row[columnMetadataVersion] ?? 0;
+    file.fileSize = row[columnFileSize];
 
     file.mMdVersion = row[columnMMdVersion] ?? 0;
     file.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';

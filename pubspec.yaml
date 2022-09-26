@@ -31,7 +31,7 @@ dependencies:
   connectivity: ^3.0.3
   cupertino_icons: ^1.0.0
   device_info: ^2.0.2
-  dio: ^4.0.0
+  dio: ^4.0.6
   dots_indicator: ^2.0.0
   dotted_border: ^2.0.0+2
   email_validator: ^2.0.1
