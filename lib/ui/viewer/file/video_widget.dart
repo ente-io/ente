@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/services/files_service.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/video_controls.dart';
 import 'package:photos/utils/file_util.dart';
@@ -45,6 +46,7 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.initState();
     if (widget.file.isRemoteFile) {
       _loadNetworkVideo();
+      _setFileSizeIfNull();
     } else if (widget.file.isSharedMediaToAppSandbox) {
       final localFile = io.File(getSharedMediaFilePath(widget.file));
       if (localFile.existsSync()) {
@@ -64,6 +66,17 @@ class _VideoWidgetState extends State<VideoWidget> {
             _setVideoPlayerController(url: url);
           });
         }
+      });
+    }
+  }
+
+  void _setFileSizeIfNull() {
+    if (widget.file.fileSize == null) {
+      FilesService.instance
+          .getFileSize(widget.file.uploadedFileID)
+          .then((value) {
+        widget.file.fileSize = value;
+        setState(() {});
       });
     }
   }
