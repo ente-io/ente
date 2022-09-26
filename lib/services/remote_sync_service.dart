@@ -595,7 +595,7 @@ class RemoteSyncService {
           remoteDiff.localID,
           remoteDiff.fileType,
           title: remoteDiff.title,
-          deviceFolder: remoteDiff.deviceFolder,
+          deviceFolder: remoteDiff.deviceFolder ?? '',
         );
         if (localFileEntries.isEmpty) {
           // set remote file's localID as null because corresponding local file
