@@ -5,6 +5,8 @@ import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/models/file.dart';
 import 'package:tuple/tuple.dart';
 
@@ -255,6 +257,10 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
     currentPageResult = await pathEntity.getAssetListPaged(
       page: currentPage,
       size: assetFetchPageSize,
+    );
+    Bus.instance.fire(
+      LocalImportProgressEvent(pathEntity.name,
+          currentPage * assetFetchPageSize + currentPageResult.length),
     );
     result.addAll(currentPageResult);
     currentPage = currentPage + 1;
