@@ -1,5 +1,4 @@
-// @dart=2.9
-
+import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -8,37 +7,41 @@ import 'package:photos/models/ente_file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/feature_flag_service.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/exif_util.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/file_uploader_util.dart';
 
 class File extends EnteFile {
-  int generatedID;
-  int uploadedFileID;
-  int ownerID;
-  int collectionID;
-  String localID;
-  String title;
-  String deviceFolder;
-  int creationTime;
-  int modificationTime;
-  int updationTime;
-  Location location;
-  FileType fileType;
-  int fileSubType;
-  int duration;
-  String exif;
-  String hash;
-  int metadataVersion;
-  String encryptedKey;
-  String keyDecryptionNonce;
-  String fileDecryptionHeader;
-  String thumbnailDecryptionHeader;
-  String metadataDecryptionHeader;
+  int? generatedID;
+  int? uploadedFileID;
+  int? ownerID;
+  int? collectionID;
+  String? localID;
+  String? title;
+  String? deviceFolder;
+  int? creationTime;
+  int? modificationTime;
+  int? updationTime;
+  Location? location;
+  late FileType fileType;
+  int? fileSubType;
+  int? duration;
+  String? exif;
+  String? hash;
+  int? metadataVersion;
+  String? encryptedKey;
+  String? keyDecryptionNonce;
+  String? fileDecryptionHeader;
+  String? thumbnailDecryptionHeader;
+  String? metadataDecryptionHeader;
+  int? fileSize;
 
-  String mMdEncodedJson;
+  String? mMdEncodedJson;
   int mMdVersion = 0;
-  MagicMetadata _mmd;
+  MagicMetadata? _mmd;
 
   MagicMetadata get magicMetadata =>
       _mmd ?? MagicMetadata.fromEncodedJson(mMdEncodedJson ?? '{}');
@@ -46,11 +49,11 @@ class File extends EnteFile {
   set magicMetadata(val) => _mmd = val;
 
   // public magic metadata is shared if during file/album sharing
-  String pubMmdEncodedJson;
+  String? pubMmdEncodedJson;
   int pubMmdVersion = 0;
-  PubMagicMetadata _pubMmd;
+  PubMagicMetadata? _pubMmd;
 
-  PubMagicMetadata get pubMagicMetadata =>
+  PubMagicMetadata? get pubMagicMetadata =>
       _pubMmd ?? PubMagicMetadata.fromEncodedJson(pubMmdEncodedJson ?? '{}');
 
   set pubMagicMetadata(val) => _pubMmd = val;
@@ -58,6 +61,8 @@ class File extends EnteFile {
   // in Version 1, live photo hash is stored as zip's hash.
   // in V2: LivePhoto hash is stored as imgHash:vidHash
   static const kCurrentMetadataVersion = 2;
+
+  static final _logger = Logger('File');
 
   File();
 
@@ -72,7 +77,7 @@ class File extends EnteFile {
     if (file.creationTime == 0) {
       try {
         final parsedDateTime = DateTime.parse(
-          basenameWithoutExtension(file.title)
+          basenameWithoutExtension(file.title!)
               .replaceAll("IMG_", "")
               .replaceAll("VID_", "")
               .replaceAll("DCIM_", "")
@@ -112,11 +117,11 @@ class File extends EnteFile {
     return type;
   }
 
-  Future<AssetEntity> getAsset() {
+  Future<AssetEntity?> get getAsset {
     if (localID == null) {
       return Future.value(null);
     }
-    return AssetEntity.fromId(localID);
+    return AssetEntity.fromId(localID!);
   }
 
   void applyMetadata(Map<String, dynamic> metadata) {
@@ -152,7 +157,7 @@ class File extends EnteFile {
   Future<Map<String, dynamic>> getMetadataForUpload(
     MediaUploadData mediaUploadData,
   ) async {
-    final asset = await getAsset();
+    final asset = await getAsset;
     // asset can be null for files shared to app
     if (asset != null) {
       fileSubType = asset.subtype;
@@ -168,22 +173,22 @@ class File extends EnteFile {
       }
     }
     hash = mediaUploadData.hashData?.fileHash;
-    return getMetadata();
+    return metadata;
   }
 
-  Map<String, dynamic> getMetadata() {
+  Map<String, dynamic> get metadata {
     final metadata = <String, dynamic>{};
-    metadata["localID"] = isSharedMediaToAppSandbox() ? null : localID;
+    metadata["localID"] = isSharedMediaToAppSandbox ? null : localID;
     metadata["title"] = title;
     metadata["deviceFolder"] = deviceFolder;
     metadata["creationTime"] = creationTime;
     metadata["modificationTime"] = modificationTime;
     metadata["fileType"] = fileType.index;
     if (location != null &&
-        location.latitude != null &&
-        location.longitude != null) {
-      metadata["latitude"] = location.latitude;
-      metadata["longitude"] = location.longitude;
+        location!.latitude != null &&
+        location!.longitude != null) {
+      metadata["latitude"] = location!.latitude;
+      metadata["longitude"] = location!.longitude;
     }
     if (fileSubType != null) {
       metadata["subType"] = fileSubType;
@@ -200,7 +205,7 @@ class File extends EnteFile {
     return metadata;
   }
 
-  String getDownloadUrl() {
+  String get downloadUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
@@ -210,7 +215,7 @@ class File extends EnteFile {
     }
   }
 
-  String getThumbnailUrl() {
+  String get thumbnailUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint ||
         FeatureFlagService.instance.disableCFWorker()) {
@@ -220,27 +225,28 @@ class File extends EnteFile {
     }
   }
 
-  String getDisplayName() {
-    if (pubMagicMetadata != null && pubMagicMetadata.editedName != null) {
-      return pubMagicMetadata.editedName;
+  String get displayName {
+    if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
+      return pubMagicMetadata!.editedName!;
     }
-    return title;
+    if (title == null) _logger.severe('File title is null');
+    return title ?? '';
   }
 
   // returns true if the file isn't available in the user's gallery
-  bool isRemoteFile() {
+  bool get isRemoteFile {
     return localID == null && uploadedFileID != null;
   }
 
-  bool isSharedMediaToAppSandbox() {
+  bool get isSharedMediaToAppSandbox {
     return localID != null &&
-        (localID.startsWith(kOldSharedMediaIdentifier) ||
-            localID.startsWith(kSharedMediaIdentifier));
+        (localID!.startsWith(oldSharedMediaIdentifier) ||
+            localID!.startsWith(sharedMediaIdentifier));
   }
 
-  bool hasLocation() {
+  bool get hasLocation {
     return location != null &&
-        (location.longitude != 0 || location.latitude != 0);
+        (location!.longitude != 0 || location!.latitude != 0);
   }
 
   @override
@@ -265,7 +271,7 @@ class File extends EnteFile {
     return generatedID.hashCode ^ uploadedFileID.hashCode ^ localID.hashCode;
   }
 
-  String tag() {
+  String get tag {
     return "local_" +
         localID.toString() +
         ":remote_" +
@@ -277,11 +283,6 @@ class File extends EnteFile {
   @override
   String cacheKey() {
     // todo: Neeraj: 19thJuly'22: evaluate and add fileHash as the key?
-    return localID ?? uploadedFileID?.toString() ?? generatedID?.toString();
-  }
-
-  @override
-  String localIdentifier() {
-    return localID;
+    return localID ?? uploadedFileID?.toString() ?? generatedID.toString();
   }
 }

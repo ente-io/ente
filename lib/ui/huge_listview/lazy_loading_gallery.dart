@@ -103,7 +103,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
         final result = await widget.asyncLoader(
           dayStartTime.microsecondsSinceEpoch,
-          dayStartTime.microsecondsSinceEpoch + kMicroSecondsInDay - 1,
+          dayStartTime.microsecondsSinceEpoch + microSecondsInDay - 1,
         );
         if (mounted) {
           setState(() {
@@ -321,7 +321,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
           child: Stack(
             children: [
               Hero(
-                tag: widget.tag + file.tag(),
+                tag: widget.tag + file.tag,
                 child: ColorFiltered(
                   colorFilter: ColorFilter.mode(
                     Colors.black.withOpacity(
@@ -331,10 +331,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   ),
                   child: ThumbnailWidget(
                     file,
-                    diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-                    serverLoadDeferDuration: kThumbnailServerLoadDeferDuration,
+                    diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                    serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                     shouldShowLivePhotoOverlay: true,
-                    key: Key(widget.tag + file.tag()),
+                    key: Key(widget.tag + file.tag),
                   ),
                 ),
               ),

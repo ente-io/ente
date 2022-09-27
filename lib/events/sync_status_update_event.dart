@@ -1,15 +1,13 @@
-// @dart=2.9
-
 import 'package:photos/events/event.dart';
 
 class SyncStatusUpdate extends Event {
-  final int completed;
-  final int total;
-  final bool wasStopped;
   final SyncStatus status;
+  final int? completed;
+  final int? total;
+  final bool wasStopped;
   final String reason;
-  final Error error;
-  int timestamp;
+  final Error? error;
+  late int timestamp;
 
   SyncStatusUpdate(
     this.status, {
@@ -20,11 +18,6 @@ class SyncStatusUpdate extends Event {
     this.error,
   }) {
     timestamp = DateTime.now().microsecondsSinceEpoch;
-  }
-
-  @override
-  String toString() {
-    return 'SyncStatusUpdate(completed: $completed, total: $total, wasStopped: $wasStopped, status: $status, reason: $reason, error: $error)';
   }
 }
 

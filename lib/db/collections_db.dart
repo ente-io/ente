@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -54,15 +52,16 @@ class CollectionsDB {
 
   static final CollectionsDB instance = CollectionsDB._privateConstructor();
 
-  static Future<Database> _dbFuture;
+  static Future<Database>? _dbFuture;
 
   Future<Database> get database async {
     _dbFuture ??= _initDatabase();
-    return _dbFuture;
+    return _dbFuture!;
   }
 
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     return await openDatabaseWithMigration(path, dbConfig);
   }
@@ -180,20 +179,6 @@ class CollectionsDB {
     return collections;
   }
 
-  Future<int> getLastCollectionUpdationTime() async {
-    final db = await instance.database;
-    final rows = await db.query(
-      table,
-      orderBy: '$columnUpdationTime DESC',
-      limit: 1,
-    );
-    if (rows.isNotEmpty) {
-      return int.parse(rows[0][columnUpdationTime]);
-    } else {
-      return null;
-    }
-  }
-
   Future<int> deleteCollection(int collectionID) async {
     final db = await instance.database;
     return db.delete(
@@ -206,7 +191,7 @@ class CollectionsDB {
   Map<String, dynamic> _getRowForCollection(Collection collection) {
     final row = <String, dynamic>{};
     row[columnID] = collection.id;
-    row[columnOwner] = collection.owner.toJson();
+    row[columnOwner] = collection.owner!.toJson();
     row[columnEncryptedKey] = collection.encryptedKey;
     row[columnKeyDecryptionNonce] = collection.keyDecryptionNonce;
     row[columnName] = collection.name;
@@ -217,16 +202,16 @@ class CollectionsDB {
     row[columnPathDecryptionNonce] = collection.attributes.pathDecryptionNonce;
     row[columnVersion] = collection.attributes.version;
     row[columnSharees] =
-        json.encode(collection.sharees?.map((x) => x?.toMap())?.toList());
+        json.encode(collection.sharees?.map((x) => x?.toMap()).toList());
     row[columnPublicURLs] =
-        json.encode(collection.publicURLs?.map((x) => x?.toMap())?.toList());
+        json.encode(collection.publicURLs?.map((x) => x?.toMap()).toList());
     row[columnUpdationTime] = collection.updationTime;
-    if (collection.isDeleted ?? false) {
+    if (collection.isDeleted) {
       row[columnIsDeleted] = _sqlBoolTrue;
     } else {
       row[columnIsDeleted] = _sqlBoolFalse;
     }
-    row[columnMMdVersion] = collection.mMdVersion ?? 0;
+    row[columnMMdVersion] = collection.mMdVersion;
     row[columnMMdEncodedJson] = collection.mMdEncodedJson ?? '{}';
     return row;
   }

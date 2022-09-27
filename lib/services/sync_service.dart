@@ -179,6 +179,15 @@ class SyncService {
     );
   }
 
+  void onDeviceCollectionSet(Set<int> collectionIDs) {
+    _uploader.removeFromQueueWhere(
+      (file) {
+        return !collectionIDs.contains(file.collectionID);
+      },
+      UserCancelledUploadError(),
+    );
+  }
+
   void onVideoBackupPaused() {
     _uploader.removeFromQueueWhere(
       (file) {
@@ -243,7 +252,7 @@ class SyncService {
     final lastNotificationShownTime =
         _prefs.getInt(kLastStorageLimitExceededNotificationPushTime) ?? 0;
     final now = DateTime.now().microsecondsSinceEpoch;
-    if ((now - lastNotificationShownTime) > kMicroSecondsInDay) {
+    if ((now - lastNotificationShownTime) > microSecondsInDay) {
       await _prefs.setInt(kLastStorageLimitExceededNotificationPushTime, now);
       NotificationService.instance.showNotification(
         "storage limit exceeded",

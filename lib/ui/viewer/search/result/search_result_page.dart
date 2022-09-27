@@ -4,33 +4,33 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
-import 'package:photos/models/search/year_search_result.dart';
+import 'package:photos/models/search/search_result.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
-class FilesFromYearPage extends StatelessWidget {
-  final YearSearchResult yearSearchResult;
-  final String tagPrefix;
+class SearchResultPage extends StatelessWidget {
+  final SearchResult searchResult;
 
   final _selectedFiles = SelectedFiles();
   static const GalleryType appBarType = GalleryType.searchResults;
   static const GalleryType overlayType = GalleryType.searchResults;
 
-  FilesFromYearPage(
-    this.yearSearchResult,
-    this.tagPrefix, {
+  SearchResultPage(
+    this.searchResult, {
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final List<File> files = searchResult.resultFiles();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        final result = yearSearchResult.files
+        final result = files
             .where(
               (file) =>
                   file.creationTime >= creationStartTime &&
@@ -40,7 +40,7 @@ class FilesFromYearPage extends StatelessWidget {
         return Future.value(
           FileLoadResult(
             result,
-            result.length < yearSearchResult.files.length,
+            result.length < files.length,
           ),
         );
       },
@@ -49,16 +49,16 @@ class FilesFromYearPage extends StatelessWidget {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
       },
-      tagPrefix: tagPrefix,
+      tagPrefix: searchResult.heroTag(),
       selectedFiles: _selectedFiles,
-      initialFiles: [yearSearchResult.files[0]],
+      initialFiles: [searchResult.previewThumbnail()],
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          yearSearchResult.year.toString(),
+          searchResult.name(),
           _selectedFiles,
         ),
       ),

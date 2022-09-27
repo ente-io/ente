@@ -1,15 +1,15 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
-import 'package:photos/models/device_folder.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/device_folder_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class DeviceFolderIcon extends StatelessWidget {
+  final DeviceCollection deviceCollection;
   const DeviceFolderIcon(
-    this.folder, {
+    this.deviceCollection, {
     Key key,
   }) : super(key: key);
 
@@ -38,12 +38,9 @@ class DeviceFolderIcon extends StatelessWidget {
     ),
   );
 
-  final DeviceFolder folder;
-
   @override
   Widget build(BuildContext context) {
-    final isBackedUp =
-        Configuration.instance.getPathsToBackUp().contains(folder.path);
+    final isBackedUp = deviceCollection.shouldBackup;
     return GestureDetector(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 2),
@@ -58,17 +55,18 @@ class DeviceFolderIcon extends StatelessWidget {
                   height: 120,
                   width: 120,
                   child: Hero(
-                    tag:
-                        "device_folder:" + folder.path + folder.thumbnail.tag(),
+                    tag: "device_folder:" +
+                        deviceCollection.name +
+                        deviceCollection.thumbnail.tag,
                     child: Stack(
                       children: [
                         ThumbnailWidget(
-                          folder.thumbnail,
+                          deviceCollection.thumbnail,
                           shouldShowSyncStatus: false,
                           key: Key(
                             "device_folder:" +
-                                folder.path +
-                                folder.thumbnail.tag(),
+                                deviceCollection.name +
+                                deviceCollection.thumbnail.tag,
                           ),
                         ),
                         isBackedUp ? Container() : kUnsyncedIconOverlay,
@@ -80,7 +78,7 @@ class DeviceFolderIcon extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
-                  folder.name,
+                  deviceCollection.name,
                   style: Theme.of(context)
                       .textTheme
                       .subtitle1
@@ -93,7 +91,7 @@ class DeviceFolderIcon extends StatelessWidget {
         ),
       ),
       onTap: () {
-        routeToPage(context, DeviceFolderPage(folder));
+        routeToPage(context, DeviceFolderPage(deviceCollection));
       },
     );
   }

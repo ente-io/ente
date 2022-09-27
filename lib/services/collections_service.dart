@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -13,6 +14,7 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/collections_db.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -25,6 +27,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/file_magic_service.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/file_download_util.dart';
@@ -44,7 +47,7 @@ class CollectionsService {
   SharedPreferences _prefs;
   Future<List<File>> _cachedLatestFiles;
   final _dio = Network.instance.getDio();
-  final _localCollections = <String, Collection>{};
+  final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
 
@@ -117,7 +120,7 @@ class CollectionsService {
   }
 
   void clearCache() {
-    _localCollections.clear();
+    _localPathToCollectionID.clear();
     _collectionIDToCollections.clear();
     _cachedKeys.clear();
   }
@@ -158,10 +161,6 @@ class CollectionsService {
       return _prefs.remove(key);
     }
     return _prefs.setInt(key, time);
-  }
-
-  Collection getCollectionForPath(String path) {
-    return _localCollections[path];
   }
 
   // getActiveCollections returns list of collections which are not deleted yet
@@ -241,6 +240,40 @@ class CollectionsService {
     RemoteSyncService.instance.sync(silently: true);
   }
 
+  Future<void> trashCollection(Collection collection) async {
+    try {
+      final deviceCollections = await _filesDB.getDeviceCollections();
+      final Map<String, bool> deivcePathIDsToUnsync = Map.fromEntries(
+        deviceCollections
+            .where((e) => e.shouldBackup && e.collectionID == collection.id)
+            .map((e) => MapEntry(e.id, false)),
+      );
+
+      if (deivcePathIDsToUnsync.isNotEmpty) {
+        _logger.info(
+          'turning off backup status for folders $deivcePathIDsToUnsync',
+        );
+        await RemoteSyncService.instance
+            .updateDeviceFolderSyncStatus(deivcePathIDsToUnsync);
+      }
+      await _dio.delete(
+        Configuration.instance.getHttpEndpoint() +
+            "/collections/v2/${collection.id}",
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
+      );
+      await _filesDB.deleteCollection(collection.id);
+      final deletedCollection = collection.copyWith(isDeleted: true);
+      _collectionIDToCollections[collection.id] = deletedCollection;
+      _db.insert([deletedCollection]);
+      unawaited(LocalSyncService.instance.syncAll());
+    } catch (e) {
+      _logger.severe('failed to trash collection', e);
+      rethrow;
+    }
+  }
+
   Uint8List getCollectionKey(int collectionID) {
     if (!_cachedKeys.containsKey(collectionID)) {
       final collection = _collectionIDToCollections[collectionID];
@@ -259,6 +292,9 @@ class CollectionsService {
   Uint8List _getDecryptedKey(Collection collection) {
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
     if (collection.owner.id == _config.getUserID()) {
+      if(_config.getKey() == null) {
+        throw Exception("key can not be null");
+      }
       return CryptoUtil.decryptSync(
         encryptedKey,
         _config.getKey(),
@@ -545,9 +581,14 @@ class CollectionsService {
   }
 
   Future<Collection> getOrCreateForPath(String path) async {
-    if (_localCollections.containsKey(path) &&
-        _localCollections[path].owner.id == _config.getUserID()) {
-      return _localCollections[path];
+    if (_localPathToCollectionID.containsKey(path)) {
+      final Collection cachedCollection =
+          _collectionIDToCollections[_localPathToCollectionID[path]];
+      if (cachedCollection != null &&
+          !cachedCollection.isDeleted &&
+          cachedCollection.owner.id == _config.getUserID()) {
+        return cachedCollection;
+      }
     }
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
@@ -789,10 +830,6 @@ class CollectionsService {
     Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
   }
 
-  String getCollectionNameByID(int collectionID) {
-    return getCollectionByID(collectionID).name;
-  }
-
   void _validateMoveRequest(
     int toCollectionID,
     int fromCollectionID,
@@ -853,9 +890,10 @@ class CollectionsService {
     final collectionWithDecryptedName =
         _getCollectionWithDecryptedName(collection);
     if (collection.attributes.encryptedPath != null &&
-        !(collection.isDeleted)) {
-      _localCollections[decryptCollectionPath(collection)] =
-          collectionWithDecryptedName;
+        !collection.isDeleted &&
+        collection.owner.id == _config.getUserID()) {
+      _localPathToCollectionID[decryptCollectionPath(collection)] =
+          collection.id;
     }
     _collectionIDToCollections[collection.id] = collectionWithDecryptedName;
     return collectionWithDecryptedName;

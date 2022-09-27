@@ -4,18 +4,24 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:computer/computer.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
-import 'package:photos/utils/file_sync_util.dart';
+import 'package:photos/services/local/local_sync_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:tuple/tuple.dart';
 
 class LocalSyncService {
   final _logger = Logger("LocalSyncService");
@@ -26,6 +32,7 @@ class LocalSyncService {
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
+  static const hasImportedDeviceCollections = "has_imported_device_collections";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kPermissionStateKey = "permission_state";
   static const kEditedFileIDsKey = "edited_file_ids";
@@ -75,8 +82,8 @@ class LocalSyncService {
     _logger.info(
       existingLocalFileIDs.length.toString() + " localIDs were discovered",
     );
-    final editedFileIDs = getEditedFileIDs().toSet();
-    final downloadedFileIDs = getDownloadedFileIDs().toSet();
+    final editedFileIDs = _getEditedFileIDs().toSet();
+    final downloadedFileIDs = _getDownloadedFileIDs().toSet();
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
     final startTime = DateTime.now().microsecondsSinceEpoch;
@@ -117,6 +124,9 @@ class LocalSyncService {
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !_prefs.getBool(kHasCompletedFirstImportKey)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
+      // mark device collection has imported on first import
+      await _refreshDeviceFolderCountAndCover(isFirstSync: true);
+      await _prefs.setBool(hasImportedDeviceCollections, true);
       _logger.fine("first gallery import finished");
       Bus.instance
           .fire(SyncStatusUpdate(SyncStatus.completedFirstGalleryImport));
@@ -128,41 +138,114 @@ class LocalSyncService {
     _existingSync = null;
   }
 
-  Future<bool> syncAll() async {
-    final sTime = DateTime.now().microsecondsSinceEpoch;
-    final localAssets = await getAllLocalAssets();
-    final eTime = DateTime.now().microsecondsSinceEpoch;
-    final d = Duration(microseconds: eTime - sTime);
-    _logger.info(
-      "Loading from the beginning returned " +
-          localAssets.length.toString() +
-          " assets and took " +
-          d.inMilliseconds.toString() +
-          "ms",
+  Future<bool> _refreshDeviceFolderCountAndCover({
+    bool isFirstSync = false,
+  }) async {
+    final List<Tuple2<AssetPathEntity, String>> result =
+        await getDeviceFolderWithCountAndCoverID();
+    final bool hasUpdated = await _db.updateDeviceCoverWithCount(
+      result,
+      shouldBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
-    final existingIDs = await _db.getExistingLocalFileIDs();
-    final invalidIDs = getInvalidFileIDs().toSet();
-    final unsyncedFiles =
-        await getUnsyncedFiles(localAssets, existingIDs, invalidIDs, _computer);
-    if (unsyncedFiles.isNotEmpty) {
-      await _db.insertMultiple(unsyncedFiles);
-      _logger.info(
-        "Inserted " + unsyncedFiles.length.toString() + " unsynced files.",
-      );
-      _updatePathsToBackup(unsyncedFiles);
-      Bus.instance.fire(LocalPhotosUpdatedEvent(unsyncedFiles));
-      return true;
+    // do not fire UI update event during first sync. Otherwise the next screen
+    // to shop the backup folder is skipped
+    if (hasUpdated && !isFirstSync) {
+      Bus.instance.fire(BackupFoldersUpdatedEvent());
     }
-    return false;
+    // migrate the backed up folder settings after first import is done remove
+    // after 6 months?
+    if (!_prefs.containsKey(hasImportedDeviceCollections) &&
+        _prefs.containsKey(kHasCompletedFirstImportKey)) {
+      await _migrateOldSettings(result);
+    }
+    return hasUpdated;
+  }
+
+  Future<void> _migrateOldSettings(
+    List<Tuple2<AssetPathEntity, String>> result,
+  ) async {
+    final pathsToBackUp = Configuration.instance.getPathsToBackUp();
+    final entriesToBackUp = Map.fromEntries(
+      result
+          .where((element) => pathsToBackUp.contains(element.item1.name))
+          .map((e) => MapEntry(e.item1.id, true)),
+    );
+    if (entriesToBackUp.isNotEmpty) {
+      await _db.updateDevicePathSyncStatus(entriesToBackUp);
+      Bus.instance.fire(BackupFoldersUpdatedEvent());
+    }
+    await Configuration.instance
+        .setHasSelectedAnyBackupFolder(pathsToBackUp.isNotEmpty);
+    await _prefs.setBool(hasImportedDeviceCollections, true);
+  }
+
+  bool isDeviceFileMigrationDone() {
+    return _prefs.containsKey(hasImportedDeviceCollections);
+  }
+
+  Future<bool> syncAll() async {
+    final stopwatch = Stopwatch()..start();
+    final localAssets = await getAllLocalAssets();
+    _logger.info(
+      "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
+    );
+    await _refreshDeviceFolderCountAndCover();
+    _logger.info(
+      "refreshDeviceFolderCountAndCover + allLocalAssets took ${stopwatch.elapsedMilliseconds}ms ",
+    );
+    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
+    final Map<String, Set<String>> pathToLocalIDs =
+        await _db.getDevicePathIDToLocalIDMap();
+    final invalidIDs = _getInvalidFileIDs().toSet();
+    final localDiffResult = await getDiffWithLocal(
+      localAssets,
+      existingLocalFileIDs,
+      pathToLocalIDs,
+      invalidIDs,
+      _computer,
+    );
+    bool hasAnyMappingChanged = false;
+    if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
+      await _db.insertPathIDToLocalIDMapping(localDiffResult.newPathToLocalIDs);
+      hasAnyMappingChanged = true;
+    }
+    if (localDiffResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
+      await _db
+          .deletePathIDToLocalIDMapping(localDiffResult.deletePathToLocalIDs);
+      hasAnyMappingChanged = true;
+    }
+    final bool hasUnsyncedFiles =
+        localDiffResult.uniqueLocalFiles?.isNotEmpty ?? false;
+    if (hasUnsyncedFiles) {
+      await _db.insertMultiple(
+        localDiffResult.uniqueLocalFiles,
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+      _logger.info(
+        "Inserted ${localDiffResult.uniqueLocalFiles.length} "
+        "un-synced files",
+      );
+    }
+    debugPrint(
+      "syncAll: mappingChange : $hasAnyMappingChanged, "
+      "unSyncedFiles: $hasUnsyncedFiles",
+    );
+    if (hasAnyMappingChanged || hasUnsyncedFiles) {
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(localDiffResult.uniqueLocalFiles),
+      );
+    }
+    _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
+    return hasUnsyncedFiles;
   }
 
   Future<void> trackEditedFile(File file) async {
-    final editedIDs = getEditedFileIDs();
+    final editedIDs = _getEditedFileIDs();
     editedIDs.add(file.localID);
     await _prefs.setStringList(kEditedFileIDsKey, editedIDs);
   }
 
-  List<String> getEditedFileIDs() {
+  List<String> _getEditedFileIDs() {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey);
     } else {
@@ -172,32 +255,30 @@ class LocalSyncService {
   }
 
   Future<void> trackDownloadedFile(String localID) async {
-    final downloadedIDs = getDownloadedFileIDs();
+    final downloadedIDs = _getDownloadedFileIDs();
     downloadedIDs.add(localID);
     await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
   }
 
-  List<String> getDownloadedFileIDs() {
+  List<String> _getDownloadedFileIDs() {
     if (_prefs.containsKey(kDownloadedFileIDsKey)) {
       return _prefs.getStringList(kDownloadedFileIDsKey);
     } else {
-      final List<String> downloadedIDs = [];
-      return downloadedIDs;
+      return <String>[];
     }
   }
 
   Future<void> trackInvalidFile(File file) async {
-    final invalidIDs = getInvalidFileIDs();
+    final invalidIDs = _getInvalidFileIDs();
     invalidIDs.add(file.localID);
     await _prefs.setStringList(kInvalidFileIDsKey, invalidIDs);
   }
 
-  List<String> getInvalidFileIDs() {
+  List<String> _getInvalidFileIDs() {
     if (_prefs.containsKey(kInvalidFileIDsKey)) {
       return _prefs.getStringList(kInvalidFileIDsKey);
     } else {
-      final List<String> invalidIDs = [];
-      return invalidIDs;
+      return <String>[];
     }
   }
 
@@ -213,11 +294,34 @@ class LocalSyncService {
   Future<void> onPermissionGranted(PermissionState state) async {
     await _prefs.setBool(kHasGrantedPermissionsKey, true);
     await _prefs.setString(kPermissionStateKey, state.toString());
+    if (state == PermissionState.limited) {
+      // when limited permission is granted, by default mark all folders for
+      // backup
+      await Configuration.instance.setSelectAllFoldersForBackup(true);
+    }
     _registerChangeCallback();
   }
 
   bool hasCompletedFirstImport() {
     return _prefs.getBool(kHasCompletedFirstImportKey) ?? false;
+  }
+
+  // Warning: resetLocalSync should only be used for testing imported related
+  // changes
+  Future<void> resetLocalSync() async {
+    assert(kDebugMode, "only available in debug mode");
+    await FilesDB.instance.deleteDB();
+    for (var element in [
+      kHasCompletedFirstImportKey,
+      hasImportedDeviceCollections,
+      kDbUpdationTimeKey,
+      kDownloadedFileIDsKey,
+      kEditedFileIDsKey,
+      "has_synced_edit_time",
+      "has_selected_all_folders_for_backup",
+    ]) {
+      await _prefs.remove(element);
+    }
   }
 
   Future<void> _loadAndStorePhotos(
@@ -233,21 +337,50 @@ class LocalSyncService {
           " to " +
           DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
     );
-    final files = await getDeviceFiles(fromTime, toTime, _computer);
+    final Tuple2<List<LocalPathAsset>, List<File>> result =
+        await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
+    await FilesDB.instance.insertLocalAssets(
+      result.item1,
+      shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
+    );
+    final List<File> files = result.item2;
     if (files.isNotEmpty) {
       _logger.info("Fetched " + files.length.toString() + " files.");
-      final updatedFiles = files
-          .where((file) => existingLocalFileIDs.contains(file.localID))
-          .toList();
-      updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
-      updatedFiles
-          .removeWhere((file) => downloadedFileIDs.contains(file.localID));
-      if (updatedFiles.isNotEmpty) {
-        _logger.info(
-          updatedFiles.length.toString() + " local files were updated.",
-        );
-      }
+      await _trackUpdatedFiles(
+        files,
+        existingLocalFileIDs,
+        editedFileIDs,
+        downloadedFileIDs,
+      );
+      final List<File> allFiles = [];
+      allFiles.addAll(files);
+      files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
+      await _db.insertMultiple(
+        files,
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+      _logger.info("Inserted " + files.length.toString() + " files.");
+      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
+    }
+    await _prefs.setInt(kDbUpdationTimeKey, toTime);
+  }
 
+  Future<void> _trackUpdatedFiles(
+    List<File> files,
+    Set<String> existingLocalFileIDs,
+    Set<String> editedFileIDs,
+    Set<String> downloadedFileIDs,
+  ) async {
+    final updatedFiles = files
+        .where((file) => existingLocalFileIDs.contains(file.localID))
+        .toList();
+    updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
+    updatedFiles
+        .removeWhere((file) => downloadedFileIDs.contains(file.localID));
+    if (updatedFiles.isNotEmpty) {
+      _logger.info(
+        updatedFiles.length.toString() + " local files were updated.",
+      );
       final List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
         updatedLocalIDs.add(file.localID);
@@ -256,23 +389,6 @@ class LocalSyncService {
         updatedLocalIDs,
         FileUpdationDB.modificationTimeUpdated,
       );
-      final List<File> allFiles = [];
-      allFiles.addAll(files);
-      files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
-      await _db.insertMultiple(files);
-      _logger.info("Inserted " + files.length.toString() + " files.");
-      _updatePathsToBackup(files);
-      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
-    }
-    await _prefs.setInt(kDbUpdationTimeKey, toTime);
-  }
-
-  void _updatePathsToBackup(List<File> files) {
-    if (Configuration.instance.hasSelectedAllFoldersForBackup()) {
-      final pathsToBackup = Configuration.instance.getPathsToBackUp();
-      final newFilePaths = files.map((file) => file.deviceFolder).toList();
-      pathsToBackup.addAll(newFilePaths);
-      Configuration.instance.setPathsToBackUp(pathsToBackup);
     }
   }
 
@@ -287,7 +403,7 @@ class LocalSyncService {
       if (hasGrantedLimitedPermissions()) {
         syncAll();
       } else {
-        sync();
+        sync().then((value) => _refreshDeviceFolderCountAndCover());
       }
     });
     PhotoManager.startChangeNotify();

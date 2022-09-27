@@ -57,10 +57,11 @@ class NoResultWidget extends StatelessWidget {
             Container(
               margin: const EdgeInsets.only(bottom: 20, top: 12),
               child: Text(
-                '''\u2022 Places (e.g. "London")
+                '''\u2022 Album names (e.g. "Camera")
+\u2022 Types of files (e.g. "Videos", ".gif")
 \u2022 Years and months (e.g. "2022", "January")
 \u2022 Holidays (e.g. "Christmas")
-\u2022 Album names (e.g. "Recents")''',
+''',
                 style: TextStyle(
                   fontSize: 14,
                   color: Theme.of(context)

@@ -12,7 +12,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
-import 'package:photos/ui/viewer/gallery/empte_state.dart';
+import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -445,16 +445,15 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             child: Stack(
               children: [
                 Hero(
-                  tag: "deduplicate_" + file.tag(),
+                  tag: "deduplicate_" + file.tag,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: ThumbnailWidget(
                       file,
-                      diskLoadDeferDuration: kThumbnailDiskLoadDeferDuration,
-                      serverLoadDeferDuration:
-                          kThumbnailServerLoadDeferDuration,
+                      diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                      serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                       shouldShowLivePhotoOverlay: true,
-                      key: Key("deduplicate_" + file.tag()),
+                      key: Key("deduplicate_" + file.tag),
                     ),
                   ),
                 ),
@@ -472,7 +471,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             padding: const EdgeInsets.only(right: 2),
             child: Text(
               CollectionsService.instance
-                  .getCollectionNameByID(file.collectionID),
+                  .getCollectionByID(file.collectionID)
+                  .name,
               style: Theme.of(context).textTheme.caption.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),

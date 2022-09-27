@@ -62,8 +62,8 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
 
 Future<Uint8List> getThumbnailFromLocal(
   File file, {
-  int size = kThumbnailSmallSize,
-  int quality = kThumbnailQuality,
+  int size = thumbnailSmallSize,
+  int quality = thumbnailQuality,
 }) async {
   final lruCachedThumbnail = ThumbnailLruCache.get(file, size);
   if (lruCachedThumbnail != null) {
@@ -75,7 +75,7 @@ Future<Uint8List> getThumbnailFromLocal(
     ThumbnailLruCache.put(file, data);
     return data;
   }
-  if (file.isSharedMediaToAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox) {
     //todo:neeraj support specifying size/quality
     return getThumbnailFromInAppCacheFile(file).then((data) {
       if (data != null) {
@@ -84,7 +84,7 @@ Future<Uint8List> getThumbnailFromLocal(
       return data;
     });
   } else {
-    return file.getAsset().then((asset) async {
+    return file.getAsset.then((asset) async {
       if (asset == null || !(await asset.exists)) {
         return null;
       }
@@ -130,7 +130,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   Uint8List encryptedThumbnail;
   try {
     encryptedThumbnail = (await Network.instance.getDio().get(
-              file.getThumbnailUrl(),
+              file.thumbnailUrl,
               options: Options(
                 headers: {"X-Auth-Token": Configuration.instance.getToken()},
                 responseType: ResponseType.bytes,
@@ -154,7 +154,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     Sodium.base642bin(file.thumbnailDecryptionHeader),
   );
   final thumbnailSize = data.length;
-  if (thumbnailSize > kThumbnailDataLimit) {
+  if (thumbnailSize > thumbnailDataLimit) {
     data = await compressThumbnail(data);
   }
   ThumbnailLruCache.put(item.file, data);

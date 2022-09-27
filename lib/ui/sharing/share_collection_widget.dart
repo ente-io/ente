@@ -9,14 +9,11 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
@@ -92,86 +89,70 @@ class _SharingDialogState extends State<SharingDialog> {
       );
     }
 
-    if (!FeatureFlagService.instance.disableUrlSharing()) {
-      final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
-      children.addAll([
-        const Padding(padding: EdgeInsets.all(16)),
-        const Divider(height: 1),
-        const Padding(padding: EdgeInsets.all(12)),
-        SizedBox(
-          height: 36,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Public link"),
-              Switch(
-                value: hasUrl,
-                onChanged: (enable) async {
-                  // confirm if user wants to disable the url
-                  if (!enable) {
-                    final choice = await showChoiceDialog(
-                      context,
-                      'Disable link',
-                      'Are you sure that you want to disable the album link?',
-                      firstAction: 'Yes, disable',
-                      secondAction: 'No',
-                      actionType: ActionType.critical,
-                    );
-                    if (choice != DialogUserChoice.firstChoice) {
-                      return;
-                    }
-                  } else {
-                    // Add local folder in backup patch before creating
-                    // sharable link
-                    if (widget.collection.type == CollectionType.folder) {
-                      final path = CollectionsService.instance
-                          .decryptCollectionPath(widget.collection);
-                      if (!Configuration.instance
-                          .getPathsToBackUp()
-                          .contains(path)) {
-                        await Configuration.instance
-                            .addPathToFoldersToBeBackedUp(path);
-                        Bus.instance.fire(BackupFoldersUpdatedEvent());
-                      }
-                    }
-                  }
-                  final dialog = createProgressDialog(
+    final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
+    children.addAll([
+      const Padding(padding: EdgeInsets.all(16)),
+      const Divider(height: 1),
+      const Padding(padding: EdgeInsets.all(12)),
+      SizedBox(
+        height: 36,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("Public link"),
+            Switch(
+              value: hasUrl,
+              onChanged: (enable) async {
+                // confirm if user wants to disable the url
+                if (!enable) {
+                  final choice = await showChoiceDialog(
                     context,
-                    enable ? "Creating link..." : "Disabling link...",
+                    'Disable link',
+                    'Are you sure that you want to disable the album link?',
+                    firstAction: 'Yes, disable',
+                    secondAction: 'No',
+                    actionType: ActionType.critical,
                   );
-                  try {
-                    await dialog.show();
-                    enable
-                        ? await CollectionsService.instance
-                            .createShareUrl(widget.collection)
-                        : await CollectionsService.instance
-                            .disableShareUrl(widget.collection);
-                    dialog.hide();
-                    setState(() {});
-                  } catch (e) {
-                    dialog.hide();
-                    if (e is SharingNotPermittedForFreeAccountsError) {
-                      _showUnSupportedAlert();
-                    } else {
-                      _logger.severe("failed to share collection", e);
-                      showGenericErrorDialog(context);
-                    }
+                  if (choice != DialogUserChoice.firstChoice) {
+                    return;
                   }
-                },
-              ),
-            ],
-          ),
+                }
+                final dialog = createProgressDialog(
+                  context,
+                  enable ? "Creating link..." : "Disabling link...",
+                );
+                try {
+                  await dialog.show();
+                  enable
+                      ? await CollectionsService.instance
+                          .createShareUrl(widget.collection)
+                      : await CollectionsService.instance
+                          .disableShareUrl(widget.collection);
+                  dialog.hide();
+                  setState(() {});
+                } catch (e) {
+                  dialog.hide();
+                  if (e is SharingNotPermittedForFreeAccountsError) {
+                    _showUnSupportedAlert();
+                  } else {
+                    _logger.severe("failed to share collection", e);
+                    showGenericErrorDialog(context);
+                  }
+                }
+              },
+            ),
+          ],
         ),
-        const Padding(padding: EdgeInsets.all(8)),
-      ]);
-      if (widget.collection.publicURLs?.isNotEmpty ?? false) {
-        children.add(
-          const Padding(
-            padding: EdgeInsets.all(2),
-          ),
-        );
-        children.add(_getShareableUrlWidget(context));
-      }
+      ),
+      const Padding(padding: EdgeInsets.all(8)),
+    ]);
+    if (widget.collection.publicURLs?.isNotEmpty ?? false) {
+      children.add(
+        const Padding(
+          padding: EdgeInsets.all(2),
+        ),
+      );
+      children.add(_getShareableUrlWidget(context));
     }
 
     return AlertDialog(
@@ -251,7 +232,8 @@ class _SharingDialogState extends State<SharingDialog> {
     final String collectionKey = Base58Encode(
       CollectionsService.instance.getCollectionKey(widget.collection.id),
     );
-    final String url = "${widget.collection.publicURLs.first.url}#$collectionKey";
+    final String url =
+        "${widget.collection.publicURLs.first.url}#$collectionKey";
     return SingleChildScrollView(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -408,15 +390,7 @@ class _SharingDialogState extends State<SharingDialog> {
     } else {
       final dialog = createProgressDialog(context, "Sharing...");
       await dialog.show();
-      final collection = widget.collection;
       try {
-        if (collection.type == CollectionType.folder) {
-          final path =
-              CollectionsService.instance.decryptCollectionPath(collection);
-          if (!Configuration.instance.getPathsToBackUp().contains(path)) {
-            await Configuration.instance.addPathToFoldersToBeBackedUp(path);
-          }
-        }
         await CollectionsService.instance
             .share(widget.collection.id, email, publicKey);
         await dialog.hide();

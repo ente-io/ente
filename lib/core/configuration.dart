@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:io' as io;
 import 'dart:typed_data';
@@ -10,14 +8,19 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/files_db.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/ignored_files_db.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/db/public_keys_db.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/signed_in_event.dart';
@@ -25,11 +28,17 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/billing_service.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/collections_service.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/favorites_service.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/memories_service.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/search_service.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/validator_util.dart';
@@ -57,8 +66,8 @@ class Configuration {
   static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
   static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
-  static const keyHasSkippedBackupFolderSelection =
-      "has_skipped_backup_folder_selection";
+  static const keyHasSelectedAnyBackupFolder =
+      "has_selected_any_folder_for_backup";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const nameKey = "name";
   static const secretKeyKey = "secret_key";
@@ -75,21 +84,21 @@ class Configuration {
 
   static final _logger = Logger("Configuration");
 
-  String _cachedToken;
-  String _documentsDirectory;
-  String _key;
-  SharedPreferences _preferences;
-  String _secretKey;
-  FlutterSecureStorage _secureStorage;
-  String _tempDirectory;
-  String _thumbnailCacheDirectory;
+  String? _cachedToken;
+  late String _documentsDirectory;
+  String? _key;
+  late SharedPreferences _preferences;
+  String? _secretKey;
+  late FlutterSecureStorage _secureStorage;
+  late String _tempDirectory;
+  late String _thumbnailCacheDirectory;
   // 6th July 22: Remove this after 3 months. Hopefully, active users
   // will migrate to newer version of the app, where shared media is stored
   // on appSupport directory which OS won't clean up automatically
-  String _sharedTempMediaDirectory;
+  late String _sharedTempMediaDirectory;
 
-  String _sharedDocumentsMediaDirectory;
-  String _volatilePassword;
+  late String _sharedDocumentsMediaDirectory;
+  String? _volatilePassword;
 
   final _secureStorageOptionsIOS =
       const IOSOptions(accessibility: IOSAccessibility.first_unlock);
@@ -133,12 +142,15 @@ class Configuration {
         key: secretKeyKey,
         iOptions: _secureStorageOptionsIOS,
       );
+      if (_key == null) {
+        await logout(autoLogout: true);
+      }
       await _migrateSecurityStorageToFirstUnlock();
     }
     SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
   }
 
-  Future<void> logout() async {
+  Future<void> logout({bool autoLogout = false}) async {
     if (SyncService.instance.isSyncInProgress()) {
       SyncService.instance.stopSync();
       try {
@@ -161,12 +173,24 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesDB.instance.clearTable();
     await TrashDB.instance.clearTable();
-    CollectionsService.instance.clearCache();
-    FavoritesService.instance.clearCache();
-    MemoriesService.instance.clearCache();
-    BillingService.instance.clearCache();
-    SearchService.instance.clearCache();
-    Bus.instance.fire(UserLoggedOutEvent());
+    if (!autoLogout) {
+      CollectionsService.instance.clearCache();
+      FavoritesService.instance.clearCache();
+      MemoriesService.instance.clearCache();
+      BillingService.instance.clearCache();
+      SearchService.instance.clearCache();
+      Bus.instance.fire(UserLoggedOutEvent());
+    } else {
+      _preferences.setBool("auto_logout", true);
+    }
+  }
+
+  bool showAutoLogoutDialog() {
+    return _preferences.containsKey("auto_logout");
+  }
+
+  Future<bool> clearAutoLogoutFlag() {
+    return _preferences.remove("auto_logout");
   }
 
   Future<KeyGenResult> generateKey(String password) async {
@@ -183,8 +207,10 @@ class Configuration {
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    final derivedKeyResult =
-        await CryptoUtil.deriveSensitiveKey(utf8.encode(password), kekSalt);
+    final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
+      utf8.encode(password) as Uint8List,
+      kekSalt,
+    );
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
@@ -197,17 +223,17 @@ class Configuration {
 
     final attributes = KeyAttributes(
       Sodium.bin2base64(kekSalt),
-      Sodium.bin2base64(encryptedKeyData.encryptedData),
-      Sodium.bin2base64(encryptedKeyData.nonce),
+      Sodium.bin2base64(encryptedKeyData.encryptedData!),
+      Sodium.bin2base64(encryptedKeyData.nonce!),
       Sodium.bin2base64(keyPair.pk),
-      Sodium.bin2base64(encryptedSecretKeyData.encryptedData),
-      Sodium.bin2base64(encryptedSecretKeyData.nonce),
+      Sodium.bin2base64(encryptedSecretKeyData.encryptedData!),
+      Sodium.bin2base64(encryptedSecretKeyData.nonce!),
       derivedKeyResult.memLimit,
       derivedKeyResult.opsLimit,
-      Sodium.bin2base64(encryptedMasterKey.encryptedData),
-      Sodium.bin2base64(encryptedMasterKey.nonce),
-      Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
-      Sodium.bin2base64(encryptedRecoveryKey.nonce),
+      Sodium.bin2base64(encryptedMasterKey.encryptedData!),
+      Sodium.bin2base64(encryptedMasterKey.nonce!),
+      Sodium.bin2base64(encryptedRecoveryKey.encryptedData!),
+      Sodium.bin2base64(encryptedRecoveryKey.nonce!),
     );
     final privateAttributes = PrivateKeyAttributes(
       Sodium.bin2base64(masterKey),
@@ -224,19 +250,21 @@ class Configuration {
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
-    final derivedKeyResult =
-        await CryptoUtil.deriveSensitiveKey(utf8.encode(password), kekSalt);
+    final derivedKeyResult = await CryptoUtil.deriveSensitiveKey(
+      utf8.encode(password) as Uint8List,
+      kekSalt,
+    );
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
+        CryptoUtil.encryptSync(masterKey!, derivedKeyResult.key);
 
     final existingAttributes = getKeyAttributes();
 
-    return existingAttributes.copyWith(
+    return existingAttributes!.copyWith(
       kekSalt: Sodium.bin2base64(kekSalt),
-      encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData),
-      keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce),
+      encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
+      keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
       memLimit: derivedKeyResult.memLimit,
       opsLimit: derivedKeyResult.opsLimit,
     );
@@ -254,7 +282,7 @@ class Configuration {
     );
     _logger.info('state validation done');
     final kek = await CryptoUtil.deriveKey(
-      utf8.encode(password),
+      utf8.encode(password) as Uint8List,
       Sodium.base642bin(attributes.kekSalt),
       attributes.memLimit,
       attributes.opsLimit,
@@ -285,7 +313,7 @@ class Configuration {
     _logger.info("secret-key done");
     await setSecretKey(Sodium.bin2base64(secretKey));
     final token = CryptoUtil.openSealSync(
-      Sodium.base642bin(getEncryptedToken()),
+      Sodium.base642bin(getEncryptedToken()!),
       Sodium.base642bin(attributes.publicKey),
       secretKey,
     );
@@ -296,7 +324,7 @@ class Configuration {
   }
 
   Future<KeyAttributes> createNewRecoveryKey() async {
-    final masterKey = getKey();
+    final masterKey = getKey()!;
     final existingAttributes = getKeyAttributes();
 
     // Create a recovery key
@@ -306,22 +334,23 @@ class Configuration {
     final encryptedMasterKey = CryptoUtil.encryptSync(masterKey, recoveryKey);
     final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, masterKey);
 
-    return existingAttributes.copyWith(
+    return existingAttributes!.copyWith(
       masterKeyEncryptedWithRecoveryKey:
-          Sodium.bin2base64(encryptedMasterKey.encryptedData),
-      masterKeyDecryptionNonce: Sodium.bin2base64(encryptedMasterKey.nonce),
+          Sodium.bin2base64(encryptedMasterKey.encryptedData!),
+      masterKeyDecryptionNonce: Sodium.bin2base64(encryptedMasterKey.nonce!),
       recoveryKeyEncryptedWithMasterKey:
-          Sodium.bin2base64(encryptedRecoveryKey.encryptedData),
-      recoveryKeyDecryptionNonce: Sodium.bin2base64(encryptedRecoveryKey.nonce),
+          Sodium.bin2base64(encryptedRecoveryKey.encryptedData!),
+      recoveryKeyDecryptionNonce:
+          Sodium.bin2base64(encryptedRecoveryKey.nonce!),
     );
   }
 
   Future<void> recover(String recoveryKey) async {
     // check if user has entered mnemonic code
     if (recoveryKey.contains(' ')) {
-      if (recoveryKey.split(' ').length != kMnemonicKeyWordCount) {
+      if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
         throw AssertionError(
-          'recovery code should have $kMnemonicKeyWordCount words',
+          'recovery code should have $mnemonicKeyWordCount words',
         );
       }
       recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
@@ -330,7 +359,7 @@ class Configuration {
     Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
-        Sodium.base642bin(attributes.masterKeyEncryptedWithRecoveryKey),
+        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey),
         Sodium.hex2bin(recoveryKey),
         Sodium.base642bin(attributes.masterKeyDecryptionNonce),
       );
@@ -346,7 +375,7 @@ class Configuration {
     );
     await setSecretKey(Sodium.bin2base64(secretKey));
     final token = CryptoUtil.openSealSync(
-      Sodium.base642bin(getEncryptedToken()),
+      Sodium.base642bin(getEncryptedToken()!),
       Sodium.base642bin(attributes.publicKey),
       secretKey,
     );
@@ -359,7 +388,7 @@ class Configuration {
     return endpoint;
   }
 
-  String getToken() {
+  String? getToken() {
     _cachedToken ??= _preferences.getString(tokenKey);
     return _cachedToken;
   }
@@ -374,11 +403,11 @@ class Configuration {
     await _preferences.setString(encryptedTokenKey, encryptedToken);
   }
 
-  String getEncryptedToken() {
+  String? getEncryptedToken() {
     return _preferences.getString(encryptedTokenKey);
   }
 
-  String getEmail() {
+  String? getEmail() {
     return _preferences.getString(emailKey);
   }
 
@@ -386,7 +415,7 @@ class Configuration {
     await _preferences.setString(emailKey, email);
   }
 
-  String getName() {
+  String? getName() {
     return _preferences.getString(nameKey);
   }
 
@@ -394,7 +423,7 @@ class Configuration {
     await _preferences.setString(nameKey, name);
   }
 
-  int getUserID() {
+  int? getUserID() {
     return _preferences.getInt(userIDKey);
   }
 
@@ -404,33 +433,17 @@ class Configuration {
 
   Set<String> getPathsToBackUp() {
     if (_preferences.containsKey(foldersToBackUpKey)) {
-      return _preferences.getStringList(foldersToBackUpKey).toSet();
+      return _preferences.getStringList(foldersToBackUpKey)!.toSet();
     } else {
       return <String>{};
     }
   }
 
-  Future<void> setPathsToBackUp(Set<String> newPaths) async {
-    await _preferences.setStringList(foldersToBackUpKey, newPaths.toList());
-    final allFolders = (await FilesDB.instance.getLatestLocalFiles())
-        .map((file) => file.deviceFolder)
-        .toList();
-    await _setSelectAllFoldersForBackup(newPaths.length == allFolders.length);
-    SyncService.instance.onFoldersSet(newPaths);
-    SyncService.instance.sync();
-  }
-
-  Future<void> addPathToFoldersToBeBackedUp(String path) async {
-    final currentPaths = getPathsToBackUp();
-    currentPaths.add(path);
-    return setPathsToBackUp(currentPaths);
-  }
-
   Future<void> setKeyAttributes(KeyAttributes attributes) async {
-    await _preferences.setString(keyAttributesKey, attributes?.toJson());
+    await _preferences.setString(keyAttributesKey, attributes.toJson());
   }
 
-  KeyAttributes getKeyAttributes() {
+  KeyAttributes? getKeyAttributes() {
     final jsonValue = _preferences.getString(keyAttributesKey);
     if (jsonValue == null) {
       return null;
@@ -439,7 +452,7 @@ class Configuration {
     }
   }
 
-  Future<void> setKey(String key) async {
+  Future<void> setKey(String? key) async {
     _key = key;
     if (key == null) {
       await _secureStorage.delete(
@@ -455,7 +468,7 @@ class Configuration {
     }
   }
 
-  Future<void> setSecretKey(String secretKey) async {
+  Future<void> setSecretKey(String? secretKey) async {
     _secretKey = secretKey;
     if (secretKey == null) {
       await _secureStorage.delete(
@@ -471,25 +484,21 @@ class Configuration {
     }
   }
 
-  Uint8List getKey() {
-    return _key == null ? null : Sodium.base642bin(_key);
+  Uint8List? getKey() {
+    return _key == null ? null : Sodium.base642bin(_key!);
   }
 
-  Uint8List getSecretKey() {
-    return _secretKey == null ? null : Sodium.base642bin(_secretKey);
+  Uint8List? getSecretKey() {
+    return _secretKey == null ? null : Sodium.base642bin(_secretKey!);
   }
 
   Uint8List getRecoveryKey() {
-    final keyAttributes = getKeyAttributes();
+    final keyAttributes = getKeyAttributes()!;
     return CryptoUtil.decryptSync(
       Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
       getKey(),
       Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce),
     );
-  }
-
-  String getDocumentsDirectory() {
-    return _documentsDirectory;
   }
 
   // Caution: This directory is cleared on app start
@@ -515,7 +524,7 @@ class Configuration {
 
   bool shouldBackupOverMobileData() {
     if (_preferences.containsKey(keyShouldBackupOverMobileData)) {
-      return _preferences.getBool(keyShouldBackupOverMobileData);
+      return _preferences.getBool(keyShouldBackupOverMobileData)!;
     } else {
       return false;
     }
@@ -530,14 +539,15 @@ class Configuration {
 
   bool shouldBackupVideos() {
     if (_preferences.containsKey(keyShouldBackupVideos)) {
-      return _preferences.getBool(keyShouldBackupVideos);
+      return _preferences.getBool(keyShouldBackupVideos)!;
     } else {
       return true;
     }
   }
 
   bool shouldKeepDeviceAwake() {
-    return _preferences.get(keyShouldKeepDeviceAwake) ?? false;
+    final keepAwake = _preferences.get(keyShouldKeepDeviceAwake);
+    return keepAwake == null ? false : keepAwake as bool;
   }
 
   Future<void> setShouldKeepDeviceAwake(bool value) async {
@@ -556,7 +566,7 @@ class Configuration {
 
   bool shouldShowLockScreen() {
     if (_preferences.containsKey(keyShouldShowLockScreen)) {
-      return _preferences.getBool(keyShouldShowLockScreen);
+      return _preferences.getBool(keyShouldShowLockScreen)!;
     } else {
       return false;
     }
@@ -567,11 +577,7 @@ class Configuration {
   }
 
   bool shouldHideFromRecents() {
-    if (_preferences.containsKey(keyShouldHideFromRecents)) {
-      return _preferences.getBool(keyShouldHideFromRecents);
-    } else {
-      return false;
-    }
+    return _preferences.getBool(keyShouldHideFromRecents) ?? false;
   }
 
   Future<void> setShouldHideFromRecents(bool value) {
@@ -582,23 +588,23 @@ class Configuration {
     _volatilePassword = volatilePassword;
   }
 
-  String getVolatilePassword() {
+  String? getVolatilePassword() {
     return _volatilePassword;
   }
 
-  Future<void> skipBackupFolderSelection() async {
-    await _preferences.setBool(keyHasSkippedBackupFolderSelection, true);
+  Future<void> setHasSelectedAnyBackupFolder(bool val) async {
+    await _preferences.setBool(keyHasSelectedAnyBackupFolder, val);
   }
 
-  bool hasSkippedBackupFolderSelection() {
-    return _preferences.getBool(keyHasSkippedBackupFolderSelection) ?? false;
+  bool hasSelectedAnyBackupFolder() {
+    return _preferences.getBool(keyHasSelectedAnyBackupFolder) ?? false;
   }
 
   bool hasSelectedAllFoldersForBackup() {
     return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
   }
 
-  Future<void> _setSelectAllFoldersForBackup(bool value) async {
+  Future<void> setSelectAllFoldersForBackup(bool value) async {
     await _preferences.setBool(hasSelectedAllFoldersForBackupKey, value);
   }
 
@@ -630,6 +636,6 @@ class Configuration {
       //ignore: prefer_const_constructors
       await _preferences.setString(anonymousUserIDKey, Uuid().v4());
     }
-    return _preferences.getString(anonymousUserIDKey);
+    return _preferences.getString(anonymousUserIDKey)!;
   }
 }

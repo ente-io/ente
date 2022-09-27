@@ -71,6 +71,9 @@ class DiffFetcher {
           file.thumbnailDecryptionHeader =
               item["thumbnail"]["decryptionHeader"];
           file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
+          if (item["info"] != null) {
+            file.fileSize = item["info"]["fileSize"];
+          }
 
           final fileDecryptionKey = decryptFileKey(file);
           final encodedMetadata = await CryptoUtil.decryptChaCha(

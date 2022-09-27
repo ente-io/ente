@@ -297,7 +297,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
 
     final bool showBackupFolderHook =
-        Configuration.instance.getPathsToBackUp().isEmpty &&
+        !Configuration.instance.hasSelectedAnyBackupFolder() &&
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
             CollectionsService.instance.getActiveCollections().isEmpty;
     return Stack(
@@ -392,42 +392,32 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final importantPaths = Configuration.instance.getPathsToBackUp();
         final ownerID = Configuration.instance.getUserID();
+        final hasSelectedAllForBackup =
+            Configuration.instance.hasSelectedAllFoldersForBackup();
         final archivedCollectionIds =
             CollectionsService.instance.getArchivedCollections();
         FileLoadResult result;
-        if (importantPaths.isNotEmpty) {
-          result = await FilesDB.instance.getImportantFiles(
+        if (hasSelectedAllForBackup) {
+          result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
             creationEndTime,
             ownerID,
-            importantPaths.toList(),
             limit: limit,
             asc: asc,
             ignoredCollectionIDs: archivedCollectionIds,
           );
         } else {
-          if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
-            result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-              creationStartTime,
-              creationEndTime,
-              ownerID,
-              limit: limit,
-              asc: asc,
-              ignoredCollectionIDs: archivedCollectionIds,
-            );
-          } else {
-            result = await FilesDB.instance.getAllUploadedFiles(
-              creationStartTime,
-              creationEndTime,
-              ownerID,
-              limit: limit,
-              asc: asc,
-              ignoredCollectionIDs: archivedCollectionIds,
-            );
-          }
+          result = await FilesDB.instance.getAllPendingOrUploadedFiles(
+            creationStartTime,
+            creationEndTime,
+            ownerID,
+            limit: limit,
+            asc: asc,
+            ignoredCollectionIDs: archivedCollectionIds,
+          );
         }
+
         // hide ignored files from home page UI
         final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
         result.files.removeWhere(

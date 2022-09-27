@@ -11,6 +11,7 @@ import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -94,7 +95,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                       _showNameAlbumDialog();
                     },
                     iconData: Icons.create_new_folder_outlined,
-                    paddingValue: 6,
                     text: "To a new album",
                   ),
                 ),
@@ -156,7 +156,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               child: SizedBox(
                 height: 64,
                 width: 64,
-                key: Key("collection_item:" + item.thumbnail.tag()),
+                key: Key("collection_item:" + item.thumbnail.tag),
                 child: ThumbnailWidget(item.thumbnail),
               ),
             ),
@@ -290,7 +290,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     try {
       final int fromCollectionID =
-          widget.selectedFiles.files?.first?.collectionID;
+          widget.selectedFiles.files.first?.collectionID;
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,
@@ -360,6 +360,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         }
       }
       if (filesPendingUpload.isNotEmpty) {
+        // filesPendingUpload might be getting ignored during auto-upload
+        // because the user deleted these files from ente in the past.
+        await IgnoredFilesService.instance
+            .removeIgnoredMappings(filesPendingUpload);
         await FilesDB.instance.insertMultiple(filesPendingUpload);
       }
       if (files.isNotEmpty) {

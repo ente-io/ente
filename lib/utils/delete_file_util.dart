@@ -34,7 +34,7 @@ Future<void> deleteFilesFromEverywhere(
 ) async {
   final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
-  _logger.info("Trying to delete files " + files.toString());
+  _logger.info("Trying to deleteFilesFromEverywhere " + files.toString());
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
@@ -44,7 +44,7 @@ Future<void> deleteFilesFromEverywhere(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
-      } else if (file.isSharedMediaToAppSandbox()) {
+      } else if (file.isSharedMediaToAppSandbox) {
         localSharedMediaIDs.add(file.localID);
       } else {
         localAssetIDs.add(file.localID);
@@ -151,7 +151,8 @@ Future<void> deleteFilesFromRemoteOnly(
   final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
   _logger.info(
-    "Trying to delete files " + files.map((f) => f.uploadedFileID).toString(),
+    "Trying to deleteFilesFromRemoteOnly " +
+        files.map((f) => f.uploadedFileID).toString(),
   );
   final updatedCollectionIDs = <int>{};
   final List<int> uploadedFileIDs = [];
@@ -192,7 +193,7 @@ Future<void> deleteFilesOnDeviceOnly(
 ) async {
   final dialog = createProgressDialog(context, "Deleting...");
   await dialog.show();
-  _logger.info("Trying to delete files " + files.toString());
+  _logger.info("Trying to deleteFilesOnDeviceOnly" + files.toString());
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   final List<String> alreadyDeletedIDs = []; // to ignore already deleted files
@@ -202,7 +203,7 @@ Future<void> deleteFilesOnDeviceOnly(
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
         alreadyDeletedIDs.add(file.localID);
-      } else if (file.isSharedMediaToAppSandbox()) {
+      } else if (file.isSharedMediaToAppSandbox) {
         localSharedMediaIDs.add(file.localID);
       } else {
         localAssetIDs.add(file.localID);
@@ -310,8 +311,8 @@ Future<bool> deleteLocalFiles(
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
   for (String id in localIDs) {
-    if (id.startsWith(kOldSharedMediaIdentifier) ||
-        id.startsWith(kSharedMediaIdentifier)) {
+    if (id.startsWith(oldSharedMediaIdentifier) ||
+        id.startsWith(sharedMediaIdentifier)) {
       localSharedMediaIDs.add(id);
     } else {
       localAssetIDs.add(id);
@@ -321,7 +322,7 @@ Future<bool> deleteLocalFiles(
 
   if (Platform.isAndroid) {
     final androidInfo = await DeviceInfoPlugin().androidInfo;
-    if (androidInfo.version.sdkInt < kAndroid11SDKINT) {
+    if (androidInfo.version.sdkInt < android11SDKINT) {
       deletedIDs
           .addAll(await _deleteLocalFilesInBatches(context, localAssetIDs));
     } else {
@@ -419,11 +420,11 @@ Future<List<String>> _deleteLocalFilesInBatches(
 }
 
 Future<bool> _localFileExist(File file) {
-  if (file.isSharedMediaToAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox) {
     final localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists();
   } else {
-    return file.getAsset().then((asset) {
+    return file.getAsset.then((asset) {
       if (asset == null) {
         return false;
       }
