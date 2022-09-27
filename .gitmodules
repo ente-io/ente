@@ -9,6 +9,7 @@
 [submodule "thirdparty/sentry-dart"]
 	path = thirdparty/sentry-dart
 	url = https://github.com/ente-io/sentry-dart.git
+	 branch = sentry_tunnel
 
 [submodule "thirdparty/extended_image"]
     path = thirdparty/extended_image
