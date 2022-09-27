@@ -60,6 +60,8 @@
 			<key>NSAllowsArbitraryLoadsInWebContent</key>
 			<true/>
 		</dict>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Please allow ente to lock itself with FaceID or TouchID</string>
 		<key>NSPhotoLibraryUsageDescription</key>

@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -9,9 +7,9 @@ import 'package:photos/models/key_attributes.dart';
 Logger _logger = Logger("Validator");
 
 void validatePreVerificationStateCheck(
-  KeyAttributes keyAttr,
-  String password,
-  String encryptedToken,
+  KeyAttributes? keyAttr,
+  String? password,
+  String? encryptedToken,
 ) {
   nullOrEmptyArgCheck(encryptedToken, "encryptedToken");
   nullOrEmptyArgCheck(password, "userPassword");
@@ -27,12 +25,12 @@ void validatePreVerificationStateCheck(
     "secretKeyDecryptionNonce",
   );
   nullOrEmptyArgCheck(keyAttr.publicKey, "publicKey");
-  if ((keyAttr.memLimit ?? 0) <= 0 || (keyAttr.opsLimit ?? 0) <= 0) {
-    throw ArgumentError("Key mem/OpsLimit can not be null or <0");
+  if (keyAttr.memLimit <= 0 || keyAttr.opsLimit <= 0) {
+    throw ArgumentError("Key mem/OpsLimit can not be <0");
   }
   // check password encoding issues
   try {
-    final Uint8List passwordL = utf8.encode(password);
+    final Uint8List passwordL = utf8.encode(password!) as Uint8List;
     try {
       utf8.decode(passwordL);
     } catch (e) {
@@ -45,7 +43,7 @@ void validatePreVerificationStateCheck(
   }
 }
 
-void nullOrEmptyArgCheck(String value, String name) {
+void nullOrEmptyArgCheck(String? value, String name) {
   if (value == null || value.isEmpty) {
     throw ArgumentError("Critical: $name is nullOrEmpty");
   }

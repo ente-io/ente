@@ -181,6 +181,7 @@ class TrashSyncService {
         data: params,
       );
       await _trashDB.clearTable();
+      unawaited(syncTrash());
       Bus.instance.fire(TrashUpdatedEvent());
       Bus.instance.fire(ForceReloadTrashPageEvent());
     } catch (e, s) {

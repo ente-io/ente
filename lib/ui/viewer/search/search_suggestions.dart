@@ -2,23 +2,20 @@
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/album_search_result.dart';
 import 'package:photos/models/search/file_search_result.dart';
-import 'package:photos/models/search/holiday_search_result.dart';
-import 'package:photos/models/search/location_search_result.dart';
-import 'package:photos/models/search/month_search_result.dart';
-import 'package:photos/models/search/search_results.dart';
-import 'package:photos/models/search/year_search_result.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/collection_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/file_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/holiday_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/location_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/month_result_widget.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/year_result_widget.dart';
+import 'package:photos/models/search/generic_search_result.dart';
+import 'package:photos/models/search/search_result.dart';
+import 'package:photos/ui/viewer/gallery/collection_page.dart';
+import 'package:photos/ui/viewer/search/result/file_result_widget.dart';
+import 'package:photos/ui/viewer/search/result/search_result_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class SearchSuggestionsWidget extends StatelessWidget {
   final List<SearchResult> results;
+
   const SearchSuggestionsWidget(
     this.results, {
     Key key,
@@ -62,17 +59,24 @@ class SearchSuggestionsWidget extends StatelessWidget {
                   }
                   final result = results[index];
                   if (result is AlbumSearchResult) {
-                    return AlbumSearchResultWidget(result);
-                  } else if (result is LocationSearchResult) {
-                    return LocationSearchResultWidget(result);
+                    final AlbumSearchResult albumSearchResult = result;
+                    return SearchResultWidget(
+                      result,
+                      resultCount: FilesDB.instance.collectionFileCount(
+                        albumSearchResult.collectionWithThumbnail.collection.id,
+                      ),
+                      onResultTap: () => routeToPage(
+                        context,
+                        CollectionPage(
+                          albumSearchResult.collectionWithThumbnail,
+                          tagPrefix: result.heroTag(),
+                        ),
+                      ),
+                    );
                   } else if (result is FileSearchResult) {
                     return FileSearchResultWidget(result);
-                  } else if (result is YearSearchResult) {
-                    return YearSearchResultWidget(result);
-                  } else if (result is HolidaySearchResult) {
-                    return HolidaySearchResultWidget(result);
-                  } else if (result is MonthSearchResult) {
-                    return MonthSearchResultWidget(result);
+                  } else if (result is GenericSearchResult) {
+                    return SearchResultWidget(result);
                   } else {
                     Logger('SearchSuggestionsWidget')
                         .info("Invalid/Unsupported value");

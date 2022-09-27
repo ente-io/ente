@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -56,12 +54,12 @@ class FileUpdationDB {
   static final FileUpdationDB instance = FileUpdationDB._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static Future<Database> _dbFuture;
+  static Future<Database>? _dbFuture;
 
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
-    return _dbFuture;
+    return _dbFuture!;
   }
 
   // this opens the database (and creates it if it doesn't exist)
@@ -129,25 +127,25 @@ class FileUpdationDB {
     );
   }
 
-  Future<List<String>> getLocalIDsForPotentialReUpload(
+  Future<List<String?>> getLocalIDsForPotentialReUpload(
     int limit,
     String reason,
   ) async {
     final db = await instance.database;
-    String whereClause = '$columnReason = "$reason"';
+    final String whereClause = '$columnReason = "$reason"';
     final rows = await db.query(
       tableName,
       limit: limit,
       where: whereClause,
     );
-    final result = <String>[];
+    final result = <String?>[];
     for (final row in rows) {
-      result.add(row[columnLocalID]);
+      result.add(row[columnLocalID] as String?);
     }
     return result;
   }
 
-  Map<String, dynamic> _getRowForReUploadTable(String localID, String reason) {
+  Map<String, dynamic> _getRowForReUploadTable(String? localID, String reason) {
     assert(localID != null);
     final row = <String, dynamic>{};
     row[columnLocalID] = localID;

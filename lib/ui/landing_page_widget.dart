@@ -10,6 +10,7 @@ import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/payment/subscription.dart';
 
@@ -22,6 +23,12 @@ class LandingPageWidget extends StatefulWidget {
 
 class _LandingPageWidgetState extends State<LandingPageWidget> {
   double _featureIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    Future(_showAutoLogoutDialogIfRequired);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +201,25 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
         },
       ),
     );
+  }
+
+  Future<void> _showAutoLogoutDialogIfRequired() async {
+    final bool autoLogout = Configuration.instance.showAutoLogoutDialog();
+    if (autoLogout) {
+      final result = await showChoiceDialog(
+        context,
+        "Please login again",
+        '''Unfortunately, the ente app had to log you out because of some technical issues. Sorry!\n\nPlease login again.''',
+        firstAction: "Cancel",
+        secondAction: "Login",
+      );
+      if (result != null) {
+        await Configuration.instance.clearAutoLogoutFlag();
+      }
+      if (result == DialogUserChoice.secondChoice) {
+        _navigateToSignInPage();
+      }
+    }
   }
 }
 

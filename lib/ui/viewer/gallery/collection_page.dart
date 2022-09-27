@@ -6,8 +6,10 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
@@ -29,14 +31,23 @@ class CollectionPage extends StatelessWidget {
   Widget build(Object context) {
     final initialFiles = c.thumbnail != null ? [c.thumbnail] : null;
     final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getFilesInCollection(
+      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
+        final FileLoadResult result =
+            await FilesDB.instance.getFilesInCollection(
           c.collection.id,
           creationStartTime,
           creationEndTime,
           limit: limit,
           asc: asc,
         );
+        // hide ignored files from home page UI
+        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
+        result.files.removeWhere(
+          (f) =>
+              f.uploadedFileID == null &&
+              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
+        );
+        return result;
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()

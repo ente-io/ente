@@ -4,24 +4,30 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/models/upload_strategy.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_file_update_service.dart';
-import 'package:photos/services/local_sync_service.dart';
+import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/utils/diff_fetcher.dart';
 import 'package:photos/utils/file_uploader.dart';
@@ -31,9 +37,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RemoteSyncService {
   final _logger = Logger("RemoteSyncService");
   final _db = FilesDB.instance;
-  final _uploader = FileUploader.instance;
-  final _collectionsService = CollectionsService.instance;
-  final _diffFetcher = DiffFetcher();
+  final FileUploader _uploader = FileUploader.instance;
+  final Configuration _config = Configuration.instance;
+  final CollectionsService _collectionsService = CollectionsService.instance;
+  final DiffFetcher _diffFetcher = DiffFetcher();
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
@@ -42,6 +49,7 @@ class RemoteSyncService {
   bool _existingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
+  final String _isFirstRemoteSyncDone = "isFirstRemoteSyncDone";
 
   // 28 Sept, 2021 9:03:20 AM IST
   static const kArchiveFeatureReleaseTime = 1632800000000000;
@@ -70,7 +78,7 @@ class RemoteSyncService {
   }
 
   Future<void> sync({bool silently = false}) async {
-    if (!Configuration.instance.hasConfiguredAccount()) {
+    if (!_config.hasConfiguredAccount()) {
       _logger.info("Skipping remote sync since account is not configured");
       return;
     }
@@ -87,6 +95,15 @@ class RemoteSyncService {
     _existingSyncSilent = silently;
 
     try {
+      // use flag to decide if we should start marking files for upload before
+      // remote-sync is done. This is done to avoid adding existing files to
+      // the same or different collection when user had already uploaded them
+      // before.
+      final bool hasSyncedBefore =
+          _prefs.containsKey(_isFirstRemoteSyncDone) ?? false;
+      if (hasSyncedBefore) {
+        await syncDeviceCollectionFilesForUpload();
+      }
       await _pullDiff();
       // sync trash but consume error during initial launch.
       // this is to ensure that we don't pause upload due to any error during
@@ -95,12 +112,17 @@ class RemoteSyncService {
       await TrashSyncService.instance
           .syncTrash()
           .onError((e, s) => _logger.severe('trash sync failed', e, s));
+      if (!hasSyncedBefore) {
+        await _prefs.setBool(_isFirstRemoteSyncDone, true);
+        await syncDeviceCollectionFilesForUpload();
+      }
       final filesToBeUploaded = await _getFilesToBeUploaded();
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
         await _pullDiff();
         _existingSync.complete();
         _existingSync = null;
+        await syncDeviceCollectionFilesForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
         if (hasMoreFilesToBackup && !_shouldThrottleSync()) {
           // Skipping a resync to ensure that files that were ignored in this
@@ -180,9 +202,8 @@ class RemoteSyncService {
         await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
       final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID).toList();
-      final deletedFiles =
-          (await FilesDB.instance.getFilesFromIDs(fileIDs)).values.toList();
-      await FilesDB.instance.deleteFilesFromCollection(collectionID, fileIDs);
+      final deletedFiles = (await _db.getFilesFromIDs(fileIDs)).values.toList();
+      await _db.deleteFilesFromCollection(collectionID, fileIDs);
       Bus.instance.fire(
         CollectionUpdatedEvent(
           collectionID,
@@ -224,17 +245,165 @@ class RemoteSyncService {
     }
   }
 
-  Future<List<File>> _getFilesToBeUploaded() async {
-    final foldersToBackUp = Configuration.instance.getPathsToBackUp();
-    List<File> filesToBeUploaded;
-    if (LocalSyncService.instance.hasGrantedLimitedPermissions() &&
-        foldersToBackUp.isEmpty) {
-      filesToBeUploaded = await _db.getAllLocalFiles();
-    } else {
-      filesToBeUploaded =
-          await _db.getFilesToBeUploadedWithinFolders(foldersToBackUp);
+  Future<void> syncDeviceCollectionFilesForUpload() async {
+    final int ownerID = _config.getUserID();
+    final deviceCollections = await _db.getDeviceCollections();
+    deviceCollections.removeWhere((element) => !element.shouldBackup);
+    // Sort by count to ensure that photos in iOS are first inserted in
+    // smallest album marked for backup. This is to ensure that photo is
+    // first attempted to upload in a non-recent album.
+    deviceCollections.sort((a, b) => a.count.compareTo(b.count));
+    await _createCollectionsForDevicePath(deviceCollections);
+    final Map<String, Set<String>> pathIdToLocalIDs =
+        await _db.getDevicePathIDToLocalIDMap();
+    for (final deviceCollection in deviceCollections) {
+      _logger.fine("processing ${deviceCollection.name}");
+      final Set<String> localIDsToSync =
+          pathIdToLocalIDs[deviceCollection.id] ?? {};
+      if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
+        final Set<String> alreadyClaimedLocalIDs =
+            await _db.getLocalIDsMarkedForOrAlreadyUploaded(ownerID);
+        localIDsToSync.removeAll(alreadyClaimedLocalIDs);
+      }
+
+      if (localIDsToSync.isEmpty || deviceCollection.collectionID == -1) {
+        continue;
+      }
+
+      await _db.setCollectionIDForUnMappedLocalFiles(
+        deviceCollection.collectionID,
+        localIDsToSync,
+      );
+
+      // mark IDs as already synced if corresponding entry is present in
+      // the collection. This can happen when a user has marked a folder
+      // for sync, then un-synced it and again tries to mark if for sync.
+      final Set<String> existingMapping =
+          await _db.getLocalFileIDsForCollection(deviceCollection.collectionID);
+      final Set<String> commonElements =
+          localIDsToSync.intersection(existingMapping);
+      if (commonElements.isNotEmpty) {
+        debugPrint(
+          "${commonElements.length} files already existing in "
+          "collection ${deviceCollection.collectionID} for ${deviceCollection.name}",
+        );
+        localIDsToSync.removeAll(commonElements);
+      }
+
+      // At this point, the remaining localIDsToSync will need to create
+      // new file entries, where we can store mapping for localID and
+      // corresponding collection ID
+      if (localIDsToSync.isNotEmpty) {
+        debugPrint(
+          'Adding new entries for ${localIDsToSync.length} files'
+          ' for ${deviceCollection.name}',
+        );
+        final filesWithCollectionID =
+            await _db.getLocalFiles(localIDsToSync.toList());
+        final List<File> newFilesToInsert = [];
+        final Set<String> fileFoundForLocalIDs = {};
+        for (var existingFile in filesWithCollectionID) {
+          final String localID = existingFile.localID;
+          if (!fileFoundForLocalIDs.contains(localID)) {
+            existingFile.generatedID = null;
+            existingFile.collectionID = deviceCollection.collectionID;
+            existingFile.uploadedFileID = null;
+            existingFile.ownerID = null;
+            newFilesToInsert.add(existingFile);
+            fileFoundForLocalIDs.add(localID);
+          }
+        }
+        await _db.insertMultiple(newFilesToInsert);
+        if (fileFoundForLocalIDs.length != localIDsToSync.length) {
+          _logger.warning(
+            "mismatch in num of filesToSync ${localIDsToSync.length} to "
+            "fileSynced ${fileFoundForLocalIDs.length}",
+          );
+        }
+      }
     }
-    if (!Configuration.instance.shouldBackupVideos() || _shouldThrottleSync()) {
+  }
+
+  Future<void> updateDeviceFolderSyncStatus(
+    Map<String, bool> syncStatusUpdate,
+  ) async {
+    final Set<int> oldCollectionIDsForAutoSync =
+        await _db.getDeviceSyncCollectionIDs();
+    await _db.updateDevicePathSyncStatus(syncStatusUpdate);
+    final Set<int> newCollectionIDsForAutoSync =
+        await _db.getDeviceSyncCollectionIDs();
+    SyncService.instance.onDeviceCollectionSet(newCollectionIDsForAutoSync);
+    // remove all collectionIDs which are still marked for backup
+    oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
+    await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
+    Bus.instance.fire(LocalPhotosUpdatedEvent(<File>[]));
+    Bus.instance.fire(BackupFoldersUpdatedEvent());
+  }
+
+  Future<void> removeFilesQueuedForUpload(List<int> collectionIDs) async {
+    /*
+      For each collection, perform following action
+      1) Get List of all files not uploaded yet
+      2) Delete files who localIDs is also present in other collections.
+      3) For Remaining files, set the collectionID as -1
+     */
+    debugPrint("Removing files for collections $collectionIDs");
+    for (int collectionID in collectionIDs) {
+      final List<File> pendingUploads =
+          await _db.getPendingUploadForCollection(collectionID);
+      if (pendingUploads.isEmpty) {
+        continue;
+      }
+      final Set<String> localIDsInOtherFileEntries =
+          await _db.getLocalIDsPresentInEntries(
+        pendingUploads,
+        collectionID,
+      );
+      final List<File> entriesToUpdate = [];
+      final List<int> entriesToDelete = [];
+      for (File pendingUpload in pendingUploads) {
+        if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
+          entriesToDelete.add(pendingUpload.generatedID);
+        } else {
+          pendingUpload.collectionID = null;
+          entriesToUpdate.add(pendingUpload);
+        }
+      }
+      await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
+      await _db.insertMultiple(entriesToUpdate);
+    }
+  }
+
+  Future<void> _createCollectionsForDevicePath(
+    List<DeviceCollection> deviceCollections,
+  ) async {
+    for (var deviceCollection in deviceCollections) {
+      int deviceCollectionID = deviceCollection.collectionID;
+      if (deviceCollectionID != -1) {
+        final collectionByID =
+            _collectionsService.getCollectionByID(deviceCollectionID);
+        if (collectionByID == null || collectionByID.isDeleted) {
+          _logger.info(
+            "Collection $deviceCollectionID either deleted or missing "
+            "for path ${deviceCollection.name}",
+          );
+          deviceCollectionID = -1;
+        }
+      }
+      if (deviceCollectionID == -1) {
+        final collection =
+            await _collectionsService.getOrCreateForPath(deviceCollection.name);
+        await _db.updateDeviceCollection(deviceCollection.id, collection.id);
+        deviceCollection.collectionID = collection.id;
+      }
+    }
+  }
+
+  Future<List<File>> _getFilesToBeUploaded() async {
+    final deviceCollections = await _db.getDeviceCollections();
+    deviceCollections.removeWhere((element) => !element.shouldBackup);
+    final List<File> filesToBeUploaded = await _db.getFilesPendingForUpload();
+    if (!_config.shouldBackupVideos() || _shouldThrottleSync()) {
       filesToBeUploaded
           .removeWhere((element) => element.fileType == FileType.video);
     }
@@ -252,11 +421,6 @@ class RemoteSyncService {
         );
       }
     }
-    if (filesToBeUploaded.isEmpty) {
-      // look for files which user manually tried to back up but they are not
-      // uploaded yet. These files should ignore video backup & ignored files filter
-      filesToBeUploaded = await _db.getPendingManualUploads();
-    }
     _sortByTimeAndType(filesToBeUploaded);
     _logger.info(
       filesToBeUploaded.length.toString() + " new files to be uploaded.",
@@ -265,16 +429,14 @@ class RemoteSyncService {
   }
 
   Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
-    final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated();
-    _logger.info(updatedFileIDs.length.toString() + " files updated.");
-
-    final editedFiles = await _db.getEditedRemoteFiles();
-    _logger.info(editedFiles.length.toString() + " files edited.");
+    final int ownerID = _config.getUserID();
+    final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
+    if (updatedFileIDs.isNotEmpty) {
+      _logger.info("Identified ${updatedFileIDs.length} files for reupload");
+    }
 
     _completedUploads = 0;
-    final int toBeUploaded =
-        filesToBeUploaded.length + updatedFileIDs.length + editedFiles.length;
-
+    final int toBeUploaded = filesToBeUploaded.length + updatedFileIDs.length;
     if (toBeUploaded > 0) {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.preparingForUpload));
       // verify if files upload is allowed based on their subscription plan and
@@ -303,19 +465,8 @@ class RemoteSyncService {
       // prefer existing collection ID for manually uploaded files.
       // See https://github.com/ente-io/frame/pull/187
       final collectionID = file.collectionID ??
-          (await CollectionsService.instance
-                  .getOrCreateForPath(file.deviceFolder))
-              .id;
+          (await _collectionsService.getOrCreateForPath(file.deviceFolder)).id;
       _uploadFile(file, collectionID, futures);
-    }
-
-    for (final file in editedFiles) {
-      if (_shouldThrottleSync() &&
-          futures.length >= kMaximumPermissibleUploadsInThrottledMode) {
-        _logger.info("Skipping some edited files as we are throttling uploads");
-        break;
-      }
-      _uploadFile(file, file.collectionID, futures);
     }
 
     try {
@@ -348,8 +499,7 @@ class RemoteSyncService {
   Future<void> _onFileUploaded(File file) async {
     Bus.instance.fire(CollectionUpdatedEvent(file.collectionID, [file]));
     _completedUploads++;
-    final toBeUploadedInThisSession =
-        FileUploader.instance.getCurrentSessionUploadCount();
+    final toBeUploadedInThisSession = _uploader.getCurrentSessionUploadCount();
     if (toBeUploadedInThisSession == 0) {
       return;
     }
@@ -396,7 +546,7 @@ class RemoteSyncService {
         localUploadedFromDevice = 0,
         localButUpdatedOnDevice = 0,
         remoteNewFile = 0;
-    final int userID = Configuration.instance.getUserID();
+    final int userID = _config.getUserID();
     bool needsGalleryReload = false;
     // this is required when same file is uploaded twice in the same
     // collection. Without this check, if both remote files are part of same
@@ -507,6 +657,7 @@ class RemoteSyncService {
           " remoteFiles seen first time",
     );
     if (needsGalleryReload) {
+      _logger.fine('force reload home gallery');
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
     }
   }

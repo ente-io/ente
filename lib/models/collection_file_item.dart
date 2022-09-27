@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 class CollectionFileItem {
@@ -14,9 +12,9 @@ class CollectionFileItem {
   );
 
   CollectionFileItem copyWith({
-    int id,
-    String encryptedKey,
-    String keyDecryptionNonce,
+    int? id,
+    String? encryptedKey,
+    String? keyDecryptionNonce,
   }) {
     return CollectionFileItem(
       id ?? this.id,
@@ -33,7 +31,7 @@ class CollectionFileItem {
     };
   }
 
-  factory CollectionFileItem.fromMap(Map<String, dynamic> map) {
+  static fromMap(Map<String, dynamic>? map) {
     if (map == null) return null;
 
     return CollectionFileItem(

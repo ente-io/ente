@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -15,11 +13,11 @@ class FeatureFlagService {
 
   static final FeatureFlagService instance =
       FeatureFlagService._privateConstructor();
-  static const kBooleanFeatureFlagsKey = "feature_flags_key";
+  static const _featureFlagsKey = "feature_flags_key";
 
   final _logger = Logger("FeatureFlagService");
-  FeatureFlags _featureFlags;
-  SharedPreferences _prefs;
+  FeatureFlags? _featureFlags;
+  late SharedPreferences _prefs;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -35,12 +33,12 @@ class FeatureFlagService {
 
   FeatureFlags _getFeatureFlags() {
     _featureFlags ??=
-        FeatureFlags.fromJson(_prefs.getString(kBooleanFeatureFlagsKey));
+        FeatureFlags.fromJson(_prefs.getString(_featureFlagsKey)!);
     // if nothing is cached, use defaults as temporary fallback
     if (_featureFlags == null) {
       return FeatureFlags.defaultFlags;
     }
-    return _featureFlags;
+    return _featureFlags!;
   }
 
   bool disableCFWorker() {
@@ -49,28 +47,6 @@ class FeatureFlagService {
     } catch (e) {
       _logger.severe(e);
       return FFDefault.disableCFWorker;
-    }
-  }
-
-  bool disableUrlSharing() {
-    try {
-      return _getFeatureFlags().disableUrlSharing;
-    } catch (e) {
-      _logger.severe(e);
-      return FFDefault.disableUrlSharing;
-    }
-  }
-
-  bool enableMissingLocationMigration() {
-    // only needs to be enabled for android
-    if (!Platform.isAndroid) {
-      return false;
-    }
-    try {
-      return _getFeatureFlags().enableMissingLocationMigration;
-    } catch (e) {
-      _logger.severe(e);
-      return FFDefault.enableMissingLocationMigration;
     }
   }
 
@@ -86,17 +62,8 @@ class FeatureFlagService {
     }
   }
 
-  bool enableSearch() {
-    try {
-      return isInternalUserOrDebugBuild() || _getFeatureFlags().enableSearch;
-    } catch (e) {
-      _logger.severe("failed to getSearchFeatureFlag", e);
-      return FFDefault.enableSearch;
-    }
-  }
-
   bool isInternalUserOrDebugBuild() {
-    final String email = Configuration.instance.getEmail();
+    final String? email = Configuration.instance.getEmail();
     return (email != null && email.endsWith("@ente.io")) || kDebugMode;
   }
 
@@ -107,7 +74,7 @@ class FeatureFlagService {
           .get("https://static.ente.io/feature_flags.json");
       final flagsResponse = FeatureFlags.fromMap(response.data);
       if (flagsResponse != null) {
-        _prefs.setString(kBooleanFeatureFlagsKey, flagsResponse.toJson());
+        _prefs.setString(_featureFlagsKey, flagsResponse.toJson());
         _featureFlags = flagsResponse;
       }
     } catch (e) {
@@ -119,33 +86,21 @@ class FeatureFlagService {
 class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
     disableCFWorker: FFDefault.disableCFWorker,
-    disableUrlSharing: FFDefault.disableUrlSharing,
     enableStripe: FFDefault.enableStripe,
-    enableMissingLocationMigration: FFDefault.enableMissingLocationMigration,
-    enableSearch: FFDefault.enableSearch,
   );
 
   final bool disableCFWorker;
-  final bool disableUrlSharing;
   final bool enableStripe;
-  final bool enableMissingLocationMigration;
-  final bool enableSearch;
 
   FeatureFlags({
-    @required this.disableCFWorker,
-    @required this.disableUrlSharing,
-    @required this.enableStripe,
-    @required this.enableMissingLocationMigration,
-    @required this.enableSearch,
+    required this.disableCFWorker,
+    required this.enableStripe,
   });
 
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
-      "disableUrlSharing": disableUrlSharing,
       "enableStripe": enableStripe,
-      "enableMissingLocationMigration": enableMissingLocationMigration,
-      "enableSearch": enableSearch,
     };
   }
 
@@ -157,17 +112,7 @@ class FeatureFlags {
   factory FeatureFlags.fromMap(Map<String, dynamic> json) {
     return FeatureFlags(
       disableCFWorker: json["disableCFWorker"] ?? FFDefault.disableCFWorker,
-      disableUrlSharing:
-          json["disableUrlSharing"] ?? FFDefault.disableUrlSharing,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
-      enableMissingLocationMigration: json["enableMissingLocationMigration"] ??
-          FFDefault.enableMissingLocationMigration,
-      enableSearch: json["enableSearch"] ?? FFDefault.enableSearch,
     );
-  }
-
-  @override
-  String toString() {
-    return toMap().toString();
   }
 }

@@ -10,6 +10,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
@@ -20,12 +21,13 @@ import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/sharing/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class GalleryAppBarWidget extends StatefulWidget {
   final GalleryType type;
   final String title;
   final SelectedFiles selectedFiles;
-  final String path;
+  final DeviceCollection deviceCollection;
   final Collection collection;
 
   const GalleryAppBarWidget(
@@ -33,7 +35,7 @@ class GalleryAppBarWidget extends StatefulWidget {
     this.title,
     this.selectedFiles, {
     Key key,
-    this.path,
+    this.deviceCollection,
     this.collection,
   }) : super(key: key);
 
@@ -127,8 +129,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
-        (widget.type == GalleryType.localFolder ||
-            widget.type == GalleryType.ownedCollection)) {
+        widget.type == GalleryType.ownedCollection) {
       actions.add(
         Tooltip(
           message: "Share",
@@ -162,7 +163,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         PopupMenuButton(
           itemBuilder: (context) {
             final List<PopupMenuItem> items = [];
-            if (widget.collection.type == CollectionType.album) {
+            if (widget.collection.type != CollectionType.favorites) {
               items.add(
                 PopupMenuItem(
                   value: 1,
@@ -172,7 +173,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                       Padding(
                         padding: EdgeInsets.all(8),
                       ),
-                      Text("Rename"),
+                      Text("Rename album"),
                     ],
                   ),
                 ),
@@ -188,25 +189,42 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text(isArchived ? "Unhide" : "Hide"),
+                    Text(isArchived ? "Unhide album" : "Hide album"),
                   ],
                 ),
               ),
             );
+            if (widget.collection.type != CollectionType.favorites) {
+              items.add(
+                PopupMenuItem(
+                  value: 3,
+                  child: Row(
+                    children: const [
+                      Icon(Icons.delete_outline),
+                      Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      Text("Delete album"),
+                    ],
+                  ),
+                ),
+              );
+            }
             return items;
           },
           onSelected: (value) async {
             if (value == 1) {
               await _renameAlbum(context);
-            }
-            if (value == 2) {
+            } else if (value == 2) {
               await changeCollectionVisibility(
                 context,
                 widget.collection,
                 widget.collection.isArchived()
-                    ? kVisibilityVisible
-                    : kVisibilityArchive,
+                    ? visibilityVisible
+                    : visibilityArchive,
               );
+            } else if (value == 3) {
+              await _trashCollection();
             }
           },
         ),
@@ -215,20 +233,47 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     return actions;
   }
 
+  Future<void> _trashCollection() async {
+    final result = await showChoiceDialog(
+      context,
+      "Delete album?",
+      "Files that are unique to this album "
+          "will be moved to trash, and this album will be deleted.",
+      firstAction: "Cancel",
+      secondAction: "Delete album",
+      secondActionColor: Colors.red,
+    );
+    if (result != DialogUserChoice.secondChoice) {
+      return;
+    }
+    final dialog = createProgressDialog(
+      context,
+      "Please wait, deleting album",
+    );
+    await dialog.show();
+    try {
+      await CollectionsService.instance.trashCollection(widget.collection);
+
+      showShortToast(context, "Successfully deleted album");
+      await dialog.hide();
+      Navigator.of(context).pop();
+    } catch (e, s) {
+      _logger.severe("failed to trash collection", e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+      rethrow;
+    }
+  }
+
   Future<void> _showShareCollectionDialog() async {
     var collection = widget.collection;
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      if (collection == null) {
-        if (widget.type == GalleryType.localFolder) {
-          collection =
-              await CollectionsService.instance.getOrCreateForPath(widget.path);
-        } else {
-          throw Exception(
-            "Cannot create a collection of type" + widget.type.toString(),
-          );
-        }
+      if (collection == null || widget.type != GalleryType.ownedCollection) {
+        throw Exception(
+          "Cannot share empty collection of type ${widget.type}",
+        );
       } else {
         final sharees =
             await CollectionsService.instance.getSharees(collection.id);
@@ -238,7 +283,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
-          return SharingDialog(collection);
+          return SharingDialog(
+            collection,
+          );
         },
       );
     } catch (e, s) {

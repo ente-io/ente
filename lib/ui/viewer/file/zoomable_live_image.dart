@@ -121,14 +121,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    if (_file.isRemoteFile() && !(await isFileCached(_file, liveVideo: true))) {
+    if (_file.isRemoteFile && !(await isFileCached(_file, liveVideo: true))) {
       showToast(context, "Downloading...", toastLength: Toast.LENGTH_LONG);
     }
 
     var videoFile = await getFile(widget.file, liveVideo: true)
         .timeout(const Duration(seconds: 15))
         .onError((e, s) {
-      _logger.info("getFile failed ${_file.tag()}", e);
+      _logger.info("getFile failed ${_file.tag}", e);
       return null;
     });
 
@@ -140,7 +140,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       videoFile = await getFileFromServer(widget.file, liveVideo: true)
           .timeout(const Duration(seconds: 15))
           .onError((e, s) {
-        _logger.info("getRemoteFile failed ${_file.tag()}", e);
+        _logger.info("getRemoteFile failed ${_file.tag}", e);
         return null;
       });
     }
@@ -167,10 +167,10 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
 
   void _showLivePhotoToast() async {
     final preferences = await SharedPreferences.getInstance();
-    final int promptTillNow = preferences.getInt(kLivePhotoToastCounterKey) ?? 0;
-    if (promptTillNow < kMaxLivePhotoToastCount && mounted) {
+    final int promptTillNow = preferences.getInt(livePhotoToastCounterKey) ?? 0;
+    if (promptTillNow < maxLivePhotoToastCount && mounted) {
       showToast(context, "Press and hold to play video");
-      preferences.setInt(kLivePhotoToastCounterKey, promptTillNow + 1);
+      preferences.setInt(livePhotoToastCounterKey, promptTillNow + 1);
     }
   }
 }

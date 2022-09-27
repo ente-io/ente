@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 class UploadURL {
@@ -15,8 +13,6 @@ class UploadURL {
   }
 
   factory UploadURL.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return UploadURL(
       map['url'],
       map['objectKey'],

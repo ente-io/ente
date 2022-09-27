@@ -5,23 +5,24 @@ import 'package:flutter/material.dart';
 class GradientButton extends StatelessWidget {
   final List<Color> linearGradientColors;
   final Function onTap;
-  final Widget child;
+
   // text is ignored if child is specified
   final String text;
+
   // nullable
   final IconData iconData;
+
   // padding between the text and icon
   final double paddingValue;
 
   const GradientButton({
     Key key,
-    this.child,
     this.linearGradientColors = const [
       Color(0xFF2CD267),
       Color(0xFF1DB954),
     ],
     this.onTap,
-    this.text,
+    this.text = '',
     this.iconData,
     this.paddingValue = 0.0,
   }) : super(key: key);
@@ -29,9 +30,7 @@ class GradientButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget buttonContent;
-    if (child != null) {
-      buttonContent = child;
-    } else if (iconData == null) {
+    if (iconData == null) {
       buttonContent = Text(
         text,
         style: const TextStyle(
@@ -48,9 +47,10 @@ class GradientButton extends StatelessWidget {
         children: [
           Icon(
             iconData,
+            size: 20,
             color: Colors.white,
           ),
-          Padding(padding: EdgeInsets.all(paddingValue)),
+          const Padding(padding: EdgeInsets.symmetric(horizontal: 6)),
           Text(
             text,
             style: const TextStyle(

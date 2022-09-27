@@ -1,11 +1,13 @@
 // @dart=2.9
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/events/local_import_progress.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
@@ -21,7 +23,9 @@ class LoadingPhotosWidget extends StatefulWidget {
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   StreamSubscription<SyncStatusUpdate> _firstImportEvent;
+  StreamSubscription<LocalImportProgressEvent> _imprortProgressEvent;
   int _currentPage = 0;
+  String _loadingMessage = "Loading your photos...";
   final PageController _pageController = PageController(
     initialPage: 0,
   );
@@ -56,6 +60,15 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
         }
       }
     });
+    _imprortProgressEvent =
+        Bus.instance.on<LocalImportProgressEvent>().listen((event) {
+      if (Platform.isAndroid) {
+        _loadingMessage = 'Processing ${event.folderName}...';
+        if (mounted) {
+          setState(() {});
+        }
+      }
+    });
     Timer.periodic(const Duration(seconds: 5), (Timer timer) {
       if (!mounted) {
         return;
@@ -77,6 +90,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
   @override
   void dispose() {
     _firstImportEvent.cancel();
+    _imprortProgressEvent.cancel();
     super.dispose();
   }
 
@@ -118,7 +132,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                   ],
                 ),
                 Text(
-                  "Loading your photos...",
+                  _loadingMessage,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.subTextColor,
                   ),

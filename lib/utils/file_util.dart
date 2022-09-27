@@ -39,10 +39,10 @@ Future<io.File> getFile(
   bool isOrigin = false,
 } // only relevant for live photos
     ) async {
-  if (file.isRemoteFile()) {
+  if (file.isRemoteFile) {
     return getFileFromServer(file, liveVideo: liveVideo);
   } else {
-    final String key = file.tag() + liveVideo.toString() + isOrigin.toString();
+    final String key = file.tag + liveVideo.toString() + isOrigin.toString();
     final cachedFile = FileLruCache.get(key);
     if (cachedFile == null) {
       final diskFile = await _getLocalDiskFile(
@@ -70,7 +70,7 @@ Future<io.File> _getLocalDiskFile(
   bool liveVideo = false,
   bool isOrigin = false,
 }) async {
-  if (file.isSharedMediaToAppSandbox()) {
+  if (file.isSharedMediaToAppSandbox) {
     final localFile = io.File(getSharedMediaFilePath(file));
     return localFile.exists().then((exist) {
       return exist ? localFile : null;
@@ -78,7 +78,7 @@ Future<io.File> _getLocalDiskFile(
   } else if (file.fileType == FileType.livePhoto && liveVideo) {
     return Motionphoto.getLivePhotoFile(file.localID);
   } else {
-    return file.getAsset().then((asset) async {
+    return file.getAsset.then((asset) async {
       if (asset == null || !(await asset.exists)) {
         return null;
       }
@@ -92,19 +92,19 @@ String getSharedMediaFilePath(ente.File file) {
 }
 
 String getSharedMediaPathFromLocalID(String localID) {
-  if (localID.startsWith(kOldSharedMediaIdentifier)) {
+  if (localID.startsWith(oldSharedMediaIdentifier)) {
     return Configuration.instance.getOldSharedMediaCacheDirectory() +
         "/" +
-        localID.replaceAll(kOldSharedMediaIdentifier, '');
+        localID.replaceAll(oldSharedMediaIdentifier, '');
   } else {
     return Configuration.instance.getSharedMediaDirectory() +
         "/" +
-        localID.replaceAll(kSharedMediaIdentifier, '');
+        localID.replaceAll(sharedMediaIdentifier, '');
   }
 }
 
 void preloadThumbnail(ente.File file) {
-  if (file.isRemoteFile()) {
+  if (file.isRemoteFile) {
     getThumbnailFromServer(file);
   } else {
     getThumbnailFromLocal(file);
@@ -122,8 +122,7 @@ Future<io.File> getFileFromServer(
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
-  final fileFromCache =
-      await cacheManager.getFileFromCache(file.getDownloadUrl());
+  final fileFromCache = await cacheManager.getFileFromCache(file.downloadUrl);
   if (fileFromCache != null) {
     return fileFromCache.file;
   }
@@ -154,7 +153,7 @@ Future<bool> isFileCached(ente.File file, {bool liveVideo = false}) async {
   final cacheManager = (file.fileType == FileType.video || liveVideo)
       ? VideoCacheManager.instance
       : DefaultCacheManager();
-  final fileInfo = await cacheManager.getFileFromCache(file.getDownloadUrl());
+  final fileInfo = await cacheManager.getFileFromCache(file.downloadUrl);
   return fileInfo != null;
 }
 
@@ -222,9 +221,9 @@ Future<_LivePhoto> _downloadLivePhoto(
             await imageFile.delete();
           }
           imageFileCache = await DefaultCacheManager().putFile(
-            file.getDownloadUrl(),
+            file.downloadUrl,
             await imageConvertedFile.readAsBytes(),
-            eTag: file.getDownloadUrl(),
+            eTag: file.downloadUrl,
             maxAge: const Duration(days: 365),
             fileExtension: fileExtension,
           );
@@ -234,9 +233,9 @@ Future<_LivePhoto> _downloadLivePhoto(
           await videoFile.create(recursive: true);
           await videoFile.writeAsBytes(data);
           videoFileCache = await VideoCacheManager.instance.putFile(
-            file.getDownloadUrl(),
+            file.downloadUrl,
             await videoFile.readAsBytes(),
-            eTag: file.getDownloadUrl(),
+            eTag: file.downloadUrl,
             maxAge: const Duration(days: 365),
             fileExtension: fileExtension,
           );
@@ -246,7 +245,7 @@ Future<_LivePhoto> _downloadLivePhoto(
     }
     return _LivePhoto(imageFileCache, videoFileCache);
   }).catchError((e) {
-    _logger.warning("failed to download live photos : ${file.tag()}", e);
+    _logger.warning("failed to download live photos : ${file.tag}", e);
     throw e;
   });
 }
@@ -274,16 +273,16 @@ Future<io.File> _downloadAndCache(
       await decryptedFile.delete();
     }
     final cachedFile = await cacheManager.putFile(
-      file.getDownloadUrl(),
+      file.downloadUrl,
       await outputFile.readAsBytes(),
-      eTag: file.getDownloadUrl(),
+      eTag: file.downloadUrl,
       maxAge: const Duration(days: 365),
       fileExtension: fileExtension,
     );
     await outputFile.delete();
     return cachedFile;
   }).catchError((e) {
-    _logger.warning("failed to download file : ${file.tag()}", e);
+    _logger.warning("failed to download file : ${file.tag}", e);
     throw e;
   });
 }
@@ -301,17 +300,17 @@ String getExtension(String nameOrPath) {
 Future<Uint8List> compressThumbnail(Uint8List thumbnail) {
   return FlutterImageCompress.compressWithList(
     thumbnail,
-    minHeight: kCompressedThumbnailResolution,
-    minWidth: kCompressedThumbnailResolution,
+    minHeight: compressedThumbnailResolution,
+    minWidth: compressedThumbnailResolution,
     quality: 25,
   );
 }
 
 Future<void> clearCache(ente.File file) async {
   if (file.fileType == FileType.video) {
-    VideoCacheManager.instance.removeFile(file.getDownloadUrl());
+    VideoCacheManager.instance.removeFile(file.downloadUrl);
   } else {
-    DefaultCacheManager().removeFile(file.getDownloadUrl());
+    DefaultCacheManager().removeFile(file.downloadUrl);
   }
   final cachedThumbnail = io.File(
     Configuration.instance.getThumbnailCacheDirectory() +

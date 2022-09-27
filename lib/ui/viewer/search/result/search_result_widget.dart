@@ -1,21 +1,26 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/search/album_search_result.dart';
-import 'package:photos/ui/viewer/gallery/collection_page.dart';
-import 'package:photos/ui/viewer/search/search_result_widgets/search_result_thumbnail_widget.dart';
+import 'package:photos/models/search/search_result.dart';
+import 'package:photos/ui/viewer/search/result/search_result_page.dart';
+import 'package:photos/ui/viewer/search/result/search_thumbnail_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class AlbumSearchResultWidget extends StatelessWidget {
-  final AlbumSearchResult albumSearchResult;
+class SearchResultWidget extends StatelessWidget {
+  final SearchResult searchResult;
+  final Future<int>? resultCount;
+  final Function? onResultTap;
 
-  const AlbumSearchResultWidget(this.albumSearchResult, {Key key})
-      : super(key: key);
+  const SearchResultWidget(
+    this.searchResult, {
+    Key? key,
+    this.resultCount,
+    this.onResultTap,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final heroTagPrefix = searchResult.heroTag();
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       child: Container(
@@ -23,19 +28,19 @@ class AlbumSearchResultWidget extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SearchResultThumbnailWidget(
-                albumSearchResult.collectionWithThumbnail.thumbnail,
-                "collection_search",
+              SearchThumbnailWidget(
+                searchResult.previewThumbnail(),
+                heroTagPrefix,
               ),
               const SizedBox(width: 16),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Album',
+                    _resultTypeName(searchResult.type()),
                     style: TextStyle(
                       fontSize: 12,
                       color: Theme.of(context).colorScheme.subTextColor,
@@ -45,18 +50,17 @@ class AlbumSearchResultWidget extends StatelessWidget {
                   SizedBox(
                     width: 220,
                     child: Text(
-                      albumSearchResult.collectionWithThumbnail.collection.name,
+                      searchResult.name(),
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(height: 2),
                   FutureBuilder<int>(
-                    future: FilesDB.instance.collectionFileCount(
-                      albumSearchResult.collectionWithThumbnail.collection.id,
-                    ),
+                    future: resultCount ??
+                        Future.value(searchResult.resultFiles().length),
                     builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data > 0) {
+                      if (snapshot.hasData && snapshot.data! > 0) {
                         final noOfMemories = snapshot.data;
                         return RichText(
                           text: TextSpan(
@@ -78,7 +82,7 @@ class AlbumSearchResultWidget extends StatelessWidget {
                         return const SizedBox.shrink();
                       }
                     },
-                  ),
+                  )
                 ],
               ),
               const Spacer(),
@@ -91,14 +95,38 @@ class AlbumSearchResultWidget extends StatelessWidget {
         ),
       ),
       onTap: () {
-        routeToPage(
-          context,
-          CollectionPage(
-            albumSearchResult.collectionWithThumbnail,
-            tagPrefix: "collection_search",
-          ),
-        );
+        if (onResultTap != null) {
+          onResultTap!();
+        } else {
+          routeToPage(
+            context,
+            SearchResultPage(searchResult),
+          );
+        }
       },
     );
+  }
+
+  String _resultTypeName(ResultType type) {
+    switch (type) {
+      case ResultType.collection:
+        return "Album";
+      case ResultType.year:
+        return "Year";
+      case ResultType.month:
+        return "Month";
+      case ResultType.file:
+        return "Memory";
+      case ResultType.event:
+        return "Day";
+      case ResultType.location:
+        return "Location";
+      case ResultType.fileType:
+        return "Type";
+      case ResultType.fileExtension:
+        return "File Extension";
+      default:
+        return type.name.toUpperCase();
+    }
   }
 }

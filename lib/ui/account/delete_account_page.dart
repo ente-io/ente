@@ -75,7 +75,6 @@ class DeleteAccountPage extends StatelessWidget {
               ),
               GradientButton(
                 text: "Yes, send feedback",
-                paddingValue: 4,
                 iconData: Icons.check,
                 onTap: () async {
                   await sendEmail(

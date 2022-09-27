@@ -1,10 +1,8 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 
-Future<T> routeToPage<T extends Object>(
+Future<T?> routeToPage<T extends Object>(
   BuildContext context,
   Widget page, {
   bool forceCustomPageRoute = false,
@@ -63,13 +61,13 @@ class SwipeableRouteBuilder<T> extends PageRoute<T> {
       const CupertinoPageTransitionsBuilder(); // Default iOS/macOS (to get the swipe right to go back gesture)
   // final PageTransitionsBuilder matchingBuilder = const FadeUpwardsPageTransitionsBuilder(); // Default Android/Linux/Windows
 
-  SwipeableRouteBuilder({this.pageBuilder});
+  SwipeableRouteBuilder({required this.pageBuilder});
 
   @override
-  Color get barrierColor => null;
+  Null get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  Null get barrierLabel => null;
 
   @override
   Widget buildPage(
@@ -110,21 +108,21 @@ class SwipeableRouteBuilder<T> extends PageRoute<T> {
 
 class TransparentRoute extends PageRoute<void> {
   TransparentRoute({
-    @required this.builder,
-    RouteSettings settings,
+    required this.builder,
+    RouteSettings? settings,
   })  : assert(builder != null),
         super(settings: settings, fullscreenDialog: false);
 
-  final WidgetBuilder builder;
+  final WidgetBuilder? builder;
 
   @override
   bool get opaque => false;
 
   @override
-  Color get barrierColor => null;
+  Null get barrierColor => null;
 
   @override
-  String get barrierLabel => null;
+  Null get barrierLabel => null;
 
   @override
   bool get maintainState => true;
@@ -138,7 +136,7 @@ class TransparentRoute extends PageRoute<void> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    final result = builder(context);
+    final result = builder!(context);
     return FadeTransition(
       opacity: Tween<double>(begin: 0, end: 1).animate(animation),
       child: Semantics(

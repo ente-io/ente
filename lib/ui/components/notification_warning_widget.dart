@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/text_style.dart';
 
 class NotificationWarningWidget extends StatelessWidget {
   final IconData warningIcon;
@@ -21,14 +23,14 @@ class NotificationWarningWidget extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.all(10.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(
                 Radius.circular(8),
               ),
-              boxShadow: Theme.of(context).colorScheme.shadowMenu,
-              color: Theme.of(context).colorScheme.warning500,
+              boxShadow: Theme.of(context).colorScheme.enteTheme.shadowMenu,
+              color: warning500,
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -39,18 +41,18 @@ class NotificationWarningWidget extends StatelessWidget {
                     size: 36,
                     color: Colors.white,
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Flexible(
                     child: Text(
                       text,
-                      style: const TextStyle(height: 1.4, color: Colors.white),
+                      style: darkTextTheme.bodyBold,
                       textAlign: TextAlign.left,
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   ClipOval(
                     child: Material(
-                      color: Theme.of(context).colorScheme.fillFaint,
+                      color: fillFaintDark,
                       child: InkWell(
                         splashColor: Colors.red, // Splash color
                         onTap: onTap,

@@ -54,7 +54,8 @@ class IgnoredFilesDB {
 
   // this opens the database (and creates it if it doesn't exist)
   Future<Database> _initDatabase() async {
-    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory =
+        await getApplicationDocumentsDirectory();
     final String path = join(documentsDirectory.path, _databaseName);
     return await openDatabase(
       path,
@@ -106,6 +107,42 @@ class IgnoredFilesDB {
       result.add(_getIgnoredFileFromRow(row));
     }
     return result;
+  }
+
+  Future<void> removeIgnoredEntries(List<IgnoredFile> ignoredFiles) async {
+    final startTime = DateTime.now();
+    final db = await instance.database;
+    var batch = db.batch();
+    int batchCounter = 0;
+    for (IgnoredFile file in ignoredFiles) {
+      if (batchCounter == 400) {
+        await batch.commit(noResult: true);
+        batch = db.batch();
+        batchCounter = 0;
+      }
+      // on Android, we track device folder and title to track files to ignore.
+      // See IgnoredFileService#_getIgnoreID method for more detail
+      if (Platform.isAndroid) {
+        batch.rawDelete(
+          "DELETE from $tableName WHERE  $columnDeviceFolder = '${file.deviceFolder}' AND $columnTitle = '${file.title}' ",
+        );
+      } else {
+        batch.rawDelete(
+          "DELETE from $tableName WHERE $columnLocalID = '${file.localID}' ",
+        );
+      }
+      batchCounter++;
+    }
+    await batch.commit(noResult: true);
+    final endTime = DateTime.now();
+    final duration = Duration(
+      microseconds:
+          endTime.microsecondsSinceEpoch - startTime.microsecondsSinceEpoch,
+    );
+    _logger.info(
+      "Batch delete for ${ignoredFiles.length} "
+      "took ${duration.inMilliseconds} ms.",
+    );
   }
 
   IgnoredFile _getIgnoredFileFromRow(Map<String, dynamic> row) {

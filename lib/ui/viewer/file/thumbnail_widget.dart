@@ -35,7 +35,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowArchiveStatus = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
-  }) : super(key: key ?? Key(file.tag()));
+  }) : super(key: key ?? Key(file.tag));
 
   @override
   State<ThumbnailWidget> createState() => _ThumbnailWidgetState();
@@ -60,7 +60,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     super.dispose();
     Future.delayed(const Duration(milliseconds: 10), () {
       // Cancel request only if the widget has been unmounted
-      if (!mounted && widget.file.isRemoteFile() && !_hasLoadedThumbnail) {
+      if (!mounted && widget.file.isRemoteFile && !_hasLoadedThumbnail) {
         removePendingGetThumbnailRequestIfAny(widget.file);
       }
     });
@@ -76,7 +76,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.file.isRemoteFile()) {
+    if (widget.file.isRemoteFile) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);
@@ -138,7 +138,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailLruCache.get(widget.file, kThumbnailSmallSize);
+          ThumbnailLruCache.get(widget.file, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
@@ -160,7 +160,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     getThumbnailFromLocal(widget.file).then((thumbData) async {
       if (thumbData == null) {
         if (widget.file.uploadedFileID != null) {
-          _logger.fine("Removing localID reference for " + widget.file.tag());
+          _logger.fine("Removing localID reference for " + widget.file.tag);
           widget.file.localID = null;
           if (widget.file is TrashFile) {
             TrashDB.instance.update(widget.file);
@@ -170,7 +170,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           _loadNetworkImage();
         } else {
           if (await doesLocalFileExist(widget.file) == false) {
-            _logger.info("Deleting file " + widget.file.tag());
+            _logger.info("Deleting file " + widget.file.tag);
             FilesDB.instance.deleteLocalFile(widget.file);
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
@@ -187,7 +187,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         final imageProvider = Image.memory(thumbData).image;
         _cacheAndRender(imageProvider);
       }
-      ThumbnailLruCache.put(widget.file, thumbData, kThumbnailSmallSize);
+      ThumbnailLruCache.put(widget.file, thumbData, thumbnailSmallSize);
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _errorLoadingLocalThumbnail = true;

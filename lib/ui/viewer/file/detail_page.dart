@@ -231,7 +231,7 @@ class _DetailPageState extends State<DetailPage> {
     }
     if (_selectedIndex == _files.length - 1 && !_hasLoadedTillEnd) {
       final result = await widget.config.asyncLoader(
-        kGalleryLoadStartTime,
+        galleryLoadStartTime,
         _files[_selectedIndex].creationTime - 1,
         limit: kLoadLimit,
       );
