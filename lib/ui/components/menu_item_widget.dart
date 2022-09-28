@@ -3,18 +3,27 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:photos/ente_theme_data.dart';
 
+enum LeadingIcon {
+  chevronRight,
+  check,
+}
+
 class MenuItemWidget extends StatelessWidget {
   final String text;
   final String? subText;
   final TextStyle? textStyle;
   final Color? leadingIconColor;
   final bool isBigger;
+  final LeadingIcon? leadingIcon;
+  final Widget? leadingSwitch;
   const MenuItemWidget({
     required this.text,
     this.subText,
     this.textStyle,
     this.leadingIconColor,
     this.isBigger = false,
+    this.leadingIcon,
+    this.leadingSwitch,
     Key? key,
   }) : super(key: key);
 
@@ -63,7 +72,16 @@ class MenuItemWidget extends StatelessWidget {
                   : const SizedBox.shrink(),
             ],
           ),
-          Icon(Icons.chevron_right),
+          SizedBox(
+            height: 24,
+            child: leadingIcon == LeadingIcon.chevronRight
+                ? Icon(Icons.chevron_right_rounded)
+                : leadingIcon == LeadingIcon.check
+                    ? Icon(Icons.check)
+                    : leadingSwitch != null
+                        ? leadingSwitch
+                        : const SizedBox.shrink(),
+          )
         ],
       ),
     );
