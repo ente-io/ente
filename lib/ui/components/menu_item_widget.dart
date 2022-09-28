@@ -6,6 +6,7 @@ enum LeadingIcon {
   check,
 }
 
+// trailing icon can be passed without size as default size set by flutter is what this component expects
 class MenuItemWidget extends StatelessWidget {
   final Widget leadingWidget;
   final LeadingIcon? trailingIcon;
@@ -57,6 +58,7 @@ class MenuItemWidget extends StatelessWidget {
   }
 }
 
+// leading icon can be passed without specifing size, this component set size to 20x20
 class LeadingWidget extends StatelessWidget {
   final String text;
   final IconData? leadingIcon;
