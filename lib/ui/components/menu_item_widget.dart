@@ -59,14 +59,16 @@ class MenuItemWidget extends StatelessWidget {
 
 class LeadingWidget extends StatelessWidget {
   final String text;
+  final IconData? leadingIcon;
+  final Color? leadingIconColor;
   final String? subText;
   final TextStyle? textStyle;
-  final Color? leadingIconColor;
   const LeadingWidget({
     required this.text,
+    this.leadingIcon,
+    this.leadingIconColor,
     this.subText,
     this.textStyle,
-    this.leadingIconColor,
     Key? key,
   }) : super(key: key);
 
@@ -79,10 +81,16 @@ class LeadingWidget extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Row(
           children: [
-            Icon(
-              Icons.add_outlined,
-              size: 20,
-              color: leadingIconColor ?? enteTheme.colorScheme.strokeBase,
+            SizedBox(
+              height: 20,
+              width: 20,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Icon(
+                  leadingIcon ?? Icons.add_outlined,
+                  color: leadingIconColor ?? enteTheme.colorScheme.strokeBase,
+                ),
+              ),
             ),
             const SizedBox(width: 12),
             Flexible(
