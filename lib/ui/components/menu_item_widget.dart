@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:photos/ente_theme_data.dart';
 
 enum LeadingIcon {
@@ -15,6 +13,7 @@ class MenuItemWidget extends StatelessWidget {
   final Color? leadingIconColor;
   final LeadingIcon? leadingIcon;
   final Widget? leadingSwitch;
+  final bool trailingIconIsMuted;
   const MenuItemWidget({
     required this.text,
     this.subText,
@@ -22,6 +21,7 @@ class MenuItemWidget extends StatelessWidget {
     this.leadingIconColor,
     this.leadingIcon,
     this.leadingSwitch,
+    this.trailingIconIsMuted = false,
     Key? key,
   }) : super(key: key);
 
@@ -64,7 +64,8 @@ class MenuItemWidget extends StatelessWidget {
                           Text(
                             subText!,
                             style: enteTheme.textTheme.small.copyWith(
-                                color: enteTheme.colorScheme.textMuted),
+                              color: enteTheme.colorScheme.textMuted,
+                            ),
                           ),
                         ],
                       )
@@ -72,15 +73,20 @@ class MenuItemWidget extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(
-            height: 24,
+          Container(
             child: leadingIcon == LeadingIcon.chevronRight
-                ? Icon(Icons.chevron_right_rounded)
+                ? Icon(
+                    Icons.chevron_right_rounded,
+                    color: trailingIconIsMuted
+                        ? enteTheme.colorScheme.strokeMuted
+                        : null,
+                  )
                 : leadingIcon == LeadingIcon.check
-                    ? Icon(Icons.check)
-                    : leadingSwitch != null
-                        ? leadingSwitch
-                        : const SizedBox.shrink(),
+                    ? Icon(
+                        Icons.check,
+                        color: enteTheme.colorScheme.strokeMuted,
+                      )
+                    : leadingSwitch ?? const SizedBox.shrink(),
           )
         ],
       ),
