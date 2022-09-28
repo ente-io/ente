@@ -45,7 +45,7 @@ class MenuItemWidget extends StatelessWidget {
               child: FittedBox(
                 fit: BoxFit.contain,
                 child: Icon(
-                  leadingIcon ?? Icons.add_outlined,
+                  leadingIcon,
                   color: leadingIconColor,
                 ),
               ),
