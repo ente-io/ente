@@ -8,7 +8,7 @@ enum LeadingIcon {
 
 // trailing icon can be passed without size as default size set by flutter is what this component expects
 class MenuItemWidget extends StatelessWidget {
-  final Widget leadingWidget;
+  final Widget captionedTextWidget;
   final IconData? leadingIcon;
   final Color? leadingIconColor;
   final LeadingIcon? trailingIcon;
@@ -16,7 +16,7 @@ class MenuItemWidget extends StatelessWidget {
   final bool trailingIconIsMuted;
   final Function? onTap;
   const MenuItemWidget({
-    required this.leadingWidget,
+    required this.captionedTextWidget,
     this.leadingIcon,
     this.leadingIconColor,
     this.trailingIcon,
@@ -51,7 +51,7 @@ class MenuItemWidget extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            leadingWidget,
+            captionedTextWidget,
             Container(
               child: trailingIcon == LeadingIcon.chevronRight
                   ? Icon(
