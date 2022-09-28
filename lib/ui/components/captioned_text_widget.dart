@@ -6,10 +6,12 @@ class CaptionedTextWidget extends StatelessWidget {
   final String text;
   final String? subText;
   final TextStyle? textStyle;
+  final Color? textColor;
   const CaptionedTextWidget({
     required this.text,
     this.subText,
     this.textStyle,
+    this.textColor,
     Key? key,
   }) : super(key: key);
 
@@ -25,7 +27,8 @@ class CaptionedTextWidget extends StatelessWidget {
             Flexible(
               child: RichText(
                 text: TextSpan(
-                  style: textStyle ?? enteTheme.textTheme.bodyBold,
+                  style: textStyle ??
+                      enteTheme.textTheme.bodyBold.copyWith(color: textColor),
                   children: [
                     TextSpan(
                       text: text,

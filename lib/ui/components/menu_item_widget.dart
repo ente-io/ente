@@ -46,7 +46,7 @@ class MenuItemWidget extends StatelessWidget {
                 fit: BoxFit.contain,
                 child: Icon(
                   leadingIcon ?? Icons.add_outlined,
-                  color: leadingIconColor ?? enteTheme.colorScheme.strokeBase,
+                  color: leadingIconColor,
                 ),
               ),
             ),
