@@ -20,10 +20,6 @@ If you are running into issues with this app, please drop a mail to [support@ent
 
 - [Latest Release](https://github.com/ente-io/bhari-frame/releases/latest)
 
-*User contributed ports*
-
-- [AUR](https://aur.archlinux.org/packages/ente-desktop-appimage):
-  `yay -S ente-desktop-appimage`
 
 ## Building from source
 
