@@ -13,7 +13,6 @@ class MenuItemWidget extends StatelessWidget {
   final String? subText;
   final TextStyle? textStyle;
   final Color? leadingIconColor;
-  final bool isBigger;
   final LeadingIcon? leadingIcon;
   final Widget? leadingSwitch;
   const MenuItemWidget({
@@ -21,7 +20,6 @@ class MenuItemWidget extends StatelessWidget {
     this.subText,
     this.textStyle,
     this.leadingIconColor,
-    this.isBigger = false,
     this.leadingIcon,
     this.leadingSwitch,
     Key? key,
@@ -31,46 +29,48 @@ class MenuItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final enteTheme = Theme.of(context).colorScheme.enteTheme;
     return Container(
-      height: isBigger ? 48 : 44,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(
-                Icons.add_outlined,
-                size: 20,
-                color: leadingIconColor ?? enteTheme.colorScheme.strokeBase,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                text,
-                style: textStyle ?? enteTheme.textTheme.bodyBold,
-              ),
-              subText != null
-                  ? Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Text(
-                            '\u2022',
-                            style: enteTheme.textTheme.small.copyWith(
-                              color: enteTheme.colorScheme.textMuted,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Icon(
+                  Icons.add_outlined,
+                  size: 20,
+                  color: leadingIconColor ?? enteTheme.colorScheme.strokeBase,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  text,
+                  style: textStyle ?? enteTheme.textTheme.bodyBold,
+                ),
+                subText != null
+                    ? Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4),
+                            child: Text(
+                              '\u2022',
+                              style: enteTheme.textTheme.small.copyWith(
+                                color: enteTheme.colorScheme.textMuted,
+                              ),
                             ),
                           ),
-                        ),
-                        Text(
-                          subText!,
-                          style: enteTheme.textTheme.small
-                              .copyWith(color: enteTheme.colorScheme.textMuted),
-                        ),
-                      ],
-                    )
-                  : const SizedBox.shrink(),
-            ],
+                          Text(
+                            subText!,
+                            style: enteTheme.textTheme.small.copyWith(
+                                color: enteTheme.colorScheme.textMuted),
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ],
+            ),
           ),
           SizedBox(
             height: 24,
