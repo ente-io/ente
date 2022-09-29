@@ -17,6 +17,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
 
 class BackupFolderSelectionPage extends StatefulWidget {
   final bool isOnboarding;
@@ -175,23 +176,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     onPressed: _selectedDevicePathIDs.isEmpty
                         ? null
                         : () async {
-                            final Map<String, bool> syncStatus = {};
-                            for (String pathID in _allDevicePathIDs) {
-                              syncStatus[pathID] =
-                                  _selectedDevicePathIDs.contains(pathID);
-                            }
-                            await Configuration.instance
-                                .setHasSelectedAnyBackupFolder(
-                              _selectedDevicePathIDs.isNotEmpty,
-                            );
-                            await RemoteSyncService.instance
-                                .updateDeviceFolderSyncStatus(syncStatus);
-                            await Configuration.instance
-                                .setSelectAllFoldersForBackup(
-                              _allDevicePathIDs.length ==
-                                  _selectedDevicePathIDs.length,
-                            );
-                            Navigator.of(context).pop();
+                            await updateFolderSettings();
                           },
                     child: Text(widget.buttonText),
                   ),
@@ -221,6 +206,33 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
         ],
       ),
     );
+  }
+
+  Future<void> updateFolderSettings() async {
+    final dialog = createProgressDialog(
+      context,
+      "Updating folder selection...",
+    );
+    await dialog.show();
+    try {
+      final Map<String, bool> syncStatus = {};
+      for (String pathID in _allDevicePathIDs) {
+        syncStatus[pathID] = _selectedDevicePathIDs.contains(pathID);
+      }
+      await Configuration.instance.setHasSelectedAnyBackupFolder(
+        _selectedDevicePathIDs.isNotEmpty,
+      );
+      await Configuration.instance.setSelectAllFoldersForBackup(
+        _allDevicePathIDs.length == _selectedDevicePathIDs.length,
+      );
+      await RemoteSyncService.instance.updateDeviceFolderSyncStatus(syncStatus);
+      dialog.hide();
+      Navigator.of(context).pop();
+    } catch (e, s) {
+      _logger.severe("Failed to updated backup folder", e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
   }
 
   Widget _getFolders() {

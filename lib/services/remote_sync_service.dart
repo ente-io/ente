@@ -347,18 +347,23 @@ class RemoteSyncService {
       2) Delete files who localIDs is also present in other collections.
       3) For Remaining files, set the collectionID as -1
      */
-    debugPrint("Removing files for collections $collectionIDs");
+    _logger.info("Removing files for collections $collectionIDs");
     for (int collectionID in collectionIDs) {
       final List<File> pendingUploads =
           await _db.getPendingUploadForCollection(collectionID);
       if (pendingUploads.isEmpty) {
         continue;
+      } else {
+        _logger.info("RemovingFiles $collectionIDs: pendingUploads "
+            "${pendingUploads.length}");
       }
       final Set<String> localIDsInOtherFileEntries =
           await _db.getLocalIDsPresentInEntries(
         pendingUploads,
         collectionID,
       );
+      _logger.info("RemovingFiles $collectionIDs: filesInOtherCollection "
+          "${localIDsInOtherFileEntries.length}");
       final List<File> entriesToUpdate = [];
       final List<int> entriesToDelete = [];
       for (File pendingUpload in pendingUploads) {
@@ -371,6 +376,10 @@ class RemoteSyncService {
       }
       await _db.deleteMultipleByGeneratedIDs(entriesToDelete);
       await _db.insertMultiple(entriesToUpdate);
+      _logger.info(
+        "RemovingFiles $collectionIDs: deleted "
+        "${entriesToDelete.length} and updated ${entriesToUpdate.length}",
+      );
     }
   }
 
