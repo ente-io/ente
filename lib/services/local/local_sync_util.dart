@@ -1,4 +1,5 @@
 // @dart = 2.9
+import 'dart:io';
 import 'dart:math';
 
 import 'package:computer/computer.dart';
@@ -92,7 +93,7 @@ Future<List<LocalPathAsset>> getAllLocalAssets() async {
   );
   filterOptionGroup.createTimeCond = DateTimeCond.def().copyWith(ignore: true);
   final assetPaths = await PhotoManager.getAssetPathList(
-    hasAll: true,
+    hasAll: !Platform.isAndroid,
     type: RequestType.common,
     filterOption: filterOptionGroup,
   );
@@ -235,7 +236,7 @@ Future<List<AssetPathEntity>> _getGalleryList({
   }
   filterOptionGroup.containsPathModified = containsModifiedPath;
   final galleryList = await PhotoManager.getAssetPathList(
-    hasAll: true,
+    hasAll: !Platform.isAndroid,
     type: RequestType.common,
     filterOption: filterOptionGroup,
   );
