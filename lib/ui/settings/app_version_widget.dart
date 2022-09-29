@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:photos/utils/dialog_util.dart';
 
 class AppVersionWidget extends StatefulWidget {
   const AppVersionWidget({
@@ -30,13 +29,7 @@ class _AppVersionWidgetState extends State<AppVersionWidget> {
         if (now - (_lastTap ?? now) < kConsecutiveTapTimeWindowInMilliseconds) {
           _consecutiveTaps++;
           if (_consecutiveTaps == kTapThresholdForInspector) {
-            final dialog =
-                createProgressDialog(context, "Starting network inspector...");
-            await dialog.show();
-            await Future.delayed(
-              const Duration(milliseconds: kDummyDelayDurationInMilliseconds),
-            );
-            await dialog.hide();
+            // Do nothing
           }
         } else {
           _consecutiveTaps = 1;
