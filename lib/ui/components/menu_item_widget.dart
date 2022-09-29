@@ -1,10 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
-
-enum TrailingIcon {
-  chevronRight,
-  check,
-}
 
 // trailing icon can be passed without size as default size set by flutter is what this component expects
 class MenuItemWidget extends StatelessWidget {
@@ -12,10 +6,11 @@ class MenuItemWidget extends StatelessWidget {
   final bool isHeaderOfExpansion;
   final IconData? leadingIcon;
   final Color? leadingIconColor;
-  final TrailingIcon? trailingIcon;
+  final IconData? trailingIcon;
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;
   final Function? onTap;
+  final Color? menuItemColor;
   const MenuItemWidget({
     required this.captionedTextWidget,
     required this.isHeaderOfExpansion,
@@ -25,6 +20,7 @@ class MenuItemWidget extends StatelessWidget {
     this.trailingSwitch,
     this.trailingIconIsMuted = false,
     this.onTap,
+    this.menuItemColor,
     Key? key,
   }) : super(key: key);
 
@@ -41,9 +37,8 @@ class MenuItemWidget extends StatelessWidget {
   }
 
   Widget menuItemWidget(BuildContext context) {
-    final enteTheme = Theme.of(context).colorScheme.enteTheme;
-
     return Container(
+      color: menuItemColor,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
@@ -62,21 +57,9 @@ class MenuItemWidget extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           captionedTextWidget,
-          Container(
-            child: trailingIcon == TrailingIcon.chevronRight
-                ? Icon(
-                    Icons.chevron_right_rounded,
-                    color: trailingIconIsMuted
-                        ? enteTheme.colorScheme.strokeMuted
-                        : null,
-                  )
-                : trailingIcon == TrailingIcon.check
-                    ? Icon(
-                        Icons.check,
-                        color: enteTheme.colorScheme.strokeMuted,
-                      )
-                    : trailingSwitch ?? const SizedBox.shrink(),
-          )
+          trailingIcon != null
+              ? Icon(trailingIcon)
+              : trailingSwitch ?? const SizedBox.shrink(),
         ],
       ),
     );
