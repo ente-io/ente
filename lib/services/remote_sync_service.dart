@@ -247,6 +247,7 @@ class RemoteSyncService {
 
   Future<void> syncDeviceCollectionFilesForUpload() async {
     final int ownerID = _config.getUserID();
+
     final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
     // Sort by count to ensure that photos in iOS are first inserted in
@@ -256,6 +257,7 @@ class RemoteSyncService {
     await _createCollectionsForDevicePath(deviceCollections);
     final Map<String, Set<String>> pathIdToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
+    bool moreFilesMarkedForBackup = false;
     for (final deviceCollection in deviceCollections) {
       _logger.fine("processing ${deviceCollection.name}");
       final Set<String> localIDsToSync =
@@ -269,7 +271,7 @@ class RemoteSyncService {
       if (localIDsToSync.isEmpty || deviceCollection.collectionID == -1) {
         continue;
       }
-
+      moreFilesMarkedForBackup = true;
       await _db.setCollectionIDForUnMappedLocalFiles(
         deviceCollection.collectionID,
         localIDsToSync,
@@ -321,6 +323,10 @@ class RemoteSyncService {
           );
         }
       }
+    }
+    if (moreFilesMarkedForBackup && !_config.hasSelectedAllFoldersForBackup()) {
+      debugPrint("force reload due to display new files");
+      Bus.instance.fire(ForceReloadHomeGalleryEvent());
     }
   }
 
