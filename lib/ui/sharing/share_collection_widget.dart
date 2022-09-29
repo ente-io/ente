@@ -6,7 +6,6 @@ import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/public_keys_db.dart';
@@ -174,57 +173,46 @@ class _SharingDialogState extends State<SharingDialog> {
   }
 
   Widget _getEmailField() {
-    return Row(
-      children: [
-        Expanded(
-          child: TypeAheadField(
-            textFieldConfiguration: const TextFieldConfiguration(
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: "email@your-friend.com",
-              ),
-            ),
-            hideOnEmpty: true,
-            loadingBuilder: (context) {
-              return const EnteLoadingWidget();
-            },
-            suggestionsCallback: (pattern) async {
-              _email = pattern;
-              return PublicKeysDB.instance.searchByEmail(_email);
-            },
-            itemBuilder: (context, suggestion) {
-              return Container(
-                padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                child: Text(
-                  suggestion.email,
-                  overflow: TextOverflow.clip,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TypeAheadField(
+              textFieldConfiguration: const TextFieldConfiguration(
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: "email@your-friend.com",
                 ),
-              );
-            },
-            onSuggestionSelected: (PublicKey suggestion) {
-              _addEmailToCollection(
-                suggestion.email,
-                publicKey: suggestion.publicKey,
-              );
-            },
+              ),
+              hideOnEmpty: true,
+              loadingBuilder: (context) {
+                return const EnteLoadingWidget();
+              },
+              suggestionsCallback: (pattern) async {
+                _email = pattern;
+                return PublicKeysDB.instance.searchByEmail(_email);
+              },
+              itemBuilder: (context, suggestion) {
+                return Container(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+                  child: Text(
+                    suggestion.email,
+                    overflow: TextOverflow.clip,
+                  ),
+                );
+              },
+              onSuggestionSelected: (PublicKey suggestion) {
+                _addEmailToCollection(
+                  suggestion.email,
+                  publicKey: suggestion.publicKey,
+                );
+              },
+            ),
           ),
-        ),
-        const Padding(padding: EdgeInsets.all(8)),
-        IconButton(
-          icon: Icon(
-            Icons.contact_mail_outlined,
-            color:
-                Theme.of(context).colorScheme.greenAlternative.withOpacity(0.8),
-          ),
-          onPressed: () async {
-            final emailContact = await FlutterContactPicker.pickEmailContact(
-              askForPermission: true,
-            );
-            _addEmailToCollection(emailContact.email.email);
-          },
-        ),
-      ],
+        ],
+      ),
     );
   }
 

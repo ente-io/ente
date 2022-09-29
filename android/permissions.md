@@ -4,10 +4,6 @@
 
   **Used to read photos and videos from the device.**
 
-> android.permission.READ_CONTACTS
-
-**Used when a customer tries to pick a contact in the phonebook to share an album with. This is an optional permission, which users can deny if their android version allows granting granular permission.**
-
 > android.permission.ACCESS_MEDIA_LOCATION
 
 **Used to extract the coordinates a photo/video was captured in. This information is encrypted with the customer's key before being sent to our servers.**
