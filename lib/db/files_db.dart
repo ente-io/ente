@@ -344,6 +344,8 @@ class FilesDB {
   Future<void> clearTable() async {
     final db = await instance.database;
     await db.delete(filesTable);
+    await db.delete("device_files");
+    await db.delete("device_collections");
   }
 
   Future<void> deleteDB() async {
