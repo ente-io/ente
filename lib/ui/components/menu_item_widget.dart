@@ -9,6 +9,7 @@ enum TrailingIcon {
 // trailing icon can be passed without size as default size set by flutter is what this component expects
 class MenuItemWidget extends StatelessWidget {
   final Widget captionedTextWidget;
+  final bool isHeaderOfExpansion;
   final IconData? leadingIcon;
   final Color? leadingIconColor;
   final TrailingIcon? trailingIcon;
@@ -17,6 +18,7 @@ class MenuItemWidget extends StatelessWidget {
   final Function? onTap;
   const MenuItemWidget({
     required this.captionedTextWidget,
+    required this.isHeaderOfExpansion,
     this.leadingIcon,
     this.leadingIconColor,
     this.trailingIcon,
@@ -28,47 +30,54 @@ class MenuItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return isHeaderOfExpansion
+        ? menuItemWidget(context)
+        : GestureDetector(
+            onTap: () {
+              onTap;
+            },
+            child: menuItemWidget(context),
+          );
+  }
+
+  Widget menuItemWidget(BuildContext context) {
     final enteTheme = Theme.of(context).colorScheme.enteTheme;
-    return GestureDetector(
-      onTap: () {
-        onTap;
-      },
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(
-              height: 20,
-              width: 20,
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Icon(
-                  leadingIcon,
-                  color: leadingIconColor,
-                ),
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          SizedBox(
+            height: 20,
+            width: 20,
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: Icon(
+                leadingIcon,
+                color: leadingIconColor,
               ),
             ),
-            const SizedBox(width: 12),
-            captionedTextWidget,
-            Container(
-              child: trailingIcon == TrailingIcon.chevronRight
-                  ? Icon(
-                      Icons.chevron_right_rounded,
-                      color: trailingIconIsMuted
-                          ? enteTheme.colorScheme.strokeMuted
-                          : null,
-                    )
-                  : trailingIcon == TrailingIcon.check
-                      ? Icon(
-                          Icons.check,
-                          color: enteTheme.colorScheme.strokeMuted,
-                        )
-                      : trailingSwitch ?? const SizedBox.shrink(),
-            )
-          ],
-        ),
+          ),
+          const SizedBox(width: 12),
+          captionedTextWidget,
+          Container(
+            child: trailingIcon == TrailingIcon.chevronRight
+                ? Icon(
+                    Icons.chevron_right_rounded,
+                    color: trailingIconIsMuted
+                        ? enteTheme.colorScheme.strokeMuted
+                        : null,
+                  )
+                : trailingIcon == TrailingIcon.check
+                    ? Icon(
+                        Icons.check,
+                        color: enteTheme.colorScheme.strokeMuted,
+                      )
+                    : trailingSwitch ?? const SizedBox.shrink(),
+          )
+        ],
       ),
     );
   }
