@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
-enum LeadingIcon {
+enum TrailingIcon {
   chevronRight,
   check,
 }
@@ -11,7 +11,7 @@ class MenuItemWidget extends StatelessWidget {
   final Widget captionedTextWidget;
   final IconData? leadingIcon;
   final Color? leadingIconColor;
-  final LeadingIcon? trailingIcon;
+  final TrailingIcon? trailingIcon;
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;
   final Function? onTap;
@@ -53,14 +53,14 @@ class MenuItemWidget extends StatelessWidget {
             const SizedBox(width: 12),
             captionedTextWidget,
             Container(
-              child: trailingIcon == LeadingIcon.chevronRight
+              child: trailingIcon == TrailingIcon.chevronRight
                   ? Icon(
                       Icons.chevron_right_rounded,
                       color: trailingIconIsMuted
                           ? enteTheme.colorScheme.strokeMuted
                           : null,
                     )
-                  : trailingIcon == LeadingIcon.check
+                  : trailingIcon == TrailingIcon.check
                       ? Icon(
                           Icons.check,
                           color: enteTheme.colorScheme.strokeMuted,
