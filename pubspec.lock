@@ -995,14 +995,14 @@ packages:
       path: "thirdparty/sentry-dart/dart"
       relative: true
     source: path
-    version: "6.5.1"
+    version: "6.11.0"
   sentry_flutter:
     dependency: "direct main"
     description:
       path: "thirdparty/sentry-dart/flutter"
       relative: true
     source: path
-    version: "6.5.1"
+    version: "6.11.0"
   share_plus:
     dependency: "direct main"
     description:
