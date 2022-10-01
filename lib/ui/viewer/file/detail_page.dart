@@ -75,9 +75,12 @@ class _DetailPageState extends State<DetailPage> {
   bool _shouldHideAppBar = false;
   GlobalKey<FadingAppBarState> _appBarKey;
   GlobalKey<FadingBottomBarState> _bottomBarKey;
+  bool wakeLockEnabledHere;
 
   @override
   void initState() {
+    wakeLockEnabledHere = false;
+
     _files = [
       ...widget.config.files
     ]; // Make a copy since we append preceding and succeeding entries to this
@@ -92,6 +95,11 @@ class _DetailPageState extends State<DetailPage> {
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
     );
+    if (wakeLockEnabledHere) {
+      Wakelock.enabled.then((isEnabled) {
+        isEnabled ? Wakelock.disable() : null;
+      });
+    }
     super.dispose();
   }
 
@@ -254,7 +262,6 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   void _keepScreenAliveOnPlaying(bool isPlaying) {
-    bool wakeLockEnabledHere = false;
     if (isPlaying) {
       Wakelock.enabled.then((value) {
         if (value == false) {
