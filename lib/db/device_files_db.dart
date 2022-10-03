@@ -360,7 +360,6 @@ extension DeviceFiles on FilesDB {
             final File result =
                 await getDeviceCollectionThumbnail(deviceCollection.id);
             if (result == null) {
-              // this collection
               _logger.severe(
                 'Failed to find coverThumbnail for deviceFolder',
               );
