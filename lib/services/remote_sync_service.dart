@@ -623,7 +623,16 @@ class RemoteSyncService {
                 (e) => e.modificationTime ?? 0,
               )
               .reduce(max);
-          if (maxModificationTime > remoteDiff.modificationTime) {
+
+          /* todo: In case of iOS, we will miss any asset modification in
+            between of two installation. This is done to avoid fetching assets
+            from iCloud when modification time could have changed for number of
+            reasons. To fix this, we need to identify a way to store version
+            for the adjustments or just if the asset has been modified ever.
+            https://stackoverflow.com/a/50093266/546896
+            */
+          if (maxModificationTime > remoteDiff.modificationTime &&
+              Platform.isAndroid) {
             localButUpdatedOnDevice++;
             await FileUpdationDB.instance.insertMultiple(
               [remoteDiff.localID],
