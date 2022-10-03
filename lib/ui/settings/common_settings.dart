@@ -11,13 +11,10 @@ Widget sectionOptionDivider = Padding(
 );
 
 ExpandableThemeData getExpandableTheme(BuildContext context) {
-  return ExpandableThemeData(
-    expandIcon: CupertinoIcons.chevron_down,
-    collapseIcon: CupertinoIcons.chevron_up,
-    iconPadding: const EdgeInsets.all(4),
-    iconColor: Theme.of(context).colorScheme.onSurface,
-    iconSize: 20.0,
-    iconRotationAngle: -3.14 / 2,
-    hasIcon: true,
+  return const ExpandableThemeData(
+    hasIcon: false,
+    useInkWell: false,
+    tapBodyToCollapse: true,
+    tapBodyToExpand: true,
   );
 }
