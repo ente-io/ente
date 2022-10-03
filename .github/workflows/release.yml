@@ -62,7 +62,7 @@ jobs:
           file-name: release-hash.txt
       - uses: actions/upload-artifact@v2
         with:
-          name: Releae Asset Hashes
+          name: Release Asset Hashes
           path: release-hash.txt
 
       # Create a Github release
