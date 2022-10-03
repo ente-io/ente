@@ -55,6 +55,16 @@ jobs:
           name: release-apk
           path: build/app/outputs/flutter-apk/ente.apk
 
+      # Publish hash of the generated artifacts
+      - uses: MCJack123/ghaction-generate-release-hashes@v3
+        with:
+          hash-type: sha256
+          file-name: release-hash.txt
+      - uses: actions/upload-artifact@v2
+        with:
+          name: Releae Asset Hashes
+          path: release-hash.txt
+
       # Create a Github release
       - uses: ncipollo/release-action@v1
         with:
