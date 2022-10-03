@@ -66,5 +66,5 @@ jobs:
       # Create a Github release
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/flutter-apk/ente.apk"
+          artifacts: "build/app/outputs/flutter-apk/ente.apk,build/app/outputs/flutter-apk/checksum"
           token: ${{ secrets.GITHUB_TOKEN }}
