@@ -193,6 +193,10 @@ Future<List<File>> _convertLocalAssetsToUniqueFiles(
     for (final String localID in localPathAsset.localIDs) {
       if (!alreadySeenLocalIDs.contains(localID)) {
         final assetEntity = await AssetEntity.fromId(localID);
+        if (assetEntity == null) {
+          _logger.warning('Failed to fetch asset with id $localID');
+          continue;
+        }
         files.add(
           await File.fromAsset(localPathName, assetEntity),
         );
