@@ -37,11 +37,6 @@ class LocalFileUpdateService {
   static LocalFileUpdateService instance =
       LocalFileUpdateService._privateConstructor();
 
-  Future<bool> _markLocationMigrationAsCompleted() async {
-    _logger.info('marking migration as completed');
-    return _prefs.setBool(isLocationMigrationComplete, true);
-  }
-
   bool isLocationMigrationCompleted() {
     return _prefs.get(isLocationMigrationComplete) ?? false;
   }
@@ -53,10 +48,6 @@ class LocalFileUpdateService {
     }
     _existingMigration = Completer<void>();
     try {
-      if (!isLocationMigrationCompleted() && Platform.isAndroid) {
-        _logger.info("start migration for missing location");
-        await _runMigrationForFilesWithMissingLocation();
-      }
       await _markFilesWhichAreActuallyUpdated();
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
@@ -153,39 +144,6 @@ class LocalFileUpdateService {
     return mediaUploadData;
   }
 
-  Future<void> _runMigrationForFilesWithMissingLocation() async {
-    if (!Platform.isAndroid) {
-      return;
-    }
-    // migration only needs to run if Android API Level is 29 or higher
-    final int version = int.parse(await PhotoManager.systemVersion());
-    final bool isMigrationRequired = version >= 29;
-    if (isMigrationRequired) {
-      await _importLocalFilesForMigration();
-      final sTime = DateTime.now().microsecondsSinceEpoch;
-      bool hasData = true;
-      const int limitInBatch = 100;
-      while (hasData) {
-        final localIDsToProcess =
-            await _fileUpdationDB.getLocalIDsForPotentialReUpload(
-          limitInBatch,
-          FileUpdationDB.missingLocation,
-        );
-        if (localIDsToProcess.isEmpty) {
-          hasData = false;
-        } else {
-          await _checkAndMarkFilesWithLocationForReUpload(localIDsToProcess);
-        }
-      }
-      final eTime = DateTime.now().microsecondsSinceEpoch;
-      final d = Duration(microseconds: eTime - sTime);
-      _logger.info(
-        'filesWithMissingLocation migration completed in ${d.inSeconds.toString()} seconds',
-      );
-    }
-    await _markLocationMigrationAsCompleted();
-  }
-
   Future<void> _checkAndMarkFilesWithLocationForReUpload(
     List<String> localIDsToProcess,
   ) async {
@@ -219,24 +177,5 @@ class LocalFileUpdateService {
       localIDsToProcess,
       FileUpdationDB.missingLocation,
     );
-  }
-
-  Future<void> _importLocalFilesForMigration() async {
-    if (_prefs.containsKey(isLocalImportDone)) {
-      return;
-    }
-    final sTime = DateTime.now().microsecondsSinceEpoch;
-    _logger.info('importing files without location info');
-    final fileLocalIDs = await _filesDB.getLocalFilesBackedUpWithoutLocation();
-    await _fileUpdationDB.insertMultiple(
-      fileLocalIDs,
-      FileUpdationDB.missingLocation,
-    );
-    final eTime = DateTime.now().microsecondsSinceEpoch;
-    final d = Duration(microseconds: eTime - sTime);
-    _logger.info(
-      'importing completed, total files count ${fileLocalIDs.length} and took ${d.inSeconds.toString()} seconds',
-    );
-    await _prefs.setBool(isLocalImportDone, true);
   }
 }
