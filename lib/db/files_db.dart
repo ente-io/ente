@@ -1252,23 +1252,6 @@ class FilesDB {
     return result;
   }
 
-  Future<List<String>> getLocalFilesBackedUpWithoutLocation() async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      columns: [columnLocalID],
-      distinct: true,
-      where:
-          '$columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) '
-          'AND ($columnLatitude IS NULL OR $columnLongitude IS NULL OR $columnLongitude = 0.0 or $columnLongitude = 0.0)',
-    );
-    final result = <String>[];
-    for (final row in rows) {
-      result.add(row[columnLocalID]);
-    }
-    return result;
-  }
-
   Future<void> markForReUploadIfLocationMissing(List<String> localIDs) async {
     if (localIDs.isEmpty) {
       return;
