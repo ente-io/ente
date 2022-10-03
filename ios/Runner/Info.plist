@@ -22,6 +22,8 @@
 		<string>$(FLUTTER_BUILD_NAME)</string>
 		<key>CFBundleSignature</key>
 		<string>????</string>
+		<key>MinimumOSVersion</key>
+        <string>12.0</string>
 		<key>LSApplicationQueriesSchemes</key>
         <array>
             <string>googlegmail</string>

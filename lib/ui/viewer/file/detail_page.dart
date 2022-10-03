@@ -16,6 +16,7 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:wakelock/wakelock.dart';
 
 enum DetailPageMode {
   minimalistic,
@@ -74,9 +75,12 @@ class _DetailPageState extends State<DetailPage> {
   bool _shouldHideAppBar = false;
   GlobalKey<FadingAppBarState> _appBarKey;
   GlobalKey<FadingBottomBarState> _bottomBarKey;
+  bool wakeLockEnabledHere;
 
   @override
   void initState() {
+    wakeLockEnabledHere = false;
+
     _files = [
       ...widget.config.files
     ]; // Make a copy since we append preceding and succeeding entries to this
@@ -91,6 +95,11 @@ class _DetailPageState extends State<DetailPage> {
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
     );
+    if (wakeLockEnabledHere) {
+      Wakelock.enabled.then((isEnabled) {
+        isEnabled ? Wakelock.disable() : null;
+      });
+    }
     super.dispose();
   }
 
@@ -154,6 +163,7 @@ class _DetailPageState extends State<DetailPage> {
           },
           playbackCallback: (isPlaying) {
             _shouldHideAppBar = isPlaying;
+            _keepScreenAliveOnPlaying(isPlaying);
             Future.delayed(Duration.zero, () {
               _toggleFullScreen();
             });
@@ -248,6 +258,22 @@ class _DetailPageState extends State<DetailPage> {
     }
     if (index < _files.length - 1) {
       preloadFile(_files[index + 1]);
+    }
+  }
+
+  void _keepScreenAliveOnPlaying(bool isPlaying) {
+    if (isPlaying) {
+      Wakelock.enabled.then((value) {
+        if (value == false) {
+          Wakelock.enable();
+          wakeLockEnabledHere = true;
+          //wakeLockEnabledHere will not be set to true if wakeLock is already enabled from settings on iOS.
+          //We shouldn't disable when video is not playing if it was enabled manually by the user from ente settings by user.
+        }
+      });
+    }
+    if (wakeLockEnabledHere && !isPlaying) {
+      Wakelock.disable();
     }
   }
 
