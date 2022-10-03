@@ -49,21 +49,19 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
+      - name: Checksum
+        run: sha256sum build/app/outputs/flutter-apk/ente.apk > build/app/outputs/flutter-apk/checksum
+
       # Upload generated apk to the artifacts.
       - uses: actions/upload-artifact@v2
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/ente.apk
 
-      # Publish hash of the generated artifacts
-      - uses: MCJack123/ghaction-generate-release-hashes@v3
-        with:
-          hash-type: sha256
-          file-name: release-hash.txt
       - uses: actions/upload-artifact@v2
         with:
-          name: Release Asset Hashes
-          path: release-hash.txt
+          name: release-checksum
+          path: build/app/outputs/flutter-apk/checksum
 
       # Create a Github release
       - uses: ncipollo/release-action@v1
