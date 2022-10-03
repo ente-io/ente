@@ -81,6 +81,7 @@ class FilesDB {
     ...addPubMagicMetadataColumns(),
     ...createOnDeviceFilesAndPathCollection(),
     ...addFileSizeColumn(),
+    ...updateIndexes(),
   ];
 
   final dbConfig = MigrationConfig(
@@ -337,6 +338,17 @@ class FilesDB {
     return [
       '''
       ALTER TABLE $filesTable ADD COLUMN $columnFileSize INTEGER;
+      ''',
+    ];
+  }
+
+  static List<String> updateIndexes() {
+    return [
+      '''
+      DROP INDEX IF EXISTS device_folder_index;
+      ''',
+      '''
+      CREATE INDEX IF NOT EXISTS file_hash_index ON $filesTable($columnHash);
       ''',
     ];
   }
