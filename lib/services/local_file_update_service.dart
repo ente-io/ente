@@ -63,27 +63,26 @@ class LocalFileUpdateService {
   // then it marks the file for file update.
   Future<void> _markFilesWhichAreActuallyUpdated() async {
     final sTime = DateTime.now().microsecondsSinceEpoch;
-    bool hasData = true;
-    const int limitInBatch = 100;
-    while (hasData) {
-      final localIDsToProcess =
-          await _fileUpdationDB.getLocalIDsForPotentialReUpload(
-        limitInBatch,
-        FileUpdationDB.modificationTimeUpdated,
-      );
-      if (localIDsToProcess.isEmpty) {
-        hasData = false;
-      } else {
-        await _checkAndMarkFilesWithDifferentHashForFileUpdate(
-          localIDsToProcess,
-        );
-      }
-    }
-    final eTime = DateTime.now().microsecondsSinceEpoch;
-    final d = Duration(microseconds: eTime - sTime);
-    _logger.info(
-      '_markFilesWhichAreActuallyUpdated migration completed in ${d.inSeconds.toString()} seconds',
+    // singleRunLimit indicates number of files to check during single
+    // invocation of this method. The limit act as a crude way to limit the
+    // resource consumed by the method
+    const int singleRunLimit = 10;
+    final localIDsToProcess =
+        await _fileUpdationDB.getLocalIDsForPotentialReUpload(
+      singleRunLimit,
+      FileUpdationDB.modificationTimeUpdated,
     );
+    if (localIDsToProcess.isNotEmpty) {
+      await _checkAndMarkFilesWithDifferentHashForFileUpdate(
+        localIDsToProcess,
+      );
+      final eTime = DateTime.now().microsecondsSinceEpoch;
+      final d = Duration(microseconds: eTime - sTime);
+      _logger.info(
+        'Performed hashCheck for ${localIDsToProcess.length} updated files '
+        'completed in ${d.inSeconds.toString()} secs',
+      );
+    }
   }
 
   Future<void> _checkAndMarkFilesWithDifferentHashForFileUpdate(
