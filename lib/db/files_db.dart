@@ -879,28 +879,6 @@ class FilesDB {
     return convertToFiles(rows);
   }
 
-  Future<List<File>> getMatchingFiles(
-    String localID,
-    FileType fileType,
-    String title,
-    String deviceFolder,
-  ) async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      where: '''$columnTitle=? AND $columnDeviceFolder=?''',
-      whereArgs: [
-        title,
-        deviceFolder,
-      ],
-    );
-    if (rows.isNotEmpty) {
-      return convertToFiles(rows);
-    } else {
-      return null;
-    }
-  }
-
   Future<List<File>> getUploadedFilesWithHashes(
     FileHashData hashData,
     FileType fileType,
@@ -1151,37 +1129,6 @@ class FilesDB {
     return result;
   }
 
-  Future<List<File>> getLatestLocalFiles() async {
-    final db = await instance.database;
-    final rows = await db.rawQuery(
-      '''
-      SELECT $filesTable.*
-      FROM $filesTable
-      INNER JOIN
-        (
-          SELECT $columnDeviceFolder, MAX($columnCreationTime) AS max_creation_time
-          FROM $filesTable
-          WHERE $filesTable.$columnLocalID IS NOT NULL
-          GROUP BY $columnDeviceFolder
-        ) latest_files
-        ON $filesTable.$columnDeviceFolder = latest_files.$columnDeviceFolder
-        AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
-    ''',
-    );
-    final files = convertToFiles(rows);
-    // TODO: Do this de-duplication within the SQL Query
-    final folderMap = <String, File>{};
-    for (final file in files) {
-      if (folderMap.containsKey(file.deviceFolder)) {
-        if (folderMap[file.deviceFolder].updationTime < file.updationTime) {
-          continue;
-        }
-      }
-      folderMap[file.deviceFolder] = file;
-    }
-    return folderMap.values.toList();
-  }
-
   Future<List<File>> getLatestCollectionFiles() async {
     debugPrint("Fetching latestCollectionFiles from db");
     String query;
@@ -1233,23 +1180,6 @@ class FilesDB {
       collectionMap[file.collectionID] = file;
     }
     return collectionMap.values.toList();
-  }
-
-  Future<Map<String, int>> getFileCountInDeviceFolders() async {
-    final db = await instance.database;
-    final rows = await db.rawQuery(
-      '''
-      SELECT COUNT(DISTINCT($columnLocalID)) as count, $columnDeviceFolder
-      FROM $filesTable
-      WHERE $columnLocalID IS NOT NULL
-      GROUP BY $columnDeviceFolder
-    ''',
-    );
-    final result = <String, int>{};
-    for (final row in rows) {
-      result[row[columnDeviceFolder]] = row["count"];
-    }
-    return result;
   }
 
   Future<List<String>> getLocalFilesBackedUpWithoutLocation() async {
