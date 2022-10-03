@@ -331,12 +331,6 @@ class LocalSyncService {
     Set<String> editedFileIDs,
     Set<String> downloadedFileIDs,
   ) async {
-    _logger.info(
-      "Loading photos from " +
-          DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
-          " to " +
-          DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
-    );
     final Tuple2<List<LocalPathAsset>, List<File>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
     await FilesDB.instance.insertLocalAssets(
@@ -344,8 +338,13 @@ class LocalSyncService {
       shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
     final List<File> files = result.item2;
+    _logger.info(
+      "Loaded ${files.length} photos from " +
+          DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
+          " to " +
+          DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
+    );
     if (files.isNotEmpty) {
-      _logger.info("Fetched " + files.length.toString() + " files.");
       await _trackUpdatedFiles(
         files,
         existingLocalFileIDs,
