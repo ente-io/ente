@@ -12,6 +12,7 @@ class MenuItemWidget extends StatelessWidget {
   final Function? onTap;
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
+  final double borderRadius;
   const MenuItemWidget({
     required this.captionedTextWidget,
     required this.isHeaderOfExpansion,
@@ -23,6 +24,7 @@ class MenuItemWidget extends StatelessWidget {
     this.onTap,
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
+    this.borderRadius = 4.0,
     Key? key,
   }) : super(key: key);
 
@@ -40,9 +42,12 @@ class MenuItemWidget extends StatelessWidget {
 
   Widget menuItemWidget(BuildContext context) {
     return Container(
-      color: menuItemColor,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(borderRadius),
+        color: menuItemColor,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
