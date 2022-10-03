@@ -11,6 +11,7 @@ class MenuItemWidget extends StatelessWidget {
   final bool trailingIconIsMuted;
   final Function? onTap;
   final Color? menuItemColor;
+  final bool alignCaptionedTextToLeft;
   const MenuItemWidget({
     required this.captionedTextWidget,
     required this.isHeaderOfExpansion,
@@ -21,6 +22,7 @@ class MenuItemWidget extends StatelessWidget {
     this.trailingIconIsMuted = false,
     this.onTap,
     this.menuItemColor,
+    this.alignCaptionedTextToLeft = false,
     Key? key,
   }) : super(key: key);
 
@@ -44,18 +46,24 @@ class MenuItemWidget extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          SizedBox(
-            height: 20,
-            width: 20,
-            child: FittedBox(
-              fit: BoxFit.contain,
-              child: Icon(
-                leadingIcon,
-                color: leadingIconColor,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
+          alignCaptionedTextToLeft && leadingIcon == null
+              ? const SizedBox.shrink()
+              : Padding(
+                  padding: const EdgeInsets.only(right: 10),
+                  child: SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: leadingIcon == null
+                        ? const SizedBox.shrink()
+                        : FittedBox(
+                            fit: BoxFit.contain,
+                            child: Icon(
+                              leadingIcon,
+                              color: leadingIconColor,
+                            ),
+                          ),
+                  ),
+                ),
           captionedTextWidget,
           trailingIcon != null
               ? Icon(trailingIcon)
