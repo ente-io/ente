@@ -17,7 +17,7 @@ This repository contains the code for our mobile apps, built with a lot of ‚ù§Ô∏
 - Family plans
 - Shareable links for albums
 - Highlights of memories from previous years
-- Search by album, day, month, year, and file types
+- Search by album, day, month, year, and file types (more in the works...)
 - Ability to detect and delete duplicate files
 - Light and dark mode
 - Image editor
