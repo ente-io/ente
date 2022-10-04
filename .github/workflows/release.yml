@@ -49,14 +49,22 @@ jobs:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
+      - name: Checksum
+        run: sha256sum build/app/outputs/flutter-apk/ente.apk > build/app/outputs/flutter-apk/checksum
+
       # Upload generated apk to the artifacts.
       - uses: actions/upload-artifact@v2
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/ente.apk
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: release-checksum
+          path: build/app/outputs/flutter-apk/checksum
+
       # Create a Github release
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/flutter-apk/ente.apk"
+          artifacts: "build/app/outputs/flutter-apk/ente.apk,build/app/outputs/flutter-apk/checksum"
           token: ${{ secrets.GITHUB_TOKEN }}

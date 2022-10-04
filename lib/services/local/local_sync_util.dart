@@ -193,6 +193,10 @@ Future<List<File>> _convertLocalAssetsToUniqueFiles(
     for (final String localID in localPathAsset.localIDs) {
       if (!alreadySeenLocalIDs.contains(localID)) {
         final assetEntity = await AssetEntity.fromId(localID);
+        if (assetEntity == null) {
+          _logger.warning('Failed to fetch asset with id $localID');
+          continue;
+        }
         files.add(
           await File.fromAsset(localPathName, assetEntity),
         );
@@ -230,8 +234,8 @@ Future<List<AssetPathEntity>> _getGalleryList({
 
   if (updateFromTime != null && updateToTime != null) {
     filterOptionGroup.updateTimeCond = DateTimeCond(
-      min: DateTime.fromMicrosecondsSinceEpoch(updateFromTime),
-      max: DateTime.fromMicrosecondsSinceEpoch(updateToTime),
+      min: DateTime.fromMillisecondsSinceEpoch(updateFromTime ~/ 1000),
+      max: DateTime.fromMillisecondsSinceEpoch(updateToTime ~/ 1000),
     );
   }
   filterOptionGroup.containsPathModified = containsModifiedPath;
@@ -283,10 +287,10 @@ Future<Tuple2<Set<String>, List<File>>> _getLocalIDsAndFilesFromAssets(
   for (AssetEntity entity in assetList) {
     localIDs.add(entity.id);
     final bool assetCreatedOrUpdatedAfterGivenTime = max(
-          entity.createDateTime.microsecondsSinceEpoch,
-          entity.modifiedDateTime.microsecondsSinceEpoch,
-        ) >
-        fromTime;
+          entity.createDateTime.millisecondsSinceEpoch,
+          entity.modifiedDateTime.millisecondsSinceEpoch,
+        ) >=
+        (fromTime / ~1000);
     if (!alreadySeenLocalIDs.contains(entity.id) &&
         assetCreatedOrUpdatedAfterGivenTime) {
       try {

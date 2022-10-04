@@ -357,20 +357,44 @@ extension DeviceFiles on FilesDB {
             orElse: () => null,
           );
           if (deviceCollection.thumbnail == null) {
-            //todo: find another image which is already imported in db for
-            // this collection
-            _logger.warning(
-              'Failed to find coverThumbnail for ${deviceCollection.name}',
-            );
-            continue;
+            final File result =
+                await getDeviceCollectionThumbnail(deviceCollection.id);
+            if (result == null) {
+              _logger.severe(
+                'Failed to find coverThumbnail for deviceFolder',
+              );
+              continue;
+            } else {
+              deviceCollection.thumbnail = result;
+            }
           }
         }
         deviceCollections.add(deviceCollection);
+      }
+      if (includeCoverThumbnail) {
+        deviceCollections.sort((a, b) =>
+            b.thumbnail.creationTime.compareTo(a.thumbnail.creationTime));
       }
       return deviceCollections;
     } catch (e) {
       _logger.severe('Failed to getDeviceCollections', e);
       rethrow;
+    }
+  }
+
+  Future<File> getDeviceCollectionThumbnail(String pathID) async {
+    debugPrint("Call fallback method to get potential thumbnail");
+    final db = await database;
+    final fileRows = await db.rawQuery(
+      '''SELECT * FROM FILES  f JOIN device_files df on f.local_id = df.id 
+      and df.path_id=$pathID order by f.modification_time DESC limit 1;
+          ''',
+    );
+    final files = convertToFiles(fileRows);
+    if (files.isNotEmpty) {
+      return files.first;
+    } else {
+      return null;
     }
   }
 }
