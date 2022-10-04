@@ -1,5 +1,6 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 
 // trailing icon can be passed without size as default size set by flutter is what this component expects
 class MenuItemWidget extends StatefulWidget {
@@ -17,7 +18,7 @@ class MenuItemWidget extends StatefulWidget {
   final ExpandableController? expandableController;
   const MenuItemWidget({
     required this.captionedTextWidget,
-    required this.isHeaderOfExpansion,
+    this.isHeaderOfExpansion = false,
     this.leadingIcon,
     this.leadingIconColor,
     this.trailingIcon,
@@ -65,6 +66,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   Widget menuItemWidget(BuildContext context) {
+    final enteTheme = Theme.of(context).colorScheme.enteTheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -99,7 +101,12 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                   ? const SizedBox.shrink()
                   : Icon(widget.trailingIcon)
               : widget.trailingIcon != null
-                  ? Icon(widget.trailingIcon)
+                  ? Icon(
+                      widget.trailingIcon,
+                      color: widget.trailingIconIsMuted
+                          ? enteTheme.colorScheme.strokeMuted
+                          : null,
+                    )
                   : widget.trailingSwitch ?? const SizedBox.shrink(),
         ],
       ),
