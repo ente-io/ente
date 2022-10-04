@@ -6,22 +6,48 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/email_util.dart';
 
-class SupportSectionWidget extends StatelessWidget {
+class SupportSectionWidget extends StatefulWidget {
   const SupportSectionWidget({Key key}) : super(key: key);
+
+  @override
+  State<SupportSectionWidget> createState() => _SupportSectionWidgetState();
+}
+
+class _SupportSectionWidgetState extends State<SupportSectionWidget> {
+  final expandableController = ExpandableController(initialExpanded: false);
+
+  @override
+  void dispose() {
+    expandableController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: const SettingsSectionTitle("Support"),
+      header: MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          text: "Support",
+        ),
+        isHeaderOfExpansion: true,
+        leadingIcon: Icons.help_outline_outlined,
+        trailingIcon: Icons.expand_more,
+        menuItemColor:
+            Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
+        expandableController: expandableController,
+      ),
       collapsed: Container(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
+      controller: expandableController,
     );
   }
 

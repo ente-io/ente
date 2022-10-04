@@ -14,8 +14,9 @@ import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/sessions_page.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
@@ -29,6 +30,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
 
   StreamSubscription<TwoFactorStatusChangeEvent> _twoFactorStatusChangeEvent;
+  final expandableController = ExpandableController(initialExpanded: false);
 
   @override
   void initState() {
@@ -44,16 +46,28 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   @override
   void dispose() {
     _twoFactorStatusChangeEvent.cancel();
+    expandableController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: const SettingsSectionTitle("Security"),
-      collapsed: Container(),
+      header: MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          text: "Security",
+        ),
+        isHeaderOfExpansion: true,
+        leadingIcon: Icons.local_police_outlined,
+        trailingIcon: Icons.expand_more,
+        menuItemColor:
+            Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
+        expandableController: expandableController,
+      ),
+      collapsed: const SizedBox.shrink(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
+      controller: expandableController,
     );
   }
 

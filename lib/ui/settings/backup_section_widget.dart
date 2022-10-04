@@ -12,8 +12,9 @@ import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -31,18 +32,38 @@ class BackupSectionWidget extends StatefulWidget {
 }
 
 class BackupSectionWidgetState extends State<BackupSectionWidget> {
+  final expandableController = ExpandableController(initialExpanded: false);
+
+  @override
+  void dispose() {
+    expandableController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ExpandablePanel(
-      header: const SettingsSectionTitle("Backup"),
-      collapsed: Container(),
+      header: MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          text: "Backup",
+        ),
+        isHeaderOfExpansion: true,
+        leadingIcon: Icons.backup_outlined,
+        trailingIcon: Icons.expand_more,
+        menuItemColor:
+            Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
+        expandableController: expandableController,
+      ),
+      collapsed: const SizedBox.shrink(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
+      controller: expandableController,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
     final List<Widget> sectionOptions = [
+      sectionOptionDivider,
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () async {
@@ -160,7 +181,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                 "You've no files on this device that can be deleted",
               );
             } else {
-              final bool result = await routeToPage(context, FreeSpacePage(status));
+              final bool result =
+                  await routeToPage(context, FreeSpacePage(status));
               if (result == true) {
                 _showSpaceFreedDialog(status);
               }
