@@ -10,7 +10,7 @@ class MenuItemWidget extends StatefulWidget {
   final IconData? trailingIcon;
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;
-  final Function? onTap;
+  final VoidCallback? onTap;
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
   final double borderRadius;
@@ -59,9 +59,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return widget.isHeaderOfExpansion
         ? menuItemWidget(context)
         : GestureDetector(
-            onTap: () {
-              widget.onTap;
-            },
+            onTap: widget.onTap,
             child: menuItemWidget(context),
           );
   }
