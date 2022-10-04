@@ -56,6 +56,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
     return Column(
       children: [
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

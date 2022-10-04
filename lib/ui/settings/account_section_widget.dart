@@ -56,6 +56,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
   Column _getSectionOptions(BuildContext context) {
     return Column(
       children: [
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

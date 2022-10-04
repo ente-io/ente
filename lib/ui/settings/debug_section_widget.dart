@@ -54,6 +54,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

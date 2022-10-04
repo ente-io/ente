@@ -54,6 +54,7 @@ class _InfoSectionWidgetState extends State<InfoSectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
+        sectionOptionDivider,
         GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async {

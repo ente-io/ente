@@ -51,6 +51,7 @@ class _SocialSectionWidgetState extends State<SocialSectionWidget> {
 
   Widget _getSectionOptions(BuildContext context) {
     final List<Widget> options = [
+      sectionOptionDivider,
       GestureDetector(
         behavior: HitTestBehavior.translucent,
         onTap: () {
