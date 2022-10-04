@@ -54,24 +54,34 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-    final sectionDivider = Divider(
-      height: 20,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+    const sectionSpacing = SizedBox(
+      height: 8,
     );
     contents.add(const Padding(padding: EdgeInsets.all(4)));
     if (hasLoggedIn) {
       contents.addAll([
         const DetailsSectionWidget(),
         const Padding(padding: EdgeInsets.only(bottom: 24)),
+        // MenuItemWidget(
+        //   captionedTextWidget: CaptionedTextWidget(
+        //     text: "Button",
+        //     subText: "Sub text",
+        //   ),
+        //   isHeaderOfExpansion: false,
+        //   trailingSwitch: ToggleSwitch(
+        //     value: true,
+        //     onChanged: () {},
+        //   ),
+        // ),
         const BackupSectionWidget(),
-        sectionDivider,
+        sectionSpacing,
         const AccountSectionWidget(),
-        sectionDivider,
+        sectionSpacing,
       ]);
     }
     contents.addAll([
       const SecuritySectionWidget(),
-      sectionDivider,
+      sectionSpacing,
     ]);
 
     if (Platform.isAndroid || kDebugMode) {
@@ -87,27 +97,27 @@ class SettingsPage extends StatelessWidget {
             ),
           ],
         ),
-        sectionDivider,
+        sectionSpacing,
       ]);
     }
 
     contents.addAll([
       const SupportSectionWidget(),
-      sectionDivider,
+      sectionSpacing,
       const SocialSectionWidget(),
-      sectionDivider,
+      sectionSpacing,
       const InfoSectionWidget(),
     ]);
     if (hasLoggedIn) {
       contents.addAll([
-        sectionDivider,
+        sectionSpacing,
         const DangerSectionWidget(),
       ]);
     }
 
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
         hasLoggedIn) {
-      contents.addAll([sectionDivider, const DebugSectionWidget()]);
+      contents.addAll([sectionSpacing, const DebugSectionWidget()]);
     }
     contents.add(const AppVersionWidget());
     contents.add(
