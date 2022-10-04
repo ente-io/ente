@@ -48,7 +48,9 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
           text: "Theme",
         ),
         isHeaderOfExpansion: true,
-        leadingIcon: Icons.light_mode_outlined,
+        leadingIcon: Theme.of(context).brightness == Brightness.light
+            ? Icons.light_mode_outlined
+            : Icons.dark_mode_outlined,
         trailingIcon: Icons.expand_more,
         menuItemColor:
             Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
