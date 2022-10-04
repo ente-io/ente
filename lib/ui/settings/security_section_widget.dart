@@ -56,6 +56,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Security",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.local_police_outlined,

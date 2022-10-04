@@ -6,11 +6,13 @@ class CaptionedTextWidget extends StatelessWidget {
   final String text;
   final String? subText;
   final TextStyle? textStyle;
+  final bool makeTextBold;
   final Color? textColor;
   const CaptionedTextWidget({
     required this.text,
     this.subText,
     this.textStyle,
+    this.makeTextBold = false,
     this.textColor,
     Key? key,
   }) : super(key: key);
@@ -28,7 +30,11 @@ class CaptionedTextWidget extends StatelessWidget {
               child: RichText(
                 text: TextSpan(
                   style: textStyle ??
-                      enteTheme.textTheme.bodyBold.copyWith(color: textColor),
+                      (makeTextBold
+                          ? enteTheme.textTheme.bodyBold
+                              .copyWith(color: textColor)
+                          : enteTheme.textTheme.body
+                              .copyWith(color: textColor)),
                   children: [
                     TextSpan(
                       text: text,

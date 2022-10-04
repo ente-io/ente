@@ -61,17 +61,6 @@ class SettingsPage extends StatelessWidget {
       contents.addAll([
         const DetailsSectionWidget(),
         const Padding(padding: EdgeInsets.only(bottom: 24)),
-        // MenuItemWidget(
-        //   captionedTextWidget: CaptionedTextWidget(
-        //     text: "Button",
-        //     subText: "Sub text",
-        //   ),
-        //   isHeaderOfExpansion: false,
-        //   trailingSwitch: ToggleSwitch(
-        //     value: true,
-        //     onChanged: () {},
-        //   ),
-        // ),
         const BackupSectionWidget(),
         sectionSpacing,
         const AccountSectionWidget(),

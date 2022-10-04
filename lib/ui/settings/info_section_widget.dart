@@ -36,6 +36,7 @@ class _InfoSectionWidgetState extends State<InfoSectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "About",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.info_outlined,

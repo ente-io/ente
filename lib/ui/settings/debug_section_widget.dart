@@ -36,6 +36,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Debug",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.bug_report_outlined,

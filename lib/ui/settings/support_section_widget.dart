@@ -36,6 +36,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Support",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.help_outline_outlined,

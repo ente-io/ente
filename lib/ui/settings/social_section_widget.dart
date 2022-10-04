@@ -34,6 +34,7 @@ class _SocialSectionWidgetState extends State<SocialSectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Social",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.interests_outlined,

@@ -46,6 +46,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Theme",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Theme.of(context).brightness == Brightness.light

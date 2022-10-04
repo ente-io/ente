@@ -38,6 +38,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Account",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.account_circle_outlined,

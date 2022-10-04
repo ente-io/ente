@@ -45,6 +45,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Backup",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.backup_outlined,
@@ -61,14 +62,11 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final bodyTextTheme =
-        Theme.of(context).colorScheme.enteTheme.textTheme.body;
     final List<Widget> sectionOptions = [
       sectionOptionDivider,
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
+        captionedTextWidget: const CaptionedTextWidget(
           text: "Backed up folders",
-          textStyle: bodyTextTheme,
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -82,9 +80,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         },
       ),
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
+        captionedTextWidget: const CaptionedTextWidget(
           text: "Backup over mobile data",
-          textStyle: bodyTextTheme,
         ),
         trailingSwitch: Switch.adaptive(
           value: Configuration.instance.shouldBackupOverMobileData(),
@@ -95,9 +92,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         ),
       ),
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
+        captionedTextWidget: const CaptionedTextWidget(
           text: "Backup videos",
-          textStyle: bodyTextTheme,
         ),
         trailingSwitch: Switch.adaptive(
           value: Configuration.instance.shouldBackupVideos(),
@@ -111,9 +107,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     if (Platform.isIOS) {
       sectionOptions.addAll([
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             text: "Disable auto lock",
-            textStyle: bodyTextTheme,
           ),
           trailingSwitch: Switch.adaptive(
             value: Configuration.instance.shouldKeepDeviceAwake(),
@@ -140,9 +135,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     sectionOptions.addAll(
       [
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             text: "Free up space",
-            textStyle: bodyTextTheme,
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -175,9 +169,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           },
         ),
         MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
+          captionedTextWidget: const CaptionedTextWidget(
             text: "Deduplicate files",
-            textStyle: bodyTextTheme,
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,

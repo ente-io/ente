@@ -33,6 +33,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
       header: MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Exit",
+          makeTextBold: true,
         ),
         isHeaderOfExpansion: true,
         leadingIcon: Icons.logout_outlined,
