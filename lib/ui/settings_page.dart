@@ -14,7 +14,6 @@ import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/details_section_widget.dart';
 import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
@@ -86,17 +85,7 @@ class SettingsPage extends StatelessWidget {
 
     if (Platform.isAndroid || kDebugMode) {
       contents.addAll([
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            SettingsSectionTitle("Theme"),
-            Padding(
-              padding: EdgeInsets.only(right: 4),
-              child: ThemeSwitchWidget(),
-            ),
-          ],
-        ),
+        const ThemeSwitchWidget(),
         sectionSpacing,
       ]);
     }

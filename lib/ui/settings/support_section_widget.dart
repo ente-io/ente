@@ -44,7 +44,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
             Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
         expandableController: expandableController,
       ),
-      collapsed: Container(),
+      collapsed: const SizedBox.shrink(),
       expanded: _getSectionOptions(context),
       theme: getExpandableTheme(context),
       controller: expandableController,

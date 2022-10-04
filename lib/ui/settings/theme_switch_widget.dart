@@ -1,8 +1,13 @@
 // @dart=2.9
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/settings/common_settings.dart';
+import 'package:photos/ui/settings/settings_text_item.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key key}) : super(key: key);
@@ -13,6 +18,8 @@ class ThemeSwitchWidget extends StatefulWidget {
 
 class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   AdaptiveThemeMode themeMode;
+  final expandableController = ExpandableController(initialExpanded: false);
+
   @override
   void initState() {
     super.initState();
@@ -28,43 +35,70 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   @override
+  void dispose() {
+    expandableController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        await showCupertinoModalPopup(
-          context: context,
-          builder: (_) => CupertinoActionSheet(
-            title: Text(
-              "Theme",
-              style: Theme.of(context)
-                  .textTheme
-                  .headline4
-                  .copyWith(color: Colors.white),
-            ),
-            actions: [
-              for (var mode in AdaptiveThemeMode.values)
-                CupertinoActionSheetAction(
-                  child: Text(mode.modeName),
-                  onPressed: () async {
-                    AdaptiveTheme.of(context).setThemeMode(mode);
-                    themeMode = mode;
-                    Navigator.of(context, rootNavigator: true).pop();
-                    if (mounted) {
-                      setState(() => {});
-                    }
-                  },
-                ),
-            ],
-            cancelButton: CupertinoActionSheetAction(
-              child: const Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-            ),
+    return ExpandablePanel(
+      header: MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          text: "Theme",
+        ),
+        isHeaderOfExpansion: true,
+        leadingIcon: Icons.light_mode_outlined,
+        trailingIcon: Icons.expand_more,
+        menuItemColor:
+            Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
+        expandableController: expandableController,
+      ),
+      collapsed: const SizedBox.shrink(),
+      expanded: _getSectionOptions(context),
+      theme: getExpandableTheme(context),
+      controller: expandableController,
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
+    return Column(
+      children: [
+        sectionOptionDivider,
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.light);
+            themeMode = AdaptiveThemeMode.light;
+          },
+          child:
+              const SettingsTextItem(text: "Light", icon: Icons.navigate_next),
+        ),
+        sectionOptionDivider,
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.dark);
+            themeMode = AdaptiveThemeMode.dark;
+          },
+          child: const SettingsTextItem(
+            text: "Dark",
+            icon: Icons.navigate_next,
           ),
-        );
-      },
-      child: Text(themeMode?.modeName ?? ">"),
+        ),
+        sectionOptionDivider,
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async {
+            AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.system);
+            themeMode = AdaptiveThemeMode.system;
+          },
+          child: const SettingsTextItem(
+            text: "System",
+            icon: Icons.navigate_next,
+          ),
+        ),
+      ],
     );
   }
 }
