@@ -3,6 +3,7 @@
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -16,7 +17,7 @@ class ThemeSwitchWidget extends StatefulWidget {
 }
 
 class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
-  AdaptiveThemeMode themeMode;
+  AdaptiveThemeMode currentThemeMode;
   final expandableController = ExpandableController(initialExpanded: false);
 
   @override
@@ -24,7 +25,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     super.initState();
     AdaptiveTheme.getThemeMode().then(
       (value) {
-        themeMode = value ?? AdaptiveThemeMode.system;
+        currentThemeMode = value ?? AdaptiveThemeMode.system;
         debugPrint('theme value $value');
         if (mounted) {
           setState(() => {});
@@ -66,52 +67,28 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
     return Column(
       children: [
         sectionOptionDivider,
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            text: "Light",
-            textStyle: bodyTextTheme,
-          ),
-          isHeaderOfExpansion: false,
-          trailingIcon: themeMode.isLight ? Icons.check : null,
-          onTap: () async {
-            AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.light);
-            themeMode = AdaptiveThemeMode.light;
-            if (mounted) {
-              setState(() {});
-            }
-          },
-        ),
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            text: "Dark",
-            textStyle: bodyTextTheme,
-          ),
-          isHeaderOfExpansion: false,
-          trailingIcon: themeMode.isDark ? Icons.check : null,
-          onTap: () async {
-            AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.dark);
-            themeMode = AdaptiveThemeMode.dark;
-            if (mounted) {
-              setState(() {});
-            }
-          },
-        ),
-        MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            text: "System",
-            textStyle: bodyTextTheme,
-          ),
-          isHeaderOfExpansion: false,
-          trailingIcon: themeMode.isSystem ? Icons.check : null,
-          onTap: () async {
-            AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.system);
-            themeMode = AdaptiveThemeMode.system;
-            if (mounted) {
-              setState(() {});
-            }
-          },
-        ),
+        _menuItem(context, AdaptiveThemeMode.light),
+        _menuItem(context, AdaptiveThemeMode.dark),
+        _menuItem(context, AdaptiveThemeMode.system),
       ],
+    );
+  }
+
+  Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
+    return MenuItemWidget(
+      captionedTextWidget: CaptionedTextWidget(
+        text: toBeginningOfSentenceCase(themeMode.name),
+        textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
+      ),
+      isHeaderOfExpansion: false,
+      trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
+      onTap: () async {
+        AdaptiveTheme.of(context).setThemeMode(themeMode);
+        currentThemeMode = themeMode;
+        if (mounted) {
+          setState(() {});
+        }
+      },
     );
   }
 }
