@@ -12,7 +12,6 @@ import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -58,8 +57,12 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
     return Column(
       children: [
         sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Recovery key",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -85,14 +88,13 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               );
             }
           },
-          child: const SettingsTextItem(
-            text: "Recovery key",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Change email",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -110,14 +112,13 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               );
             }
           },
-          child: const SettingsTextItem(
-            text: "Change email",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Change password",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -136,10 +137,6 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               );
             }
           },
-          child: const SettingsTextItem(
-            text: "Change password",
-            icon: Icons.navigate_next,
-          ),
         ),
       ],
     );
