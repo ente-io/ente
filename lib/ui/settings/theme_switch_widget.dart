@@ -7,7 +7,6 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key key}) : super(key: key);
@@ -62,41 +61,55 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final bodyTextTheme =
+        Theme.of(context).colorScheme.enteTheme.textTheme.body;
     return Column(
       children: [
         sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            text: "Light",
+            textStyle: bodyTextTheme,
+          ),
+          isHeaderOfExpansion: false,
+          trailingIcon: themeMode.isLight ? Icons.check : null,
           onTap: () async {
             AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.light);
             themeMode = AdaptiveThemeMode.light;
+            if (mounted) {
+              setState(() {});
+            }
           },
-          child:
-              const SettingsTextItem(text: "Light", icon: Icons.navigate_next),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            text: "Dark",
+            textStyle: bodyTextTheme,
+          ),
+          isHeaderOfExpansion: false,
+          trailingIcon: themeMode.isDark ? Icons.check : null,
+          onTap: () async {
             AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.dark);
             themeMode = AdaptiveThemeMode.dark;
+            if (mounted) {
+              setState(() {});
+            }
           },
-          child: const SettingsTextItem(
-            text: "Dark",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            text: "System",
+            textStyle: bodyTextTheme,
+          ),
+          isHeaderOfExpansion: false,
+          trailingIcon: themeMode.isSystem ? Icons.check : null,
           onTap: () async {
             AdaptiveTheme.of(context).setThemeMode(AdaptiveThemeMode.system);
             themeMode = AdaptiveThemeMode.system;
+            if (mounted) {
+              setState(() {});
+            }
           },
-          child: const SettingsTextItem(
-            text: "System",
-            icon: Icons.navigate_next,
-          ),
         ),
       ],
     );
