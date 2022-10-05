@@ -12,6 +12,7 @@ class MenuItemWidget extends StatefulWidget {
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;
   final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
   final double borderRadius;
@@ -25,6 +26,7 @@ class MenuItemWidget extends StatefulWidget {
     this.trailingSwitch,
     this.trailingIconIsMuted = false,
     this.onTap,
+    this.onDoubleTap,
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
     this.borderRadius = 4.0,
@@ -61,6 +63,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ? menuItemWidget(context)
         : GestureDetector(
             onTap: widget.onTap,
+            onDoubleTap: widget.onDoubleTap,
             child: menuItemWidget(context),
           );
   }

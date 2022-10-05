@@ -11,7 +11,6 @@ import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/email_util.dart';
 
 class SupportSectionWidget extends StatefulWidget {
@@ -58,17 +57,22 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
     return Column(
       children: [
         sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Email",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await sendEmail(context, to: supportEmail);
           },
-          child:
-              const SettingsTextItem(text: "Email", icon: Icons.navigate_next),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Roadmap",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -84,14 +88,13 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
               ),
             );
           },
-          child: const SettingsTextItem(
-            text: "Roadmap",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Report a bug",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await sendLogs(context, "Report bug", bugsEmail);
           },
@@ -99,10 +102,6 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
             final zipFilePath = await getZippedLogsFile(context);
             await shareLogs(context, bugsEmail, zipFilePath);
           },
-          child: const SettingsTextItem(
-            text: "Report bug 🐞",
-            icon: Icons.navigate_next,
-          ),
         ),
       ],
     );
