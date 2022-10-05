@@ -6,13 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/details_section_widget.dart';
-import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
@@ -84,7 +84,7 @@ class SettingsPage extends StatelessWidget {
       sectionSpacing,
       const SocialSectionWidget(),
       sectionSpacing,
-      const InfoSectionWidget(),
+      const AboutSectionWidget(),
     ]);
     if (hasLoggedIn) {
       contents.addAll([

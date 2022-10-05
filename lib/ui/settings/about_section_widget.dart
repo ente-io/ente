@@ -13,14 +13,14 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class InfoSectionWidget extends StatefulWidget {
-  const InfoSectionWidget({Key key}) : super(key: key);
+class AboutSectionWidget extends StatefulWidget {
+  const AboutSectionWidget({Key key}) : super(key: key);
 
   @override
-  State<InfoSectionWidget> createState() => _InfoSectionWidgetState();
+  State<AboutSectionWidget> createState() => _AboutSectionWidgetState();
 }
 
-class _InfoSectionWidgetState extends State<InfoSectionWidget> {
+class _AboutSectionWidgetState extends State<AboutSectionWidget> {
   final expandableController = ExpandableController(initialExpanded: false);
 
   @override
