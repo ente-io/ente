@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
@@ -25,7 +26,13 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _getBody(context),
+      body: Container(
+          color: Theme.of(context)
+              .colorScheme
+              .enteTheme
+              .colorScheme
+              .backgroundElevated,
+          child: _getBody(context)),
     );
   }
 
