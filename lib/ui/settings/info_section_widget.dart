@@ -9,7 +9,6 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -56,68 +55,40 @@ class _InfoSectionWidgetState extends State<InfoSectionWidget> {
     return Column(
       children: [
         sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const WebPage("FAQ", "https://ente.io/faq");
-                },
-              ),
-            );
-          },
-          child: const SettingsTextItem(text: "FAQ", icon: Icons.navigate_next),
+        const AboutMenuItemWidget(
+          title: "FAQ",
+          webPageTitle: "FAQ",
+          url: "https://ente.io/faq",
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const WebPage("terms", "https://ente.io/terms");
-                },
-              ),
-            );
-          },
-          child:
-              const SettingsTextItem(text: "Terms", icon: Icons.navigate_next),
+        const AboutMenuItemWidget(
+          title: "Terms",
+          webPageTitle: "terms",
+          url: "https://ente.io/terms",
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const WebPage("privacy", "https://ente.io/privacy");
-                },
-              ),
-            );
-          },
-          child: const SettingsTextItem(
-            text: "Privacy",
-            icon: Icons.navigate_next,
+        const AboutMenuItemWidget(
+          title: "Privacy",
+          webPageTitle: "privacy",
+          url: "https://ente.io/privacy",
+        ),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Source code",
           ),
-        ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             launchUrl(Uri.parse("https://github.com/ente-io/frame"));
           },
-          child: const SettingsTextItem(
-            text: "Source code",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
         UpdateService.instance.isIndependent()
             ? Column(
                 children: [
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      text: "Check for updates",
+                    ),
+                    trailingIcon: Icons.chevron_right_outlined,
+                    trailingIconIsMuted: true,
                     onTap: () async {
                       final dialog =
                           createProgressDialog(context, "Checking...");
@@ -139,15 +110,43 @@ class _InfoSectionWidgetState extends State<InfoSectionWidget> {
                         showToast(context, "You are on the latest version");
                       }
                     },
-                    child: const SettingsTextItem(
-                      text: "Check for updates",
-                      icon: Icons.navigate_next,
-                    ),
                   ),
                 ],
               )
             : const SizedBox.shrink(),
       ],
+    );
+  }
+}
+
+class AboutMenuItemWidget extends StatelessWidget {
+  final String title;
+  final String webPageTitle;
+  final String url;
+  const AboutMenuItemWidget({
+    @required this.title,
+    @required this.webPageTitle,
+    @required this.url,
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuItemWidget(
+      captionedTextWidget: CaptionedTextWidget(
+        text: title,
+      ),
+      trailingIcon: Icons.chevron_right_outlined,
+      trailingIconIsMuted: true,
+      onTap: () async {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return WebPage(webPageTitle, url);
+            },
+          ),
+        );
+      },
     );
   }
 }
