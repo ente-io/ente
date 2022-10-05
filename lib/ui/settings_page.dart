@@ -53,14 +53,12 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-    const sectionSpacing = SizedBox(
-      height: 8,
-    );
-    contents.add(const Padding(padding: EdgeInsets.all(4)));
+    const sectionSpacing = SizedBox(height: 8);
+    contents.add(const SizedBox(height: 8));
     if (hasLoggedIn) {
       contents.addAll([
         const DetailsSectionWidget(),
-        const Padding(padding: EdgeInsets.only(bottom: 24)),
+        const SizedBox(height: 12),
         const BackupSectionWidget(),
         sectionSpacing,
         const AccountSectionWidget(),
@@ -106,10 +104,10 @@ class SettingsPage extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 350),
+            constraints: const BoxConstraints(maxWidth: 428),
             child: Column(
               children: contents,
             ),
