@@ -51,7 +51,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        sectionOptionDivider,
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Logout",
@@ -62,6 +62,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
             _onLogoutTapped();
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Delete account",
@@ -72,6 +73,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
             routeToPage(context, const DeleteAccountPage());
           },
         ),
+        sectionOptionSpacing,
       ],
     );
   }

@@ -76,7 +76,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
-          const Padding(padding: EdgeInsets.all(2)),
+          sectionOptionSpacing,
           FutureBuilder(
             future: UserService.instance.fetchTwoFactorStatus(),
             builder: (_, snapshot) {
@@ -108,7 +108,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         : const EnteLoadingWidget(),
               );
             },
-          )
+          ),
+          sectionOptionSpacing,
         ],
       );
     }
@@ -133,6 +134,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           },
         ),
       ),
+      sectionOptionSpacing,
     ]);
     if (Platform.isAndroid) {
       children.addAll(
@@ -219,6 +221,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               },
             ),
           ),
+          sectionOptionSpacing,
         ],
       );
     }
@@ -246,6 +249,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           }
         },
       ),
+      sectionOptionSpacing,
     ]);
     return Column(
       children: children,

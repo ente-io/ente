@@ -56,7 +56,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
     return Column(
       children: [
-        sectionOptionDivider,
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Email",
@@ -67,6 +67,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
             await sendEmail(context, to: supportEmail);
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Roadmap",
@@ -89,6 +90,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
             );
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Report a bug",
@@ -103,6 +105,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
             await shareLogs(context, bugsEmail, zipFilePath);
           },
         ),
+        sectionOptionSpacing,
       ],
     );
   }

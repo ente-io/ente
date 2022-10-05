@@ -65,14 +65,15 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final bodyTextTheme =
-        Theme.of(context).colorScheme.enteTheme.textTheme.body;
     return Column(
       children: [
-        sectionOptionDivider,
+        sectionOptionSpacing,
         _menuItem(context, AdaptiveThemeMode.light),
+        sectionOptionSpacing,
         _menuItem(context, AdaptiveThemeMode.dark),
+        sectionOptionSpacing,
         _menuItem(context, AdaptiveThemeMode.system),
+        sectionOptionSpacing,
       ],
     );
   }

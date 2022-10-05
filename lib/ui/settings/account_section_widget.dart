@@ -56,7 +56,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
   Column _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        sectionOptionDivider,
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Recovery key",
@@ -89,6 +89,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             }
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Change email",
@@ -113,6 +114,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             }
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Change password",

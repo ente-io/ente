@@ -54,22 +54,25 @@ class _AboutSectionWidgetState extends State<AboutSectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        sectionOptionDivider,
+        sectionOptionSpacing,
         const AboutMenuItemWidget(
           title: "FAQ",
           webPageTitle: "FAQ",
           url: "https://ente.io/faq",
         ),
+        sectionOptionSpacing,
         const AboutMenuItemWidget(
           title: "Terms",
           webPageTitle: "terms",
           url: "https://ente.io/terms",
         ),
+        sectionOptionSpacing,
         const AboutMenuItemWidget(
           title: "Privacy",
           webPageTitle: "privacy",
           url: "https://ente.io/privacy",
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Source code",
@@ -80,6 +83,7 @@ class _AboutSectionWidgetState extends State<AboutSectionWidget> {
             launchUrl(Uri.parse("https://github.com/ente-io/frame"));
           },
         ),
+        sectionOptionSpacing,
         UpdateService.instance.isIndependent()
             ? Column(
                 children: [
@@ -111,6 +115,7 @@ class _AboutSectionWidgetState extends State<AboutSectionWidget> {
                       }
                     },
                   ),
+                  sectionOptionSpacing,
                 ],
               )
             : const SizedBox.shrink(),

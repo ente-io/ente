@@ -51,10 +51,13 @@ class _SocialSectionWidgetState extends State<SocialSectionWidget> {
 
   Widget _getSectionOptions(BuildContext context) {
     final List<Widget> options = [
-      sectionOptionDivider,
+      sectionOptionSpacing,
       const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
+      sectionOptionSpacing,
       const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
+      sectionOptionSpacing,
       const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
+      sectionOptionSpacing,
     ];
     if (!UpdateService.instance.isIndependent()) {
       options.addAll(
@@ -65,6 +68,7 @@ class _SocialSectionWidgetState extends State<SocialSectionWidget> {
                 ? "https://play.google.com/store/apps/details?id=io.ente.photos"
                 : "https://apps.apple.com/in/app/ente-photos/id1542026904",
           ),
+          sectionOptionSpacing,
         ],
       );
     }

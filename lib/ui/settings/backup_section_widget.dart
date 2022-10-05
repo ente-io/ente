@@ -63,7 +63,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
   Widget _getSectionOptions(BuildContext context) {
     final List<Widget> sectionOptions = [
-      sectionOptionDivider,
+      sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Backed up folders",
@@ -79,6 +79,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           );
         },
       ),
+      sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Backup over mobile data",
@@ -91,6 +92,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           },
         ),
       ),
+      sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           text: "Backup videos",
@@ -103,6 +105,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           },
         ),
       ),
+      sectionOptionSpacing,
     ];
     if (Platform.isIOS) {
       sectionOptions.addAll([
@@ -130,6 +133,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             },
           ),
         ),
+        sectionOptionSpacing,
       ]);
     }
     sectionOptions.addAll(
@@ -168,6 +172,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             }
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Deduplicate files",
@@ -203,6 +208,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             }
           },
         ),
+        sectionOptionSpacing,
       ],
     );
     return Column(

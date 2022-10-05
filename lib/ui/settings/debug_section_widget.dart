@@ -54,7 +54,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        sectionOptionDivider,
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Key attributes",
@@ -65,6 +65,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
             _showKeyAttributesDialog(context);
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Delete Local Import DB",
@@ -76,6 +77,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
             showToast(context, "Done");
           },
         ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             text: "Allow auto-upload for ignored files",
@@ -88,6 +90,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
             showToast(context, "Done");
           },
         ),
+        sectionOptionSpacing,
       ],
     );
   }
