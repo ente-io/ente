@@ -8,7 +8,6 @@ import 'package:photos/ui/account/delete_account_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class DangerSectionWidget extends StatefulWidget {
@@ -53,24 +52,25 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
     return Column(
       children: [
         sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Logout",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () {
             _onLogoutTapped();
           },
-          child:
-              const SettingsTextItem(text: "Logout", icon: Icons.navigate_next),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Delete account",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () {
             routeToPage(context, const DeleteAccountPage());
           },
-          child: const SettingsTextItem(
-            text: "Delete account",
-            icon: Icons.navigate_next,
-          ),
         ),
       ],
     );

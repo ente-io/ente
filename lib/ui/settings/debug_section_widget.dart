@@ -11,7 +11,6 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatefulWidget {
@@ -56,38 +55,38 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
     return Column(
       children: [
         sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Key attributes",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             _showKeyAttributesDialog(context);
           },
-          child: const SettingsTextItem(
-            text: "Key attributes",
-            icon: Icons.navigate_next,
-          ),
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Delete Local Import DB",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await LocalSyncService.instance.resetLocalSync();
             showToast(context, "Done");
           },
-          child: const SettingsTextItem(
-            text: "Delete Local Import DB",
-            icon: Icons.navigate_next,
-          ),
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            text: "Allow auto-upload for ignored files",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await IgnoredFilesService.instance.reset();
             SyncService.instance.sync();
             showToast(context, "Done");
           },
-          child: const SettingsTextItem(
-            text: "Allow auto-upload for ignored files",
-            icon: Icons.navigate_next,
-          ),
         ),
       ],
     );
