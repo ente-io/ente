@@ -37,7 +37,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Recovery key",
+            title: "Recovery key",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -70,7 +70,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Change email",
+            title: "Change email",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -95,7 +95,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Change password",
+            title: "Change password",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,

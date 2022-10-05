@@ -66,7 +66,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
-        text: toBeginningOfSentenceCase(themeMode.name),
+        title: toBeginningOfSentenceCase(themeMode.name),
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
       isHeaderOfExpansion: false,

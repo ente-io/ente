@@ -45,7 +45,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          text: "Backed up folders",
+          title: "Backed up folders",
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
@@ -61,7 +61,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          text: "Backup over mobile data",
+          title: "Backup over mobile data",
         ),
         trailingSwitch: Switch.adaptive(
           value: Configuration.instance.shouldBackupOverMobileData(),
@@ -74,7 +74,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          text: "Backup videos",
+          title: "Backup videos",
         ),
         trailingSwitch: Switch.adaptive(
           value: Configuration.instance.shouldBackupVideos(),
@@ -90,7 +90,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptions.addAll([
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Disable auto lock",
+            title: "Disable auto lock",
           ),
           trailingSwitch: Switch.adaptive(
             value: Configuration.instance.shouldKeepDeviceAwake(),
@@ -119,7 +119,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       [
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Free up space",
+            title: "Free up space",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -154,7 +154,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Deduplicate files",
+            title: "Deduplicate files",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,

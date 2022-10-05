@@ -35,7 +35,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Key attributes",
+            title: "Key attributes",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -46,7 +46,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Delete Local Import DB",
+            title: "Delete Local Import DB",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -58,7 +58,7 @@ class _DebugSectionWidgetState extends State<DebugSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Allow auto-upload for ignored files",
+            title: "Allow auto-upload for ignored files",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,

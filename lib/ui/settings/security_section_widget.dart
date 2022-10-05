@@ -67,7 +67,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             builder: (_, snapshot) {
               return MenuItemWidget(
                 captionedTextWidget: const CaptionedTextWidget(
-                  text: "Two-factor",
+                  title: "Two-factor",
                 ),
                 trailingSwitch: snapshot.hasData
                     ? Switch.adaptive(
@@ -101,7 +101,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          text: "Lockscreen",
+          title: "Lockscreen",
         ),
         trailingSwitch: Switch.adaptive(
           value: _config.shouldShowLockScreen(),
@@ -126,7 +126,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         [
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
-              text: "Hide from recents",
+              title: "Hide from recents",
             ),
             trailingSwitch: Switch.adaptive(
               value: _config.shouldHideFromRecents(),
@@ -213,7 +213,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          text: "Active sessions",
+          title: "Active sessions",
         ),
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,

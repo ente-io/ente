@@ -37,7 +37,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Email",
+            title: "Email",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -48,7 +48,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Roadmap",
+            title: "Roadmap",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -71,7 +71,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Report a bug",
+            title: "Report a bug",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,

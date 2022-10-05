@@ -53,7 +53,7 @@ class _AboutSectionWidgetState extends State<AboutSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Source code",
+            title: "Source code",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -67,7 +67,7 @@ class _AboutSectionWidgetState extends State<AboutSectionWidget> {
                 children: [
                   MenuItemWidget(
                     captionedTextWidget: const CaptionedTextWidget(
-                      text: "Check for updates",
+                      title: "Check for updates",
                     ),
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
@@ -117,7 +117,7 @@ class AboutMenuItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
-        text: title,
+        title: title,
       ),
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,

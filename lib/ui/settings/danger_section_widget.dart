@@ -33,7 +33,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Logout",
+            title: "Logout",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
@@ -44,7 +44,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            text: "Delete account",
+            title: "Delete account",
           ),
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,

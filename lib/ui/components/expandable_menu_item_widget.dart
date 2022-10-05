@@ -44,7 +44,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
       child: ExpandablePanel(
         header: MenuItemWidget(
           captionedTextWidget: CaptionedTextWidget(
-            text: widget.title,
+            title: widget.title,
             makeTextBold: true,
           ),
           isHeaderOfExpansion: true,

@@ -1,16 +1,16 @@
-// leading icon can be passed without specifing size, this component set size to 20x20
+// leading icon can be passed without specifing size, this component sets size to 20x20
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class CaptionedTextWidget extends StatelessWidget {
-  final String text;
-  final String? subText;
+  final String title;
+  final String? subTitle;
   final TextStyle? textStyle;
   final bool makeTextBold;
   final Color? textColor;
   const CaptionedTextWidget({
-    required this.text,
-    this.subText,
+    required this.title,
+    this.subTitle,
     this.textStyle,
     this.makeTextBold = false,
     this.textColor,
@@ -37,9 +37,9 @@ class CaptionedTextWidget extends StatelessWidget {
                               .copyWith(color: textColor)),
                   children: [
                     TextSpan(
-                      text: text,
+                      text: title,
                     ),
-                    subText != null
+                    subTitle != null
                         ? TextSpan(
                             text: ' \u2022 ',
                             style: enteTheme.textTheme.small.copyWith(
@@ -47,9 +47,9 @@ class CaptionedTextWidget extends StatelessWidget {
                             ),
                           )
                         : const TextSpan(text: ''),
-                    subText != null
+                    subTitle != null
                         ? TextSpan(
-                            text: subText,
+                            text: subTitle,
                             style: enteTheme.textTheme.small.copyWith(
                               color: enteTheme.colorScheme.textMuted,
                             ),

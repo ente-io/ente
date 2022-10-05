@@ -64,7 +64,7 @@ class SocialsMenuItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
-        text: text,
+        title: text,
       ),
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
