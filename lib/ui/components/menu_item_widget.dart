@@ -110,15 +110,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                           ? enteColorScheme.strokeMuted
                           : null,
                     )
-                  : widget.trailingSwitch != null
-                      ? SizedBox(
-                          height: 36,
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: widget.trailingSwitch,
-                          ),
-                        )
-                      : const SizedBox.shrink(),
+                  : widget.trailingSwitch ?? const SizedBox.shrink(),
         ],
       ),
     );

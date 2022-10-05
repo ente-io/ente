@@ -14,6 +14,7 @@ import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -63,7 +64,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: "Backup over mobile data",
         ),
-        trailingSwitch: Switch.adaptive(
+        trailingSwitch: ToggleSwitchWidget(
           value: Configuration.instance.shouldBackupOverMobileData(),
           onChanged: (value) async {
             Configuration.instance.setBackupOverMobileData(value);
@@ -76,7 +77,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: "Backup videos",
         ),
-        trailingSwitch: Switch.adaptive(
+        trailingSwitch: ToggleSwitchWidget(
           value: Configuration.instance.shouldBackupVideos(),
           onChanged: (value) async {
             Configuration.instance.setShouldBackupVideos(value);
@@ -92,7 +93,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Disable auto lock",
           ),
-          trailingSwitch: Switch.adaptive(
+          trailingSwitch: ToggleSwitchWidget(
             value: Configuration.instance.shouldKeepDeviceAwake(),
             onChanged: (value) async {
               if (value) {
