@@ -2,11 +2,10 @@
 
 import 'dart:io';
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -19,33 +18,12 @@ class SocialSectionWidget extends StatefulWidget {
 }
 
 class _SocialSectionWidgetState extends State<SocialSectionWidget> {
-  final expandableController = ExpandableController(initialExpanded: false);
-
-  @override
-  void dispose() {
-    expandableController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          text: "Social",
-          makeTextBold: true,
-        ),
-        isHeaderOfExpansion: true,
-        leadingIcon: Icons.interests_outlined,
-        trailingIcon: Icons.expand_more,
-        menuItemColor:
-            Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
-        expandableController: expandableController,
-      ),
-      collapsed: const SizedBox.shrink(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
-      controller: expandableController,
+    return ExpandableMenuItemWidget(
+      title: "Social",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.interests_outlined,
     );
   }
 

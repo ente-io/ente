@@ -1,11 +1,10 @@
 // @dart=2.9
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings/common_settings.dart';
@@ -21,33 +20,12 @@ class AboutSectionWidget extends StatefulWidget {
 }
 
 class _AboutSectionWidgetState extends State<AboutSectionWidget> {
-  final expandableController = ExpandableController(initialExpanded: false);
-
-  @override
-  void dispose() {
-    expandableController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          text: "About",
-          makeTextBold: true,
-        ),
-        isHeaderOfExpansion: true,
-        leadingIcon: Icons.info_outlined,
-        trailingIcon: Icons.expand_more,
-        menuItemColor:
-            Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
-        expandableController: expandableController,
-      ),
-      collapsed: const SizedBox.shrink(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
-      controller: expandableController,
+    return ExpandableMenuItemWidget(
+      title: "About",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.info_outline,
     );
   }
 
