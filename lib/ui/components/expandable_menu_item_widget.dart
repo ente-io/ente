@@ -32,13 +32,10 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context)
-            .colorScheme
-            .enteTheme
-            .colorScheme
-            .backgroundElevated2,
+        color: enteColorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(4),
       ),
       child: ExpandablePanel(
@@ -50,8 +47,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
           isHeaderOfExpansion: true,
           leadingIcon: widget.leadingIcon,
           trailingIcon: Icons.expand_more,
-          menuItemColor:
-              Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
+          menuItemColor: enteColorScheme.fillFaint,
           expandableController: expandableController,
         ),
         collapsed: const SizedBox.shrink(),

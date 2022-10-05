@@ -69,7 +69,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   Widget menuItemWidget(BuildContext context) {
-    final enteTheme = Theme.of(context).colorScheme.enteTheme;
+    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -107,7 +107,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                   ? Icon(
                       widget.trailingIcon,
                       color: widget.trailingIconIsMuted
-                          ? enteTheme.colorScheme.strokeMuted
+                          ? enteColorScheme.strokeMuted
                           : null,
                     )
                   : widget.trailingSwitch != null
