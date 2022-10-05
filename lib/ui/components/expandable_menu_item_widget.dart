@@ -32,23 +32,33 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          text: widget.title,
-          makeTextBold: true,
-        ),
-        isHeaderOfExpansion: true,
-        leadingIcon: widget.leadingIcon,
-        trailingIcon: Icons.expand_more,
-        menuItemColor:
-            Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
-        expandableController: expandableController,
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context)
+            .colorScheme
+            .enteTheme
+            .colorScheme
+            .backgroundElevated2,
+        borderRadius: BorderRadius.circular(4),
       ),
-      collapsed: const SizedBox.shrink(),
-      expanded: widget.selectionOptionsWidget,
-      theme: getExpandableTheme(context),
-      controller: expandableController,
+      child: ExpandablePanel(
+        header: MenuItemWidget(
+          captionedTextWidget: CaptionedTextWidget(
+            text: widget.title,
+            makeTextBold: true,
+          ),
+          isHeaderOfExpansion: true,
+          leadingIcon: widget.leadingIcon,
+          trailingIcon: Icons.expand_more,
+          menuItemColor:
+              Theme.of(context).colorScheme.enteTheme.colorScheme.fillFaint,
+          expandableController: expandableController,
+        ),
+        collapsed: const SizedBox.shrink(),
+        expanded: widget.selectionOptionsWidget,
+        theme: getExpandableTheme(context),
+        controller: expandableController,
+      ),
     );
   }
 }
