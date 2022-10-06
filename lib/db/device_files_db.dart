@@ -356,7 +356,7 @@ extension DeviceFiles on FilesDB {
             (element) => element.localID == deviceCollection.coverId,
             orElse: () => null,
           );
-          if (deviceCollection.thumbnail != null) {
+          if (deviceCollection.thumbnail == null) {
             final File result =
                 await getDeviceCollectionThumbnail(deviceCollection.id);
             if (result == null) {
