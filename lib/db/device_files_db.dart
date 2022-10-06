@@ -356,7 +356,7 @@ extension DeviceFiles on FilesDB {
             (element) => element.localID == deviceCollection.coverId,
             orElse: () => null,
           );
-          if (deviceCollection.thumbnail == null) {
+          if (deviceCollection.thumbnail != null) {
             final File result =
                 await getDeviceCollectionThumbnail(deviceCollection.id);
             if (result == null) {
@@ -387,8 +387,9 @@ extension DeviceFiles on FilesDB {
     final db = await database;
     final fileRows = await db.rawQuery(
       '''SELECT * FROM FILES  f JOIN device_files df on f.local_id = df.id 
-      and df.path_id=$pathID order by f.modification_time DESC limit 1;
+      and df.path_id= ? order by f.modification_time DESC limit 1;
           ''',
+      [pathID],
     );
     final files = convertToFiles(fileRows);
     if (files.isNotEmpty) {
