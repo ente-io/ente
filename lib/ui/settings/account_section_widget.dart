@@ -14,14 +14,9 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class AccountSectionWidget extends StatefulWidget {
+class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({Key key}) : super(key: key);
 
-  @override
-  AccountSectionWidgetState createState() => AccountSectionWidgetState();
-}
-
-class AccountSectionWidgetState extends State<AccountSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
@@ -50,7 +45,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             if (hasAuthenticated) {
               String recoveryKey;
               try {
-                recoveryKey = await _getOrCreateRecoveryKey();
+                recoveryKey = await _getOrCreateRecoveryKey(context);
               } catch (e) {
                 showGenericErrorDialog(context);
                 return;
@@ -122,7 +117,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
     );
   }
 
-  Future<String> _getOrCreateRecoveryKey() async {
+  Future<String> _getOrCreateRecoveryKey(BuildContext context) async {
     return Sodium.bin2hex(
       await UserService.instance.getOrCreateRecoveryKey(context),
     );

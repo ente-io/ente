@@ -10,14 +10,9 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-class SocialSectionWidget extends StatefulWidget {
+class SocialSectionWidget extends StatelessWidget {
   const SocialSectionWidget({Key key}) : super(key: key);
 
-  @override
-  State<SocialSectionWidget> createState() => _SocialSectionWidgetState();
-}
-
-class _SocialSectionWidgetState extends State<SocialSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(

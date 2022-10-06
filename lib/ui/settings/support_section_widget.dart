@@ -12,14 +12,9 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/email_util.dart';
 
-class SupportSectionWidget extends StatefulWidget {
+class SupportSectionWidget extends StatelessWidget {
   const SupportSectionWidget({Key key}) : super(key: key);
 
-  @override
-  State<SupportSectionWidget> createState() => _SupportSectionWidgetState();
-}
-
-class _SupportSectionWidgetState extends State<SupportSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(

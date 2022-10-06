@@ -12,14 +12,9 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class AboutSectionWidget extends StatefulWidget {
+class AboutSectionWidget extends StatelessWidget {
   const AboutSectionWidget({Key key}) : super(key: key);
 
-  @override
-  State<AboutSectionWidget> createState() => _AboutSectionWidgetState();
-}
-
-class _AboutSectionWidgetState extends State<AboutSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(

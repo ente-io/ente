@@ -10,14 +10,9 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class DangerSectionWidget extends StatefulWidget {
+class DangerSectionWidget extends StatelessWidget {
   const DangerSectionWidget({Key key}) : super(key: key);
 
-  @override
-  State<DangerSectionWidget> createState() => _DangerSectionWidgetState();
-}
-
-class _DangerSectionWidgetState extends State<DangerSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
@@ -38,7 +33,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () {
-            _onLogoutTapped();
+            _onLogoutTapped(context);
           },
         ),
         sectionOptionSpacing,
@@ -57,7 +52,7 @@ class _DangerSectionWidgetState extends State<DangerSectionWidget> {
     );
   }
 
-  Future<void> _onLogoutTapped() async {
+  Future<void> _onLogoutTapped(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       title: const Text(
         "Logout",

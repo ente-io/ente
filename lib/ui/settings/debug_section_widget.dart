@@ -12,14 +12,9 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class DebugSectionWidget extends StatefulWidget {
+class DebugSectionWidget extends StatelessWidget {
   const DebugSectionWidget({Key key}) : super(key: key);
 
-  @override
-  State<DebugSectionWidget> createState() => _DebugSectionWidgetState();
-}
-
-class _DebugSectionWidgetState extends State<DebugSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
