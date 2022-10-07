@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
@@ -25,24 +26,22 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     return Scaffold(
       body: Container(
-        color: Theme.of(context)
-            .colorScheme
-            .enteTheme
-            .colorScheme
-            .backgroundElevated,
-        child: _getBody(context),
+        color: enteColorScheme.backgroundElevated,
+        child: _getBody(context, enteColorScheme),
       ),
     );
   }
 
-  Widget _getBody(BuildContext context) {
+  Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
+    final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
     final List<Widget> contents = [];
     contents.add(
       Container(
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Align(
           alignment: Alignment.centerLeft,
           child: AnimatedBuilder(
@@ -51,10 +50,10 @@ class SettingsPage extends StatelessWidget {
             builder: (BuildContext context, Widget child) {
               return Text(
                 emailNotifier.value,
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1
-                    .copyWith(overflow: TextOverflow.ellipsis),
+                style: enteTextTheme.body.copyWith(
+                  color: colorScheme.textMuted,
+                  overflow: TextOverflow.ellipsis,
+                ),
               );
             },
           ),
