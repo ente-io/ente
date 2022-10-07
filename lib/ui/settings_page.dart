@@ -5,16 +5,16 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/details_section_widget.dart';
-import 'package:photos/ui/settings/info_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
@@ -26,7 +26,14 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _getBody(context),
+      body: Container(
+        color: Theme.of(context)
+            .colorScheme
+            .enteTheme
+            .colorScheme
+            .backgroundElevated,
+        child: _getBody(context),
+      ),
     );
   }
 
@@ -54,60 +61,47 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-    final sectionDivider = Divider(
-      height: 20,
-      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
-    );
-    contents.add(const Padding(padding: EdgeInsets.all(4)));
+    const sectionSpacing = SizedBox(height: 8);
+    contents.add(const SizedBox(height: 8));
     if (hasLoggedIn) {
       contents.addAll([
         const DetailsSectionWidget(),
-        const Padding(padding: EdgeInsets.only(bottom: 24)),
+        const SizedBox(height: 12),
         const BackupSectionWidget(),
-        sectionDivider,
+        sectionSpacing,
         const AccountSectionWidget(),
-        sectionDivider,
+        sectionSpacing,
       ]);
     }
     contents.addAll([
       const SecuritySectionWidget(),
-      sectionDivider,
+      sectionSpacing,
     ]);
 
     if (Platform.isAndroid || kDebugMode) {
       contents.addAll([
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: const [
-            SettingsSectionTitle("Theme"),
-            Padding(
-              padding: EdgeInsets.only(right: 4),
-              child: ThemeSwitchWidget(),
-            ),
-          ],
-        ),
-        sectionDivider,
+        const ThemeSwitchWidget(),
+        sectionSpacing,
       ]);
     }
 
     contents.addAll([
       const SupportSectionWidget(),
-      sectionDivider,
+      sectionSpacing,
       const SocialSectionWidget(),
-      sectionDivider,
-      const InfoSectionWidget(),
+      sectionSpacing,
+      const AboutSectionWidget(),
     ]);
     if (hasLoggedIn) {
       contents.addAll([
-        sectionDivider,
+        sectionSpacing,
         const DangerSectionWidget(),
       ]);
     }
 
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
         hasLoggedIn) {
-      contents.addAll([sectionDivider, const DebugSectionWidget()]);
+      contents.addAll([sectionSpacing, const DebugSectionWidget()]);
     }
     contents.add(const AppVersionWidget());
     contents.add(
@@ -118,10 +112,10 @@ class SettingsPage extends StatelessWidget {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 350),
+            constraints: const BoxConstraints(maxWidth: 428),
             child: Column(
               children: contents,
             ),

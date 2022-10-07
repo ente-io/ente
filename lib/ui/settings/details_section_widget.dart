@@ -89,10 +89,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   }
 
   Widget getContainer() {
-    return SizedBox(
-      width: 350,
-      height: 175,
-      // constraints: BoxConstraints(maxWidth: 390, maxHeight: 195),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 428, maxHeight: 175),
       child: Stack(
         children: [
           Container(

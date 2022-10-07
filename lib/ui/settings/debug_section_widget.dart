@@ -1,65 +1,69 @@
 // @dart=2.9
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatelessWidget {
   const DebugSectionWidget({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: const SettingsSectionTitle("Debug"),
-      collapsed: Container(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
+    return ExpandableMenuItemWidget(
+      title: "Debug",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.bug_report_outlined,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Key attributes",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             _showKeyAttributesDialog(context);
           },
-          child: const SettingsTextItem(
-            text: "Key attributes",
-            icon: Icons.navigate_next,
-          ),
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Delete Local Import DB",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await LocalSyncService.instance.resetLocalSync();
             showToast(context, "Done");
           },
-          child: const SettingsTextItem(
-            text: "Delete Local Import DB",
-            icon: Icons.navigate_next,
-          ),
         ),
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Allow auto-upload for ignored files",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await IgnoredFilesService.instance.reset();
             SyncService.instance.sync();
             showToast(context, "Done");
           },
-          child: const SettingsTextItem(
-            text: "Allow auto-upload for ignored files",
-            icon: Icons.navigate_next,
-          ),
         ),
+        sectionOptionSpacing,
       ],
     );
   }
