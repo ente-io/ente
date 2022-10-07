@@ -5,9 +5,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
@@ -26,7 +26,7 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
+    final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
       body: Container(
         color: enteColorScheme.backgroundElevated,
@@ -37,7 +37,7 @@ class SettingsPage extends StatelessWidget {
 
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
-    final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
+    final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
     contents.add(
       Container(
