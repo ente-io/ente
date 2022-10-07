@@ -30,19 +30,16 @@ class AboutSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         const AboutMenuItemWidget(
           title: "FAQ",
-          webPageTitle: "FAQ",
           url: "https://ente.io/faq",
         ),
         sectionOptionSpacing,
         const AboutMenuItemWidget(
           title: "Terms",
-          webPageTitle: "terms",
           url: "https://ente.io/terms",
         ),
         sectionOptionSpacing,
         const AboutMenuItemWidget(
           title: "Privacy",
-          webPageTitle: "privacy",
           url: "https://ente.io/privacy",
         ),
         sectionOptionSpacing,
@@ -99,12 +96,12 @@ class AboutSectionWidget extends StatelessWidget {
 
 class AboutMenuItemWidget extends StatelessWidget {
   final String title;
-  final String webPageTitle;
   final String url;
+  final String webPageTitle;
   const AboutMenuItemWidget({
     @required this.title,
-    @required this.webPageTitle,
     @required this.url,
+    this.webPageTitle,
     Key key,
   }) : super(key: key);
 
@@ -120,7 +117,7 @@ class AboutMenuItemWidget extends StatelessWidget {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (BuildContext context) {
-              return WebPage(webPageTitle, url);
+              return WebPage(webPageTitle ?? title, url);
             },
           ),
         );
