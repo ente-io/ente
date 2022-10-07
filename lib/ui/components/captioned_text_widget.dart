@@ -1,4 +1,3 @@
-// leading icon can be passed without specifing size, this component sets size to 20x20
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
@@ -19,7 +18,8 @@ class CaptionedTextWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTheme = Theme.of(context).colorScheme.enteTheme;
+    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
+    final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
 
     return Flexible(
       child: Padding(
@@ -31,27 +31,17 @@ class CaptionedTextWidget extends StatelessWidget {
                 text: TextSpan(
                   style: textStyle ??
                       (makeTextBold
-                          ? enteTheme.textTheme.bodyBold
-                              .copyWith(color: textColor)
-                          : enteTheme.textTheme.body
-                              .copyWith(color: textColor)),
+                          ? enteTextTheme.bodyBold.copyWith(color: textColor)
+                          : enteTextTheme.body.copyWith(color: textColor)),
                   children: [
                     TextSpan(
                       text: title,
                     ),
                     subTitle != null
                         ? TextSpan(
-                            text: ' \u2022 ',
-                            style: enteTheme.textTheme.small.copyWith(
-                              color: enteTheme.colorScheme.textMuted,
-                            ),
-                          )
-                        : const TextSpan(text: ''),
-                    subTitle != null
-                        ? TextSpan(
-                            text: subTitle,
-                            style: enteTheme.textTheme.small.copyWith(
-                              color: enteTheme.colorScheme.textMuted,
+                            text: ' \u2022 $subTitle',
+                            style: enteTextTheme.small.copyWith(
+                              color: enteColorScheme.textMuted,
                             ),
                           )
                         : const TextSpan(text: ''),

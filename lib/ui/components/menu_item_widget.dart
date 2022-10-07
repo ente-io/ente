@@ -2,12 +2,13 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
-// trailing icon can be passed without size as default size set by flutter is what this component expects
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
   final bool isHeaderOfExpansion;
+// leading icon can be passed without specifing size of icon, this component sets size to 20x20 irrespective of passed icon's size
   final IconData? leadingIcon;
   final Color? leadingIconColor;
+// trailing icon can be passed without size as default size set by flutter is what this component expects
   final IconData? trailingIcon;
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;

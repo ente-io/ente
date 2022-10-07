@@ -27,12 +27,13 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-          color: Theme.of(context)
-              .colorScheme
-              .enteTheme
-              .colorScheme
-              .backgroundElevated,
-          child: _getBody(context)),
+        color: Theme.of(context)
+            .colorScheme
+            .enteTheme
+            .colorScheme
+            .backgroundElevated,
+        child: _getBody(context),
+      ),
     );
   }
 
