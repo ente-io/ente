@@ -70,12 +70,12 @@ Future<List<Tuple2<AssetPathEntity, String>>>
         const OrderOption(type: OrderOptionType.createDate, asc: false),
   );
   for (AssetPathEntity pathEntity in pathEntities) {
-    //todo: test and handle empty album case
     final latestEntity = await pathEntity.getAssetListPaged(
       page: 0,
       size: 1,
     );
-    final String localCoverID = latestEntity.first.id;
+    final String localCoverID =
+        latestEntity.isEmpty ? '' : latestEntity.first.id;
     result.add(Tuple2(pathEntity, localCoverID));
   }
   return result;
