@@ -112,9 +112,19 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                 ),
           widget.captionedTextWidget,
           widget.expandableController != null
-              ? _isExpanded()
-                  ? const SizedBox.shrink()
-                  : Icon(widget.trailingIcon)
+              ? AnimatedOpacity(
+                  duration: const Duration(milliseconds: 100),
+                  opacity: isExpanded! ? 0 : 1,
+                  child: AnimatedSwitcher(
+                    transitionBuilder: (child, animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    duration: const Duration(milliseconds: 200),
+                    child: isExpanded!
+                        ? const SizedBox.shrink()
+                        : Icon(widget.trailingIcon),
+                  ),
+                )
               : widget.trailingIcon != null
                   ? Icon(
                       widget.trailingIcon,
@@ -126,9 +136,5 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ],
       ),
     );
-  }
-
-  bool _isExpanded() {
-    return widget.expandableController!.value;
   }
 }
