@@ -71,11 +71,22 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   Widget menuItemWidget(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    return Container(
+    final borderRadius = Radius.circular(widget.borderRadius);
+    final isExpanded = widget.expandableController?.value;
+    final bottomBorderRadius = isExpanded != null && isExpanded
+        ? const Radius.circular(0)
+        : borderRadius;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(widget.borderRadius),
+        borderRadius: BorderRadius.only(
+          topLeft: borderRadius,
+          topRight: borderRadius,
+          bottomLeft: bottomBorderRadius,
+          bottomRight: bottomBorderRadius,
+        ),
         color: widget.menuItemColor,
       ),
       child: Row(
