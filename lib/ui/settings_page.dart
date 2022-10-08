@@ -110,15 +110,49 @@ class SettingsPage extends StatelessWidget {
     );
 
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 428),
-            child: Column(
-              children: contents,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TitleBarWidget(),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 428),
+                child: Column(
+                  children: contents,
+                ),
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class TitleBarWidget extends StatelessWidget {
+  const TitleBarWidget({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 0, 20, 0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+              onPressed: () {},
+              icon: const Icon(Icons.keyboard_double_arrow_left_outlined),
+            ),
+            Text(
+              '2,532 memories',
+              style: getEnteTextTheme(context).largeBold,
+            ),
+          ],
         ),
       ),
     );
