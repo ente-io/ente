@@ -35,7 +35,6 @@ export const getAutoCompleteSuggestions =
             ...getDateSuggestion(searchPhrase),
             ...getCollectionSuggestion(searchPhrase, collections),
             ...getFileSuggestion(searchPhrase, files),
-            ...(await getLocationSuggestions(searchPhrase)),
         ];
 
         const previewImageAppendedOptions: SearchOption[] = suggestions
@@ -166,6 +165,7 @@ function getFileSuggestion(
     }));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getLocationSuggestions(searchPhrase: string) {
     const locationResults = await searchLocation(searchPhrase);
 
