@@ -272,7 +272,6 @@ function PhotoSwipe(props: Iprops) {
         deletedFileIds.add(file.id);
         setDeletedFileIds(new Set(deletedFileIds));
         await trashFiles([file]);
-        setIsFav(true);
         needUpdate.current = true;
     };
 
