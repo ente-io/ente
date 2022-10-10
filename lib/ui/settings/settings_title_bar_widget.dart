@@ -39,11 +39,11 @@ class SettingsTitleBarWidget extends StatelessWidget {
                 if (InheritedUserDetails.of(context) == null) {
                   logger.severe(
                     (InheritedUserDetails).toString() +
-                        'not found before ' +
+                        ' not found before ' +
                         (SettingsTitleBarWidget).toString() +
                         ' on tree',
                   );
-                  return const SizedBox.shrink();
+                  throw Error();
                 }
                 if (snapshot.hasData) {
                   final userDetails = snapshot.data as UserDetails;

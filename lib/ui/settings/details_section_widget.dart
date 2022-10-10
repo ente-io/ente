@@ -4,6 +4,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
 
@@ -42,11 +43,11 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     if (inheritedUserDetails == null) {
       _logger.severe(
         (InheritedUserDetails).toString() +
-            'not found before ' +
+            ' not found before ' +
             (_DetailsSectionWidgetState).toString() +
             ' on tree',
       );
-      return const SizedBox.shrink();
+      throw Error();
     } else {
       return GestureDetector(
         behavior: HitTestBehavior.translucent,
