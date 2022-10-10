@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -21,7 +23,14 @@ class SettingsTitleBarWidget extends StatelessWidget {
           children: [
             IconButton(
               visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-              onPressed: () {},
+              onPressed: () {
+                Bus.instance.fire(
+                  TabChangedEvent(
+                    0,
+                    TabChangedEventSource.settingsTitleBar,
+                  ),
+                );
+              },
               icon: const Icon(Icons.keyboard_double_arrow_left_outlined),
             ),
             FutureBuilder(
