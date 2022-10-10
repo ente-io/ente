@@ -82,6 +82,9 @@ const darkThemeOptions = createTheme({
                 body: {
                     fontFamily: ['Inter', 'sans-serif'].join(','),
                     letterSpacing: '-0.011em',
+                    '::-webkit-scrollbar-thumb': {
+                        backgroundColor: 'rgba(256, 256, 256, 0.12)',
+                    },
                 },
                 strong: { fontWeight: 900 },
             },
