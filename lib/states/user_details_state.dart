@@ -55,13 +55,6 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
       );
 
   void _fetchUserDetails() {
-    // UserService.instance.getUserDetailsV2(memoryCount: true).then((details) {
-    //   if (mounted) {
-    //     setState(() {
-    //       userDetails = details;
-    //     });
-    //   }
-    // });
     userDetails = UserService.instance.getUserDetailsV2(memoryCount: true);
     if (mounted) {
       setState(() {});

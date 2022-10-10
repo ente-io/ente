@@ -1,14 +1,10 @@
 // @dart=2.9
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/tab_changed_event.dart';
-import 'package:photos/events/user_details_changed_event.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/models/user_details.dart';
-import 'package:photos/services/user_service.dart';
+import 'package:photos/states/user_details_state.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
@@ -21,25 +17,13 @@ class DetailsSectionWidget extends StatefulWidget {
 }
 
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
-  UserDetails _userDetails;
-  StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
-  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
+  // StreamSubscription<UserDetailsChangedEvent> userDetailsChangedEvent;
+  // StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   Image _background;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserDetails();
-    _userDetailsChangedEvent =
-        Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
-      _fetchUserDetails();
-    });
-    _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.selectedIndex == 3) {
-        _fetchUserDetails();
-      }
-    });
     _background = const Image(
       image: AssetImage("assets/storage_card_background.png"),
       fit: BoxFit.fill,
@@ -54,25 +38,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     precacheImage(_background.image, context);
   }
 
-  void _fetchUserDetails() {
-    UserService.instance.getUserDetailsV2(memoryCount: true).then((details) {
-      if (mounted) {
-        setState(() {
-          _userDetails = details;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _userDetailsChangedEvent.cancel();
-    _tabChangedEventSubscription.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final logger = Logger((_DetailsSectionWidgetState).toString());
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () async {
@@ -84,11 +52,24 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
           ),
         );
       },
-      child: getContainer(),
+      // child: getContainer(),
+      child: FutureBuilder(
+        future: InheritedUserDetails.of(context).userDetails,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            return getContainer(snapshot.data);
+          }
+          if (snapshot.hasError) {
+            logger.severe('failed to load user details', snapshot.error);
+            return const SizedBox.shrink();
+          }
+          return const EnteLoadingWidget();
+        },
+      ),
     );
   }
 
-  Widget getContainer() {
+  Widget getContainer(UserDetails userDetails) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 428, maxHeight: 175),
       child: Stack(
@@ -101,7 +82,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               child: _background,
             ),
           ),
-          _userDetails == null
+          userDetails == null
               ? const EnteLoadingWidget()
               : Padding(
                   padding: const EdgeInsets.only(
@@ -131,7 +112,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                     ),
                               ),
                               Text(
-                                "${convertBytesToReadableFormat(_userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(_userDetails.getTotalStorage())} free",
+                                "${convertBytesToReadableFormat(userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(userDetails.getTotalStorage())} free",
                                 style: Theme.of(context)
                                     .textTheme
                                     .headline5
@@ -155,16 +136,16 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 Container(
                                   color: Colors.white.withOpacity(0.75),
                                   width: MediaQuery.of(context).size.width *
-                                      ((_userDetails
+                                      ((userDetails
                                               .getFamilyOrPersonalUsage()) /
-                                          _userDetails.getTotalStorage()),
+                                          userDetails.getTotalStorage()),
                                   height: 4,
                                 ),
                                 Container(
                                   color: Colors.white,
                                   width: MediaQuery.of(context).size.width *
-                                      (_userDetails.usage /
-                                          _userDetails.getTotalStorage()),
+                                      (userDetails.usage /
+                                          userDetails.getTotalStorage()),
                                   height: 4,
                                 ),
                               ],
@@ -175,7 +156,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                _userDetails.isPartOfFamily()
+                                userDetails.isPartOfFamily()
                                     ? Row(
                                         children: [
                                           Container(
@@ -227,7 +208,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                         ],
                                       )
                                     : Text(
-                                        "${convertBytesToReadableFormat(_userDetails.getFamilyOrPersonalUsage())} used",
+                                        "${convertBytesToReadableFormat(userDetails.getFamilyOrPersonalUsage())} used",
                                         style: Theme.of(context)
                                             .textTheme
                                             .bodyText1
@@ -239,7 +220,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 Padding(
                                   padding: const EdgeInsets.only(right: 16.0),
                                   child: Text(
-                                    "${NumberFormat().format(_userDetails.fileCount)} Memories",
+                                    "${NumberFormat().format(userDetails.fileCount)} Memories",
                                     style: Theme.of(context)
                                         .textTheme
                                         .bodyText1
