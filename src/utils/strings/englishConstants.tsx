@@ -433,7 +433,7 @@ const englishConstants = {
         'This video cannot be played on your browser',
     METADATA: 'Metadata',
     INFO: 'Info',
-    FILE_ID: 'File id',
+    FILE_ID: 'File ID',
     FILE_NAME: 'File name',
     CREATION_TIME: 'Creation time',
     UPDATED_ON: 'Updated on',
