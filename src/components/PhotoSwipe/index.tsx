@@ -376,6 +376,16 @@ function PhotoSwipe(props: Iprops) {
                                 className="pswp__button pswp__button--close"
                                 title={constants.CLOSE}
                             />
+                            <button
+                                className="pswp__button pswp__button--custom"
+                                title={constants.DELETE}
+                                onClick={() => {
+                                    confirmTrashFile(
+                                        photoSwipe?.currItem as EnteFile
+                                    );
+                                }}>
+                                <DeleteIcon fontSize="small" />
+                            </button>
 
                             {props.enableDownload && (
                                 <button
@@ -398,6 +408,11 @@ function PhotoSwipe(props: Iprops) {
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
+                                        title={
+                                            isFav
+                                                ? constants.UNFAVORITE
+                                                : constants.FAVORITE
+                                        }
                                         className="pswp__button pswp__button--custom"
                                         onClick={() => {
                                             onFavClick(photoSwipe?.currItem);
@@ -409,15 +424,7 @@ function PhotoSwipe(props: Iprops) {
                                         )}
                                     </button>
                                 )}
-                            <button
-                                className="pswp__button pswp__button--custom"
-                                onClick={() => {
-                                    confirmTrashFile(
-                                        photoSwipe?.currItem as EnteFile
-                                    );
-                                }}>
-                                <DeleteIcon fontSize="small" />
-                            </button>
+
                             {!props.isSharedCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"

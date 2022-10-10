@@ -154,6 +154,8 @@ const englishConstants = {
         'Selected files will be permanently deleted from your ente account.',
     DELETE_FILE: 'Delete files',
     DELETE: 'Delete',
+    FAVORITE: 'Favorite',
+    UNFAVORITE: 'Unfavorite',
     MULTI_FOLDER_UPLOAD: 'Multiple folders detected',
     UPLOAD_STRATEGY_CHOICE: 'Would you like to upload them into',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'A single album',
