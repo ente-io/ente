@@ -247,6 +247,8 @@ export function PhotoList({
         filteredData,
         showAppDownloadBanner,
         publicCollectionGalleryContext.accessedThroughSharedURL,
+        galleryContext.photoListHeader,
+        publicCollectionGalleryContext.photoListHeader,
     ]);
 
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
