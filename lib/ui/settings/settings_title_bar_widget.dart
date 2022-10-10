@@ -6,17 +6,12 @@ import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 
-class SettingsTitleBarWidget extends StatefulWidget {
+class SettingsTitleBarWidget extends StatelessWidget {
   const SettingsTitleBarWidget({Key? key}) : super(key: key);
 
   @override
-  State<SettingsTitleBarWidget> createState() => _SettingsTitleBarWidgetState();
-}
-
-class _SettingsTitleBarWidgetState extends State<SettingsTitleBarWidget> {
-  @override
   Widget build(BuildContext context) {
-    final logger = Logger((_SettingsTitleBarWidgetState).toString());
+    final logger = Logger((SettingsTitleBarWidget).toString());
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
@@ -36,7 +31,7 @@ class _SettingsTitleBarWidgetState extends State<SettingsTitleBarWidget> {
                   logger.severe(
                     (InheritedUserDetails).toString() +
                         'not found before ' +
-                        (_SettingsTitleBarWidgetState).toString() +
+                        (SettingsTitleBarWidget).toString() +
                         ' on tree',
                   );
                   return const SizedBox.shrink();
