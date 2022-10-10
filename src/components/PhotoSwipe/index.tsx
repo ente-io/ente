@@ -270,11 +270,10 @@ function PhotoSwipe(props: Iprops) {
     const trashFile = async (file: EnteFile) => {
         const { deletedFileIds, setDeletedFileIds } = props;
         deletedFileIds.add(file.id);
-        setDeletedFileIds(deletedFileIds);
+        setDeletedFileIds(new Set(deletedFileIds));
         await trashFiles([file]);
         setIsFav(true);
         needUpdate.current = true;
-        photoSwipe.next();
     };
 
     const confirmTrashFile = (file: EnteFile) =>
@@ -287,7 +286,7 @@ function PhotoSwipe(props: Iprops) {
                 photoSwipe.items.push(item);
             });
             photoSwipe.invalidateCurrItems();
-            if ((photoSwipe as any).isOpen()) {
+            if (isOpen) {
                 photoSwipe.updateSize(true);
             }
         }

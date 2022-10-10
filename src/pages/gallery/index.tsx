@@ -498,7 +498,7 @@ export default function Gallery() {
                     selectedFiles.forEach((file) =>
                         deletedFileIds.add(file.id)
                     );
-                    return deletedFileIds;
+                    return new Set(deletedFileIds);
                 });
             } else {
                 await trashFiles(selectedFiles);
