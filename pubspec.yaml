@@ -87,7 +87,7 @@ dependencies:
   path: #dart
   path_provider: ^2.0.1
   pedantic: ^1.9.2
-  photo_manager: 2.1.4
+  photo_manager: ^2.4.0
   photo_view: ^0.14.0
   pinput: ^1.2.2
   provider: ^6.0.0
