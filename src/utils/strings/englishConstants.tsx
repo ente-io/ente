@@ -147,9 +147,8 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
     WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
-    CONFIRM_DELETE: 'Confirm deletion',
-    DELETE_MESSAGE: `The selected files will be permanently deleted and can't be restored `,
     TRASH_FILES_TITLE: 'Delete files?',
+    TRASH_FILE_TITLE: 'Delete file?',
     DELETE_FILES_TITLE: 'Delete immediately?',
     DELETE_FILES_MESSAGE:
         'Selected files will be permanently deleted from your ente account.',
@@ -569,6 +568,8 @@ const englishConstants = {
     MOVE_TO_TRASH: 'Move to trash',
     TRASH_FILES_MESSAGE:
         'Selected files will be removed from all albums and moved to trash.',
+    TRASH_FILE_MESSAGE:
+        'The file will be removed from all albums and moved to trash.',
     DELETE_PERMANENTLY: 'Delete permanently',
     RESTORE: 'Restore',
     CONFIRM_RESTORE: 'Confirm restoration',

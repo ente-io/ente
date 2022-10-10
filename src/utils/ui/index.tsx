@@ -30,3 +30,14 @@ export const getTrashFilesMessage = (
     },
     close: { text: constants.CANCEL },
 });
+
+export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
+    title: constants.TRASH_FILE_TITLE,
+    content: constants.TRASH_FILE_MESSAGE,
+    proceed: {
+        action: deleteFileHelper,
+        text: constants.MOVE_TO_TRASH,
+        variant: 'danger',
+    },
+    close: { text: constants.CANCEL },
+});
