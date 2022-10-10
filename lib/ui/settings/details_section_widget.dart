@@ -88,7 +88,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               }
               if (snapshot.hasError) {
                 _logger.severe('failed to load user details', snapshot.error);
-                return const SizedBox.shrink();
+                return const EnteLoadingWidget();
               }
               return const EnteLoadingWidget();
             },

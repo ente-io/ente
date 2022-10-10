@@ -54,7 +54,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
                 }
                 if (snapshot.hasError) {
                   logger.severe('failed to load user details');
-                  return const SizedBox.shrink();
+                  return const EnteLoadingWidget();
                 } else {
                   return const EnteLoadingWidget();
                 }
