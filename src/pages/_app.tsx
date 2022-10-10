@@ -239,7 +239,7 @@ export default function App({ Component, err }) {
             </Head>
 
             <ThemeProvider theme={darkThemeOptions}>
-                <CssBaseline />
+                <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <MessageContainer>
                     {offline && constants.OFFLINE_MSG}
