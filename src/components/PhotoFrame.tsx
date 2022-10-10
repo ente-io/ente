@@ -122,7 +122,10 @@ const PhotoFrame = ({
                 h: window.innerHeight,
             }))
             .filter((item) => {
-                if (deletedFileIds?.has(item.id)) {
+                if (
+                    deletedFileIds?.has(item.id) &&
+                    activeCollection !== TRASH_SECTION
+                ) {
                     return false;
                 }
                 if (
