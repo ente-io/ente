@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
@@ -16,6 +17,7 @@ import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/details_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
+import 'package:photos/ui/settings/settings_title_bar_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
@@ -109,48 +111,22 @@ class SettingsPage extends StatelessWidget {
       ),
     );
 
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TitleBarWidget(),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 428),
-                child: Column(
-                  children: contents,
+    return UserDetailsStateWidget(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SettingsTitleBarWidget(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 428),
+                  child: Column(
+                    children: contents,
+                  ),
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class TitleBarWidget extends StatelessWidget {
-  const TitleBarWidget({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 20, 0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard_double_arrow_left_outlined),
-            ),
-            Text(
-              '2,532 memories',
-              style: getEnteTextTheme(context).largeBold,
             ),
           ],
         ),

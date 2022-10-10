@@ -8,7 +8,7 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
-  const DetailsSectionWidget({required Key key}) : super(key: key);
+  const DetailsSectionWidget({Key? key}) : super(key: key);
 
   @override
   State<DetailsSectionWidget> createState() => _DetailsSectionWidgetState();
