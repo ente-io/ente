@@ -38,22 +38,27 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
         color: enteColorScheme.backgroundElevated2,
         borderRadius: BorderRadius.circular(4),
       ),
-      child: ExpandablePanel(
-        header: MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: widget.title,
-            makeTextBold: true,
-          ),
-          isHeaderOfExpansion: true,
-          leadingIcon: widget.leadingIcon,
-          trailingIcon: Icons.expand_more,
-          menuItemColor: enteColorScheme.fillFaint,
-          expandableController: expandableController,
-        ),
-        collapsed: const SizedBox.shrink(),
-        expanded: widget.selectionOptionsWidget,
-        theme: getExpandableTheme(context),
+      child: ExpandableNotifier(
         controller: expandableController,
+        child: ScrollOnExpand(
+          child: ExpandablePanel(
+            header: MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: widget.title,
+                makeTextBold: true,
+              ),
+              isHeaderOfExpansion: true,
+              leadingIcon: widget.leadingIcon,
+              trailingIcon: Icons.expand_more,
+              menuItemColor: enteColorScheme.fillFaint,
+              expandableController: expandableController,
+            ),
+            collapsed: const SizedBox.shrink(),
+            expanded: widget.selectionOptionsWidget,
+            theme: getExpandableTheme(context),
+            controller: expandableController,
+          ),
+        ),
       ),
     );
   }
