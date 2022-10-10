@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
@@ -40,6 +41,7 @@ class _DeviceFoldersGridViewWidgetState
 
   @override
   Widget build(BuildContext context) {
+    final logger = Logger((_DeviceFoldersGridViewWidgetState).toString());
     final bool isMigrationDone =
         LocalSyncService.instance.isDeviceFileMigrationDone();
     return Padding(
@@ -75,7 +77,8 @@ class _DeviceFoldersGridViewWidgetState
                         itemCount: snapshot.data.length,
                       );
               } else if (snapshot.hasError) {
-                return Text(snapshot.error.toString());
+                logger.severe("failed to load device galler", snapshot.error);
+                return const Text("Failed to load albums");
               } else {
                 return const EnteLoadingWidget();
               }
