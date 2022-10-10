@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -10,16 +8,14 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/data_util.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
-  const DetailsSectionWidget({Key key}) : super(key: key);
+  const DetailsSectionWidget({required Key key}) : super(key: key);
 
   @override
   State<DetailsSectionWidget> createState() => _DetailsSectionWidgetState();
 }
 
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
-  // StreamSubscription<UserDetailsChangedEvent> userDetailsChangedEvent;
-  // StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
-  Image _background;
+  late Image _background;
 
   @override
   void initState() {
@@ -41,32 +37,41 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   @override
   Widget build(BuildContext context) {
     final logger = Logger((_DetailsSectionWidgetState).toString());
-    return GestureDetector(
-      behavior: HitTestBehavior.translucent,
-      onTap: () async {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return getSubscriptionPage();
-            },
-          ),
-        );
-      },
-      // child: getContainer(),
-      child: FutureBuilder(
-        future: InheritedUserDetails.of(context).userDetails,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return getContainer(snapshot.data);
-          }
-          if (snapshot.hasError) {
-            logger.severe('failed to load user details', snapshot.error);
-            return const SizedBox.shrink();
-          }
-          return const EnteLoadingWidget();
+    final inheritedUserDetails = InheritedUserDetails.of(context);
+
+    if (inheritedUserDetails == null) {
+      logger.severe((InheritedUserDetails).toString() +
+          'not found before ' +
+          (_DetailsSectionWidgetState).toString() +
+          ' on tree');
+      return const SizedBox.shrink();
+    } else {
+      return GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () async {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return getSubscriptionPage();
+              },
+            ),
+          );
         },
-      ),
-    );
+        child: FutureBuilder(
+          future: inheritedUserDetails.userDetails,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return getContainer(snapshot.data as UserDetails);
+            }
+            if (snapshot.hasError) {
+              logger.severe('failed to load user details', snapshot.error);
+              return const SizedBox.shrink();
+            }
+            return const EnteLoadingWidget();
+          },
+        ),
+      );
+    }
   }
 
   Widget getContainer(UserDetails userDetails) {
@@ -82,162 +87,156 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               child: _background,
             ),
           ),
-          userDetails == null
-              ? const EnteLoadingWidget()
-              : Padding(
-                  padding: const EdgeInsets.only(
-                    top: 20,
-                    bottom: 20,
-                    left: 16,
-                    right: 16,
-                  ),
-                  child: Container(
-                    color: Colors.transparent,
+          Padding(
+            padding: const EdgeInsets.only(
+              top: 20,
+              bottom: 20,
+              left: 16,
+              right: 16,
+            ),
+            child: Container(
+              color: Colors.transparent,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Align(
+                    alignment: Alignment.topLeft,
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Align(
-                          alignment: Alignment.topLeft,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Storage",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .subtitle2
-                                    .copyWith(
-                                      color: Colors.white.withOpacity(0.7),
-                                    ),
-                              ),
-                              Text(
-                                "${convertBytesToReadableFormat(userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(userDetails.getTotalStorage())} free",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headline5
-                                    .copyWith(color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Stack(
-                              children: <Widget>[
-                                Container(
-                                  color: Colors.white.withOpacity(0.2),
-                                  width: MediaQuery.of(context).size.width,
-                                  height: 4,
-                                ),
-                                Container(
-                                  color: Colors.white.withOpacity(0.75),
-                                  width: MediaQuery.of(context).size.width *
-                                      ((userDetails
-                                              .getFamilyOrPersonalUsage()) /
-                                          userDetails.getTotalStorage()),
-                                  height: 4,
-                                ),
-                                Container(
-                                  color: Colors.white,
-                                  width: MediaQuery.of(context).size.width *
-                                      (userDetails.usage /
-                                          userDetails.getTotalStorage()),
-                                  height: 4,
-                                ),
-                              ],
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 8),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                userDetails.isPartOfFamily()
-                                    ? Row(
-                                        children: [
-                                          Container(
-                                            width: 8.71,
-                                            height: 8.99,
-                                            decoration: const BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                          const Padding(
-                                            padding: EdgeInsets.only(right: 4),
-                                          ),
-                                          Text(
-                                            "You",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1
-                                                .copyWith(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                ),
-                                          ),
-                                          const Padding(
-                                            padding: EdgeInsets.only(right: 12),
-                                          ),
-                                          Container(
-                                            width: 8.71,
-                                            height: 8.99,
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.white
-                                                  .withOpacity(0.75),
-                                            ),
-                                          ),
-                                          const Padding(
-                                            padding: EdgeInsets.only(right: 4),
-                                          ),
-                                          Text(
-                                            "Family",
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1
-                                                .copyWith(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                ),
-                                          ),
-                                        ],
-                                      )
-                                    : Text(
-                                        "${convertBytesToReadableFormat(userDetails.getFamilyOrPersonalUsage())} used",
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyText1
-                                            .copyWith(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                      ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 16.0),
-                                  child: Text(
-                                    "${NumberFormat().format(userDetails.fileCount)} Memories",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodyText1
-                                        .copyWith(
-                                          color: Colors.white,
-                                          fontSize: 12,
-                                        ),
+                        Text(
+                          "Storage",
+                          style:
+                              Theme.of(context).textTheme.subtitle2!.copyWith(
+                                    color: Colors.white.withOpacity(0.7),
                                   ),
-                                )
-                              ],
-                            ),
-                          ],
-                        )
+                        ),
+                        Text(
+                          "${convertBytesToReadableFormat(userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(userDetails.getTotalStorage())} free",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline5!
+                              .copyWith(color: Colors.white),
+                        ),
                       ],
                     ),
                   ),
-                ),
+                  Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Stack(
+                        children: <Widget>[
+                          Container(
+                            color: Colors.white.withOpacity(0.2),
+                            width: MediaQuery.of(context).size.width,
+                            height: 4,
+                          ),
+                          Container(
+                            color: Colors.white.withOpacity(0.75),
+                            width: MediaQuery.of(context).size.width *
+                                ((userDetails.getFamilyOrPersonalUsage()) /
+                                    userDetails.getTotalStorage()),
+                            height: 4,
+                          ),
+                          Container(
+                            color: Colors.white,
+                            width: MediaQuery.of(context).size.width *
+                                (userDetails.usage /
+                                    userDetails.getTotalStorage()),
+                            height: 4,
+                          ),
+                        ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          userDetails.isPartOfFamily()
+                              ? Row(
+                                  children: [
+                                    Container(
+                                      width: 8.71,
+                                      height: 8.99,
+                                      decoration: const BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                    ),
+                                    Text(
+                                      "You",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1!
+                                          .copyWith(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 12),
+                                    ),
+                                    Container(
+                                      width: 8.71,
+                                      height: 8.99,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withOpacity(0.75),
+                                      ),
+                                    ),
+                                    const Padding(
+                                      padding: EdgeInsets.only(right: 4),
+                                    ),
+                                    Text(
+                                      "Family",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1!
+                                          .copyWith(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                          ),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  "${convertBytesToReadableFormat(userDetails.getFamilyOrPersonalUsage())} used",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyText1!
+                                      .copyWith(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                      ),
+                                ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 16.0),
+                            child: Text(
+                              "${NumberFormat().format(userDetails.fileCount)} Memories",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyText1!
+                                  .copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
           const Align(
             alignment: Alignment.centerRight,
             child: Icon(
