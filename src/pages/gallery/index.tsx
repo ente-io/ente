@@ -180,7 +180,9 @@ export default function Gallery() {
         useState<SearchResultSummary>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
-    const [deleted, setDeleted] = useState<number[]>([]);
+    const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
@@ -492,10 +494,12 @@ export default function Gallery() {
             const selectedFiles = getSelectedFiles(selected, files);
             if (permanent) {
                 await deleteFromTrash(selectedFiles.map((file) => file.id));
-                setDeleted([
-                    ...deleted,
-                    ...selectedFiles.map((file) => file.id),
-                ]);
+                setDeletedFileIds((deletedFileIds) => {
+                    selectedFiles.forEach((file) =>
+                        deletedFileIds.add(file.id)
+                    );
+                    return deletedFileIds;
+                });
             } else {
                 await trashFiles(selectedFiles);
             }
@@ -698,7 +702,8 @@ export default function Gallery() {
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}
-                    deleted={deleted}
+                    deletedFileIds={deletedFileIds}
+                    setDeletedFileIds={setDeletedFileIds}
                     activeCollection={activeCollection}
                     isSharedCollection={isSharedCollection(
                         activeCollection,

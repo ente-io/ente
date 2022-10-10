@@ -60,7 +60,8 @@ interface Props {
     openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
-    deleted?: number[];
+    deletedFileIds?: Set<number>;
+    setDeletedFileIds?: (value: Set<number>) => void;
     activeCollection: number;
     isSharedCollection?: boolean;
     enableDownload?: boolean;
@@ -86,7 +87,8 @@ const PhotoFrame = ({
     isInSearchMode,
     search,
     resetSearch,
-    deleted,
+    deletedFileIds,
+    setDeletedFileIds,
     activeCollection,
     isSharedCollection,
     enableDownload,
@@ -172,7 +174,7 @@ const PhotoFrame = ({
                 h: window.innerHeight,
             }))
             .filter((item) => {
-                if (deleted?.includes(item.id)) {
+                if (deletedFileIds?.has(item.id)) {
                     return false;
                 }
                 if (
@@ -230,7 +232,7 @@ const PhotoFrame = ({
                 }
                 return false;
             });
-    }, [files, deleted, search, activeCollection]);
+    }, [files, deletedFileIds, search, activeCollection]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -603,6 +605,8 @@ const PhotoFrame = ({
                         onClose={handleClose}
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
+                        deletedFileIds={deletedFileIds}
+                        setDeletedFileIds={setDeletedFileIds}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
                         enableDownload={enableDownload}
