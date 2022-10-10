@@ -601,7 +601,28 @@ packages:
       name: in_app_purchase
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.2"
+    version: "3.0.7"
+  in_app_purchase_android:
+    dependency: transitive
+    description:
+      name: in_app_purchase_android
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.3+5"
+  in_app_purchase_platform_interface:
+    dependency: transitive
+    description:
+      name: in_app_purchase_platform_interface
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.3.2"
+  in_app_purchase_storekit:
+    dependency: transitive
+    description:
+      name: in_app_purchase_storekit
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.2+2"
   intl:
     dependency: "direct main"
     description:

@@ -68,7 +68,7 @@ dependencies:
   image: ^3.0.2
   image_editor: ^1.0.0
   implicitly_animated_reorderable_list: ^0.4.0
-  in_app_purchase: ^0.5.2
+  in_app_purchase: ^3.0.7
   intl: ^0.17.0
   like_button: ^2.0.2
   loading_animations: ^2.1.0
