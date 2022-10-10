@@ -388,7 +388,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 showErrorDialog(
                   context,
                   "Sorry",
-                  "you cannot downgrade to this plan",
+                  "You cannot downgrade to this plan",
                 );
                 return;
               }
