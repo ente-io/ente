@@ -492,14 +492,12 @@ export default function Gallery() {
         startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, files);
+            setDeletedFileIds((deletedFileIds) => {
+                selectedFiles.forEach((file) => deletedFileIds.add(file.id));
+                return new Set(deletedFileIds);
+            });
             if (permanent) {
                 await deleteFromTrash(selectedFiles.map((file) => file.id));
-                setDeletedFileIds((deletedFileIds) => {
-                    selectedFiles.forEach((file) =>
-                        deletedFileIds.add(file.id)
-                    );
-                    return new Set(deletedFileIds);
-                });
             } else {
                 await trashFiles(selectedFiles);
             }
