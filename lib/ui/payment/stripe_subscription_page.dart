@@ -289,7 +289,9 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   RichText(
                     text: TextSpan(
                       text: "Manage family",
-                      style: Theme.of(context).textTheme.overline,
+                      style: Theme.of(context).textTheme.bodyMedium.copyWith(
+                            decoration: TextDecoration.underline,
+                          ),
                     ),
                     textAlign: TextAlign.center,
                   ),
