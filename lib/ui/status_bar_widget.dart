@@ -10,9 +10,10 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
+import 'package:photos/ui/components/brand_title_widget.dart';
+import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_warning_widget.dart';
 import 'package:photos/ui/header_error_widget.dart';
-import 'package:photos/ui/viewer/search/search_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 const double kContainerHeight = 36;
@@ -80,32 +81,12 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Stack(
-          children: [
-            AnimatedOpacity(
-              opacity: _showStatus
-                  ? _showErrorBanner
-                      ? 1
-                      : 0
-                  : 1,
-              duration: const Duration(milliseconds: 1000),
-              child: const BrandingWidget(),
-            ),
-            AnimatedOpacity(
-              opacity: _showStatus ? 1 : 0,
-              duration: const Duration(milliseconds: 1000),
-              child: const SyncStatusWidget(),
-            ),
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                height: kContainerHeight,
-                child: const SearchIconWidget(),
-              ),
-            ),
-          ],
+        HomeHeaderWidget(
+          centerWidget: _showStatus
+              ? _showErrorBanner
+                  ? const BrandTitleWidget(size: SizeVarient.medium)
+                  : const SyncStatusWidget()
+              : const BrandTitleWidget(size: SizeVarient.medium),
         ),
         AnimatedOpacity(
           opacity: _showStatus ? 1 : 0,
@@ -197,7 +178,6 @@ class RefreshIndicatorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: kContainerHeight,
-      width: double.infinity,
       alignment: Alignment.center,
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
