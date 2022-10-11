@@ -33,6 +33,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
     return Hero(
       tag: "search_icon",
       child: IconButton(
+        visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
         onPressed: () {
           Navigator.push(
             context,
