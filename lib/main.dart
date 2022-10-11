@@ -7,7 +7,6 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
@@ -128,7 +127,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } else {
     AppLifecycleService.instance.onAppInForeground('init via: $via');
   }
-  InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
   await NotificationService.instance.init();
   await Network.instance.init();

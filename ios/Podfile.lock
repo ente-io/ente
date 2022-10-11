@@ -100,7 +100,7 @@ PODS:
     - GoogleUtilities/Logger
   - image_editor (1.0.0):
     - Flutter
-  - in_app_purchase (0.0.1):
+  - in_app_purchase_storekit (0.0.1):
     - Flutter
   - libwebp (1.2.3):
     - libwebp/demux (= 1.2.3)
@@ -190,7 +190,7 @@ DEPENDENCIES:
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_editor (from `.symlinks/plugins/image_editor/ios`)
-  - in_app_purchase (from `.symlinks/plugins/in_app_purchase/ios`)
+  - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
@@ -266,8 +266,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   image_editor:
     :path: ".symlinks/plugins/image_editor/ios"
-  in_app_purchase:
-    :path: ".symlinks/plugins/in_app_purchase/ios"
+  in_app_purchase_storekit:
+    :path: ".symlinks/plugins/in_app_purchase_storekit/ios"
   local_auth:
     :path: ".symlinks/plugins/local_auth/ios"
   motionphoto:
@@ -330,7 +330,7 @@ SPEC CHECKSUMS:
   GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f
   GoogleUtilities: 1d20a6ad97ef46f67bbdec158ce00563a671ebb7
   image_editor: eab82a302a6623a866da5145b7c4c0ee8a4ffbb4
-  in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
+  in_app_purchase_storekit: d7fcf4646136ec258e237872755da8ea6c1b6096
   libwebp: 60305b2e989864154bd9be3d772730f08fc6a59c
   local_auth: 1740f55d7af0a2e2a8684ce225fe79d8931e808c
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
