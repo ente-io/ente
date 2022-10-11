@@ -6,9 +6,11 @@ typedef OnChangedCallBack = void Function(bool);
 class ToggleSwitchWidget extends StatefulWidget {
   final bool value;
   final OnChangedCallBack onChanged;
-  const ToggleSwitchWidget(
-      {required this.value, required this.onChanged, Key? key})
-      : super(key: key);
+  const ToggleSwitchWidget({
+    required this.value,
+    required this.onChanged,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<ToggleSwitchWidget> createState() => _ToggleSwitchWidgetState();

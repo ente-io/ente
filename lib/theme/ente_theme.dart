@@ -1,4 +1,5 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/text_style.dart';
@@ -34,3 +35,11 @@ EnteTheme darkTheme = EnteTheme(
   shadowMenu: shadowMenuDark,
   shadowButton: shadowButtonDark,
 );
+
+EnteColorScheme getEnteColorScheme(BuildContext context) {
+  return Theme.of(context).colorScheme.enteTheme.colorScheme;
+}
+
+EnteTextTheme getEnteTextTheme(BuildContext context) {
+  return Theme.of(context).colorScheme.enteTheme.textTheme;
+}

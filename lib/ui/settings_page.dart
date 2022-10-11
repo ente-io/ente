@@ -5,8 +5,10 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
@@ -15,6 +17,7 @@ import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/details_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
+import 'package:photos/ui/settings/settings_title_bar_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
@@ -25,24 +28,22 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
       body: Container(
-        color: Theme.of(context)
-            .colorScheme
-            .enteTheme
-            .colorScheme
-            .backgroundElevated,
-        child: _getBody(context),
+        color: enteColorScheme.backgroundElevated,
+        child: _getBody(context, enteColorScheme),
       ),
     );
   }
 
-  Widget _getBody(BuildContext context) {
+  Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
     final hasLoggedIn = Configuration.instance.getToken() != null;
+    final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
     contents.add(
       Container(
-        padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Align(
           alignment: Alignment.centerLeft,
           child: AnimatedBuilder(
@@ -51,10 +52,10 @@ class SettingsPage extends StatelessWidget {
             builder: (BuildContext context, Widget child) {
               return Text(
                 emailNotifier.value,
-                style: Theme.of(context)
-                    .textTheme
-                    .subtitle1
-                    .copyWith(overflow: TextOverflow.ellipsis),
+                style: enteTextTheme.body.copyWith(
+                  color: colorScheme.textMuted,
+                  overflow: TextOverflow.ellipsis,
+                ),
               );
             },
           ),
@@ -110,16 +111,24 @@ class SettingsPage extends StatelessWidget {
       ),
     );
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 428),
-            child: Column(
-              children: contents,
+    return UserDetailsStateWidget(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SettingsTitleBarWidget(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 428),
+                  child: Column(
+                    children: contents,
+                  ),
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

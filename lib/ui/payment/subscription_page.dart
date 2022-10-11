@@ -171,7 +171,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       }).toList();
       _freePlan = billingPlans.freePlan;
       _hasLoadedData = true;
-      setState(() {});
+      if (mounted) {
+        setState(() {});
+      }
     });
   }
 

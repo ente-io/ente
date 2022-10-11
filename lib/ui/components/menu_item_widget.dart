@@ -71,11 +71,22 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   Widget menuItemWidget(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    return Container(
+    final borderRadius = Radius.circular(widget.borderRadius);
+    final isExpanded = widget.expandableController?.value;
+    final bottomBorderRadius = isExpanded != null && isExpanded
+        ? const Radius.circular(0)
+        : borderRadius;
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(widget.borderRadius),
+        borderRadius: BorderRadius.only(
+          topLeft: borderRadius,
+          topRight: borderRadius,
+          bottomLeft: bottomBorderRadius,
+          bottomRight: bottomBorderRadius,
+        ),
         color: widget.menuItemColor,
       ),
       child: Row(
@@ -101,9 +112,19 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                 ),
           widget.captionedTextWidget,
           widget.expandableController != null
-              ? _isExpanded()
-                  ? const SizedBox.shrink()
-                  : Icon(widget.trailingIcon)
+              ? AnimatedOpacity(
+                  duration: const Duration(milliseconds: 100),
+                  opacity: isExpanded! ? 0 : 1,
+                  child: AnimatedSwitcher(
+                    transitionBuilder: (child, animation) {
+                      return ScaleTransition(scale: animation, child: child);
+                    },
+                    duration: const Duration(milliseconds: 200),
+                    child: isExpanded!
+                        ? const SizedBox.shrink()
+                        : Icon(widget.trailingIcon),
+                  ),
+                )
               : widget.trailingIcon != null
                   ? Icon(
                       widget.trailingIcon,
@@ -115,9 +136,5 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ],
       ),
     );
-  }
-
-  bool _isExpanded() {
-    return widget.expandableController!.value;
   }
 }
