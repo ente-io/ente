@@ -94,10 +94,8 @@ dependencies:
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
   scrollable_positioned_list: ^0.2.2
-  sentry:
-    path: thirdparty/sentry-dart/dart
-  sentry_flutter:
-    path: thirdparty/sentry-dart/flutter
+  sentry: ^6.12.1
+  sentry_flutter: ^6.12.1
   share_plus: ^4.0.10
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3
