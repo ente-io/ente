@@ -29,16 +29,19 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   StreamSubscription<NotificationEvent> _notificationSubscription;
   bool _showStatus = false;
   bool _showErrorBanner = false;
+  Error _syncError;
 
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       if (event.status == SyncStatus.error) {
         setState(() {
+          _syncError = event.error;
           _showErrorBanner = true;
         });
       } else {
         setState(() {
+          _syncError = null;
           _showErrorBanner = false;
         });
       }
@@ -109,6 +112,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
           duration: const Duration(milliseconds: 1000),
           child: const Divider(),
         ),
+        _showErrorBanner
+            ? HeaderErrorWidget(error: _syncError)
+            : const SizedBox.shrink(),
         UserRemoteFlagService.instance.shouldShowRecoveryVerification()
             ? NotificationWarningWidget(
                 warningIcon: Icons.gpp_maybe,
@@ -165,14 +171,10 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
             _event.status == SyncStatus.completedFirstGalleryImport) &&
         (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
             kSleepDuration.inMicroseconds);
-    if (_event == null || isNotOutdatedEvent) {
+    if (_event == null ||
+        isNotOutdatedEvent ||
+        _event.status == SyncStatus.error) {
       return const SizedBox.shrink();
-    }
-    if (_event.status == SyncStatus.error) {
-      return Padding(
-        padding: const EdgeInsets.only(top: kContainerHeight + 8),
-        child: HeaderErrorWidget(error: _event.error),
-      );
     }
     if (_event.status == SyncStatus.completedBackup) {
       return const SyncStatusCompletedWidget();
