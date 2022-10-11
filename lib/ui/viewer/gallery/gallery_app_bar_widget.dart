@@ -136,11 +136,9 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       secondActionColor:
           Theme.of(context).colorScheme.enteTheme.colorScheme.warning700,
     );
-    // indicates user cancelled the rename request
     if (result != DialogUserChoice.secondChoice) {
       return;
     }
-
     final dialog = createProgressDialog(context, "Leaving album...");
     await dialog.show();
     try {
