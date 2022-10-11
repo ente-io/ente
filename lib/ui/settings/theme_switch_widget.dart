@@ -1,8 +1,13 @@
 // @dart=2.9
 
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:photos/ente_theme_data.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/settings/common_settings.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
   const ThemeSwitchWidget({Key key}) : super(key: key);
@@ -12,13 +17,14 @@ class ThemeSwitchWidget extends StatefulWidget {
 }
 
 class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
-  AdaptiveThemeMode themeMode;
+  AdaptiveThemeMode currentThemeMode;
+
   @override
   void initState() {
     super.initState();
     AdaptiveTheme.getThemeMode().then(
       (value) {
-        themeMode = value ?? AdaptiveThemeMode.system;
+        currentThemeMode = value ?? AdaptiveThemeMode.system;
         debugPrint('theme value $value');
         if (mounted) {
           setState(() => {});
@@ -28,43 +34,50 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return ExpandableMenuItemWidget(
+      title: "Theme",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Theme.of(context).brightness == Brightness.light
+          ? Icons.light_mode_outlined
+          : Icons.dark_mode_outlined,
+    );
+  }
+
+  Widget _getSectionOptions(BuildContext context) {
+    return Column(
+      children: [
+        sectionOptionSpacing,
+        _menuItem(context, AdaptiveThemeMode.light),
+        sectionOptionSpacing,
+        _menuItem(context, AdaptiveThemeMode.dark),
+        sectionOptionSpacing,
+        _menuItem(context, AdaptiveThemeMode.system),
+        sectionOptionSpacing,
+      ],
+    );
+  }
+
+  Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
+    return MenuItemWidget(
+      captionedTextWidget: CaptionedTextWidget(
+        title: toBeginningOfSentenceCase(themeMode.name),
+        textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
+      ),
+      isHeaderOfExpansion: false,
+      trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       onTap: () async {
-        await showCupertinoModalPopup(
-          context: context,
-          builder: (_) => CupertinoActionSheet(
-            title: Text(
-              "Theme",
-              style: Theme.of(context)
-                  .textTheme
-                  .headline4
-                  .copyWith(color: Colors.white),
-            ),
-            actions: [
-              for (var mode in AdaptiveThemeMode.values)
-                CupertinoActionSheetAction(
-                  child: Text(mode.modeName),
-                  onPressed: () async {
-                    AdaptiveTheme.of(context).setThemeMode(mode);
-                    themeMode = mode;
-                    Navigator.of(context, rootNavigator: true).pop();
-                    if (mounted) {
-                      setState(() => {});
-                    }
-                  },
-                ),
-            ],
-            cancelButton: CupertinoActionSheetAction(
-              child: const Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context, rootNavigator: true).pop();
-              },
-            ),
-          ),
-        );
+        AdaptiveTheme.of(context).setThemeMode(themeMode);
+        currentThemeMode = themeMode;
+        if (mounted) {
+          setState(() {});
+        }
       },
-      child: Text(themeMode?.modeName ?? ">"),
     );
   }
 }

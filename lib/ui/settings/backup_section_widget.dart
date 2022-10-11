@@ -2,7 +2,6 @@
 
 import 'dart:io';
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -12,9 +11,11 @@ import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
 import 'package:photos/utils/data_util.dart';
@@ -33,19 +34,23 @@ class BackupSectionWidget extends StatefulWidget {
 class BackupSectionWidgetState extends State<BackupSectionWidget> {
   @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: const SettingsSectionTitle("Backup"),
-      collapsed: Container(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
+    return ExpandableMenuItemWidget(
+      title: "Backup",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.backup_outlined,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
     final List<Widget> sectionOptions = [
-      GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () async {
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Backed up folders",
+        ),
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () {
           routeToPage(
             context,
             const BackupFolderSelectionPage(
@@ -53,93 +58,72 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             ),
           );
         },
-        child: const SettingsTextItem(
-          text: "Backed up folders",
-          icon: Icons.navigate_next,
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Backup over mobile data",
+        ),
+        trailingSwitch: ToggleSwitchWidget(
+          value: Configuration.instance.shouldBackupOverMobileData(),
+          onChanged: (value) async {
+            Configuration.instance.setBackupOverMobileData(value);
+            setState(() {});
+          },
         ),
       ),
-      sectionOptionDivider,
-      SizedBox(
-        height: 48,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Backup over mobile data",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            Switch.adaptive(
-              value: Configuration.instance.shouldBackupOverMobileData(),
-              onChanged: (value) async {
-                Configuration.instance.setBackupOverMobileData(value);
-                setState(() {});
-              },
-            ),
-          ],
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Backup videos",
+        ),
+        trailingSwitch: ToggleSwitchWidget(
+          value: Configuration.instance.shouldBackupVideos(),
+          onChanged: (value) async {
+            Configuration.instance.setShouldBackupVideos(value);
+            setState(() {});
+          },
         ),
       ),
-      sectionOptionDivider,
-      SizedBox(
-        height: 48,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Backup videos",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            Switch.adaptive(
-              value: Configuration.instance.shouldBackupVideos(),
-              onChanged: (value) async {
-                Configuration.instance.setShouldBackupVideos(value);
-                setState(() {});
-              },
-            ),
-          ],
-        ),
-      ),
+      sectionOptionSpacing,
     ];
     if (Platform.isIOS) {
       sectionOptions.addAll([
-        sectionOptionDivider,
-        SizedBox(
-          height: 48,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Disable auto lock",
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-              Switch.adaptive(
-                value: Configuration.instance.shouldKeepDeviceAwake(),
-                onChanged: (value) async {
-                  if (value) {
-                    final choice = await showChoiceDialog(
-                      context,
-                      "Disable automatic screen lock when ente is running?",
-                      "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
-                      firstAction: "No",
-                      secondAction: "Yes",
-                    );
-                    if (choice != DialogUserChoice.secondChoice) {
-                      return;
-                    }
-                  }
-                  await Configuration.instance.setShouldKeepDeviceAwake(value);
-                  setState(() {});
-                },
-              ),
-            ],
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Disable auto lock",
+          ),
+          trailingSwitch: ToggleSwitchWidget(
+            value: Configuration.instance.shouldKeepDeviceAwake(),
+            onChanged: (value) async {
+              if (value) {
+                final choice = await showChoiceDialog(
+                  context,
+                  "Disable automatic screen lock when ente is running?",
+                  "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
+                  firstAction: "No",
+                  secondAction: "Yes",
+                );
+                if (choice != DialogUserChoice.secondChoice) {
+                  return;
+                }
+              }
+              await Configuration.instance.setShouldKeepDeviceAwake(value);
+              setState(() {});
+            },
           ),
         ),
+        sectionOptionSpacing,
       ]);
     }
     sectionOptions.addAll(
       [
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Free up space",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final dialog = createProgressDialog(context, "Calculating...");
             await dialog.show();
@@ -160,20 +144,21 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                 "You've no files on this device that can be deleted",
               );
             } else {
-              final bool result = await routeToPage(context, FreeSpacePage(status));
+              final bool result =
+                  await routeToPage(context, FreeSpacePage(status));
               if (result == true) {
                 _showSpaceFreedDialog(status);
               }
             }
           },
-          child: const SettingsTextItem(
-            text: "Free up space",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Deduplicate files",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final dialog = createProgressDialog(context, "Calculating...");
             await dialog.show();
@@ -202,11 +187,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
               }
             }
           },
-          child: const SettingsTextItem(
-            text: "Deduplicate files",
-            icon: Icons.navigate_next,
-          ),
         ),
+        sectionOptionSpacing,
       ],
     );
     return Column(

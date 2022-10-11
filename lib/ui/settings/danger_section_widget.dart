@@ -1,60 +1,58 @@
 // @dart=2.9
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/delete_account_page.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class DangerSectionWidget extends StatefulWidget {
+class DangerSectionWidget extends StatelessWidget {
   const DangerSectionWidget({Key key}) : super(key: key);
 
   @override
-  State<DangerSectionWidget> createState() => _DangerSectionWidgetState();
-}
-
-class _DangerSectionWidgetState extends State<DangerSectionWidget> {
-  @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: const SettingsSectionTitle("Exit", color: Colors.red),
-      collapsed: Container(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
+    return ExpandableMenuItemWidget(
+      title: "Exit",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.logout_outlined,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Logout",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () {
-            _onLogoutTapped();
+            _onLogoutTapped(context);
           },
-          child:
-              const SettingsTextItem(text: "Logout", icon: Icons.navigate_next),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
-          onTap: () async {
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Delete account",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () {
             routeToPage(context, const DeleteAccountPage());
           },
-          child: const SettingsTextItem(
-            text: "Delete account",
-            icon: Icons.navigate_next,
-          ),
         ),
+        sectionOptionSpacing,
       ],
     );
   }
 
-  Future<void> _onLogoutTapped() async {
+  Future<void> _onLogoutTapped(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       title: const Text(
         "Logout",

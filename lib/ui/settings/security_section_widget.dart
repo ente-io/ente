@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:photos/core/configuration.dart';
@@ -14,9 +13,11 @@ import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/sessions_page.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key key}) : super(key: key);
@@ -49,11 +50,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: const SettingsSectionTitle("Security"),
-      collapsed: Container(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
+    return ExpandableMenuItemWidget(
+      title: "Security",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.local_police_outlined,
     );
   }
 
@@ -62,21 +62,16 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
-          const Padding(padding: EdgeInsets.all(2)),
-          SizedBox(
-            height: 48,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Two-factor",
-                  style: Theme.of(context).textTheme.subtitle1,
+          sectionOptionSpacing,
+          FutureBuilder(
+            future: UserService.instance.fetchTwoFactorStatus(),
+            builder: (_, snapshot) {
+              return MenuItemWidget(
+                captionedTextWidget: const CaptionedTextWidget(
+                  title: "Two-factor",
                 ),
-                FutureBuilder(
-                  future: UserService.instance.fetchTwoFactorStatus(),
-                  builder: (_, snapshot) {
-                    if (snapshot.hasData) {
-                      return Switch.adaptive(
+                trailingSwitch: snapshot.hasData
+                    ? ToggleSwitchWidget(
                         value: snapshot.data,
                         onChanged: (value) async {
                           final hasAuthenticated =
@@ -93,155 +88,136 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                             }
                           }
                         },
-                      );
-                    } else if (snapshot.hasError) {
-                      return Icon(
-                        Icons.error_outline,
-                        color: Colors.white.withOpacity(0.8),
-                      );
-                    }
-                    return const EnteLoadingWidget();
-                  },
-                ),
-              ],
-            ),
+                      )
+                    : snapshot.hasError
+                        ? const Icon(Icons.error_outline_outlined)
+                        : const EnteLoadingWidget(),
+              );
+            },
           ),
+          sectionOptionSpacing,
         ],
       );
     }
     children.addAll([
-      sectionOptionDivider,
-      SizedBox(
-        height: 48,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Lockscreen",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            Switch.adaptive(
-              value: _config.shouldShowLockScreen(),
-              onChanged: (value) async {
-                final hasAuthenticated = await LocalAuthenticationService
-                    .instance
-                    .requestLocalAuthForLockScreen(
-                  context,
-                  value,
-                  "Please authenticate to change lockscreen setting",
-                  "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
-                );
-                if (hasAuthenticated) {
-                  setState(() {});
-                }
-              },
-            ),
-          ],
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Lockscreen",
+        ),
+        trailingSwitch: ToggleSwitchWidget(
+          value: _config.shouldShowLockScreen(),
+          onChanged: (value) async {
+            final hasAuthenticated = await LocalAuthenticationService.instance
+                .requestLocalAuthForLockScreen(
+              context,
+              value,
+              "Please authenticate to change lockscreen setting",
+              "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
+            );
+            if (hasAuthenticated) {
+              setState(() {});
+            }
+          },
         ),
       ),
+      sectionOptionSpacing,
     ]);
     if (Platform.isAndroid) {
       children.addAll(
         [
-          sectionOptionDivider,
-          SizedBox(
-            height: 48,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Hide from recents",
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-                Switch.adaptive(
-                  value: _config.shouldHideFromRecents(),
-                  onChanged: (value) async {
-                    if (value) {
-                      final AlertDialog alert = AlertDialog(
-                        title: const Text("Hide from recents?"),
-                        content: SingleChildScrollView(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                "Hiding from the task switcher will prevent you from taking screenshots in this app.",
-                                style: TextStyle(
-                                  height: 1.5,
-                                ),
-                              ),
-                              Padding(padding: EdgeInsets.all(8)),
-                              Text(
-                                "Are you sure?",
-                                style: TextStyle(
-                                  height: 1.5,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                            child: Text(
-                              "No",
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .defaultTextColor,
-                              ),
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Hide from recents",
+            ),
+            trailingSwitch: Switch.adaptive(
+              value: _config.shouldHideFromRecents(),
+              onChanged: (value) async {
+                if (value) {
+                  final AlertDialog alert = AlertDialog(
+                    title: const Text("Hide from recents?"),
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "Hiding from the task switcher will prevent you from taking screenshots in this app.",
+                            style: TextStyle(
+                              height: 1.5,
                             ),
-                            onPressed: () {
-                              Navigator.of(context, rootNavigator: true)
-                                  .pop('dialog');
-                            },
                           ),
-                          TextButton(
-                            child: Text(
-                              "Yes",
-                              style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .defaultTextColor,
-                              ),
+                          Padding(padding: EdgeInsets.all(8)),
+                          Text(
+                            "Are you sure?",
+                            style: TextStyle(
+                              height: 1.5,
                             ),
-                            onPressed: () async {
-                              Navigator.of(context, rootNavigator: true)
-                                  .pop('dialog');
-                              await _config.setShouldHideFromRecents(true);
-                              await FlutterWindowManager.addFlags(
-                                FlutterWindowManager.FLAG_SECURE,
-                              );
-                              setState(() {});
-                            },
                           ),
                         ],
-                      );
-
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return alert;
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        child: Text(
+                          "No",
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.defaultTextColor,
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context, rootNavigator: true)
+                              .pop('dialog');
                         },
-                      );
-                    } else {
-                      await _config.setShouldHideFromRecents(false);
-                      await FlutterWindowManager.clearFlags(
-                        FlutterWindowManager.FLAG_SECURE,
-                      );
-                      setState(() {});
-                    }
-                  },
-                ),
-              ],
+                      ),
+                      TextButton(
+                        child: Text(
+                          "Yes",
+                          style: TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.defaultTextColor,
+                          ),
+                        ),
+                        onPressed: () async {
+                          Navigator.of(context, rootNavigator: true)
+                              .pop('dialog');
+                          await _config.setShouldHideFromRecents(true);
+                          await FlutterWindowManager.addFlags(
+                            FlutterWindowManager.FLAG_SECURE,
+                          );
+                          setState(() {});
+                        },
+                      ),
+                    ],
+                  );
+
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return alert;
+                    },
+                  );
+                } else {
+                  await _config.setShouldHideFromRecents(false);
+                  await FlutterWindowManager.clearFlags(
+                    FlutterWindowManager.FLAG_SECURE,
+                  );
+                  setState(() {});
+                }
+              },
             ),
           ),
+          sectionOptionSpacing,
         ],
       );
     }
     children.addAll([
-      sectionOptionDivider,
-      GestureDetector(
-        behavior: HitTestBehavior.translucent,
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Active sessions",
+        ),
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
         onTap: () async {
           final hasAuthenticated = await LocalAuthenticationService.instance
               .requestLocalAuthentication(
@@ -258,11 +234,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             );
           }
         },
-        child: const SettingsTextItem(
-          text: "Active sessions",
-          icon: Icons.navigate_next,
-        ),
       ),
+      sectionOptionSpacing,
     ]);
     return Column(
       children: children,

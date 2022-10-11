@@ -2,14 +2,14 @@
 
 import 'dart:io';
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/email_util.dart';
 
 class SupportSectionWidget extends StatelessWidget {
@@ -17,11 +17,10 @@ class SupportSectionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: const SettingsSectionTitle("Support"),
-      collapsed: Container(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
+    return ExpandableMenuItemWidget(
+      title: "Support",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.help_outline_outlined,
     );
   }
 
@@ -30,17 +29,24 @@ class SupportSectionWidget extends StatelessWidget {
         Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
     return Column(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Email",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await sendEmail(context, to: supportEmail);
           },
-          child:
-              const SettingsTextItem(text: "Email", icon: Icons.navigate_next),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Roadmap",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute(
@@ -56,14 +62,14 @@ class SupportSectionWidget extends StatelessWidget {
               ),
             );
           },
-          child: const SettingsTextItem(
-            text: "Roadmap",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Report a bug",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             await sendLogs(context, "Report bug", bugsEmail);
           },
@@ -71,11 +77,8 @@ class SupportSectionWidget extends StatelessWidget {
             final zipFilePath = await getZippedLogsFile(context);
             await shareLogs(context, bugsEmail, zipFilePath);
           },
-          child: const SettingsTextItem(
-            text: "Report bug 🐞",
-            icon: Icons.navigate_next,
-          ),
         ),
+        sectionOptionSpacing,
       ],
     );
   }

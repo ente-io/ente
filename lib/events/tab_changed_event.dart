@@ -15,4 +15,5 @@ enum TabChangedEventSource {
   pageView,
   collectionsPage,
   backButton,
+  settingsTitleBar
 }

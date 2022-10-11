@@ -1,6 +1,5 @@
 // @dart=2.9
 
-import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/services/local_authentication_service.dart';
@@ -8,35 +7,35 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/change_email_dialog.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/expandable_menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/ui/settings/settings_section_title.dart';
-import 'package:photos/ui/settings/settings_text_item.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class AccountSectionWidget extends StatefulWidget {
+class AccountSectionWidget extends StatelessWidget {
   const AccountSectionWidget({Key key}) : super(key: key);
 
   @override
-  AccountSectionWidgetState createState() => AccountSectionWidgetState();
-}
-
-class AccountSectionWidgetState extends State<AccountSectionWidget> {
-  @override
   Widget build(BuildContext context) {
-    return ExpandablePanel(
-      header: const SettingsSectionTitle("Account"),
-      collapsed: const SizedBox.shrink(),
-      expanded: _getSectionOptions(context),
-      theme: getExpandableTheme(context),
+    return ExpandableMenuItemWidget(
+      title: "Account",
+      selectionOptionsWidget: _getSectionOptions(context),
+      leadingIcon: Icons.account_circle_outlined,
     );
   }
 
   Column _getSectionOptions(BuildContext context) {
     return Column(
       children: [
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Recovery key",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -46,7 +45,7 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
             if (hasAuthenticated) {
               String recoveryKey;
               try {
-                recoveryKey = await _getOrCreateRecoveryKey();
+                recoveryKey = await _getOrCreateRecoveryKey(context);
               } catch (e) {
                 showGenericErrorDialog(context);
                 return;
@@ -62,14 +61,14 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               );
             }
           },
-          child: const SettingsTextItem(
-            text: "Recovery key",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Change email",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -87,14 +86,14 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               );
             }
           },
-          child: const SettingsTextItem(
-            text: "Change email",
-            icon: Icons.navigate_next,
-          ),
         ),
-        sectionOptionDivider,
-        GestureDetector(
-          behavior: HitTestBehavior.translucent,
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Change password",
+          ),
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
           onTap: () async {
             final hasAuthenticated = await LocalAuthenticationService.instance
                 .requestLocalAuthentication(
@@ -113,16 +112,13 @@ class AccountSectionWidgetState extends State<AccountSectionWidget> {
               );
             }
           },
-          child: const SettingsTextItem(
-            text: "Change password",
-            icon: Icons.navigate_next,
-          ),
         ),
+        sectionOptionSpacing,
       ],
     );
   }
 
-  Future<String> _getOrCreateRecoveryKey() async {
+  Future<String> _getOrCreateRecoveryKey(BuildContext context) async {
     return Sodium.bin2hex(
       await UserService.instance.getOrCreateRecoveryKey(context),
     );

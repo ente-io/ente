@@ -100,7 +100,7 @@ PODS:
     - GoogleUtilities/Logger
   - image_editor (1.0.0):
     - Flutter
-  - in_app_purchase (0.0.1):
+  - in_app_purchase_storekit (0.0.1):
     - Flutter
   - libwebp (1.2.3):
     - libwebp/demux (= 1.2.3)
@@ -145,13 +145,13 @@ PODS:
   - SDWebImageWebPCoder (0.9.1):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.13)
-  - Sentry (7.25.1):
-    - Sentry/Core (= 7.25.1)
-  - Sentry/Core (7.25.1)
+  - Sentry (7.27.1):
+    - Sentry/Core (= 7.27.1)
+  - Sentry/Core (7.27.1)
   - sentry_flutter (0.0.1):
     - Flutter
     - FlutterMacOS
-    - Sentry (~> 7.25.1)
+    - Sentry (~> 7.27.1)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_ios (0.0.1):
@@ -190,7 +190,7 @@ DEPENDENCIES:
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_editor (from `.symlinks/plugins/image_editor/ios`)
-  - in_app_purchase (from `.symlinks/plugins/in_app_purchase/ios`)
+  - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
@@ -266,8 +266,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/fluttertoast/ios"
   image_editor:
     :path: ".symlinks/plugins/image_editor/ios"
-  in_app_purchase:
-    :path: ".symlinks/plugins/in_app_purchase/ios"
+  in_app_purchase_storekit:
+    :path: ".symlinks/plugins/in_app_purchase_storekit/ios"
   local_auth:
     :path: ".symlinks/plugins/local_auth/ios"
   motionphoto:
@@ -330,7 +330,7 @@ SPEC CHECKSUMS:
   GoogleDataTransport: 1c8145da7117bd68bbbed00cf304edb6a24de00f
   GoogleUtilities: 1d20a6ad97ef46f67bbdec158ce00563a671ebb7
   image_editor: eab82a302a6623a866da5145b7c4c0ee8a4ffbb4
-  in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
+  in_app_purchase_storekit: d7fcf4646136ec258e237872755da8ea6c1b6096
   libwebp: 60305b2e989864154bd9be3d772730f08fc6a59c
   local_auth: 1740f55d7af0a2e2a8684ce225fe79d8931e808c
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
@@ -347,8 +347,8 @@ SPEC CHECKSUMS:
   receive_sharing_intent: c0d87310754e74c0f9542947e7cbdf3a0335a3b1
   SDWebImage: e5cc87bf736e60f49592f307bdf9e157189298a3
   SDWebImageWebPCoder: 18503de6621dd2c420d680e33d46bf8e1d5169b0
-  Sentry: dd29c18c32b0af9269949f079cf631d581ca76ca
-  sentry_flutter: 544b23de27343d0cd12d8d16b0fac71dc884f0e6
+  Sentry: bc644307e2eb6a4c9c55cf117a80b895bb2a25a7
+  sentry_flutter: 649559f0512e00d3f6fc92cf51f74bc2fe68d1d3
   share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
   shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
