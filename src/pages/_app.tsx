@@ -265,6 +265,7 @@ export default function App({ Component, err }) {
                 <LoadingBar color="#51cd7c" ref={loadingBar} />
 
                 <DialogBox
+                    sx={{ zIndex: 1600 }}
                     size="xs"
                     open={messageDialogView}
                     onClose={closeMessageDialog}

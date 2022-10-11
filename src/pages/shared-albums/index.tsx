@@ -318,7 +318,7 @@ export default function PublicCollectionGallery() {
                 openUploader={() => null}
                 isInSearchMode={false}
                 search={{}}
-                deleted={[]}
+                deletedFileIds={new Set<number>()}
                 activeCollection={ALL_SECTION}
                 isSharedCollection
                 enableDownload={

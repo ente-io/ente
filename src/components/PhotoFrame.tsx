@@ -1,6 +1,6 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
@@ -30,6 +30,7 @@ import { logError } from 'utils/sentry';
 import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { useMemo } from 'react';
 
 const Container = styled('div')`
     display: block;
@@ -60,7 +61,8 @@ interface Props {
     openUploader?;
     isInSearchMode?: boolean;
     search?: Search;
-    deleted?: number[];
+    deletedFileIds?: Set<number>;
+    setDeletedFileIds?: (value: Set<number>) => void;
     activeCollection: number;
     isSharedCollection?: boolean;
     enableDownload?: boolean;
@@ -86,7 +88,8 @@ const PhotoFrame = ({
     isInSearchMode,
     search,
     resetSearch,
-    deleted,
+    deletedFileIds,
+    setDeletedFileIds,
     activeCollection,
     isSharedCollection,
     enableDownload,
@@ -104,67 +107,14 @@ const PhotoFrame = ({
     const [rangeStart, setRangeStart] = useState(null);
     const [currentHover, setCurrentHover] = useState(null);
     const [isShiftKeyPressed, setIsShiftKeyPressed] = useState(false);
-    const filteredDataRef = useRef<EnteFile[]>([]);
-    const filteredData = filteredDataRef?.current ?? [];
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Shift') {
-                setIsShiftKeyPressed(true);
-            }
-        };
-        const handleKeyUp = (e: KeyboardEvent) => {
-            if (e.key === 'Shift') {
-                setIsShiftKeyPressed(false);
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown, false);
-        document.addEventListener('keyup', handleKeyUp, false);
-        router.events.on('hashChangeComplete', (url: string) => {
-            const start = url.indexOf('#');
-            const hash = url.slice(start !== -1 ? start : url.length);
-            const shouldPhotoSwipeBeOpened = hash.endsWith(
-                PHOTOSWIPE_HASH_SUFFIX
-            );
-            if (shouldPhotoSwipeBeOpened) {
-                setOpen(true);
-            } else {
-                setOpen(false);
-            }
-        });
-        return () => {
-            document.addEventListener('keydown', handleKeyDown, false);
-            document.addEventListener('keyup', handleKeyUp, false);
-        };
-    }, []);
 
-    useEffect(() => {
-        if (!isNaN(search?.file)) {
-            const filteredDataIdx = filteredData.findIndex((file) => {
-                return file.id === search.file;
-            });
-            if (!isNaN(filteredDataIdx)) {
-                onThumbnailClick(filteredDataIdx)();
-            }
-            resetSearch();
-        }
-    }, [search, filteredData]);
-
-    const resetFetching = () => {
-        setFetching({});
-    };
-
-    useEffect(() => {
-        if (selected.count === 0) {
-            setRangeStart(null);
-        }
-    }, [selected]);
-
-    useEffect(() => {
+    const filteredData = useMemo(() => {
         const idSet = new Set();
         const user: User = getData(LS_KEYS.USER);
-        filteredDataRef.current = files
+
+        return files
             .map((item, index) => ({
                 ...item,
                 dataIndex: index,
@@ -172,7 +122,10 @@ const PhotoFrame = ({
                 h: window.innerHeight,
             }))
             .filter((item) => {
-                if (deleted?.includes(item.id)) {
+                if (
+                    deletedFileIds?.has(item.id) &&
+                    activeCollection !== TRASH_SECTION
+                ) {
                     return false;
                 }
                 if (
@@ -230,7 +183,7 @@ const PhotoFrame = ({
                 }
                 return false;
             });
-    }, [files, deleted, search, activeCollection]);
+    }, [files, deletedFileIds, search, activeCollection]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -246,6 +199,59 @@ const PhotoFrame = ({
             });
         }
     }, [open]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setIsShiftKeyPressed(true);
+            }
+        };
+        const handleKeyUp = (e: KeyboardEvent) => {
+            if (e.key === 'Shift') {
+                setIsShiftKeyPressed(false);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown, false);
+        document.addEventListener('keyup', handleKeyUp, false);
+        router.events.on('hashChangeComplete', (url: string) => {
+            const start = url.indexOf('#');
+            const hash = url.slice(start !== -1 ? start : url.length);
+            const shouldPhotoSwipeBeOpened = hash.endsWith(
+                PHOTOSWIPE_HASH_SUFFIX
+            );
+            if (shouldPhotoSwipeBeOpened) {
+                setOpen(true);
+            } else {
+                setOpen(false);
+            }
+        });
+        return () => {
+            document.addEventListener('keydown', handleKeyDown, false);
+            document.addEventListener('keyup', handleKeyUp, false);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!isNaN(search?.file)) {
+            const filteredDataIdx = filteredData.findIndex((file) => {
+                return file.id === search.file;
+            });
+            if (!isNaN(filteredDataIdx)) {
+                onThumbnailClick(filteredDataIdx)();
+            }
+            resetSearch();
+        }
+    }, [search, filteredData]);
+
+    const resetFetching = () => {
+        setFetching({});
+    };
+
+    useEffect(() => {
+        if (selected.count === 0) {
+            setRangeStart(null);
+        }
+    }, [selected]);
 
     const getFileIndexFromID = (files: EnteFile[], id: number) => {
         const index = files.findIndex((file) => file.id === id);
@@ -603,6 +609,8 @@ const PhotoFrame = ({
                         onClose={handleClose}
                         gettingData={getSlideData}
                         favItemIds={favItemIds}
+                        deletedFileIds={deletedFileIds}
+                        setDeletedFileIds={setDeletedFileIds}
                         isSharedCollection={isSharedCollection}
                         isTrashCollection={activeCollection === TRASH_SECTION}
                         enableDownload={enableDownload}
