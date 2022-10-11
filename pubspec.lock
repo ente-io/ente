@@ -985,17 +985,17 @@ packages:
   sentry:
     dependency: "direct main"
     description:
-      path: "thirdparty/sentry-dart/dart"
-      relative: true
-    source: path
-    version: "6.11.0"
+      name: sentry
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.12.1"
   sentry_flutter:
     dependency: "direct main"
     description:
-      path: "thirdparty/sentry-dart/flutter"
-      relative: true
-    source: path
-    version: "6.11.0"
+      name: sentry_flutter
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "6.12.1"
   share_plus:
     dependency: "direct main"
     description:
