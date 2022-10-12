@@ -11,8 +11,7 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-
-version: 0.6.42+372
+version: 0.6.41+371
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -77,6 +76,8 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
+  media_extension:
+    git: "https://github.com/ente-io/media_extension.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2

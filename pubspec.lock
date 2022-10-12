@@ -707,6 +707,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.5"
+  media_extension:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "8f70825a6384ccca750302430ba590a6059a2b3a"
+      url: "https://github.com/ente-io/media_extension.git"
+    source: git
+    version: "0.0.1"
   meta:
     dependency: transitive
     description:
