@@ -20,7 +20,9 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
         children: [
           IconButton(
             visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-            onPressed: () {},
+            onPressed: () {
+              Scaffold.of(context).openDrawer();
+            },
             splashColor: Colors.transparent,
             icon: const Icon(
               Icons.menu_outlined,

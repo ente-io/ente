@@ -72,8 +72,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // if (widget.selectedFiles.files.isEmpty) {
     return AppBar(
+      automaticallyImplyLeading: false,
       backgroundColor:
           widget.type == GalleryType.homepage ? const Color(0x00000000) : null,
       elevation: 0,

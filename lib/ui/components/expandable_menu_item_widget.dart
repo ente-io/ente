@@ -25,12 +25,6 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
   final expandableController = ExpandableController(initialExpanded: false);
 
   @override
-  void dispose() {
-    expandableController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     return Container(

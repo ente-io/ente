@@ -261,6 +261,9 @@ class _HomeWidgetState extends State<HomeWidget> {
           preferredSize: const Size.fromHeight(0),
           child: Container(),
         ),
+        drawer: Drawer(
+          child: _settingsPage,
+        ),
         body: _getBody(),
         resizeToAvoidBottomInset: false,
       ),
