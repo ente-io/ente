@@ -299,8 +299,12 @@ const PhotoFrame = ({
             return file;
         };
         setFiles((files) => {
-            const index = getFileIndexFromID(files, id);
-            files[index] = updateFile(files[index]);
+            try {
+                const index = getFileIndexFromID(files, id);
+                files[index] = updateFile(files[index]);
+            } catch (e) {
+                logError(e, 'failed to update url');
+            }
             return files;
         });
         const index = getFileIndexFromID(files, id);
@@ -363,8 +367,12 @@ const PhotoFrame = ({
             return file;
         };
         setFiles((files) => {
-            const index = getFileIndexFromID(files, id);
-            files[index] = updateFile(files[index]);
+            try {
+                const index = getFileIndexFromID(files, id);
+                files[index] = updateFile(files[index]);
+            } catch (e) {
+                logError(e, 'failed to update src url');
+            }
             return files;
         });
         setIsSourceLoaded(true);
