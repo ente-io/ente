@@ -183,7 +183,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           } else if (value == 2) {
             _showDeleteSheet(widget.file);
           } else if (value == 3) {
-            _useAs(widget.file);
+            _setAs(widget.file);
           }
         },
       ),
@@ -369,14 +369,13 @@ class FadingAppBarState extends State<FadingAppBar> {
     }
   }
 
-  Future<void> _useAs(File file) async {
+  Future<void> _setAs(File file) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      // save and track image for livePhoto/image and video for FileType.video
       final io.File fileToSave = await getFile(file);
       var m = MediaExtension();
-      bool result = await m.setAs("file://${fileToSave.path}", "image/*");
+      final bool result = await m.setAs("file://${fileToSave.path}", "image/*");
       if (result == false) {
         showShortToast(context, "Something went wrong");
       }
