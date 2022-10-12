@@ -97,13 +97,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     _logger.info("Building initstate");
-    _headerWidgetWithSettingsButton = Container(
-      margin: const EdgeInsets.only(top: 12),
-      child: Stack(
-        children: const [
-          _headerWidget,
-        ],
-      ),
+    _headerWidgetWithSettingsButton = Stack(
+      children: const [
+        _headerWidget,
+      ],
     );
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {

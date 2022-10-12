@@ -15,7 +15,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 0, 20, 0),
+        padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
