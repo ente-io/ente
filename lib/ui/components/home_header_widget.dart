@@ -30,9 +30,6 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
             duration: const Duration(milliseconds: 250),
             child: widget.centerWidget,
           ),
-          // const BrandTitleWidget(
-          //   size: SizeVarient.medium,
-          // ),
           const SearchIconWidget(),
         ],
       ),

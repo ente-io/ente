@@ -120,7 +120,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                       return ScaleTransition(scale: animation, child: child);
                     },
                     duration: const Duration(milliseconds: 200),
-                    child: isExpanded!
+                    child: isExpanded
                         ? const SizedBox.shrink()
                         : Icon(widget.trailingIcon),
                   ),
