@@ -119,13 +119,8 @@ class SettingsPage extends StatelessWidget {
             const SettingsTitleBarWidget(),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 428),
-                  child: Column(
-                    children: contents,
-                  ),
-                ),
+              child: Column(
+                children: contents,
               ),
             ),
           ],

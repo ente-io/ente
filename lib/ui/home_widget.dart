@@ -256,8 +256,12 @@ class _HomeWidgetState extends State<HomeWidget> {
     return UserDetailsStateWidget(
       child: WillPopScope(
         child: Scaffold(
-          drawer: Drawer(
-            child: _settingsPage,
+          drawer: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 428),
+            child: Drawer(
+              width: double.infinity,
+              child: _settingsPage,
+            ),
           ),
           body: SafeArea(bottom: false, child: _getBody()),
           resizeToAvoidBottomInset: false,
