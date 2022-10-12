@@ -32,6 +32,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/states/user_details_state.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
@@ -253,34 +254,36 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building home_Widget with tab $_selectedTabIndex");
+    _logger.info("Building home_Widget with tab $_selectedTabIndex"); //nullable
 
-    return WillPopScope(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(0),
-          child: Container(),
+    return UserDetailsStateWidget(
+      child: WillPopScope(
+        child: Scaffold(
+          appBar: PreferredSize(
+            preferredSize: const Size.fromHeight(0),
+            child: Container(),
+          ),
+          drawer: Drawer(
+            child: _settingsPage,
+          ),
+          body: _getBody(),
+          resizeToAvoidBottomInset: false,
         ),
-        drawer: Drawer(
-          child: _settingsPage,
-        ),
-        body: _getBody(),
-        resizeToAvoidBottomInset: false,
-      ),
-      onWillPop: () async {
-        if (_selectedTabIndex == 0) {
-          if (Platform.isAndroid) {
-            MoveToBackground.moveTaskToBack();
-            return false;
+        onWillPop: () async {
+          if (_selectedTabIndex == 0) {
+            if (Platform.isAndroid) {
+              MoveToBackground.moveTaskToBack();
+              return false;
+            } else {
+              return true;
+            }
           } else {
-            return true;
+            Bus.instance
+                .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
+            return false;
           }
-        } else {
-          Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
-          return false;
-        }
-      },
+        },
+      ),
     );
   }
 
