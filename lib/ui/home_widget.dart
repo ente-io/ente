@@ -321,7 +321,6 @@ class _HomeWidgetState extends State<HomeWidget> {
                 : _getMainGalleryWidget(),
             _deviceFolderGalleryWidget,
             _sharedCollectionGallery,
-            _settingsPage,
           ],
         ),
         const Align(
@@ -626,7 +625,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                     child: Container(
                       alignment: Alignment.bottomCenter,
                       height: 52,
-                      width: 240,
+                      width: 180,
                       child: ClipRect(
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
@@ -681,7 +680,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(0, 6, 6, 6),
                                 icon: Icons.folder_shared,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -695,21 +694,6 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                   ); // To take care of occasional missing events
                                 },
                               ),
-                              GButton(
-                                margin: const EdgeInsets.fromLTRB(0, 6, 6, 6),
-                                icon: Icons.person,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
-                                text: '',
-                                onPressed: () {
-                                  _onTabChange(
-                                    3,
-                                  ); // To take care of occasional missing events
-                                },
-                              )
                             ],
                             selectedIndex: currentTabIndex,
                             onTabChange: _onTabChange,
