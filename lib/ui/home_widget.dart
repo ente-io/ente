@@ -75,7 +75,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
 
-  // final _settingsButton = SettingsButton();
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
@@ -305,23 +304,28 @@ class _HomeWidgetState extends State<HomeWidget> {
             CollectionsService.instance.getActiveCollections().isEmpty;
     return Stack(
       children: [
-        ExtentsPageView(
-          onPageChanged: (page) {
-            Bus.instance.fire(
-              TabChangedEvent(
-                page,
-                TabChangedEventSource.pageView,
-              ),
+        Builder(
+          builder: (context) {
+            return ExtentsPageView(
+              onPageChanged: (page) {
+                Bus.instance.fire(
+                  TabChangedEvent(
+                    page,
+                    TabChangedEventSource.pageView,
+                  ),
+                );
+              },
+              controller: _pageController,
+              openDrawer: Scaffold.of(context).openDrawer,
+              children: [
+                showBackupFolderHook
+                    ? _getBackupFolderSelectionHook()
+                    : _getMainGalleryWidget(),
+                _deviceFolderGalleryWidget,
+                _sharedCollectionGallery,
+              ],
             );
           },
-          controller: _pageController,
-          children: [
-            showBackupFolderHook
-                ? _getBackupFolderSelectionHook()
-                : _getMainGalleryWidget(),
-            _deviceFolderGalleryWidget,
-            _sharedCollectionGallery,
-          ],
         ),
         const Align(
           alignment: Alignment.bottomCenter,

@@ -58,6 +58,7 @@ class ExtentsPageView extends StatefulWidget {
     this.onPageChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
+    this.openDrawer,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildListDelegate(children),
         extents = children.length,
@@ -90,6 +91,7 @@ class ExtentsPageView extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.openDrawer,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate =
             SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
@@ -108,6 +110,7 @@ class ExtentsPageView extends StatefulWidget {
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.openDrawer,
   })  : controller = controller ?? _defaultPageController,
         childrenDelegate = SliverChildBuilderDelegate(
           itemBuilder,
@@ -207,6 +210,7 @@ class ExtentsPageView extends StatefulWidget {
     this.onPageChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.openDrawer,
   })  : assert(childrenDelegate != null),
         extents = 0,
         controller = controller ?? _defaultPageController,
@@ -272,6 +276,8 @@ class ExtentsPageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  final Function openDrawer; //nullable
+
   @override
   State<ExtentsPageView> createState() => _PageViewState();
 }
@@ -283,6 +289,19 @@ class _PageViewState extends State<ExtentsPageView> {
   void initState() {
     super.initState();
     _lastReportedPage = widget.controller.initialPage;
+    widget.openDrawer != null
+        ? widget.controller.addListener(() {
+            if (widget.controller.offset < -200) {
+              widget.openDrawer();
+            }
+          })
+        : null;
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(() {});
+    super.dispose();
   }
 
   AxisDirection _getDirection(BuildContext context) {
