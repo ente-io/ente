@@ -254,19 +254,15 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building home_Widget with tab $_selectedTabIndex"); //nullable
+    _logger.info("Building home_Widget with tab $_selectedTabIndex");
 
     return UserDetailsStateWidget(
       child: WillPopScope(
         child: Scaffold(
-          appBar: PreferredSize(
-            preferredSize: const Size.fromHeight(0),
-            child: Container(),
-          ),
           drawer: Drawer(
             child: _settingsPage,
           ),
-          body: _getBody(),
+          body: SafeArea(bottom: false, child: _getBody()),
           resizeToAvoidBottomInset: false,
         ),
         onWillPop: () async {
