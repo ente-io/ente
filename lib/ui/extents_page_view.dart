@@ -293,7 +293,7 @@ class _PageViewState extends State<ExtentsPageView> {
     _lastReportedPage = widget.controller.initialPage;
     widget.openDrawer != null
         ? widget.controller.addListener(() {
-            if (widget.controller.offset < -60) {
+            if (widget.controller.offset < -45) {
               widget.openDrawer();
               Bus.instance.fire(OpenedSettingsEvent());
             }
