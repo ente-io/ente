@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:photos/ui/viewer/search/search_widget.dart';
 
@@ -13,8 +15,9 @@ class HomeHeaderWidget extends StatefulWidget {
 class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   @override
   Widget build(BuildContext context) {
+    final hasNotch = window.viewPadding.top > 65;
     return Padding(
-      padding: const EdgeInsets.all(4),
+      padding: EdgeInsets.fromLTRB(4, hasNotch ? 4 : 8, 4, 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
