@@ -252,6 +252,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
+    bool isSettingsOpen = false;
 
     return UserDetailsStateWidget(
       child: WillPopScope(
@@ -263,11 +264,16 @@ class _HomeWidgetState extends State<HomeWidget> {
               child: _settingsPage,
             ),
           ),
+          onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
           body: SafeArea(bottom: false, child: _getBody()),
           resizeToAvoidBottomInset: false,
         ),
         onWillPop: () async {
           if (_selectedTabIndex == 0) {
+            if (isSettingsOpen) {
+              Navigator.pop(context);
+              return false;
+            }
             if (Platform.isAndroid) {
               MoveToBackground.moveTaskToBack();
               return false;
