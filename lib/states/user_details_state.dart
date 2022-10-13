@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/tab_changed_event.dart';
+import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
 import 'package:photos/models/user_details.dart';
 // ignore: import_of_legacy_library_into_null_safe
@@ -22,7 +22,7 @@ class UserDetailsStateWidget extends StatefulWidget {
 class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
   late Future<UserDetails> userDetails;
   late StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
-  late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
+  late StreamSubscription<OpenedSettingsEvent> _openedSettingsEventSubscription;
 
   @override
   void initState() {
@@ -31,11 +31,14 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
         Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
       _fetchUserDetails();
     });
-    _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.selectedIndex == 3) {
-        _fetchUserDetails();
-      }
+    _openedSettingsEventSubscription =
+        Bus.instance.on<OpenedSettingsEvent>().listen((event) {
+      Future.delayed(
+        const Duration(
+          seconds: 1,
+        ),
+        _fetchUserDetails,
+      );
     });
     super.initState();
   }
@@ -43,7 +46,7 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
   @override
   void dispose() {
     _userDetailsChangedEvent.cancel();
-    _tabChangedEventSubscription.cancel();
+    _openedSettingsEventSubscription.cancel();
     super.dispose();
   }
 

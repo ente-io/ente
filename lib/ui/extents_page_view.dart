@@ -3,6 +3,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' hide PageView;
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/opened_settings_event.dart';
 
 /// This is copy-pasted from the Flutter framework with a support added for building
 /// pages off screen using [Viewport.cacheExtents] and a [LayoutBuilder]
@@ -293,6 +295,7 @@ class _PageViewState extends State<ExtentsPageView> {
         ? widget.controller.addListener(() {
             if (widget.controller.offset < -60) {
               widget.openDrawer();
+              Bus.instance.fire(OpenedSettingsEvent());
             }
           })
         : null;
