@@ -317,6 +317,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               },
               controller: _pageController,
               openDrawer: Scaffold.of(context).openDrawer,
+              physics: const BouncingScrollPhysics(),
               children: [
                 showBackupFolderHook
                     ? _getBackupFolderSelectionHook()
