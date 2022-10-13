@@ -11,7 +11,8 @@ description: ente photos application
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.6.41+371
+
+version: 0.6.42+372
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -69,13 +70,15 @@ dependencies:
   image: ^3.0.2
   image_editor: ^1.0.0
   implicitly_animated_reorderable_list: ^0.4.0
-  in_app_purchase: ^0.5.2
+  in_app_purchase: ^3.0.7
   intl: ^0.17.0
   like_button: ^2.0.2
   loading_animations: ^2.1.0
   local_auth: ^1.1.5
   logging: ^1.0.1
   lottie: ^1.2.2
+  media_extension:
+    git: "https://github.com/ente-io/media_extension.git"
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
@@ -95,10 +98,8 @@ dependencies:
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
   scrollable_positioned_list: ^0.2.2
-  sentry:
-    path: thirdparty/sentry-dart/dart
-  sentry_flutter:
-    path: thirdparty/sentry-dart/flutter
+  sentry: ^6.12.1
+  sentry_flutter: ^6.12.1
   share_plus: ^4.0.10
   shared_preferences: ^2.0.5
   sqflite: ^2.0.0+3

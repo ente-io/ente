@@ -38,12 +38,11 @@ class BillingService {
   Future<BillingPlans> _future;
 
   Future<void> init() async {
-    InAppPurchaseConnection.enablePendingPurchases();
     // if (Platform.isIOS && kDebugMode) {
     //   await FlutterInappPurchase.instance.initConnection;
     //   FlutterInappPurchase.instance.clearTransactionIOS();
     // }
-    InAppPurchaseConnection.instance.purchaseUpdatedStream.listen((purchases) {
+    InAppPurchase.instance.purchaseStream.listen((purchases) {
       if (_isOnSubscriptionPage) {
         return;
       }
@@ -54,11 +53,11 @@ class BillingService {
             purchase.verificationData.serverVerificationData,
           ).then((response) {
             if (response != null) {
-              InAppPurchaseConnection.instance.completePurchase(purchase);
+              InAppPurchase.instance.completePurchase(purchase);
             }
           });
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
-          InAppPurchaseConnection.instance.completePurchase(purchase);
+          InAppPurchase.instance.completePurchase(purchase);
         }
       }
     });

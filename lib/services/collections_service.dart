@@ -292,7 +292,7 @@ class CollectionsService {
   Uint8List _getDecryptedKey(Collection collection) {
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
     if (collection.owner.id == _config.getUserID()) {
-      if(_config.getKey() == null) {
+      if (_config.getKey() == null) {
         throw Exception("key can not be null");
       }
       return CryptoUtil.decryptSync(
@@ -330,6 +330,23 @@ class CollectionsService {
       sync();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
+      rethrow;
+    }
+  }
+
+  Future<void> leaveAlbum(Collection collection) async {
+    try {
+      await _dio.post(
+        Configuration.instance.getHttpEndpoint() +
+            "/collections/leave/${collection.id}",
+        options: Options(
+          headers: {"X-Auth-Token": Configuration.instance.getToken()},
+        ),
+      );
+      // trigger sync to fetch the latest name from server
+      sync();
+    } catch (e, s) {
+      _logger.severe("failed to leave collection", e, s);
       rethrow;
     }
   }

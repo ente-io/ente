@@ -60,9 +60,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   }
 
   void _setupPurchaseUpdateStreamListener() {
-    _purchaseUpdateSubscription = InAppPurchaseConnection
-        .instance.purchaseUpdatedStream
-        .listen((purchases) async {
+    _purchaseUpdateSubscription =
+        InAppPurchase.instance.purchaseStream.listen((purchases) async {
       if (!_dialog.isShowing()) {
         await _dialog.show();
       }
@@ -74,7 +73,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               purchase.productID,
               purchase.verificationData.serverVerificationData,
             );
-            await InAppPurchaseConnection.instance.completePurchase(purchase);
+            await InAppPurchase.instance.completePurchase(purchase);
             String text = "Thank you for subscribing!";
             if (!widget.isOnboarding) {
               final isUpgrade = _hasActiveSubscription &&
@@ -121,7 +120,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             return;
           }
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
-          await InAppPurchaseConnection.instance.completePurchase(purchase);
+          await InAppPurchase.instance.completePurchase(purchase);
           await _dialog.hide();
         } else if (purchase.status == PurchaseStatus.error) {
           await _dialog.hide();
@@ -296,7 +295,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   RichText(
                     text: TextSpan(
                       text: "Manage family",
-                      style: Theme.of(context).textTheme.overline,
+                      style: Theme.of(context).textTheme.bodyMedium.copyWith(
+                            decoration: TextDecoration.underline,
+                          ),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -391,14 +392,13 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 showErrorDialog(
                   context,
                   "Sorry",
-                  "you cannot downgrade to this plan",
+                  "You cannot downgrade to this plan",
                 );
                 return;
               }
               await _dialog.show();
               final ProductDetailsResponse response =
-                  await InAppPurchaseConnection.instance
-                      .queryProductDetails({productID});
+                  await InAppPurchase.instance.queryProductDetails({productID});
               if (response.notFoundIDs.isNotEmpty) {
                 _logger.severe(
                   "Could not find products: " + response.notFoundIDs.toString(),
@@ -412,34 +412,15 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   _currentSubscription.productID != freeProductID &&
                   _currentSubscription.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
-                final existingProductDetailsResponse =
-                    await InAppPurchaseConnection.instance
-                        .queryProductDetails({_currentSubscription.productID});
-                if (existingProductDetailsResponse.notFoundIDs.isNotEmpty) {
-                  _logger.severe(
-                    "Could not find existing products: " +
-                        response.notFoundIDs.toString(),
-                  );
-                  await _dialog.hide();
-                  showGenericErrorDialog(context);
-                  return;
-                }
-                final subscriptionChangeParam = ChangeSubscriptionParam(
-                  oldPurchaseDetails: PurchaseDetails(
-                    purchaseID: null,
-                    productID: _currentSubscription.productID,
-                    verificationData: null,
-                    transactionDate: null,
-                  ),
+                await _dialog.hide();
+                showErrorDialog(
+                  context,
+                  "Could not update subscription",
+                  "Please contact support@ente.io and we will be happy to help!",
                 );
-                await InAppPurchaseConnection.instance.buyNonConsumable(
-                  purchaseParam: PurchaseParam(
-                    productDetails: response.productDetails[0],
-                    changeSubscriptionParam: subscriptionChangeParam,
-                  ),
-                );
+                return;
               } else {
-                await InAppPurchaseConnection.instance.buyNonConsumable(
+                await InAppPurchase.instance.buyNonConsumable(
                   purchaseParam: PurchaseParam(
                     productDetails: response.productDetails[0],
                   ),

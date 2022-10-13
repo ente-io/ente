@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
+import 'package:media_extension/media_extension.dart';
 import 'package:path/path.dart' as file_path;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
@@ -153,6 +154,27 @@ class FadingAppBarState extends State<FadingAppBar> {
               ),
             );
           }
+          if ((widget.file.fileType == FileType.image ||
+                  widget.file.fileType == FileType.livePhoto) &&
+              Platform.isAndroid) {
+            items.add(
+              PopupMenuItem(
+                value: 3,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.wallpaper_outlined,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    const Text("Use as"),
+                  ],
+                ),
+              ),
+            );
+          }
           return items;
         },
         onSelected: (value) {
@@ -160,6 +182,8 @@ class FadingAppBarState extends State<FadingAppBar> {
             _download(widget.file);
           } else if (value == 2) {
             _showDeleteSheet(widget.file);
+          } else if (value == 3) {
+            _setAs(widget.file);
           }
         },
       ),
@@ -342,6 +366,24 @@ class FadingAppBarState extends State<FadingAppBar> {
       showToast(context, "Photo and video saved to gallery");
     } else {
       showToast(context, "File saved to gallery");
+    }
+  }
+
+  Future<void> _setAs(File file) async {
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      final io.File fileToSave = await getFile(file);
+      var m = MediaExtension();
+      final bool result = await m.setAs("file://${fileToSave.path}", "image/*");
+      if (result == false) {
+        showShortToast(context, "Something went wrong");
+      }
+      dialog.hide();
+    } catch (e) {
+      dialog.hide();
+      _logger.severe("Failed to use as", e);
+      showGenericErrorDialog(context);
     }
   }
 }
