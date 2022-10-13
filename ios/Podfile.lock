@@ -116,6 +116,8 @@ PODS:
   - Mantle (2.2.0):
     - Mantle/extobjc (= 2.2.0)
   - Mantle/extobjc (2.2.0)
+  - media_extension (0.0.1):
+    - Flutter
   - motionphoto (0.0.1):
     - Flutter
   - move_to_background (0.0.1):
@@ -192,6 +194,7 @@ DEPENDENCIES:
   - image_editor (from `.symlinks/plugins/image_editor/ios`)
   - in_app_purchase_storekit (from `.symlinks/plugins/in_app_purchase_storekit/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
+  - media_extension (from `.symlinks/plugins/media_extension/ios`)
   - motionphoto (from `.symlinks/plugins/motionphoto/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
   - open_mail_app (from `.symlinks/plugins/open_mail_app/ios`)
@@ -270,6 +273,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/in_app_purchase_storekit/ios"
   local_auth:
     :path: ".symlinks/plugins/local_auth/ios"
+  media_extension:
+    :path: ".symlinks/plugins/media_extension/ios"
   motionphoto:
     :path: ".symlinks/plugins/motionphoto/ios"
   move_to_background:
@@ -334,6 +339,7 @@ SPEC CHECKSUMS:
   libwebp: 60305b2e989864154bd9be3d772730f08fc6a59c
   local_auth: 1740f55d7af0a2e2a8684ce225fe79d8931e808c
   Mantle: c5aa8794a29a022dfbbfc9799af95f477a69b62d
+  media_extension: 6d30dc1431ebaa63f43c397c37917b1a0a597a4c
   motionphoto: d4a432b8c8f22fb3ad966258597c0103c9c5ff16
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   nanopb: b552cce312b6c8484180ef47159bc0f65a1f0431

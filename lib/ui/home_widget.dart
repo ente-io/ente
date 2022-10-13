@@ -33,6 +33,7 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
@@ -298,6 +299,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       return CreateCollectionPage(null, _sharedFiles);
     }
 
+    final isBottomInsetPresent = MediaQuery.of(context).viewPadding.bottom != 0;
+
     final bool showBackupFolderHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
             !LocalSyncService.instance.hasGrantedLimitedPermissions() &&
@@ -334,8 +337,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: SafeArea(
-            minimum: const EdgeInsets.only(bottom: 8),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isBottomInsetPresent ? 32 : 8),
             child: HomeBottomNavigationBar(
               _selectedFiles,
               selectedTabIndex: _selectedTabIndex,
@@ -612,7 +615,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      height: filesAreSelected ? 0 : 52,
+      height: filesAreSelected ? 0 : 56,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 100),
         opacity: filesAreSelected ? 0.0 : 1.0,
@@ -626,19 +629,17 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(36),
+                    borderRadius: BorderRadius.circular(32),
                     child: Container(
                       alignment: Alignment.bottomCenter,
-                      height: 52,
-                      width: 180,
+                      height: 56,
                       child: ClipRect(
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          filter: ImageFilter.blur(sigmaX: 96, sigmaY: 96),
                           child: GNav(
                             curve: Curves.easeOutExpo,
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .gNavBackgroundColor,
+                            backgroundColor:
+                                getEnteColorScheme(context).fillMuted,
                             mainAxisAlignment: MainAxisAlignment.center,
                             rippleColor: Colors.white.withOpacity(0.1),
                             activeColor: Theme.of(context)
@@ -655,7 +656,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                             haptic: false,
                             tabs: [
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(12, 8, 6, 8),
                                 icon: Icons.home,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -670,7 +671,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(6, 8, 6, 8),
                                 icon: Icons.photo_library,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -685,7 +686,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(0, 6, 6, 6),
+                                margin: const EdgeInsets.fromLTRB(6, 8, 12, 8),
                                 icon: Icons.folder_shared,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
