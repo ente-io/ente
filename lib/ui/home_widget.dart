@@ -258,7 +258,8 @@ class _HomeWidgetState extends State<HomeWidget> {
     return UserDetailsStateWidget(
       child: WillPopScope(
         child: Scaffold(
-          drawerEnableOpenDragGesture: false,
+          drawerEnableOpenDragGesture:
+              false, //using a hack instead of enabling this as enabling this will create other problems
           drawer: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 428),
             child: Drawer(
