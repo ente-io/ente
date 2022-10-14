@@ -144,6 +144,22 @@ class CollectionsService {
         .toSet();
   }
 
+  Set<int> getHiddenCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isHidden())
+        .map((e) => e.id)
+        .toSet();
+  }
+
+  Set<int> collectionsHiddenFromTimeline() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isHidden() || element.isArchived())
+        .map((e) => e.id)
+        .toSet();
+  }
+
   int getCollectionSyncTime(int collectionID) {
     return _prefs
             .getInt(_collectionSyncTimeKeyPrefix + collectionID.toString()) ??

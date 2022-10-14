@@ -249,8 +249,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       child: WillPopScope(
         child: Scaffold(
           drawerScrimColor: getEnteColorScheme(context).strokeFainter,
-          drawerEnableOpenDragGesture:
-              false, //using a hack instead of enabling this as enabling this will create other problems
+          drawerEnableOpenDragGesture: false,
+          //using a hack instead of enabling this as enabling this will create other problems
           drawer: enableDrawer
               ? ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 428),
