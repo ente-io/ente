@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron/renderer';
-import { isPlatformMac } from '../utils/main';
+import { isPlatformMac } from '../utils/preload';
 
 export async function convertHEIC(fileData: Uint8Array): Promise<Uint8Array> {
     if (!isPlatformMac()) {

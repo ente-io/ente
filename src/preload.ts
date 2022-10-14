@@ -35,7 +35,6 @@ import {
 import { selectRootDirectory, logToDisk } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
-
 import { convertHEIC } from './api/heicConvert';
 
 fixHotReloadNext12();
