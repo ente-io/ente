@@ -4,6 +4,8 @@ const visibilityVisible = 0;
 const visibilityArchive = 1;
 
 const magicKeyVisibility = 'visibility';
+// key for collection subType
+const subTypeKey = 'subType';
 
 const pubMagicKeyEditedTime = 'editedTime';
 const pubMagicKeyEditedName = 'editedName';
@@ -56,7 +58,19 @@ class CollectionMagicMetadata {
   // 2 -> hidden etc?
   int visibility;
 
-  CollectionMagicMetadata({required this.visibility});
+  // null/0 value -> no subType
+  // 1 -> DEFAULT_HIDDEN COLLECTION for files hidden individually
+  int? subType;
+
+  CollectionMagicMetadata({required this.visibility, int? subType});
+
+  Map<String, dynamic> toJson() {
+    final result = {magicKeyVisibility: visibility};
+    if (subType != null) {
+      result[subTypeKey] = subType!;
+    }
+    return result;
+  }
 
   factory CollectionMagicMetadata.fromEncodedJson(String encodedJson) =>
       CollectionMagicMetadata.fromJson(jsonDecode(encodedJson));
@@ -68,6 +82,7 @@ class CollectionMagicMetadata {
     if (map == null) return null;
     return CollectionMagicMetadata(
       visibility: map[magicKeyVisibility] ?? visibilityVisible,
+      subType: map[subTypeKey],
     );
   }
 }
