@@ -26,6 +26,7 @@ class EnteColorScheme {
   final Color strokeBase;
   final Color strokeMuted;
   final Color strokeFaint;
+  final Color strokeFainter;
 
   // Fixed Colors
   final Color primary700;
@@ -52,7 +53,8 @@ class EnteColorScheme {
     this.fillFaint,
     this.strokeBase,
     this.strokeMuted,
-    this.strokeFaint, {
+    this.strokeFaint,
+    this.strokeFainter, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -79,6 +81,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   strokeBaseLight,
   strokeMutedLight,
   strokeFaintLight,
+  strokeFainterLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -96,6 +99,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   strokeBaseDark,
   strokeMutedDark,
   strokeFaintDark,
+  strokeFainterDark,
 );
 
 // Background Colors
@@ -135,11 +139,13 @@ const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
 // Stroke Colors
 const Color strokeBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color strokeMutedLight = Color.fromRGBO(0, 0, 0, 0.24);
-const Color strokeFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color strokeFaintLight = Color.fromRGBO(0, 0, 0, 0.12);
+const Color strokeFainterLight = Color.fromRGBO(0, 0, 0, 0.06);
 
 const Color strokeBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
+const Color strokeFainterDark = Color.fromRGBO(255, 255, 255, 0.08);
 
 // Fixed Colors
 
