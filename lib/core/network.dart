@@ -59,18 +59,19 @@ class Network {
 }
 
 class EnteRequestInterceptor extends Interceptor {
-  final SharedPreferences preferences;
+  final SharedPreferences _preferences;
 
-  EnteRequestInterceptor(this.preferences);
+  EnteRequestInterceptor(this._preferences);
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
-      assert(options.baseUrl == Network.apiEndpoint, "request should be");
+      assert(options.baseUrl == Network.apiEndpoint,
+          "interceptor should only be used for API endpoint");
     }
     // ignore: prefer_const_constructors
     options.headers.putIfAbsent("x-request-id", () => Uuid().v4().toString());
-    final String? tokenValue = preferences.getString(Configuration.tokenKey);
+    final String? tokenValue = _preferences.getString(Configuration.tokenKey);
     if (tokenValue != null) {
       options.headers.putIfAbsent("X-Auth-Token", () => tokenValue);
     }
