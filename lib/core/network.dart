@@ -46,7 +46,7 @@ class Network {
         },
       ),
     );
-    enteDio.interceptors.add(EnteRequestInterceptor(preferences));
+    _enteDio.interceptors.add(EnteRequestInterceptor(preferences));
   }
 
   Network._privateConstructor();
