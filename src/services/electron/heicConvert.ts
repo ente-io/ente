@@ -11,6 +11,7 @@ class ElectronHEICConverter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async convert(fileBlob: Blob, format = 'JPEG'): Promise<Blob> {
         try {
+            console.log(this.electronAPIs);
             if (this.allElectronAPIExists) {
                 const inputFileData = new Uint8Array(
                     await fileBlob.arrayBuffer()
@@ -18,6 +19,7 @@ class ElectronHEICConverter {
                 const convertedFileData = await this.electronAPIs.convertHEIC(
                     inputFileData
                 );
+                console.log('convertedFileData', convertedFileData.length);
                 return new Blob([convertedFileData]);
             }
         } catch (e) {
