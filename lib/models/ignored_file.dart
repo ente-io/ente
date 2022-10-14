@@ -1,7 +1,6 @@
 import 'package:photos/models/trash_file.dart';
 
 const kIgnoreReasonTrash = "trash";
-const kIgnoreReasonInvalidFile = "invalidFile";
 
 class IgnoredFile {
   final String? localID;
