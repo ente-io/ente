@@ -386,14 +386,9 @@ class UserService {
         keyAttributes.recoveryKeyEncryptedWithMasterKey,
         keyAttributes.recoveryKeyDecryptionNonce,
       );
-      await _dio.put(
-        _config.getHttpEndpoint() + "/users/recovery-key",
+      await _enteDio.put(
+        "/users/recovery-key",
         data: setRecoveryKeyRequest.toMap(),
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
@@ -598,14 +593,7 @@ class UserService {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/setup",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.post("/users/two-factor/setup");
       await dialog.hide();
       routeToPage(
         context,
@@ -638,8 +626,8 @@ class UserService {
     final encryptionResult =
         CryptoUtil.encryptSync(Sodium.base642bin(secret), recoveryKey);
     try {
-      await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/enable",
+      await _enteDio.post(
+        "/users/two-factor/enable",
         data: {
           "code": code,
           "encryptedTwoFactorSecret":
@@ -647,11 +635,6 @@ class UserService {
           "twoFactorSecretDecryptionNonce":
               Sodium.bin2base64(encryptionResult.nonce),
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await dialog.hide();
       Navigator.pop(context);
@@ -684,13 +667,8 @@ class UserService {
         createProgressDialog(context, "Disabling two-factor authentication...");
     await dialog.show();
     try {
-      await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/disable",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
+      await _enteDio.post(
+        "/users/two-factor/disable",
       );
       Bus.instance.fire(TwoFactorStatusChangeEvent(false));
       await dialog.hide();
@@ -708,14 +686,7 @@ class UserService {
 
   Future<bool> fetchTwoFactorStatus() async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/two-factor/status",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/two-factor/status");
       return response.data["status"];
     } catch (e) {
       _logger.severe("Failed to fetch 2FA status", e);
@@ -745,14 +716,7 @@ class UserService {
 
   Future<String> getPaymentToken() async {
     try {
-      final response = await _dio.get(
-        "${_config.getHttpEndpoint()}/users/payment-token",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/payment-token");
       if (response != null && response.statusCode == 200) {
         return response.data["paymentToken"];
       } else {
