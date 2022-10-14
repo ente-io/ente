@@ -303,7 +303,7 @@ class _PageViewState extends State<ExtentsPageView> {
 
   @override
   void dispose() {
-    widget.controller.removeListener(() {});
+    widget.controller.dispose();
     super.dispose();
   }
 
