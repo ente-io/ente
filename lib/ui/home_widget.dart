@@ -257,6 +257,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return UserDetailsStateWidget(
       child: WillPopScope(
         child: Scaffold(
+          drawerEnableOpenDragGesture: false,
           drawer: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 428),
             child: Drawer(
@@ -265,7 +266,14 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
           ),
           onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
-          body: SafeArea(bottom: false, child: _getBody()),
+          body: SafeArea(
+            bottom: false,
+            child: Builder(
+              builder: (context) {
+                return _getBody(context);
+              },
+            ),
+          ),
           resizeToAvoidBottomInset: false,
         ),
         onWillPop: () async {
@@ -290,8 +298,9 @@ class _HomeWidgetState extends State<HomeWidget> {
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(BuildContext context) {
     if (!Configuration.instance.hasConfiguredAccount()) {
+      _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
@@ -304,7 +313,6 @@ class _HomeWidgetState extends State<HomeWidget> {
       ReceiveSharingIntent.reset();
       return CreateCollectionPage(null, _sharedFiles);
     }
-
     final isBottomInsetPresent = MediaQuery.of(context).viewPadding.bottom != 0;
 
     final bool showBackupFolderHook =
@@ -357,6 +365,12 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       ],
     );
+  }
+
+  void _closeDrawerIfOpen(BuildContext context) {
+    Scaffold.of(context).isDrawerOpen
+        ? Scaffold.of(context).closeDrawer()
+        : null;
   }
 
   Future<bool> _initDeepLinks() async {
