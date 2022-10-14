@@ -505,30 +505,27 @@ class _HomeWidgetState extends State<HomeWidget> {
               .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),
         ),
         Center(
-          child: Hero(
-            tag: "select_folders",
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                width: double.infinity,
-                height: 64,
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                child: GradientButton(
-                  onTap: () async {
-                    if (LocalSyncService.instance
-                        .hasGrantedLimitedPermissions()) {
-                      PhotoManager.presentLimited();
-                    } else {
-                      routeToPage(
-                        context,
-                        const BackupFolderSelectionPage(
-                          buttonText: "Start backup",
-                        ),
-                      );
-                    }
-                  },
-                  text: "Start backup",
-                ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              width: double.infinity,
+              height: 64,
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              child: GradientButton(
+                onTap: () async {
+                  if (LocalSyncService.instance
+                      .hasGrantedLimitedPermissions()) {
+                    PhotoManager.presentLimited();
+                  } else {
+                    routeToPage(
+                      context,
+                      const BackupFolderSelectionPage(
+                        buttonText: "Start backup",
+                      ),
+                    );
+                  }
+                },
+                text: "Start backup",
               ),
             ),
           ),
