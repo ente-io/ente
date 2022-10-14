@@ -1,7 +1,12 @@
 import 'dart:convert';
 
+// Visibility Constants
 const visibilityVisible = 0;
 const visibilityArchive = 1;
+const visibilityHidden = 2;
+
+// Collection SubType Constants
+const subTypeDefaultHidden = 1;
 
 const magicKeyVisibility = 'visibility';
 // key for collection subType
