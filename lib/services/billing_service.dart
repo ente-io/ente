@@ -69,7 +69,7 @@ class BillingService {
   }
 
   Future<BillingPlans> getBillingPlans() {
-    _future ??= (_config.getToken() == null
+    _future ??= (_config.isLoggedIn()
             ? _fetchPublicBillingPlans()
             : _fetchPrivateBillingPlans())
         .then((response) {

@@ -1,6 +1,5 @@
 // @dart=2.9
 
-import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logging/logging.dart';
@@ -21,8 +20,6 @@ class PushService {
 
   static final PushService instance = PushService._privateConstructor();
   static final _logger = Logger("PushService");
-
-  final _dio = Network.instance.getDio();
 
   SharedPreferences _prefs;
 
@@ -75,15 +72,12 @@ class PushService {
   }
 
   Future<void> _setPushTokenOnServer(String fcmToken, String apnsToken) async {
-    await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/push/token",
+    await Network.instance.enteDio.post(
+      "/push/token",
       data: {
         "fcmToken": fcmToken,
         "apnsToken": apnsToken,
       },
-      options: Options(
-        headers: {"X-Auth-Token": Configuration.instance.getToken()},
-      ),
     );
   }
 
