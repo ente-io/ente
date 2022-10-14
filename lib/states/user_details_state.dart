@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/events/user_details_changed_event.dart';
@@ -20,13 +21,17 @@ class UserDetailsStateWidget extends StatefulWidget {
 }
 
 class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
-  late Future<UserDetails> userDetails;
+  late Future<UserDetails?> userDetails;
   late StreamSubscription<UserDetailsChangedEvent> _userDetailsChangedEvent;
   late StreamSubscription<OpenedSettingsEvent> _openedSettingsEventSubscription;
 
   @override
   void initState() {
-    _fetchUserDetails();
+    if (Configuration.instance.hasConfiguredAccount()) {
+      _fetchUserDetails();
+    } else {
+      userDetails = Future.value(null);
+    }
     _userDetailsChangedEvent =
         Bus.instance.on<UserDetailsChangedEvent>().listen((event) {
       _fetchUserDetails();
@@ -67,7 +72,7 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
 
 class InheritedUserDetails extends InheritedWidget {
   final UserDetailsStateWidgetState userDetailsState;
-  final Future<UserDetails> userDetails;
+  final Future<UserDetails?> userDetails;
 
   const InheritedUserDetails({
     Key? key,
