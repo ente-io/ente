@@ -21,7 +21,7 @@ import {
     FILE_TYPE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import ElectronHEICConverter from 'services/electron/heicConvert';
+import heicConversionService from 'services/heicConversionService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
@@ -343,7 +343,7 @@ async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 imageBlob.size
             )}`
         );
-        const convertedImageBlob = await ElectronHEICConverter.convert(
+        const convertedImageBlob = await heicConversionService.convert(
             imageBlob
         );
 
