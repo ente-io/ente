@@ -254,6 +254,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
     bool isSettingsOpen = false;
+    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
 
     return UserDetailsStateWidget(
       child: WillPopScope(
@@ -261,13 +262,15 @@ class _HomeWidgetState extends State<HomeWidget> {
           drawerScrimColor: getEnteColorScheme(context).strokeFainter,
           drawerEnableOpenDragGesture:
               false, //using a hack instead of enabling this as enabling this will create other problems
-          drawer: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 428),
-            child: Drawer(
-              width: double.infinity,
-              child: _settingsPage,
-            ),
-          ),
+          drawer: enableDrawer
+              ? ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 428),
+                  child: Drawer(
+                    width: double.infinity,
+                    child: _settingsPage,
+                  ),
+                )
+              : null,
           onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
           body: SafeArea(
             bottom: false,
