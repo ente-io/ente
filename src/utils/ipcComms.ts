@@ -98,7 +98,7 @@ export default function setupIpcComs(
         return app.getPath(message);
     });
 
-    ipcMain.handle('convert-heic', (_, fileData, outputType) => {
-        return convertHEIC(fileData, outputType);
+    ipcMain.handle('convert-heic', (_, fileData) => {
+        return convertHEIC(fileData);
     });
 }
