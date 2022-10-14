@@ -63,4 +63,5 @@ export interface ElectronAPIs {
     openDiskCache: (cacheName: string) => Promise<Cache>;
     deleteDiskCache: (cacheName: string) => Promise<boolean>;
     logToDisk: (msg: string) => void;
+    convertHEIC(fileData: Uint8Array): Promise<Uint8Array>;
 }
