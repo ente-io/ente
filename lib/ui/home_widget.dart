@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -369,7 +370,9 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   void _closeDrawerIfOpen(BuildContext context) {
     Scaffold.of(context).isDrawerOpen
-        ? Scaffold.of(context).closeDrawer()
+        ? SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+            Scaffold.of(context).closeDrawer();
+          })
         : null;
   }
 
