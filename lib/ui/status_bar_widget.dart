@@ -89,9 +89,11 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               : const BrandTitleWidget(size: SizeVarient.medium),
         ),
         AnimatedOpacity(
-          opacity: _showStatus ? 1 : 0,
-          duration: const Duration(milliseconds: 1000),
-          child: const Divider(),
+          opacity: _showErrorBanner ? 1 : 0,
+          duration: const Duration(milliseconds: 200),
+          child: const Divider(
+            height: 8,
+          ),
         ),
         _showErrorBanner
             ? HeaderErrorWidget(error: _syncError)
