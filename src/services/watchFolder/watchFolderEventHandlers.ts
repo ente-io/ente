@@ -22,7 +22,9 @@ export async function diskFileAddedCallback(file: ElectronFile) {
             files: [file],
         };
         watchFolderService.pushEvent(event);
-        addLogLine(`added (upload) to event queue, ${JSON.stringify(event)}`);
+        addLogLine(
+            `added (upload) to event queue, collectionName:${event.collectionName} folderPath:${event.folderPath}, filesCount: ${event.files.length}`
+        );
     } catch (e) {
         logError(e, 'error while calling diskFileAddedCallback');
     }
@@ -46,7 +48,9 @@ export async function diskFileRemovedCallback(filePath: string) {
             paths: [filePath],
         };
         watchFolderService.pushEvent(event);
-        addLogLine(`added (trash) to event queue, ${JSON.stringify(event)}`);
+        addLogLine(
+            `added (trash) to event queue collectionName:${event.collectionName} folderPath:${event.folderPath} , pathsCount: ${event.paths.length}`
+        );
     } catch (e) {
         logError(e, 'error while calling diskFileRemovedCallback');
     }

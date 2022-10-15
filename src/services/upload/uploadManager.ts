@@ -197,10 +197,6 @@ class UploadManager {
                 }
             } else {
                 logError(e, 'uploading failed with error');
-                addLogLine(
-                    `uploading failed with error -> ${e.message}
-                ${(e as Error).stack}`
-                );
                 throw e;
             }
         } finally {
@@ -440,7 +436,9 @@ class UploadManager {
     ) {
         try {
             let decryptedFile: EnteFile;
-            addLogLine(`uploadedFile ${JSON.stringify(uploadedFile)}`);
+            addLogLine(
+                `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`
+            );
             this.updateElectronRemainingFiles(fileWithCollection);
             switch (fileUploadResult) {
                 case UPLOAD_RESULT.FAILED:
@@ -486,10 +484,6 @@ class UploadManager {
             return fileUploadResult;
         } catch (e) {
             logError(e, 'failed to do post file upload action');
-            addLogLine(
-                `failed to do post file upload action -> ${e.message}
-                ${(e as Error).stack}`
-            );
             return UPLOAD_RESULT.FAILED;
         }
     }
