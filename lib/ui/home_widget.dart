@@ -669,7 +669,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                       child: ClipRect(
                         child: BackdropFilter(
                           filter: ImageFilter.blur(
-                              sigmaX: navBarBlur, sigmaY: navBarBlur),
+                            sigmaX: navBarBlur,
+                            sigmaY: navBarBlur,
+                          ),
                           child: GNav(
                             curve: Curves.easeOutExpo,
                             backgroundColor:
