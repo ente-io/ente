@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
@@ -232,16 +231,6 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                       fontSize: 12,
                                     ),
                           ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: Text(
-                        "${NumberFormat().format(userDetails.fileCount)} Memories",
-                        style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                              color: Colors.white,
-                              fontSize: 12,
-                            ),
-                      ),
-                    )
                   ],
                 ),
               ],
