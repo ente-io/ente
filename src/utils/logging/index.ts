@@ -10,12 +10,13 @@ export function addLogLine(log: string) {
     if (isDEVSentryENV()) {
         console.log(log);
     }
-    saveLogLine({
-        timestamp: Date.now(),
-        logLine: log,
-    });
     if (isElectron()) {
         ElectronService.logToDisk(log);
+    } else {
+        saveLogLine({
+            timestamp: Date.now(),
+            logLine: log,
+        });
     }
 }
 
