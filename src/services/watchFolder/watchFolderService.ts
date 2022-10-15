@@ -80,8 +80,6 @@ class watchFolderService {
         try {
             let mappings = this.getWatchMappings();
 
-            addLogLine(`mappings, ${mappings.map((m) => JSON.stringify(m))}`);
-
             if (!mappings?.length) {
                 return;
             }
@@ -238,11 +236,6 @@ class watchFolderService {
 
     private async runNextEvent() {
         try {
-            addLogLine(
-                `mappings,
-            ${this.getWatchMappings().map((m) => JSON.stringify(m))}`
-            );
-
             if (
                 this.eventQueue.length === 0 ||
                 this.isEventRunning ||
@@ -267,8 +260,10 @@ class watchFolderService {
             }
             this.currentEvent = event;
             this.currentlySyncedMapping = mapping;
-            addLogLine(`running event', ${JSON.stringify(event)}`);
-            this.setIsEventRunning(true);
+            addLogLine(
+                `running event type:${event.type} collectionName:${event.collectionName} folderPath:${event.folderPath} , fileCount:${event.files?.length} pathsCount: ${event.paths?.length}`
+            );
+
             if (event.type === 'upload') {
                 this.processUploadEvent();
             } else {
