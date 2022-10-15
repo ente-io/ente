@@ -14,7 +14,7 @@ import { logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
-import { convertHEIC } from '../services/heicConversion';
+import { convertHEIC } from '../services/heicConvertor';
 
 export default function setupIpcComs(
     tray: Tray,
