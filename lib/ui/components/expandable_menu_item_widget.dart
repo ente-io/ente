@@ -45,7 +45,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
         color: expandableController.value
-            ? enteColorScheme.backgroundElevated2
+            ? enteColorScheme.backgroundElevated
             : null,
         borderRadius: BorderRadius.circular(4),
       ),
