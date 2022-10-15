@@ -15,15 +15,12 @@ export async function convertHEIC(
         if (!existsSync(tempDir)) {
             await mkdir(tempDir);
         }
-        tempInputFilePath = path.join(
-            tempDir,
-            generateRandomName(10) + '.heic'
-        );
-        tempOutputFilePath = path.join(
-            tempDir,
-            generateRandomName(10) + '.jpeg'
-        );
-        writeFile(tempInputFilePath, heicFileData);
+        const tempName = generateRandomName(10);
+
+        tempInputFilePath = path.join(tempDir, tempName + '.heic');
+        tempOutputFilePath = path.join(tempDir, tempName + '.jpeg');
+
+        await writeFile(tempInputFilePath, heicFileData);
 
         await new Promise((resolve, reject) => {
             exec(
