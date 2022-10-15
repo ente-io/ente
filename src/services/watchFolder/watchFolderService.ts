@@ -260,6 +260,7 @@ class watchFolderService {
             );
             if (event.type === 'upload') {
                 event.files = getValidFilesToUpload(event.files, mapping);
+                addLogLine(`valid files count: ${event.files?.length}`);
                 if (event.files.length === 0) {
                     return;
                 }
