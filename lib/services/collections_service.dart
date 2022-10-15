@@ -46,7 +46,7 @@ class CollectionsService {
   Configuration _config;
   SharedPreferences _prefs;
   Future<List<File>> _cachedLatestFiles;
-  final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
@@ -172,16 +172,12 @@ class CollectionsService {
   }
 
   Future<List<User>> getSharees(int collectionID) {
-    return _dio
-        .get(
-      Configuration.instance.getHttpEndpoint() + "/collections/sharees",
+    return _enteDio.get(
+      "/collections/sharees",
       queryParameters: {
         "collectionID": collectionID,
       },
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
-    )
-        .then((response) {
+    ).then((response) {
       _logger.info(response.toString());
       final sharees = <User>[];
       for (final user in response.data["sharees"]) {
@@ -197,16 +193,13 @@ class CollectionsService {
       Sodium.base642bin(publicKey),
     );
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/collections/share",
+      await _enteDio.post(
+        "/collections/share",
         data: {
           "collectionID": collectionID,
           "email": email,
           "encryptedKey": Sodium.bin2base64(encryptedKey),
         },
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
@@ -219,15 +212,12 @@ class CollectionsService {
 
   Future<void> unshare(int collectionID, String email) async {
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/collections/unshare",
+      await _enteDio.post(
+        "/collections/unshare",
         data: {
           "collectionID": collectionID,
           "email": email,
         },
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       _collectionIDToCollections[collectionID]
           .sharees
@@ -256,12 +246,8 @@ class CollectionsService {
         await RemoteSyncService.instance
             .updateDeviceFolderSyncStatus(deivcePathIDsToUnsync);
       }
-      await _dio.delete(
-        Configuration.instance.getHttpEndpoint() +
-            "/collections/v2/${collection.id}",
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
+      await _enteDio.delete(
+        "/collections/v2/${collection.id}",
       );
       await _filesDB.deleteCollection(collection.id);
       final deletedCollection = collection.copyWith(isDeleted: true);
@@ -315,16 +301,13 @@ class CollectionsService {
         utf8.encode(newName),
         getCollectionKey(collection.id),
       );
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/collections/rename",
+      await _enteDio.post(
+        "/collections/rename",
         data: {
           "collectionID": collection.id,
           "encryptedName": Sodium.bin2base64(encryptedName.encryptedData),
           "nameDecryptionNonce": Sodium.bin2base64(encryptedName.nonce)
         },
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       // trigger sync to fetch the latest name from server
       sync();
@@ -336,12 +319,8 @@ class CollectionsService {
 
   Future<void> leaveAlbum(Collection collection) async {
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() +
-            "/collections/leave/${collection.id}",
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
+      await _enteDio.post(
+        "/collections/leave/${collection.id}",
       );
       // trigger sync to fetch the latest name from server
       sync();
@@ -390,13 +369,9 @@ class CollectionsService {
           header: Sodium.bin2base64(encryptedMMd.header),
         ),
       );
-      await _dio.put(
-        Configuration.instance.getHttpEndpoint() +
-            "/collections/magic-metadata",
+      await _enteDio.put(
+        "/collections/magic-metadata",
         data: params,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       collection.mMdVersion = currentVersion + 1;
       _cacheCollectionAttributes(collection);
@@ -416,14 +391,11 @@ class CollectionsService {
 
   Future<void> createShareUrl(Collection collection) async {
     try {
-      final response = await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/collections/share-url",
+      final response = await _enteDio.post(
+        "/collections/share-url",
         data: {
           "collectionID": collection.id,
         },
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
@@ -446,12 +418,9 @@ class CollectionsService {
   ) async {
     prop.putIfAbsent('collectionID', () => collection.id);
     try {
-      final response = await _dio.put(
-        Configuration.instance.getHttpEndpoint() + "/collections/share-url",
+      final response = await _enteDio.put(
+        "/collections/share-url",
         data: json.encode(prop),
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       // remove existing url information
       collection.publicURLs?.clear();
@@ -472,15 +441,8 @@ class CollectionsService {
 
   Future<void> disableShareUrl(Collection collection) async {
     try {
-      await _dio.delete(
-        _config.getHttpEndpoint() +
-            "/collections/share-url/" +
-            collection.id.toString(),
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
+      await _enteDio.delete(
+        "/collections/share-url/" + collection.id.toString(),
       );
       collection.publicURLs.clear();
       await _db.insert(List.from([collection]));
@@ -494,15 +456,12 @@ class CollectionsService {
 
   Future<List<Collection>> _fetchCollections(int sinceTime) async {
     try {
-      final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/collections",
+      final response = await _enteDio.get(
+        "/collections",
         queryParameters: {
           "sinceTime": sinceTime,
           "source": AppLifecycleService.instance.isForeground ? "fg" : "bg",
         },
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       final List<Collection> collections = [];
       if (response != null) {
@@ -564,11 +523,8 @@ class CollectionsService {
   Future<Collection> fetchCollectionByID(int collectionID) async {
     try {
       _logger.fine('fetching collectionByID $collectionID');
-      final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/collections/$collectionID",
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
+      final response = await _enteDio.get(
+        "/collections/$collectionID",
       );
       assert(response != null && response.data != null);
       final collectionData = response.data["collection"];
@@ -676,12 +632,9 @@ class CollectionsService {
     }
 
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+      await _enteDio.post(
+        "/collections/add-files",
         data: params,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       await _filesDB.insertMultiple(files);
       Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
@@ -719,12 +672,9 @@ class CollectionsService {
     );
 
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/collections/add-files",
+      await _enteDio.post(
+        "/collections/add-files",
         data: params,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       localFileToUpload.collectionID = destCollectionID;
       localFileToUpload.uploadedFileID = uploadedFileID;
@@ -756,12 +706,9 @@ class CollectionsService {
       );
     }
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/collections/restore-files",
+      await _enteDio.post(
+        "/collections/restore-files",
         data: params,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
       );
       await _filesDB.insertMultiple(files);
       await TrashDB.instance
@@ -818,11 +765,9 @@ class CollectionsService {
         ).toMap(),
       );
     }
-    await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/collections/move-files",
+    await _enteDio.post(
+      "/collections/move-files",
       data: params,
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     );
 
     // remove files from old collection
@@ -877,11 +822,9 @@ class CollectionsService {
       }
       params["fileIDs"].add(file.uploadedFileID);
     }
-    await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/collections/v2/remove-files",
+    await _enteDio.post(
+      "/collections/v2/remove-files",
       data: params,
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
@@ -890,12 +833,10 @@ class CollectionsService {
   }
 
   Future<Collection> createAndCacheCollection(Collection collection) async {
-    return _dio
+    return _enteDio
         .post(
-      Configuration.instance.getHttpEndpoint() + "/collections",
+      "/collections",
       data: collection.toMap(),
-      options:
-          Options(headers: {"X-Auth-Token": Configuration.instance.getToken()}),
     )
         .then((response) {
       final collection = Collection.fromMap(response.data["collection"]);
@@ -969,65 +910,6 @@ class CollectionsService {
       }
     }
   }
-}
-
-class AddFilesRequest {
-  final int collectionID;
-  final List<CollectionFileItem> files;
-
-  AddFilesRequest(
-    this.collectionID,
-    this.files,
-  );
-
-  AddFilesRequest copyWith({
-    int collectionID,
-    List<CollectionFileItem> files,
-  }) {
-    return AddFilesRequest(
-      collectionID ?? this.collectionID,
-      files ?? this.files,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'collectionID': collectionID,
-      'files': files?.map((x) => x?.toMap())?.toList(),
-    };
-  }
-
-  factory AddFilesRequest.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
-    return AddFilesRequest(
-      map['collectionID'],
-      List<CollectionFileItem>.from(
-        map['files']?.map((x) => CollectionFileItem.fromMap(x)),
-      ),
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory AddFilesRequest.fromJson(String source) =>
-      AddFilesRequest.fromMap(json.decode(source));
-
-  @override
-  String toString() =>
-      'AddFilesRequest(collectionID: $collectionID, files: $files)';
-
-  @override
-  bool operator ==(Object o) {
-    if (identical(this, o)) return true;
-
-    return o is AddFilesRequest &&
-        o.collectionID == collectionID &&
-        listEquals(o.files, files);
-  }
-
-  @override
-  int get hashCode => collectionID.hashCode ^ files.hashCode;
 }
 
 class SharingNotPermittedForFreeAccountsError extends Error {}

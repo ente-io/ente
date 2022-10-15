@@ -1,8 +1,6 @@
 // @dart=2.9
 
-import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -11,7 +9,7 @@ import 'package:photos/models/file.dart';
 
 class DeduplicationService {
   final _logger = Logger("DeduplicationService");
-  final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
 
   DeduplicationService._privateConstructor();
 
@@ -107,14 +105,7 @@ class DeduplicationService {
   }
 
   Future<DuplicateFilesResponse> _fetchDuplicateFileIDs() async {
-    final response = await _dio.get(
-      Configuration.instance.getHttpEndpoint() + "/files/duplicates",
-      options: Options(
-        headers: {
-          "X-Auth-Token": Configuration.instance.getToken(),
-        },
-      ),
-    );
+    final response = await _enteDio.get("/files/duplicates");
     return DuplicateFilesResponse.fromMap(response.data);
   }
 }

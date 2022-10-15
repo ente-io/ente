@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/events/notification_event.dart';
@@ -12,9 +10,8 @@ import 'package:photos/services/user_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UserRemoteFlagService {
-  final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
   final _logger = Logger((UserRemoteFlagService).toString());
-  final _config = Configuration.instance;
   late SharedPreferences _prefs;
 
   UserRemoteFlagService._privateConstructor();
@@ -95,15 +92,8 @@ class UserRemoteFlagService {
       if (defaultValue != null) {
         queryParams["defaultValue"] = defaultValue;
       }
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/remote-store",
-        queryParameters: queryParams,
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response =
+          await _enteDio.get("/remote-store", queryParameters: queryParams);
       if (response.statusCode != HttpStatus.ok) {
         throw Exception("Unexpected status code ${response.statusCode}");
       }
@@ -118,17 +108,12 @@ class UserRemoteFlagService {
   // to mark recovery as completed
   Future<void> _updateKeyValue(String key, String value) async {
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/remote-store/update",
+      final response = await _enteDio.post(
+        "/remote-store/update",
         data: {
           "key": key,
           "value": value,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       if (response.statusCode != HttpStatus.ok) {
         throw Exception("Unexpected state");

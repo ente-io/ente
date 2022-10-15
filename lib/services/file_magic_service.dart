@@ -20,12 +20,12 @@ import 'package:photos/utils/file_download_util.dart';
 
 class FileMagicService {
   final _logger = Logger("FileMagicService");
-  Dio _dio;
+  Dio _enteDio;
   FilesDB _filesDB;
 
   FileMagicService._privateConstructor() {
     _filesDB = FilesDB.instance;
-    _dio = Network.instance.getDio();
+    _enteDio = Network.instance.enteDio;
   }
 
   static final FileMagicService instance =
@@ -93,14 +93,7 @@ class FileMagicService {
         file.pubMmdVersion = file.pubMmdVersion + 1;
       }
 
-      await _dio.put(
-        Configuration.instance.getHttpEndpoint() +
-            "/files/public-magic-metadata",
-        data: params,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-      );
+      await _enteDio.put("/files/public-magic-metadata", data: params);
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
       await _filesDB.insertMultiple(files);
@@ -164,13 +157,7 @@ class FileMagicService {
         file.mMdVersion = file.mMdVersion + 1;
       }
 
-      await _dio.put(
-        Configuration.instance.getHttpEndpoint() + "/files/magic-metadata",
-        data: params,
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-      );
+      await _enteDio.put("/files/magic-metadata", data: params);
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
       await _filesDB.insertMultiple(files);

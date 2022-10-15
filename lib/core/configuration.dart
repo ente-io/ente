@@ -393,6 +393,10 @@ class Configuration {
     return _cachedToken;
   }
 
+  bool isLoggedIn() {
+    return getToken() != null;
+  }
+
   Future<void> setToken(String token) async {
     _cachedToken = token;
     await _preferences.setString(tokenKey, token);
@@ -519,7 +523,7 @@ class Configuration {
   }
 
   bool hasConfiguredAccount() {
-    return getToken() != null && _key != null;
+    return isLoggedIn() && _key != null;
   }
 
   bool shouldBackupOverMobileData() {

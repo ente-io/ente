@@ -3,10 +3,8 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart';
@@ -16,7 +14,7 @@ import 'package:photos/utils/file_download_util.dart';
 
 class DiffFetcher {
   final _logger = Logger("DiffFetcher");
-  final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
 
   Future<Diff> getEncryptedFilesDiff(int collectionID, int sinceTime) async {
     _logger.info(
@@ -26,11 +24,8 @@ class DiffFetcher {
           sinceTime.toString(),
     );
     try {
-      final response = await _dio.get(
-        Configuration.instance.getHttpEndpoint() + "/collections/v2/diff",
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
+      final response = await _enteDio.get(
+        "/collections/v2/diff",
         queryParameters: {
           "collectionID": collectionID,
           "sinceTime": sinceTime,

@@ -38,7 +38,7 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _getBody(BuildContext context, EnteColorScheme colorScheme) {
-    final hasLoggedIn = Configuration.instance.getToken() != null;
+    final hasLoggedIn = Configuration.instance.isLoggedIn();
     final enteTextTheme = getEnteTextTheme(context);
     final List<Widget> contents = [];
     contents.add(

@@ -53,8 +53,7 @@ class SupportSectionWidget extends StatelessWidget {
                 builder: (BuildContext context) {
                   final endpoint = Configuration.instance.getHttpEndpoint() +
                       "/users/roadmap";
-                  final isLoggedIn = Configuration.instance.getToken() != null;
-                  final url = isLoggedIn
+                  final url = Configuration.instance.isLoggedIn()
                       ? endpoint + "?token=" + Configuration.instance.getToken()
                       : roadmapURL;
                   return WebPage("Roadmap", url);
