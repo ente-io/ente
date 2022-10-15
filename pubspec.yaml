@@ -15,13 +15,13 @@ description: ente photos application
 version: 0.6.42+372
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.17.0 <3.0.0'
 
 dependencies:
   adaptive_theme: ^3.1.0
   animate_do: ^2.0.0
   archive: ^3.1.2
-  background_fetch: ^1.0.1
+  background_fetch: ^1.1.1
   bip39: ^1.0.6
   cached_network_image: ^3.0.0
   chewie:

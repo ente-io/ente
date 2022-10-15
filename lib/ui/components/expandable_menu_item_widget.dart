@@ -23,19 +23,30 @@ class ExpandableMenuItemWidget extends StatefulWidget {
 
 class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
   final expandableController = ExpandableController(initialExpanded: false);
+  @override
+  void initState() {
+    expandableController.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
-    expandableController.dispose();
+    expandableController.removeListener(() {});
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    return Container(
+    return AnimatedContainer(
+      curve: Curves.ease,
+      duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: enteColorScheme.backgroundElevated2,
+        color: expandableController.value
+            ? enteColorScheme.backgroundElevated2
+            : null,
         borderRadius: BorderRadius.circular(4),
       ),
       child: ExpandableNotifier(

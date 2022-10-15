@@ -73,26 +73,28 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // if (widget.selectedFiles.files.isEmpty) {
-    return AppBar(
-      backgroundColor:
-          widget.type == GalleryType.homepage ? const Color(0x00000000) : null,
-      elevation: 0,
-      centerTitle: false,
-      title: widget.type == GalleryType.homepage
-          ? const SizedBox.shrink()
-          : TextButton(
-              child: Text(
-                _appBarTitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .headline5
-                    .copyWith(fontSize: 16),
-              ),
-              onPressed: () => _renameAlbum(context),
-            ),
-      actions: _getDefaultActions(context),
-    );
+    return widget.type == GalleryType.homepage
+        ? const SizedBox.shrink()
+        : AppBar(
+            backgroundColor: widget.type == GalleryType.homepage
+                ? const Color(0x00000000)
+                : null,
+            elevation: 0,
+            centerTitle: false,
+            title: widget.type == GalleryType.homepage
+                ? const SizedBox.shrink()
+                : TextButton(
+                    child: Text(
+                      _appBarTitle,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline5
+                          .copyWith(fontSize: 16),
+                    ),
+                    onPressed: () => _renameAlbum(context),
+                  ),
+            actions: _getDefaultActions(context),
+          );
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
