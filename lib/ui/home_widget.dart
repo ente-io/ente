@@ -657,7 +657,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                     borderRadius: BorderRadius.circular(32),
                     child: Container(
                       alignment: Alignment.bottomCenter,
-                      height: 56,
+                      height: 48,
                       child: ClipRect(
                         child: BackdropFilter(
                           filter: ImageFilter.blur(sigmaX: 96, sigmaY: 96),
@@ -671,17 +671,17 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 .colorScheme
                                 .gNavBarActiveColor,
                             iconSize: 24,
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                             duration: const Duration(milliseconds: 200),
                             gap: 0,
-                            tabBorderRadius: 24,
+                            tabBorderRadius: 32,
                             tabBackgroundColor: Theme.of(context)
                                 .colorScheme
                                 .gNavBarActiveColor,
                             haptic: false,
                             tabs: [
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+                                margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
                                 icon: Icons.home,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -696,7 +696,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(8, 8, 8, 8),
+                                margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
                                 icon: Icons.photo_library,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -711,7 +711,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+                                margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
                                 icon: Icons.folder_shared,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
