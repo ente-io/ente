@@ -88,7 +88,6 @@ class HEICConverter {
                     this.workerPool.push({ comlink, worker });
                     return convertedHEIC;
                 } catch (e) {
-                    addLogLine('heic conversion failed-' + e.message);
                     logError(e, 'heic conversion failed');
                     worker.terminate();
                     this.workerPool.push(await createNewConvertWorker());
