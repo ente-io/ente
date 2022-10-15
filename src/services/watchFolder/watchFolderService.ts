@@ -267,6 +267,7 @@ class watchFolderService {
             this.currentEvent = event;
             this.currentlySyncedMapping = mapping;
 
+            this.setIsEventRunning(true);
             if (event.type === 'upload') {
                 this.processUploadEvent();
             } else {
