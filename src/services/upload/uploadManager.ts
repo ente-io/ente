@@ -436,7 +436,9 @@ class UploadManager {
     ) {
         try {
             let decryptedFile: EnteFile;
-            addLogLine(`uploadedFile present ${!!uploadedFile}`);
+            addLogLine(
+                `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`
+            );
             this.updateElectronRemainingFiles(fileWithCollection);
             switch (fileUploadResult) {
                 case UPLOAD_RESULT.FAILED:
