@@ -10,9 +10,10 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
+import 'package:photos/ui/components/brand_title_widget.dart';
+import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_warning_widget.dart';
 import 'package:photos/ui/header_error_widget.dart';
-import 'package:photos/ui/viewer/search/search_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 const double kContainerHeight = 36;
@@ -29,16 +30,19 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   StreamSubscription<NotificationEvent> _notificationSubscription;
   bool _showStatus = false;
   bool _showErrorBanner = false;
+  Error _syncError;
 
   @override
   void initState() {
     _subscription = Bus.instance.on<SyncStatusUpdate>().listen((event) {
       if (event.status == SyncStatus.error) {
         setState(() {
+          _syncError = event.error;
           _showErrorBanner = true;
         });
       } else {
         setState(() {
+          _syncError = null;
           _showErrorBanner = false;
         });
       }
@@ -77,38 +81,23 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Stack(
-          children: [
-            AnimatedOpacity(
-              opacity: _showStatus
-                  ? _showErrorBanner
-                      ? 1
-                      : 0
-                  : 1,
-              duration: const Duration(milliseconds: 1000),
-              child: const BrandingWidget(),
-            ),
-            AnimatedOpacity(
-              opacity: _showStatus ? 1 : 0,
-              duration: const Duration(milliseconds: 1000),
-              child: const SyncStatusWidget(),
-            ),
-            Positioned(
-              right: 0,
-              top: 0,
-              child: Container(
-                color: Theme.of(context).colorScheme.defaultBackgroundColor,
-                height: kContainerHeight,
-                child: const SearchIconWidget(),
-              ),
-            ),
-          ],
+        HomeHeaderWidget(
+          centerWidget: _showStatus
+              ? _showErrorBanner
+                  ? const BrandTitleWidget(size: SizeVarient.medium)
+                  : const SyncStatusWidget()
+              : const BrandTitleWidget(size: SizeVarient.medium),
         ),
         AnimatedOpacity(
-          opacity: _showStatus ? 1 : 0,
-          duration: const Duration(milliseconds: 1000),
-          child: const Divider(),
+          opacity: _showErrorBanner ? 1 : 0,
+          duration: const Duration(milliseconds: 200),
+          child: const Divider(
+            height: 8,
+          ),
         ),
+        _showErrorBanner
+            ? HeaderErrorWidget(error: _syncError)
+            : const SizedBox.shrink(),
         UserRemoteFlagService.instance.shouldShowRecoveryVerification()
             ? NotificationWarningWidget(
                 warningIcon: Icons.gpp_maybe,
@@ -165,14 +154,11 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
             _event.status == SyncStatus.completedFirstGalleryImport) &&
         (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
             kSleepDuration.inMicroseconds);
-    if (_event == null || isNotOutdatedEvent) {
+    if (_event == null ||
+        isNotOutdatedEvent ||
+        //sync error cases are handled in StatusBarWidget
+        _event.status == SyncStatus.error) {
       return const SizedBox.shrink();
-    }
-    if (_event.status == SyncStatus.error) {
-      return Padding(
-        padding: const EdgeInsets.only(top: kContainerHeight + 8),
-        child: HeaderErrorWidget(error: _event.error),
-      );
     }
     if (_event.status == SyncStatus.completedBackup) {
       return const SyncStatusCompletedWidget();
@@ -195,7 +181,6 @@ class RefreshIndicatorWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: kContainerHeight,
-      width: double.infinity,
       alignment: Alignment.center,
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),

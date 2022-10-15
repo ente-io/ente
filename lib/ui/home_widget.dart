@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
@@ -32,6 +33,8 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
@@ -74,7 +77,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
 
-  // final _settingsButton = SettingsButton();
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
   Widget _headerWidgetWithSettingsButton;
@@ -96,13 +98,10 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     _logger.info("Building initstate");
-    _headerWidgetWithSettingsButton = Container(
-      margin: const EdgeInsets.only(top: 12),
-      child: Stack(
-        children: const [
-          _headerWidget,
-        ],
-      ),
+    _headerWidgetWithSettingsButton = Stack(
+      children: const [
+        _headerWidget,
+      ],
     );
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
@@ -254,35 +253,60 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   Widget build(BuildContext context) {
     _logger.info("Building home_Widget with tab $_selectedTabIndex");
+    bool isSettingsOpen = false;
+    final enableDrawer = LocalSyncService.instance.hasCompletedFirstImport();
 
-    return WillPopScope(
-      child: Scaffold(
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(0),
-          child: Container(),
+    return UserDetailsStateWidget(
+      child: WillPopScope(
+        child: Scaffold(
+          drawerScrimColor: getEnteColorScheme(context).strokeFainter,
+          drawerEnableOpenDragGesture:
+              false, //using a hack instead of enabling this as enabling this will create other problems
+          drawer: enableDrawer
+              ? ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 428),
+                  child: Drawer(
+                    width: double.infinity,
+                    child: _settingsPage,
+                  ),
+                )
+              : null,
+          onDrawerChanged: (isOpened) => isSettingsOpen = isOpened,
+          body: SafeArea(
+            bottom: false,
+            child: Builder(
+              builder: (context) {
+                return _getBody(context);
+              },
+            ),
+          ),
+          resizeToAvoidBottomInset: false,
         ),
-        body: _getBody(),
-        resizeToAvoidBottomInset: false,
-      ),
-      onWillPop: () async {
-        if (_selectedTabIndex == 0) {
-          if (Platform.isAndroid) {
-            MoveToBackground.moveTaskToBack();
-            return false;
+        onWillPop: () async {
+          if (_selectedTabIndex == 0) {
+            if (isSettingsOpen) {
+              Navigator.pop(context);
+              return false;
+            }
+            if (Platform.isAndroid) {
+              MoveToBackground.moveTaskToBack();
+              return false;
+            } else {
+              return true;
+            }
           } else {
-            return true;
+            Bus.instance
+                .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
+            return false;
           }
-        } else {
-          Bus.instance
-              .fire(TabChangedEvent(0, TabChangedEventSource.backButton));
-          return false;
-        }
-      },
+        },
+      ),
     );
   }
 
-  Widget _getBody() {
+  Widget _getBody(BuildContext context) {
     if (!Configuration.instance.hasConfiguredAccount()) {
+      _closeDrawerIfOpen(context);
       return const LandingPageWidget();
     }
     if (!LocalSyncService.instance.hasGrantedPermissions()) {
@@ -295,6 +319,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       ReceiveSharingIntent.reset();
       return CreateCollectionPage(null, _sharedFiles);
     }
+    final isBottomInsetPresent = MediaQuery.of(context).viewPadding.bottom != 0;
 
     final bool showBackupFolderHook =
         !Configuration.instance.hasSelectedAnyBackupFolder() &&
@@ -302,24 +327,29 @@ class _HomeWidgetState extends State<HomeWidget> {
             CollectionsService.instance.getActiveCollections().isEmpty;
     return Stack(
       children: [
-        ExtentsPageView(
-          onPageChanged: (page) {
-            Bus.instance.fire(
-              TabChangedEvent(
-                page,
-                TabChangedEventSource.pageView,
-              ),
+        Builder(
+          builder: (context) {
+            return ExtentsPageView(
+              onPageChanged: (page) {
+                Bus.instance.fire(
+                  TabChangedEvent(
+                    page,
+                    TabChangedEventSource.pageView,
+                  ),
+                );
+              },
+              controller: _pageController,
+              openDrawer: Scaffold.of(context).openDrawer,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                showBackupFolderHook
+                    ? _getBackupFolderSelectionHook()
+                    : _getMainGalleryWidget(),
+                _deviceFolderGalleryWidget,
+                _sharedCollectionGallery,
+              ],
             );
           },
-          controller: _pageController,
-          children: [
-            showBackupFolderHook
-                ? _getBackupFolderSelectionHook()
-                : _getMainGalleryWidget(),
-            _deviceFolderGalleryWidget,
-            _sharedCollectionGallery,
-            _settingsPage,
-          ],
         ),
         const Align(
           alignment: Alignment.bottomCenter,
@@ -327,8 +357,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: SafeArea(
-            minimum: const EdgeInsets.only(bottom: 8),
+          child: Padding(
+            padding: EdgeInsets.only(bottom: isBottomInsetPresent ? 32 : 8),
             child: HomeBottomNavigationBar(
               _selectedFiles,
               selectedTabIndex: _selectedTabIndex,
@@ -341,6 +371,14 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       ],
     );
+  }
+
+  void _closeDrawerIfOpen(BuildContext context) {
+    Scaffold.of(context).isDrawerOpen
+        ? SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+            Scaffold.of(context).closeDrawer();
+          })
+        : null;
   }
 
   Future<bool> _initDeepLinks() async {
@@ -472,30 +510,27 @@ class _HomeWidgetState extends State<HomeWidget> {
               .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),
         ),
         Center(
-          child: Hero(
-            tag: "select_folders",
-            child: Material(
-              type: MaterialType.transparency,
-              child: Container(
-                width: double.infinity,
-                height: 64,
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                child: GradientButton(
-                  onTap: () async {
-                    if (LocalSyncService.instance
-                        .hasGrantedLimitedPermissions()) {
-                      PhotoManager.presentLimited();
-                    } else {
-                      routeToPage(
-                        context,
-                        const BackupFolderSelectionPage(
-                          buttonText: "Start backup",
-                        ),
-                      );
-                    }
-                  },
-                  text: "Start backup",
-                ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: Container(
+              width: double.infinity,
+              height: 64,
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+              child: GradientButton(
+                onTap: () async {
+                  if (LocalSyncService.instance
+                      .hasGrantedLimitedPermissions()) {
+                    PhotoManager.presentLimited();
+                  } else {
+                    routeToPage(
+                      context,
+                      const BackupFolderSelectionPage(
+                        buttonText: "Start backup",
+                      ),
+                    );
+                  }
+                },
+                text: "Start backup",
               ),
             ),
           ),
@@ -605,7 +640,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
-      height: filesAreSelected ? 0 : 52,
+      height: filesAreSelected ? 0 : 56,
       child: AnimatedOpacity(
         duration: const Duration(milliseconds: 100),
         opacity: filesAreSelected ? 0.0 : 1.0,
@@ -619,19 +654,17 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(36),
+                    borderRadius: BorderRadius.circular(32),
                     child: Container(
                       alignment: Alignment.bottomCenter,
-                      height: 52,
-                      width: 240,
+                      height: 56,
                       child: ClipRect(
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                          filter: ImageFilter.blur(sigmaX: 96, sigmaY: 96),
                           child: GNav(
                             curve: Curves.easeOutExpo,
-                            backgroundColor: Theme.of(context)
-                                .colorScheme
-                                .gNavBackgroundColor,
+                            backgroundColor:
+                                getEnteColorScheme(context).fillMuted,
                             mainAxisAlignment: MainAxisAlignment.center,
                             rippleColor: Colors.white.withOpacity(0.1),
                             activeColor: Theme.of(context)
@@ -648,7 +681,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                             haptic: false,
                             tabs: [
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(6, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(12, 8, 6, 8),
                                 icon: Icons.home,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -663,7 +696,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(6, 8, 6, 8),
                                 icon: Icons.photo_library,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -678,7 +711,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(0, 6, 0, 6),
+                                margin: const EdgeInsets.fromLTRB(6, 8, 12, 8),
                                 icon: Icons.folder_shared,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
@@ -692,21 +725,6 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                   ); // To take care of occasional missing events
                                 },
                               ),
-                              GButton(
-                                margin: const EdgeInsets.fromLTRB(0, 6, 6, 6),
-                                icon: Icons.person,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
-                                text: '',
-                                onPressed: () {
-                                  _onTabChange(
-                                    3,
-                                  ); // To take care of occasional missing events
-                                },
-                              )
                             ],
                             selectedIndex: currentTabIndex,
                             onTabChange: _onTabChange,

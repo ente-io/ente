@@ -114,13 +114,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
           widget.expandableController != null
               ? AnimatedOpacity(
                   duration: const Duration(milliseconds: 100),
+                  curve: Curves.easeInOut,
                   opacity: isExpanded! ? 0 : 1,
                   child: AnimatedSwitcher(
                     transitionBuilder: (child, animation) {
                       return ScaleTransition(scale: animation, child: child);
                     },
                     duration: const Duration(milliseconds: 200),
-                    child: isExpanded!
+                    switchInCurve: Curves.easeOut,
+                    child: isExpanded
                         ? const SizedBox.shrink()
                         : Icon(widget.trailingIcon),
                   ),
