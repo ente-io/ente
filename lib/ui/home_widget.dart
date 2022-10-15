@@ -682,7 +682,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                             tabs: [
                               GButton(
                                 margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
-                                icon: Icons.home,
+                                icon: Icons.home_rounded,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
                                 iconActiveColor: Theme.of(context)
@@ -697,7 +697,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               ),
                               GButton(
                                 margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-                                icon: Icons.photo_library,
+                                icon: Icons.collections_rounded,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
                                 iconActiveColor: Theme.of(context)
@@ -712,7 +712,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               ),
                               GButton(
                                 margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-                                icon: Icons.folder_shared,
+                                icon: Icons.people_outlined,
                                 iconColor:
                                     Theme.of(context).colorScheme.gNavIconColor,
                                 iconActiveColor: Theme.of(context)
