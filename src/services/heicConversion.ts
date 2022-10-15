@@ -1,6 +1,6 @@
 import { exec, ExecException } from 'child_process';
 import { app } from 'electron';
-import { existsSync } from 'fs';
+import { existsSync, rmSync } from 'fs';
 import path from 'path';
 import { mkdir, readFile, writeFile } from 'promise-fs';
 import { logErrorSentry } from './sentry';
@@ -8,16 +8,18 @@ import { logErrorSentry } from './sentry';
 export async function convertHEIC(
     heicFileData: Uint8Array
 ): Promise<Uint8Array> {
+    let tempInputFilePath: string;
+    let tempOutputFilePath: string;
     try {
         const tempDir = path.join(app.getPath('temp'), 'ente');
         if (!existsSync(tempDir)) {
             await mkdir(tempDir);
         }
-        const tempInputFilePath = path.join(
+        tempInputFilePath = path.join(
             tempDir,
             generateRandomName(10) + '.heic'
         );
-        const tempOutputFilePath = path.join(
+        tempOutputFilePath = path.join(
             tempDir,
             generateRandomName(10) + '.jpeg'
         );
@@ -48,6 +50,17 @@ export async function convertHEIC(
     } catch (e) {
         logErrorSentry(e, 'failed to convert heic');
         throw e;
+    } finally {
+        try {
+            rmSync(tempInputFilePath);
+        } catch (e) {
+            logErrorSentry(e, 'failed to remove tempInputFile');
+        }
+        try {
+            rmSync(tempOutputFilePath);
+        } catch (e) {
+            logErrorSentry(e, 'failed to remove tempOutputFile');
+        }
     }
 }
 
