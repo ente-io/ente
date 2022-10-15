@@ -7,6 +7,8 @@ import SidebarButton from './Button';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { User } from 'types/user';
 import { getSentryUserID } from 'utils/user';
+import isElectron from 'is-electron';
+import ElectronService from 'services/electron/common';
 
 export default function DebugLogs() {
     const appContext = useContext(AppContext);
@@ -31,9 +33,13 @@ export default function DebugLogs() {
         addLogLine(`user sentry id ${getSentryUserID()}`);
         addLogLine(`ente userID ${(getData(LS_KEYS.USER) as User)?.id}`);
         addLogLine('exporting logs');
-        const logs = getDebugLogs();
-        const logString = logs.join('\n');
-        downloadAsFile(`debug_logs_${Date.now()}.txt`, logString);
+        if (isElectron()) {
+            ElectronService.openLogDirectory();
+        } else {
+            const logs = getDebugLogs();
+            const logString = logs.join('\n');
+            downloadAsFile(`debug_logs_${Date.now()}.txt`, logString);
+        }
     };
 
     return (

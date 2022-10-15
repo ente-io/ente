@@ -7,16 +7,21 @@ class ElectronService {
 
     constructor() {
         this.electronAPIs = globalThis['ElectronAPIs'];
-        this.isBundledApp = !!this.electronAPIs?.openDiskCache;
     }
 
     checkIsBundledApp() {
-        return isElectron() && this.isBundledApp;
+        return isElectron() && !!this.electronAPIs?.openDiskCache;
     }
 
     logToDisk(msg: string) {
         if (this.electronAPIs?.logToDisk) {
-            this.electronAPIs?.logToDisk(msg);
+            this.electronAPIs.logToDisk(msg);
+        }
+    }
+
+    openLogDirectory() {
+        if (this.electronAPIs?.openLogDirectory) {
+            this.electronAPIs.openLogDirectory();
         }
     }
 }
