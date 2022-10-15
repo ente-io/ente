@@ -5,18 +5,24 @@ import { saveLogLine, getLogs } from 'utils/storage';
 import { isDEVSentryENV } from 'constants/sentry';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
+import { logError } from 'utils/sentry';
 
 export function addLogLine(log: string) {
-    if (isDEVSentryENV()) {
-        console.log(log);
-    }
-    if (isElectron()) {
-        ElectronService.logToDisk(log);
-    } else {
-        saveLogLine({
-            timestamp: Date.now(),
-            logLine: log,
-        });
+    try {
+        if (isDEVSentryENV()) {
+            console.log(log);
+        }
+        if (isElectron()) {
+            ElectronService.logToDisk(log);
+        } else {
+            saveLogLine({
+                timestamp: Date.now(),
+                logLine: log,
+            });
+        }
+    } catch (e) {
+        logError(e, 'failed to addLogLine');
+        // ignore
     }
 }
 
