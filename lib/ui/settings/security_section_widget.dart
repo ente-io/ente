@@ -129,7 +129,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             captionedTextWidget: const CaptionedTextWidget(
               title: "Hide from recents",
             ),
-            trailingSwitch: Switch.adaptive(
+            trailingSwitch: ToggleSwitchWidget(
               value: _config.shouldHideFromRecents(),
               onChanged: (value) async {
                 if (value) {
