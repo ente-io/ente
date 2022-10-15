@@ -1,7 +1,7 @@
 {
   "name": "ente",
   "productName": "ente",
-  "version": "1.6.10",
+  "version": "1.6.11-alpha.1",
   "private": true,
   "description": "Desktop client for ente.io",
   "main": "app/main.js",
@@ -63,7 +63,7 @@
     "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
     "build-renderer": "cd ui && yarn install && yarn build && cd ..",
     "build": "yarn build-renderer && yarn build-main",
-    "test-release": "yarn build && electron-builder"
+    "test-release": "yarn build && electron-builder --config.compression=store"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
