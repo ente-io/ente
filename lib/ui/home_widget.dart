@@ -35,6 +35,7 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
@@ -639,6 +640,11 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   Widget build(BuildContext context) {
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
     final enteColorScheme = getEnteColorScheme(context);
+    final navBarBlur =
+        MediaQuery.of(context).platformBrightness == Brightness.light
+            ? blurBase
+            : blurMuted;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -662,7 +668,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                       height: 48,
                       child: ClipRect(
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 96, sigmaY: 96),
+                          filter: ImageFilter.blur(
+                              sigmaX: navBarBlur, sigmaY: navBarBlur),
                           child: GNav(
                             curve: Curves.easeOutExpo,
                             backgroundColor:
