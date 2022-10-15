@@ -1,4 +1,6 @@
 import { ElectronAPIs } from 'types/electron';
+import { makeHumanReadableStorage } from 'utils/billing';
+import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 
 class ElectronHEICConverter {
@@ -16,11 +18,21 @@ class ElectronHEICConverter {
     async convert(fileBlob: Blob): Promise<Blob> {
         try {
             if (this.allElectronAPIExists) {
+                const startTime = Date.now();
                 const inputFileData = new Uint8Array(
                     await fileBlob.arrayBuffer()
                 );
                 const convertedFileData = await this.electronAPIs.convertHEIC(
                     inputFileData
+                );
+                addLogLine(
+                    `originalFileSize:${makeHumanReadableStorage(
+                        fileBlob?.size
+                    )},convertedFileSize:${makeHumanReadableStorage(
+                        convertedFileData?.length
+                    )},  native heic conversion time: ${
+                        Date.now() - startTime
+                    }ms `
                 );
                 return new Blob([convertedFileData]);
             }
