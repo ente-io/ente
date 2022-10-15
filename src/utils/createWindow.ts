@@ -16,7 +16,6 @@ export async function createWindow(): Promise<BrowserWindow> {
     const mainWindow = new BrowserWindow({
         height: 600,
         width: 800,
-        backgroundColor: '#111111',
         webPreferences: {
             preload: path.join(__dirname, '../preload.js'),
             contextIsolation: false,
