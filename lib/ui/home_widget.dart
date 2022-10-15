@@ -34,6 +34,7 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
@@ -637,6 +638,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    final enteColorScheme = getEnteColorScheme(context);
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -683,11 +685,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               GButton(
                                 margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
                                 icon: Icons.home_rounded,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                iconColor: enteColorScheme.tabIcon,
+                                iconActiveColor: strokeBaseLight,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
@@ -698,11 +697,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               GButton(
                                 margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
                                 icon: Icons.collections_rounded,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                iconColor: enteColorScheme.tabIcon,
+                                iconActiveColor: strokeBaseLight,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
@@ -713,11 +709,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                               GButton(
                                 margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
                                 icon: Icons.people_outlined,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                iconColor: enteColorScheme.tabIcon,
+                                iconActiveColor: strokeBaseLight,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
