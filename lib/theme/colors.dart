@@ -34,10 +34,14 @@ class EnteColorScheme {
   final Color primary400;
   final Color primary300;
 
+  //warning colors
   final Color warning700;
   final Color warning500;
   final Color warning400;
   final Color caution500;
+
+  //other colors
+  final Color tabIcon;
 
   const EnteColorScheme(
     this.backgroundBase,
@@ -54,7 +58,8 @@ class EnteColorScheme {
     this.strokeBase,
     this.strokeMuted,
     this.strokeFaint,
-    this.strokeFainter, {
+    this.strokeFainter,
+    this.tabIcon, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -82,6 +87,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   strokeMutedLight,
   strokeFaintLight,
   strokeFainterLight,
+  tabIconLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -100,6 +106,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   strokeMutedDark,
   strokeFaintDark,
   strokeFainterDark,
+  tabIconDark,
 );
 
 // Background Colors
@@ -146,6 +153,11 @@ const Color strokeBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color strokeFainterDark = Color.fromRGBO(255, 255, 255, 0.08);
+
+// Other colors
+const Color tabIconLight = Color.fromRGBO(0, 0, 0, 0.85);
+
+const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
 
 // Fixed Colors
 

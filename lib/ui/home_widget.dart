@@ -34,6 +34,8 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
@@ -637,6 +639,12 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
   @override
   Widget build(BuildContext context) {
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
+    final enteColorScheme = getEnteColorScheme(context);
+    final navBarBlur =
+        MediaQuery.of(context).platformBrightness == Brightness.light
+            ? blurBase
+            : blurMuted;
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
@@ -657,10 +665,13 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                     borderRadius: BorderRadius.circular(32),
                     child: Container(
                       alignment: Alignment.bottomCenter,
-                      height: 56,
+                      height: 48,
                       child: ClipRect(
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 96, sigmaY: 96),
+                          filter: ImageFilter.blur(
+                            sigmaX: navBarBlur,
+                            sigmaY: navBarBlur,
+                          ),
                           child: GNav(
                             curve: Curves.easeOutExpo,
                             backgroundColor:
@@ -671,23 +682,20 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 .colorScheme
                                 .gNavBarActiveColor,
                             iconSize: 24,
-                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
                             duration: const Duration(milliseconds: 200),
                             gap: 0,
-                            tabBorderRadius: 24,
+                            tabBorderRadius: 32,
                             tabBackgroundColor: Theme.of(context)
                                 .colorScheme
                                 .gNavBarActiveColor,
                             haptic: false,
                             tabs: [
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(12, 8, 8, 8),
-                                icon: Icons.home,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
+                                icon: Icons.home_rounded,
+                                iconColor: enteColorScheme.tabIcon,
+                                iconActiveColor: strokeBaseLight,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
@@ -696,13 +704,10 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                icon: Icons.photo_library,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
+                                icon: Icons.collections_rounded,
+                                iconColor: enteColorScheme.tabIcon,
+                                iconActiveColor: strokeBaseLight,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(
@@ -711,13 +716,10 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 },
                               ),
                               GButton(
-                                margin: const EdgeInsets.fromLTRB(8, 8, 12, 8),
-                                icon: Icons.folder_shared,
-                                iconColor:
-                                    Theme.of(context).colorScheme.gNavIconColor,
-                                iconActiveColor: Theme.of(context)
-                                    .colorScheme
-                                    .gNavActiveIconColor,
+                                margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
+                                icon: Icons.people_outlined,
+                                iconColor: enteColorScheme.tabIcon,
+                                iconActiveColor: strokeBaseLight,
                                 text: '',
                                 onPressed: () {
                                   _onTabChange(

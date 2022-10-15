@@ -297,14 +297,6 @@ extension CustomColorScheme on ColorScheme {
       ? const Color.fromRGBO(255, 255, 255, 0.6)
       : const Color.fromRGBO(255, 255, 255, 0.9);
 
-  Color get gNavIconColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 0.8)
-      : const Color.fromRGBO(255, 255, 255, 0.8);
-
-  Color get gNavActiveIconColor => brightness == Brightness.light
-      ? const Color.fromRGBO(0, 0, 0, 0.8)
-      : const Color.fromRGBO(0, 0, 0, 0.8);
-
   Color get galleryThumbBackgroundColor => brightness == Brightness.light
       ? const Color.fromRGBO(240, 240, 240, 1)
       : const Color.fromRGBO(20, 20, 20, 1);
