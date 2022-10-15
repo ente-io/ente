@@ -245,6 +245,9 @@ class watchFolderService {
             }
 
             const event = this.clubSameCollectionEvents();
+            addLogLine(
+                `running event type:${event.type} collectionName:${event.collectionName} folderPath:${event.folderPath} , fileCount:${event.files?.length} pathsCount: ${event.paths?.length}`
+            );
             const mappings = this.getWatchMappings();
             const mapping = mappings.find(
                 (mapping) => mapping.folderPath === event.folderPath
@@ -252,6 +255,9 @@ class watchFolderService {
             if (!mapping) {
                 throw Error('no Mapping found for event');
             }
+            addLogLine(
+                `mapping for event rootFolder: ${mapping.rootFolderName} folderPath: ${mapping.folderPath} uploadStrategy: ${mapping.uploadStrategy} syncedFilesCount: ${mapping.syncedFiles.length} ignoredFilesCount ${mapping.ignoredFiles.length}`
+            );
             if (event.type === 'upload') {
                 event.files = getValidFilesToUpload(event.files, mapping);
                 if (event.files.length === 0) {
@@ -260,9 +266,6 @@ class watchFolderService {
             }
             this.currentEvent = event;
             this.currentlySyncedMapping = mapping;
-            addLogLine(
-                `running event type:${event.type} collectionName:${event.collectionName} folderPath:${event.folderPath} , fileCount:${event.files?.length} pathsCount: ${event.paths?.length}`
-            );
 
             if (event.type === 'upload') {
                 this.processUploadEvent();
