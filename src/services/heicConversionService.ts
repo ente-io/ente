@@ -6,7 +6,7 @@ import ElectronHEICConvertor from 'services/electron/heicConvertor';
 class HeicConversionService {
     async convert(heicFileData: Blob): Promise<Blob> {
         try {
-            if (isElectron() && !ElectronHEICConvertor.apiExists()) {
+            if (isElectron() && ElectronHEICConvertor.apiExists()) {
                 try {
                     return await ElectronHEICConvertor.convert(heicFileData);
                 } catch (e) {
