@@ -1,7 +1,5 @@
 // @dart=2.9
 
-import 'dart:io';
-
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +7,9 @@ import 'package:flutter/services.dart';
 import 'package:password_strength/password_strength.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/models/billing_plan.dart';
-import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
-import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/web_page.dart';
-import 'package:photos/utils/data_util.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class EmailEntryPage extends StatefulWidget {
@@ -500,136 +494,5 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         _hasAgreedToTOS &&
         _hasAgreedToE2E &&
         _passwordIsValid;
-  }
-}
-
-class PricingWidget extends StatelessWidget {
-  const PricingWidget({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<BillingPlans>(
-      future: BillingService.instance.getBillingPlans(),
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData) {
-          return _buildPlans(context, snapshot.data);
-        } else if (snapshot.hasError) {
-          return const Text("Oops, Something went wrong.");
-        }
-        return const EnteLoadingWidget();
-      },
-    );
-  }
-
-  Container _buildPlans(BuildContext context, BillingPlans plans) {
-    final planWidgets = <BillingPlanWidget>[];
-    for (final plan in plans.plans) {
-      final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      if (productID != null && productID.isNotEmpty) {
-        planWidgets.add(BillingPlanWidget(plan));
-      }
-    }
-    final freePlan = plans.freePlan;
-    return Container(
-      height: 280,
-      color: Theme.of(context).cardColor,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          const Text(
-            "Pricing",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 18,
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: planWidgets,
-            ),
-          ),
-          Text(
-            "We offer a free trial of " +
-                convertBytesToReadableFormat(freePlan.storage) +
-                " for " +
-                freePlan.duration.toString() +
-                " " +
-                freePlan.period,
-          ),
-          GestureDetector(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Icon(
-                  Icons.close,
-                  size: 12,
-                  color: Colors.white38,
-                ),
-                Padding(padding: EdgeInsets.all(1)),
-                Text(
-                  "Close",
-                  style: TextStyle(
-                    color: Colors.white38,
-                  ),
-                ),
-              ],
-            ),
-            onTap: () => Navigator.pop(context),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-class BillingPlanWidget extends StatelessWidget {
-  final BillingPlan plan;
-
-  const BillingPlanWidget(
-    this.plan, {
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(2.0),
-      child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        color: Colors.black.withOpacity(0.2),
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(12, 20, 12, 20),
-          child: Column(
-            children: [
-              Text(
-                convertBytesToGBs(plan.storage, precision: 0).toString() +
-                    " GB",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(4),
-              ),
-              Text(
-                plan.price + " / " + plan.period,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
