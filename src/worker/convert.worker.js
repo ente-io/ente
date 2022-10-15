@@ -1,5 +1,5 @@
 import * as Comlink from 'comlink';
-import { convertHEIC } from 'services/wasmHeicConverter/wasmHEICConverterService.ts';
+import { convertHEIC } from 'services/wasmHeicConverter/wasmHEICConverterClient.ts';
 
 export class Convert {
     async convertHEIC(fileBlob, format) {
