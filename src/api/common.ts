@@ -9,4 +9,4 @@ export const selectRootDirectory = async (): Promise<string> => {
     }
 };
 
-export { logToDisk } from '../services/logging';
+export { logToDisk, openLogDirectory } from '../services/logging';

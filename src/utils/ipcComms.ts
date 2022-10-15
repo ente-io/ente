@@ -6,6 +6,7 @@ import {
     Notification,
     safeStorage,
     app,
+    shell,
 } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
@@ -100,5 +101,9 @@ export default function setupIpcComs(
 
     ipcMain.handle('convert-heic', (_, fileData) => {
         return convertHEIC(fileData);
+    });
+
+    ipcMain.handle('open-log-dir', () => {
+        shell.openPath(app.getPath('logs'));
     });
 }
