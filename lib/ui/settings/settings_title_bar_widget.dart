@@ -41,7 +41,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
                 if (snapshot.hasData) {
                   final userDetails = snapshot.data as UserDetails;
                   return Text(
-                    "${NumberFormat().format(userDetails.fileCount)} Memories",
+                    "${NumberFormat().format(userDetails.fileCount)} memories",
                     style: getEnteTextTheme(context).largeBold,
                   );
                 }
