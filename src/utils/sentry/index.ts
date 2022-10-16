@@ -6,17 +6,20 @@ import { getSentryUserID } from 'utils/user';
 export const logError = (
     error: any,
     msg: string,
-    info?: Record<string, unknown>
+    info?: Record<string, unknown>,
+    skipAddLogLine = false
 ) => {
     if (isErrorUnnecessaryForSentry(error)) {
         return;
     }
     const err = errorWithContext(error, msg);
-    addLogLine(
-        `error: ${error?.name} ${error?.message} ${
-            error?.stack
-        } msg: ${msg} info: ${JSON.stringify(info)}`
-    );
+    if (!skipAddLogLine) {
+        addLogLine(
+            `error: ${error?.name} ${error?.message} ${
+                error?.stack
+            } msg: ${msg} info: ${JSON.stringify(info)}`
+        );
+    }
     if (isDEVSentryENV()) {
         console.log(error, { msg, info });
     }

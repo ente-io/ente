@@ -83,8 +83,8 @@ function saveLogLine(log: Log) {
         logs.push(log);
         setLogs(logs);
     } catch (e) {
-        logError(e, 'failed to save log line');
-        // don't throw
+        logError(e, 'failed to save log line', undefined, true);
+        // ignore
     }
 }
 
