@@ -48,6 +48,9 @@ export const getFileStream = async (filePath: string) => {
                 await fs.close(file);
             }
         },
+        async cancel() {
+            await fs.close(file);
+        },
     });
     return readableStream;
 };
