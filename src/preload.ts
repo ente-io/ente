@@ -35,6 +35,7 @@ import {
 import { selectRootDirectory, logToDisk, openLogDirectory } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
+import { convertHEIC } from './api/heicConvert';
 
 fixHotReloadNext12();
 
@@ -77,5 +78,6 @@ windowObject['ElectronAPIs'] = {
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
     logToDisk,
+    convertHEIC,
     openLogDirectory,
 };

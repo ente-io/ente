@@ -14,6 +14,7 @@ import { logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
+import { convertHEIC } from '../services/heicConvertor';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -96,6 +97,10 @@ export default function setupIpcComs(
 
     ipcMain.handle('get-path', (_, message) => {
         return app.getPath(message);
+    });
+
+    ipcMain.handle('convert-heic', (_, fileData) => {
+        return convertHEIC(fileData);
     });
 
     ipcMain.handle('open-log-dir', () => {
