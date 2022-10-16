@@ -34,7 +34,7 @@ export function addLogLine(log: string) {
             });
         }
     } catch (e) {
-        logError(e, 'failed to addLogLine');
+        logError(e, 'failed to addLogLine', undefined, true);
         // ignore
     }
 }
@@ -75,17 +75,12 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
 };
 
 function saveLogLine(log: Log) {
-    try {
-        const logs = getLogs();
-        if (logs.length > MAX_LOG_LINES) {
-            logs.slice(logs.length - MAX_LOG_LINES);
-        }
-        logs.push(log);
-        setLogs(logs);
-    } catch (e) {
-        logError(e, 'failed to save log line');
-        // don't throw
+    const logs = getLogs();
+    if (logs.length > MAX_LOG_LINES) {
+        logs.slice(logs.length - MAX_LOG_LINES);
     }
+    logs.push(log);
+    setLogs(logs);
 }
 
 function getLogs(): Log[] {
