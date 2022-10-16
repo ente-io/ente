@@ -40,33 +40,11 @@ export const addLocalLog = (getLog: () => string) => {
 };
 
 export function getDebugLogs() {
-    return getLogs().map(formatLog).join('\n');
+    return combineLogLines(getLogs());
 }
 
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
-}
-
-export function saveLogLine(log: Log) {
-    try {
-        const logs = getLogs();
-        let logSize = getStringSize(logs.map(formatLog).join('\n'));
-        while (logSize > MAX_LOG_SIZE) {
-            logs.shift();
-            logSize = getStringSize(logs.map(formatLog).join('\n'));
-        }
-        setLogs([...logs, log]);
-    } catch (e) {
-        logError(e, 'failed to save log line');
-        // don't throw
-    }
-}
-
-function getStringSize(str: string) {
-    return new Blob([str]).size;
-}
-function formatLog(log: Log) {
-    return `[${formatDateTime(log.timestamp)}] ${log.logLine}`;
 }
 
 export const clearLogsIfLocalStorageLimitExceeded = () => {
@@ -86,6 +64,21 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
     addLogLine(`logs size: ${convertBytesToHumanReadable(logStringSize)}`);
 };
 
+function saveLogLine(log: Log) {
+    try {
+        const logs = getLogs();
+        let logSize = getStringSize(combineLogLines(logs));
+        while (logSize > MAX_LOG_SIZE) {
+            logs.shift();
+            logSize = getStringSize(combineLogLines(logs));
+        }
+        setLogs([...logs, log]);
+    } catch (e) {
+        logError(e, 'failed to save log line');
+        // don't throw
+    }
+}
+
 function getLogs(): Log[] {
     return getData(LS_KEYS.LOGS)?.logs ?? [];
 }
@@ -94,6 +87,16 @@ function setLogs(logs: Log[]) {
     setData(LS_KEYS.LOGS, { logs });
 }
 
-export function deleteLogs() {
+function deleteLogs() {
     removeData(LS_KEYS.LOGS);
+}
+
+function getStringSize(str: string) {
+    return new Blob([str]).size;
+}
+function formatLog(log: Log) {
+    return `[${formatDateTime(log.timestamp)}] ${log.logLine}`;
+}
+function combineLogLines(logs: Log[]) {
+    return logs.map(formatLog).join('\n');
 }
