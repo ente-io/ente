@@ -1,11 +1,24 @@
 import { ElectronFile } from 'types/upload';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { formatDateTime } from 'utils/time';
-import { saveLogLine, getLogs } from 'utils/storage';
 import { isDEVSentryENV } from 'constants/sentry';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
 import { logError } from 'utils/sentry';
+import {
+    getData,
+    LS_KEYS,
+    removeData,
+    setData,
+} from 'utils/storage/localStorage';
+
+export const MAX_LOG_SIZE = 5 * 1024 * 1024; // 5MB
+export const MAX_LOG_LINES = 1000;
+
+export interface Log {
+    timestamp: number;
+    logLine: string;
+}
 
 export function addLogLine(log: string) {
     try {
@@ -33,11 +46,68 @@ export const addLocalLog = (getLog: () => string) => {
 };
 
 export function getDebugLogs() {
-    return getLogs().map(
-        (log) => `[${formatDateTime(log.timestamp)}] ${log.logLine}`
-    );
+    return combineLogLines(getLogs());
 }
 
 export function getFileNameSize(file: File | ElectronFile) {
     return `${file.name}_${convertBytesToHumanReadable(file.size)}`;
+}
+
+export const clearLogsIfLocalStorageLimitExceeded = () => {
+    try {
+        const logs = getDebugLogs();
+        const logSize = getStringSize(logs);
+        if (logSize > MAX_LOG_SIZE) {
+            deleteLogs();
+            addLogLine('Logs cleared due to size limit exceeded');
+        } else {
+            try {
+                addLogLine(`app started`);
+            } catch (e) {
+                deleteLogs();
+                logError(e, 'failed to log test log');
+            }
+        }
+        addLogLine(`logs size: ${convertBytesToHumanReadable(logSize)}`);
+    } catch (e) {
+        logError(e, 'failed to clearLogsIfLocalStorageLimitExceeded');
+    }
+};
+
+function saveLogLine(log: Log) {
+    try {
+        const logs = getLogs();
+        if (logs.length > MAX_LOG_LINES) {
+            logs.slice(logs.length - MAX_LOG_LINES);
+        }
+        logs.push(log);
+        setLogs(logs);
+    } catch (e) {
+        logError(e, 'failed to save log line');
+        // don't throw
+    }
+}
+
+function getLogs(): Log[] {
+    return getData(LS_KEYS.LOGS)?.logs ?? [];
+}
+
+function setLogs(logs: Log[]) {
+    setData(LS_KEYS.LOGS, { logs });
+}
+
+function deleteLogs() {
+    removeData(LS_KEYS.LOGS);
+}
+
+function getStringSize(str: string) {
+    return new Blob([str]).size;
+}
+
+function formatLog(log: Log) {
+    return `[${formatDateTime(log.timestamp)}] ${log.logLine}`;
+}
+
+function combineLogLines(logs: Log[]) {
+    return logs.map(formatLog).join('\n');
 }

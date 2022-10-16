@@ -13,7 +13,6 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
 import Head from 'next/head';
-import { addLogLine } from 'utils/logging';
 import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
@@ -27,6 +26,7 @@ import {
     getRoadmapRedirectURL,
 } from 'services/userService';
 import { CustomError } from 'utils/error';
+import { clearLogsIfLocalStorageLimitExceeded } from 'utils/logging';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -124,7 +124,9 @@ export default function App({ Component, err }) {
                     }
                 });
         }
+    }, []);
 
+    useEffect(() => {
         HTTPService.getInterceptors().response.use(
             (resp) => resp,
             (error) => {
@@ -132,6 +134,7 @@ export default function App({ Component, err }) {
                 return Promise.reject(error);
             }
         );
+        clearLogsIfLocalStorageLimitExceeded();
     }, []);
 
     const setUserOnline = () => setOffline(false);
@@ -204,10 +207,6 @@ export default function App({ Component, err }) {
             window.removeEventListener('offline', setUserOffline);
         };
     }, [redirectName]);
-
-    useEffect(() => {
-        addLogLine(`app started`);
-    }, []);
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
