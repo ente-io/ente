@@ -53,8 +53,8 @@ export function getFileNameSize(file: File | ElectronFile) {
 
 export const clearLogsIfLocalStorageLimitExceeded = () => {
     const logs = getDebugLogs();
-    const logStringSize = new Blob([logs]).size;
-    if (logStringSize > MAX_LOG_SIZE) {
+    const logSize = getStringSize(logs);
+    if (logSize > MAX_LOG_SIZE) {
         deleteLogs();
         addLogLine('Logs cleared due to size limit exceeded');
     } else {
@@ -65,7 +65,7 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
             logError(e, 'failed to log test log');
         }
     }
-    addLogLine(`logs size: ${convertBytesToHumanReadable(logStringSize)}`);
+    addLogLine(`logs size: ${convertBytesToHumanReadable(logSize)}`);
 };
 
 function saveLogLine(log: Log) {
