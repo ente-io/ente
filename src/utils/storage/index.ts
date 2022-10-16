@@ -1,10 +1,5 @@
 import { getData, LS_KEYS, setData } from './localStorage';
 
-export interface Log {
-    timestamp: number;
-    logLine: string;
-}
-
 export const isFirstLogin = () =>
     getData(LS_KEYS.IS_FIRST_LOGIN)?.status ?? false;
 

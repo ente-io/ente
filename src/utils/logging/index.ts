@@ -1,7 +1,6 @@
 import { ElectronFile } from 'types/upload';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { formatDateTime } from 'utils/time';
-import { Log } from 'utils/storage';
 import { isDEVSentryENV } from 'constants/sentry';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
@@ -13,6 +12,11 @@ import {
     removeData,
     setData,
 } from 'utils/storage/localStorage';
+
+export interface Log {
+    timestamp: number;
+    logLine: string;
+}
 
 export function addLogLine(log: string) {
     try {
