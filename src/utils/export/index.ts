@@ -7,6 +7,7 @@ import { EnteFile } from 'types/file';
 import { Metadata } from 'types/upload';
 import { formatDate, splitFilenameAndExtension } from 'utils/file';
 import { ENTE_METADATA_FOLDER } from 'constants/export';
+import sanitize from 'sanitize-filename';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -158,7 +159,7 @@ export const oldSanitizeName = (name: string) =>
     name.replaceAll('/', '_').replaceAll(' ', '_');
 
 export const sanitizeName = (name: string) =>
-    name.replace(/[^a-z0-9.]/gi, '_').toLowerCase();
+    sanitize(name, { replacement: '_' });
 
 export const getUniqueCollectionFolderPath = (
     dir: string,
