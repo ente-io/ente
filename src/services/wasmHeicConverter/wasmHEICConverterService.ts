@@ -11,6 +11,7 @@ const MAX_CONVERSION_IN_PARALLEL = 1;
 const WAIT_TIME_BEFORE_NEXT_ATTEMPT_IN_MICROSECONDS = [100, 100];
 const WAIT_TIME_IN_MICROSECONDS = 30 * 1000;
 const BREATH_TIME_IN_MICROSECONDS = 1000;
+const CONVERT_FORMAT = 'JPEG';
 
 class HEICConverter {
     private convertProcessor = new QueueProcessor<Blob>(
@@ -22,13 +23,13 @@ class HEICConverter {
     constructor() {
         this.ready = this.init();
     }
-    async init() {
+    private async init() {
         this.workerPool = [];
         for (let i = 0; i < WORKER_POOL_SIZE; i++) {
             this.workerPool.push(await createNewConvertWorker());
         }
     }
-    async convert(fileBlob: Blob, format = 'JPEG'): Promise<Blob> {
+    async convert(fileBlob: Blob): Promise<Blob> {
         await this.ready;
         const response = this.convertProcessor.queueUpRequest(() =>
             retryAsyncFunction<Blob>(async () => {
@@ -45,7 +46,7 @@ class HEICConverter {
                                     const convertedHEIC: Blob =
                                         await comlink.convertHEIC(
                                             fileBlob,
-                                            format
+                                            CONVERT_FORMAT
                                         );
                                     addLogLine(
                                         `originalFileSize:${makeHumanReadableStorage(

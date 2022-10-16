@@ -7,8 +7,8 @@ import { convertBytesToHumanReadable } from 'utils/file/size';
 import { isExactTypeHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
-import HEICConverter from 'services/heicConverter/heicConverterService';
 import { getFileNameSize, addLogLine } from 'utils/logging';
+import HeicConversionService from 'services/heicConversionService';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -108,7 +108,7 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
 
     if (isHEIC) {
         addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
-        file = new File([await HEICConverter.convert(file)], file.name);
+        file = new File([await HeicConversionService.convert(file)], file.name);
         addLogLine(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();

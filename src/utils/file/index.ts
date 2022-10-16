@@ -21,7 +21,7 @@ import {
     FILE_TYPE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import HEICConverter from 'services/heicConverter/heicConverterService';
+import heicConversionService from 'services/heicConversionService';
 import ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
@@ -343,7 +343,10 @@ async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 imageBlob.size
             )}`
         );
-        const convertedImageBlob = await HEICConverter.convert(imageBlob);
+        const convertedImageBlob = await heicConversionService.convert(
+            imageBlob
+        );
+
         addLogLine(`${fileName} successfully converted`);
         return convertedImageBlob;
     } else {
