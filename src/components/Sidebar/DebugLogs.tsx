@@ -37,8 +37,8 @@ export default function DebugLogs() {
             ElectronService.openLogDirectory();
         } else {
             const logs = getDebugLogs();
-            const logString = logs.join('\n');
-            downloadAsFile(`debug_logs_${Date.now()}.txt`, logString);
+
+            downloadAsFile(`debug_logs_${Date.now()}.txt`, logs);
         }
     };
 
