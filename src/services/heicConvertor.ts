@@ -3,6 +3,7 @@ import { app } from 'electron';
 import { existsSync, rmSync } from 'fs';
 import path from 'path';
 import { mkdir, readFile, writeFile } from 'promise-fs';
+import { generateRandomName } from '../utils/common';
 import { logErrorSentry } from './sentry';
 
 export async function convertHEIC(
@@ -59,17 +60,4 @@ export async function convertHEIC(
             logErrorSentry(e, 'failed to remove tempOutputFile');
         }
     }
-}
-
-function generateRandomName(length: number) {
-    let result = '';
-    const characters =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(
-            Math.floor(Math.random() * charactersLength)
-        );
-    }
-    return result;
 }
