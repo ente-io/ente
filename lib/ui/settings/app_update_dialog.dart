@@ -7,6 +7,8 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/update_service.dart';
+import 'package:photos/theme/ente_theme.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo latestVersionInfo;
@@ -21,11 +23,30 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> changelog = [];
+    final enteTextTheme = getEnteTextTheme(context);
+    final enteColor = getEnteColorScheme(context);
     for (final log in widget.latestVersionInfo.changelog) {
       changelog.add(
         Padding(
-          padding: const EdgeInsets.fromLTRB(8, 4, 0, 4),
-          child: Text("- " + log, style: Theme.of(context).textTheme.caption),
+          padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "- ",
+                style: enteTextTheme.small.copyWith(color: enteColor.textMuted),
+              ),
+              Flexible(
+                child: Text(
+                  log,
+                  softWrap: true,
+                  style:
+                      enteTextTheme.small.copyWith(color: enteColor.textMuted),
+                ),
+              )
+            ],
+          ),
         ),
       );
     }
@@ -34,20 +55,10 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          widget.latestVersionInfo.name,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          "A new version of ente is available.",
+          style: enteTextTheme.body.copyWith(color: enteColor.textMuted),
         ),
         const Padding(padding: EdgeInsets.all(8)),
-        const Text(
-          "Changelog",
-          style: TextStyle(
-            fontSize: 18,
-          ),
-        ),
-        const Padding(padding: EdgeInsets.all(4)),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: changelog,
@@ -55,12 +66,12 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
         const Padding(padding: EdgeInsets.all(8)),
         SizedBox(
           width: double.infinity,
-          height: 64,
+          height: 56,
           child: OutlinedButton(
             style: Theme.of(context).outlinedButtonTheme.style.copyWith(
               textStyle: MaterialStateProperty.resolveWith<TextStyle>(
                 (Set<MaterialState> states) {
-                  return Theme.of(context).textTheme.subtitle1;
+                  return enteTextTheme.bodyBold;
                 },
               ),
             ),
@@ -79,6 +90,22 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
             ),
           ),
         ),
+        const Padding(padding: EdgeInsets.all(8)),
+        Center(
+          child: InkWell(
+            child: Text(
+              "Install manually",
+              style: Theme.of(context)
+                  .textTheme
+                  .caption
+                  .copyWith(decoration: TextDecoration.underline),
+            ),
+            onTap: () => launchUrlString(
+              widget.latestVersionInfo.url,
+              mode: LaunchMode.externalApplication,
+            ),
+          ),
+        )
       ],
     );
     final shouldForceUpdate =
@@ -86,8 +113,24 @@ class _AppUpdateDialogState extends State<AppUpdateDialog> {
     return WillPopScope(
       onWillPop: () async => !shouldForceUpdate,
       child: AlertDialog(
-        title: Text(
-          shouldForceUpdate ? "Critical update available" : "Update available",
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              Icons.auto_awesome_outlined,
+              size: 48,
+              color: enteColor.strokeMuted,
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            Text(
+              shouldForceUpdate
+                  ? "Critical update available"
+                  : "Update available",
+              style: enteTextTheme.h3Bold,
+            ),
+          ],
         ),
         content: content,
       ),
