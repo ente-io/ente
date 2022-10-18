@@ -3,6 +3,7 @@ import log from 'electron-log';
 import { ipcRenderer } from 'electron';
 log.transports.file.fileName = LOG_FILENAME;
 log.transports.file.maxSize = MAX_LOG_SIZE;
+log.transports.console.level = false;
 
 export function logToDisk(logLine: string) {
     log.info(logLine);

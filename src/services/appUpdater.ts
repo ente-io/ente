@@ -9,6 +9,7 @@ class AppUpdater {
     constructor() {
         log.transports.file.fileName = LOG_FILENAME;
         log.transports.file.maxSize = MAX_LOG_SIZE;
+        log.transports.console.level = false;
         autoUpdater.logger = log;
     }
 
