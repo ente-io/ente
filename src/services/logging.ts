@@ -1,8 +1,5 @@
-import { LOG_FILENAME, MAX_LOG_SIZE } from '../config';
 import log from 'electron-log';
 import { ipcRenderer } from 'electron';
-log.transports.file.fileName = LOG_FILENAME;
-log.transports.file.maxSize = MAX_LOG_SIZE;
 
 export function logToDisk(logLine: string) {
     log.info(logLine);
@@ -10,4 +7,8 @@ export function logToDisk(logLine: string) {
 
 export function openLogDirectory() {
     ipcRenderer.invoke('open-log-dir');
+}
+
+export function logError(error: Error, message: string, info?: string): void {
+    ipcRenderer.invoke('log-error', error, message, info);
 }

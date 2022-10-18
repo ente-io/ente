@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron/renderer';
-import { logError } from '../utils/logging';
+import { logError } from '../services/logging';
 
 export const selectRootDirectory = async (): Promise<string> => {
     try {

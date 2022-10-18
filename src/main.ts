@@ -15,6 +15,7 @@ import {
     handleDockIconHideOnAutoLaunch,
 } from './utils/main';
 import { initSentry } from './services/sentry';
+import { setupLogging } from './utils/logging';
 
 let mainWindow: BrowserWindow;
 
@@ -40,6 +41,8 @@ export const setIsUpdateAvailable = (value: boolean): void => {
 setupMainHotReload();
 
 setupNextElectronServe();
+
+setupLogging();
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {

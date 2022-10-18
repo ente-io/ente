@@ -1,6 +1,6 @@
 import { readTextFile, writeStream } from './../services/fs';
 import { ipcRenderer } from 'electron';
-import { logError } from '../utils/logging';
+import { logError } from '../services/logging';
 import * as fs from 'promise-fs';
 
 export const exists = (path: string) => {
