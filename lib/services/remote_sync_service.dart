@@ -578,6 +578,7 @@ class RemoteSyncService {
         // Case [1] Check and clear local cache when uploadedFile already exist
         existingFile = await _db.getFile(remoteDiff.generatedID);
         if (_shouldClearCache(remoteDiff, existingFile)) {
+          needsGalleryReload = true;
           await clearCache(remoteDiff);
         }
       }
