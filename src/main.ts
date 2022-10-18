@@ -13,9 +13,9 @@ import {
     setupNextElectronServe,
     enableSharedArrayBufferSupport,
     handleDockIconHideOnAutoLaunch,
-    setupLogging,
 } from './utils/main';
 import { initSentry } from './services/sentry';
+import { setupLogging } from './utils/logging';
 
 let mainWindow: BrowserWindow;
 

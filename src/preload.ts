@@ -33,9 +33,10 @@ import {
     exists,
 } from './api/export';
 import { selectRootDirectory, logToDisk, openLogDirectory } from './api/common';
-import { fixHotReloadNext12, setupLogging } from './utils/preload';
+import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
 import { convertHEIC } from './api/heicConvert';
+import { setupLogging } from './utils/logging';
 
 fixHotReloadNext12();
 setupLogging();
