@@ -27,6 +27,7 @@ import {
 } from 'services/userService';
 import { CustomError } from 'utils/error';
 import { clearLogsIfLocalStorageLimitExceeded } from 'utils/logging';
+import isElectron from 'is-electron';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -109,7 +110,7 @@ export default function App({ Component, err }) {
         // const wb = new Workbox('sw.js', { scope: '/' });
         // wb.register();
 
-        if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator && !isElectron()) {
             navigator.serviceWorker.onmessage = (event) => {
                 if (event.data.action === 'upload-files') {
                     const files = event.data.files;
