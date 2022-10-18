@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { safeStorageStore } from '../stores/safeStorage.store';
-import { logError } from '../utils/logging';
+import { logError } from '../services/logging';
 
 export async function setEncryptionKey(encryptionKey: string) {
     try {

@@ -1,7 +1,7 @@
 import { getElectronFile } from './../services/fs';
 import { uploadStatusStore } from '../stores/upload.store';
 import { ElectronFile, FILE_PATH_TYPE } from '../types';
-import { logError } from '../utils/logging';
+import { logError } from '../services/logging';
 import { ipcRenderer } from 'electron';
 import {
     getElectronFilesFromGoogleZip,
