@@ -112,10 +112,11 @@ Future<void> _runInBackground(String taskId) async {
 // https://stackoverflow.com/a/73796478/546896
 @pragma('vm:entry-point')
 void _headlessTaskHandler(HeadlessTask task) {
+  print("_headlessTaskHandler");
   if (task.timeout) {
     BackgroundFetch.finish(task.taskId);
   } else {
-    _runInBackground(task.taskId);
+    _runBackgroundTask(task.taskId);
   }
 }
 
