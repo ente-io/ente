@@ -62,8 +62,7 @@ export async function updateFileCreationDateInEXIF(
     updatedDate: Date
 ) {
     try {
-        const fileURL = URL.createObjectURL(fileBlob);
-        let imageDataURL = await convertImageToDataURL(reader, fileURL);
+        let imageDataURL = await convertImageToDataURL(reader, fileBlob);
         imageDataURL =
             'data:image/jpeg;base64' +
             imageDataURL.slice(imageDataURL.indexOf(','));
@@ -83,8 +82,7 @@ export async function updateFileCreationDateInEXIF(
     }
 }
 
-async function convertImageToDataURL(reader: FileReader, url: string) {
-    const blob = await fetch(url).then((r) => r.blob());
+async function convertImageToDataURL(reader: FileReader, blob: Blob) {
     const dataURL = await new Promise<string>((resolve) => {
         reader.onload = () => resolve(reader.result as string);
         reader.readAsDataURL(blob);

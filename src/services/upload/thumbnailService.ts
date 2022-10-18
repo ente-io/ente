@@ -117,6 +117,7 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
     await new Promise((resolve, reject) => {
         image.onload = () => {
             try {
+                URL.revokeObjectURL(imageURL);
                 const imageDimension = {
                     width: image.width,
                     height: image.height,
@@ -165,6 +166,7 @@ export async function generateVideoThumbnail(file: File) {
         videoURL = URL.createObjectURL(file);
         video.addEventListener('loadeddata', function () {
             try {
+                URL.revokeObjectURL(videoURL);
                 if (!video) {
                     throw Error('video load failed');
                 }

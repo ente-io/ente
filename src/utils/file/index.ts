@@ -32,16 +32,8 @@ export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
     });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(file);
-    a.download = filename;
-
-    a.style.display = 'none';
-    document.body.appendChild(a);
-
-    a.click();
-
-    a.remove();
+    const fileURL = URL.createObjectURL(file);
+    downloadUsingAnchor(fileURL, filename);
 }
 
 export async function downloadFile(
@@ -116,10 +108,6 @@ export async function downloadFile(
         tempURL = URL.createObjectURL(fileBlob);
         downloadUsingAnchor(tempURL, file.metadata.title);
     }
-
-    tempURL && URL.revokeObjectURL(tempURL);
-    tempImageURL && URL.revokeObjectURL(tempImageURL);
-    tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
 function downloadUsingAnchor(link: string, name: string) {
@@ -129,6 +117,7 @@ function downloadUsingAnchor(link: string, name: string) {
     a.download = name;
     document.body.appendChild(a);
     a.click();
+    URL.revokeObjectURL(link);
     a.remove();
 }
 
