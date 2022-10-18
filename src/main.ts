@@ -13,6 +13,7 @@ import {
     setupNextElectronServe,
     enableSharedArrayBufferSupport,
     handleDockIconHideOnAutoLaunch,
+    setupLogging,
 } from './utils/main';
 import { initSentry } from './services/sentry';
 
@@ -40,6 +41,8 @@ export const setIsUpdateAvailable = (value: boolean): void => {
 setupMainHotReload();
 
 setupNextElectronServe();
+
+setupLogging();
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {

@@ -1,4 +1,9 @@
-import { PROD_HOST_URL, RENDERER_OUTPUT_DIR } from '../config';
+import {
+    LOG_FILENAME,
+    MAX_LOG_SIZE,
+    PROD_HOST_URL,
+    RENDERER_OUTPUT_DIR,
+} from '../config';
 import { nativeImage, Tray, app, BrowserWindow, Menu } from 'electron';
 import electronReload from 'electron-reload';
 import serveNextAt from 'next-electron-server';
@@ -9,6 +14,7 @@ import { isDev } from './common';
 import { buildContextMenu, buildMenuBar } from './menu';
 import autoLauncher from '../services/autoLauncher';
 import { getHideDockIconPreference } from '../services/userPreference';
+import log from 'electron-log';
 
 export function handleUpdates(mainWindow: BrowserWindow, tray: Tray) {
     if (!isDev) {
@@ -98,4 +104,10 @@ export async function handleDockIconHideOnAutoLaunch() {
 
 export function enableSharedArrayBufferSupport() {
     app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
+}
+
+export function setupLogging() {
+    log.transports.file.fileName = LOG_FILENAME;
+    log.transports.file.maxSize = MAX_LOG_SIZE;
+    log.transports.console.level = false;
 }
