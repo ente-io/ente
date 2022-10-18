@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/db/files_db.dart';
+import 'package:photos/models/count_of_file_types.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/ui/payment/subscription.dart';
@@ -223,14 +228,46 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                               ),
                             ],
                           )
-                        : Text(
-                            "${convertBytesToReadableFormat(userDetails.getFamilyOrPersonalUsage())} used",
-                            style:
-                                Theme.of(context).textTheme.bodyText1!.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 12,
+                        : FutureBuilder(
+                            future: FilesDB.instance.fetchPhotoAndVideoCount(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                final countOfFileTypes =
+                                    snapshot.data as CountOfFileTypes;
+                                return Column(
+                                  children: [
+                                    Text(
+                                      "${NumberFormat().format(countOfFileTypes.photosCount)} photos",
+                                      style: getEnteTextTheme(context)
+                                          .mini
+                                          .copyWith(color: textBaseDark),
                                     ),
+                                    Text(
+                                      "${NumberFormat().format(countOfFileTypes.videosCount)} videos",
+                                      style: getEnteTextTheme(context)
+                                          .mini
+                                          .copyWith(color: textBaseDark),
+                                    ),
+                                  ],
+                                );
+                              } else if (snapshot.hasError) {
+                                _logger.severe(
+                                  'Error fetching photo and video count',
+                                  snapshot.error,
+                                );
+                                return const SizedBox.shrink();
+                              } else {
+                                return const EnteLoadingWidget();
+                              }
+                            },
                           ),
+                    Text(
+                      "${convertBytesToReadableFormat(userDetails.getFamilyOrPersonalUsage())} used",
+                      style: Theme.of(context).textTheme.bodyText1!.copyWith(
+                            color: Colors.white,
+                            fontSize: 12,
+                          ),
+                    ),
                   ],
                 ),
               ],
