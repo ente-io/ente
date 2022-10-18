@@ -73,7 +73,7 @@ Future<void> _runInForeground() async {
   });
 }
 
-Future<void> _runBackgroundTask(String taskId) async {
+Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
   if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
@@ -81,7 +81,7 @@ Future<void> _runBackgroundTask(String taskId) async {
   } else {
     _runWithLogs(
       () async {
-        _logger.info("run background task");
+        _logger.info("Starting background task in $mode mode");
         _runInBackground(taskId);
       },
       prefix: "[bg]",
@@ -116,7 +116,7 @@ void _headlessTaskHandler(HeadlessTask task) {
   if (task.timeout) {
     BackgroundFetch.finish(task.taskId);
   } else {
-    _runBackgroundTask(task.taskId);
+    _runBackgroundTask(task.taskId, mode: "headless");
   }
 }
 
