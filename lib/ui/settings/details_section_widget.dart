@@ -172,11 +172,10 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                     ),
                   ],
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                ),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     userDetails.isPartOfFamily()
                         ? Row(
@@ -235,6 +234,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 final countOfFileTypes =
                                     snapshot.data as CountOfFileTypes;
                                 return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       "${NumberFormat().format(countOfFileTypes.photosCount)} photos",
