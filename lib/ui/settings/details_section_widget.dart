@@ -111,6 +111,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   }
 
   Widget userDetails(UserDetails userDetails) {
+    final usedSpaceInGB =
+        convertUsedSpaceInBytesToGB(userDetails.getFamilyOrPersonalUsage());
     return Padding(
       padding: const EdgeInsets.only(
         top: 20,
@@ -136,7 +138,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                         ),
                   ),
                   Text(
-                    "${convertBytesToReadableFormat(userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(userDetails.getTotalStorage())} free",
+                    "$usedSpaceInGB GB of ${convertBytesToReadableFormat(userDetails.getTotalStorage())} used",
                     style: Theme.of(context)
                         .textTheme
                         .headline5!
