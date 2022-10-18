@@ -25,16 +25,13 @@ String formatBytes(int bytes, [int decimals = 2]) {
   return ((bytes / pow(k, i)).toStringAsFixed(dm)) + ' ' + storageUnits[i];
 }
 
-num convertUsedSpaceInBytesToGB(int bytes) {
+num convertBytesToGB(int bytes) {
   const tenGBinBytes = 10737418240;
-  int fractionDigits = 0;
+  int precision = 0;
   if (bytes < tenGBinBytes) {
-    fractionDigits = 1;
+    precision = 1;
   }
-  num bytesInGB =
-      num.parse((bytes / (pow(1024, 3))).toStringAsFixed(fractionDigits));
-  if (fractionDigits == 1 && bytesInGB.remainder(1) == 0) {
-    bytesInGB = bytesInGB.toInt();
-  }
+  final bytesInGB =
+      num.parse((bytes / (pow(1024, 3))).toStringAsPrecision(precision));
   return bytesInGB;
 }
