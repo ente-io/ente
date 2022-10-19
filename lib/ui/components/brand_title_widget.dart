@@ -27,7 +27,7 @@ class BrandTitleWidget extends StatelessWidget {
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontFamily: 'Montserrat',
-        fontSize: SizeVarient.medium.size(),
+        fontSize: size.size(),
       ),
     );
   }
