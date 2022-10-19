@@ -139,6 +139,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               ),
               const SizedBox(height: 2),
               RichText(
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 text: TextSpan(
                   style: getEnteTextTheme(context)
                       .h3Bold
