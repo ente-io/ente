@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -10,12 +8,11 @@ import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class CollectionItem extends StatelessWidget {
+  final CollectionWithThumbnail c;
   CollectionItem(
     this.c, {
-    Key key,
+    Key? key,
   }) : super(key: Key(c.collection.id.toString()));
-
-  final CollectionWithThumbnail c;
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +23,11 @@ class CollectionItem extends StatelessWidget {
     final double totalWhiteSpaceOfRow = (horizontalPaddingOfGridRow * 2) +
         (albumsCountInOneRow - 1) * crossAxisSpacingOfGrid;
     final TextStyle albumTitleTextStyle =
-        Theme.of(context).textTheme.subtitle1.copyWith(fontSize: 14);
+        Theme.of(context).textTheme.subtitle1!.copyWith(fontSize: 14);
     final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
         (totalWhiteSpaceOfRow / albumsCountInOneRow);
+    final String heroTag =
+        "collection" + (c.thumbnail?.tag ?? c.collection.id.toString());
     return GestureDetector(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,13 +38,11 @@ class CollectionItem extends StatelessWidget {
               height: sideOfThumbnail,
               width: sideOfThumbnail,
               child: Hero(
-                tag: "collection" + c.thumbnail.tag,
+                tag: heroTag,
                 child: ThumbnailWidget(
                   c.thumbnail,
                   shouldShowArchiveStatus: c.collection.isArchived(),
-                  key: Key(
-                    "collection" + c.thumbnail.tag,
-                  ),
+                  key: Key(heroTag),
                 ),
               ),
             ),
@@ -56,7 +53,7 @@ class CollectionItem extends StatelessWidget {
               Container(
                 constraints: BoxConstraints(maxWidth: sideOfThumbnail - 40),
                 child: Text(
-                  c.collection.name,
+                  c.collection.name ?? "Unnamed",
                   style: albumTitleTextStyle,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -64,11 +61,11 @@ class CollectionItem extends StatelessWidget {
               FutureBuilder<int>(
                 future: FilesDB.instance.collectionFileCount(c.collection.id),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data > 0) {
+                  if (snapshot.hasData && snapshot.data! > 0) {
                     return RichText(
                       text: TextSpan(
                         style: albumTitleTextStyle.copyWith(
-                          color: albumTitleTextStyle.color.withOpacity(0.5),
+                          color: albumTitleTextStyle.color!.withOpacity(0.5),
                         ),
                         children: [
                           const TextSpan(text: "  \u2022  "),
