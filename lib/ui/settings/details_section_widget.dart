@@ -11,6 +11,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/settings/storage_error_widget.dart';
+import 'package:photos/ui/settings/storage_progress_widget.dart';
 import 'package:photos/utils/data_util.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
@@ -184,37 +185,25 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             children: [
               Stack(
                 children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      color: const Color.fromRGBO(255, 255, 255, 0.2),
-                    ),
-                    width: MediaQuery.of(context).size.width,
-                    height: 4,
+                  const StorageProgressWidget(
+                    color: Color.fromRGBO(255, 255, 255, 0.2),
+                    fractionOfStorage: 1,
                   ),
                   userDetails.isPartOfFamily()
-                      ? Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(2),
-                            color: strokeBaseDark,
-                          ),
-                          width: MediaQuery.of(context).size.width *
+                      ? StorageProgressWidget(
+                          color: strokeBaseDark,
+                          fractionOfStorage:
                               ((userDetails.getFamilyOrPersonalUsage()) /
                                   userDetails.getTotalStorage()),
-                          height: 4,
                         )
                       : const SizedBox.shrink(),
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      color: userDetails.isPartOfFamily()
-                          ? getEnteColorScheme(context).primary300
-                          : strokeBaseDark,
-                    ),
-                    width: MediaQuery.of(context).size.width *
+                  StorageProgressWidget(
+                    color: userDetails.isPartOfFamily()
+                        ? getEnteColorScheme(context).primary300
+                        : strokeBaseDark,
+                    fractionOfStorage:
                         (userDetails.usage / userDetails.getTotalStorage()),
-                    height: 4,
-                  ),
+                  )
                 ],
               ),
               const SizedBox(height: 12),
@@ -288,7 +277,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                               );
                               return const SizedBox.shrink();
                             } else {
-                              return const EnteLoadingWidget();
+                              return const EnteLoadingWidget(
+                                color: strokeBaseDark,
+                              );
                             }
                           },
                         ),
