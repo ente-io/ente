@@ -290,6 +290,9 @@ function PhotoSwipe(props: Iprops) {
             photoSwipe.invalidateCurrItems();
             if (isOpen) {
                 photoSwipe.updateSize(true);
+                if (photoSwipe.getCurrentIndex() >= photoSwipe.items.length) {
+                    photoSwipe.goTo(0);
+                }
             }
         }
     };
