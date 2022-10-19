@@ -25,6 +25,7 @@ String formatBytes(int bytes, [int decimals = 2]) {
   return ((bytes / pow(k, i)).toStringAsFixed(dm)) + ' ' + storageUnits[i];
 }
 
+//shows decimals only if less than 10GB & omits decimal if decimal is 0
 num convertBytesToGB(int bytes) {
   const tenGBinBytes = 10737418240;
   int precision = 0;
@@ -34,4 +35,8 @@ num convertBytesToGB(int bytes) {
   final bytesInGB =
       num.parse((bytes / (pow(1024, 3))).toStringAsPrecision(precision));
   return bytesInGB;
+}
+
+int convertBytesToMB(int bytes) {
+  return (bytes / pow(1024, 2)).round();
 }

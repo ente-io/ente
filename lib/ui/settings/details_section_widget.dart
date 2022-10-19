@@ -111,6 +111,15 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   }
 
   Widget userDetails(UserDetails userDetails) {
+    bool shouldShowFreeSpaceInMBs = false;
+
+    const hundredMBinBytes = 107374182;
+    final freeSpaceInBytes = userDetails.getFreeStorage();
+
+    if (freeSpaceInBytes < hundredMBinBytes) {
+      shouldShowFreeSpaceInMBs = true;
+    }
+
     final usedSpaceInGB =
         convertBytesToGB(userDetails.getFamilyOrPersonalUsage());
     final totalStorageInGB = convertBytesToGB(userDetails.getTotalStorage());
@@ -267,14 +276,22 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                           ),
                     Column(
                       children: [
-                        Text(
-                          "${_roundedFreeSpace(totalStorageInGB, usedSpaceInGB)} GB free",
-                          style:
-                              Theme.of(context).textTheme.bodyText1!.copyWith(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                  ),
-                        ),
+                        RichText(
+                          text: TextSpan(
+                            text:
+                                "${shouldShowFreeSpaceInMBs ? convertBytesToMB(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
+                            style: getEnteTextTheme(context)
+                                .mini
+                                .copyWith(color: textFaintDark),
+                            children: [
+                              TextSpan(
+                                text: shouldShowFreeSpaceInMBs
+                                    ? " MB free"
+                                    : " GB free",
+                              )
+                            ],
+                          ),
+                        )
                       ],
                     ),
                   ],
