@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -39,11 +40,13 @@ class CollectionItem extends StatelessWidget {
               width: sideOfThumbnail,
               child: Hero(
                 tag: heroTag,
-                child: ThumbnailWidget(
-                  c.thumbnail,
-                  shouldShowArchiveStatus: c.collection.isArchived(),
-                  key: Key(heroTag),
-                ),
+                child: c.thumbnail != null
+                    ? ThumbnailWidget(
+                        c.thumbnail,
+                        shouldShowArchiveStatus: c.collection.isArchived(),
+                        key: Key(heroTag),
+                      )
+                    : const NoThumbnailWidget(),
               ),
             ),
           ),
