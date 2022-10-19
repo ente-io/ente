@@ -112,7 +112,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
 
   Widget userDetails(UserDetails userDetails) {
     final usedSpaceInGB =
-        convertUsedSpaceInBytesToGB(userDetails.getFamilyOrPersonalUsage());
+        convertBytesToGB(userDetails.getFamilyOrPersonalUsage());
+    final totalStorageInGB = convertBytesToGB(userDetails.getTotalStorage());
+
     return Padding(
       padding: const EdgeInsets.only(
         top: 20,
@@ -138,7 +140,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                         ),
                   ),
                   Text(
-                    "$usedSpaceInGB GB of ${convertBytesToReadableFormat(userDetails.getTotalStorage())} used",
+                    "$usedSpaceInGB GB of $totalStorageInGB GB used",
                     style: Theme.of(context)
                         .textTheme
                         .headline5!
@@ -263,12 +265,17 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                               }
                             },
                           ),
-                    Text(
-                      "${convertBytesToReadableFormat(userDetails.getFamilyOrPersonalUsage())} used",
-                      style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                            color: Colors.white,
-                            fontSize: 12,
-                          ),
+                    Column(
+                      children: [
+                        Text(
+                          "${_roundedFreeSpace(totalStorageInGB, usedSpaceInGB)} GB free",
+                          style:
+                              Theme.of(context).textTheme.bodyText1!.copyWith(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                  ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -278,5 +285,21 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         ),
       ),
     );
+  }
+
+  num _roundedFreeSpace(num totalStorageInGB, num usedSpaceInGB) {
+    int fractionDigits;
+    final freeSpace = totalStorageInGB - usedSpaceInGB;
+    //show one decimal place if free space is less than 10GB
+    if (freeSpace < 10) {
+      fractionDigits = 1;
+    } else {
+      fractionDigits = 0;
+    }
+    //omit decimal if decimal is 0
+    if (fractionDigits == 1 && freeSpace.remainder(1) == 0) {
+      fractionDigits = 0;
+    }
+    return num.parse(freeSpace.toStringAsFixed(fractionDigits));
   }
 }
