@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
@@ -16,6 +17,7 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enteTextTheme = getEnteTextTheme(context);
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 12, 0, 0),
       child: Column(
@@ -24,8 +26,7 @@ class SectionTitle extends StatelessWidget {
             alignment: alignment,
             child: Text(
               title,
-              style:
-                  Theme.of(context).textTheme.headline6.copyWith(fontSize: 22),
+              style: enteTextTheme.largeBold,
             ),
           ),
         ],
