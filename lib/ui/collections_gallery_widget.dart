@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -22,6 +23,8 @@ import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
+
+import '../models/file.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
@@ -84,10 +87,16 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final latestCollectionFiles =
         await collectionsService.getLatestCollectionFiles();
-    for (final file in latestCollectionFiles) {
-      final c = collectionsService.getCollectionByID(file.collectionID);
+    final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
+      latestCollectionFiles.map((e) => MapEntry(e.collectionID, e)),
+    );
+    final usersCollection = collectionsService.getActiveCollections().where(
+          (c) => c.owner.id == userID,
+        );
+    for (final c in usersCollection) {
+      final File thumbnail = collectionToThumbnailMap[c.id];
       if (c.owner.id == userID) {
-        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file));
+        collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
       }
     }
     collectionsWithThumbnail.sort(
@@ -105,8 +114,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             second.collection.name,
           );
         } else if (sortKey == AlbumSortKey.newestPhoto) {
-          return second.thumbnail.creationTime
-              .compareTo(first.thumbnail.creationTime);
+          return (second.thumbnail?.creationTime ?? -1 * intMaxValue)
+              .compareTo(first.thumbnail?.creationTime ?? -1 * intMaxValue);
         } else {
           return second.collection.updationTime
               .compareTo(first.collection.updationTime);

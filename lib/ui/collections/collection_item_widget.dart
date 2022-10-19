@@ -21,7 +21,6 @@ class CollectionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
-
     final String heroTag =
         "collection" + (c.thumbnail?.tag ?? c.collection.id.toString());
     return GestureDetector(
