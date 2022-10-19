@@ -1,5 +1,5 @@
 PODS:
-  - background_fetch (1.1.1):
+  - background_fetch (1.1.0):
     - Flutter
   - connectivity (0.0.1):
     - Flutter
@@ -309,7 +309,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
-  background_fetch: ef7bc433c96131e4f284d8616d2e0d4e18fa6af4
+  background_fetch: 3795af8a49054dc526477cc2f60d2ed41de60587
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 800f16f07af493d98d017446a315c27af0552f41
@@ -321,7 +321,7 @@ SPEC CHECKSUMS:
   FirebaseInstallations: 0a115432c4e223c5ab20b0dbbe4cbefa793a0e8e
   FirebaseMessaging: 732623518591384f61c287e3d8f65294beb7ffb3
   fk_user_agent: 1f47ec39291e8372b1d692b50084b0d54103c545
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_email_sender: 02d7443217d8c41483223627972bfdc09f74276b
   flutter_image_compress: 5a5e9aee05b6553048b8df1c3bc456d0afaac433
   flutter_inappwebview: bfd58618f49dc62f2676de690fc6dcda1d6c3721

@@ -14,7 +14,6 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
-import 'package:photos/ui/collections/ente_section_title.dart';
 import 'package:photos/ui/collections/hidden_collections_button_widget.dart';
 import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
 import 'package:photos/ui/collections/section_title.dart';
@@ -141,7 +140,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const EnteSectionTitle(),
+                SectionTitle(titleWithBrand: onEnteSection),
                 _sortMenu(),
               ],
             ),
