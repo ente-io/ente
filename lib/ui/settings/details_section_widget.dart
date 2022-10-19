@@ -121,8 +121,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     }
 
     final usedSpaceInGB =
-        convertBytesToGB(userDetails.getFamilyOrPersonalUsage());
-    final totalStorageInGB = convertBytesToGB(userDetails.getTotalStorage());
+        convertBytesToGBs(userDetails.getFamilyOrPersonalUsage());
+    final totalStorageInGB = convertBytesToGBs(userDetails.getTotalStorage());
 
     return Padding(
       padding: const EdgeInsets.only(
@@ -279,7 +279,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                         RichText(
                           text: TextSpan(
                             text:
-                                "${shouldShowFreeSpaceInMBs ? convertBytesToMB(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
+                                "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
                             style: getEnteTextTheme(context)
                                 .mini
                                 .copyWith(color: textFaintDark),
@@ -306,6 +306,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
 
   num _roundedFreeSpace(num totalStorageInGB, num usedSpaceInGB) {
     int fractionDigits;
+    //subtracting usedSpace from totalStorage in GB instead of converting from bytes so that free space and used space adds up in the UI
     final freeSpace = totalStorageInGB - usedSpaceInGB;
     //show one decimal place if free space is less than 10GB
     if (freeSpace < 10) {
