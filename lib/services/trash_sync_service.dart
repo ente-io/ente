@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/trash_db.dart';
@@ -31,7 +30,7 @@ class TrashSyncService {
 
   static final TrashSyncService instance =
       TrashSyncService._privateConstructor();
-  final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -129,13 +128,8 @@ class TrashSyncService {
   Future<Response<dynamic>> _trashFiles(
     Map<String, dynamic> requestData,
   ) async {
-    return _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/files/trash",
-      options: Options(
-        headers: {
-          "X-Auth-Token": Configuration.instance.getToken(),
-        },
-      ),
+    return _enteDio.post(
+      "/files/trash",
       data: requestData,
     );
   }
@@ -148,13 +142,8 @@ class TrashSyncService {
       params["fileIDs"].add(fileID);
     }
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/trash/delete",
-        options: Options(
-          headers: {
-            "X-Auth-Token": Configuration.instance.getToken(),
-          },
-        ),
+      await _enteDio.post(
+        "/trash/delete",
         data: params,
       );
       await _trashDB.delete(uniqueFileIds);
@@ -171,13 +160,8 @@ class TrashSyncService {
     final params = <String, dynamic>{};
     params["lastUpdatedAt"] = _getSyncTime();
     try {
-      await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/trash/empty",
-        options: Options(
-          headers: {
-            "X-Auth-Token": Configuration.instance.getToken(),
-          },
-        ),
+      await _enteDio.post(
+        "/trash/empty",
         data: params,
       );
       await _trashDB.clearTable();

@@ -49,6 +49,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Function() _selectedFilesListener;
   String _appBarTitle;
   final GlobalKey shareButtonKey = GlobalKey();
+
   @override
   void initState() {
     _selectedFilesListener = () {
@@ -72,26 +73,28 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // if (widget.selectedFiles.files.isEmpty) {
-    return AppBar(
-      backgroundColor:
-          widget.type == GalleryType.homepage ? const Color(0x00000000) : null,
-      elevation: 0,
-      centerTitle: false,
-      title: widget.type == GalleryType.homepage
-          ? const SizedBox.shrink()
-          : TextButton(
-              child: Text(
-                _appBarTitle,
-                style: Theme.of(context)
-                    .textTheme
-                    .headline5
-                    .copyWith(fontSize: 16),
-              ),
-              onPressed: () => _renameAlbum(context),
-            ),
-      actions: _getDefaultActions(context),
-    );
+    return widget.type == GalleryType.homepage
+        ? const SizedBox.shrink()
+        : AppBar(
+            backgroundColor: widget.type == GalleryType.homepage
+                ? const Color(0x00000000)
+                : null,
+            elevation: 0,
+            centerTitle: false,
+            title: widget.type == GalleryType.homepage
+                ? const SizedBox.shrink()
+                : TextButton(
+                    child: Text(
+                      _appBarTitle,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline5
+                          .copyWith(fontSize: 16),
+                    ),
+                    onPressed: () => _renameAlbum(context),
+                  ),
+            actions: _getDefaultActions(context),
+          );
   }
 
   Future<dynamic> _renameAlbum(BuildContext context) async {
@@ -118,6 +121,33 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       if (mounted) {
         _appBarTitle = result;
         setState(() {});
+      }
+    } catch (e) {
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
+  }
+
+  Future<dynamic> _leaveAlbum(BuildContext context) async {
+    final DialogUserChoice result = await showChoiceDialog(
+      context,
+      "Leave shared album?",
+      "You will leave the album, and it will stop being visible to you.",
+      firstAction: "Cancel",
+      secondAction: "Yes, Leave",
+      secondActionColor:
+          Theme.of(context).colorScheme.enteTheme.colorScheme.warning700,
+    );
+    if (result != DialogUserChoice.secondChoice) {
+      return;
+    }
+    final dialog = createProgressDialog(context, "Leaving album...");
+    await dialog.show();
+    try {
+      await CollectionsService.instance.leaveAlbum(widget.collection);
+      await dialog.hide();
+      if (mounted) {
+        Navigator.of(context).pop();
       }
     } catch (e) {
       await dialog.hide();
@@ -158,78 +188,101 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
+    final List<PopupMenuItem> items = [];
     if (widget.type == GalleryType.ownedCollection) {
-      actions.add(
-        PopupMenuButton(
-          itemBuilder: (context) {
-            final List<PopupMenuItem> items = [];
-            if (widget.collection.type != CollectionType.favorites) {
-              items.add(
-                PopupMenuItem(
-                  value: 1,
-                  child: Row(
-                    children: const [
-                      Icon(Icons.edit),
-                      Padding(
-                        padding: EdgeInsets.all(8),
-                      ),
-                      Text("Rename album"),
-                    ],
-                  ),
+      if (widget.collection.type != CollectionType.favorites) {
+        items.add(
+          PopupMenuItem(
+            value: 1,
+            child: Row(
+              children: const [
+                Icon(Icons.edit),
+                Padding(
+                  padding: EdgeInsets.all(8),
                 ),
-              );
-            }
-            final bool isArchived = widget.collection.isArchived();
-            items.add(
-              PopupMenuItem(
-                value: 2,
-                child: Row(
-                  children: [
-                    Icon(isArchived ? Icons.visibility : Icons.visibility_off),
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                    ),
-                    Text(isArchived ? "Unhide album" : "Hide album"),
-                  ],
-                ),
+                Text("Rename album"),
+              ],
+            ),
+          ),
+        );
+      }
+      final bool isArchived = widget.collection.isArchived();
+      items.add(
+        PopupMenuItem(
+          value: 2,
+          child: Row(
+            children: [
+              Icon(isArchived ? Icons.visibility : Icons.visibility_off),
+              const Padding(
+                padding: EdgeInsets.all(8),
               ),
-            );
-            if (widget.collection.type != CollectionType.favorites) {
-              items.add(
-                PopupMenuItem(
-                  value: 3,
-                  child: Row(
-                    children: const [
-                      Icon(Icons.delete_outline),
-                      Padding(
-                        padding: EdgeInsets.all(8),
-                      ),
-                      Text("Delete album"),
-                    ],
-                  ),
+              Text(isArchived ? "Unhide album" : "Hide album"),
+            ],
+          ),
+        ),
+      );
+      if (widget.collection.type != CollectionType.favorites) {
+        items.add(
+          PopupMenuItem(
+            value: 3,
+            child: Row(
+              children: const [
+                Icon(Icons.delete_outline),
+                Padding(
+                  padding: EdgeInsets.all(8),
                 ),
-              );
-            }
-            return items;
-          },
-          onSelected: (value) async {
-            if (value == 1) {
-              await _renameAlbum(context);
-            } else if (value == 2) {
-              await changeCollectionVisibility(
-                context,
-                widget.collection,
-                widget.collection.isArchived()
-                    ? visibilityVisible
-                    : visibilityArchive,
-              );
-            } else if (value == 3) {
-              await _trashCollection();
-            }
-          },
+                Text("Delete album"),
+              ],
+            ),
+          ),
+        );
+      }
+    } // ownedCollection open ends
+
+    if (widget.type == GalleryType.sharedCollection) {
+      items.add(
+        PopupMenuItem(
+          value: 4,
+          child: Row(
+            children: const [
+              Icon(Icons.logout),
+              Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text("Leave album"),
+            ],
+          ),
         ),
       );
     }
+
+    actions.add(
+      PopupMenuButton(
+        itemBuilder: (context) {
+          return items;
+        },
+        onSelected: (value) async {
+          if (value == 1) {
+            await _renameAlbum(context);
+          } else if (value == 2) {
+            await changeCollectionVisibility(
+              context,
+              widget.collection,
+              widget.collection.isArchived()
+                  ? visibilityVisible
+                  : visibilityArchive,
+            );
+          } else if (value == 3) {
+            await _trashCollection();
+          } else if (value == 4) {
+            await _leaveAlbum(context);
+          } else {
+            showToast(context, "Something went wrong");
+          }
+        },
+      ),
+    );
+
     return actions;
   }
 

@@ -113,6 +113,7 @@ class AccountSectionWidget extends StatelessWidget {
             }
           },
         ),
+        sectionOptionSpacing,
       ],
     );
   }

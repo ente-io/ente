@@ -23,10 +23,10 @@ jobs:
           java-version: '11'
 
       # Setup the flutter environment.
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.3.0'
+          flutter-version: '3.0.0'
 
       # Fetch sub modules
       - run: git submodule update --init --recursive
@@ -50,7 +50,7 @@ jobs:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
       - name: Checksum
-        run: sha256sum build/app/outputs/flutter-apk/ente.apk > build/app/outputs/flutter-apk/checksum
+        run: sha256sum build/app/outputs/flutter-apk/ente.apk > build/app/outputs/flutter-apk/sha256sum
 
       # Upload generated apk to the artifacts.
       - uses: actions/upload-artifact@v2
@@ -66,5 +66,5 @@ jobs:
       # Create a Github release
       - uses: ncipollo/release-action@v1
         with:
-          artifacts: "build/app/outputs/flutter-apk/ente.apk,build/app/outputs/flutter-apk/checksum"
+          artifacts: "build/app/outputs/flutter-apk/ente.apk,build/app/outputs/flutter-apk/sha256sum"
           token: ${{ secrets.GITHUB_TOKEN }}

@@ -29,7 +29,7 @@ class SyncService {
   final _logger = Logger("SyncService");
   final _localSyncService = LocalSyncService.instance;
   final _remoteSyncService = RemoteSyncService.instance;
-  final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
   final _uploader = FileUploader.instance;
   bool _syncStopRequested = false;
   Completer<bool> _existingSync;
@@ -198,13 +198,8 @@ class SyncService {
   }
 
   Future<void> deleteFilesOnServer(List<int> fileIDs) async {
-    return await _dio.post(
-      Configuration.instance.getHttpEndpoint() + "/files/delete",
-      options: Options(
-        headers: {
-          "X-Auth-Token": Configuration.instance.getToken(),
-        },
-      ),
+    return await _enteDio.post(
+      "/files/delete",
       data: {
         "fileIDs": fileIDs,
       },
@@ -219,16 +214,9 @@ class SyncService {
 
   Future<int> _getFileSize(List<int> fileIDs) async {
     try {
-      final response = await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/files/size",
-        options: Options(
-          headers: {
-            "X-Auth-Token": Configuration.instance.getToken(),
-          },
-        ),
-        data: {
-          "fileIDs": fileIDs,
-        },
+      final response = await _enteDio.post(
+        "/files/size",
+        data: {"fileIDs": fileIDs},
       );
       return response.data["size"];
     } catch (e) {

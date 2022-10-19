@@ -34,6 +34,7 @@ import 'package:photos/utils/toast_util.dart';
 
 class UserService {
   final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
   final _logger = Logger((UserService).toString());
   final _config = Configuration.instance;
   ValueNotifier<String> emailValueNotifier;
@@ -92,14 +93,9 @@ class UserService {
 
   Future<String> getPublicKey(String email) async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/public-key",
+      final response = await _enteDio.get(
+        "/users/public-key",
         queryParameters: {"email": email},
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       final publicKey = response.data["publicKey"];
       await PublicKeysDB.instance.setKey(PublicKey(email, publicKey));
@@ -112,17 +108,11 @@ class UserService {
 
   Future<UserDetails> getUserDetailsV2({bool memoryCount = true}) async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() +
-            "/users/details/v2?memoryCount=$memoryCount",
+      final response = await _enteDio.get(
+        "/users/details/v2?memoryCount=$memoryCount",
         queryParameters: {
           "memoryCount": memoryCount,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       return UserDetails.fromMap(response.data);
     } on DioError catch (e) {
@@ -133,14 +123,7 @@ class UserService {
 
   Future<Sessions> getActiveSessions() async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/sessions",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/sessions");
       return Sessions.fromMap(response.data);
     } on DioError catch (e) {
       _logger.info(e);
@@ -150,13 +133,8 @@ class UserService {
 
   Future<void> terminateSession(String token) async {
     try {
-      await _dio.delete(
-        _config.getHttpEndpoint() + "/users/session",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
+      await _enteDio.delete(
+        "/users/session",
         queryParameters: {
           "token": token,
         },
@@ -169,14 +147,7 @@ class UserService {
 
   Future<void> leaveFamilyPlan() async {
     try {
-      await _dio.delete(
-        _config.getHttpEndpoint() + "/family/leave",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      await _enteDio.delete("/family/leave");
     } on DioError catch (e) {
       _logger.warning('failed to leave family plan', e);
       rethrow;
@@ -187,14 +158,7 @@ class UserService {
     final dialog = createProgressDialog(context, "Logging out...");
     await dialog.show();
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/logout",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.post("/users/logout");
       if (response != null && response.statusCode == 200) {
         await Configuration.instance.logout();
         await dialog.hide();
@@ -215,14 +179,7 @@ class UserService {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/delete-challenge",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/delete-challenge");
       if (response != null && response.statusCode == 200) {
         // clear data
         await dialog.hide();
@@ -248,16 +205,11 @@ class UserService {
     final dialog = createProgressDialog(context, "Deleting account...");
     await dialog.show();
     try {
-      final response = await _dio.delete(
-        _config.getHttpEndpoint() + "/users/delete",
+      final response = await _enteDio.delete(
+        "/users/delete",
         data: {
           "challenge": challengeResponse,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       if (response != null && response.statusCode == 200) {
         // clear data
@@ -353,17 +305,12 @@ class UserService {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/change-email",
+      final response = await _enteDio.post(
+        "/users/change-email",
         data: {
           "email": email,
           "ott": ott,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
@@ -395,17 +342,12 @@ class UserService {
   Future<void> setAttributes(KeyGenResult result) async {
     try {
       final name = _config.getName();
-      await _dio.put(
-        _config.getHttpEndpoint() + "/users/attributes",
+      await _enteDio.put(
+        "/users/attributes",
         data: {
           "name": name,
           "keyAttributes": result.keyAttributes.toMap(),
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await _config.setKey(result.privateKeyAttributes.key);
       await _config.setSecretKey(result.privateKeyAttributes.secretKey);
@@ -425,14 +367,9 @@ class UserService {
         memLimit: keyAttributes.memLimit,
         opsLimit: keyAttributes.opsLimit,
       );
-      await _dio.put(
-        _config.getHttpEndpoint() + "/users/keys",
+      await _enteDio.put(
+        "/users/keys",
         data: setKeyRequest.toMap(),
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
@@ -449,14 +386,9 @@ class UserService {
         keyAttributes.recoveryKeyEncryptedWithMasterKey,
         keyAttributes.recoveryKeyDecryptionNonce,
       );
-      await _dio.put(
-        _config.getHttpEndpoint() + "/users/recovery-key",
+      await _enteDio.put(
+        "/users/recovery-key",
         data: setRecoveryKeyRequest.toMap(),
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await _config.setKeyAttributes(keyAttributes);
     } catch (e) {
@@ -661,14 +593,7 @@ class UserService {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/setup",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.post("/users/two-factor/setup");
       await dialog.hide();
       routeToPage(
         context,
@@ -701,8 +626,8 @@ class UserService {
     final encryptionResult =
         CryptoUtil.encryptSync(Sodium.base642bin(secret), recoveryKey);
     try {
-      await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/enable",
+      await _enteDio.post(
+        "/users/two-factor/enable",
         data: {
           "code": code,
           "encryptedTwoFactorSecret":
@@ -710,11 +635,6 @@ class UserService {
           "twoFactorSecretDecryptionNonce":
               Sodium.bin2base64(encryptionResult.nonce),
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       await dialog.hide();
       Navigator.pop(context);
@@ -747,13 +667,8 @@ class UserService {
         createProgressDialog(context, "Disabling two-factor authentication...");
     await dialog.show();
     try {
-      await _dio.post(
-        _config.getHttpEndpoint() + "/users/two-factor/disable",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
+      await _enteDio.post(
+        "/users/two-factor/disable",
       );
       Bus.instance.fire(TwoFactorStatusChangeEvent(false));
       await dialog.hide();
@@ -771,14 +686,7 @@ class UserService {
 
   Future<bool> fetchTwoFactorStatus() async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/users/two-factor/status",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/two-factor/status");
       return response.data["status"];
     } catch (e) {
       _logger.severe("Failed to fetch 2FA status", e);
@@ -808,14 +716,7 @@ class UserService {
 
   Future<String> getPaymentToken() async {
     try {
-      final response = await _dio.get(
-        "${_config.getHttpEndpoint()}/users/payment-token",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/payment-token");
       if (response != null && response.statusCode == 200) {
         return response.data["paymentToken"];
       } else {
@@ -829,14 +730,7 @@ class UserService {
 
   Future<String> getFamiliesToken() async {
     try {
-      final response = await _dio.get(
-        "${_config.getHttpEndpoint()}/users/families-token",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/users/families-token");
       if (response != null && response.statusCode == 200) {
         return response.data["familiesToken"];
       } else {

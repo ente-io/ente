@@ -150,36 +150,33 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           Expanded(child: _getFolders()),
           Column(
             children: [
-              Hero(
-                tag: "select_folders",
-                child: Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Theme.of(context).backgroundColor,
-                        blurRadius: 24,
-                        offset: const Offset(0, -8),
-                        spreadRadius: 4,
-                      )
-                    ],
-                  ),
-                  padding: widget.isOnboarding
-                      ? const EdgeInsets.only(left: 20, right: 20)
-                      : EdgeInsets.only(
-                          top: 16,
-                          left: 20,
-                          right: 20,
-                          bottom: Platform.isIOS ? 60 : 32,
-                        ),
-                  child: OutlinedButton(
-                    onPressed: _selectedDevicePathIDs.isEmpty
-                        ? null
-                        : () async {
-                            await updateFolderSettings();
-                          },
-                    child: Text(widget.buttonText),
-                  ),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).backgroundColor,
+                      blurRadius: 24,
+                      offset: const Offset(0, -8),
+                      spreadRadius: 4,
+                    )
+                  ],
+                ),
+                padding: widget.isOnboarding
+                    ? const EdgeInsets.only(left: 20, right: 20)
+                    : EdgeInsets.only(
+                        top: 16,
+                        left: 20,
+                        right: 20,
+                        bottom: Platform.isIOS ? 60 : 32,
+                      ),
+                child: OutlinedButton(
+                  onPressed: _selectedDevicePathIDs.isEmpty
+                      ? null
+                      : () async {
+                          await updateFolderSettings();
+                        },
+                  child: Text(widget.buttonText),
                 ),
               ),
               widget.isOnboarding

@@ -26,6 +26,7 @@ class EnteColorScheme {
   final Color strokeBase;
   final Color strokeMuted;
   final Color strokeFaint;
+  final Color strokeFainter;
 
   // Fixed Colors
   final Color primary700;
@@ -33,10 +34,14 @@ class EnteColorScheme {
   final Color primary400;
   final Color primary300;
 
+  //warning colors
   final Color warning700;
   final Color warning500;
   final Color warning400;
   final Color caution500;
+
+  //other colors
+  final Color tabIcon;
 
   const EnteColorScheme(
     this.backgroundBase,
@@ -52,7 +57,9 @@ class EnteColorScheme {
     this.fillFaint,
     this.strokeBase,
     this.strokeMuted,
-    this.strokeFaint, {
+    this.strokeFaint,
+    this.strokeFainter,
+    this.tabIcon, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -79,6 +86,8 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   strokeBaseLight,
   strokeMutedLight,
   strokeFaintLight,
+  strokeFainterLight,
+  tabIconLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -96,6 +105,8 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   strokeBaseDark,
   strokeMutedDark,
   strokeFaintDark,
+  strokeFainterDark,
+  tabIconDark,
 );
 
 // Background Colors
@@ -135,11 +146,18 @@ const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
 // Stroke Colors
 const Color strokeBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color strokeMutedLight = Color.fromRGBO(0, 0, 0, 0.24);
-const Color strokeFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color strokeFaintLight = Color.fromRGBO(0, 0, 0, 0.12);
+const Color strokeFainterLight = Color.fromRGBO(0, 0, 0, 0.06);
 
 const Color strokeBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
+const Color strokeFainterDark = Color.fromRGBO(255, 255, 255, 0.08);
+
+// Other colors
+const Color tabIconLight = Color.fromRGBO(0, 0, 0, 0.85);
+
+const Color tabIconDark = Color.fromRGBO(255, 255, 255, 0.80);
 
 // Fixed Colors
 

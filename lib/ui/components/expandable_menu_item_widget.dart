@@ -23,37 +23,55 @@ class ExpandableMenuItemWidget extends StatefulWidget {
 
 class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
   final expandableController = ExpandableController(initialExpanded: false);
+  @override
+  void initState() {
+    expandableController.addListener(() {
+      setState(() {});
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
-    expandableController.dispose();
+    expandableController.removeListener(() {});
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    return Container(
+    final backgroundColor =
+        MediaQuery.of(context).platformBrightness == Brightness.light
+            ? enteColorScheme.backgroundElevated2
+            : enteColorScheme.backgroundElevated;
+    return AnimatedContainer(
+      curve: Curves.ease,
+      duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: enteColorScheme.backgroundElevated2,
+        color: expandableController.value ? backgroundColor : null,
         borderRadius: BorderRadius.circular(4),
       ),
-      child: ExpandablePanel(
-        header: MenuItemWidget(
-          captionedTextWidget: CaptionedTextWidget(
-            title: widget.title,
-            makeTextBold: true,
-          ),
-          isHeaderOfExpansion: true,
-          leadingIcon: widget.leadingIcon,
-          trailingIcon: Icons.expand_more,
-          menuItemColor: enteColorScheme.fillFaint,
-          expandableController: expandableController,
-        ),
-        collapsed: const SizedBox.shrink(),
-        expanded: widget.selectionOptionsWidget,
-        theme: getExpandableTheme(context),
+      child: ExpandableNotifier(
         controller: expandableController,
+        child: ScrollOnExpand(
+          child: ExpandablePanel(
+            header: MenuItemWidget(
+              captionedTextWidget: CaptionedTextWidget(
+                title: widget.title,
+                makeTextBold: true,
+              ),
+              isHeaderOfExpansion: true,
+              leadingIcon: widget.leadingIcon,
+              trailingIcon: Icons.expand_more,
+              menuItemColor: enteColorScheme.fillFaint,
+              expandableController: expandableController,
+            ),
+            collapsed: const SizedBox.shrink(),
+            expanded: widget.selectionOptionsWidget,
+            theme: getExpandableTheme(context),
+            controller: expandableController,
+          ),
+        ),
       ),
     );
   }

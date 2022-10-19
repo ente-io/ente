@@ -46,6 +46,7 @@ class FileUploader {
 
   final _logger = Logger("FileUploader");
   final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
   final LinkedHashMap _queue = LinkedHashMap<String, FileUploadItem>();
   final _uploadLocks = UploadLocksDB.instance;
   final kSafeBufferForLockExpiry = const Duration(days: 1).inMicroseconds;
@@ -186,7 +187,8 @@ class FileUploader {
     for (final id in uploadsToBeRemoved) {
       _queue.remove(id).completer.completeError(reason);
     }
-    _logger.info('number of enteries removed from queue ${uploadsToBeRemoved.length}');
+    _logger.info(
+        'number of enteries removed from queue ${uploadsToBeRemoved.length}');
     _totalCountInUploadSession -= uploadsToBeRemoved.length;
   }
 
@@ -670,13 +672,7 @@ class FileUploader {
       }
     };
     try {
-      final response = await _dio.post(
-        Configuration.instance.getHttpEndpoint() + "/files",
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-        data: request,
-      );
+      final response = await _enteDio.post("/files", data: request);
       final data = response.data;
       file.uploadedFileID = data["id"];
       file.collectionID = collectionID;
@@ -747,13 +743,7 @@ class FileUploader {
       }
     };
     try {
-      final response = await _dio.put(
-        Configuration.instance.getHttpEndpoint() + "/files/update",
-        options: Options(
-          headers: {"X-Auth-Token": Configuration.instance.getToken()},
-        ),
-        data: request,
-      );
+      final response = await _enteDio.put("/files/update", data: request);
       final data = response.data;
       file.uploadedFileID = data["id"];
       file.updationTime = data["updationTime"];
@@ -805,14 +795,11 @@ class FileUploader {
   Future<void> fetchUploadURLs(int fileCount) async {
     _uploadURLFetchInProgress ??= Future<void>(() async {
       try {
-        final response = await _dio.get(
-          Configuration.instance.getHttpEndpoint() + "/files/upload-urls",
+        final response = await _enteDio.get(
+          "/files/upload-urls",
           queryParameters: {
             "count": min(42, fileCount * 2), // m4gic number
           },
-          options: Options(
-            headers: {"X-Auth-Token": Configuration.instance.getToken()},
-          ),
         );
         final urls = (response.data["urls"] as List)
             .map((e) => UploadURL.fromMap(e))

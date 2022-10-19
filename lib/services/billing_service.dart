@@ -31,6 +31,7 @@ class BillingService {
 
   final _logger = Logger("BillingService");
   final _dio = Network.instance.getDio();
+  final _enteDio = Network.instance.enteDio;
   final _config = Configuration.instance;
 
   bool _isOnSubscriptionPage = false;
@@ -38,12 +39,11 @@ class BillingService {
   Future<BillingPlans> _future;
 
   Future<void> init() async {
-    InAppPurchaseConnection.enablePendingPurchases();
     // if (Platform.isIOS && kDebugMode) {
     //   await FlutterInappPurchase.instance.initConnection;
     //   FlutterInappPurchase.instance.clearTransactionIOS();
     // }
-    InAppPurchaseConnection.instance.purchaseUpdatedStream.listen((purchases) {
+    InAppPurchase.instance.purchaseStream.listen((purchases) {
       if (_isOnSubscriptionPage) {
         return;
       }
@@ -54,11 +54,11 @@ class BillingService {
             purchase.verificationData.serverVerificationData,
           ).then((response) {
             if (response != null) {
-              InAppPurchaseConnection.instance.completePurchase(purchase);
+              InAppPurchase.instance.completePurchase(purchase);
             }
           });
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
-          InAppPurchaseConnection.instance.completePurchase(purchase);
+          InAppPurchase.instance.completePurchase(purchase);
         }
       }
     });
@@ -69,7 +69,7 @@ class BillingService {
   }
 
   Future<BillingPlans> getBillingPlans() {
-    _future ??= (_config.getToken() == null
+    _future ??= (_config.isLoggedIn()
             ? _fetchPublicBillingPlans()
             : _fetchPrivateBillingPlans())
         .then((response) {
@@ -79,14 +79,7 @@ class BillingService {
   }
 
   Future<Response<dynamic>> _fetchPrivateBillingPlans() {
-    return _dio.get(
-      _config.getHttpEndpoint() + "/billing/user-plans/",
-      options: Options(
-        headers: {
-          "X-Auth-Token": _config.getToken(),
-        },
-      ),
-    );
+    return _enteDio.get("/billing/user-plans/");
   }
 
   Future<Response<dynamic>> _fetchPublicBillingPlans() {
@@ -99,19 +92,14 @@ class BillingService {
     final paymentProvider,
   }) async {
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/billing/verify-subscription",
+      final response = await _enteDio.post(
+        "/billing/verify-subscription",
         data: {
           "paymentProvider": paymentProvider ??
               (Platform.isAndroid ? "playstore" : "appstore"),
           "productID": productID,
           "verificationData": verificationData,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       return Subscription.fromMap(response.data["subscription"]);
     } on DioError catch (e) {
@@ -128,14 +116,7 @@ class BillingService {
 
   Future<Subscription> fetchSubscription() async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/billing/subscription",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response = await _enteDio.get("/billing/subscription");
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
     } on DioError catch (e, s) {
@@ -146,14 +127,8 @@ class BillingService {
 
   Future<Subscription> cancelStripeSubscription() async {
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/billing/stripe/cancel-subscription",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response =
+          await _enteDio.post("/billing/stripe/cancel-subscription");
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
     } on DioError catch (e, s) {
@@ -164,14 +139,8 @@ class BillingService {
 
   Future<Subscription> activateStripeSubscription() async {
     try {
-      final response = await _dio.post(
-        _config.getHttpEndpoint() + "/billing/stripe/activate-subscription",
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
-      );
+      final response =
+          await _enteDio.post("/billing/stripe/activate-subscription");
       final subscription = Subscription.fromMap(response.data["subscription"]);
       return subscription;
     } on DioError catch (e, s) {
@@ -184,16 +153,11 @@ class BillingService {
     String endpoint = kWebPaymentRedirectUrl,
   }) async {
     try {
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/billing/stripe/customer-portal",
+      final response = await _enteDio.get(
+        "/billing/stripe/customer-portal",
         queryParameters: {
           "redirectURL": kWebPaymentRedirectUrl,
         },
-        options: Options(
-          headers: {
-            "X-Auth-Token": _config.getToken(),
-          },
-        ),
       );
       return response.data["url"];
     } on DioError catch (e, s) {

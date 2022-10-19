@@ -7,7 +7,6 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/app.dart';
@@ -74,7 +73,7 @@ Future<void> _runInForeground() async {
   });
 }
 
-Future<void> _runBackgroundTask(String taskId) async {
+Future<void> _runBackgroundTask(String taskId, {String mode = 'normal'}) async {
   if (_isProcessRunning) {
     _logger.info("Background task triggered when process was already running");
     await _sync('bgTaskActiveProcess');
@@ -82,7 +81,7 @@ Future<void> _runBackgroundTask(String taskId) async {
   } else {
     _runWithLogs(
       () async {
-        _logger.info("run background task");
+        _logger.info("Starting background task in $mode mode");
         _runInBackground(taskId);
       },
       prefix: "[bg]",
@@ -110,11 +109,14 @@ Future<void> _runInBackground(String taskId) async {
   BackgroundFetch.finish(taskId);
 }
 
+// https://stackoverflow.com/a/73796478/546896
+@pragma('vm:entry-point')
 void _headlessTaskHandler(HeadlessTask task) {
+  print("_headlessTaskHandler");
   if (task.timeout) {
     BackgroundFetch.finish(task.taskId);
   } else {
-    _runInBackground(task.taskId);
+    _runBackgroundTask(task.taskId, mode: "headless");
   }
 }
 
@@ -128,7 +130,6 @@ Future<void> _init(bool isBackground, {String via = ''}) async {
   } else {
     AppLifecycleService.instance.onAppInForeground('init via: $via');
   }
-  InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
   await NotificationService.instance.init();
   await Network.instance.init();

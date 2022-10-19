@@ -10,5 +10,6 @@ ExpandableThemeData getExpandableTheme(BuildContext context) {
     useInkWell: false,
     tapBodyToCollapse: true,
     tapBodyToExpand: true,
+    animationDuration: Duration(milliseconds: 400),
   );
 }

@@ -1,8 +1,6 @@
 // @dart=2.9
 
-import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/data/holidays.dart';
@@ -25,8 +23,7 @@ import 'package:tuple/tuple.dart';
 
 class SearchService {
   Future<List<File>> _cachedFilesFuture;
-  final _dio = Network.instance.getDio();
-  final _config = Configuration.instance;
+  final _enteDio = Network.instance.enteDio;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
   static const _maximumResultsLimit = 20;
@@ -85,13 +82,9 @@ class SearchService {
     final List<GenericSearchResult> searchResults = [];
     try {
       final List<File> allFiles = await _getAllFiles();
-
-      final response = await _dio.get(
-        _config.getHttpEndpoint() + "/search/location",
+      final response = await _enteDio.get(
+        "/search/location",
         queryParameters: {"query": query, "limit": 10},
-        options: Options(
-          headers: {"X-Auth-Token": _config.getToken()},
-        ),
       );
 
       final matchedLocationSearchResults =
