@@ -100,7 +100,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                   );
                   return const StorageErrorWidget();
                 }
-                return const EnteLoadingWidget();
+                return const EnteLoadingWidget(color: strokeBaseDark);
               },
             ),
             Align(
