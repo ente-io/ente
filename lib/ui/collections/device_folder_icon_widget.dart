@@ -48,6 +48,7 @@ class DeviceFolderIcon extends StatelessWidget {
           height: 140,
           width: 120,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               ClipRRect(
                 borderRadius: BorderRadius.circular(4),
@@ -79,6 +80,7 @@ class DeviceFolderIcon extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 10),
                 child: Text(
                   deviceCollection.name,
+                  textAlign: TextAlign.left,
                   style: Theme.of(context)
                       .textTheme
                       .subtitle1
