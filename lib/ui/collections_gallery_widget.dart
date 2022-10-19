@@ -24,8 +24,6 @@ import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
 
-import '../models/file.dart';
-
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
 
@@ -82,23 +80,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Future<List<CollectionWithThumbnail>> _getCollections() async {
-    final collectionsService = CollectionsService.instance;
-    final userID = Configuration.instance.getUserID();
-    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
-    final latestCollectionFiles =
-        await collectionsService.getLatestCollectionFiles();
-    final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
-      latestCollectionFiles.map((e) => MapEntry(e.collectionID, e)),
-    );
-    final usersCollection = collectionsService.getActiveCollections().where(
-          (c) => c.owner.id == userID,
-        );
-    for (final c in usersCollection) {
-      final File thumbnail = collectionToThumbnailMap[c.id];
-      if (c.owner.id == userID) {
-        collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
-      }
-    }
+    final List<CollectionWithThumbnail> collectionsWithThumbnail =
+        await CollectionsService.instance.getCollectionsWithThumbnails();
     collectionsWithThumbnail.sort(
       (first, second) {
         if (second.collection.type == CollectionType.favorites &&

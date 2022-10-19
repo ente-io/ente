@@ -23,6 +23,7 @@ import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -169,6 +170,27 @@ class CollectionsService {
         .toList()
         .where((element) => !element.isDeleted)
         .toList();
+  }
+
+  Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
+    bool includedOwnedByOthers = false,
+  }) async {
+    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
+    final usersCollection = getActiveCollections();
+    if (!includedOwnedByOthers) {
+      final userID = Configuration.instance.getUserID();
+      usersCollection.removeWhere((c) => c.owner.id != userID);
+    }
+    final latestCollectionFiles = await getLatestCollectionFiles();
+    final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
+      latestCollectionFiles.map((e) => MapEntry(e.collectionID, e)),
+    );
+
+    for (final c in usersCollection) {
+      final File thumbnail = collectionToThumbnailMap[c.id];
+      collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
+    }
+    return collectionsWithThumbnail;
   }
 
   Future<List<User>> getSharees(int collectionID) {
