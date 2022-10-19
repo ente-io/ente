@@ -113,14 +113,11 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   }
 
   Widget userDetails(UserDetails userDetails) {
-    bool shouldShowFreeSpaceInMBs = false;
-
     const hundredMBinBytes = 107374182;
-    final freeSpaceInBytes = userDetails.getFreeStorage();
 
-    if (freeSpaceInBytes < hundredMBinBytes) {
-      shouldShowFreeSpaceInMBs = true;
-    }
+    final isMobileScreenSmall = MediaQuery.of(context).size.width <= 365;
+    final freeSpaceInBytes = userDetails.getFreeStorage();
+    final shouldShowFreeSpaceInMBs = freeSpaceInBytes < hundredMBinBytes;
 
     final usedSpaceInGB =
         convertBytesToGBs(userDetails.getFamilyOrPersonalUsage());
@@ -141,11 +138,17 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                     .copyWith(color: textMutedDark),
               ),
               const SizedBox(height: 2),
-              Text(
-                "$usedSpaceInGB GB of $totalStorageInGB GB used",
-                style: getEnteTextTheme(context)
-                    .h3Bold
-                    .copyWith(color: textBaseDark),
+              RichText(
+                text: TextSpan(
+                  style: getEnteTextTheme(context)
+                      .h3Bold
+                      .copyWith(color: textBaseDark),
+                  children: [
+                    TextSpan(text: usedSpaceInGB.toString()),
+                    TextSpan(text: isMobileScreenSmall ? "/" : " GB of "),
+                    TextSpan(text: totalStorageInGB.toString() + " GB used"),
+                  ],
+                ),
               ),
             ],
           ),
@@ -251,12 +254,14 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                       ),
                 RichText(
                   text: TextSpan(
-                    text:
-                        "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
                     style: getEnteTextTheme(context)
                         .mini
                         .copyWith(color: textFaintDark),
                     children: [
+                      TextSpan(
+                        text:
+                            "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
+                      ),
                       TextSpan(
                         text:
                             shouldShowFreeSpaceInMBs ? " MB free" : " GB free",
