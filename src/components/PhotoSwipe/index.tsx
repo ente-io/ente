@@ -381,16 +381,19 @@ function PhotoSwipe(props: Iprops) {
                                 className="pswp__button pswp__button--close"
                                 title={constants.CLOSE}
                             />
-                            <button
-                                className="pswp__button pswp__button--custom"
-                                title={constants.DELETE}
-                                onClick={() => {
-                                    confirmTrashFile(
-                                        photoSwipe?.currItem as EnteFile
-                                    );
-                                }}>
-                                <DeleteIcon fontSize="small" />
-                            </button>
+                            {!props.isSharedCollection &&
+                                !props.isTrashCollection && (
+                                    <button
+                                        className="pswp__button pswp__button--custom"
+                                        title={constants.DELETE}
+                                        onClick={() => {
+                                            confirmTrashFile(
+                                                photoSwipe?.currItem as EnteFile
+                                            );
+                                        }}>
+                                        <DeleteIcon fontSize="small" />
+                                    </button>
+                                )}
 
                             {props.enableDownload && (
                                 <button
