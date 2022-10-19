@@ -19,7 +19,7 @@ class GenericSearchResult extends SearchResult {
   }
 
   @override
-  File previewThumbnail() {
+  File? previewThumbnail() {
     return _files.first;
   }
 

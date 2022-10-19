@@ -8,7 +8,6 @@ import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -123,23 +122,19 @@ class SearchService {
   Future<List<AlbumSearchResult>> getCollectionSearchResults(
     String query,
   ) async {
-    /*latestCollectionFiles is to identify collections which have at least one file as we don't display
-     empty collections and to get the file to pass for tumbnail */
-    final List<File> latestCollectionFiles =
-        await _collectionService.getLatestCollectionFiles();
+    final List<CollectionWithThumbnail> collectionWithThumbnails =
+        await _collectionService.getCollectionsWithThumbnails(
+      includedOwnedByOthers: true,
+    );
 
     final List<AlbumSearchResult> collectionSearchResults = [];
 
-    for (var file in latestCollectionFiles) {
+    for (var c in collectionWithThumbnails) {
       if (collectionSearchResults.length >= _maximumResultsLimit) {
         break;
       }
-      final Collection collection =
-          CollectionsService.instance.getCollectionByID(file.collectionID);
-      if (!collection.isArchived() &&
-          collection.name.toLowerCase().contains(query.toLowerCase())) {
-        collectionSearchResults
-            .add(AlbumSearchResult(CollectionWithThumbnail(collection, file)));
+      if (c.collection.name.toLowerCase().contains(query.toLowerCase())) {
+        collectionSearchResults.add(AlbumSearchResult(c));
       }
     }
 

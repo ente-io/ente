@@ -5,7 +5,7 @@ abstract class SearchResult {
 
   String name();
 
-  File previewThumbnail();
+  File? previewThumbnail();
 
   String heroTag() {
     return '${type().toString()}_${name()}';
