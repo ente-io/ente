@@ -10,6 +10,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/ui/payment/subscription.dart';
+import 'package:photos/ui/settings/storage_error_widget.dart';
 import 'package:photos/utils/data_util.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
@@ -86,22 +87,21 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         child: Stack(
           children: [
             _background,
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
-              child: FutureBuilder(
-                future: inheritedUserDetails.userDetails,
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return userDetails(snapshot.data as UserDetails);
-                  }
-                  if (snapshot.hasError) {
-                    _logger.severe(
-                        'failed to load user details', snapshot.error);
-                    return const EnteLoadingWidget();
-                  }
-                  return const EnteLoadingWidget();
-                },
-              ),
+            FutureBuilder(
+              future: inheritedUserDetails.userDetails,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return userDetails(snapshot.data as UserDetails);
+                }
+                if (snapshot.hasData) {
+                  _logger.severe(
+                    'failed to load user details',
+                    snapshot.error,
+                  );
+                  return const StorageErrorWidget();
+                }
+                return const EnteLoadingWidget();
+              },
             ),
             Align(
               alignment: Alignment.centerRight,
@@ -135,159 +135,163 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         convertBytesToGBs(userDetails.getFamilyOrPersonalUsage());
     final totalStorageInGB = convertBytesToGBs(userDetails.getTotalStorage());
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Align(
-          alignment: Alignment.topLeft,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Storage",
-                style: getEnteTextTheme(context)
-                    .small
-                    .copyWith(color: textMutedDark),
-              ),
-              const SizedBox(height: 2),
-              RichText(
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                text: TextSpan(
-                  style: getEnteTextTheme(context)
-                      .h3Bold
-                      .copyWith(color: textBaseDark),
-                  children: [
-                    TextSpan(text: usedSpaceInGB.toString()),
-                    TextSpan(text: isMobileScreenSmall ? "/" : " GB of "),
-                    TextSpan(text: totalStorageInGB.toString() + " GB used"),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        Column(
-          children: [
-            Stack(
-              children: <Widget>[
-                Container(
-                  color: Colors.white.withOpacity(0.2),
-                  width: MediaQuery.of(context).size.width,
-                  height: 4,
-                ),
-                Container(
-                  color: Colors.white.withOpacity(0.75),
-                  width: MediaQuery.of(context).size.width *
-                      ((userDetails.getFamilyOrPersonalUsage()) /
-                          userDetails.getTotalStorage()),
-                  height: 4,
-                ),
-                Container(
-                  color: Colors.white,
-                  width: MediaQuery.of(context).size.width *
-                      (userDetails.usage / userDetails.getTotalStorage()),
-                  height: 4,
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                userDetails.isPartOfFamily()
-                    ? Row(
-                        children: [
-                          Container(
-                            width: 8.71,
-                            height: 8.99,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            "You",
-                            style: getEnteTextTheme(context)
-                                .miniBold
-                                .copyWith(color: textBaseDark),
-                          ),
-                          const SizedBox(width: 12),
-                          Container(
-                            width: 8.71,
-                            height: 8.99,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withOpacity(0.75),
-                            ),
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            "Family",
-                            style: getEnteTextTheme(context)
-                                .miniBold
-                                .copyWith(color: textBaseDark),
-                          ),
-                        ],
-                      )
-                    : FutureBuilder(
-                        future: FilesDB.instance.fetchPhotoAndVideoCount(),
-                        builder: (context, snapshot) {
-                          if (snapshot.hasData) {
-                            final countOfFileTypes =
-                                snapshot.data as CountOfFileTypes;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${NumberFormat().format(countOfFileTypes.photosCount)} photos",
-                                  style: getEnteTextTheme(context)
-                                      .mini
-                                      .copyWith(color: textBaseDark),
-                                ),
-                                Text(
-                                  "${NumberFormat().format(countOfFileTypes.videosCount)} videos",
-                                  style: getEnteTextTheme(context)
-                                      .mini
-                                      .copyWith(color: textBaseDark),
-                                ),
-                              ],
-                            );
-                          } else if (snapshot.hasError) {
-                            _logger.severe(
-                              'Error fetching photo and video count',
-                              snapshot.error,
-                            );
-                            return const SizedBox.shrink();
-                          } else {
-                            return const EnteLoadingWidget();
-                          }
-                        },
-                      ),
+                Text(
+                  "Storage",
+                  style: getEnteTextTheme(context)
+                      .small
+                      .copyWith(color: textMutedDark),
+                ),
+                const SizedBox(height: 2),
                 RichText(
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                   text: TextSpan(
                     style: getEnteTextTheme(context)
-                        .mini
-                        .copyWith(color: textFaintDark),
+                        .h3Bold
+                        .copyWith(color: textBaseDark),
                     children: [
-                      TextSpan(
-                        text:
-                            "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
-                      ),
-                      TextSpan(
-                        text:
-                            shouldShowFreeSpaceInMBs ? " MB free" : " GB free",
-                      )
+                      TextSpan(text: usedSpaceInGB.toString()),
+                      TextSpan(text: isMobileScreenSmall ? "/" : " GB of "),
+                      TextSpan(text: totalStorageInGB.toString() + " GB used"),
                     ],
                   ),
                 ),
               ],
             ),
-          ],
-        )
-      ],
+          ),
+          Column(
+            children: [
+              Stack(
+                children: <Widget>[
+                  Container(
+                    color: Colors.white.withOpacity(0.2),
+                    width: MediaQuery.of(context).size.width,
+                    height: 4,
+                  ),
+                  Container(
+                    color: Colors.white.withOpacity(0.75),
+                    width: MediaQuery.of(context).size.width *
+                        ((userDetails.getFamilyOrPersonalUsage()) /
+                            userDetails.getTotalStorage()),
+                    height: 4,
+                  ),
+                  Container(
+                    color: Colors.white,
+                    width: MediaQuery.of(context).size.width *
+                        (userDetails.usage / userDetails.getTotalStorage()),
+                    height: 4,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  userDetails.isPartOfFamily()
+                      ? Row(
+                          children: [
+                            Container(
+                              width: 8.71,
+                              height: 8.99,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "You",
+                              style: getEnteTextTheme(context)
+                                  .miniBold
+                                  .copyWith(color: textBaseDark),
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              width: 8.71,
+                              height: 8.99,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white.withOpacity(0.75),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "Family",
+                              style: getEnteTextTheme(context)
+                                  .miniBold
+                                  .copyWith(color: textBaseDark),
+                            ),
+                          ],
+                        )
+                      : FutureBuilder(
+                          future: FilesDB.instance.fetchPhotoAndVideoCount(),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              final countOfFileTypes =
+                                  snapshot.data as CountOfFileTypes;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${NumberFormat().format(countOfFileTypes.photosCount)} photos",
+                                    style: getEnteTextTheme(context)
+                                        .mini
+                                        .copyWith(color: textBaseDark),
+                                  ),
+                                  Text(
+                                    "${NumberFormat().format(countOfFileTypes.videosCount)} videos",
+                                    style: getEnteTextTheme(context)
+                                        .mini
+                                        .copyWith(color: textBaseDark),
+                                  ),
+                                ],
+                              );
+                            } else if (snapshot.hasError) {
+                              _logger.severe(
+                                'Error fetching photo and video count',
+                                snapshot.error,
+                              );
+                              return const SizedBox.shrink();
+                            } else {
+                              return const EnteLoadingWidget();
+                            }
+                          },
+                        ),
+                  RichText(
+                    text: TextSpan(
+                      style: getEnteTextTheme(context)
+                          .mini
+                          .copyWith(color: textFaintDark),
+                      children: [
+                        TextSpan(
+                          text:
+                              "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
+                        ),
+                        TextSpan(
+                          text: shouldShowFreeSpaceInMBs
+                              ? " MB free"
+                              : " GB free",
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          )
+        ],
+      ),
     );
   }
 
