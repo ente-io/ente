@@ -3,7 +3,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
@@ -15,6 +14,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -156,8 +156,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
               child: SizedBox(
                 height: 64,
                 width: 64,
-                key: Key("collection_item:" + item.thumbnail.tag),
-                child: ThumbnailWidget(item.thumbnail),
+                key: Key("collection_item:" + (item.thumbnail?.tag ?? "")),
+                child: item.thumbnail != null
+                    ? ThumbnailWidget(item.thumbnail)
+                    : const NoThumbnailWidget(),
               ),
             ),
             const Padding(padding: EdgeInsets.all(8)),
@@ -187,16 +189,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<List<CollectionWithThumbnail>> _getCollectionsWithThumbnail() async {
-    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
-    final latestCollectionFiles =
-        await CollectionsService.instance.getLatestCollectionFiles();
-    for (final file in latestCollectionFiles) {
-      final c =
-          CollectionsService.instance.getCollectionByID(file.collectionID);
-      if (c.owner.id == Configuration.instance.getUserID()) {
-        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file));
-      }
-    }
+    final List<CollectionWithThumbnail> collectionsWithThumbnail =
+        await CollectionsService.instance.getCollectionsWithThumbnails();
     collectionsWithThumbnail.sort((first, second) {
       return compareAsciiLowerCaseNatural(
         first.collection.name ?? "",
