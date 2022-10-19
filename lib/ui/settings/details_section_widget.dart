@@ -136,7 +136,12 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     final totalStorageInGB = convertBytesToGBs(userDetails.getTotalStorage());
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        20,
+        16,
+        userDetails.isPartOfFamily() ? 20 : 12,
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -174,19 +179,32 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               Stack(
                 children: <Widget>[
                   Container(
-                    color: Colors.white.withOpacity(0.2),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      color: const Color.fromRGBO(255, 255, 255, 0.2),
+                    ),
                     width: MediaQuery.of(context).size.width,
                     height: 4,
                   ),
+                  userDetails.isPartOfFamily()
+                      ? Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            color: strokeBaseDark,
+                          ),
+                          width: MediaQuery.of(context).size.width *
+                              ((userDetails.getFamilyOrPersonalUsage()) /
+                                  userDetails.getTotalStorage()),
+                          height: 4,
+                        )
+                      : const SizedBox.shrink(),
                   Container(
-                    color: Colors.white.withOpacity(0.75),
-                    width: MediaQuery.of(context).size.width *
-                        ((userDetails.getFamilyOrPersonalUsage()) /
-                            userDetails.getTotalStorage()),
-                    height: 4,
-                  ),
-                  Container(
-                    color: Colors.white,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(2),
+                      color: userDetails.isPartOfFamily()
+                          ? getEnteColorScheme(context).primary300
+                          : strokeBaseDark,
+                    ),
                     width: MediaQuery.of(context).size.width *
                         (userDetails.usage / userDetails.getTotalStorage()),
                     height: 4,
@@ -204,9 +222,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                             Container(
                               width: 8.71,
                               height: 8.99,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white,
+                                color: getEnteColorScheme(context).primary300,
                               ),
                             ),
                             const SizedBox(width: 4),
@@ -220,9 +238,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                             Container(
                               width: 8.71,
                               height: 8.99,
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.75),
+                                color: textBaseDark,
                               ),
                             ),
                             const SizedBox(width: 4),
