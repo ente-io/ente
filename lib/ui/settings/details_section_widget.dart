@@ -73,39 +73,41 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     InheritedUserDetails inheritedUserDetails,
   ) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 428, maxHeight: 175),
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            color: Colors.transparent,
-            child: AspectRatio(
-              aspectRatio: 2 / 1,
-              child: _background,
+      constraints: const BoxConstraints(maxWidth: 350),
+      child: AspectRatio(
+        aspectRatio: 2 / 1,
+        child: Stack(
+          children: [
+            _background,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 12),
+              child: FutureBuilder(
+                future: inheritedUserDetails.userDetails,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return userDetails(snapshot.data as UserDetails);
+                  }
+                  if (snapshot.hasError) {
+                    _logger.severe(
+                        'failed to load user details', snapshot.error);
+                    return const EnteLoadingWidget();
+                  }
+                  return const EnteLoadingWidget();
+                },
+              ),
             ),
-          ),
-          FutureBuilder(
-            future: inheritedUserDetails.userDetails,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return userDetails(snapshot.data as UserDetails);
-              }
-              if (snapshot.hasError) {
-                _logger.severe('failed to load user details', snapshot.error);
-                return const EnteLoadingWidget();
-              }
-              return const EnteLoadingWidget();
-            },
-          ),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Icon(
-              Icons.chevron_right,
-              color: Colors.white,
-              size: 24,
+            const Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: EdgeInsets.only(right: 4),
+                child: Icon(
+                  Icons.chevron_right_outlined,
+                  color: strokeBaseDark,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -124,183 +126,149 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         convertBytesToGBs(userDetails.getFamilyOrPersonalUsage());
     final totalStorageInGB = convertBytesToGBs(userDetails.getTotalStorage());
 
-    return Padding(
-      padding: const EdgeInsets.only(
-        top: 20,
-        bottom: 20,
-        left: 16,
-        right: 16,
-      ),
-      child: Container(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Storage",
-                    style: Theme.of(context).textTheme.subtitle2!.copyWith(
-                          color: Colors.white.withOpacity(0.7),
-                        ),
-                  ),
-                  Text(
-                    "$usedSpaceInGB GB of $totalStorageInGB GB used",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline5!
-                        .copyWith(color: Colors.white),
-                  ),
-                ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Align(
+          alignment: Alignment.topLeft,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Storage",
+                style: getEnteTextTheme(context)
+                    .small
+                    .copyWith(color: textMutedDark),
               ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Stack(
-                  children: <Widget>[
-                    Container(
-                      color: Colors.white.withOpacity(0.2),
-                      width: MediaQuery.of(context).size.width,
-                      height: 4,
-                    ),
-                    Container(
-                      color: Colors.white.withOpacity(0.75),
-                      width: MediaQuery.of(context).size.width *
-                          ((userDetails.getFamilyOrPersonalUsage()) /
-                              userDetails.getTotalStorage()),
-                      height: 4,
-                    ),
-                    Container(
-                      color: Colors.white,
-                      width: MediaQuery.of(context).size.width *
-                          (userDetails.usage / userDetails.getTotalStorage()),
-                      height: 4,
-                    ),
-                  ],
+              const SizedBox(height: 2),
+              Text(
+                "$usedSpaceInGB GB of $totalStorageInGB GB used",
+                style: getEnteTextTheme(context)
+                    .h3Bold
+                    .copyWith(color: textBaseDark),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          children: [
+            Stack(
+              children: <Widget>[
+                Container(
+                  color: Colors.white.withOpacity(0.2),
+                  width: MediaQuery.of(context).size.width,
+                  height: 4,
                 ),
-                const SizedBox(height: 12),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    userDetails.isPartOfFamily()
-                        ? Row(
-                            children: [
-                              Container(
-                                width: 8.71,
-                                height: 8.99,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 4),
-                              ),
-                              Text(
-                                "You",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .copyWith(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 12),
-                              ),
-                              Container(
-                                width: 8.71,
-                                height: 8.99,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.75),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 4),
-                              ),
-                              Text(
-                                "Family",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .copyWith(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                              ),
-                            ],
-                          )
-                        : FutureBuilder(
-                            future: FilesDB.instance.fetchPhotoAndVideoCount(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                final countOfFileTypes =
-                                    snapshot.data as CountOfFileTypes;
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "${NumberFormat().format(countOfFileTypes.photosCount)} photos",
-                                      style: getEnteTextTheme(context)
-                                          .mini
-                                          .copyWith(color: textBaseDark),
-                                    ),
-                                    Text(
-                                      "${NumberFormat().format(countOfFileTypes.videosCount)} videos",
-                                      style: getEnteTextTheme(context)
-                                          .mini
-                                          .copyWith(color: textBaseDark),
-                                    ),
-                                  ],
-                                );
-                              } else if (snapshot.hasError) {
-                                _logger.severe(
-                                  'Error fetching photo and video count',
-                                  snapshot.error,
-                                );
-                                return const SizedBox.shrink();
-                              } else {
-                                return const EnteLoadingWidget();
-                              }
-                            },
-                          ),
-                    Column(
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            text:
-                                "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
-                            style: getEnteTextTheme(context)
-                                .mini
-                                .copyWith(color: textFaintDark),
-                            children: [
-                              TextSpan(
-                                text: shouldShowFreeSpaceInMBs
-                                    ? " MB free"
-                                    : " GB free",
-                              )
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
+                Container(
+                  color: Colors.white.withOpacity(0.75),
+                  width: MediaQuery.of(context).size.width *
+                      ((userDetails.getFamilyOrPersonalUsage()) /
+                          userDetails.getTotalStorage()),
+                  height: 4,
+                ),
+                Container(
+                  color: Colors.white,
+                  width: MediaQuery.of(context).size.width *
+                      (userDetails.usage / userDetails.getTotalStorage()),
+                  height: 4,
                 ),
               ],
-            )
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                userDetails.isPartOfFamily()
+                    ? Row(
+                        children: [
+                          Container(
+                            width: 8.71,
+                            height: 8.99,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "You",
+                            style: getEnteTextTheme(context)
+                                .miniBold
+                                .copyWith(color: textBaseDark),
+                          ),
+                          const SizedBox(width: 12),
+                          Container(
+                            width: 8.71,
+                            height: 8.99,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withOpacity(0.75),
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            "Family",
+                            style: getEnteTextTheme(context)
+                                .miniBold
+                                .copyWith(color: textBaseDark),
+                          ),
+                        ],
+                      )
+                    : FutureBuilder(
+                        future: FilesDB.instance.fetchPhotoAndVideoCount(),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final countOfFileTypes =
+                                snapshot.data as CountOfFileTypes;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${NumberFormat().format(countOfFileTypes.photosCount)} photos",
+                                  style: getEnteTextTheme(context)
+                                      .mini
+                                      .copyWith(color: textBaseDark),
+                                ),
+                                Text(
+                                  "${NumberFormat().format(countOfFileTypes.videosCount)} videos",
+                                  style: getEnteTextTheme(context)
+                                      .mini
+                                      .copyWith(color: textBaseDark),
+                                ),
+                              ],
+                            );
+                          } else if (snapshot.hasError) {
+                            _logger.severe(
+                              'Error fetching photo and video count',
+                              snapshot.error,
+                            );
+                            return const SizedBox.shrink();
+                          } else {
+                            return const EnteLoadingWidget();
+                          }
+                        },
+                      ),
+                RichText(
+                  text: TextSpan(
+                    text:
+                        "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
+                    style: getEnteTextTheme(context)
+                        .mini
+                        .copyWith(color: textFaintDark),
+                    children: [
+                      TextSpan(
+                        text:
+                            shouldShowFreeSpaceInMBs ? " MB free" : " GB free",
+                      )
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
-        ),
-      ),
+        )
+      ],
     );
   }
 
