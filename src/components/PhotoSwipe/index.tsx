@@ -280,6 +280,9 @@ function PhotoSwipe(props: Iprops) {
 
     const updateItems = (items = []) => {
         if (photoSwipe) {
+            if (items.length === 0) {
+                photoSwipe.close();
+            }
             photoSwipe.items.length = 0;
             items.forEach((item) => {
                 photoSwipe.items.push(item);
