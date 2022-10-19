@@ -22,6 +22,7 @@ class DetailsSectionWidget extends StatefulWidget {
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   late Image _background;
   final _logger = Logger((_DetailsSectionWidgetState).toString());
+  final ValueNotifier<bool> _isStorageCardPressed = ValueNotifier(false);
 
   @override
   void initState() {
@@ -64,6 +65,12 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             ),
           );
         },
+        onTapDown: (details) {
+          _isStorageCardPressed.value = true;
+        },
+        onTapUp: (details) {
+          _isStorageCardPressed.value = false;
+        },
         child: containerForUserDetails(inheritedUserDetails),
       );
     }
@@ -96,13 +103,18 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                 },
               ),
             ),
-            const Align(
+            Align(
               alignment: Alignment.centerRight,
               child: Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: Icon(
-                  Icons.chevron_right_outlined,
-                  color: strokeBaseDark,
+                padding: const EdgeInsets.only(right: 4),
+                child: ValueListenableBuilder<bool>(
+                  builder: (BuildContext context, bool value, Widget? child) {
+                    return Icon(
+                      Icons.chevron_right_outlined,
+                      color: value ? strokeMutedDark : strokeBaseDark,
+                    );
+                  },
+                  valueListenable: _isStorageCardPressed,
                 ),
               ),
             ),
