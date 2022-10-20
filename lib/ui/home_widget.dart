@@ -10,24 +10,18 @@ import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/account_configured_event.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
-import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/events/force_reload_home_gallery_event.dart';
-import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -40,6 +34,7 @@ import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
 import 'package:photos/ui/home/home_bottom_nav_bar.dart';
+import 'package:photos/ui/home/home_gallery_widget.dart';
 import 'package:photos/ui/home/landing_page_widget.dart';
 import 'package:photos/ui/home/preserve_footer_widget.dart';
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
@@ -47,7 +42,6 @@ import 'package:photos/ui/loading_photos_widget.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
-import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -336,7 +330,11 @@ class _HomeWidgetState extends State<HomeWidget> {
               children: [
                 showBackupFolderHook
                     ? const StartBackupHookWidget(headerWidget: _headerWidget)
-                    : _getMainGalleryWidget(),
+                    : HomeGalleryWidget(
+                        header: _headerWidget,
+                        footer: const PreserveFooterWidget(),
+                        selectedFiles: _selectedFiles,
+                      ),
                 _deviceFolderGalleryWidget,
                 _sharedCollectionGallery,
               ],
@@ -411,62 +409,5 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     final ott = Uri.parse(link).queryParameters["ott"];
     UserService.instance.verifyEmail(context, ott);
-  }
-
-  Widget _getMainGalleryWidget() {
-    const Widget header = _headerWidget;
-    final gallery = Gallery(
-      asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
-        final ownerID = Configuration.instance.getUserID();
-        final hasSelectedAllForBackup =
-            Configuration.instance.hasSelectedAllFoldersForBackup();
-        final archivedCollectionIds =
-            CollectionsService.instance.getArchivedCollections();
-        FileLoadResult result;
-        if (hasSelectedAllForBackup) {
-          result = await FilesDB.instance.getAllLocalAndUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID,
-            limit: limit,
-            asc: asc,
-            ignoredCollectionIDs: archivedCollectionIds,
-          );
-        } else {
-          result = await FilesDB.instance.getAllPendingOrUploadedFiles(
-            creationStartTime,
-            creationEndTime,
-            ownerID,
-            limit: limit,
-            asc: asc,
-            ignoredCollectionIDs: archivedCollectionIds,
-          );
-        }
-
-        // hide ignored files from home page UI
-        final ignoredIDs = await IgnoredFilesService.instance.ignoredIDs;
-        result.files.removeWhere(
-          (f) =>
-              f.uploadedFileID == null &&
-              IgnoredFilesService.instance.shouldSkipUpload(ignoredIDs, f),
-        );
-        return result;
-      },
-      reloadEvent: Bus.instance.on<LocalPhotosUpdatedEvent>(),
-      removalEventTypes: const {
-        EventType.deletedFromRemote,
-        EventType.deletedFromEverywhere,
-        EventType.archived,
-      },
-      forceReloadEvents: [
-        Bus.instance.on<BackupFoldersUpdatedEvent>(),
-        Bus.instance.on<ForceReloadHomeGalleryEvent>(),
-      ],
-      tagPrefix: "home_gallery",
-      selectedFiles: _selectedFiles,
-      header: header,
-      footer: const PreserveFooterWidget(),
-    );
-    return gallery;
   }
 }
