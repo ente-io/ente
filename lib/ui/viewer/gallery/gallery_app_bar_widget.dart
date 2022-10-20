@@ -255,33 +255,34 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-
-    actions.add(
-      PopupMenuButton(
-        itemBuilder: (context) {
-          return items;
-        },
-        onSelected: (value) async {
-          if (value == 1) {
-            await _renameAlbum(context);
-          } else if (value == 2) {
-            await changeCollectionVisibility(
-              context,
-              widget.collection,
-              widget.collection.isArchived()
-                  ? visibilityVisible
-                  : visibilityArchive,
-            );
-          } else if (value == 3) {
-            await _trashCollection();
-          } else if (value == 4) {
-            await _leaveAlbum(context);
-          } else {
-            showToast(context, "Something went wrong");
-          }
-        },
-      ),
-    );
+    if (items.isNotEmpty) {
+      actions.add(
+        PopupMenuButton(
+          itemBuilder: (context) {
+            return items;
+          },
+          onSelected: (value) async {
+            if (value == 1) {
+              await _renameAlbum(context);
+            } else if (value == 2) {
+              await changeCollectionVisibility(
+                context,
+                widget.collection,
+                widget.collection.isArchived()
+                    ? visibilityVisible
+                    : visibilityArchive,
+              );
+            } else if (value == 3) {
+              await _trashCollection();
+            } else if (value == 4) {
+              await _leaveAlbum(context);
+            } else {
+              showToast(context, "Something went wrong");
+            }
+          },
+        ),
+      );
+    }
 
     return actions;
   }

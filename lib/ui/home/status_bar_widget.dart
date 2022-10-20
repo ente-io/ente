@@ -9,11 +9,11 @@ import 'package:photos/events/notification_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
+import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
-import 'package:photos/ui/components/brand_title_widget.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
 import 'package:photos/ui/components/notification_warning_widget.dart';
-import 'package:photos/ui/header_error_widget.dart';
+import 'package:photos/ui/home/header_error_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 const double kContainerHeight = 36;
@@ -84,9 +84,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
         HomeHeaderWidget(
           centerWidget: _showStatus
               ? _showErrorBanner
-                  ? const BrandTitleWidget(size: SizeVarient.medium)
+                  ? const Text("ente", style: brandStyleMedium)
                   : const SyncStatusWidget()
-              : const BrandTitleWidget(size: SizeVarient.medium),
+              : const Text("ente", style: brandStyleMedium),
         ),
         AnimatedOpacity(
           opacity: _showErrorBanner ? 1 : 0,
@@ -100,9 +100,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             : const SizedBox.shrink(),
         UserRemoteFlagService.instance.shouldShowRecoveryVerification()
             ? NotificationWarningWidget(
-                warningIcon: Icons.gpp_maybe,
+                warningIcon: Icons.error_outline,
                 actionIcon: Icons.arrow_forward,
-                text: "Please ensure you have your 24 word recovery key",
+                text: "Confirm your recovery key",
                 onTap: () async => {
                   await routeToPage(
                     context,

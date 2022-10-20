@@ -114,7 +114,7 @@ dependencies:
   video_player:
     path: thirdparty/plugins/packages/video_player/video_player
   video_thumbnail: ^0.4.3
-  visibility_detector: ^0.2.2
+  visibility_detector: ^0.3.3
   wakelock: ^0.6.1+2
   wallpaper_manager_flutter: ^0.0.2
 
