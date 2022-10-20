@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/count_of_file_types.dart';
 import 'package:photos/models/file.dart';
@@ -1287,9 +1288,10 @@ class FilesDB {
   }
 
   Future<CountOfFileTypes> fetchPhotoAndVideoCount() async {
+    final userID = Configuration.instance.getUserID();
     final db = await instance.database;
     final result = await db.rawQuery(
-      "SELECT $columnFileType, COUNT(*) FROM $filesTable GROUP BY $columnFileType",
+      "SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) FROM $filesTable WHERE $columnUploadedFileID != -1 AND $columnOwnerID == $userID GROUP BY $columnFileType",
     );
     int photosCount = 0;
     int videosCount = 0;

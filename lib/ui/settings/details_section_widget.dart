@@ -186,7 +186,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               Stack(
                 children: <Widget>[
                   const StorageProgressWidget(
-                    color: Color.fromRGBO(255, 255, 255, 0.2),
+                    color:
+                        Color.fromRGBO(255, 255, 255, 0.2), //hardcoded in figma
                     fractionOfStorage: 1,
                   ),
                   userDetails.isPartOfFamily()
