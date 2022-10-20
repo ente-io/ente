@@ -100,9 +100,9 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
             : const SizedBox.shrink(),
         UserRemoteFlagService.instance.shouldShowRecoveryVerification()
             ? NotificationWarningWidget(
-                warningIcon: Icons.gpp_maybe,
+                warningIcon: Icons.error_outline,
                 actionIcon: Icons.arrow_forward,
-                text: "Please ensure you have your 24 word recovery key",
+                text: "Confirm your recovery key",
                 onTap: () async => {
                   await routeToPage(
                     context,
