@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -7,8 +5,8 @@ import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/utils/navigation_util.dart';
 
-class GalleryFooterWidget extends StatelessWidget {
-  const GalleryFooterWidget({Key key}) : super(key: key);
+class PreserveFooterWidget extends StatelessWidget {
+  const PreserveFooterWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
