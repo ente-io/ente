@@ -1,5 +1,5 @@
 PODS:
-  - background_fetch (1.1.0):
+  - background_fetch (1.1.1):
     - Flutter
   - connectivity (0.0.1):
     - Flutter
@@ -309,7 +309,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
-  background_fetch: 3795af8a49054dc526477cc2f60d2ed41de60587
+  background_fetch: ef7bc433c96131e4f284d8616d2e0d4e18fa6af4
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 800f16f07af493d98d017446a315c27af0552f41
