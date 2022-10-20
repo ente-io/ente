@@ -94,7 +94,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                 if (snapshot.hasData) {
                   return userDetails(snapshot.data as UserDetails);
                 }
-                if (snapshot.hasData) {
+                if (snapshot.hasError) {
                   _logger.severe(
                     'failed to load user details',
                     snapshot.error,
