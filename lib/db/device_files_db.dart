@@ -372,8 +372,10 @@ extension DeviceFiles on FilesDB {
         deviceCollections.add(deviceCollection);
       }
       if (includeCoverThumbnail) {
-        deviceCollections.sort((a, b) =>
-            b.thumbnail.creationTime.compareTo(a.thumbnail.creationTime));
+        deviceCollections.sort(
+          (a, b) =>
+              b.thumbnail.creationTime.compareTo(a.thumbnail.creationTime),
+        );
       }
       return deviceCollections;
     } catch (e) {

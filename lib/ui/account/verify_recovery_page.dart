@@ -148,16 +148,14 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                       SizedBox(
                         width: double.infinity,
                         child: Text(
-                          'Verify recovery key',
+                          'Confirm recovery key',
                           style: enteTheme.textTheme.h3Bold,
                           textAlign: TextAlign.left,
                         ),
                       ),
                       const SizedBox(height: 18),
                       Text(
-                        "If you forget your password, your recovery key is the "
-                        "only way to recover your photos.\n\nPlease verify that "
-                        "you have safely backed up your 24 word recovery key by re-entering it.",
+                        "Your recovery key is the only way to recover your photos if you forget your password. You can find your recovery key in Settings > Account.\n\nPlease enter your recovery key here to verify that you have saved it correctly.",
                         style: enteTheme.textTheme.small
                             .copyWith(color: enteTheme.colorScheme.textMuted),
                       ),
@@ -187,12 +185,6 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                         },
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        "If you saved the recovery key from older app versions, you might have a 64 character recovery code instead of 24 words. You can enter that too.",
-                        style: enteTheme.textTheme.mini
-                            .copyWith(color: enteTheme.colorScheme.textMuted),
-                      ),
-                      const SizedBox(height: 8),
                       Expanded(
                         child: Container(
                           alignment: Alignment.bottomCenter,
@@ -204,8 +196,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
                             children: [
                               GradientButton(
                                 onTap: _verifyRecoveryKey,
-                                text: "Verify",
-                                iconData: Icons.shield_outlined,
+                                text: "Confirm",
                               ),
                               const SizedBox(height: 8),
                             ],

@@ -260,7 +260,6 @@ class RemoteSyncService {
         await _db.getDevicePathIDToLocalIDMap();
     bool moreFilesMarkedForBackup = false;
     for (final deviceCollection in deviceCollections) {
-      _logger.fine("processing ${deviceCollection.name}");
       final Set<String> localIDsToSync =
           pathIdToLocalIDs[deviceCollection.id] ?? {};
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
@@ -401,7 +400,7 @@ class RemoteSyncService {
         if (collectionByID == null || collectionByID.isDeleted) {
           _logger.info(
             "Collection $deviceCollectionID either deleted or missing "
-            "for path ${deviceCollection.name}",
+            "for path ${deviceCollection.id}",
           );
           deviceCollectionID = -1;
         }
