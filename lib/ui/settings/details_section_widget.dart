@@ -82,7 +82,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     InheritedUserDetails inheritedUserDetails,
   ) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 350),
+      constraints: const BoxConstraints(maxWidth: 365),
       child: AspectRatio(
         aspectRatio: 2 / 1,
         child: Stack(
@@ -158,7 +158,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Storage",
+                  isMobileScreenSmall ? "Used space" : "Storage",
                   style: getEnteTextTheme(context)
                       .small
                       .copyWith(color: textMutedDark),
@@ -174,7 +174,8 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                     children: [
                       TextSpan(text: usedSpaceInGB.toString()),
                       TextSpan(text: isMobileScreenSmall ? "/" : " GB of "),
-                      TextSpan(text: totalStorageInGB.toString() + " GB used"),
+                      TextSpan(text: totalStorageInGB.toString() + " GB"),
+                      TextSpan(text: isMobileScreenSmall ? "" : " used"),
                     ],
                   ),
                 ),
