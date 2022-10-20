@@ -129,6 +129,7 @@ class RemoteSyncService {
           // session are not processed now
           sync();
         } else {
+          debugPrint("Fire backup completed event");
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
         }
       } else {

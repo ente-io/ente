@@ -2,14 +2,12 @@
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:move_to_background/move_to_background.dart';
-import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -34,29 +32,24 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
-import 'package:photos/theme/colors.dart';
-import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
-import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
+import 'package:photos/ui/home/header_widget.dart';
+import 'package:photos/ui/home/home_bottom_nav_bar.dart';
 import 'package:photos/ui/home/landing_page_widget.dart';
-import 'package:photos/ui/home/memories_widget.dart';
-import 'package:photos/ui/home/status_bar_widget.dart';
+import 'package:photos/ui/home/preserve_footer_widget.dart';
+import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
-import 'package:photos/ui/nav_bar.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
-import 'package:photos/ui/viewer/gallery/gallery_footer_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/navigation_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -119,34 +112,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     _triggerLogoutEvent =
         Bus.instance.on<TriggerLogoutEvent>().listen((event) async {
-      final AlertDialog alert = AlertDialog(
-        title: const Text("Session expired"),
-        content: const Text("Please login again"),
-        actions: [
-          TextButton(
-            child: Text(
-              "Ok",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.greenAlternative,
-              ),
-            ),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-              final dialog = createProgressDialog(context, "Logging out...");
-              await dialog.show();
-              await Configuration.instance.logout();
-              await dialog.hide();
-            },
-          ),
-        ],
-      );
-
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return alert;
-        },
-      );
+      await _autoLogoutAlert();
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
       _logger.info('logged out, selectTab index to 0');
@@ -209,6 +175,37 @@ class _HomeWidgetState extends State<HomeWidget> {
     // For sharing images coming from outside the app while the app is in the memory
     _initMediaShareSubscription();
     super.initState();
+  }
+
+  Future<void> _autoLogoutAlert() async {
+    final AlertDialog alert = AlertDialog(
+      title: const Text("Session expired"),
+      content: const Text("Please login again"),
+      actions: [
+        TextButton(
+          child: Text(
+            "Ok",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.greenAlternative,
+            ),
+          ),
+          onPressed: () async {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            final dialog = createProgressDialog(context, "Logging out...");
+            await dialog.show();
+            await Configuration.instance.logout();
+            await dialog.hide();
+          },
+        ),
+      ],
+    );
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   @override
@@ -338,7 +335,7 @@ class _HomeWidgetState extends State<HomeWidget> {
               physics: const BouncingScrollPhysics(),
               children: [
                 showBackupFolderHook
-                    ? _getBackupFolderSelectionHook()
+                    ? const StartBackupHookWidget(headerWidget: _headerWidget)
                     : _getMainGalleryWidget(),
                 _deviceFolderGalleryWidget,
                 _sharedCollectionGallery,
@@ -417,7 +414,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getMainGalleryWidget() {
-    Widget header = _headerWidget;
+    const Widget header = _headerWidget;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
@@ -468,249 +465,8 @@ class _HomeWidgetState extends State<HomeWidget> {
       tagPrefix: "home_gallery",
       selectedFiles: _selectedFiles,
       header: header,
-      footer: const GalleryFooterWidget(),
+      footer: const PreserveFooterWidget(),
     );
-    return Stack(
-      children: [
-        Container(
-          child: gallery,
-        ),
-      ],
-    );
-  }
-
-  Widget _getBackupFolderSelectionHook() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _headerWidget,
-        Padding(
-          padding: const EdgeInsets.only(top: 64),
-          child: Image.asset(
-            "assets/onboarding_safe.png",
-            height: 206,
-          ),
-        ),
-        Text(
-          'No photos are being backed up right now',
-          style: Theme.of(context)
-              .textTheme
-              .caption
-              .copyWith(fontFamily: 'Inter-Medium', fontSize: 16),
-        ),
-        Center(
-          child: Material(
-            type: MaterialType.transparency,
-            child: Container(
-              width: double.infinity,
-              height: 64,
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-              child: GradientButton(
-                onTap: () async {
-                  if (LocalSyncService.instance
-                      .hasGrantedLimitedPermissions()) {
-                    PhotoManager.presentLimited();
-                  } else {
-                    routeToPage(
-                      context,
-                      const BackupFolderSelectionPage(
-                        buttonText: "Start backup",
-                      ),
-                    );
-                  }
-                },
-                text: "Start backup",
-              ),
-            ),
-          ),
-        ),
-        const Padding(padding: EdgeInsets.all(50)),
-      ],
-    );
-  }
-}
-
-class HomeBottomNavigationBar extends StatefulWidget {
-  const HomeBottomNavigationBar(
-    this.selectedFiles, {
-    this.selectedTabIndex,
-    Key key,
-  }) : super(key: key);
-
-  final SelectedFiles selectedFiles;
-  final int selectedTabIndex;
-
-  @override
-  State<HomeBottomNavigationBar> createState() =>
-      _HomeBottomNavigationBarState();
-}
-
-class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
-  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
-  int currentTabIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    currentTabIndex = widget.selectedTabIndex;
-    widget.selectedFiles.addListener(() {
-      setState(() {});
-    });
-    _tabChangedEventSubscription =
-        Bus.instance.on<TabChangedEvent>().listen((event) {
-      if (event.source != TabChangedEventSource.tabBar) {
-        debugPrint('index changed to ${event.selectedIndex}');
-        if (mounted) {
-          setState(() {
-            currentTabIndex = event.selectedIndex;
-          });
-        }
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _tabChangedEventSubscription.cancel();
-    super.dispose();
-  }
-
-  void _onTabChange(int index) {
-    Bus.instance.fire(
-      TabChangedEvent(
-        index,
-        TabChangedEventSource.tabBar,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
-    final enteColorScheme = getEnteColorScheme(context);
-    final navBarBlur =
-        MediaQuery.of(context).platformBrightness == Brightness.light
-            ? blurBase
-            : blurMuted;
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-      height: filesAreSelected ? 0 : 56,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 100),
-        opacity: filesAreSelected ? 0.0 : 1.0,
-        curve: Curves.easeIn,
-        child: IgnorePointer(
-          ignoring: filesAreSelected,
-          child: ListView(
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(32),
-                    child: Container(
-                      alignment: Alignment.bottomCenter,
-                      height: 48,
-                      child: ClipRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(
-                            sigmaX: navBarBlur,
-                            sigmaY: navBarBlur,
-                          ),
-                          child: GNav(
-                            curve: Curves.easeOutExpo,
-                            backgroundColor:
-                                getEnteColorScheme(context).fillMuted,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            rippleColor: Colors.white.withOpacity(0.1),
-                            activeColor: Theme.of(context)
-                                .colorScheme
-                                .gNavBarActiveColor,
-                            iconSize: 24,
-                            padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
-                            duration: const Duration(milliseconds: 200),
-                            gap: 0,
-                            tabBorderRadius: 32,
-                            tabBackgroundColor: Theme.of(context)
-                                .colorScheme
-                                .gNavBarActiveColor,
-                            haptic: false,
-                            tabs: [
-                              GButton(
-                                margin: const EdgeInsets.fromLTRB(8, 6, 10, 6),
-                                icon: Icons.home_rounded,
-                                iconColor: enteColorScheme.tabIcon,
-                                iconActiveColor: strokeBaseLight,
-                                text: '',
-                                onPressed: () {
-                                  _onTabChange(
-                                    0,
-                                  ); // To take care of occasional missing events
-                                },
-                              ),
-                              GButton(
-                                margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
-                                icon: Icons.collections_rounded,
-                                iconColor: enteColorScheme.tabIcon,
-                                iconActiveColor: strokeBaseLight,
-                                text: '',
-                                onPressed: () {
-                                  _onTabChange(
-                                    1,
-                                  ); // To take care of occasional missing events
-                                },
-                              ),
-                              GButton(
-                                margin: const EdgeInsets.fromLTRB(10, 6, 8, 6),
-                                icon: Icons.people_outlined,
-                                iconColor: enteColorScheme.tabIcon,
-                                iconActiveColor: strokeBaseLight,
-                                text: '',
-                                onPressed: () {
-                                  _onTabChange(
-                                    2,
-                                  ); // To take care of occasional missing events
-                                },
-                              ),
-                            ],
-                            selectedIndex: currentTabIndex,
-                            onTabChange: _onTabChange,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class HeaderWidget extends StatelessWidget {
-  static const _memoriesWidget = MemoriesWidget();
-  static const _statusBarWidget = StatusBarWidget();
-
-  const HeaderWidget({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    Logger("Header").info("Building header widget");
-    const list = [
-      _statusBarWidget,
-      _memoriesWidget,
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: list,
-    );
+    return gallery;
   }
 }
