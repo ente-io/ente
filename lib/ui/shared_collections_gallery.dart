@@ -126,7 +126,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            const SectionTitle("Shared with me"),
+            const SectionTitle(title: "Shared with me"),
             const SizedBox(height: 12),
             collections.incoming.isNotEmpty
                 ? Padding(
@@ -150,7 +150,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
                     ),
                   )
                 : _getIncomingCollectionEmptyState(),
-            const SectionTitle("Shared by me"),
+            const SectionTitle(title: "Shared by me"),
             const SizedBox(height: 12),
             collections.outgoing.isNotEmpty
                 ? ListView.builder(
