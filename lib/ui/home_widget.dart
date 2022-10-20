@@ -53,7 +53,6 @@ import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
 import 'package:photos/ui/status_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
-import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_footer_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -487,7 +486,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         Container(
           child: gallery,
         ),
-        HomePageAppBar(_selectedFiles),
       ],
     );
   }
@@ -540,45 +538,6 @@ class _HomeWidgetState extends State<HomeWidget> {
         const Padding(padding: EdgeInsets.all(50)),
       ],
     );
-  }
-}
-
-class HomePageAppBar extends StatefulWidget {
-  const HomePageAppBar(
-    this.selectedFiles, {
-    Key key,
-  }) : super(key: key);
-
-  final SelectedFiles selectedFiles;
-
-  @override
-  State<HomePageAppBar> createState() => _HomePageAppBarState();
-}
-
-class _HomePageAppBarState extends State<HomePageAppBar> {
-  @override
-  void initState() {
-    super.initState();
-    widget.selectedFiles.addListener(() {
-      setState(() {});
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appBar = SizedBox(
-      height: 60,
-      child: GalleryAppBarWidget(
-        GalleryType.homepage,
-        null,
-        widget.selectedFiles,
-      ),
-    );
-    if (widget.selectedFiles.files.isEmpty) {
-      return IgnorePointer(child: appBar);
-    } else {
-      return appBar;
-    }
   }
 }
 
