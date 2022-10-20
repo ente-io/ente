@@ -80,7 +80,6 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
-  Widget _headerWidgetWithSettingsButton;
 
   // for receiving media files
   // ignore: unused_field
@@ -99,11 +98,6 @@ class _HomeWidgetState extends State<HomeWidget> {
   @override
   void initState() {
     _logger.info("Building initstate");
-    _headerWidgetWithSettingsButton = Stack(
-      children: const [
-        _headerWidget,
-      ],
-    );
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.pageView) {
@@ -423,12 +417,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   }
 
   Widget _getMainGalleryWidget() {
-    Widget header;
-    if (_selectedFiles.files.isEmpty) {
-      header = _headerWidgetWithSettingsButton;
-    } else {
-      header = _headerWidget;
-    }
+    Widget header = _headerWidget;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
@@ -494,7 +483,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _headerWidgetWithSettingsButton,
+        _headerWidget,
         Padding(
           padding: const EdgeInsets.only(top: 64),
           child: Image.asset(
