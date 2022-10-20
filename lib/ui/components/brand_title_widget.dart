@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 
-enum SizeVarient {
-  small(21),
-  medium(24),
-  large(28);
+enum SizeVarient { small, medium, large }
 
-  final double size;
-  const SizeVarient(this.size);
+extension ExtraSizeVarient on SizeVarient {
+  double size() {
+    if (this == SizeVarient.small) {
+      return 21;
+    } else if (this == SizeVarient.medium) {
+      return 24;
+    } else if (this == SizeVarient.large) {
+      return 28;
+    }
+    return -1;
+  }
 }
 
 class BrandTitleWidget extends StatelessWidget {
   final SizeVarient size;
+
   const BrandTitleWidget({required this.size, Key? key}) : super(key: key);
 
   @override
@@ -20,7 +27,7 @@ class BrandTitleWidget extends StatelessWidget {
       style: TextStyle(
         fontWeight: FontWeight.bold,
         fontFamily: 'Montserrat',
-        fontSize: SizeVarient.medium.size,
+        fontSize: size.size(),
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/utils/file_uploader_util.dart';
+import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // LocalFileUpdateService tracks all the potential local file IDs which have
@@ -106,6 +107,7 @@ class LocalFileUpdateService {
           _logger.info(
             "Marking for file update as hash did not match ${file.tag}",
           );
+          await clearCache(file);
           await FilesDB.instance.updateUploadedFile(
             file.localID,
             file.title,
