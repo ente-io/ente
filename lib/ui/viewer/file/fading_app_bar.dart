@@ -169,7 +169,7 @@ class FadingAppBarState extends State<FadingAppBar> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    const Text("Use as"),
+                    const Text("Set as"),
                   ],
                 ),
               ),
