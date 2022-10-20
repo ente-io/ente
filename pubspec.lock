@@ -42,7 +42,7 @@ packages:
       name: background_fetch
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.1"
+    version: "1.1.0"
   bip39:
     dependency: "direct main"
     description:
@@ -411,7 +411,7 @@ packages:
       name: flutter_inappwebview
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.5.0+2"
+    version: "5.4.3+7"
   flutter_keyboard_visibility:
     dependency: transitive
     description:

@@ -5,6 +5,22 @@ const FontWeight _regularWeight = FontWeight.w500;
 const FontWeight _boldWeight = FontWeight.w600;
 const String _fontFamily = 'Inter';
 
+const TextStyle brandStyleSmall = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontFamily: 'Montserrat',
+  fontSize: 21,
+);
+
+const TextStyle brandStyleMedium = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontFamily: 'Montserrat',
+  fontSize: 24,
+);
+const TextStyle brandStyleLarge = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontFamily: 'Montserrat',
+  fontSize: 28,
+);
 const TextStyle h1 = TextStyle(
   fontSize: 48,
   height: 48 / 28,
