@@ -51,9 +51,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
       getExif(widget.file).then((exif) {
-        setState(() {
-          _exif = exif;
-        });
+        if (mounted) {
+          setState(() {
+            _exif = exif;
+          });
+        }
       });
     }
     super.initState();

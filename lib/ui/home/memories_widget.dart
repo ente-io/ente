@@ -410,9 +410,11 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
       extents: 1,
       onPageChanged: (index) async {
         await MemoriesService.instance.markMemoryAsSeen(widget.memories[index]);
-        setState(() {
-          _index = index;
-        });
+        if (mounted) {
+          setState(() {
+            _index = index;
+          });
+        }
       },
       physics: _shouldDisableScroll
           ? const NeverScrollableScrollPhysics()
