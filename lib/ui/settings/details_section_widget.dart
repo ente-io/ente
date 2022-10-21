@@ -255,18 +255,19 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                           ),
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
-                              final filesCount = snapshot.data as Map<int, int>;
+                              final filesCount =
+                                  FilesCount(snapshot.data as Map<int, int>);
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "${NumberFormat().format(FilesCount(filesCount).photos)} photos",
+                                    "${NumberFormat().format(filesCount.photos)} photos",
                                     style: getEnteTextTheme(context)
                                         .mini
                                         .copyWith(color: textBaseDark),
                                   ),
                                   Text(
-                                    "${NumberFormat().format(FilesCount(filesCount).videos)} videos",
+                                    "${NumberFormat().format(filesCount.videos)} videos",
                                     style: getEnteTextTheme(context)
                                         .mini
                                         .copyWith(color: textBaseDark),
