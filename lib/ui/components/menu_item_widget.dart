@@ -71,6 +71,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
             onDoubleTap: widget.onDoubleTap,
             onTapDown: _onTapDown,
             onTapUp: _onTapUp,
+            onTapCancel: _onCancel,
             child: menuItemWidget(context),
           );
   }
@@ -159,5 +160,11 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         menuItemColor = widget.menuItemColor;
       }),
     );
+  }
+
+  void _onCancel() {
+    setState(() {
+      menuItemColor = widget.menuItemColor;
+    });
   }
 }
