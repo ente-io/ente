@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/count_of_file_types.dart';
 import 'package:photos/models/user_details.dart';
@@ -250,7 +251,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                           ],
                         )
                       : FutureBuilder(
-                          future: FilesDB.instance.fetchPhotoAndVideoCount(),
+                          future: FilesDB.instance.fetchPhotoAndVideoCount(
+                            Configuration.instance.getUserID(),
+                          ),
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
                               final countOfFileTypes =
