@@ -125,6 +125,8 @@ class FilesCount {
 
   int get total => images + videos + livePhotos + (filesCount[-1] ?? 0);
 
+  int get photos => images + livePhotos;
+
   int get images => filesCount[0] ?? 0;
 
   int get videos => filesCount[1] ?? 0;

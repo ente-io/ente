@@ -260,7 +260,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "${NumberFormat().format(FilesCount(filesCount).images + FilesCount(filesCount).livePhotos)} photos",
+                                    "${NumberFormat().format(FilesCount(filesCount).photos)} photos",
                                     style: getEnteTextTheme(context)
                                         .mini
                                         .copyWith(color: textBaseDark),
