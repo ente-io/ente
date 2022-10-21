@@ -9,6 +9,7 @@ import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -48,6 +49,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: "Backed up folders",
         ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () {
@@ -122,6 +124,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Free up space",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -157,6 +160,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Deduplicate files",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

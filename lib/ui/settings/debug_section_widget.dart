@@ -6,6 +6,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -32,6 +33,7 @@ class DebugSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Key attributes",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -43,6 +45,7 @@ class DebugSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Delete Local Import DB",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -55,6 +58,7 @@ class DebugSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Allow auto-upload for ignored files",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

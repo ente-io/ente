@@ -17,6 +17,7 @@ class MenuItemWidget extends StatefulWidget {
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
   final double borderRadius;
+  final Color? pressedColor;
   final ExpandableController? expandableController;
   const MenuItemWidget({
     required this.captionedTextWidget,
@@ -31,6 +32,7 @@ class MenuItemWidget extends StatefulWidget {
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
     this.borderRadius = 4.0,
+    this.pressedColor,
     this.expandableController,
     Key? key,
   }) : super(key: key);
@@ -40,8 +42,10 @@ class MenuItemWidget extends StatefulWidget {
 }
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
+  Color? menuItemColor;
   @override
   void initState() {
+    menuItemColor = widget.menuItemColor;
     if (widget.expandableController != null) {
       widget.expandableController!.addListener(() {
         setState(() {});
@@ -65,6 +69,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         : GestureDetector(
             onTap: widget.onTap,
             onDoubleTap: widget.onDoubleTap,
+            onTapDown: _onTapDown,
+            onTapUp: _onTapUp,
             child: menuItemWidget(context),
           );
   }
@@ -77,7 +83,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ? const Radius.circular(0)
         : borderRadius;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 20),
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -87,7 +93,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
           bottomLeft: bottomBorderRadius,
           bottomRight: bottomBorderRadius,
         ),
-        color: widget.menuItemColor,
+        color: menuItemColor,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -137,6 +143,21 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                   : widget.trailingSwitch ?? const SizedBox.shrink(),
         ],
       ),
+    );
+  }
+
+  void _onTapDown(details) {
+    setState(() {
+      menuItemColor = widget.pressedColor;
+    });
+  }
+
+  void _onTapUp(details) {
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () => setState(() {
+        menuItemColor = widget.menuItemColor;
+      }),
     );
   }
 }
