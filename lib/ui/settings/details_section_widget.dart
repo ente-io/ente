@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/models/count_of_file_types.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -251,24 +250,23 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                           ],
                         )
                       : FutureBuilder(
-                          future: FilesDB.instance.fetchPhotoAndVideoCount(
+                          future: FilesDB.instance.fetchFilesCountbyType(
                             Configuration.instance.getUserID(),
                           ),
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
-                              final countOfFileTypes =
-                                  snapshot.data as CountOfFileTypes;
+                              final filesCount = snapshot.data as Map<int, int>;
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "${NumberFormat().format(countOfFileTypes.photosCount)} photos",
+                                    "${NumberFormat().format(FilesCount(filesCount).images + FilesCount(filesCount).livePhotos)} photos",
                                     style: getEnteTextTheme(context)
                                         .mini
                                         .copyWith(color: textBaseDark),
                                   ),
                                   Text(
-                                    "${NumberFormat().format(countOfFileTypes.videosCount)} videos",
+                                    "${NumberFormat().format(FilesCount(filesCount).videos)} videos",
                                     style: getEnteTextTheme(context)
                                         .mini
                                         .copyWith(color: textBaseDark),

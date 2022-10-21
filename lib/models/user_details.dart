@@ -118,3 +118,24 @@ class FamilyData {
     );
   }
 }
+
+class FilesCount {
+  final Map<int, int> filesCount;
+  FilesCount(this.filesCount);
+
+  int get total {
+    return images + videos + livePhotos + (filesCount[-1] ?? 0);
+  }
+
+  int get images {
+    return filesCount[0] ?? 0;
+  }
+
+  int get videos {
+    return filesCount[1] ?? 0;
+  }
+
+  int get livePhotos {
+    return filesCount[2] ?? 0;
+  }
+}
