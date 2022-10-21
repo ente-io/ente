@@ -35,7 +35,9 @@ class SettingsTitleBarWidget extends StatelessWidget {
                   final totalFiles =
                       FilesCount(snapshot.data as Map<int, int>).total;
                   return Text(
-                    "${NumberFormat().format(totalFiles)} memories",
+                    totalFiles == 0
+                        ? "No memories yet"
+                        : "${NumberFormat().format(totalFiles)} memories",
                     style: getEnteTextTheme(context).largeBold,
                   );
                 } else if (snapshot.hasError) {
