@@ -78,7 +78,9 @@ class _VideoWidgetState extends State<VideoWidget> {
           .getFileSize(widget.file.uploadedFileID)
           .then((value) {
         widget.file.fileSize = value;
-        setState(() {});
+        if (mounted) {
+          setState(() {});
+        }
       });
     }
   }
