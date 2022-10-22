@@ -16,3 +16,9 @@ enum TabChangedEventSource {
   collectionsPage,
   backButton,
 }
+
+class TabDoubleTapEvent extends Event {
+  final int selectedIndex;
+
+  TabDoubleTapEvent(this.selectedIndex);
+}

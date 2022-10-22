@@ -97,7 +97,7 @@ dependencies:
   provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
-  scrollable_positioned_list: ^0.2.2
+  scrollable_positioned_list: ^0.3.5
   sentry: ^6.12.1
   sentry_flutter: ^6.12.1
   share_plus: ^4.0.10
