@@ -368,10 +368,10 @@ class UploadManager {
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
         addLogLine(`uploadMediaFiles called`);
-        this.filesToBeUploaded.push(...mediaFiles);
+        this.filesToBeUploaded.concat(mediaFiles);
 
         if (isElectron()) {
-            this.remainingFiles.push(...mediaFiles);
+            this.remainingFiles.concat(mediaFiles);
         }
 
         UIService.reset(mediaFiles.length);

@@ -69,7 +69,7 @@ function PlanSelectorCard(props: Props) {
         const main = async () => {
             try {
                 props.setLoading(true);
-                let plans = await billingService.getPlans();
+                const plans = await billingService.getPlans();
                 if (isSubscriptionActive(subscription)) {
                     const planNotListed =
                         plans.filter((plan) =>
@@ -80,7 +80,7 @@ function PlanSelectorCard(props: Props) {
                         !isOnFreePlan(subscription) &&
                         planNotListed
                     ) {
-                        plans = [planForSubscription(subscription), ...plans];
+                        plans.push(planForSubscription(subscription));
                     }
                 }
                 setPlans(plans);

@@ -243,10 +243,10 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            const files = mergeMetadata(await getLocalFiles());
+            let files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
-            files.push(...getTrashedFiles(trash));
+            files = [...files, ...getTrashedFiles(trash)];
             setUser(user);
             setFiles(sortFiles(files));
             setCollections(collections);
@@ -343,9 +343,9 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            const files = await syncFiles(collections, setFiles);
+            let files = await syncFiles(collections, setFiles);
             const trash = await syncTrash(collections, setFiles, files);
-            files.push(...getTrashedFiles(trash));
+            files = [...files, ...getTrashedFiles(trash)];
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
