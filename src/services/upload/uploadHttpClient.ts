@@ -51,7 +51,7 @@ class UploadHttpClient {
                         { 'X-Auth-Token': token }
                     );
                     const response = await this.uploadURLFetchInProgress;
-                    for (const url of response.data) {
+                    for (const url of response.data['urls']) {
                         urlStore.push(url);
                     }
                 } finally {

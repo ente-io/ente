@@ -87,11 +87,12 @@ export default function Deduplicate() {
         let toSelectFileIDs: number[] = [];
         let count = 0;
         for (const dupe of duplicates) {
-            allDuplicateFiles = allDuplicateFiles.concat(dupe.files);
+            allDuplicateFiles = [...allDuplicateFiles, ...dupe.files];
             // select all except first file
-            toSelectFileIDs = toSelectFileIDs.concat(
-                dupe.files.slice(1).map((f) => f.id)
-            );
+            toSelectFileIDs = [
+                ...toSelectFileIDs,
+                ...dupe.files.slice(1).map((f) => f.id),
+            ];
             count += dupe.files.length - 1;
 
             for (const file of dupe.files) {

@@ -458,9 +458,10 @@ export function PhotoList({
                             date: currItem.date,
                             span: items[index + 1].items.length,
                         });
-                        newList[newIndex + 1].items = newList[
-                            newIndex + 1
-                        ].items.concat(items[index + 1].items);
+                        newList[newIndex + 1].items = [
+                            ...newList[newIndex + 1].items,
+                            ...items[index + 1].items,
+                        ];
                         index += 2;
                     } else {
                         // Adding items would exceed the number of columns.
