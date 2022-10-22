@@ -33,6 +33,12 @@ module.exports = (phase) =>
         withWorkbox(
             withBundleAnalyzer(
                 withTM({
+                    compiler: {
+                        styledComponents: {
+                            ssr: true,
+                            displayName: true,
+                        },
+                    },
                     env: {
                         SENTRY_RELEASE: GIT_SHA,
                         NEXT_PUBLIC_LATEST_COMMIT_HASH: GIT_SHA,
