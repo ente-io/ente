@@ -55,6 +55,12 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   @override
+  void didChangeDependencies() {
+    menuItemColor = widget.menuItemColor;
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     if (widget.expandableController != null) {
       widget.expandableController!.dispose();
