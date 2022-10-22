@@ -69,7 +69,7 @@ export const syncFiles = async (
         }
         const fetchedFiles =
             (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
-        files.push(...fetchedFiles);
+        files = [...files, ...fetchedFiles];
         const latestVersionFiles = new Map<string, EnteFile>();
         files.forEach((file) => {
             const uid = `${file.collectionID}-${file.id}`;
@@ -105,7 +105,7 @@ export const getFiles = async (
     setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
-        const decryptedFiles: EnteFile[] = [];
+        let decryptedFiles: EnteFile[] = [];
         let time = sinceTime;
         let resp;
         do {
@@ -124,7 +124,8 @@ export const getFiles = async (
                 }
             );
 
-            decryptedFiles.push(
+            decryptedFiles = [
+                ...decryptedFiles,
                 ...(await Promise.all(
                     resp.data.diff.map(async (file: EnteFile) => {
                         if (!file.isDeleted) {
@@ -132,8 +133,8 @@ export const getFiles = async (
                         }
                         return file;
                     }) as Promise<EnteFile>[]
-                ))
-            );
+                )),
+            ];
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;

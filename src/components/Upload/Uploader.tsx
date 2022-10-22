@@ -287,7 +287,7 @@ export default function Uploader(props: Props) {
     ) => {
         try {
             await preCollectionCreationAction();
-            const filesWithCollectionToUpload: FileWithCollection[] = [];
+            let filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionNameToFilesMap = new Map<
                 string,
@@ -321,13 +321,14 @@ export default function Uploader(props: Props) {
                         ...existingCollection,
                         ...collections,
                     ]);
-                    filesWithCollectionToUpload.push(
+                    filesWithCollectionToUpload = [
+                        ...filesWithCollectionToUpload,
                         ...files.map((file) => ({
                             localID: index++,
                             collectionID: collection.id,
                             file,
-                        }))
-                    );
+                        })),
+                    ];
                 }
             } catch (e) {
                 closeUploadProgress();

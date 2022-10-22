@@ -33,7 +33,7 @@ export async function getDuplicateFiles(
             fileMap.set(file.id, file);
         }
 
-        const result: DuplicateFiles[] = [];
+        let result: DuplicateFiles[] = [];
 
         for (const dupe of dupes) {
             let duplicateFiles: EnteFile[] = [];
@@ -48,12 +48,13 @@ export async function getDuplicateFiles(
             );
 
             if (duplicateFiles.length > 1) {
-                result.push(
+                result = [
+                    ...result,
                     ...getDupesGroupedBySameFileHashes(
                         duplicateFiles,
                         dupe.size
-                    )
-                );
+                    ),
+                ];
             }
         }
 
