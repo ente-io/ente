@@ -1,6 +1,6 @@
 // @dart=2.9
 
-import 'dart:math' show max;
+import 'dart:math' show max, min;
 
 import 'package:flutter/material.dart';
 import 'package:photos/ui/huge_listview/draggable_scrollbar.dart';
@@ -136,8 +136,11 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
           totalCount: widget.totalCount,
           initialScrollIndex: widget.startIndex,
           onChange: (position) {
-            widget.controller
-                ?.jumpTo(index: (position * widget.totalCount).floor());
+            final int newIndex = (position * widget.totalCount).floor();
+            final int currentIndex = _currentFirst();
+            if (newIndex != currentIndex) {
+              widget.controller?.jumpTo(index: newIndex);
+            }
           },
           labelTextBuilder: widget.labelTextBuilder,
           backgroundColor: widget.thumbBackgroundColor,

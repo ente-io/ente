@@ -196,7 +196,7 @@ class _GalleryState extends State<Gallery> {
       controller: _itemScroller,
       startIndex: 0,
       totalCount: _collatedFiles.length,
-      isDraggableScrollbarEnabled: _collatedFiles.length > 30,
+      isDraggableScrollbarEnabled: _collatedFiles.length > 10,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
       },
