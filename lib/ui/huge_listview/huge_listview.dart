@@ -88,6 +88,7 @@ class HugeListView<T> extends StatefulWidget {
 class HugeListViewState<T> extends State<HugeListView<T>> {
   final scrollKey = GlobalKey<DraggableScrollbarState>();
   final listener = ItemPositionsListener.create();
+  int lastIndexJump = -1;
   dynamic error;
 
   @override
@@ -136,10 +137,20 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
           totalCount: widget.totalCount,
           initialScrollIndex: widget.startIndex,
           onChange: (position) {
-            final int newIndex = (position * widget.totalCount).floor();
             final int currentIndex = _currentFirst();
-            if (newIndex != currentIndex) {
-              widget.controller?.jumpTo(index: newIndex);
+            final int floorIndex = (position * widget.totalCount).floor();
+            final int cielIndex = (position * widget.totalCount).ceil();
+            int nextIndexToJump;
+            if (floorIndex != currentIndex && floorIndex > currentIndex) {
+              nextIndexToJump = floorIndex;
+            } else if (cielIndex != currentIndex && cielIndex < currentIndex) {
+              nextIndexToJump = floorIndex;
+            } else {
+              return;
+            }
+            if (lastIndexJump != nextIndexToJump) {
+              lastIndexJump = nextIndexToJump;
+              widget.controller?.jumpTo(index: nextIndexToJump);
             }
           },
           labelTextBuilder: widget.labelTextBuilder,
