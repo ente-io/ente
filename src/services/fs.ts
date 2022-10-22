@@ -16,7 +16,7 @@ export const getDirFilePaths = async (dirPath: string) => {
 
     for (const filePath of filePaths) {
         const absolute = path.join(dirPath, filePath);
-        files = files.concat(await getDirFilePaths(absolute));
+        files = [...files, ...(await getDirFilePaths(absolute))];
     }
 
     return files;

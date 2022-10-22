@@ -69,7 +69,7 @@ export default function setupIpcComs(
 
         let files: string[] = [];
         for (const dirPath of dir.filePaths) {
-            files = files.concat(await getDirFilePaths(dirPath));
+            files = [...files, ...(await getDirFilePaths(dirPath))];
         }
 
         return files;
