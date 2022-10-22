@@ -4,7 +4,7 @@ import 'package:photos/ente_theme_data.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
-  final bool isHeaderOfExpansion;
+  final bool isExpandable;
 // leading icon can be passed without specifing size of icon, this component sets size to 20x20 irrespective of passed icon's size
   final IconData? leadingIcon;
   final Color? leadingIconColor;
@@ -21,7 +21,7 @@ class MenuItemWidget extends StatefulWidget {
   final ExpandableController? expandableController;
   const MenuItemWidget({
     required this.captionedTextWidget,
-    this.isHeaderOfExpansion = false,
+    this.isExpandable = false,
     this.leadingIcon,
     this.leadingIconColor,
     this.trailingIcon,
@@ -70,7 +70,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.isHeaderOfExpansion
+    return widget.isExpandable
         ? menuItemWidget(context)
         : GestureDetector(
             onTap: widget.onTap,

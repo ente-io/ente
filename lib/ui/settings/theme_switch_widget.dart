@@ -71,7 +71,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
       pressedColor: getEnteColorScheme(context).fillFaint,
-      isHeaderOfExpansion: false,
+      isExpandable: false,
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
       onTap: () async {
         AdaptiveTheme.of(context).setThemeMode(themeMode);
