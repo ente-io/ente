@@ -11,6 +11,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/two_factor_status_change_event.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/sessions_page.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -216,6 +217,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: "Active sessions",
         ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
