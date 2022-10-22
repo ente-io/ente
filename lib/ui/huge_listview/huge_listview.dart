@@ -38,6 +38,10 @@ class HugeListView<T> extends StatefulWidget {
   /// Height of scroll thumb, defaults to 48.
   final double thumbHeight;
 
+  /// Height of bottomSafeArea so that scroll thumb does not become hidden
+  /// or un-clickable due to footer elements. Default value is 120
+  final double bottomSafeArea;
+
   /// Called to build an individual item with the specified [index].
   final HugeListViewItemBuilder<T> itemBuilder;
 
@@ -72,6 +76,7 @@ class HugeListView<T> extends StatefulWidget {
     this.thumbBackgroundColor = Colors.red, // Colors.white,
     this.thumbDrawColor = Colors.yellow, //Colors.grey,
     this.thumbHeight = 48.0,
+    this.bottomSafeArea = 120.0,
     this.isDraggableScrollbarEnabled = true,
     this.thumbPadding,
   }) : super(key: key);
@@ -138,6 +143,7 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
           backgroundColor: widget.thumbBackgroundColor,
           drawColor: widget.thumbDrawColor,
           heightScrollThumb: widget.thumbHeight,
+          bottomSafeArea: widget.bottomSafeArea,
           currentFirstIndex: _currentFirst(),
           isEnabled: widget.isDraggableScrollbarEnabled,
           padding: widget.thumbPadding,
