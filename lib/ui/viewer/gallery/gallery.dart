@@ -39,6 +39,7 @@ class Gallery extends StatefulWidget {
   final Widget footer;
   final bool smallerTodayFont;
   final String albumName;
+  final double scrollBottomSafeArea;
 
   const Gallery({
     @required this.asyncLoader,
@@ -50,6 +51,7 @@ class Gallery extends StatefulWidget {
     this.removalEventTypes = const {},
     this.header,
     this.footer = const SizedBox(height: 120),
+    this.scrollBottomSafeArea = 120.0,
     this.smallerTodayFont = false,
     this.albumName = '',
     Key key,
@@ -92,7 +94,10 @@ class _GalleryState extends State<Gallery> {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
       if (mounted && event.selectedIndex == 0) {
-        _itemScroller.jumpTo(index: 0);
+        _itemScroller.scrollTo(
+          index: 0,
+          duration: const Duration(milliseconds: 150),
+        );
       }
     });
     if (widget.forceReloadEvents != null) {
@@ -194,7 +199,7 @@ class _GalleryState extends State<Gallery> {
       controller: _itemScroller,
       startIndex: 0,
       totalCount: _collatedFiles.length,
-      isDraggableScrollbarEnabled: _collatedFiles.length > 30,
+      isDraggableScrollbarEnabled: _collatedFiles.length > 10,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
       },
@@ -253,6 +258,7 @@ class _GalleryState extends State<Gallery> {
       thumbPadding: widget.header != null
           ? const EdgeInsets.only(top: 60)
           : const EdgeInsets.all(0),
+      bottomSafeArea: widget.scrollBottomSafeArea,
       firstShown: (int firstIndex) {
         Bus.instance
             .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));

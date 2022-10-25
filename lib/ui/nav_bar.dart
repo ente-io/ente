@@ -2,8 +2,6 @@
 
 library google_nav_bar;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -13,7 +11,6 @@ class GNav extends StatefulWidget {
     this.tabs,
     this.selectedIndex = 0,
     this.onTabChange,
-    this.onDoubleTap,
     this.gap,
     this.padding,
     this.activeColor,
@@ -40,7 +37,6 @@ class GNav extends StatefulWidget {
   final List<GButton> tabs;
   final int selectedIndex;
   final Function onTabChange;
-  final Function onDoubleTap;
   final double gap;
   final double tabBorderRadius;
   final double iconSize;
@@ -121,23 +117,8 @@ class _GNavState extends State<GNav> {
                     widget.tabBackgroundColor ??
                     Colors.transparent,
                 duration: widget.duration ?? const Duration(milliseconds: 500),
-                onDoubleTap: () {
-                  widget.onDoubleTap(widget.tabs.indexOf(t));
-                },
                 onPressed: () {
-                  if (!clickable) return;
-                  setState(() {
-                    selectedIndex = widget.tabs.indexOf(t);
-                    clickable = false;
-                  });
-                  widget.onTabChange(selectedIndex);
-
-                  Future.delayed(
-                      widget.duration ?? const Duration(milliseconds: 500), () {
-                    setState(() {
-                      clickable = true;
-                    });
-                  });
+                  widget.onTabChange(widget.tabs.indexOf(t));
                 },
               ),
             )
@@ -162,7 +143,6 @@ class GButton extends StatefulWidget {
   final TextStyle textStyle;
   final double iconSize;
   final Function onPressed;
-  final Function onDoubleTap;
   final String text;
   final IconData icon;
   final Color backgroundColor;
@@ -198,7 +178,6 @@ class GButton extends StatefulWidget {
     this.iconSize,
     this.leading,
     this.onPressed,
-    this.onDoubleTap,
     this.backgroundGradient,
     this.borderRadius,
     this.border,
@@ -228,11 +207,6 @@ class _GButtonState extends State<GButton> {
         onPressed: () {
           if (widget.haptic) HapticFeedback.selectionClick();
           widget.onPressed();
-        },
-        onDoubleTap: () {
-          if (widget.onDoubleTap != null) {
-            widget.onDoubleTap();
-          }
         },
         padding: widget.padding,
         margin: widget.margin,
@@ -265,7 +239,6 @@ class Button extends StatefulWidget {
     this.rippleColor,
     this.hoverColor,
     this.onPressed,
-    this.onDoubleTap,
     this.duration,
     this.curve,
     this.padding = const EdgeInsets.all(25),
@@ -292,7 +265,6 @@ class Button extends StatefulWidget {
   final bool active;
   final bool debug;
   final VoidCallback onPressed;
-  final VoidCallback onDoubleTap;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry margin;
   final Duration duration;
@@ -352,11 +324,6 @@ class _ButtonState extends State<Button> with TickerProviderStateMixin {
         borderRadius: BorderRadius.circular(100),
         onTap: () {
           widget.onPressed();
-        },
-        onDoubleTap: () {
-          if (widget.onDoubleTap != null) {
-            widget.onDoubleTap();
-          }
         },
         child: Container(
           padding: widget.margin,
