@@ -66,6 +66,15 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     );
   }
 
+  void _onDoubleTap(int index) {
+    debugPrint("doubleTap on tab $index");
+    Bus.instance.fire(
+      TabDoubleTapEvent(
+        index,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool filesAreSelected = widget.selectedFiles.files.isNotEmpty;
@@ -132,6 +141,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                     0,
                                   ); // To take care of occasional missing events
                                 },
+                                onDoubleTap: () {
+                                  _onDoubleTap(0);
+                                },
                               ),
                               GButton(
                                 margin: const EdgeInsets.fromLTRB(10, 6, 10, 6),
@@ -142,7 +154,11 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 onPressed: () {
                                   _onTabChange(
                                     1,
-                                  ); // To take care of occasional missing events
+                                  ); // To take care of occasional missing
+                                  // events
+                                },
+                                onDoubleTap: () {
+                                  _onDoubleTap(1);
                                 },
                               ),
                               GButton(
@@ -154,12 +170,17 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 onPressed: () {
                                   _onTabChange(
                                     2,
-                                  ); // To take care of occasional missing events
+                                  ); // To take care
+                                  // of occasional missing events
+                                },
+                                onDoubleTap: () {
+                                  _onDoubleTap(2);
                                 },
                               ),
                             ],
                             selectedIndex: currentTabIndex,
                             onTabChange: _onTabChange,
+                            onDoubleTap: _onDoubleTap,
                           ),
                         ),
                       ),
