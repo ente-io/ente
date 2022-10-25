@@ -94,7 +94,10 @@ class _GalleryState extends State<Gallery> {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
       if (mounted && event.selectedIndex == 0) {
-        _itemScroller.jumpTo(index: 0);
+        _itemScroller.scrollTo(
+          index: 0,
+          duration: const Duration(milliseconds: 150),
+        );
       }
     });
     if (widget.forceReloadEvents != null) {
