@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class TitleBarWidget extends StatelessWidget {
-  const TitleBarWidget({super.key});
+  final List<Widget>? actionIcons;
+  const TitleBarWidget({this.actionIcons, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -34,31 +35,10 @@ class TitleBarWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
           child: Row(
-            children: [
-              IconButton(
-                visualDensity:
-                    const VisualDensity(horizontal: -2, vertical: -2),
-                onPressed: () {},
-                icon: Icon(
-                  Icons.favorite_border_rounded,
-                  color: getEnteColorScheme(context).strokeBase,
-                ),
-              ),
-              const SizedBox(width: 4),
-              IconButton(
-                visualDensity:
-                    const VisualDensity(horizontal: -2, vertical: -2),
-                onPressed: () {},
-                icon: Icon(
-                  Icons.more_horiz_outlined,
-                  color: getEnteColorScheme(context).strokeBase,
-                ),
-              ),
-            ],
+            children: _getActions(),
           ),
         ),
       ],
-      // iconTheme:
       leading: Padding(
         padding: const EdgeInsets.all(4),
         child: IconButton(
@@ -92,5 +72,32 @@ class TitleBarWidget extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  _getActions() {
+    if (actionIcons == null) {
+      return <Widget>[const SizedBox.shrink()];
+    }
+    final actions = <Widget>[];
+    bool addWhiteSpace = false;
+    final length = actionIcons!.length;
+    int index = 0;
+    if (length == 0) {
+      return <Widget>[const SizedBox.shrink()];
+    }
+    if (length == 1) {
+      return actionIcons;
+    }
+    while (index < length) {
+      if (!addWhiteSpace) {
+        actions.add(actionIcons![index]);
+        index++;
+        addWhiteSpace = true;
+      } else {
+        actions.add(const SizedBox(width: 4));
+        addWhiteSpace = false;
+      }
+    }
+    return actions;
   }
 }
