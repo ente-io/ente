@@ -88,10 +88,12 @@ class TitleBarWidget extends StatelessWidget {
               flexibleSpaceCaption == null
                   ? const SizedBox.shrink()
                   : Text(
-                      'Caption',
+                      flexibleSpaceCaption!,
                       style: textTheme.small.copyWith(
                         color: colorTheme.textMuted,
                       ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
                     )
             ],
           ),
