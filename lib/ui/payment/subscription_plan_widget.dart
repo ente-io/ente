@@ -19,7 +19,7 @@ class SubscriptionPlanWidget extends StatelessWidget {
 
   String _displayPrice() {
     final result = price + (period.isNotEmpty ? " / " + period : "");
-    return result.isNotEmpty ? result : "Trial plan";
+    return price.isNotEmpty ? result : "Free trial";
   }
 
   @override
