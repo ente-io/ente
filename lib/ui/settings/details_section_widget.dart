@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -255,8 +256,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                           ),
                           builder: (context, snapshot) {
                             if (snapshot.hasData) {
-                              final filesCount =
-                                  FilesCount(snapshot.data as Map<int, int>);
+                              final filesCount = FilesCount(
+                                snapshot.data as Map<FileType, int>,
+                              );
                               return Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [

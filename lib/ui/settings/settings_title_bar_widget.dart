@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -33,7 +34,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   final totalFiles =
-                      FilesCount(snapshot.data as Map<int, int>).total;
+                      FilesCount(snapshot.data as Map<FileType, int>).total;
                   return Text(
                     totalFiles == 0
                         ? "No memories yet"

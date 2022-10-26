@@ -1285,15 +1285,15 @@ class FilesDB {
     return deduplicatedFiles;
   }
 
-  Future<Map<int, int>> fetchFilesCountbyType(int userID) async {
+  Future<Map<FileType, int>> fetchFilesCountbyType(int userID) async {
     final db = await instance.database;
     final result = await db.rawQuery(
       "SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) FROM $filesTable WHERE $columnUploadedFileID != -1 AND $columnOwnerID == $userID GROUP BY $columnFileType",
     );
 
-    final filesCount = <int, int>{};
+    final filesCount = <FileType, int>{};
     for (var e in result) {
-      filesCount.addAll({e[columnFileType]: e.values.last});
+      filesCount.addAll({getFileType(e[columnFileType]): e.values.last});
     }
     return filesCount;
   }
