@@ -24,10 +24,11 @@ class TitleBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const toolbarHeight = 48.0;
     final textTheme = getEnteTextTheme(context);
     final colorTheme = getEnteColorScheme(context);
     return SliverAppBar(
-      toolbarHeight: 48,
+      toolbarHeight: toolbarHeight,
       leadingWidth: 48,
       automaticallyImplyLeading: false,
       pinned: true,
@@ -79,26 +80,34 @@ class TitleBarWidget extends StatelessWidget {
               ),
             ),
       flexibleSpace: FlexibleSpaceBar(
-        background: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        background: SafeArea(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              flexibleSpaceTitle == null
-                  ? const SizedBox.shrink()
-                  : flexibleSpaceTitle!,
-              flexibleSpaceCaption == null
-                  ? const SizedBox.shrink()
-                  : Text(
-                      flexibleSpaceCaption!,
-                      style: textTheme.small.copyWith(
-                        color: colorTheme.textMuted,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                    )
+              const SizedBox(height: toolbarHeight),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    flexibleSpaceTitle == null
+                        ? const SizedBox.shrink()
+                        : flexibleSpaceTitle!,
+                    flexibleSpaceCaption == null
+                        ? const SizedBox.shrink()
+                        : Text(
+                            flexibleSpaceCaption!,
+                            style: textTheme.small.copyWith(
+                              color: colorTheme.textMuted,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          )
+                  ],
+                ),
+              ),
             ],
           ),
         ),
