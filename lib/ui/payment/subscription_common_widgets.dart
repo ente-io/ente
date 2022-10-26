@@ -94,7 +94,7 @@ class ValidityWidget extends StatelessWidget {
     );
     var message = "Renews on $endDate";
     if (currentSubscription.productID == freeProductID) {
-      message = "Free plan valid till $endDate";
+      message = "Free trial valid till $endDate";
     } else if (currentSubscription.attributes?.isCancelled ?? false) {
       message = "Your subscription will be cancelled on $endDate";
     }
