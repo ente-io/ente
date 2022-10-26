@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/subscription.dart';
 
 class UserDetails extends Equatable {
@@ -117,4 +118,20 @@ class FamilyData {
       map['expiryTime'] as int,
     );
   }
+}
+
+class FilesCount {
+  final Map<FileType, int> filesCount;
+  FilesCount(this.filesCount);
+
+  int get total =>
+      images + videos + livePhotos + (filesCount[getInt(FileType.other)] ?? 0);
+
+  int get photos => images + livePhotos;
+
+  int get images => filesCount[FileType.image] ?? 0;
+
+  int get videos => filesCount[FileType.video] ?? 0;
+
+  int get livePhotos => filesCount[FileType.livePhoto] ?? 0;
 }
