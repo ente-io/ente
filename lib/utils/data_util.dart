@@ -19,16 +19,20 @@ String formatBytes(int bytes, [int decimals = 2]) {
   return ((bytes / pow(k, i)).toStringAsFixed(dm)) + ' ' + storageUnits[i];
 }
 
-//shows decimals only if less than 10GB & omits decimal if decimal is 0
-num convertBytesToGBs(int bytes) {
+//shows 1st decimal only if less than 10GB & omits decimal if decimal is 0
+num roundBytesUsedToGBs(int usedBytes, int freeSpace) {
   const tenGBinBytes = 10737418240;
-  int precision = 0;
-  if (bytes < tenGBinBytes) {
-    precision = 1;
+  num bytesInGB = convertBytesToGBs(usedBytes);
+  if ((usedBytes >= tenGBinBytes && freeSpace >= tenGBinBytes) ||
+      bytesInGB % 1 == 0) {
+    bytesInGB = bytesInGB.truncate();
   }
-  final bytesInGB =
-      num.parse((bytes / (pow(1024, 3))).toStringAsPrecision(precision));
   return bytesInGB;
+}
+
+//Eg: 0.3 GB, 11.0 GB, 532.3 GB
+num convertBytesToGBs(int bytes) {
+  return num.parse((bytes / (pow(1024, 3))).toStringAsFixed(1));
 }
 
 int convertBytesToMBs(int bytes) {
