@@ -7,17 +7,21 @@ class TitleBarWidget extends StatelessWidget {
   final Widget? flexibleSpaceTitle;
   final String? flexibleSpaceCaption;
   final List<Widget>? actionIcons;
+  final bool isTitleBigWithoutLeading;
   const TitleBarWidget({
     this.title,
     this.caption,
     this.flexibleSpaceTitle,
     this.flexibleSpaceCaption,
     this.actionIcons,
+    this.isTitleBigWithoutLeading = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = getEnteTextTheme(context);
+    final colorTheme = getEnteColorScheme(context);
     return SliverAppBar(
       toolbarHeight: 48,
       leadingWidth: 48,
@@ -26,25 +30,28 @@ class TitleBarWidget extends StatelessWidget {
       expandedHeight: 102,
       centerTitle: false,
       titleSpacing: 0,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          title == null
-              ? const SizedBox.shrink()
-              : Text(
-                  title!,
-                  style: getEnteTextTheme(context).largeBold,
-                ),
-          caption == null
-              ? const SizedBox.shrink()
-              : Text(
-                  caption!,
-                  style: getEnteTextTheme(context)
-                      .mini
-                      .copyWith(color: getEnteColorScheme(context).textMuted),
-                )
-        ],
+      title: Padding(
+        padding: EdgeInsets.only(left: isTitleBigWithoutLeading ? 16 : 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            title == null
+                ? const SizedBox.shrink()
+                : Text(
+                    title!,
+                    style: isTitleBigWithoutLeading
+                        ? textTheme.h2Bold
+                        : textTheme.largeBold,
+                  ),
+            caption == null || isTitleBigWithoutLeading
+                ? const SizedBox.shrink()
+                : Text(
+                    caption!,
+                    style: textTheme.mini.copyWith(color: colorTheme.textMuted),
+                  )
+          ],
+        ),
       ),
       actions: [
         Padding(
@@ -54,16 +61,19 @@ class TitleBarWidget extends StatelessWidget {
           ),
         ),
       ],
-      leading: Padding(
-        padding: const EdgeInsets.all(4),
-        child: IconButton(
-          visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(Icons.arrow_back_outlined),
-        ),
-      ),
+      leading: isTitleBigWithoutLeading
+          ? null
+          : Padding(
+              padding: const EdgeInsets.all(4),
+              child: IconButton(
+                visualDensity:
+                    const VisualDensity(horizontal: -2, vertical: -2),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.arrow_back_outlined),
+              ),
+            ),
       flexibleSpace: FlexibleSpaceBar(
         background: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -79,9 +89,9 @@ class TitleBarWidget extends StatelessWidget {
                   ? const SizedBox.shrink()
                   : Text(
                       'Caption',
-                      style: getEnteTextTheme(context).small.copyWith(
-                            color: getEnteColorScheme(context).textMuted,
-                          ),
+                      style: textTheme.small.copyWith(
+                        color: colorTheme.textMuted,
+                      ),
                     )
             ],
           ),
