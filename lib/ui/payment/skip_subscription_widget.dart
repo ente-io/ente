@@ -44,7 +44,7 @@ class SkipSubscriptionWidget extends StatelessWidget {
           BillingService.instance
               .verifySubscription(freeProductID, "", paymentProvider: "ente");
         },
-        child: const Text("Continue on free plan"),
+        child: const Text("Continue on free trial"),
       ),
     );
   }

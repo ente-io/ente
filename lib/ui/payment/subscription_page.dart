@@ -368,7 +368,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       planWidgets.add(
         SubscriptionPlanWidget(
           storage: _freePlan.storage,
-          price: "free",
+          price: "Free trial",
           period: "",
           isActive: true,
         ),
