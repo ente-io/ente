@@ -30,7 +30,7 @@ num roundBytesUsedToGBs(int usedBytes, int freeSpace) {
   return bytesInGB;
 }
 
-//Eg: 0.3 GB, 11.0 GB, 532.39 GB
+//Eg: 0.3 GB, 11.0 GB, 532.3 GB
 num convertBytesToGBs(int bytes) {
   return num.parse((bytes / (pow(1024, 3))).toStringAsFixed(1));
 }
