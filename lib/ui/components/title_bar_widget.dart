@@ -6,6 +6,10 @@ class TitleBarWidget extends StatelessWidget {
   final String? caption;
   final Widget? flexibleSpaceTitle;
   final String? flexibleSpaceCaption;
+  //If passing IconButton, set visualDensity to -2 (horizontal & vertical).
+  //This could be applicable to other widgets too. If layout looks different see if
+  // VisualDensity property exists for the widget and try to find the right values.
+  // https://api.flutter.dev/flutter/material/VisualDensity-class.html
   final List<Widget>? actionIcons;
   final bool isTitleBigWithoutLeading;
   const TitleBarWidget({
