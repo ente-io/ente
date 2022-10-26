@@ -134,8 +134,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     final shouldShowFreeSpaceInMBs = freeSpaceInBytes < hundredMBinBytes;
 
     final usedSpaceInGB =
-        convertBytesToGBs(userDetails.getFamilyOrPersonalUsage());
-    final totalStorageInGB = convertBytesToGBs(userDetails.getTotalStorage());
+        roundBytesUsedToGBs(userDetails.getFamilyOrPersonalUsage());
+    final totalStorageInGB =
+        convertBytesToGBs(userDetails.getTotalStorage()).truncate();
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
