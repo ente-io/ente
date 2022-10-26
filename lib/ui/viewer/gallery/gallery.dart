@@ -9,6 +9,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/selected_files.dart';
@@ -38,6 +39,7 @@ class Gallery extends StatefulWidget {
   final Widget footer;
   final bool smallerTodayFont;
   final String albumName;
+  final double scrollBottomSafeArea;
 
   const Gallery({
     @required this.asyncLoader,
@@ -49,6 +51,7 @@ class Gallery extends StatefulWidget {
     this.removalEventTypes = const {},
     this.header,
     this.footer = const SizedBox(height: 120),
+    this.scrollBottomSafeArea = 120.0,
     this.smallerTodayFont = false,
     this.albumName = '',
     Key key,
@@ -68,12 +71,16 @@ class _GalleryState extends State<Gallery> {
   Logger _logger;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
+  ItemScrollController _itemScroller;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
+  StreamSubscription<TabDoubleTapEvent> _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
 
   @override
   void initState() {
     _logger = Logger("Gallery_" + widget.tagPrefix);
+    _itemScroller = ItemScrollController();
+
     _logger.info("initState");
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent.listen((event) async {
@@ -82,6 +89,17 @@ class _GalleryState extends State<Gallery> {
         _onFilesLoaded(result.files);
       });
     }
+    _tabDoubleTapEvent =
+        Bus.instance.on<TabDoubleTapEvent>().listen((event) async {
+      // todo: Assign ID to Gallery and fire generic event with ID &
+      //  target index/date
+      if (mounted && event.selectedIndex == 0) {
+        _itemScroller.scrollTo(
+          index: 0,
+          duration: const Duration(milliseconds: 150),
+        );
+      }
+    });
     if (widget.forceReloadEvents != null) {
       for (final event in widget.forceReloadEvents) {
         _forceReloadEventSubscriptions.add(
@@ -159,6 +177,7 @@ class _GalleryState extends State<Gallery> {
   @override
   void dispose() {
     _reloadEventSubscription?.cancel();
+    _tabDoubleTapEvent?.cancel();
     for (final subscription in _forceReloadEventSubscriptions) {
       subscription.cancel();
     }
@@ -177,10 +196,10 @@ class _GalleryState extends State<Gallery> {
   Widget _getListView() {
     return HugeListView<List<File>>(
       key: _hugeListViewKey,
-      controller: ItemScrollController(),
+      controller: _itemScroller,
       startIndex: 0,
       totalCount: _collatedFiles.length,
-      isDraggableScrollbarEnabled: _collatedFiles.length > 30,
+      isDraggableScrollbarEnabled: _collatedFiles.length > 10,
       waitBuilder: (_) {
         return const EnteLoadingWidget();
       },
@@ -239,6 +258,7 @@ class _GalleryState extends State<Gallery> {
       thumbPadding: widget.header != null
           ? const EdgeInsets.only(top: 60)
           : const EdgeInsets.all(0),
+      bottomSafeArea: widget.scrollBottomSafeArea,
       firstShown: (int firstIndex) {
         Bus.instance
             .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));

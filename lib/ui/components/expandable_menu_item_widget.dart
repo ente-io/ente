@@ -60,7 +60,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
                 title: widget.title,
                 makeTextBold: true,
               ),
-              isHeaderOfExpansion: true,
+              isExpandable: true,
               leadingIcon: widget.leadingIcon,
               trailingIcon: Icons.expand_more,
               menuItemColor: enteColorScheme.fillFaint,

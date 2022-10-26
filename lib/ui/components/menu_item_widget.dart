@@ -4,7 +4,7 @@ import 'package:photos/ente_theme_data.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
-  final bool isHeaderOfExpansion;
+  final bool isExpandable;
 // leading icon can be passed without specifing size of icon, this component sets size to 20x20 irrespective of passed icon's size
   final IconData? leadingIcon;
   final Color? leadingIconColor;
@@ -17,10 +17,11 @@ class MenuItemWidget extends StatefulWidget {
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
   final double borderRadius;
+  final Color? pressedColor;
   final ExpandableController? expandableController;
   const MenuItemWidget({
     required this.captionedTextWidget,
-    this.isHeaderOfExpansion = false,
+    this.isExpandable = false,
     this.leadingIcon,
     this.leadingIconColor,
     this.trailingIcon,
@@ -31,6 +32,7 @@ class MenuItemWidget extends StatefulWidget {
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
     this.borderRadius = 4.0,
+    this.pressedColor,
     this.expandableController,
     Key? key,
   }) : super(key: key);
@@ -40,14 +42,22 @@ class MenuItemWidget extends StatefulWidget {
 }
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
+  Color? menuItemColor;
   @override
   void initState() {
+    menuItemColor = widget.menuItemColor;
     if (widget.expandableController != null) {
       widget.expandableController!.addListener(() {
         setState(() {});
       });
     }
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    menuItemColor = widget.menuItemColor;
+    super.didChangeDependencies();
   }
 
   @override
@@ -60,11 +70,14 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.isHeaderOfExpansion
+    return widget.isExpandable
         ? menuItemWidget(context)
         : GestureDetector(
             onTap: widget.onTap,
             onDoubleTap: widget.onDoubleTap,
+            onTapDown: _onTapDown,
+            onTapUp: _onTapUp,
+            onTapCancel: _onCancel,
             child: menuItemWidget(context),
           );
   }
@@ -77,7 +90,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ? const Radius.circular(0)
         : borderRadius;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 20),
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
@@ -87,7 +100,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
           bottomLeft: bottomBorderRadius,
           bottomRight: bottomBorderRadius,
         ),
-        color: widget.menuItemColor,
+        color: menuItemColor,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,5 +151,26 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ],
       ),
     );
+  }
+
+  void _onTapDown(details) {
+    setState(() {
+      menuItemColor = widget.pressedColor;
+    });
+  }
+
+  void _onTapUp(details) {
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () => setState(() {
+        menuItemColor = widget.menuItemColor;
+      }),
+    );
+  }
+
+  void _onCancel() {
+    setState(() {
+      menuItemColor = widget.menuItemColor;
+    });
   }
 }

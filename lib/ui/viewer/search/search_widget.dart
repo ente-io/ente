@@ -75,7 +75,6 @@ class _SearchWidgetState extends State<SearchWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               children: [
-                const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Container(

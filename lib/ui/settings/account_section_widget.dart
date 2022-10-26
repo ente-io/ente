@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/change_email_dialog.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
@@ -34,6 +35,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Recovery key",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -67,6 +69,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Change email",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -92,6 +95,7 @@ class AccountSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Change password",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

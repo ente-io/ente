@@ -2,8 +2,6 @@
 
 library google_nav_bar;
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -120,19 +118,7 @@ class _GNavState extends State<GNav> {
                     Colors.transparent,
                 duration: widget.duration ?? const Duration(milliseconds: 500),
                 onPressed: () {
-                  if (!clickable) return;
-                  setState(() {
-                    selectedIndex = widget.tabs.indexOf(t);
-                    clickable = false;
-                  });
-                  widget.onTabChange(selectedIndex);
-
-                  Future.delayed(
-                      widget.duration ?? const Duration(milliseconds: 500), () {
-                    setState(() {
-                      clickable = true;
-                    });
-                  });
+                  widget.onTabChange(widget.tabs.indexOf(t));
                 },
               ),
             )

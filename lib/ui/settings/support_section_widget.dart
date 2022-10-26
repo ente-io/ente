@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -34,6 +35,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Email",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -45,6 +47,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Roadmap",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () {
@@ -67,6 +70,7 @@ class SupportSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Report a bug",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
