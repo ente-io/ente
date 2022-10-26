@@ -40,18 +40,22 @@ class SectionTitle extends StatelessWidget {
   }
 }
 
-RichText onEnteSection = RichText(
-  text: const TextSpan(
-    children: [
-      TextSpan(
-        text: "On ",
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter',
-          fontSize: 21,
+RichText getOnEnteSection(BuildContext context) {
+  final EnteTextTheme textTheme = getEnteTextTheme(context);
+  return RichText(
+    text: TextSpan(
+      children: [
+        TextSpan(
+          text: "On ",
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontFamily: 'Inter',
+            fontSize: 21,
+            color: textTheme.brandSmall.color,
+          ),
         ),
-      ),
-      TextSpan(text: "ente", style: brandStyleSmall),
-    ],
-  ),
-);
+        TextSpan(text: "ente", style: textTheme.brandSmall),
+      ],
+    ),
+  );
+}
