@@ -140,7 +140,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                SectionTitle(titleWithBrand: onEnteSection),
+                SectionTitle(titleWithBrand: getOnEnteSection(context)),
                 _sortMenu(),
               ],
             ),
