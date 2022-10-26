@@ -133,8 +133,10 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     final freeSpaceInBytes = userDetails.getFreeStorage();
     final shouldShowFreeSpaceInMBs = freeSpaceInBytes < hundredMBinBytes;
 
-    final usedSpaceInGB =
-        roundBytesUsedToGBs(userDetails.getFamilyOrPersonalUsage());
+    final usedSpaceInGB = roundBytesUsedToGBs(
+      userDetails.getFamilyOrPersonalUsage(),
+      userDetails.getFreeStorage(),
+    );
     final totalStorageInGB =
         convertBytesToGBs(userDetails.getTotalStorage()).truncate();
 
