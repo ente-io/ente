@@ -2,8 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class TitleBarWidget extends StatelessWidget {
+  final String? title;
+  final String? caption;
+  final Widget? flexibleSpaceTitle;
+  final String? flexibleSpaceCaption;
   final List<Widget>? actionIcons;
-  const TitleBarWidget({this.actionIcons, super.key});
+  const TitleBarWidget({
+    this.title,
+    this.caption,
+    this.flexibleSpaceTitle,
+    this.flexibleSpaceCaption,
+    this.actionIcons,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +30,20 @@ class TitleBarWidget extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(
-            'Title',
-            style: getEnteTextTheme(context).largeBold,
-          ),
-          Text(
-            'Caption',
-            style: getEnteTextTheme(context)
-                .mini
-                .copyWith(color: getEnteColorScheme(context).textMuted),
-          )
+          title == null
+              ? const SizedBox.shrink()
+              : Text(
+                  title!,
+                  style: getEnteTextTheme(context).largeBold,
+                ),
+          caption == null
+              ? const SizedBox.shrink()
+              : Text(
+                  caption!,
+                  style: getEnteTextTheme(context)
+                      .mini
+                      .copyWith(color: getEnteColorScheme(context).textMuted),
+                )
         ],
       ),
       actions: [
@@ -56,17 +71,18 @@ class TitleBarWidget extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Title',
-                style: getEnteTextTheme(context).h3Bold,
-              ),
-              Text(
-                'Caption',
-                style: getEnteTextTheme(context)
-                    .small
-                    .copyWith(color: getEnteColorScheme(context).textMuted),
-              )
+            children: <Widget>[
+              flexibleSpaceTitle == null
+                  ? const SizedBox.shrink()
+                  : flexibleSpaceTitle!,
+              flexibleSpaceCaption == null
+                  ? const SizedBox.shrink()
+                  : Text(
+                      'Caption',
+                      style: getEnteTextTheme(context).small.copyWith(
+                            color: getEnteColorScheme(context).textMuted,
+                          ),
+                    )
             ],
           ),
         ),
