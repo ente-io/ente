@@ -41,7 +41,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
       onTapCancel: _onTapCancel,
       onTap: widget.onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 50),
+        duration: const Duration(milliseconds: 20),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
