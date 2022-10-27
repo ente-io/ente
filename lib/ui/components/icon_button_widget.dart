@@ -61,7 +61,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
         color: iconStateColor,
       ),
       child: Icon(
-        Icons.close_outlined,
+        widget.icon,
         color:
             widget.isSecondary ? colorTheme.strokeMuted : colorTheme.strokeBase,
         size: 24,
