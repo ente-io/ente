@@ -17,6 +17,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -389,6 +390,23 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         ),
       );
     }
+
+    if (widget.type == GalleryType.homepage) {
+      actions.add(
+        Tooltip(
+          message: "HiddenStuff",
+          child: IconButton(
+            color: Theme.of(context).colorScheme.iconColor,
+            icon: const Icon(
+              Icons.hide_image,
+            ),
+            onPressed: () async {
+              await _handleHideRequest(context);
+            },
+          ),
+        ),
+      );
+    }
     return actions;
   }
 
@@ -453,6 +471,19 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       await showGenericErrorDialog(context);
     } finally {
       _clearSelectedFiles();
+    }
+  }
+
+  Future<void> _handleHideRequest(BuildContext context) async {
+    try {
+      final hideResult = await CollectionsService.instance
+          .hideFiles(context, widget.selectedFiles.files.toList());
+      if (hideResult) {
+        _clearSelectedFiles();
+      }
+    } catch (e, s) {
+      _logger.severe("failed to update file visibility", e, s);
+      await showGenericErrorDialog(context);
     }
   }
 

@@ -1223,6 +1223,32 @@ class FilesDB {
     return result;
   }
 
+  Future<Map<int, List<File>>> getAllFilesGroupByCollectionID(
+      List<int> ids) async {
+    final result = <int, List<File>>{};
+    if (ids.isEmpty) {
+      return result;
+    }
+    String inParam = "";
+    for (final id in ids) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnUploadedFileID IN ($inParam)',
+    );
+    final files = convertToFiles(results);
+    for (File eachFile in files) {
+      if (!result.containsKey(eachFile.collectionID)) {
+        result[eachFile.collectionID] = <File>[];
+      }
+      result[eachFile.collectionID].add(eachFile);
+    }
+    return result;
+  }
+
   Future<Set<int>> getAllCollectionIDsOfFile(
     int uploadedFileID,
   ) async {

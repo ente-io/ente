@@ -21,6 +21,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
@@ -50,6 +51,7 @@ class CollectionsService {
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
+  Collection cachedDefaultHiddenCollection;
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -77,6 +79,18 @@ class CollectionsService {
     });
   }
 
+  @protected
+  Configuration get config => _config;
+
+  @protected
+  Map<int, Collection> get collectionIDToCollections =>
+      _collectionIDToCollections;
+
+  @protected
+  FilesDB get filesDB => _filesDB;
+
+  // sync method fetches just sync the collections, not the individual files
+  // within the collection.
   Future<List<Collection>> sync() async {
     _logger.info("Syncing collections");
     final lastCollectionUpdationTime =
@@ -292,6 +306,7 @@ class CollectionsService {
   }
 
   Uint8List _getDecryptedKey(Collection collection) {
+    debugPrint("Finding collection decryption key for ${collection.id}");
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
     if (collection.owner.id == _config.getUserID()) {
       if (_config.getKey() == null) {
@@ -848,11 +863,16 @@ class CollectionsService {
     RemoteSyncService.instance.sync(silently: true);
   }
 
-  Future<Collection> createAndCacheCollection(Collection collection) async {
+  Future<Collection> createAndCacheCollection(
+    Collection collection, {
+    CreateRequest createRequest,
+  }) async {
+    final dynamic payload =
+        createRequest != null ? createRequest.toJson() : collection.toMap();
     return _enteDio
         .post(
       "/collections",
-      data: collection.toMap(),
+      data: payload,
     )
         .then((response) {
       final collection = Collection.fromMap(response.data["collection"]);
