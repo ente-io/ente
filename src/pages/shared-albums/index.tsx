@@ -310,14 +310,9 @@ export default function PublicCollectionGallery() {
             <PhotoFrame
                 files={publicFiles}
                 syncWithRemote={syncWithRemote}
-                favItemIds={null}
                 setSelected={() => null}
                 selected={{ count: 0, collectionID: null }}
                 isFirstLoad={true}
-                openUploader={() => null}
-                isInSearchMode={false}
-                search={{}}
-                deletedFileIds={null}
                 activeCollection={ALL_SECTION}
                 isSharedCollection
                 enableDownload={
