@@ -5,8 +5,12 @@ class TitleBarTitleWidget extends StatelessWidget {
   final String? title;
   final bool isTitleH2;
   final IconData? icon;
-  const TitleBarTitleWidget(
-      {this.title, this.isTitleH2 = false, this.icon, super.key});
+  const TitleBarTitleWidget({
+    this.title,
+    this.isTitleH2 = false,
+    this.icon,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

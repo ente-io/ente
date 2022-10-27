@@ -11,14 +11,14 @@ class TitleBarWidget extends StatelessWidget {
   // VisualDensity property exists for the widget and try to find the right values.
   // https://api.flutter.dev/flutter/material/VisualDensity-class.html
   final List<Widget>? actionIcons;
-  final bool isTitleBigWithoutLeading;
+  final bool isTitleH2WithoutLeading;
   const TitleBarWidget({
     this.title,
     this.caption,
     this.flexibleSpaceTitle,
     this.flexibleSpaceCaption,
     this.actionIcons,
-    this.isTitleBigWithoutLeading = false,
+    this.isTitleH2WithoutLeading = false,
     super.key,
   });
 
@@ -36,7 +36,7 @@ class TitleBarWidget extends StatelessWidget {
       centerTitle: false,
       titleSpacing: 0,
       title: Padding(
-        padding: EdgeInsets.only(left: isTitleBigWithoutLeading ? 16 : 0),
+        padding: EdgeInsets.only(left: isTitleH2WithoutLeading ? 16 : 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -45,11 +45,11 @@ class TitleBarWidget extends StatelessWidget {
                 ? const SizedBox.shrink()
                 : Text(
                     title!,
-                    style: isTitleBigWithoutLeading
+                    style: isTitleH2WithoutLeading
                         ? textTheme.h2Bold
                         : textTheme.largeBold,
                   ),
-            caption == null || isTitleBigWithoutLeading
+            caption == null || isTitleH2WithoutLeading
                 ? const SizedBox.shrink()
                 : Text(
                     caption!,
@@ -62,11 +62,11 @@ class TitleBarWidget extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
           child: Row(
-            children: _getActions(),
+            children: _actionsWithPaddingInBetween(),
           ),
         ),
       ],
-      leading: isTitleBigWithoutLeading
+      leading: isTitleH2WithoutLeading
           ? null
           : Padding(
               padding: const EdgeInsets.all(4),
@@ -115,7 +115,7 @@ class TitleBarWidget extends StatelessWidget {
     );
   }
 
-  _getActions() {
+  _actionsWithPaddingInBetween() {
     if (actionIcons == null) {
       return <Widget>[const SizedBox.shrink()];
     }
