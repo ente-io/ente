@@ -12,7 +12,6 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
-import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -611,17 +610,9 @@ class FilesDB {
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    String whereClause;
-    List<Object> whereArgs;
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      whereClause =
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnMMdVisibility = ?';
-      whereArgs = [collectionID, startTime, endTime, visibility];
-    } else {
-      whereClause =
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
-      whereArgs = [collectionID, startTime, endTime];
-    }
+    const String whereClause =
+        '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
+    final List<Object> whereArgs = [collectionID, startTime, endTime];
 
     final results = await db.query(
       filesTable,
@@ -1080,7 +1071,9 @@ class FilesDB {
     final db = await instance.database;
     final count = Sqflite.firstIntValue(
       await db.rawQuery(
-        'SELECT COUNT(*) FROM $filesTable where $columnMMdVisibility = $visibility AND $columnOwnerID = $ownerID',
+        'SELECT COUNT(distinct($columnUploadedFileID)) FROM $filesTable where '
+        '$columnMMdVisibility'
+        ' = $visibility AND $columnOwnerID = $ownerID',
       ),
     );
     return count;
@@ -1143,25 +1136,7 @@ class FilesDB {
 
   Future<List<File>> getLatestCollectionFiles() async {
     debugPrint("Fetching latestCollectionFiles from db");
-    String query;
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      query = '''
-      SELECT $filesTable.*
-      FROM $filesTable
-      INNER JOIN
-        (
-          SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
-          FROM $filesTable
-          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS 
-          NOT -1 AND $columnMMdVisibility = $visibilityVisible AND 
-          $columnUploadedFileID IS NOT -1)
-          GROUP BY $columnCollectionID
-        ) latest_files
-        ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
-        AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
-    ''';
-    } else {
-      query = '''
+    const String query = '''
       SELECT $filesTable.*
       FROM $filesTable
       INNER JOIN
@@ -1173,9 +1148,7 @@ class FilesDB {
         ) latest_files
         ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
         AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
-
   ''';
-    }
     final db = await instance.database;
     final rows = await db.rawQuery(
       query,
