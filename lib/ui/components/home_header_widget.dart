@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/viewer/search/search_widget.dart';
 
 class HomeHeaderWidget extends StatefulWidget {
@@ -23,16 +24,13 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-            onPressed: () {
+          IconButtonWidget(
+            isPrimary: true,
+            icon: Icons.menu_outlined,
+            onTap: () {
               Scaffold.of(context).openDrawer();
               Bus.instance.fire(OpenedSettingsEvent());
             },
-            splashColor: Colors.transparent,
-            icon: const Icon(
-              Icons.menu_outlined,
-            ),
           ),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 250),
