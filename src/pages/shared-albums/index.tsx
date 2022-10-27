@@ -309,16 +309,10 @@ export default function PublicCollectionGallery() {
             <SharedAlbumNavbar />
             <PhotoFrame
                 files={publicFiles}
-                setFiles={setPublicFiles}
                 syncWithRemote={syncWithRemote}
-                favItemIds={null}
                 setSelected={() => null}
                 selected={{ count: 0, collectionID: null }}
                 isFirstLoad={true}
-                openUploader={() => null}
-                isInSearchMode={false}
-                search={{}}
-                deletedFileIds={new Set<number>()}
                 activeCollection={ALL_SECTION}
                 isSharedCollection
                 enableDownload={
