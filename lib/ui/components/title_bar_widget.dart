@@ -12,6 +12,7 @@ class TitleBarWidget extends StatelessWidget {
   // https://api.flutter.dev/flutter/material/VisualDensity-class.html
   final List<Widget>? actionIcons;
   final bool isTitleH2WithoutLeading;
+  final bool isFlexibleSpaceDisabled;
   const TitleBarWidget({
     this.title,
     this.caption,
@@ -19,6 +20,7 @@ class TitleBarWidget extends StatelessWidget {
     this.flexibleSpaceCaption,
     this.actionIcons,
     this.isTitleH2WithoutLeading = false,
+    this.isFlexibleSpaceDisabled = false,
     super.key,
   });
 
@@ -79,39 +81,43 @@ class TitleBarWidget extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back_outlined),
               ),
             ),
-      flexibleSpace: FlexibleSpaceBar(
-        background: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              const SizedBox(height: toolbarHeight),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 4, horizontal: 16),
+      flexibleSpace: isFlexibleSpaceDisabled
+          ? null
+          : FlexibleSpaceBar(
+              background: SafeArea(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    flexibleSpaceTitle == null
-                        ? const SizedBox.shrink()
-                        : flexibleSpaceTitle!,
-                    flexibleSpaceCaption == null
-                        ? const SizedBox.shrink()
-                        : Text(
-                            flexibleSpaceCaption!,
-                            style: textTheme.small.copyWith(
-                              color: colorTheme.textMuted,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          )
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    const SizedBox(height: toolbarHeight),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4,
+                        horizontal: 16,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          flexibleSpaceTitle == null
+                              ? const SizedBox.shrink()
+                              : flexibleSpaceTitle!,
+                          flexibleSpaceCaption == null
+                              ? const SizedBox.shrink()
+                              : Text(
+                                  flexibleSpaceCaption!,
+                                  style: textTheme.small.copyWith(
+                                    color: colorTheme.textMuted,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                )
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
