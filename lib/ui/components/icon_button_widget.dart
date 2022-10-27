@@ -9,7 +9,7 @@ class IconButtonWidget extends StatefulWidget {
   final VoidCallback? onTap;
   const IconButtonWidget({
     required this.icon,
-    this.isPrimary = true,
+    this.isPrimary = false,
     this.isSecondary = false,
     this.isRounded = false,
     this.onTap,
@@ -32,6 +32,9 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (!widget.isPrimary && !widget.isRounded && !widget.isSecondary) {
+      return const SizedBox.shrink();
+    }
     final colorTheme = getEnteColorScheme(context);
     iconStateColor ??
         (iconStateColor = (widget.isRounded ? colorTheme.fillFaint : null));
