@@ -5,6 +5,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/events/force_reload_home_gallery_event.dart';
+import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
@@ -65,6 +69,9 @@ extension HiddenService on CollectionsService {
       for (MapEntry<int, List<File>> entry in collectionToFilesMap.entries) {
         await move(defaultHiddenCollection.id, entry.key, entry.value);
       }
+      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      Bus.instance.fire(
+          LocalPhotosUpdatedEvent(filesToHide, type: EventType.unarchived));
 
       await dialog.hide();
     } on AssertionError catch (e) {

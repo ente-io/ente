@@ -70,6 +70,7 @@ class HomeGalleryWidget extends StatelessWidget {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.archived,
+        EventType.hide,
       },
       forceReloadEvents: [
         Bus.instance.on<BackupFoldersUpdatedEvent>(),

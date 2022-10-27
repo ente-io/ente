@@ -229,7 +229,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     widget.selectedFiles.clearAll();
   }
 
-  Future<void> _createAlbum() async {
+  Future<void> _createCollectionAction(CollectionActionType type) async {
     Navigator.push(
       context,
       PageTransition(
@@ -237,6 +237,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         child: CreateCollectionPage(
           widget.selectedFiles,
           null,
+          actionType: type,
         ),
       ),
     );
@@ -264,7 +265,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type != GalleryType.sharedCollection) {
+        widget.type != GalleryType.sharedCollection &&
+        widget.type != GalleryType.hidden) {
       String msg = "Add";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
@@ -279,7 +281,25 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             color: Theme.of(context).colorScheme.iconColor,
             icon: Icon(iconData),
             onPressed: () {
-              _createAlbum();
+              _createCollectionAction(CollectionActionType.addFiles);
+            },
+          ),
+        ),
+      );
+    }
+
+    if (Configuration.instance.hasConfiguredAccount() &&
+        widget.type == GalleryType.hidden) {
+      String msg = "Unhide";
+      IconData iconData = Icons.visibility;
+      actions.add(
+        Tooltip(
+          message: msg,
+          child: IconButton(
+            color: Theme.of(context).colorScheme.iconColor,
+            icon: Icon(iconData),
+            onPressed: () {
+              _createCollectionAction(CollectionActionType.unHide);
             },
           ),
         ),
@@ -320,6 +340,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     );
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive ||
+        widget.type == GalleryType.hidden ||
         widget.type == GalleryType.localFolder ||
         widget.type == GalleryType.searchResults) {
       actions.add(

@@ -627,6 +627,43 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
+  Future<FileLoadResult> getFilesInCollections(
+    List<int> collectionIDs,
+    int startTime,
+    int endTime,
+    int userID, {
+    int limit,
+    bool asc,
+  }) async {
+    if (collectionIDs.isEmpty) {
+      return FileLoadResult(<File>[], false);
+    }
+    String inParam = "";
+    for (final id in collectionIDs) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    String whereClause =
+        '$columnCollectionID  IN ($inParam) AND $columnCreationTime >= ? AND '
+        '$columnCreationTime <= ? AND $columnOwnerID = ?';
+    final List<Object> whereArgs = [startTime, endTime, userID];
+
+    final results = await db.query(
+      filesTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = convertToFiles(results);
+    final dedupeResult = _deduplicatedAndFilterIgnoredFiles(files, {});
+    _logger.info("Fetched " + dedupeResult.length.toString() + " files");
+    return FileLoadResult(files, files.length == limit);
+  }
+
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
