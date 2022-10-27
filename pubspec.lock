@@ -411,7 +411,7 @@ packages:
       name: flutter_inappwebview
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "5.4.3+7"
+    version: "5.7.1"
   flutter_keyboard_visibility:
     dependency: transitive
     description:
@@ -927,7 +927,7 @@ packages:
       name: photo_manager
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.4"
+    version: "2.4.1"
   photo_view:
     dependency: "direct main"
     description:
@@ -1004,7 +1004,7 @@ packages:
       name: scrollable_positioned_list
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.3"
+    version: "0.3.5"
   sentry:
     dependency: "direct main"
     description:

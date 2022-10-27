@@ -12,7 +12,7 @@ description: ente photos application
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 
-version: 0.6.47+377
+version: 0.6.51+381
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
@@ -91,13 +91,13 @@ dependencies:
   path: #dart
   path_provider: ^2.0.1
   pedantic: ^1.9.2
-  photo_manager: 2.1.4
+  photo_manager: ^2.4.1
   photo_view: ^0.14.0
   pinput: ^1.2.2
   provider: ^6.0.0
   quiver: ^3.0.1
   receive_sharing_intent: ^1.4.5
-  scrollable_positioned_list: ^0.2.2
+  scrollable_positioned_list: ^0.3.5
   sentry: ^6.12.1
   sentry_flutter: ^6.12.1
   share_plus: ^4.0.10

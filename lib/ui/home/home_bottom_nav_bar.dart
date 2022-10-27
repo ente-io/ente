@@ -41,12 +41,17 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tabBar) {
-        debugPrint('index changed to ${event.selectedIndex}');
+        debugPrint('${(TabChangedEvent).toString()} index changed  from '
+            '$currentTabIndex to ${event.selectedIndex} via ${event.source}');
         if (mounted) {
           setState(() {
             currentTabIndex = event.selectedIndex;
           });
         }
+      } else if (event.source == TabChangedEventSource.tabBar &&
+          currentTabIndex == event.selectedIndex) {
+        // user tapped on the currently selected index on the tapBar
+        Bus.instance.fire(TabDoubleTapEvent(currentTabIndex));
       }
     });
   }
@@ -57,7 +62,8 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     super.dispose();
   }
 
-  void _onTabChange(int index) {
+  void _onTabChange(int index, {String mode = 'tabChanged'}) {
+    debugPrint("_TabChanged called via method $mode");
     Bus.instance.fire(
       TabChangedEvent(
         index,
@@ -130,6 +136,7 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 onPressed: () {
                                   _onTabChange(
                                     0,
+                                    mode: "OnPressed",
                                   ); // To take care of occasional missing events
                                 },
                               ),
@@ -142,7 +149,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 onPressed: () {
                                   _onTabChange(
                                     1,
-                                  ); // To take care of occasional missing events
+                                    mode: "OnPressed",
+                                  ); // To take care of occasional missing
+                                  // events
                                 },
                               ),
                               GButton(
@@ -154,7 +163,9 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
                                 onPressed: () {
                                   _onTabChange(
                                     2,
-                                  ); // To take care of occasional missing events
+                                    mode: "OnPressed",
+                                  ); // To take care
+                                  // of occasional missing events
                                 },
                               ),
                             ],

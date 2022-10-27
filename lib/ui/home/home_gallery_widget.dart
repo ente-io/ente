@@ -27,6 +27,7 @@ class HomeGalleryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double bottomSafeArea = MediaQuery.of(context).padding.bottom;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();
@@ -78,6 +79,8 @@ class HomeGalleryWidget extends StatelessWidget {
       selectedFiles: selectedFiles,
       header: header,
       footer: footer,
+      // scrollSafe area -> SafeArea + Preserver more + Nav Bar buttons
+      scrollBottomSafeArea: bottomSafeArea + 180,
     );
     return gallery;
   }

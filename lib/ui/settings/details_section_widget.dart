@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/db/files_db.dart';
+import 'package:photos/models/file_type.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/ui/payment/subscription.dart';
+import 'package:photos/ui/settings/storage_error_widget.dart';
+import 'package:photos/ui/settings/storage_progress_widget.dart';
 import 'package:photos/utils/data_util.dart';
 
 class DetailsSectionWidget extends StatefulWidget {
@@ -17,6 +25,7 @@ class DetailsSectionWidget extends StatefulWidget {
 class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
   late Image _background;
   final _logger = Logger((_DetailsSectionWidgetState).toString());
+  final ValueNotifier<bool> _isStorageCardPressed = ValueNotifier(false);
 
   @override
   void initState() {
@@ -59,6 +68,12 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             ),
           );
         },
+        onTapDown: (details) {
+          _isStorageCardPressed.value = true;
+        },
+        onTapUp: (details) {
+          _isStorageCardPressed.value = false;
+        },
         child: containerForUserDetails(inheritedUserDetails),
       );
     }
@@ -68,176 +83,256 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     InheritedUserDetails inheritedUserDetails,
   ) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 428, maxHeight: 175),
-      child: Stack(
-        children: [
-          Container(
-            width: double.infinity,
-            color: Colors.transparent,
-            child: AspectRatio(
-              aspectRatio: 2 / 1,
-              child: _background,
+      constraints: const BoxConstraints(maxWidth: 365),
+      child: AspectRatio(
+        aspectRatio: 2 / 1,
+        child: Stack(
+          children: [
+            _background,
+            FutureBuilder(
+              future: inheritedUserDetails.userDetails,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return userDetails(snapshot.data as UserDetails);
+                }
+                if (snapshot.hasError) {
+                  _logger.severe(
+                    'failed to load user details',
+                    snapshot.error,
+                  );
+                  return const StorageErrorWidget();
+                }
+                return const EnteLoadingWidget(color: strokeBaseDark);
+              },
             ),
-          ),
-          FutureBuilder(
-            future: inheritedUserDetails.userDetails,
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return userDetails(snapshot.data as UserDetails);
-              }
-              if (snapshot.hasError) {
-                _logger.severe('failed to load user details', snapshot.error);
-                return const EnteLoadingWidget();
-              }
-              return const EnteLoadingWidget();
-            },
-          ),
-          const Align(
-            alignment: Alignment.centerRight,
-            child: Icon(
-              Icons.chevron_right,
-              color: Colors.white,
-              size: 24,
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: ValueListenableBuilder<bool>(
+                  builder: (BuildContext context, bool value, Widget? child) {
+                    return Icon(
+                      Icons.chevron_right_outlined,
+                      color: value ? strokeMutedDark : strokeBaseDark,
+                    );
+                  },
+                  valueListenable: _isStorageCardPressed,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget userDetails(UserDetails userDetails) {
+    const hundredMBinBytes = 107374182;
+
+    final isMobileScreenSmall = MediaQuery.of(context).size.width <= 365;
+    final freeSpaceInBytes = userDetails.getFreeStorage();
+    final shouldShowFreeSpaceInMBs = freeSpaceInBytes < hundredMBinBytes;
+
+    final usedSpaceInGB = roundBytesUsedToGBs(
+      userDetails.getFamilyOrPersonalUsage(),
+      userDetails.getFreeStorage(),
+    );
+    final totalStorageInGB =
+        convertBytesToGBs(userDetails.getTotalStorage()).truncate();
+
     return Padding(
-      padding: const EdgeInsets.only(
-        top: 20,
-        bottom: 20,
-        left: 16,
-        right: 16,
+      padding: EdgeInsets.fromLTRB(
+        16,
+        20,
+        16,
+        isMobileScreenSmall
+            ? userDetails.isPartOfFamily()
+                ? 12
+                : 8
+            : userDetails.isPartOfFamily()
+                ? 20
+                : 12,
       ),
-      child: Container(
-        color: Colors.transparent,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isMobileScreenSmall ? "Used space" : "Storage",
+                  style: getEnteTextTheme(context)
+                      .small
+                      .copyWith(color: textMutedDark),
+                ),
+                const SizedBox(height: 2),
+                RichText(
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  text: TextSpan(
+                    style: getEnteTextTheme(context)
+                        .h3Bold
+                        .copyWith(color: textBaseDark),
+                    children: [
+                      TextSpan(text: usedSpaceInGB.toString()),
+                      TextSpan(text: isMobileScreenSmall ? "/" : " GB of "),
+                      TextSpan(text: totalStorageInGB.toString() + " GB"),
+                      TextSpan(text: isMobileScreenSmall ? "" : " used"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            children: [
+              Stack(
+                children: <Widget>[
+                  const StorageProgressWidget(
+                    color:
+                        Color.fromRGBO(255, 255, 255, 0.2), //hardcoded in figma
+                    fractionOfStorage: 1,
+                  ),
+                  userDetails.isPartOfFamily()
+                      ? StorageProgressWidget(
+                          color: strokeBaseDark,
+                          fractionOfStorage:
+                              ((userDetails.getFamilyOrPersonalUsage()) /
+                                  userDetails.getTotalStorage()),
+                        )
+                      : const SizedBox.shrink(),
+                  StorageProgressWidget(
+                    color: userDetails.isPartOfFamily()
+                        ? getEnteColorScheme(context).primary300
+                        : strokeBaseDark,
+                    fractionOfStorage:
+                        (userDetails.usage / userDetails.getTotalStorage()),
+                  )
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "Storage",
-                    style: Theme.of(context).textTheme.subtitle2!.copyWith(
-                          color: Colors.white.withOpacity(0.7),
+                  userDetails.isPartOfFamily()
+                      ? Row(
+                          children: [
+                            Container(
+                              width: 8.71,
+                              height: 8.99,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: getEnteColorScheme(context).primary300,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "You",
+                              style: getEnteTextTheme(context)
+                                  .miniBold
+                                  .copyWith(color: textBaseDark),
+                            ),
+                            const SizedBox(width: 12),
+                            Container(
+                              width: 8.71,
+                              height: 8.99,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: textBaseDark,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              "Family",
+                              style: getEnteTextTheme(context)
+                                  .miniBold
+                                  .copyWith(color: textBaseDark),
+                            ),
+                          ],
+                        )
+                      : FutureBuilder(
+                          future: FilesDB.instance.fetchFilesCountbyType(
+                            Configuration.instance.getUserID(),
+                          ),
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              final filesCount = FilesCount(
+                                snapshot.data as Map<FileType, int>,
+                              );
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${NumberFormat().format(filesCount.photos)} photos",
+                                    style: getEnteTextTheme(context)
+                                        .mini
+                                        .copyWith(color: textBaseDark),
+                                  ),
+                                  Text(
+                                    "${NumberFormat().format(filesCount.videos)} videos",
+                                    style: getEnteTextTheme(context)
+                                        .mini
+                                        .copyWith(color: textBaseDark),
+                                  ),
+                                ],
+                              );
+                            } else if (snapshot.hasError) {
+                              _logger.severe(
+                                'Error fetching photo and video count',
+                                snapshot.error,
+                              );
+                              return const SizedBox.shrink();
+                            } else {
+                              return const EnteLoadingWidget(
+                                color: strokeBaseDark,
+                              );
+                            }
+                          },
                         ),
-                  ),
-                  Text(
-                    "${convertBytesToReadableFormat(userDetails.getFreeStorage())} of ${convertBytesToReadableFormat(userDetails.getTotalStorage())} free",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline5!
-                        .copyWith(color: Colors.white),
+                  RichText(
+                    text: TextSpan(
+                      style: getEnteTextTheme(context)
+                          .mini
+                          .copyWith(color: textFaintDark),
+                      children: [
+                        TextSpan(
+                          text:
+                              "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
+                        ),
+                        TextSpan(
+                          text: shouldShowFreeSpaceInMBs
+                              ? " MB free"
+                              : " GB free",
+                        )
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Stack(
-                  children: <Widget>[
-                    Container(
-                      color: Colors.white.withOpacity(0.2),
-                      width: MediaQuery.of(context).size.width,
-                      height: 4,
-                    ),
-                    Container(
-                      color: Colors.white.withOpacity(0.75),
-                      width: MediaQuery.of(context).size.width *
-                          ((userDetails.getFamilyOrPersonalUsage()) /
-                              userDetails.getTotalStorage()),
-                      height: 4,
-                    ),
-                    Container(
-                      color: Colors.white,
-                      width: MediaQuery.of(context).size.width *
-                          (userDetails.usage / userDetails.getTotalStorage()),
-                      height: 4,
-                    ),
-                  ],
-                ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    userDetails.isPartOfFamily()
-                        ? Row(
-                            children: [
-                              Container(
-                                width: 8.71,
-                                height: 8.99,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 4),
-                              ),
-                              Text(
-                                "You",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .copyWith(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 12),
-                              ),
-                              Container(
-                                width: 8.71,
-                                height: 8.99,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withOpacity(0.75),
-                                ),
-                              ),
-                              const Padding(
-                                padding: EdgeInsets.only(right: 4),
-                              ),
-                              Text(
-                                "Family",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyText1!
-                                    .copyWith(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                              ),
-                            ],
-                          )
-                        : Text(
-                            "${convertBytesToReadableFormat(userDetails.getFamilyOrPersonalUsage())} used",
-                            style:
-                                Theme.of(context).textTheme.bodyText1!.copyWith(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                    ),
-                          ),
-                  ],
-                ),
-              ],
-            )
-          ],
-        ),
+            ],
+          )
+        ],
       ),
     );
+  }
+
+  num _roundedFreeSpace(num totalStorageInGB, num usedSpaceInGB) {
+    int fractionDigits;
+    //subtracting usedSpace from totalStorage in GB instead of converting from bytes so that free space and used space adds up in the UI
+    final freeSpace = totalStorageInGB - usedSpaceInGB;
+    //show one decimal place if free space is less than 10GB
+    if (freeSpace < 10) {
+      fractionDigits = 1;
+    } else {
+      fractionDigits = 0;
+    }
+    //omit decimal if decimal is 0
+    if (fractionDigits == 1 && freeSpace.remainder(1) == 0) {
+      fractionDigits = 0;
+    }
+    return num.parse(freeSpace.toStringAsFixed(fractionDigits));
   }
 }
