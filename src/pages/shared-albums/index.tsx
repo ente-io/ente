@@ -309,7 +309,6 @@ export default function PublicCollectionGallery() {
             <SharedAlbumNavbar />
             <PhotoFrame
                 files={publicFiles}
-                setFiles={setPublicFiles}
                 syncWithRemote={syncWithRemote}
                 favItemIds={null}
                 setSelected={() => null}

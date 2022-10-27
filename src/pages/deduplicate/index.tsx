@@ -166,7 +166,6 @@ export default function Deduplicate() {
             )}
             <PhotoFrame
                 files={duplicateFiles}
-                setFiles={setDuplicateFiles}
                 syncWithRemote={syncWithRemote}
                 setSelected={setSelected}
                 selected={selected}

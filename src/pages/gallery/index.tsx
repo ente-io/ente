@@ -690,7 +690,6 @@ export default function Gallery() {
 
                 <PhotoFrame
                     files={files}
-                    setFiles={setFiles}
                     syncWithRemote={syncWithRemote}
                     favItemIds={favItemIds}
                     archivedCollections={archivedCollections}

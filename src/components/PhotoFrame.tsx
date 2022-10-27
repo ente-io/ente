@@ -15,7 +15,7 @@ import {
 import { isSharedFile } from 'utils/file';
 import { isPlaybackPossible } from 'utils/photoFrame';
 import { PhotoList } from './PhotoList';
-import { SetFiles, SelectedState } from 'types/gallery';
+import { SelectedState } from 'types/gallery';
 import { FILE_TYPE } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
@@ -49,7 +49,6 @@ const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
     files: EnteFile[];
-    setFiles: SetFiles;
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
     archivedCollections?: Set<number>;
@@ -77,7 +76,6 @@ type SourceURL = {
 
 const PhotoFrame = ({
     files,
-    setFiles,
     syncWithRemote,
     favItemIds,
     archivedCollections,
@@ -263,12 +261,10 @@ const PhotoFrame = ({
 
     const updateURL = (id: number) => (url: string) => {
         const updateFile = (file: EnteFile) => {
-            file = {
-                ...file,
-                msrc: url,
-                w: window.innerWidth,
-                h: window.innerHeight,
-            };
+            file.msrc = url;
+            file.w = window.innerWidth;
+            file.h = window.innerHeight;
+
             if (file.metadata.fileType === FILE_TYPE.VIDEO && !file.html) {
                 file.html = `
                 <div class="pswp-item-container">
@@ -298,15 +294,6 @@ const PhotoFrame = ({
             }
             return file;
         };
-        setFiles((files) => {
-            try {
-                const index = getFileIndexFromID(files, id);
-                files[index] = updateFile(files[index]);
-            } catch (e) {
-                logError(e, 'failed to update url');
-            }
-            return files;
-        });
         const index = getFileIndexFromID(files, id);
         return updateFile(files[index]);
     };
@@ -315,11 +302,9 @@ const PhotoFrame = ({
         const { videoURL, imageURL } = srcURL;
         const isPlayable = videoURL && (await isPlaybackPossible(videoURL));
         const updateFile = (file: EnteFile) => {
-            file = {
-                ...file,
-                w: window.innerWidth,
-                h: window.innerHeight,
-            };
+            file.w = window.innerWidth;
+            file.h = window.innerHeight;
+
             if (file.metadata.fileType === FILE_TYPE.VIDEO) {
                 if (isPlayable) {
                     file.html = `
@@ -366,15 +351,6 @@ const PhotoFrame = ({
             }
             return file;
         };
-        setFiles((files) => {
-            try {
-                const index = getFileIndexFromID(files, id);
-                files[index] = updateFile(files[index]);
-            } catch (e) {
-                logError(e, 'failed to update src url');
-            }
-            return files;
-        });
         setIsSourceLoaded(true);
         const index = getFileIndexFromID(files, id);
         return updateFile(files[index]);
