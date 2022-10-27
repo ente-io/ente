@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
 
 class TitleBarWidget extends StatelessWidget {
   final String? title;
   final String? caption;
   final Widget? flexibleSpaceTitle;
   final String? flexibleSpaceCaption;
-  //If passing IconButton, set visualDensity to -2 (horizontal & vertical).
-  //This could be applicable to other widgets too. If layout looks different see if
-  // VisualDensity property exists for the widget and try to find the right values.
-  // https://api.flutter.dev/flutter/material/VisualDensity-class.html
   final List<Widget>? actionIcons;
   final bool isTitleH2WithoutLeading;
   final bool isFlexibleSpaceDisabled;
@@ -72,13 +69,12 @@ class TitleBarWidget extends StatelessWidget {
           ? null
           : Padding(
               padding: const EdgeInsets.all(4),
-              child: IconButton(
-                visualDensity:
-                    const VisualDensity(horizontal: -2, vertical: -2),
-                onPressed: () {
+              child: IconButtonWidget(
+                icon: Icons.arrow_back_outlined,
+                isPrimary: true,
+                onTap: () {
                   Navigator.pop(context);
                 },
-                icon: const Icon(Icons.arrow_back_outlined),
               ),
             ),
       flexibleSpace: isFlexibleSpaceDisabled
