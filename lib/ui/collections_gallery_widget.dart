@@ -13,6 +13,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/ui/collections/archived_collections_button_widget.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
 import 'package:photos/ui/collections/hidden_collections_button_widget.dart';
@@ -119,6 +120,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Widget _getCollectionsGalleryWidget(
     List<CollectionWithThumbnail> collections,
   ) {
+    final enableBeta = FeatureFlagService.instance.isInternalUserOrDebugBuild();
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
         .subtitle1
@@ -159,8 +161,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                   TrashButtonWidget(trashAndHiddenTextStyle),
                   const SizedBox(height: 12),
                   ArchivedCollectionsButtonWidget(trashAndHiddenTextStyle),
-                  const SizedBox(height: 12),
-                  HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
+                  enableBeta
+                      ? const SizedBox(height: 12)
+                      : const SizedBox.shrink(),
+                  enableBeta
+                      ? HiddenCollectionsButtonWidget(trashAndHiddenTextStyle)
+                      : const SizedBox.shrink(),
                 ],
               ),
             ),

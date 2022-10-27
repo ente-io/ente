@@ -17,6 +17,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -119,6 +120,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
   final GlobalKey shareButtonKey = GlobalKey();
+  bool enableBeta = false;
   @override
   void initState() {
     _selectedFilesListener = () {
@@ -141,6 +143,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
 
   @override
   Widget build(BuildContext context) {
+    enableBeta = FeatureFlagService.instance.isInternalUserOrDebugBuild();
     return Container(
       color: Colors.transparent,
       child: ListView(
@@ -412,7 +415,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       );
     }
 
-    if (widget.type == GalleryType.homepage) {
+    if (widget.type == GalleryType.homepage && enableBeta) {
       actions.add(
         Tooltip(
           message: "HiddenStuff",
