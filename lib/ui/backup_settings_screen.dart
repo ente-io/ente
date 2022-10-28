@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -8,9 +12,14 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 
-class BackupSettingsScreen extends StatelessWidget {
+class BackupSettingsScreen extends StatefulWidget {
   const BackupSettingsScreen({super.key});
 
+  @override
+  State<BackupSettingsScreen> createState() => _BackupSettingsScreenState();
+}
+
+class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -46,8 +55,13 @@ class BackupSettingsScreen extends StatelessWidget {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value: true,
-                                onChanged: (value) {},
+                                value: Configuration.instance
+                                    .shouldBackupOverMobileData(),
+                                onChanged: (value) async {
+                                  Configuration.instance
+                                      .setBackupOverMobileData(value);
+                                  setState(() {});
+                                },
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
@@ -61,8 +75,13 @@ class BackupSettingsScreen extends StatelessWidget {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value: true,
-                                onChanged: (value) {},
+                                value:
+                                    Configuration.instance.shouldBackupVideos(),
+                                onChanged: (value) async {
+                                  Configuration.instance
+                                      .setShouldBackupVideos(value);
+                                  setState(() {});
+                                },
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
@@ -72,27 +91,31 @@ class BackupSettingsScreen extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 24),
-                        Column(
-                          children: [
-                            MenuItemWidget(
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Disable auto lock",
-                              ),
-                              menuItemColor: colorScheme.fillFaint,
-                              trailingSwitch: ToggleSwitchWidget(
-                                value: false,
-                                onChanged: (value) {},
-                              ),
-                              borderRadius: 8,
-                              alignCaptionedTextToLeft: true,
-                              isGestureDetectorDisabled: true,
-                            ),
-                            const MenuSectionDescriptionWidget(
-                              content:
-                                  "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.",
-                            )
-                          ],
-                        ),
+                        Platform.isIOS
+                            ? Column(
+                                children: [
+                                  MenuItemWidget(
+                                    captionedTextWidget:
+                                        const CaptionedTextWidget(
+                                      title: "Disable auto lock",
+                                    ),
+                                    menuItemColor: colorScheme.fillFaint,
+                                    trailingSwitch: ToggleSwitchWidget(
+                                      value: Configuration.instance
+                                          .shouldKeepDeviceAwake(),
+                                      onChanged: _autoLockOnChanged,
+                                    ),
+                                    borderRadius: 8,
+                                    alignCaptionedTextToLeft: true,
+                                    isGestureDetectorDisabled: true,
+                                  ),
+                                  const MenuSectionDescriptionWidget(
+                                    content:
+                                        "Disable the device screen lock when ente is in the foreground and there is a backup in progress. This is normally not needed, but may help big uploads and initial imports of large libraries complete faster.",
+                                  )
+                                ],
+                              )
+                            : const SizedBox.shrink(),
                       ],
                     ),
                   ),
@@ -104,5 +127,22 @@ class BackupSettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _autoLockOnChanged(value) async {
+    if (value) {
+      final choice = await showChoiceDialog(
+        context,
+        "Disable automatic screen lock when ente is running?",
+        "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
+        firstAction: "No",
+        secondAction: "Yes",
+      );
+      if (choice != DialogUserChoice.secondChoice) {
+        return;
+      }
+    }
+    await Configuration.instance.setShouldKeepDeviceAwake(value);
+    setState(() {});
   }
 }
