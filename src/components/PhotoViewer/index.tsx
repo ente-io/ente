@@ -72,6 +72,19 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         if (!pswpElement) return;
+        if (isOpen) {
+            openPhotoSwipe();
+        }
+        if (!isOpen) {
+            closePhotoSwipe();
+        }
+        return () => {
+            closePhotoSwipe();
+        };
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!photoSwipe?.currItem) return;
         function handleKeyUp(event) {
             if (!isOpen) {
                 return;
@@ -100,18 +113,11 @@ function PhotoViewer(props: Iprops) {
         }
 
         window.addEventListener('keyup', handleKeyUp);
-        if (isOpen) {
-            openPhotoSwipe();
-        }
-        if (!isOpen) {
-            closePhotoSwipe();
-        }
         return () => {
-            closePhotoSwipe();
             console.log('Removing listner');
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isOpen]);
+    }, [isOpen, photoSwipe?.currItem]);
 
     useEffect(() => {
         updateItems(items);
