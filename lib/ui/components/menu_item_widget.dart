@@ -21,6 +21,8 @@ class MenuItemWidget extends StatefulWidget {
   final ExpandableController? expandableController;
   final bool isBottomBorderRadiusRemoved;
   final bool isTopBorderRadiusRemoved;
+  //disable gesture detector if not used
+  final bool isGestureDetectorDisabled;
   const MenuItemWidget({
     required this.captionedTextWidget,
     this.isExpandable = false,
@@ -38,6 +40,7 @@ class MenuItemWidget extends StatefulWidget {
     this.expandableController,
     this.isBottomBorderRadiusRemoved = false,
     this.isTopBorderRadiusRemoved = false,
+    this.isGestureDetectorDisabled = false,
     Key? key,
   }) : super(key: key);
 
@@ -74,7 +77,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.isExpandable
+    return widget.isExpandable || widget.isGestureDetectorDisabled
         ? menuItemWidget(context)
         : GestureDetector(
             onTap: widget.onTap,
