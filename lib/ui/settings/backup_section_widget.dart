@@ -11,6 +11,7 @@ import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
+import 'package:photos/ui/backup_settings_screen.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -58,6 +59,21 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             const BackupFolderSelectionPage(
               buttonText: "Backup",
             ),
+          );
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Backup settings",
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () {
+          routeToPage(
+            context,
+            const BackupSettingsScreen(),
           );
         },
       ),
