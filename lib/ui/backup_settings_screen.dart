@@ -25,6 +25,7 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
     final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       body: CustomScrollView(
+        primary: false,
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: const TitleBarTitleWidget(
