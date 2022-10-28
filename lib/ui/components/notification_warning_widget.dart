@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/text_style.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
 
 class NotificationWarningWidget extends StatelessWidget {
   final IconData warningIcon;
@@ -51,23 +52,14 @@ class NotificationWarningWidget extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  ClipOval(
-                    child: Material(
-                      color: fillFaintDark,
-                      child: InkWell(
-                        splashColor: Colors.red, // Splash color
-                        onTap: onTap,
-                        child: SizedBox(
-                          width: 40,
-                          height: 40,
-                          child: Icon(
-                            actionIcon,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  IconButtonWidget(
+                    icon: actionIcon,
+                    isRounded: true,
+                    iconColor: strokeBaseDark,
+                    defaultColor: fillFaintDark,
+                    pressedColor: fillMutedDark,
+                    onTap: onTap,
+                  )
                 ],
               ),
             ),

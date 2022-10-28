@@ -9,6 +9,9 @@ class IconButtonWidget extends StatefulWidget {
   final IconData icon;
   final bool disableGestureDetector;
   final VoidCallback? onTap;
+  final Color? defaultColor;
+  final Color? pressedColor;
+  final Color? iconColor;
   const IconButtonWidget({
     required this.icon,
     this.isPrimary = false,
@@ -16,6 +19,9 @@ class IconButtonWidget extends StatefulWidget {
     this.isRounded = false,
     this.disableGestureDetector = false,
     this.onTap,
+    this.defaultColor,
+    this.pressedColor,
+    this.iconColor,
     super.key,
   });
 
@@ -40,7 +46,8 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     }
     final colorTheme = getEnteColorScheme(context);
     iconStateColor ??
-        (iconStateColor = (widget.isRounded ? colorTheme.fillFaint : null));
+        (iconStateColor = widget.defaultColor ??
+            (widget.isRounded ? colorTheme.fillFaint : null));
     return widget.disableGestureDetector
         ? _iconButton(colorTheme)
         : GestureDetector(
@@ -62,8 +69,10 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
       ),
       child: Icon(
         widget.icon,
-        color:
-            widget.isSecondary ? colorTheme.strokeMuted : colorTheme.strokeBase,
+        color: widget.iconColor ??
+            (widget.isSecondary
+                ? colorTheme.strokeMuted
+                : colorTheme.strokeBase),
         size: 24,
       ),
     );
@@ -72,8 +81,8 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
   _onTapDown(details) {
     final colorTheme = getEnteColorScheme(context);
     setState(() {
-      iconStateColor =
-          widget.isRounded ? colorTheme.fillMuted : colorTheme.fillFaint;
+      iconStateColor = widget.pressedColor ??
+          (widget.isRounded ? colorTheme.fillMuted : colorTheme.fillFaint);
     });
   }
 
