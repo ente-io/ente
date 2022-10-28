@@ -166,7 +166,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   void _onTapDown(details) {
     setState(() {
-      menuItemColor = widget.pressedColor;
+      menuItemColor = widget.pressedColor ?? widget.menuItemColor;
     });
   }
 
