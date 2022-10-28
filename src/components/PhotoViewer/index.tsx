@@ -51,7 +51,7 @@ interface Iprops {
     isSourceLoaded: boolean;
 }
 
-function PhotoSwipe(props: Iprops) {
+function PhotoViewer(props: Iprops) {
     const pswpElement = useRef<HTMLDivElement>();
     const [photoSwipe, setPhotoSwipe] =
         useState<Photoswipe<Photoswipe.Options>>();
@@ -488,4 +488,4 @@ function PhotoSwipe(props: Iprops) {
     );
 }
 
-export default PhotoSwipe;
+export default PhotoViewer;
