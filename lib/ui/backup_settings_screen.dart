@@ -26,14 +26,17 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
     return Scaffold(
       body: CustomScrollView(
         slivers: <Widget>[
-          const TitleBarWidget(
-            flexibleSpaceTitle: TitleBarTitleWidget(
+          TitleBarWidget(
+            flexibleSpaceTitle: const TitleBarTitleWidget(
               title: "Backup settings",
             ),
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
                 isSecondary: true,
+                onTap: () {
+                  Navigator.pop(context);
+                },
               ),
             ],
           ),
