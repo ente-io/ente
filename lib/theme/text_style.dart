@@ -43,7 +43,7 @@ const TextStyle large = TextStyle(
 );
 const TextStyle body = TextStyle(
   fontSize: 16,
-  height: 19.4 / 16.0,
+  height: 20 / 16.0,
   fontWeight: _regularWeight,
   fontFamily: _fontFamily,
 );
