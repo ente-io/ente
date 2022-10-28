@@ -6,7 +6,7 @@ import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
 import constants from 'utils/strings/constants';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import PhotoSwipe from 'components/PhotoSwipe';
+import PhotoViewer from 'components/PhotoViewer';
 import {
     ALL_SECTION,
     ARCHIVE_SECTION,
@@ -586,7 +586,7 @@ const PhotoFrame = ({
                             />
                         )}
                     </AutoSizer>
-                    <PhotoSwipe
+                    <PhotoViewer
                         isOpen={open}
                         items={filteredData}
                         currentIndex={currentIndex}
