@@ -41,7 +41,8 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
               ),
             ],
           ),
-          SliverList(
+          SliverFixedExtentList(
+            itemExtent: 269,
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 return Padding(
