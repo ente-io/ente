@@ -72,6 +72,34 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         if (!pswpElement) return;
+        function handleKeyUp(event) {
+            if (!isOpen) {
+                return;
+            }
+            console.log(
+                'Event: ' + event.key + ' isShiftPressedx: ' + event.shiftKey
+            );
+            switch (event.key) {
+                case 'i':
+                    if (isOpen && !showInfo) {
+                        setShowInfo(true);
+                    }
+                    break;
+                case 'Backspace':
+                    confirmTrashFile(photoSwipe?.currItem as EnteFile);
+                    break;
+                case 'd':
+                case 'D':
+                    if (event.shiftKey) {
+                        downloadFileHelper(photoSwipe?.currItem as EnteFile);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        window.addEventListener('keyup', handleKeyUp);
         if (isOpen) {
             openPhotoSwipe();
         }
@@ -80,6 +108,8 @@ function PhotoViewer(props: Iprops) {
         }
         return () => {
             closePhotoSwipe();
+            console.log('Removing listner');
+            window.removeEventListener('keyup', handleKeyUp);
         };
     }, [isOpen]);
 
@@ -277,8 +307,12 @@ function PhotoViewer(props: Iprops) {
         needUpdate.current = true;
     };
 
-    const confirmTrashFile = (file: EnteFile) =>
+    const confirmTrashFile = (file: EnteFile) => {
+        if (props.isSharedCollection || props.isTrashCollection) {
+            return;
+        }
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+    };
 
     const updateItems = (items = []) => {
         if (photoSwipe) {
@@ -336,15 +370,16 @@ function PhotoViewer(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        appContext.startLoading();
-        await downloadFile(
-            file,
-            publicCollectionGalleryContext.accessedThroughSharedURL,
-            publicCollectionGalleryContext.token,
-            publicCollectionGalleryContext.passwordToken
-        );
-
-        appContext.finishLoading();
+        if (props.enableDownload) {
+            appContext.startLoading();
+            await downloadFile(
+                file,
+                publicCollectionGalleryContext.accessedThroughSharedURL,
+                publicCollectionGalleryContext.token,
+                publicCollectionGalleryContext.passwordToken
+            );
+            appContext.finishLoading();
+        }
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
