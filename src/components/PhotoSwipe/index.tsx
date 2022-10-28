@@ -9,7 +9,6 @@ import {
 import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
-import events from './events';
 import { downloadFile } from 'utils/file';
 import { prettyPrintExif } from 'utils/exif';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
@@ -21,7 +20,10 @@ import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
 import { FileInfo } from './InfoDialog';
-import { defaultLivePhotoDefaultOptions } from 'constants/photoswipe';
+import {
+    defaultLivePhotoDefaultOptions,
+    photoSwipeV4Events,
+} from 'constants/photoViewer';
 import { LivePhotoBtn } from './styledComponents/LivePhotoBtn';
 import DownloadIcon from '@mui/icons-material/Download';
 import InfoIcon from '@mui/icons-material/InfoOutlined';
@@ -203,7 +205,7 @@ function PhotoSwipe(props: Iprops) {
             items,
             options
         );
-        events.forEach((event) => {
+        photoSwipeV4Events.forEach((event) => {
             const callback = props[event];
             if (callback || event === 'destroy') {
                 photoSwipe.listen(event, function (...args) {
