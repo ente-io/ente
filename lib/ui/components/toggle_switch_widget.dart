@@ -18,6 +18,13 @@ class ToggleSwitchWidget extends StatefulWidget {
 }
 
 class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
+  late bool toggleValue;
+  @override
+  void initState() {
+    toggleValue = widget.value.call();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
@@ -31,10 +38,15 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
             activeColor: enteColorScheme.primary400,
             inactiveTrackColor: enteColorScheme.fillMuted,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            value: widget.value.call(),
+            value: toggleValue,
             onChanged: (value) async {
+              setState(() {
+                toggleValue = value;
+              });
               await widget.onChanged.call();
-              setState(() {});
+              setState(() {
+                toggleValue = widget.value.call();
+              });
             },
           ),
         ),
