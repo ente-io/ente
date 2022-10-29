@@ -36,8 +36,7 @@ class BackupSettingsScreen extends StatelessWidget {
               ),
             ],
           ),
-          SliverFixedExtentList(
-            itemExtent: 269,
+          SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
                 return Padding(
