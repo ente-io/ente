@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -106,10 +105,10 @@ class BackupSettingsScreen extends StatelessWidget {
                                       value: () => Configuration.instance
                                           .shouldKeepDeviceAwake(),
                                       onChanged: () {
-                                        return _autoLockOnChanged(
+                                        return Configuration.instance
+                                            .setShouldKeepDeviceAwake(
                                           !Configuration.instance
                                               .shouldKeepDeviceAwake(),
-                                          context,
                                         );
                                       },
                                     ),
@@ -135,21 +134,5 @@ class BackupSettingsScreen extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _autoLockOnChanged(value, context) async {
-    if (value) {
-      final choice = await showChoiceDialog(
-        context,
-        "Disable automatic screen lock when ente is running?",
-        "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
-        firstAction: "No",
-        secondAction: "Yes",
-      );
-      if (choice != DialogUserChoice.secondChoice) {
-        return;
-      }
-    }
-    await Configuration.instance.setShouldKeepDeviceAwake(value);
   }
 }
