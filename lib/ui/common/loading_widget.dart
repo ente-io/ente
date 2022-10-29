@@ -10,9 +10,9 @@ class EnteLoadingWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.all(5),
         child: SizedBox.fromSize(
-          size: const Size.square(16),
+          size: const Size.square(14),
           child: CircularProgressIndicator(
             strokeWidth: 2,
             color: color ?? getEnteColorScheme(context).strokeBase,
