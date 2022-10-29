@@ -28,27 +28,24 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: SizedBox(
-        height: 30,
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: Switch.adaptive(
-            activeColor: enteColorScheme.primary400,
-            inactiveTrackColor: enteColorScheme.fillMuted,
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            value: toggleValue,
-            onChanged: (value) async {
-              setState(() {
-                toggleValue = value;
-              });
-              await widget.onChanged.call();
-              setState(() {
-                toggleValue = widget.value.call();
-              });
-            },
-          ),
+    return SizedBox(
+      height: 32,
+      child: FittedBox(
+        fit: BoxFit.contain,
+        child: Switch.adaptive(
+          activeColor: enteColorScheme.primary400,
+          inactiveTrackColor: enteColorScheme.fillMuted,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          value: toggleValue,
+          onChanged: (value) async {
+            setState(() {
+              toggleValue = value;
+            });
+            await widget.onChanged.call();
+            setState(() {
+              toggleValue = widget.value.call();
+            });
+          },
         ),
       ),
     );
