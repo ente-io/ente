@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
-import 'package:photos/db/files_db.dart';
-import 'package:photos/models/file_type.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -253,45 +249,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
                             ),
                           ],
                         )
-                      : FutureBuilder(
-                          future: FilesDB.instance.fetchFilesCountbyType(
-                            Configuration.instance.getUserID(),
-                          ),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              final filesCount = FilesCount(
-                                snapshot.data as Map<FileType, int>,
-                              );
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "${NumberFormat().format(filesCount.photos)} photos",
-                                    style: getEnteTextTheme(context)
-                                        .mini
-                                        .copyWith(color: textBaseDark),
-                                  ),
-                                  Text(
-                                    "${NumberFormat().format(filesCount.videos)} videos",
-                                    style: getEnteTextTheme(context)
-                                        .mini
-                                        .copyWith(color: textBaseDark),
-                                  ),
-                                ],
-                              );
-                            } else if (snapshot.hasError) {
-                              _logger.severe(
-                                'Error fetching photo and video count',
-                                snapshot.error,
-                              );
-                              return const SizedBox.shrink();
-                            } else {
-                              return const EnteLoadingWidget(
-                                color: strokeBaseDark,
-                              );
-                            }
-                          },
-                        ),
+                      : const SizedBox.shrink(),
                   RichText(
                     text: TextSpan(
                       style: getEnteTextTheme(context)
