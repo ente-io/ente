@@ -141,13 +141,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
         16,
         20,
         16,
-        isMobileScreenSmall
-            ? userDetails.isPartOfFamily()
-                ? 12
-                : 8
-            : userDetails.isPartOfFamily()
-                ? 20
-                : 12,
+        isMobileScreenSmall ? 12 : 20,
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
