@@ -12,14 +12,9 @@ import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/components/toggle_switch_widget.dart';
 
-class BackupSettingsScreen extends StatefulWidget {
+class BackupSettingsScreen extends StatelessWidget {
   const BackupSettingsScreen({super.key});
 
-  @override
-  State<BackupSettingsScreen> createState() => _BackupSettingsScreenState();
-}
-
-class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -60,12 +55,16 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value: Configuration.instance
-                                    .shouldBackupOverMobileData(),
-                                onChanged: (value) async {
-                                  Configuration.instance
-                                      .setBackupOverMobileData(value);
-                                  setState(() {});
+                                value: () {
+                                  return Configuration.instance
+                                      .shouldBackupOverMobileData();
+                                },
+                                onChanged: () async {
+                                  await Configuration.instance
+                                      .setBackupOverMobileData(
+                                    !Configuration.instance
+                                        .shouldBackupOverMobileData(),
+                                  );
                                 },
                               ),
                               borderRadius: 8,
@@ -80,13 +79,12 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value:
+                                value: () =>
                                     Configuration.instance.shouldBackupVideos(),
-                                onChanged: (value) async {
-                                  Configuration.instance
-                                      .setShouldBackupVideos(value);
-                                  setState(() {});
-                                },
+                                onChanged: () => Configuration.instance
+                                    .setShouldBackupVideos(
+                                  !Configuration.instance.shouldBackupVideos(),
+                                ),
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
@@ -106,9 +104,15 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingSwitch: ToggleSwitchWidget(
-                                      value: Configuration.instance
+                                      value: () => Configuration.instance
                                           .shouldKeepDeviceAwake(),
-                                      onChanged: _autoLockOnChanged,
+                                      onChanged: () {
+                                        return _autoLockOnChanged(
+                                          !Configuration.instance
+                                              .shouldKeepDeviceAwake(),
+                                          context,
+                                        );
+                                      },
                                     ),
                                     borderRadius: 8,
                                     alignCaptionedTextToLeft: true,
@@ -134,7 +138,7 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
     );
   }
 
-  void _autoLockOnChanged(value) async {
+  Future<void> _autoLockOnChanged(value, context) async {
     if (value) {
       final choice = await showChoiceDialog(
         context,
@@ -148,6 +152,5 @@ class _BackupSettingsScreenState extends State<BackupSettingsScreen> {
       }
     }
     await Configuration.instance.setShouldKeepDeviceAwake(value);
-    setState(() {});
   }
 }

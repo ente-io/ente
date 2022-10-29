@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
-typedef OnChangedCallBack = void Function(bool);
+typedef OnChangedCallBack = Future<void> Function();
+typedef ValueCallBack = bool Function();
 
 class ToggleSwitchWidget extends StatefulWidget {
-  final bool value;
+  final ValueCallBack value;
   final OnChangedCallBack onChanged;
   const ToggleSwitchWidget({
     required this.value,
@@ -30,8 +31,11 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
             activeColor: enteColorScheme.primary400,
             inactiveTrackColor: enteColorScheme.fillMuted,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            value: widget.value,
-            onChanged: widget.onChanged,
+            value: widget.value.call(),
+            onChanged: (value) async {
+              await widget.onChanged.call();
+              setState(() {});
+            },
           ),
         ),
       ),
