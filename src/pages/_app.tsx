@@ -29,6 +29,7 @@ import { CustomError } from 'utils/error';
 import { clearLogsIfLocalStorageLimitExceeded } from 'utils/logging';
 import isElectron from 'is-electron';
 import ElectronUpdateService from 'services/electron/update';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -143,16 +144,17 @@ export default function App({ Component, err }) {
         if (isElectron()) {
             const showUpdateDialog = () =>
                 setDialogMessage({
-                    title: constants.STOP_WATCHING_FOLDER,
-                    content: constants.STOP_WATCHING_DIALOG_MESSAGE,
+                    icon: <AutoAwesomeIcon />,
+                    title: constants.UPDATE_AVAILABLE,
+                    content: constants.UPDATE_AVAILABLE_MESSAGE,
                     close: {
-                        text: constants.CANCEL,
+                        text: constants.INSTALL_ON_NEXT_LAUNCH,
                         variant: 'secondary',
                     },
                     proceed: {
                         action: () => ElectronUpdateService.updateAndRestart(),
-                        text: constants.YES_STOP,
-                        variant: 'danger',
+                        text: constants.INSTALL_NOW,
+                        variant: 'accent',
                     },
                 });
             ElectronUpdateService.registerUpdateEventListener(showUpdateDialog);
