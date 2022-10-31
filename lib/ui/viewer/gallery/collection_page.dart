@@ -10,6 +10,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
+import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
@@ -19,16 +20,21 @@ class CollectionPage extends StatelessWidget {
   final String tagPrefix;
   final GalleryType appBarType;
   final _selectedFiles = SelectedFiles();
+  bool hasVerifiedLock;
 
   CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.appBarType = GalleryType.ownedCollection,
+    this.hasVerifiedLock = false,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(Object context) {
+    if (hasVerifiedLock == false && c.collection.isHidden()) {
+      return const EmptyState();
+    }
     final initialFiles = c.thumbnail != null ? [c.thumbnail] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {

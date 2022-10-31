@@ -23,9 +23,11 @@ class CollectionsListOfFileWidget extends StatelessWidget {
           final Set<int> collectionIDs = snapshot.data;
           final collections = [];
           for (var collectionID in collectionIDs) {
-            collections.add(
-              CollectionsService.instance.getCollectionByID(collectionID),
-            );
+            final c =
+                CollectionsService.instance.getCollectionByID(collectionID);
+            if (!c.isHidden()) {
+              collections.add(c);
+            }
           }
           return ListView.builder(
             itemCount: collections.length,
