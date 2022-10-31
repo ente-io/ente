@@ -79,7 +79,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
     InheritedUserDetails inheritedUserDetails,
   ) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 365),
+      constraints: const BoxConstraints(maxWidth: 350),
       child: AspectRatio(
         aspectRatio: 2 / 1,
         child: Stack(
