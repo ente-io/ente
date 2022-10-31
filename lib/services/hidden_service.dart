@@ -38,7 +38,8 @@ extension HiddenService on CollectionsService {
     }
     final Collection createdHiddenCollection =
         await _createDefaultHiddenAlbum();
-    return createdHiddenCollection;
+    cachedDefaultHiddenCollection = createdHiddenCollection;
+    return cachedDefaultHiddenCollection;
   }
 
   Future<bool> hideFiles(
