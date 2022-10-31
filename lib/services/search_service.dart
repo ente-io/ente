@@ -33,16 +33,6 @@ class SearchService {
   static final SearchService instance = SearchService._privateConstructor();
 
   Future<void> init() async {
-    // Intention of delay is to give more CPU cycles to other tasks
-    // 8 is just a magic number
-    Future.delayed(const Duration(seconds: 8), () async {
-      /* In case home screen loads before 8 seconds and user starts search,
-       future will not be null.So here getAllFiles won't run again in that case. */
-      if (_cachedFilesFuture == null) {
-        _getAllFiles();
-      }
-    });
-
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
