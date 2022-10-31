@@ -40,7 +40,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
               Row(
                 children: [
                   Icon(
-                    Icons.visibility_off,
+                    Icons.archive_outlined,
                     color: Theme.of(context).iconTheme.color,
                   ),
                   const Padding(padding: EdgeInsets.all(6)),
@@ -56,7 +56,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: "Hidden",
+                                text: "Archive",
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               const TextSpan(text: "  \u2022  "),
@@ -73,7 +73,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                             style: textStyle,
                             children: [
                               TextSpan(
-                                text: "Hidden",
+                                text: "Archive",
                                 style: Theme.of(context).textTheme.subtitle1,
                               ),
                               //need to query in db and bring this value

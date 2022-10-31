@@ -47,8 +47,16 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
                       style: textStyle,
                       children: [
                         TextSpan(
-                          text: "Hidden Stuff",
+                          text: "Hidden",
                           style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                        const TextSpan(text: "  \u2022  "),
+                        WidgetSpan(
+                          child: Icon(
+                            Icons.lock_outline,
+                            size: 16,
+                            color: Theme.of(context).iconTheme.color,
+                          ),
                         ),
                         //need to query in db and bring this value
                       ],
@@ -68,7 +76,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
         final hasAuthenticated = await LocalAuthenticationService.instance
             .requestLocalAuthentication(
           context,
-          "Please authenticate to view your hidden stuff",
+          "Please authenticate to view your hidden files",
         );
         if (hasAuthenticated) {
           routeToPage(

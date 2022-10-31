@@ -158,15 +158,15 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  TrashButtonWidget(trashAndHiddenTextStyle),
-                  const SizedBox(height: 12),
                   ArchivedCollectionsButtonWidget(trashAndHiddenTextStyle),
-                  enableBeta
-                      ? const SizedBox(height: 12)
-                      : const SizedBox.shrink(),
+                  const SizedBox(height: 12),
                   enableBeta
                       ? HiddenCollectionsButtonWidget(trashAndHiddenTextStyle)
                       : const SizedBox.shrink(),
+                  enableBeta
+                      ? const SizedBox(height: 12)
+                      : const SizedBox.shrink(),
+                  TrashButtonWidget(trashAndHiddenTextStyle),
                 ],
               ),
             ),

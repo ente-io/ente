@@ -23,7 +23,10 @@ Future<void> changeVisibility(
 ) async {
   final dialog = createProgressDialog(
     context,
-    newVisibility == visibilityArchive ? "Hiding..." : "Unhiding...",
+    newVisibility == visibilityArchive
+        ? "Archiving..."
+        : "Unarchiving..."
+            "...",
   );
   await dialog.show();
   try {
@@ -31,8 +34,8 @@ Future<void> changeVisibility(
     showShortToast(
       context,
       newVisibility == visibilityArchive
-          ? "Successfully hidden"
-          : "Successfully unhidden",
+          ? "Successfully archived"
+          : "Successfully unarchived",
     );
 
     await dialog.hide();

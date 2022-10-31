@@ -31,6 +31,7 @@ class GalleryOverlayWidget extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String path;
   final Collection collection;
+
   const GalleryOverlayWidget(
     this.type,
     this.selectedFiles, {
@@ -121,6 +122,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
   Function() _selectedFilesListener;
   final GlobalKey shareButtonKey = GlobalKey();
   bool enableBeta = false;
+
   @override
   void initState() {
     _selectedFilesListener = () {
@@ -397,24 +399,38 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive) {
       final bool showArchive = widget.type == GalleryType.homepage;
-      items.add(
-        PopupMenuItem(
-          value: showArchive ? "archive" : 'unarchive',
-          child: Row(
-            children: [
-              Icon(
-                showArchive ? Icons.archive_outlined : Icons.unarchive_outlined,
-              ),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(
-                showArchive ? "Archive" : "UnArchive",
-              ),
-            ],
+      if (showArchive) {
+        items.add(
+          PopupMenuItem(
+            value: "archive",
+            child: Row(
+              children: const [
+                Icon(Icons.archive_outlined),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text("Archive"),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      } else {
+        actions.insert(
+          0,
+          Tooltip(
+            message: 'Unarchive',
+            child: IconButton(
+              color: Theme.of(context).colorScheme.iconColor,
+              icon: const Icon(
+                Icons.unarchive,
+              ),
+              onPressed: () {
+                onActionSelected('unarchive');
+              },
+            ),
+          ),
+        );
+      }
     }
 
     if (widget.type == GalleryType.homepage && enableBeta) {
@@ -449,7 +465,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
 
   Future<void> onActionSelected(String value) async {
     debugPrint("Action Selected $value");
-    switch (value) {
+    switch (value.toLowerCase()) {
       case 'hide':
         await _handleHideRequest(context);
         break;

@@ -50,7 +50,7 @@ extension HiddenService on CollectionsService {
     final List<int> uploadedIDs = <int>[];
     final dialog = createProgressDialog(
       context,
-      "Hiding Stuff...wait...",
+      "Hiding...",
     );
     await dialog.show();
     try {
@@ -71,7 +71,8 @@ extension HiddenService on CollectionsService {
       }
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
       Bus.instance.fire(
-          LocalPhotosUpdatedEvent(filesToHide, type: EventType.unarchived));
+        LocalPhotosUpdatedEvent(filesToHide, type: EventType.unarchived),
+      );
 
       await dialog.hide();
     } on AssertionError catch (e) {
@@ -92,7 +93,7 @@ extension HiddenService on CollectionsService {
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
-      utf8.encode("_DefaultHiddenAlbum") as Uint8List,
+      utf8.encode(".Hidden") as Uint8List,
       key,
     );
     final jsonToUpdate = CollectionMagicMetadata(

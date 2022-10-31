@@ -66,7 +66,7 @@ class HiddenPage extends StatelessWidget {
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "Hidden Stuff",
+          "Hidden",
           _selectedFiles,
         ),
       ),

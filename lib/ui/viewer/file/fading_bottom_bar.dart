@@ -109,14 +109,12 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             widget.file.magicMetadata.visibility == visibilityArchive;
         children.add(
           Tooltip(
-            message: isArchived ? "Unhide" : "Hide",
+            message: isArchived ? "Unarchive" : "Archive",
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
                 icon: Icon(
-                  isArchived
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
+                  isArchived ? Icons.unarchive : Icons.archive_outlined,
                   color: Colors.white,
                 ),
                 onPressed: () async {
