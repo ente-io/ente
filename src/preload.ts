@@ -1,4 +1,10 @@
-import { reloadWindow, sendNotification, showOnTray } from './api/system';
+import {
+    registerUpdateEventListener,
+    reloadWindow,
+    sendNotification,
+    showOnTray,
+    updateAndRestart,
+} from './api/system';
 import {
     showUploadDirsDialog,
     showUploadFilesDialog,
@@ -82,4 +88,6 @@ windowObject['ElectronAPIs'] = {
     logToDisk,
     convertHEIC,
     openLogDirectory,
+    registerUpdateEventListener,
+    updateAndRestart,
 };

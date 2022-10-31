@@ -9,3 +9,13 @@ export const showOnTray = (content: string) => {
 export const reloadWindow = () => {
     ipcRenderer.send('reload-window');
 };
+
+export const registerUpdateEventListener = (showUpdateDialog: () => void) => {
+    ipcRenderer.on('show-update-dialog', () => {
+        showUpdateDialog();
+    });
+};
+
+export const updateAndRestart = () => {
+    ipcRenderer.send('update-and-restart');
+};
