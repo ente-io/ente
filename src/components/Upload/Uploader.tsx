@@ -477,7 +477,7 @@ export default function Uploader(props: Props) {
                     message: constants.UNKNOWN_ERROR,
                 };
         }
-        galleryContext.setNotificationAttributes(notification);
+        appContext.setNotificationAttributes(notification);
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {

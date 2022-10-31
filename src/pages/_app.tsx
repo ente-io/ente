@@ -33,6 +33,11 @@ import {
     getUpdateAvailableForDownloadMessage,
     getUpdateReadyToInstallMessage,
 } from 'utils/ui';
+import Notification from 'components/Notification';
+import {
+    NotificationAttributes,
+    SetNotificationAttributes,
+} from 'types/Notification';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -58,6 +63,7 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
+    setNotificationAttributes: SetNotificationAttributes;
     isFolderSyncRunning: boolean;
     setIsFolderSyncRunning: (isRunning: boolean) => void;
     watchFolderView: boolean;
@@ -103,6 +109,10 @@ export default function App({ Component, err }) {
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery('(max-width:428px)');
+    const [notificationView, setNotificationView] = useState(false);
+    const closeNotification = () => setNotificationView(false);
+    const [notificationAttributes, setNotificationAttributes] =
+        useState<NotificationAttributes>(null);
 
     useEffect(() => {
         if (
@@ -231,6 +241,8 @@ export default function App({ Component, err }) {
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
+    useEffect(() => setNotificationView(true), [notificationAttributes]);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
@@ -291,6 +303,11 @@ export default function App({ Component, err }) {
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
                 />
+                <Notification
+                    open={notificationView}
+                    onClose={closeNotification}
+                    attributes={notificationAttributes}
+                />
 
                 <AppContext.Provider
                     value={{
@@ -311,6 +328,7 @@ export default function App({ Component, err }) {
                         watchFolderFiles,
                         setWatchFolderFiles,
                         isMobile,
+                        setNotificationAttributes,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

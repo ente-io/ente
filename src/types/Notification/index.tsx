@@ -10,3 +10,7 @@ export interface NotificationAttributes {
         callback: () => void;
     };
 }
+
+export type SetNotificationAttributes = React.Dispatch<
+    React.SetStateAction<NotificationAttributes>
+>;
