@@ -108,7 +108,7 @@ export default function setupIpcComs(
         shell.openPath(app.getPath('logs'));
     });
 
-    ipcMain.handle('update-and-restart', () => {
+    ipcMain.on('update-and-restart', () => {
         appUpdater.updateAndRestart();
     });
 }
