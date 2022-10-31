@@ -25,7 +25,7 @@ export function buildContextMenu(
         paused,
     } = args;
     const contextMenu = Menu.buildFromTemplate([
-        ...(!isUpdateAvailable()
+        ...(isUpdateAvailable()
             ? [
                   {
                       label: 'Update available',
