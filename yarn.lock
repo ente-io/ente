@@ -342,6 +342,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/semver-compare@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/semver-compare/-/semver-compare-1.0.1.tgz#17d1dc62c516c133ab01efb7803a537ee6eaf3d5"
+  integrity sha512-wx2LQVvKlEkhXp/HoKIZ/aSL+TvfJdKco8i0xJS3aR877mg4qBHzNT6+B5a61vewZHo79EdZavskGnRXEC2H6A==
+
 "@types/semver@^7.3.6":
   version "7.3.10"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.3.10.tgz#5f19ee40cbeff87d916eedc8c2bfe2305d957f73"
