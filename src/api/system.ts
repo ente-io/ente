@@ -11,6 +11,7 @@ export const reloadWindow = () => {
 };
 
 export const registerUpdateEventListener = (showUpdateDialog: () => void) => {
+    ipcRenderer.removeAllListeners('show-update-dialog');
     ipcRenderer.on('show-update-dialog', () => {
         showUpdateDialog();
     });
