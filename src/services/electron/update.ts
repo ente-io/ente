@@ -7,7 +7,9 @@ class ElectronUpdateService {
         this.electronAPIs = globalThis['ElectronAPIs'];
     }
 
-    registerUpdateEventListener(showUpdateDialog: () => void) {
+    registerUpdateEventListener(
+        showUpdateDialog: (updateInfo: { updateDownloaded: boolean }) => void
+    ) {
         if (this.electronAPIs?.registerUpdateEventListener) {
             this.electronAPIs.registerUpdateEventListener(showUpdateDialog);
         }

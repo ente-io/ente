@@ -65,6 +65,8 @@ export interface ElectronAPIs {
     logToDisk: (msg: string) => void;
     convertHEIC(fileData: Uint8Array): Promise<Uint8Array>;
     openLogDirectory: () => void;
-    registerUpdateEventListener: (showUpdateDialog: () => void) => void;
+    registerUpdateEventListener: (
+        showUpdateDialog: (updateInfo: { updateDownloaded: boolean }) => void
+    ) => void;
     updateAndRestart: () => void;
 }
