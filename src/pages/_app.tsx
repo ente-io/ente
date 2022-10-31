@@ -28,6 +28,7 @@ import {
 import { CustomError } from 'utils/error';
 import { clearLogsIfLocalStorageLimitExceeded } from 'utils/logging';
 import isElectron from 'is-electron';
+import ElectronUpdateService from 'services/electron/update';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -137,6 +138,26 @@ export default function App({ Component, err }) {
         );
         clearLogsIfLocalStorageLimitExceeded();
     }, []);
+
+    useEffect(() => {
+        if (isElectron()) {
+            const showUpdateDialog = () =>
+                setDialogMessage({
+                    title: constants.STOP_WATCHING_FOLDER,
+                    content: constants.STOP_WATCHING_DIALOG_MESSAGE,
+                    close: {
+                        text: constants.CANCEL,
+                        variant: 'secondary',
+                    },
+                    proceed: {
+                        action: () => ElectronUpdateService.updateAndRestart(),
+                        text: constants.YES_STOP,
+                        variant: 'danger',
+                    },
+                });
+            ElectronUpdateService.registerUpdateEventListener(showUpdateDialog);
+        }
+    });
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
