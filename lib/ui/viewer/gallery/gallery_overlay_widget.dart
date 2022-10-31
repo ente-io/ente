@@ -393,45 +393,75 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       }
     }
 
+    final List<PopupMenuItem<String>> items = [];
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive) {
       final bool showArchive = widget.type == GalleryType.homepage;
-      actions.add(
-        Tooltip(
-          message: showArchive ? "Hide" : "Unhide",
-          child: IconButton(
-            color: Theme.of(context).colorScheme.iconColor,
-            icon: Icon(
-              showArchive ? Icons.visibility_off : Icons.visibility,
-            ),
-            onPressed: () {
-              _handleVisibilityChangeRequest(
-                context,
-                showArchive ? visibilityArchive : visibilityVisible,
-              );
-            },
+      items.add(
+        PopupMenuItem(
+          value: showArchive ? "archive" : 'unarchive',
+          child: Row(
+            children: [
+              Icon(
+                showArchive ? Icons.archive_outlined : Icons.unarchive_outlined,
+              ),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(
+                showArchive ? "Archive" : "UnArchive",
+              ),
+            ],
           ),
         ),
       );
     }
 
     if (widget.type == GalleryType.homepage && enableBeta) {
-      actions.add(
-        Tooltip(
-          message: "HiddenStuff",
-          child: IconButton(
-            color: Theme.of(context).colorScheme.iconColor,
-            icon: const Icon(
-              Icons.hide_image,
-            ),
-            onPressed: () async {
-              await _handleHideRequest(context);
-            },
+      items.add(
+        PopupMenuItem(
+          value: "hide",
+          child: Row(
+            children: const [
+              Icon(Icons.visibility_off),
+              Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text("Hide"),
+            ],
           ),
         ),
       );
     }
+    if (items.isNotEmpty) {
+      actions.add(
+        PopupMenuButton<String>(
+          // color: Theme.of(context).colorScheme.frostyBlurBackdropFilterColor,
+          onSelected: onActionSelected,
+          itemBuilder: (context) {
+            return items;
+          },
+        ),
+      );
+    }
     return actions;
+  }
+
+  Future<void> onActionSelected(String value) async {
+    debugPrint("Action Selected $value");
+    switch (value) {
+      case 'hide':
+        await _handleHideRequest(context);
+        break;
+      case 'archive':
+        await _handleVisibilityChangeRequest(context, visibilityArchive);
+        break;
+      case 'unarchive':
+        await _handleVisibilityChangeRequest(context, visibilityVisible);
+        break;
+      default:
+        break;
+    }
   }
 
   void _addTrashAction(List<Widget> actions) {
