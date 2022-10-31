@@ -212,11 +212,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           value: 2,
           child: Row(
             children: [
-              Icon(isArchived ? Icons.visibility : Icons.visibility_off),
+              Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
               const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text(isArchived ? "Unhide album" : "Hide album"),
+              Text(isArchived ? "Unarchive album" : "Archive album"),
             ],
           ),
         ),
