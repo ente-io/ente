@@ -67,7 +67,7 @@ class CollectionMagicMetadata {
   // 1 -> DEFAULT_HIDDEN COLLECTION for files hidden individually
   int? subType;
 
-  CollectionMagicMetadata({required this.visibility, int? subType});
+  CollectionMagicMetadata({required this.visibility, this.subType});
 
   Map<String, dynamic> toJson() {
     final result = {magicKeyVisibility: visibility};

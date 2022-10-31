@@ -100,6 +100,7 @@ extension HiddenService on CollectionsService {
       visibility: visibilityHidden,
       subType: subTypeDefaultHidden,
     ).toJson();
+    assert(jsonToUpdate.length == 2, "metadata should have two keys");
     final encryptedMMd = await CryptoUtil.encryptChaCha(
       utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
       key,
