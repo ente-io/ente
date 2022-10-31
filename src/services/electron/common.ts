@@ -3,7 +3,6 @@ import { ElectronAPIs } from 'types/electron';
 
 class ElectronService {
     private electronAPIs: ElectronAPIs;
-    private isBundledApp: boolean = false;
 
     constructor() {
         this.electronAPIs = globalThis['ElectronAPIs'];
