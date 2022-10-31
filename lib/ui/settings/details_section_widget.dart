@@ -64,12 +64,9 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
             ),
           );
         },
-        onTapDown: (details) {
-          _isStorageCardPressed.value = true;
-        },
-        onTapUp: (details) {
-          _isStorageCardPressed.value = false;
-        },
+        onTapDown: (details) => _isStorageCardPressed.value = true,
+        onTapCancel: () => _isStorageCardPressed.value = false,
+        onTapUp: (details) => _isStorageCardPressed.value = false,
         child: containerForUserDetails(inheritedUserDetails),
       );
     }
