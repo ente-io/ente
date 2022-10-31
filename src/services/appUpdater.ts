@@ -3,6 +3,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import { buildContextMenu } from '../utils/menu';
+import semVerCmp from 'semver-compare';
 
 const LATEST_SUPPORTED_AUTO_UPDATE_VERSION = '1.6.12';
 
@@ -17,8 +18,10 @@ class AppUpdater {
         const updateCheckResult = await autoUpdater.checkForUpdatesAndNotify();
         log.info(updateCheckResult);
         if (
-            updateCheckResult.updateInfo.version >
-            LATEST_SUPPORTED_AUTO_UPDATE_VERSION
+            semVerCmp(
+                updateCheckResult.updateInfo.version,
+                LATEST_SUPPORTED_AUTO_UPDATE_VERSION
+            ) > 0
         ) {
             this.updateDownloaded = false;
             this.showUpdateDialog(mainWindow);
