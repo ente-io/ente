@@ -10,11 +10,16 @@ export const reloadWindow = () => {
     ipcRenderer.send('reload-window');
 };
 
-export const registerUpdateEventListener = (showUpdateDialog: () => void) => {
+export const registerUpdateEventListener = (
+    showUpdateDialog: (updateInfo: { uploadDownloaded: boolean }) => void
+) => {
     ipcRenderer.removeAllListeners('show-update-dialog');
-    ipcRenderer.on('show-update-dialog', () => {
-        showUpdateDialog();
-    });
+    ipcRenderer.on(
+        'show-update-dialog',
+        (_, updateInfo: { uploadDownloaded: boolean }) => {
+            showUpdateDialog(updateInfo);
+        }
+    );
 };
 
 export const updateAndRestart = () => {

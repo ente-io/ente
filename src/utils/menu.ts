@@ -12,7 +12,7 @@ import {
 import { isUpdateAvailable, setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
-import { showUpdateDialog } from '../services/appUpdater';
+import appUpdater from '../services/appUpdater';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -29,7 +29,7 @@ export function buildContextMenu(
             ? [
                   {
                       label: 'Update available',
-                      click: () => showUpdateDialog(mainWindow),
+                      click: () => appUpdater.showUpdateDialog(mainWindow),
                   },
               ]
             : []),
