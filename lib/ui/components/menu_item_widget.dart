@@ -19,6 +19,10 @@ class MenuItemWidget extends StatefulWidget {
   final double borderRadius;
   final Color? pressedColor;
   final ExpandableController? expandableController;
+  final bool isBottomBorderRadiusRemoved;
+  final bool isTopBorderRadiusRemoved;
+  //disable gesture detector if not used
+  final bool isGestureDetectorDisabled;
   const MenuItemWidget({
     required this.captionedTextWidget,
     this.isExpandable = false,
@@ -34,6 +38,9 @@ class MenuItemWidget extends StatefulWidget {
     this.borderRadius = 4.0,
     this.pressedColor,
     this.expandableController,
+    this.isBottomBorderRadiusRemoved = false,
+    this.isTopBorderRadiusRemoved = false,
+    this.isGestureDetectorDisabled = false,
     Key? key,
   }) : super(key: key);
 
@@ -70,7 +77,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.isExpandable
+    return widget.isExpandable || widget.isGestureDetectorDisabled
         ? menuItemWidget(context)
         : GestureDetector(
             onTap: widget.onTap,
@@ -86,7 +93,11 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final borderRadius = Radius.circular(widget.borderRadius);
     final isExpanded = widget.expandableController?.value;
-    final bottomBorderRadius = isExpanded != null && isExpanded
+    final bottomBorderRadius =
+        (isExpanded != null && isExpanded) || widget.isBottomBorderRadiusRemoved
+            ? const Radius.circular(0)
+            : borderRadius;
+    final topBorderRadius = widget.isTopBorderRadiusRemoved
         ? const Radius.circular(0)
         : borderRadius;
     return AnimatedContainer(
@@ -95,8 +106,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topLeft: borderRadius,
-          topRight: borderRadius,
+          topLeft: topBorderRadius,
+          topRight: topBorderRadius,
           bottomLeft: bottomBorderRadius,
           bottomRight: bottomBorderRadius,
         ),
@@ -155,7 +166,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   void _onTapDown(details) {
     setState(() {
-      menuItemColor = widget.pressedColor;
+      menuItemColor = widget.pressedColor ?? widget.menuItemColor;
     });
   }
 
