@@ -34,6 +34,10 @@ export function addLogLine(log: string) {
             });
         }
     } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+            deleteLogs();
+            addLogLine('logs cleared');
+        }
         logError(e, 'failed to addLogLine', undefined, true);
         // ignore
     }
