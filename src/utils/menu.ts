@@ -29,7 +29,7 @@ export function buildContextMenu(
             ? [
                   {
                       label: 'Update available',
-                      click: () => showUpdateDialog(),
+                      click: () => showUpdateDialog(mainWindow),
                   },
               ]
             : []),

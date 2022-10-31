@@ -15,6 +15,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
 import { convertHEIC } from '../services/heicConvertor';
+import appUpdater from '../services/appUpdater';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -105,5 +106,9 @@ export default function setupIpcComs(
 
     ipcMain.handle('open-log-dir', () => {
         shell.openPath(app.getPath('logs'));
+    });
+
+    ipcMain.on('update-and-restart', () => {
+        appUpdater.updateAndRestart();
     });
 }
