@@ -1312,12 +1312,12 @@ class FilesDB {
     return files;
   }
 
-  Future<List<File>> getAllFilesFromDB() async {
+  Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> result = await db.query(filesTable);
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, null);
+        _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
     return deduplicatedFiles;
   }
 

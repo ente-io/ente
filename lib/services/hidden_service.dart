@@ -63,9 +63,10 @@ extension HiddenService on CollectionsService {
         }
         uploadedIDs.add(file.uploadedFileID!);
       }
+
+      final defaultHiddenCollection = await getDefaultHiddenCollection();
       final Map<int, List<File>> collectionToFilesMap =
           await filesDB.getAllFilesGroupByCollectionID(uploadedIDs);
-      final defaultHiddenCollection = await getDefaultHiddenCollection();
       for (MapEntry<int, List<File>> entry in collectionToFilesMap.entries) {
         await move(defaultHiddenCollection.id, entry.key, entry.value);
       }

@@ -79,14 +79,11 @@ class CollectionsService {
     });
   }
 
-  @protected
   Configuration get config => _config;
 
-  @protected
   Map<int, Collection> get collectionIDToCollections =>
       _collectionIDToCollections;
 
-  @protected
   FilesDB get filesDB => _filesDB;
 
   // sync method fetches just sync the collections, not the individual files
