@@ -304,7 +304,7 @@ const darkThemeOptions = createTheme({
     typography: {
         body1: {
             fontSize: '16px',
-            lineHeight: '19px',
+            lineHeight: '20px',
         },
         body2: {
             fontSize: '14px',
