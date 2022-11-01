@@ -86,7 +86,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               Padding(
                 padding: const EdgeInsets.only(left: 16, right: 16),
                 child: Text(
-                  widget.code.issuer,
+                  Uri.decodeFull(widget.code.issuer),
                   style: Theme.of(context).textTheme.headline6,
                 ),
               ),
