@@ -5,14 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch development",
-      "request": "launch",
-      "type": "dart",
-      "program": "lib/main.dart",
-      "args": ["--flavor", "debug", "--target", "lib/main.dart"]
-    },
-    {
-      "name": "iOS Local",
+      "name": "Local",
       "request": "launch",
       "type": "dart",
       "flutterMode": "debug",
@@ -20,16 +13,18 @@
       "args": ["--dart-define", "endpoint=http://localhost:8080"]
     },
     {
-      "name": "Launch production",
+      "name": "Dev",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
-      "args": [
-        "--target",
-        "lib/main.dart",
-        "--dart-define",
-        "endpoint=http://192.168.1.33:8080"
-      ]
+      "args": ["--dart-define", "endpoint=http://192.168.1.33:8080"]
+    },
+    {
+      "name": "Prod",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--target", "lib/main.dart"]
     }
   ]
 }
