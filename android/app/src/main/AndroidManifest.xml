@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="io.ente.auth">
    <application
-        android:label="${appName}"
+        android:label="auth"
         android:icon="@mipmap/launcher_icon">
         <activity
             android:name=".MainActivity"
