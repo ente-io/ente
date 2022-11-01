@@ -83,7 +83,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                   if (toggleValue == newValue) {
                     if (executionState == ExecutionState.inProgress) {
                       executionState = ExecutionState.successful;
-                      Future.delayed(const Duration(seconds: 1), () {
+                      Future.delayed(const Duration(seconds: 2), () {
                         setState(() {
                           executionState = ExecutionState.idle;
                         });
@@ -104,7 +104,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
 
   Widget _stateIcon(enteColorScheme) {
     if (executionState == ExecutionState.idle) {
-      return const SizedBox.shrink();
+      return const SizedBox(width: 24);
     } else if (executionState == ExecutionState.inProgress) {
       return EnteLoadingWidget(
         color: enteColorScheme.strokeMuted,
@@ -115,7 +115,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
         color: enteColorScheme.primary500,
       );
     } else {
-      return const SizedBox.shrink();
+      return const SizedBox(width: 24);
     }
   }
 
