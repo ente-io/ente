@@ -23,3 +23,7 @@ export const registerUpdateEventListener = (
 export const updateAndRestart = () => {
     ipcRenderer.send('update-and-restart');
 };
+
+export const skipAppVersion = (version: string) => {
+    ipcRenderer.send('skip-app-version', version);
+};

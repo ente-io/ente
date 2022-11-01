@@ -5,6 +5,7 @@ import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import { buildContextMenu } from '../utils/menu';
 import semVerCmp from 'semver-compare';
 import { AppUpdateInfo } from '../types';
+import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
 
 const LATEST_SUPPORTED_AUTO_UPDATE_VERSION = '1.6.12';
 
@@ -23,6 +24,13 @@ class AppUpdater {
             0
         ) {
             log.debug('update available');
+            if (updateCheckResult.updateInfo.version === getSkipAppVersion()) {
+                log.info(
+                    'user chose to skip version ',
+                    updateCheckResult.updateInfo.version
+                );
+                return;
+            }
             if (
                 semVerCmp(
                     updateCheckResult.updateInfo.version,
@@ -30,16 +38,25 @@ class AppUpdater {
                 ) > 0
             ) {
                 log.debug('auto update not supported');
-                showUpdateDialog(mainWindow, { autoUpdatable: false });
+                showUpdateDialog(mainWindow, {
+                    autoUpdatable: false,
+                    version: updateCheckResult.updateInfo.version,
+                });
             } else {
                 log.debug('auto update supported');
                 autoUpdater.downloadUpdate();
                 autoUpdater.on('update-downloaded', () => {
-                    showUpdateDialog(mainWindow, { autoUpdatable: true });
+                    showUpdateDialog(mainWindow, {
+                        autoUpdatable: true,
+                        version: updateCheckResult.updateInfo.version,
+                    });
                 });
                 autoUpdater.on('error', (error) => {
                     log.error(error);
-                    showUpdateDialog(mainWindow, { autoUpdatable: false });
+                    showUpdateDialog(mainWindow, {
+                        autoUpdatable: false,
+                        version: updateCheckResult.updateInfo.version,
+                    });
                 });
             }
             setIsUpdateAvailable(true);
@@ -60,4 +77,8 @@ function showUpdateDialog(
     updateInfo: AppUpdateInfo
 ) {
     mainWindow.webContents.send('show-update-dialog', updateInfo);
+}
+
+export function skipAppVersion(version: string) {
+    setSkipAppVersion(version);
 }

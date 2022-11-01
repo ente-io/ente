@@ -15,7 +15,7 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
 import { convertHEIC } from '../services/heicConvertor';
-import appUpdater from '../services/appUpdater';
+import appUpdater, { skipAppVersion } from '../services/appUpdater';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -110,5 +110,8 @@ export default function setupIpcComs(
 
     ipcMain.on('update-and-restart', () => {
         appUpdater.updateAndRestart();
+    });
+    ipcMain.on('skip-app-version', (_, version) => {
+        skipAppVersion(version);
     });
 }
