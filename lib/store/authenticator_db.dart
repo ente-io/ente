@@ -40,16 +40,16 @@ class AuthenticatorDB {
     await db.execute(
       '''
                 CREATE TABLE $entityTable (
-                _generatedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                 id TEXT,
-                 encryptedData TEXT NOT NULL,
-                 header TEXT NOT NULL,
-                 createdAt INTEGER NOT NULL,
-                 updatedAt INTEGER NOT NULL,
-                 shouldSync INTERGER DEFAULT 0
+                  _generatedID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                  id TEXT,
+                  encryptedData TEXT NOT NULL,
+                  header TEXT NOT NULL,
+                  createdAt INTEGER NOT NULL,
+                  updatedAt INTEGER NOT NULL,
+                  shouldSync INTEGER DEFAULT 0,
+                  UNIQUE(id)
                 );
-                CREATE UNIQUE INDEX entity_id on $entityTable (id);
-                ''',
+      ''',
     );
   }
 
@@ -111,6 +111,8 @@ class AuthenticatorDB {
     await db.update(
       entityTable,
       localAuthEntity.toMap(),
+      where: '_generatedID = ?',
+      whereArgs: [localAuthEntity.generatedID],
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
