@@ -9,7 +9,6 @@ import { AppUpdateInfo } from '../types';
 const LATEST_SUPPORTED_AUTO_UPDATE_VERSION = '1.6.12';
 
 class AppUpdater {
-    autoUpdatable: boolean;
     constructor() {
         autoUpdater.logger = log;
         autoUpdater.autoDownload = false;
@@ -31,14 +30,12 @@ class AppUpdater {
                 ) > 0
             ) {
                 log.debug('auto update not supported');
-                this.autoUpdatable = false;
-                this.showUpdateDialog(mainWindow);
+                showUpdateDialog(mainWindow, { autoUpdatable: false });
             } else {
                 log.debug('auto update supported');
                 autoUpdater.downloadUpdate();
                 autoUpdater.on('update-downloaded', () => {
-                    this.autoUpdatable = true;
-                    this.showUpdateDialog(mainWindow);
+                    showUpdateDialog(mainWindow, { autoUpdatable: true });
                 });
             }
             setIsUpdateAvailable(true);
@@ -50,12 +47,13 @@ class AppUpdater {
         setIsAppQuitting(true);
         autoUpdater.quitAndInstall();
     };
+}
 
-    showUpdateDialog = (mainWindow: BrowserWindow) => {
-        mainWindow.webContents.send('show-update-dialog', {
-            autoUpdatable: this.autoUpdatable,
-        } as AppUpdateInfo);
-    };
+function showUpdateDialog(
+    mainWindow: BrowserWindow,
+    updateInfo: AppUpdateInfo
+) {
+    mainWindow.webContents.send('show-update-dialog', updateInfo);
 }
 
 export default new AppUpdater();
