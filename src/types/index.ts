@@ -57,3 +57,7 @@ export interface SafeStorageStoreType {
 export interface UserPreferencesType {
     hideDockIcon: boolean;
 }
+
+export interface AppUpdateInfo {
+    autoUpdatable: boolean;
+}

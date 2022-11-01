@@ -4,11 +4,12 @@ import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import { buildContextMenu } from '../utils/menu';
 import semVerCmp from 'semver-compare';
+import { AppUpdateInfo } from '../types';
 
 const LATEST_SUPPORTED_AUTO_UPDATE_VERSION = '1.6.12';
 
 class AppUpdater {
-    updateDownloaded: boolean;
+    autoUpdatable: boolean;
     constructor() {
         autoUpdater.logger = log;
         autoUpdater.autoDownload = false;
@@ -29,14 +30,14 @@ class AppUpdater {
                     LATEST_SUPPORTED_AUTO_UPDATE_VERSION
                 ) > 0
             ) {
-                log.debug('update not supported');
-                this.updateDownloaded = false;
+                log.debug('auto update not supported');
+                this.autoUpdatable = false;
                 this.showUpdateDialog(mainWindow);
             } else {
-                log.debug('update supported');
+                log.debug('auto update supported');
                 autoUpdater.downloadUpdate();
                 autoUpdater.on('update-downloaded', () => {
-                    this.updateDownloaded = true;
+                    this.autoUpdatable = true;
                     this.showUpdateDialog(mainWindow);
                 });
             }
@@ -52,8 +53,8 @@ class AppUpdater {
 
     showUpdateDialog = (mainWindow: BrowserWindow) => {
         mainWindow.webContents.send('show-update-dialog', {
-            updateDownloaded: this.updateDownloaded,
-        });
+            autoUpdatable: this.autoUpdatable,
+        } as AppUpdateInfo);
     };
 }
 

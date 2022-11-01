@@ -1,4 +1,5 @@
 import { ipcRenderer } from 'electron';
+import { AppUpdateInfo } from '../types';
 
 export const sendNotification = (content: string) => {
     ipcRenderer.send('send-notification', content);
@@ -11,15 +12,12 @@ export const reloadWindow = () => {
 };
 
 export const registerUpdateEventListener = (
-    showUpdateDialog: (updateInfo: { uploadDownloaded: boolean }) => void
+    showUpdateDialog: (updateInfo: AppUpdateInfo) => void
 ) => {
     ipcRenderer.removeAllListeners('show-update-dialog');
-    ipcRenderer.on(
-        'show-update-dialog',
-        (_, updateInfo: { uploadDownloaded: boolean }) => {
-            showUpdateDialog(updateInfo);
-        }
-    );
+    ipcRenderer.on('show-update-dialog', (_, updateInfo: AppUpdateInfo) => {
+        showUpdateDialog(updateInfo);
+    });
 };
 
 export const updateAndRestart = () => {
