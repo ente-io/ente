@@ -5,7 +5,6 @@ import { initWatcher } from './services/chokidar';
 import { addAllowOriginHeader } from './utils/cors';
 import {
     setupTrayItem,
-    handleUpdates,
     handleDownloads,
     setupMacWindowOnDockIconClick,
     setupMainMenu,
@@ -13,6 +12,7 @@ import {
     setupNextElectronServe,
     enableSharedArrayBufferSupport,
     handleDockIconHideOnAutoLaunch,
+    handleUpdates,
 } from './utils/main';
 import { initSentry } from './services/sentry';
 import { setupLogging } from './utils/logging';
@@ -72,7 +72,7 @@ if (!gotTheLock) {
         initSentry();
         setupMainMenu();
         setupIpcComs(tray, mainWindow, watcher);
-        handleUpdates(mainWindow, tray);
+        handleUpdates(mainWindow);
         handleDownloads(mainWindow);
         addAllowOriginHeader(mainWindow);
     });

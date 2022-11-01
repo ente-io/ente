@@ -4,18 +4,21 @@ import electronReload from 'electron-reload';
 import serveNextAt from 'next-electron-server';
 import path from 'path';
 import { existsSync } from 'promise-fs';
-import appUpdater from '../services/appUpdater';
 import { isDev } from './common';
 import { buildContextMenu, buildMenuBar } from './menu';
 import autoLauncher from '../services/autoLauncher';
 import { getHideDockIconPreference } from '../services/userPreference';
+import {
+    checkForUpdateAndNotify,
+    setupAutoUpdater,
+} from '../services/appUpdater';
 
-export function handleUpdates(mainWindow: BrowserWindow, tray: Tray) {
+export function handleUpdates(mainWindow: BrowserWindow) {
     if (!isDev) {
-        appUpdater.checkForUpdate(tray, mainWindow);
+        setupAutoUpdater();
+        checkForUpdateAndNotify(mainWindow);
     }
 }
-
 export function setupTrayItem(mainWindow: BrowserWindow) {
     const trayImgPath = isDev
         ? 'build/taskbar-icon.png'
