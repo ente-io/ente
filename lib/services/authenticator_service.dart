@@ -156,8 +156,12 @@ class AuthenticatorService {
         _logger.info("Adding new entry");
         final authEntity =
             await _gateway.createEntity(entity.encryptedData, entity.header);
-        entity.copyWith(id: authEntity.id, shouldSync: false);
-        await _db.updateLocalEntity(entity);
+        await _db.updateLocalEntity(
+          entity.copyWith(
+            id: authEntity.id,
+            shouldSync: false,
+          ),
+        );
       } else {
         _logger.info("Updating entry");
         await _gateway.updateEntity(
@@ -165,8 +169,7 @@ class AuthenticatorService {
           entity.encryptedData,
           entity.header,
         );
-        entity.copyWith(shouldSync: false);
-        await _db.updateLocalEntity(entity);
+        await _db.updateLocalEntity(entity.copyWith(shouldSync: false));
       }
     }
   }
