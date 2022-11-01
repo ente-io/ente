@@ -90,7 +90,7 @@ class UpdateService {
       return false;
     }
     if (!kDebugMode &&
-        _packageInfo.packageName != "io.ente.authenticator.independent") {
+        _packageInfo.packageName != "io.ente.auth.independent") {
       return false;
     }
     return true;
@@ -100,7 +100,7 @@ class UpdateService {
     if (Platform.isIOS) {
       return false;
     }
-    return _packageInfo.packageName.startsWith("io.ente.authenticator.independent");
+    return _packageInfo.packageName.startsWith("io.ente.auth.independent");
   }
 }
 

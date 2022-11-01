@@ -89,12 +89,12 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "io.ente.authenticator.ente-auth" "\0"
+            VALUE "CompanyName", "Ente Technologies, Inc." "\0"
             VALUE "FileDescription", "ente Authenticator" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "ente Authenticator" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2022 io.ente.authenticator. All rights reserved." "\0"
-            VALUE "OriginalFilename", "ente_authenticator.exe" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2022 Ente Technologies, Inc.. All rights reserved." "\0"
+            VALUE "OriginalFilename", "ente_auth.exe" "\0"
             VALUE "ProductName", "ente Authenticator" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END

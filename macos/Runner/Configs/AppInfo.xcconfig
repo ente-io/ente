@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = authenticator
+PRODUCT_NAME = auth
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = io.ente.authenticator
+PRODUCT_BUNDLE_IDENTIFIER = io.ente.auth
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2022 io.ente.authenticator. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2022 io.ente.auth. All rights reserved.

@@ -1,4 +1,4 @@
-package io.ente.authenticator
+package io.ente.auth
 
 import io.flutter.embedding.android.FlutterActivity
 

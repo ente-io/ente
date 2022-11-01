@@ -232,7 +232,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
                   launchUrlString(
                     "https://play.google.com/store/account/subscriptions?sku=" +
                         _currentSubscription.productID +
-                        "&package=io.ente.authenticator",
+                        "&package=io.ente.auth",
                   );
                   break;
                 case appStore:

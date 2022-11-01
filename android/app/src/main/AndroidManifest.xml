@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.ente.authenticator">
+    package="io.ente.auth">
    <application
         android:label="${appName}"
         android:icon="@mipmap/launcher_icon">
