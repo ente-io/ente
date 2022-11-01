@@ -511,7 +511,7 @@ const englishConstants = {
     EMAIl_ALREADY_OWNED: 'Email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
     UPLOAD_FAILED: 'Upload failed',
-    ETAGS_BLOCKED: (url: string) => (
+    ETAGS_BLOCKED: (link: string) => (
         <>
             <Box mb={1}>
                 We were unable to upload the following files because of your
@@ -520,13 +520,9 @@ const englishConstants = {
             <Box>
                 Please disable any addons that might be preventing ente from
                 using <code>eTags</code> to upload large files, or use our{' '}
-                <a
-                    href={url}
-                    style={{ color: '#51cd7c', textDecoration: 'underline' }}
-                    target="_blank"
-                    rel="noreferrer">
+                <Link href={link} target="_blank">
                     desktop app
-                </a>{' '}
+                </Link>{' '}
                 for a more reliable import experience.
             </Box>
         </>

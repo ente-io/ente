@@ -1,7 +1,7 @@
 import constants from 'utils/strings/constants';
 import { CustomError } from 'utils/error';
 
-const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
+export const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
 
 export function checkConnectivity() {
     if (navigator.onLine) {

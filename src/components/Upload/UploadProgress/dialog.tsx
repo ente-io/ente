@@ -7,9 +7,9 @@ import { UploadProgressHeader } from './header';
 import { InProgressSection } from './inProgressSection';
 import { ResultSection } from './resultSection';
 import { NotUploadSectionHeader } from './styledComponents';
-import { getOSSpecificDesktopAppDownloadLink } from 'utils/common';
 import UploadProgressContext from 'contexts/uploadProgress';
 import { dialogCloseHandler } from 'components/DialogBox/TitleWithCloseButton';
+import { APP_DOWNLOAD_URL } from 'utils/common';
 
 export function UploadProgressDialog() {
     const { open, onClose, uploadStage, finishedUploads } = useContext(
@@ -77,7 +77,7 @@ export function UploadProgressDialog() {
                                 uploadResult={UPLOAD_RESULT.BLOCKED}
                                 sectionTitle={constants.BLOCKED_UPLOADS}
                                 sectionInfo={constants.ETAGS_BLOCKED(
-                                    getOSSpecificDesktopAppDownloadLink()
+                                    APP_DOWNLOAD_URL
                                 )}
                             />
                             <ResultSection
