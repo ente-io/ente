@@ -98,6 +98,7 @@
     "electron-updater": "^4.3.8",
     "get-folder-size": "^2.0.1",
     "next-electron-server": "file:./thirdparty/next-electron-server",
+    "node-fetch": "^3.2.10",
     "node-stream-zip": "^1.15.0",
     "promise-fs": "^2.1.1",
     "semver-compare": "^1.0.0"

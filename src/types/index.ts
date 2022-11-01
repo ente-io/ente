@@ -63,3 +63,7 @@ export interface AppUpdateInfo {
     autoUpdatable: boolean;
     version: string;
 }
+
+export interface GetKeyChangeVersionResponse {
+    version?: string;
+}

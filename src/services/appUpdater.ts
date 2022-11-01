@@ -4,11 +4,9 @@ import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import { buildContextMenu } from '../utils/menu';
 import semVerCmp from 'semver-compare';
-import { AppUpdateInfo } from '../types';
+import { AppUpdateInfo, GetKeyChangeVersionResponse } from '../types';
 import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
-
-const LATEST_SUPPORTED_AUTO_UPDATE_VERSION = '1.6.12';
-
+import fetch from 'node-fetch';
 class AppUpdater {
     constructor() {
         autoUpdater.logger = log;
@@ -24,17 +22,23 @@ class AppUpdater {
             0
         ) {
             log.debug('update available');
-            if (updateCheckResult.updateInfo.version === getSkipAppVersion()) {
+            const skipAppVersion = getSkipAppVersion();
+            if (
+                skipAppVersion &&
+                updateCheckResult.updateInfo.version === skipAppVersion
+            ) {
                 log.info(
                     'user chose to skip version ',
                     updateCheckResult.updateInfo.version
                 );
                 return;
             }
+            const versionWithKeyChange = await getVersionWithKeyChange();
             if (
+                versionWithKeyChange &&
                 semVerCmp(
                     updateCheckResult.updateInfo.version,
-                    LATEST_SUPPORTED_AUTO_UPDATE_VERSION
+                    versionWithKeyChange
                 ) > 0
             ) {
                 log.debug('auto update not supported');
@@ -71,6 +75,13 @@ class AppUpdater {
 }
 
 export default new AppUpdater();
+
+async function getVersionWithKeyChange() {
+    const keyChangeVersion = (
+        await fetch('https://ente.io/desktop-key-change-version')
+    ).json() as GetKeyChangeVersionResponse;
+    return keyChangeVersion.version;
+}
 
 function showUpdateDialog(
     mainWindow: BrowserWindow,
