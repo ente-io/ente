@@ -10,6 +10,7 @@ import { AppContext } from 'pages/_app';
 import EnteSpinner from 'components/EnteSpinner';
 import { getDownloadAppMessage } from 'utils/ui';
 import { NoStyleAnchor } from 'components/pages/sharedAlbum/GoToEnte';
+import { openLink } from 'utils/common';
 
 export default function HelpSection() {
     const [exportModalView, setExportModalView] = useState(false);
@@ -20,8 +21,7 @@ export default function HelpSection() {
         const feedbackURL: string = `${getEndpoint()}/users/feedback?token=${encodeURIComponent(
             getToken()
         )}`;
-        const win = window.open(feedbackURL, '_blank');
-        win.focus();
+        openLink(feedbackURL, true);
     }
 
     function exportFiles() {
