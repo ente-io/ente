@@ -1,0 +1,116 @@
+name: ente_auth
+description: ente two-factor authenticator
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  adaptive_theme: ^3.1.0 # done
+  bloc: ^8.0.3 #done
+  bip39: ^1.0.6 #done
+  collection: # dart
+  computer: ^2.0.0
+  connectivity: ^3.0.3
+  cupertino_icons: ^1.0.0
+  device_info: ^2.0.2
+  email_validator: ^2.0.1
+  event_bus: ^2.0.0
+  dio: ^4.0.6
+  expandable: ^5.0.1
+  expansion_tile_card: ^2.0.0
+  fk_user_agent: ^2.1.0
+  flutter_email_sender: ^5.1.0
+  flutter_inappwebview: ^5.7.1
+  flutter_launcher_icons: ^0.9.3
+  dotted_border: ^2.0.0+2
+  in_app_purchase: ^0.5.2
+  flutter_secure_storage: ^6.0.0
+  flutter_animation_progress_bar: ^2.2.1
+  flutter_slidable: ^2.0.0
+
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.0.1
+  flutter_native_splash: ^2.2.12
+  local_auth: ^1.1.5
+  pinput: ^1.2.2
+  password_strength: ^0.2.0
+  flutter_sodium: ^0.2.0
+  flutter_windowmanager: ^0.2.0
+  flutter_localizations:
+    sdk: flutter
+  #  sentry:
+  #    path: thirdparty/sentry-dart/dart
+  #  sentry_flutter:
+  #      path: thirdparty/sentry-dart/flutter
+  json_annotation: ^4.5.0
+  fluttertoast: ^8.0.6
+  google_nav_bar: ^5.0.5 #supported
+  http: ^0.13.4
+  move_to_background: ^1.0.2
+  otp: ^3.1.1
+  path_provider: ^2.0.11
+  intl: ^0.17.0
+  qr_code_scanner: ^1.0.1
+  sqflite: ^2.1.0
+  share_plus: ^4.4.0
+  package_info_plus: ^1.0.1
+  shared_preferences: ^2.0.5
+  flutter_easyloading: ^3.0.5
+  uuid: ^3.0.4
+  url_launcher: ^6.1.5
+  logging: ^1.0.1
+  step_progress_indicator: ^1.0.2
+  confetti: ^0.7.0
+  clipboard: ^0.1.3
+  flutter_speed_dial: ^6.2.0
+
+dev_dependencies:
+  bloc_test: ^9.0.3
+  build_runner: ^2.1.11
+  flutter_test:
+    sdk: flutter
+  json_serializable: ^6.2.0
+  lints: ^1.0.1
+  mocktail: ^0.3.0
+
+
+# The following section is specific to Flutter.
+flutter:
+  uses-material-design: true
+  generate: true
+
+  # https://docs:flutter:dev/development/ui/assets-and-images:
+  assets:
+    - assets/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: fonts/Inter-Regular.ttf
+        - asset: fonts/Inter-Medium.ttf
+        - asset: fonts/Inter-Light.ttf
+        - asset: fonts/Inter-SemiBold.ttf
+        - asset: fonts/Inter-Bold.ttf
+    - family: Montserrat
+      fonts:
+        - asset: fonts/Montserrat-Bold.ttf
+
+flutter_icons:
+  android: "launcher_icon"
+  adaptive_icon_foreground: "assets/icon-light-adaptive-fg.png"
+  adaptive_icon_background: "#ffffff"
+  ios: true
+  image_path: "assets/icon-light.png"
+  remove_alpha_ios: true
+
+flutter_native_splash:
+  color: "#ffffff"
+  color_dark: "#000000"
+  image: assets/splash-screen-light.png
+  image_dark: assets/splash-screen-dark.png
+  android_fullscreen: true
+  android_gravity: center
+  ios_content_mode: center

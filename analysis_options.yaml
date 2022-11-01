@@ -1,0 +1,51 @@
+# For more linters, we can check https://dart-lang.github.io/linter/lints/index.html
+# or https://pub.dev/packages/lint (Effective dart)
+# use "flutter analyze ." or "dart  analyze ." for running lint checks
+
+include: package:lints/recommended.yaml
+linter:
+  rules:
+    # Ref https://github.com/flutter/packages/blob/master/packages/flutter_lints/lib/flutter.yaml
+    - avoid_print
+    - avoid_unnecessary_containers
+    - avoid_web_libraries_in_flutter
+    - no_logic_in_create_state
+    - prefer_const_constructors
+    - prefer_const_constructors_in_immutables
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - require_trailing_commas
+    - sized_box_for_whitespace
+    - use_full_hex_values_for_flutter_colors
+    - use_key_in_widget_constructors
+
+    - avoid_empty_else
+    - exhaustive_cases
+
+    # just style suggestions
+    - sort_pub_dependencies
+    - use_rethrow_when_possible
+    - directives_ordering
+    - always_use_package_imports
+
+analyzer:
+  errors:
+    avoid_empty_else: error
+    exhaustive_cases: error
+    curly_braces_in_flow_control_structures: error
+    directives_ordering: error
+    always_use_package_imports: error
+    prefer_final_fields: error
+    unused_import: error
+    prefer_is_empty: warning
+    use_rethrow_when_possible: info
+    require_trailing_commas: error
+
+    prefer_const_constructors: error # too many warnings
+    prefer_const_declarations: error # too many warnings
+    prefer_const_constructors_in_immutables: ignore # too many warnings
+
+    avoid_renaming_method_parameters: ignore # incorrect warnings for `equals` overrides
+
+  exclude:
+    - thirdparty/**

@@ -1,0 +1,23 @@
+{
+  "@@locale": "en",
+  "counterAppBarTitle": "Counter",
+  "@counterAppBarTitle": {
+    "description": "Text shown in the AppBar of the Counter Page"
+  },
+  "onBoardingBody": "Secure your 2FA codes",
+  "onBoardingGetStarted": "Get Started",
+
+  "setupFirstAccount": "Setup your first account",
+  "importScanQrCode": "Scan a QR Code",
+  "importEnterSetupKey": "Enter a setup key",
+  "importAccountPageTitle": "Enter account details",
+  "accountNameHint": "Account name",
+  "accountKeyHint" : "Your key",
+  "accountKeyType": "Type of key",
+  "timeBasedKeyType": "Time based (TOTP)",
+  "counterBasedKeyType": "Counter based (HOTP)",
+  "importAddAction": "Add",
+
+  "existingUser": "Existing User",
+  "newUser" : "New to ente"
+}
