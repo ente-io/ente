@@ -30,7 +30,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
     };
 
     const handleClick = () => {
-        attributes.action?.callback();
+        attributes?.onClick();
         onClose();
     };
     return (
@@ -55,27 +55,34 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                     spacing={2}
                     direction="row"
                     alignItems={'center'}>
-                    {attributes?.icon ?? <InfoIcon />}
+                    {attributes?.startIcon ?? <InfoIcon />}
 
-                    <Typography
-                        variant="body1"
-                        mb={0.5}
+                    <Stack
+                        direction={'column'}
+                        spacing={0.5}
                         flex={1}
                         textAlign="left">
-                        {attributes.message}{' '}
-                    </Typography>
-                    {attributes?.action && (
-                        <Typography
-                            mb={0.5}
-                            variant="button"
-                            fontWeight={'bold'}>
-                            {attributes?.action.text}
-                        </Typography>
-                    )}
+                        {attributes.subtext && (
+                            <Typography variant="body2">
+                                {attributes.subtext}
+                            </Typography>
+                        )}
+                        {attributes.message && (
+                            <Typography variant="button">
+                                {attributes.message}
+                            </Typography>
+                        )}
+                    </Stack>
 
-                    <IconButton onClick={handleClose}>
-                        <CloseIcon />
-                    </IconButton>
+                    {attributes?.endIcon ? (
+                        <IconButton onClick={attributes.onClick}>
+                            {attributes?.endIcon}
+                        </IconButton>
+                    ) : (
+                        <IconButton onClick={handleClose}>
+                            <CloseIcon />
+                        </IconButton>
+                    )}
                 </Stack>
             </Paper>
         </Snackbar>
