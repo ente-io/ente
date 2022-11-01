@@ -7,6 +7,9 @@ import { AppUpdateInfo, GetKeyChangeVersionResponse } from '../types';
 import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
 import fetch from 'node-fetch';
 import { isPlatformMac } from '../utils/main';
+import { logErrorSentry } from './sentry';
+
+const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 
 export function setupAutoUpdater() {
     autoUpdater.logger = log;
@@ -14,11 +17,17 @@ export function setupAutoUpdater() {
 }
 
 export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
-    log.debug('checkForUpdateAndNotify called');
-    const updateCheckResult = await autoUpdater.checkForUpdates();
-    log.debug(updateCheckResult);
-    if (semVerCmp(updateCheckResult.updateInfo.version, app.getVersion()) > 0) {
-        log.debug('update available');
+    try {
+        log.debug('checkForUpdateAndNotify called');
+        const updateCheckResult = await autoUpdater.checkForUpdates();
+        log.debug(updateCheckResult);
+        if (
+            semVerCmp(updateCheckResult.updateInfo.version, app.getVersion()) <=
+            0
+        ) {
+            log.debug('already at latest version');
+            return;
+        }
         const skipAppVersion = getSkipAppVersion();
         if (
             skipAppVersion &&
@@ -45,17 +54,22 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
                 version: updateCheckResult.updateInfo.version,
             });
         } else {
+            let timeout: NodeJS.Timeout;
             log.debug('attempting auto update');
             autoUpdater.downloadUpdate();
             autoUpdater.on('update-downloaded', () => {
-                showUpdateDialog(mainWindow, {
-                    autoUpdatable: true,
-                    version: updateCheckResult.updateInfo.version,
-                });
+                timeout = setTimeout(
+                    () =>
+                        showUpdateDialog(mainWindow, {
+                            autoUpdatable: true,
+                            version: updateCheckResult.updateInfo.version,
+                        }),
+                    FIVE_MIN_IN_MICROSECOND
+                );
             });
             autoUpdater.on('error', (error) => {
-                log.debug('auto update failed');
-                log.error(error);
+                clearTimeout(timeout);
+                logErrorSentry(error, 'auto update failed');
                 showUpdateDialog(mainWindow, {
                     autoUpdatable: false,
                     version: updateCheckResult.updateInfo.version,
@@ -63,6 +77,8 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
             });
         }
         setIsUpdateAvailable(true);
+    } catch (e) {
+        logErrorSentry(e, 'checkForUpdateAndNotify failed');
     }
 }
 
