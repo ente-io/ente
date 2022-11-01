@@ -107,9 +107,29 @@ class AuthenticatorService {
   Future<void> sync() async {
     try {
       _logger.info("Sync");
+      _logger.info("State of DB before sync");
+      _logger.info("_____");
+      var entities = await _db.getAll();
+      for (final entity in entities) {
+        _logger.info(entity.id);
+      }
       await _remoteToLocalSync();
       _logger.info("remote fetch completed");
+      _logger.info("State of DB after remoteToLocal sync");
+      _logger.info("_____");
+      entities = await _db.getAll();
+      for (final entity in entities) {
+        _logger.info(entity.id);
+      }
+      _logger.info("_____");
       await _localToRemoteSync();
+      _logger.info("State of DB after localToRemote sync");
+      _logger.info("_____");
+      entities = await _db.getAll();
+      for (final entity in entities) {
+        _logger.info(entity.id);
+      }
+      _logger.info("_____");
       _logger.info("local push completed");
       Bus.instance.fire(CodesUpdatedEvent());
     } catch (e) {
