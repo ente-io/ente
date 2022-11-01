@@ -17,7 +17,7 @@ class AppUpdater {
 
     async checkForUpdate(tray: Tray, mainWindow: BrowserWindow) {
         log.debug('checkForUpdate');
-        const updateCheckResult = await autoUpdater.checkForUpdatesAndNotify();
+        const updateCheckResult = await autoUpdater.checkForUpdates();
         log.debug(updateCheckResult);
         if (
             semVerCmp(updateCheckResult.updateInfo.version, app.getVersion()) >
