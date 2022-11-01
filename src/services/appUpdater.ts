@@ -14,7 +14,7 @@ export function setupAutoUpdater() {
 }
 
 export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
-    log.debug('checkForUpdate');
+    log.debug('checkForUpdateAndNotify called');
     const updateCheckResult = await autoUpdater.checkForUpdates();
     log.debug(updateCheckResult);
     if (semVerCmp(updateCheckResult.updateInfo.version, app.getVersion()) > 0) {
@@ -39,13 +39,13 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
                 versionWithKeyChange
             ) > 0
         ) {
-            log.debug('auto update not supported');
+            log.debug('auto update not possible due to key change');
             showUpdateDialog(mainWindow, {
                 autoUpdatable: false,
                 version: updateCheckResult.updateInfo.version,
             });
         } else {
-            log.debug('auto update supported');
+            log.debug('attempting auto update');
             autoUpdater.downloadUpdate();
             autoUpdater.on('update-downloaded', () => {
                 showUpdateDialog(mainWindow, {
@@ -54,6 +54,7 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
                 });
             });
             autoUpdater.on('error', (error) => {
+                log.debug('auto update failed');
                 log.error(error);
                 showUpdateDialog(mainWindow, {
                     autoUpdatable: false,
