@@ -3,6 +3,7 @@ import { WatchMapping } from 'types/watchFolder';
 
 export interface AppUpdateInfo {
     autoUpdatable: boolean;
+    version: string;
 }
 
 export interface ElectronAPIs {
@@ -73,4 +74,5 @@ export interface ElectronAPIs {
         showUpdateDialog: (updateInfo: AppUpdateInfo) => void
     ) => void;
     updateAndRestart: () => void;
+    skipAppVersion: (version: string) => void;
 }

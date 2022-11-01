@@ -4,6 +4,7 @@ import { DialogBoxAttributes } from 'types/dialogBox';
 import { downloadApp } from 'utils/common';
 import constants from 'utils/strings/constants';
 import ElectronUpdateService from 'services/electron/update';
+import { AppUpdateInfo } from 'types/electron';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: constants.DOWNLOAD_APP,
@@ -59,18 +60,20 @@ export const getUpdateReadyToInstallMessage = (): DialogBoxAttributes => ({
     },
 });
 
-export const getUpdateAvailableForDownloadMessage =
-    (): DialogBoxAttributes => ({
-        icon: <AutoAwesomeOutlinedIcon />,
-        title: constants.UPDATE_AVAILABLE,
-        content: constants.UPDATE_AVAILABLE_MESSAGE,
-        close: {
-            text: constants.IGNORE_THIS_VERSION,
-            variant: 'secondary',
-        },
-        proceed: {
-            action: downloadApp,
-            text: constants.DOWNLOAD_AND_INSTALL,
-            variant: 'accent',
-        },
-    });
+export const getUpdateAvailableForDownloadMessage = (
+    updateInfo: AppUpdateInfo
+): DialogBoxAttributes => ({
+    icon: <AutoAwesomeOutlinedIcon />,
+    title: constants.UPDATE_AVAILABLE,
+    content: constants.UPDATE_AVAILABLE_MESSAGE,
+    close: {
+        text: constants.IGNORE_THIS_VERSION,
+        variant: 'secondary',
+        action: () => ElectronUpdateService.skipAppVersion(updateInfo.version),
+    },
+    proceed: {
+        action: downloadApp,
+        text: constants.DOWNLOAD_AND_INSTALL,
+        variant: 'accent',
+    },
+});

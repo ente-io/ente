@@ -167,7 +167,7 @@ export default function App({ Component, err }) {
                         message: constants.UPDATE_AVAILABLE,
                         onClick: () =>
                             setDialogMessage(
-                                getUpdateAvailableForDownloadMessage()
+                                getUpdateAvailableForDownloadMessage(updateInfo)
                             ),
                     });
                 }

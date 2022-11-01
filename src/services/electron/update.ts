@@ -20,6 +20,12 @@ class ElectronUpdateService {
             this.electronAPIs.updateAndRestart();
         }
     }
+
+    skipAppVersion(version: string) {
+        if (this.electronAPIs?.skipAppVersion) {
+            this.electronAPIs.skipAppVersion(version);
+        }
+    }
 }
 
 export default new ElectronUpdateService();
