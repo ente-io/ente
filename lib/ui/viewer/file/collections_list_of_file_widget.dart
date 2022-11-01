@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -21,7 +22,7 @@ class CollectionsListOfFileWidget extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           final Set<int> collectionIDs = snapshot.data;
-          final collections = [];
+          final collections = <Collection>[];
           for (var collectionID in collectionIDs) {
             final c =
                 CollectionsService.instance.getCollectionByID(collectionID);
@@ -33,9 +34,13 @@ class CollectionsListOfFileWidget extends StatelessWidget {
             itemCount: collections.length,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
+              final bool isHidden = collections[index].isHidden();
               return FileInfoCollectionWidget(
-                name: collections[index].name,
+                name: isHidden ? 'Hidden' : collections[index].name,
                 onTap: () {
+                  if (isHidden) {
+                    return;
+                  }
                   routeToPage(
                     context,
                     CollectionPage(
