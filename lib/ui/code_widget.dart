@@ -27,7 +27,8 @@ class _CodeWidgetState extends State<CodeWidget> {
   void initState() {
     super.initState();
     _updateTimeRemaining();
-    _everySecondTimer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
+    _everySecondTimer =
+        Timer.periodic(const Duration(milliseconds: 200), (Timer t) {
       setState(() {
         _updateTimeRemaining();
       });
