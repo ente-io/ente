@@ -416,7 +416,7 @@ packages:
       name: flutter_native_splash
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.12"
+    version: "2.2.13"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

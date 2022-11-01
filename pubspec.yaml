@@ -33,7 +33,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
-  flutter_native_splash: ^2.2.12
+  flutter_native_splash: ^2.2.13
   local_auth: ^1.1.5
   pinput: ^1.2.2
   password_strength: ^0.2.0
