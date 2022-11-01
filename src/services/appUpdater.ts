@@ -20,7 +20,7 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
     try {
         log.debug('checkForUpdateAndNotify called');
         const updateCheckResult = await autoUpdater.checkForUpdates();
-        log.debug(updateCheckResult);
+        log.debug('update version', updateCheckResult.updateInfo.version);
         if (
             semVerCmp(updateCheckResult.updateInfo.version, app.getVersion()) <=
             0
