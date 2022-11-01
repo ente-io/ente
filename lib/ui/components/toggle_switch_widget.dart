@@ -42,11 +42,14 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
 
     return Row(
       children: [
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 175),
-          switchInCurve: Curves.easeInExpo,
-          switchOutCurve: Curves.easeOutExpo,
-          child: stateIcon,
+        Padding(
+          padding: const EdgeInsets.only(right: 2),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 175),
+            switchInCurve: Curves.easeInExpo,
+            switchOutCurve: Curves.easeOutExpo,
+            child: stateIcon,
+          ),
         ),
         SizedBox(
           height: 32,
@@ -110,9 +113,13 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
         color: enteColorScheme.strokeMuted,
       );
     } else if (executionState == ExecutionState.successful) {
-      return Icon(
-        Icons.check_outlined,
-        color: enteColorScheme.primary500,
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1),
+        child: Icon(
+          Icons.check_outlined,
+          size: 22,
+          color: enteColorScheme.primary500,
+        ),
       );
     } else {
       return const SizedBox(width: 24);
