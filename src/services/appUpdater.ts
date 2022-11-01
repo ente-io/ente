@@ -37,6 +37,10 @@ class AppUpdater {
                 autoUpdater.on('update-downloaded', () => {
                     showUpdateDialog(mainWindow, { autoUpdatable: true });
                 });
+                autoUpdater.on('error', (error) => {
+                    log.error(error);
+                    showUpdateDialog(mainWindow, { autoUpdatable: false });
+                });
             }
             setIsUpdateAvailable(true);
             tray.setContextMenu(buildContextMenu(mainWindow));
