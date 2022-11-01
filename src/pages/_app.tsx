@@ -39,6 +39,7 @@ import {
     SetNotificationAttributes,
 } from 'types/Notification';
 import ArrowForward from '@mui/icons-material/ArrowForward';
+import { AppUpdateInfo } from 'types/electron';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -156,10 +157,8 @@ export default function App({ Component, err }) {
 
     useEffect(() => {
         if (isElectron()) {
-            const showUpdateDialog = (updateInfo: {
-                updateDownloaded: boolean;
-            }) => {
-                if (updateInfo.updateDownloaded) {
+            const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
+                if (updateInfo.autoUpdatable) {
                     setDialogMessage(getUpdateReadyToInstallMessage());
                 } else {
                     setNotificationAttributes({

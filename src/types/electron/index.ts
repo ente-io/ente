@@ -1,6 +1,10 @@
 import { ElectronFile } from 'types/upload';
 import { WatchMapping } from 'types/watchFolder';
 
+export interface AppUpdateInfo {
+    autoUpdatable: boolean;
+}
+
 export interface ElectronAPIs {
     exists: (path: string) => boolean;
     checkExistsAndCreateCollectionDir: (dirPath: string) => Promise<void>;
@@ -66,7 +70,7 @@ export interface ElectronAPIs {
     convertHEIC(fileData: Uint8Array): Promise<Uint8Array>;
     openLogDirectory: () => void;
     registerUpdateEventListener: (
-        showUpdateDialog: (updateInfo: { updateDownloaded: boolean }) => void
+        showUpdateDialog: (updateInfo: AppUpdateInfo) => void
     ) => void;
     updateAndRestart: () => void;
 }

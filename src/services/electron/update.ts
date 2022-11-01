@@ -1,4 +1,4 @@
-import { ElectronAPIs } from 'types/electron';
+import { AppUpdateInfo, ElectronAPIs } from 'types/electron';
 
 class ElectronUpdateService {
     private electronAPIs: ElectronAPIs;
@@ -8,7 +8,7 @@ class ElectronUpdateService {
     }
 
     registerUpdateEventListener(
-        showUpdateDialog: (updateInfo: { updateDownloaded: boolean }) => void
+        showUpdateDialog: (updateInfo: AppUpdateInfo) => void
     ) {
         if (this.electronAPIs?.registerUpdateEventListener) {
             this.electronAPIs.registerUpdateEventListener(showUpdateDialog);
