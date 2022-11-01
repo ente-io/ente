@@ -6,6 +6,7 @@ import semVerCmp from 'semver-compare';
 import { AppUpdateInfo, GetKeyChangeVersionResponse } from '../types';
 import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
 import fetch from 'node-fetch';
+import { isPlatformMac } from '../utils/main';
 
 export function setupAutoUpdater() {
     autoUpdater.logger = log;
@@ -32,6 +33,7 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         const versionWithKeyChange = await getVersionWithKeyChange();
         if (
             versionWithKeyChange &&
+            isPlatformMac() &&
             semVerCmp(
                 updateCheckResult.updateInfo.version,
                 versionWithKeyChange
