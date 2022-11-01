@@ -153,6 +153,7 @@ class _CodeWidgetState extends State<CodeWidget> {
           ),
           onPressed: () {
             CodeStore.instance.removeCode(widget.code);
+            Navigator.of(context, rootNavigator: true).pop('dialog');
           },
         ),
         TextButton(
