@@ -49,11 +49,11 @@ class AppUpdater {
     };
 }
 
+export default new AppUpdater();
+
 function showUpdateDialog(
     mainWindow: BrowserWindow,
     updateInfo: AppUpdateInfo
 ) {
     mainWindow.webContents.send('show-update-dialog', updateInfo);
 }
-
-export default new AppUpdater();
