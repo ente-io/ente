@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/utils/debouncer.dart';
 
 enum ExecutionState {
   idle,
@@ -26,11 +27,11 @@ class ToggleSwitchWidget extends StatefulWidget {
 
 class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   late bool toggleValue;
-  late ExecutionState executionState;
+  ExecutionState executionState = ExecutionState.idle;
+  final _debouncer = Debouncer(const Duration(milliseconds: 300));
   @override
   void initState() {
     toggleValue = widget.value.call();
-    executionState = ExecutionState.idle;
     super.initState();
   }
 
@@ -42,7 +43,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     return Row(
       children: [
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 175),
           switchInCurve: Curves.easeInExpo,
           switchOutCurve: Curves.easeOutExpo,
           child: stateIcon,
@@ -59,20 +60,34 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
               onChanged: (negationOfToggleValue) async {
                 setState(() {
                   toggleValue = negationOfToggleValue;
-                  executionState = ExecutionState.inProgress;
+                  //start showing inProgress statu icons if toggle takes more than debounce time
+                  _debouncer.run(
+                    () => Future(
+                      () {
+                        setState(() {
+                          executionState = ExecutionState.inProgress;
+                        });
+                      },
+                    ),
+                  );
                 });
                 await widget.onChanged.call();
+                //debouncer gets canceled if onChanged takes less than debounce time
+                _debouncer.cancelDebounce();
                 setState(() {
                   final newValue = widget.value.call();
-                  toggleValue = newValue;
+                  //if onchanged on toggle is successful
                   if (toggleValue == newValue) {
-                    executionState = ExecutionState.successful;
-                    Future.delayed(const Duration(seconds: 1), () {
-                      setState(() {
-                        executionState = ExecutionState.idle;
+                    if (executionState == ExecutionState.inProgress) {
+                      executionState = ExecutionState.successful;
+                      Future.delayed(const Duration(seconds: 1), () {
+                        setState(() {
+                          executionState = ExecutionState.idle;
+                        });
                       });
-                    });
+                    }
                   } else {
+                    toggleValue = !toggleValue;
                     executionState = ExecutionState.idle;
                   }
                 });
