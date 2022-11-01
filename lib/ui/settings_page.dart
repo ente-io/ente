@@ -42,6 +42,7 @@ class SettingsPage extends StatelessWidget {
     final List<Widget> contents = [];
     contents.add(
       Container(
+        constraints: const BoxConstraints(maxWidth: 350),
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: Align(
           alignment: Alignment.centerLeft,
