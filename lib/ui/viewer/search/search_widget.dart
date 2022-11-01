@@ -32,17 +32,20 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   Widget build(BuildContext context) {
     return Hero(
       tag: "search_icon",
-      child: IconButton(
-        visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-        onPressed: () {
-          Navigator.push(
-            context,
-            TransparentRoute(
-              builder: (BuildContext context) => const SearchWidget(),
-            ),
-          );
-        },
-        icon: const Icon(Icons.search),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: IconButton(
+          visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
+          onPressed: () {
+            Navigator.push(
+              context,
+              TransparentRoute(
+                builder: (BuildContext context) => const SearchWidget(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.search),
+        ),
       ),
     );
   }
