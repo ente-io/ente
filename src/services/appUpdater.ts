@@ -76,10 +76,14 @@ export function skipAppVersion(version: string) {
 }
 
 async function getVersionWithKeyChange() {
-    const keyChangeVersion = (
-        await fetch('https://ente.io/desktop-key-change-version')
-    ).json() as GetKeyChangeVersionResponse;
-    return keyChangeVersion.version;
+    try {
+        const keyChangeVersion = (
+            await fetch('https://ente.io/desktop-key-change-version')
+        ).json() as GetKeyChangeVersionResponse;
+        return keyChangeVersion.version;
+    } catch (e) {
+        return undefined;
+    }
 }
 
 function showUpdateDialog(
