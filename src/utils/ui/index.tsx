@@ -69,7 +69,7 @@ export const getUpdateAvailableForDownloadMessage =
             variant: 'secondary',
         },
         proceed: {
-            action: () => ElectronUpdateService.updateAndRestart(),
+            action: downloadApp,
             text: constants.DOWNLOAD_AND_INSTALL,
             variant: 'accent',
         },
