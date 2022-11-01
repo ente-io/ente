@@ -71,7 +71,10 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                     ),
                   );
                 });
+                final Stopwatch stopwatch = Stopwatch()..start();
                 await widget.onChanged.call();
+                //for toggle feedback on short unsuccessful onChanged
+                await _feedbackOnUnsuccessfulToggle(stopwatch);
                 //debouncer gets canceled if onChanged takes less than debounce time
                 _debouncer.cancelDebounce();
                 setState(() {
@@ -113,6 +116,15 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
       );
     } else {
       return const SizedBox.shrink();
+    }
+  }
+
+  Future<void> _feedbackOnUnsuccessfulToggle(Stopwatch stopwatch) async {
+    final timeElapsed = stopwatch.elapsedMilliseconds;
+    if (timeElapsed < 200) {
+      await Future.delayed(
+        Duration(milliseconds: 200 - timeElapsed),
+      );
     }
   }
 }
