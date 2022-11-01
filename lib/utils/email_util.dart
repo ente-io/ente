@@ -5,8 +5,10 @@ import 'dart:io';
 import 'package:archive/archive_io.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
+import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 // import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -60,7 +62,7 @@ Future<void> sendLogs(
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            // return LogFileViewer(SuperLogging.logFile);
+            return LogFileViewer(SuperLogging.logFile);
           },
           barrierColor: Colors.black87,
           barrierDismissible: false,
