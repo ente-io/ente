@@ -38,6 +38,7 @@ import {
     NotificationAttributes,
     SetNotificationAttributes,
 } from 'types/Notification';
+import ArrowForward from '@mui/icons-material/ArrowForward';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -161,7 +162,15 @@ export default function App({ Component, err }) {
                 if (updateInfo.updateDownloaded) {
                     setDialogMessage(getUpdateReadyToInstallMessage());
                 } else {
-                    setDialogMessage(getUpdateAvailableForDownloadMessage());
+                    setNotificationAttributes({
+                        endIcon: <ArrowForward />,
+                        variant: 'secondary',
+                        message: constants.UPDATE_AVAILABLE,
+                        onClick: () =>
+                            setDialogMessage(
+                                getUpdateAvailableForDownloadMessage()
+                            ),
+                    });
                 }
             };
             ElectronUpdateService.registerUpdateEventListener(showUpdateDialog);
