@@ -2,13 +2,12 @@ import { ButtonProps } from '@mui/material/Button';
 import { ReactNode } from 'react';
 
 export interface NotificationAttributes {
-    icon?: ReactNode;
+    startIcon?: ReactNode;
     variant: ButtonProps['color'];
     message: JSX.Element | string;
-    action?: {
-        text: string;
-        callback: () => void;
-    };
+    subtext?: JSX.Element | string;
+    onClick?: () => void;
+    endIcon?: ReactNode;
 }
 
 export type SetNotificationAttributes = React.Dispatch<
