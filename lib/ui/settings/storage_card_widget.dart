@@ -11,16 +11,16 @@ import 'package:photos/ui/settings/storage_error_widget.dart';
 import 'package:photos/ui/settings/storage_progress_widget.dart';
 import 'package:photos/utils/data_util.dart';
 
-class DetailsSectionWidget extends StatefulWidget {
-  const DetailsSectionWidget({Key? key}) : super(key: key);
+class StorageCardWidget extends StatefulWidget {
+  const StorageCardWidget({Key? key}) : super(key: key);
 
   @override
-  State<DetailsSectionWidget> createState() => _DetailsSectionWidgetState();
+  State<StorageCardWidget> createState() => _StorageCardWidgetState();
 }
 
-class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
+class _StorageCardWidgetState extends State<StorageCardWidget> {
   late Image _background;
-  final _logger = Logger((_DetailsSectionWidgetState).toString());
+  final _logger = Logger((_StorageCardWidgetState).toString());
   final ValueNotifier<bool> _isStorageCardPressed = ValueNotifier(false);
 
   @override
@@ -46,10 +46,7 @@ class _DetailsSectionWidgetState extends State<DetailsSectionWidget> {
 
     if (inheritedUserDetails == null) {
       _logger.severe(
-        (InheritedUserDetails).toString() +
-            ' not found before ' +
-            (_DetailsSectionWidgetState).toString() +
-            ' on tree',
+        (InheritedUserDetails).toString() + 'is null',
       );
       throw Error();
     } else {

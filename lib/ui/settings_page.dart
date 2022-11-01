@@ -14,10 +14,10 @@ import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
-import 'package:photos/ui/settings/details_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/settings_title_bar_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
+import 'package:photos/ui/settings/storage_card_widget.dart';
 import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
 
@@ -65,7 +65,7 @@ class SettingsPage extends StatelessWidget {
     contents.add(const SizedBox(height: 8));
     if (hasLoggedIn) {
       contents.addAll([
-        const DetailsSectionWidget(),
+        const StorageCardWidget(),
         const SizedBox(height: 12),
         const BackupSectionWidget(),
         sectionSpacing,
