@@ -2,8 +2,6 @@
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
-import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/events/subscription_purchased_event.dart';
 import 'package:ente_auth/models/key_attributes.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
@@ -127,7 +125,6 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             return;
           }
           await dialog.hide();
-          Bus.instance.fire(SubscriptionPurchasedEvent());
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {

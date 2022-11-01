@@ -6,8 +6,8 @@ import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
-import 'package:ente_auth/events/account_configured_event.dart';
-import 'package:ente_auth/events/user_logged_out_event.dart';
+import 'package:ente_auth/events/signed_in_event.dart';
+import 'package:ente_auth/events/signed_out_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/ui/home_page.dart';
@@ -24,18 +24,17 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
-  StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
+  StreamSubscription<SignedOutEvent> _signedOutEvent;
+  StreamSubscription<SignedInEvent> _signedInEvent;
 
   @override
   void initState() {
-    _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
+    _signedOutEvent = Bus.instance.on<SignedOutEvent>().listen((event) {
       if (mounted) {
         setState(() {});
       }
     });
-    _accountConfiguredEvent =
-        Bus.instance.on<AccountConfiguredEvent>().listen((event) {
+    _signedInEvent = Bus.instance.on<SignedInEvent>().listen((event) {
       if (mounted) {
         setState(() {});
       }
@@ -46,8 +45,8 @@ class _AppState extends State<App> {
   @override
   void dispose() {
     super.dispose();
-    _loggedOutEvent.cancel();
-    _accountConfiguredEvent.cancel();
+    _signedOutEvent.cancel();
+    _signedInEvent.cancel();
   }
 
   @override

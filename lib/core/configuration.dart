@@ -8,7 +8,7 @@ import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
-import 'package:ente_auth/events/user_logged_out_event.dart';
+import 'package:ente_auth/events/signed_out_event.dart';
 import 'package:ente_auth/models/key_attributes.dart';
 import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/models/private_key_attributes.dart';
@@ -130,7 +130,7 @@ class Configuration {
     _key = null;
     _cachedToken = null;
     _secretKey = null;
-    Bus.instance.fire(UserLoggedOutEvent());
+    Bus.instance.fire(SignedOutEvent());
   }
 
   Future<KeyGenResult> generateKey(String password) async {

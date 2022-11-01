@@ -1,9 +1,6 @@
 // @dart=2.9
 
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/event_bus.dart';
-import 'package:ente_auth/events/account_configured_event.dart';
-import 'package:ente_auth/events/subscription_purchased_event.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
@@ -393,7 +390,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
       showShortToast(context, "Password changed successfully");
       Navigator.of(context).pop();
       if (widget.mode == PasswordEntryMode.reset) {
-        Bus.instance.fire(SubscriptionPurchasedEvent());
         Navigator.of(context).popUntil((route) => route.isFirst);
       }
     } catch (e, s) {
@@ -417,7 +413,6 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         try {
           await UserService.instance.setAttributes(result);
           await dialog.hide();
-          Bus.instance.fire(AccountConfiguredEvent());
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(
               builder: (BuildContext context) {

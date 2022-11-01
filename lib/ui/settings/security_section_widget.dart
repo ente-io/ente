@@ -1,12 +1,9 @@
 // @dart=2.9
 
-import 'dart:async';
 import 'dart:io';
 
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
-import 'package:ente_auth/events/two_factor_status_change_event.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/sessions_page.dart';
@@ -28,22 +25,13 @@ class SecuritySectionWidget extends StatefulWidget {
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
 
-  StreamSubscription<TwoFactorStatusChangeEvent> _twoFactorStatusChangeEvent;
-
   @override
   void initState() {
     super.initState();
-    _twoFactorStatusChangeEvent =
-        Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) async {
-      if (mounted) {
-        setState(() {});
-      }
-    });
   }
 
   @override
   void dispose() {
-    _twoFactorStatusChangeEvent.cancel();
     super.dispose();
   }
 

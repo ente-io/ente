@@ -6,7 +6,8 @@ import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/core/network.dart';
-import 'package:ente_auth/events/account_configured_event.dart';
+import 'package:ente_auth/events/codes_updated_event.dart';
+import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/gateway/authenticator.dart';
 import 'package:ente_auth/models/authenticator/auth_entity.dart';
 import 'package:ente_auth/models/authenticator/auth_key.dart';
@@ -38,7 +39,7 @@ class AuthenticatorService {
     if (Configuration.instance.hasConfiguredAccount()) {
       unawaited(sync());
     }
-    Bus.instance.on<AccountConfiguredEvent>().listen((event) {
+    Bus.instance.on<SignedInEvent>().listen((event) {
       unawaited(sync());
     });
   }
@@ -107,7 +108,10 @@ class AuthenticatorService {
     try {
       _logger.info("Sync");
       await _remoteToLocalSync();
+      _logger.info("remote fetch completed");
       await _localToRemoteSync();
+      _logger.info("local push completed");
+      Bus.instance.fire(CodesUpdatedEvent());
     } catch (e) {
       _logger.severe("Failed to sync with remote", e);
     }
@@ -120,8 +124,9 @@ class AuthenticatorService {
     final List<AuthEntity> result =
         await _gateway.getDiff(lastSyncTime, limit: fetchLimit);
     if (result.isEmpty) {
-      _logger.info('remote fetch completed');
       return;
+    } else {
+      _logger.info(result.length.toString() + " entries fetched from remote");
     }
     final maxSyncTime = result.map((e) => e.updatedAt).reduce(max);
     List<String> deletedIDs =
@@ -138,11 +143,14 @@ class AuthenticatorService {
   }
 
   Future<void> _localToRemoteSync() async {
-    _logger.info('Initiating  local to remote sync');
+    _logger.info('Initiating local to remote sync');
     final List<LocalAuthEntity> result = await _db.getAll();
     final List<LocalAuthEntity> pendingUpdate = result
         .where((element) => element.shouldSync || element.id == null)
         .toList();
+    _logger.info(
+      pendingUpdate.length.toString() + " entries to be updated at remote",
+    );
     for (LocalAuthEntity entity in pendingUpdate) {
       if (entity.id == null) {
         _logger.info("Adding new entry");
