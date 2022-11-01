@@ -1,5 +1,5 @@
 import React from 'react';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { DialogBoxAttributes } from 'types/dialogBox';
 import { downloadApp } from 'utils/common';
 import constants from 'utils/strings/constants';
@@ -45,9 +45,9 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
 });
 
 export const getUpdateReadyToInstallMessage = (): DialogBoxAttributes => ({
-    icon: <AutoAwesomeIcon />,
+    icon: <AutoAwesomeOutlinedIcon />,
     title: constants.UPDATE_AVAILABLE,
-    content: constants.UPDATE_AVAILABLE_MESSAGE,
+    content: constants.UPDATE_INSTALLABLE_MESSAGE,
     close: {
         text: constants.INSTALL_ON_NEXT_LAUNCH,
         variant: 'secondary',
@@ -61,16 +61,16 @@ export const getUpdateReadyToInstallMessage = (): DialogBoxAttributes => ({
 
 export const getUpdateAvailableForDownloadMessage =
     (): DialogBoxAttributes => ({
-        icon: <AutoAwesomeIcon />,
+        icon: <AutoAwesomeOutlinedIcon />,
         title: constants.UPDATE_AVAILABLE,
         content: constants.UPDATE_AVAILABLE_MESSAGE,
         close: {
-            text: constants.INSTALL_ON_NEXT_LAUNCH,
+            text: constants.IGNORE_THIS_VERSION,
             variant: 'secondary',
         },
         proceed: {
             action: () => ElectronUpdateService.updateAndRestart(),
-            text: constants.INSTALL_NOW,
+            text: constants.DOWNLOAD_AND_INSTALL,
             variant: 'accent',
         },
     });

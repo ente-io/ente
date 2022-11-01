@@ -826,9 +826,14 @@ const englishConstants = {
     UPLOADED_TO_SEPARATE_COLLECTIONS: 'Uploaded to separate collections',
     NEVERMIND: 'Nevermind',
     UPDATE_AVAILABLE: 'Update available',
-    UPDATE_AVAILABLE_MESSAGE: 'A new version of ente is ready to be installed.',
+    UPDATE_INSTALLABLE_MESSAGE:
+        'A new version of ente is ready to be installed.',
     INSTALL_NOW: `Install now`,
     INSTALL_ON_NEXT_LAUNCH: 'Install on next launch',
+    UPDATE_AVAILABLE_MESSAGE:
+        'A new version of ente has been released, but it cannot be automatically downloaded and installed.',
+    DOWNLOAD_AND_INSTALL: 'Download and install',
+    IGNORE_THIS_VERSION: 'Ignore this version',
 };
 
 export default englishConstants;
