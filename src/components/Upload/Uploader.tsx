@@ -462,7 +462,7 @@ export default function Uploader(props: Props) {
                     variant: 'danger',
                     subtext: constants.STORAGE_QUOTA_EXCEEDED,
                     message: constants.UPGRADE_NOW,
-                    onClick: () => galleryContext.showPlanSelectorModal,
+                    onClick: () => galleryContext.showPlanSelectorModal(),
                     startIcon: <DiscFullIcon fontSize="large" />,
                 };
                 break;
