@@ -64,6 +64,6 @@ export interface AppUpdateInfo {
     version: string;
 }
 
-export interface GetKeyChangeVersionResponse {
-    version?: string;
+export interface GetFeatureFlagResponse {
+    desktopCutoffVersion?: string;
 }

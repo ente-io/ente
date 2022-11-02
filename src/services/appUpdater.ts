@@ -3,7 +3,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import semVerCmp from 'semver-compare';
-import { AppUpdateInfo, GetKeyChangeVersionResponse } from '../types';
+import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
 import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
 import fetch from 'node-fetch';
 import { isPlatformMac } from '../utils/main';
@@ -39,13 +39,13 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
             );
             return;
         }
-        const versionWithKeyChange = await getVersionWithKeyChange();
+        const desktopCutoffVersion = await getDesktopCutoffVersion();
         if (
-            versionWithKeyChange &&
+            desktopCutoffVersion &&
             isPlatformMac() &&
             semVerCmp(
                 updateCheckResult.updateInfo.version,
-                versionWithKeyChange
+                desktopCutoffVersion
             ) > 0
         ) {
             log.debug('auto update not possible due to key change');
@@ -91,13 +91,14 @@ export function skipAppVersion(version: string) {
     setSkipAppVersion(version);
 }
 
-async function getVersionWithKeyChange() {
+async function getDesktopCutoffVersion() {
     try {
-        const keyChangeVersion = (
-            await fetch('https://ente.io/desktop-key-change-version')
-        ).json() as GetKeyChangeVersionResponse;
-        return keyChangeVersion.version;
+        const featureFlags = (
+            await fetch('https://static.ente.io/feature_flags.json')
+        ).json() as GetFeatureFlagResponse;
+        return featureFlags.desktopCutoffVersion;
     } catch (e) {
+        logErrorSentry('failed to get feature flags');
         return undefined;
     }
 }
