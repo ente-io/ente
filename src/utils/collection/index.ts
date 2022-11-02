@@ -230,10 +230,9 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
 };
 
 export const getNonHiddenCollections = (collections: Collection[]) => {
-    return collections.filter(
-        (collection) =>
-            collection.magicMetadata?.data.visibility ===
-                VISIBILITY_STATE.HIDDEN ||
-            collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN
-    );
+    return collections.filter((collection) => !isCollectionHidden(collection));
 };
+
+export const isCollectionHidden = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
+    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
