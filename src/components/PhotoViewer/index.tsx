@@ -472,8 +472,8 @@ function PhotoViewer(props: Iprops) {
                             title={constants.NEXT}>
                             <ChevronRight sx={{ pointerEvents: 'none' }} />
                         </button>
-                        <div className="pswp__caption">
-                            <div className="pswp__caption__center" />
+                        <div className="pswp__caption pswp-custom-caption-container">
+                            <div className="pswp-custom-caption"></div>
                         </div>
                     </div>
                 </div>
