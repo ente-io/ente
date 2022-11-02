@@ -55,43 +55,5 @@ class DividerWidget extends StatelessWidget {
         ),
       ],
     );
-
-    // return SizedBox(
-    //   width: double.infinity,
-    //   child: Row(
-    //     children: [
-    //       Container(
-    //         color: bgColor,
-    //         height: 1,
-    //         width: dividerType == DividerType.menu
-    //             ? 48
-    //             : dividerType == DividerType.menuNoIcon
-    //                 ? 16
-    //                 : 0,
-    //       ),
-    //       Container(
-    //         height: 1,
-    //         width: 100,
-    //         color: dividerColor,
-    //       ),
-    //     ],
-    //   ),
-    // );
-
-    //  else if (dividerType == DividerType.menu) {
-    //   return Padding(
-    //     padding: const EdgeInsets.only(left: 48),
-    //     child: divider,
-    //   );
-    // } else if (dividerType == DividerType.menuNoIcon) {
-    //   return Padding(
-    //     padding: const EdgeInsets.only(left: 16),
-    //     child: divider,
-    //   );
-    // } else if (dividerType == DividerType.bottomBar) {
-    //   return divider;
-    // } else {
-    //   return const SizedBox.shrink();
-    // }
   }
 }
