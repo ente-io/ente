@@ -8,6 +8,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
@@ -60,6 +61,11 @@ class HiddenPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
+      emptyState: const EmptyState(
+        text: "Nothing to see here! \n\n To hide a file \n"
+            "\t\t\t\tOpen file -> Click on the overflow menu -> "
+            "Select Hide\t\t\t\t",
+      ),
     );
     return Scaffold(
       appBar: PreferredSize(
