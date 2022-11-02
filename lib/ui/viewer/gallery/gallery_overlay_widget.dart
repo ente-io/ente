@@ -268,7 +268,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       _addTrashAction(actions);
       return actions;
     }
-    final List<PopupMenuItem<String>> items = [];
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryType.sharedCollection &&
@@ -280,17 +279,15 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         msg = "Upload to album";
         iconData = Icons.cloud_upload_outlined;
       }
-      items.add(
-        PopupMenuItem(
-          value: "add",
-          child: Row(
-            children: [
-              Icon(iconData),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(msg),
-            ],
+      actions.add(
+        Tooltip(
+          message: "add",
+          child: IconButton(
+            color: Theme.of(context).colorScheme.iconColor,
+            icon: Icon(iconData),
+            onPressed: () async {
+              await onActionSelected("add");
+            },
           ),
         ),
       );
@@ -316,17 +313,19 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type == GalleryType.ownedCollection &&
         widget.collection.type != CollectionType.favorites) {
-      items.add(
-        PopupMenuItem(
-          value: "move",
-          child: Row(
-            children: const [
-              Icon(Icons.arrow_forward),
-              Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text("Move to album"),
-            ],
+      actions.add(
+        Tooltip(
+          message: "Move",
+          child: IconButton(
+            color: Theme.of(context).colorScheme.iconColor,
+            icon: Icon(
+              Platform.isAndroid
+                  ? Icons.arrow_forward
+                  : CupertinoIcons.arrow_right,
+            ),
+            onPressed: () {
+              onActionSelected('move');
+            },
           ),
         ),
       );
@@ -400,17 +399,17 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         widget.type == GalleryType.archive) {
       final bool showArchive = widget.type == GalleryType.homepage;
       if (showArchive) {
-        items.add(
-          PopupMenuItem(
-            value: "archive",
-            child: Row(
-              children: const [
-                Icon(Icons.archive_outlined),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                ),
-                Text("Archive"),
-              ],
+        actions.add(
+          Tooltip(
+            message: 'Archive',
+            child: IconButton(
+              color: Theme.of(context).colorScheme.iconColor,
+              icon: const Icon(
+                Icons.archive_outlined,
+              ),
+              onPressed: () {
+                onActionSelected('archive');
+              },
             ),
           ),
         );
@@ -433,41 +432,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       }
     }
 
-    if ((widget.type == GalleryType.homepage ||
-            widget.type == GalleryType.ownedCollection) &&
-        enableBeta) {
-      items.add(
-        PopupMenuItem(
-          value: "hide",
-          child: Row(
-            children: const [
-              Icon(Icons.visibility_off),
-              Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text("Hide"),
-            ],
-          ),
-        ),
-      );
-    }
-    if (items.isNotEmpty) {
-      actions.add(
-        PopupMenuButton<String>(
-          color: Theme.of(context)
-              .colorScheme
-              .enteTheme
-              .colorScheme
-              .backgroundElevated2,
-          offset: Offset(0, (items.length * -48.0) - 16),
-          // color: Theme.of(context).colorScheme.frostyBlurBackdropFilterColor,
-          onSelected: onActionSelected,
-          itemBuilder: (context) {
-            return items;
-          },
-        ),
-      );
-    }
     return actions;
   }
 
@@ -558,6 +522,8 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     }
   }
 
+  // note: Keeping this method here so that it can be used whenever we move to
+  // to bottom UI
   Future<void> _handleHideRequest(BuildContext context) async {
     try {
       final hideResult = await CollectionsService.instance
