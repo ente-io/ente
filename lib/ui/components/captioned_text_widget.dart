@@ -23,7 +23,7 @@ class CaptionedTextWidget extends StatelessWidget {
 
     return Flexible(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 2),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 2),
         child: Row(
           children: [
             Flexible(

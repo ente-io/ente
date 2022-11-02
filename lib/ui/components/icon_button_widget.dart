@@ -60,20 +60,23 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
   }
 
   Widget _iconButton(EnteColorScheme colorTheme) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 20),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: iconStateColor,
-      ),
-      child: Icon(
-        widget.icon,
-        color: widget.iconColor ??
-            (widget.isSecondary
-                ? colorTheme.strokeMuted
-                : colorTheme.strokeBase),
-        size: 24,
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 20),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: iconStateColor,
+        ),
+        child: Icon(
+          widget.icon,
+          color: widget.iconColor ??
+              (widget.isSecondary
+                  ? colorTheme.strokeMuted
+                  : colorTheme.strokeBase),
+          size: 24,
+        ),
       ),
     );
   }

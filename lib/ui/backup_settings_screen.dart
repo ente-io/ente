@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
@@ -71,7 +72,10 @@ class BackupSettingsScreen extends StatelessWidget {
                               isBottomBorderRadiusRemoved: true,
                               isGestureDetectorDisabled: true,
                             ),
-                            const SizedBox(height: 1),
+                            DividerWidget(
+                              dividerType: DividerType.menuNoIcon,
+                              bgColor: colorScheme.fillFaint,
+                            ),
                             MenuItemWidget(
                               captionedTextWidget: const CaptionedTextWidget(
                                 title: "Backup videos",

@@ -59,7 +59,7 @@ class TitleBarWidget extends StatelessWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(4, 4, 12, 4),
+          padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Row(
             children: _actionsWithPaddingInBetween(),
           ),
@@ -67,15 +67,12 @@ class TitleBarWidget extends StatelessWidget {
       ],
       leading: isTitleH2WithoutLeading
           ? null
-          : Padding(
-              padding: const EdgeInsets.all(4),
-              child: IconButtonWidget(
-                icon: Icons.arrow_back_outlined,
-                isPrimary: true,
-                onTap: () {
-                  Navigator.pop(context);
-                },
-              ),
+          : IconButtonWidget(
+              icon: Icons.arrow_back_outlined,
+              isPrimary: true,
+              onTap: () {
+                Navigator.pop(context);
+              },
             ),
       flexibleSpace: isFlexibleSpaceDisabled
           ? null

@@ -5,10 +5,14 @@ import 'package:photos/ente_theme_data.dart';
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
   final bool isExpandable;
-// leading icon can be passed without specifing size of icon, this component sets size to 20x20 irrespective of passed icon's size
+
+  /// leading icon can be passed without specifing size of icon,
+  /// this component sets size to 20x20 irrespective of passed icon's size
   final IconData? leadingIcon;
   final Color? leadingIconColor;
-// trailing icon can be passed without size as default size set by flutter is what this component expects
+
+  /// trailing icon can be passed without size as default size set by
+  /// flutter is what this component expects
   final IconData? trailingIcon;
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;
@@ -21,7 +25,8 @@ class MenuItemWidget extends StatefulWidget {
   final ExpandableController? expandableController;
   final bool isBottomBorderRadiusRemoved;
   final bool isTopBorderRadiusRemoved;
-  //disable gesture detector if not used
+
+  /// disable gesture detector if not used
   final bool isGestureDetectorDisabled;
   const MenuItemWidget({
     required this.captionedTextWidget,
@@ -103,7 +108,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 20),
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.only(left: 16, right: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
           topLeft: topBorderRadius,
