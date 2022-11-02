@@ -44,6 +44,7 @@ export interface EnteFile {
     html: string;
     w: number;
     h: number;
+    title: string;
     isDeleted: boolean;
     isTrashed?: boolean;
     deleteBy?: number;
