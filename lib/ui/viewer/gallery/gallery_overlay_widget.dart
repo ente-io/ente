@@ -292,14 +292,12 @@ class _OverlayWidgetState extends State<OverlayWidget> {
 
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type == GalleryType.hidden) {
-      String msg = "Unhide";
-      IconData iconData = Icons.visibility;
       actions.add(
         Tooltip(
-          message: msg,
+          message: "Unhide",
           child: IconButton(
             color: Theme.of(context).colorScheme.iconColor,
-            icon: Icon(iconData),
+            icon: const Icon(Icons.visibility),
             onPressed: () {
               _createCollectionAction(CollectionActionType.unHide);
             },
