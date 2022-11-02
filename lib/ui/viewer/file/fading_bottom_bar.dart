@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
@@ -242,9 +243,8 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   }
 
   Future<void> _displayInfo(File file) async {
-    return showModalBottomSheet<void>(
+    return showMaterialModalBottomSheet(
       context: context,
-      isScrollControlled: true,
       builder: (BuildContext context) {
         return FileInfoWidget(file);
       },
