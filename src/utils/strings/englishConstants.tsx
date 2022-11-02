@@ -373,7 +373,6 @@ const englishConstants = {
             <p>All files will be queued for download sequentially</p>
         </>
     ),
-    ARCHIVED_ALBUM: 'Archived album',
     DOWNLOAD_COLLECTION_FAILED: 'Album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'Failed to create album , please try again',
 
@@ -552,11 +551,11 @@ const englishConstants = {
     THUMBNAIL_GENERATION_FAILED_INFO:
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
-    ARCHIVE: 'Hide',
-    ARCHIVE_SECTION_NAME: 'Hidden',
+    ARCHIVE: 'Archive',
+    ARCHIVE_SECTION_NAME: 'Archive',
     ALL_SECTION_NAME: 'All',
     MOVE_TO_COLLECTION: 'Move to album',
-    UNARCHIVE: 'Unhide',
+    UNARCHIVE: 'Unarchive',
     MOVE: 'Move',
     ADD: 'Add',
     SORT: 'Sort',
