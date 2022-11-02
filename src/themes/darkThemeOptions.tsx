@@ -243,6 +243,13 @@ const darkThemeOptions = createTheme({
                 },
             },
         },
+        MuiSnackbar: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '8px',
+                },
+            },
+        },
     },
 
     palette: {
@@ -316,7 +323,7 @@ const darkThemeOptions = createTheme({
         },
         button: {
             fontSize: '16px',
-            lineHeight: '19px',
+            lineHeight: '20px',
             fontWeight: 'bold',
             textTransform: 'none',
         },

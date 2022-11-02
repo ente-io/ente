@@ -89,12 +89,10 @@ import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
-import Notification from 'components/Notification';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
-import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
@@ -117,7 +115,6 @@ const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
-    setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
 };
@@ -191,13 +188,6 @@ export default function Gallery() {
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
-
-    const [notificationView, setNotificationView] = useState(false);
-
-    const closeNotification = () => setNotificationView(false);
-
-    const [notificationAttributes, setNotificationAttributes] =
-        useState<NotificationAttributes>(null);
 
     const [archivedCollections, setArchivedCollections] =
         useState<Set<number>>();
@@ -278,11 +268,6 @@ export default function Gallery() {
     useEffect(
         () => fixCreationTimeAttributes && setFixCreationTimeView(true),
         [fixCreationTimeAttributes]
-    );
-
-    useEffect(
-        () => notificationAttributes && setNotificationView(true),
-        [notificationAttributes]
     );
 
     useEffect(() => {
@@ -576,7 +561,6 @@ export default function Gallery() {
                 showPlanSelectorModal,
                 setActiveCollection,
                 syncWithRemote,
-                setNotificationAttributes,
                 setBlockingLoad,
                 photoListHeader: photoListHeader,
             }}>
@@ -603,11 +587,6 @@ export default function Gallery() {
                     modalView={planModalView}
                     closeModal={() => setPlanModalView(false)}
                     setLoading={setBlockingLoad}
-                />
-                <Notification
-                    open={notificationView}
-                    onClose={closeNotification}
-                    attributes={notificationAttributes}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
@@ -687,7 +666,6 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-
                 <PhotoFrame
                     files={files}
                     syncWithRemote={syncWithRemote}

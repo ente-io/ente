@@ -1,4 +1,4 @@
-import { ElectronAPIs } from 'types/electron';
+import { AppUpdateInfo, ElectronAPIs } from 'types/electron';
 
 class ElectronUpdateService {
     private electronAPIs: ElectronAPIs;
@@ -7,7 +7,9 @@ class ElectronUpdateService {
         this.electronAPIs = globalThis['ElectronAPIs'];
     }
 
-    registerUpdateEventListener(showUpdateDialog: () => void) {
+    registerUpdateEventListener(
+        showUpdateDialog: (updateInfo: AppUpdateInfo) => void
+    ) {
         if (this.electronAPIs?.registerUpdateEventListener) {
             this.electronAPIs.registerUpdateEventListener(showUpdateDialog);
         }
@@ -16,6 +18,12 @@ class ElectronUpdateService {
     updateAndRestart() {
         if (this.electronAPIs?.updateAndRestart) {
             this.electronAPIs.updateAndRestart();
+        }
+    }
+
+    skipAppVersion(version: string) {
+        if (this.electronAPIs?.skipAppVersion) {
+            this.electronAPIs.skipAppVersion(version);
         }
     }
 }

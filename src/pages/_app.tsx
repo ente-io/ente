@@ -29,7 +29,17 @@ import { CustomError } from 'utils/error';
 import { clearLogsIfLocalStorageLimitExceeded } from 'utils/logging';
 import isElectron from 'is-electron';
 import ElectronUpdateService from 'services/electron/update';
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import {
+    getUpdateAvailableForDownloadMessage,
+    getUpdateReadyToInstallMessage,
+} from 'utils/ui';
+import Notification from 'components/Notification';
+import {
+    NotificationAttributes,
+    SetNotificationAttributes,
+} from 'types/Notification';
+import ArrowForward from '@mui/icons-material/ArrowForward';
+import { AppUpdateInfo } from 'types/electron';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -55,6 +65,7 @@ type AppContextType = {
     finishLoading: () => void;
     closeMessageDialog: () => void;
     setDialogMessage: SetDialogBoxAttributes;
+    setNotificationAttributes: SetNotificationAttributes;
     isFolderSyncRunning: boolean;
     setIsFolderSyncRunning: (isRunning: boolean) => void;
     watchFolderView: boolean;
@@ -100,6 +111,10 @@ export default function App({ Component, err }) {
     const [watchFolderView, setWatchFolderView] = useState(false);
     const [watchFolderFiles, setWatchFolderFiles] = useState<FileList>(null);
     const isMobile = useMediaQuery('(max-width:428px)');
+    const [notificationView, setNotificationView] = useState(false);
+    const closeNotification = () => setNotificationView(false);
+    const [notificationAttributes, setNotificationAttributes] =
+        useState<NotificationAttributes>(null);
 
     useEffect(() => {
         if (
@@ -142,24 +157,24 @@ export default function App({ Component, err }) {
 
     useEffect(() => {
         if (isElectron()) {
-            const showUpdateDialog = () =>
-                setDialogMessage({
-                    icon: <AutoAwesomeIcon />,
-                    title: constants.UPDATE_AVAILABLE,
-                    content: constants.UPDATE_AVAILABLE_MESSAGE,
-                    close: {
-                        text: constants.INSTALL_ON_NEXT_LAUNCH,
+            const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
+                if (updateInfo.autoUpdatable) {
+                    setDialogMessage(getUpdateReadyToInstallMessage());
+                } else {
+                    setNotificationAttributes({
+                        endIcon: <ArrowForward />,
                         variant: 'secondary',
-                    },
-                    proceed: {
-                        action: () => ElectronUpdateService.updateAndRestart(),
-                        text: constants.INSTALL_NOW,
-                        variant: 'accent',
-                    },
-                });
+                        message: constants.UPDATE_AVAILABLE,
+                        onClick: () =>
+                            setDialogMessage(
+                                getUpdateAvailableForDownloadMessage(updateInfo)
+                            ),
+                    });
+                }
+            };
             ElectronUpdateService.registerUpdateEventListener(showUpdateDialog);
         }
-    });
+    }, []);
 
     const setUserOnline = () => setOffline(false);
     const setUserOffline = () => setOffline(true);
@@ -234,6 +249,8 @@ export default function App({ Component, err }) {
 
     useEffect(() => setMessageDialogView(true), [dialogMessage]);
 
+    useEffect(() => setNotificationView(true), [notificationAttributes]);
+
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {
         setFlashMessage(flashMessages);
@@ -294,6 +311,11 @@ export default function App({ Component, err }) {
                     onClose={closeMessageDialog}
                     attributes={dialogMessage}
                 />
+                <Notification
+                    open={notificationView}
+                    onClose={closeNotification}
+                    attributes={notificationAttributes}
+                />
 
                 <AppContext.Provider
                     value={{
@@ -314,6 +336,7 @@ export default function App({ Component, err }) {
                         watchFolderFiles,
                         setWatchFolderFiles,
                         isMobile,
+                        setNotificationAttributes,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

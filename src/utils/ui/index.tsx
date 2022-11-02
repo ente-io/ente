@@ -1,7 +1,10 @@
+import React from 'react';
+import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { DialogBoxAttributes } from 'types/dialogBox';
 import { downloadApp } from 'utils/common';
 import constants from 'utils/strings/constants';
-
+import ElectronUpdateService from 'services/electron/update';
+import { AppUpdateInfo } from 'types/electron';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: constants.DOWNLOAD_APP,
@@ -40,4 +43,37 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
         variant: 'danger',
     },
     close: { text: constants.CANCEL },
+});
+
+export const getUpdateReadyToInstallMessage = (): DialogBoxAttributes => ({
+    icon: <AutoAwesomeOutlinedIcon />,
+    title: constants.UPDATE_AVAILABLE,
+    content: constants.UPDATE_INSTALLABLE_MESSAGE,
+    close: {
+        text: constants.INSTALL_ON_NEXT_LAUNCH,
+        variant: 'secondary',
+    },
+    proceed: {
+        action: () => ElectronUpdateService.updateAndRestart(),
+        text: constants.INSTALL_NOW,
+        variant: 'accent',
+    },
+});
+
+export const getUpdateAvailableForDownloadMessage = (
+    updateInfo: AppUpdateInfo
+): DialogBoxAttributes => ({
+    icon: <AutoAwesomeOutlinedIcon />,
+    title: constants.UPDATE_AVAILABLE,
+    content: constants.UPDATE_AVAILABLE_MESSAGE,
+    close: {
+        text: constants.IGNORE_THIS_VERSION,
+        variant: 'secondary',
+        action: () => ElectronUpdateService.skipAppVersion(updateInfo.version),
+    },
+    proceed: {
+        action: downloadApp,
+        text: constants.DOWNLOAD_AND_INSTALL,
+        variant: 'accent',
+    },
 });
