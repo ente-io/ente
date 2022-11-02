@@ -29,9 +29,10 @@ export const CaptionEditForm = ({ caption, saveEdits, discardEdits }) => {
         <Formik<formValues>
             initialValues={{ caption }}
             validationSchema={Yup.object().shape({
-                caption: Yup.string()
-                    .required(constants.REQUIRED)
-                    .max(MAX_CAPTION_SIZE, constants.CAPTION_CHARACTER_LIMIT),
+                caption: Yup.string().max(
+                    MAX_CAPTION_SIZE,
+                    constants.CAPTION_CHARACTER_LIMIT
+                ),
             })}
             validateOnBlur={false}
             onSubmit={onSubmit}>
