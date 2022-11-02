@@ -469,7 +469,7 @@ function PhotoViewer(props: Iprops) {
                             <ChevronRight />
                         </button>
                         <div className="pswp__caption">
-                            <div />
+                            <div className="pswp__caption__center" />
                         </div>
                     </div>
                 </div>
