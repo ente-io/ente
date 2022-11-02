@@ -826,17 +826,17 @@ class CollectionsService {
     List<File> files,
   ) {
     if (toCollectionID == fromCollectionID) {
-      throw AssertionError("can't move to same album");
+      throw AssertionError("Can't move to same album");
     }
     for (final file in files) {
       if (file.uploadedFileID == null) {
-        throw AssertionError("can only move uploaded memories");
+        throw AssertionError("Can only move uploaded memories");
       }
       if (file.collectionID != fromCollectionID) {
-        throw AssertionError("all memories should belong to the same album");
+        throw AssertionError("All memories should belong to the same album");
       }
       if (file.ownerID != Configuration.instance.getUserID()) {
-        throw AssertionError("can only move memories uploaded by you");
+        throw AssertionError("Can only move memories uploaded by you");
       }
     }
   }

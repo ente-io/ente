@@ -293,7 +293,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
     final String message = widget.actionType == CollectionActionType.moveFiles
         ? "Moving files to album..."
-        : "Un hide files to album";
+        : "Unhiding files to album";
     final dialog = createProgressDialog(context, message);
     await dialog.show();
     try {

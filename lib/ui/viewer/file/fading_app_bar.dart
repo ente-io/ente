@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:path/path.dart' as file_path;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
@@ -16,6 +17,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
@@ -23,6 +25,7 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -101,6 +104,8 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     debugPrint("building app bar");
+    Set<int> hiddenCollections =
+        CollectionsService.instance.getHiddenCollections();
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
@@ -179,23 +184,45 @@ class FadingAppBarState extends State<FadingAppBar> {
           }
           if (widget.file.ownerID != null &&
               widget.file.ownerID == widget.userID) {
-            items.add(
-              PopupMenuItem(
-                value: 4,
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.visibility_off,
-                      color: Theme.of(context).iconTheme.color,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.all(8),
-                    ),
-                    const Text("Hide"),
-                  ],
+            final bool isAlreadyHidden =
+                hiddenCollections.contains(widget.file.collectionID);
+            if (!isAlreadyHidden) {
+              items.add(
+                PopupMenuItem(
+                  value: 4,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.visibility_off,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      const Text("Hide"),
+                    ],
+                  ),
                 ),
-              ),
-            );
+              );
+            } else {
+              items.add(
+                PopupMenuItem(
+                  value: 5,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.visibility,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      const Text("Unhide"),
+                    ],
+                  ),
+                ),
+              );
+            }
           }
           return items;
         },
@@ -208,6 +235,8 @@ class FadingAppBarState extends State<FadingAppBar> {
             _setAs(widget.file);
           } else if (value == 4) {
             _handleHideRequest(context);
+          } else if (value == 5) {
+            _handleUnHideRequest(context);
           }
         },
       ),
@@ -225,10 +254,29 @@ class FadingAppBarState extends State<FadingAppBar> {
     try {
       final hideResult =
           await CollectionsService.instance.hideFiles(context, [widget.file]);
+      if (hideResult) {
+        // Navigator.of(context, rootNavigator: true).pop();
+      }
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
       await showGenericErrorDialog(context);
     }
+  }
+
+  Future<void> _handleUnHideRequest(BuildContext context) async {
+    final s = SelectedFiles();
+    s.files.add(widget.file);
+    Navigator.push(
+      context,
+      PageTransition(
+        type: PageTransitionType.bottomToTop,
+        child: CreateCollectionPage(
+          s,
+          null,
+          actionType: CollectionActionType.unHide,
+        ),
+      ),
+    );
   }
 
   Widget _getFavoriteButton() {
