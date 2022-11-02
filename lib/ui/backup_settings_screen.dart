@@ -32,6 +32,7 @@ class BackupSettingsScreen extends StatelessWidget {
                 isSecondary: true,
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.pop(context);
                 },
               ),
             ],
