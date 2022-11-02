@@ -164,7 +164,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "Share",
           child: IconButton(
-            icon: Icon(Icons.adaptive.share),
+            icon: const Icon(Icons.people_outlined),
             onPressed: () async {
               final bool showHiddenWarning =
                   await _shouldShowHiddenFilesWarning(widget.collection);

@@ -12,6 +12,7 @@ import 'package:photos/utils/navigation_util.dart';
 
 class CollectionsListOfFileWidget extends StatelessWidget {
   final Future<Set<int>> allCollectionIDsOfFile;
+
   const CollectionsListOfFileWidget(this.allCollectionIDsOfFile, {Key key})
       : super(key: key);
 
@@ -26,9 +27,7 @@ class CollectionsListOfFileWidget extends StatelessWidget {
           for (var collectionID in collectionIDs) {
             final c =
                 CollectionsService.instance.getCollectionByID(collectionID);
-            if (!c.isHidden()) {
-              collections.add(c);
-            }
+            collections.add(c);
           }
           return ListView.builder(
             itemCount: collections.length,

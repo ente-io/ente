@@ -268,26 +268,29 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       _addTrashAction(actions);
       return actions;
     }
+    final List<PopupMenuItem<String>> items = [];
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryType.sharedCollection &&
         widget.type != GalleryType.hidden) {
-      String msg = "Add";
+      String msg = "Add to album";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
       if (widget.type == GalleryType.localFolder) {
-        msg = "Upload";
+        msg = "Upload to album";
         iconData = Icons.cloud_upload_outlined;
       }
-      actions.add(
-        Tooltip(
-          message: msg,
-          child: IconButton(
-            color: Theme.of(context).colorScheme.iconColor,
-            icon: Icon(iconData),
-            onPressed: () {
-              _createCollectionAction(CollectionActionType.addFiles);
-            },
+      items.add(
+        PopupMenuItem(
+          value: "add",
+          child: Row(
+            children: [
+              Icon(iconData),
+              const Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text(msg),
+            ],
           ),
         ),
       );
@@ -313,19 +316,17 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type == GalleryType.ownedCollection &&
         widget.collection.type != CollectionType.favorites) {
-      actions.add(
-        Tooltip(
-          message: "Move",
-          child: IconButton(
-            color: Theme.of(context).colorScheme.iconColor,
-            icon: Icon(
-              Platform.isAndroid
-                  ? Icons.arrow_forward
-                  : CupertinoIcons.arrow_right,
-            ),
-            onPressed: () {
-              _moveFiles();
-            },
+      items.add(
+        PopupMenuItem(
+          value: "move",
+          child: Row(
+            children: const [
+              Icon(Icons.arrow_forward),
+              Padding(
+                padding: EdgeInsets.all(8),
+              ),
+              Text("Move to album"),
+            ],
           ),
         ),
       );
@@ -395,7 +396,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       }
     }
 
-    final List<PopupMenuItem<String>> items = [];
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive) {
       final bool showArchive = widget.type == GalleryType.homepage;
@@ -433,7 +433,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       }
     }
 
-    if (widget.type == GalleryType.homepage && enableBeta) {
+    if ((widget.type == GalleryType.homepage ||
+            widget.type == GalleryType.ownedCollection) &&
+        enableBeta) {
       items.add(
         PopupMenuItem(
           value: "hide",
@@ -452,6 +454,12 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (items.isNotEmpty) {
       actions.add(
         PopupMenuButton<String>(
+          color: Theme.of(context)
+              .colorScheme
+              .enteTheme
+              .colorScheme
+              .backgroundElevated2,
+          offset: Offset(0, (items.length * -48.0) - 16),
           // color: Theme.of(context).colorScheme.frostyBlurBackdropFilterColor,
           onSelected: onActionSelected,
           itemBuilder: (context) {
@@ -468,6 +476,12 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     switch (value.toLowerCase()) {
       case 'hide':
         await _handleHideRequest(context);
+        break;
+      case 'add':
+        await _createCollectionAction(CollectionActionType.addFiles);
+        break;
+      case 'move':
+        await _moveFiles();
         break;
       case 'archive':
         await _handleVisibilityChangeRequest(context, visibilityArchive);
