@@ -3,6 +3,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 
 class TitleBarWidget extends StatelessWidget {
+  final IconButtonWidget? leading;
   final String? title;
   final String? caption;
   final Widget? flexibleSpaceTitle;
@@ -11,6 +12,7 @@ class TitleBarWidget extends StatelessWidget {
   final bool isTitleH2WithoutLeading;
   final bool isFlexibleSpaceDisabled;
   const TitleBarWidget({
+    this.leading,
     this.title,
     this.caption,
     this.flexibleSpaceTitle,
@@ -67,13 +69,14 @@ class TitleBarWidget extends StatelessWidget {
       ],
       leading: isTitleH2WithoutLeading
           ? null
-          : IconButtonWidget(
-              icon: Icons.arrow_back_outlined,
-              isPrimary: true,
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
+          : leading ??
+              IconButtonWidget(
+                icon: Icons.arrow_back_outlined,
+                iconButtonType: IconButtonType.primary,
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
       flexibleSpace: isFlexibleSpaceDisabled
           ? null
           : FlexibleSpaceBar(

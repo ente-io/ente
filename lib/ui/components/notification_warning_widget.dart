@@ -54,7 +54,7 @@ class NotificationWarningWidget extends StatelessWidget {
                   const SizedBox(width: 12),
                   IconButtonWidget(
                     icon: actionIcon,
-                    isRounded: true,
+                    iconButtonType: IconButtonType.rounded,
                     iconColor: strokeBaseDark,
                     defaultColor: fillFaintDark,
                     pressedColor: fillMutedDark,

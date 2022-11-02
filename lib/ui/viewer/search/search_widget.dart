@@ -34,7 +34,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
     return Hero(
       tag: "search_icon",
       child: IconButtonWidget(
-        isPrimary: true,
+        iconButtonType: IconButtonType.primary,
         icon: Icons.search,
         onTap: () {
           Navigator.push(
