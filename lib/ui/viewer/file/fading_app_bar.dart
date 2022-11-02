@@ -183,12 +183,15 @@ class FadingAppBarState extends State<FadingAppBar> {
               PopupMenuItem(
                 value: 4,
                 child: Row(
-                  children: const [
-                    Icon(Icons.visibility_off),
-                    Padding(
+                  children: [
+                    Icon(
+                      Icons.visibility_off,
+                      color: Theme.of(context).iconTheme.color,
+                    ),
+                    const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    Text("Hide"),
+                    const Text("Hide"),
                   ],
                 ),
               ),
