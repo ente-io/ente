@@ -3,9 +3,9 @@ import constants from 'utils/strings/constants';
 import { GalleryContext } from 'pages/gallery';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import DeleteIcon from '@mui/icons-material/Delete';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { CollectionSummaries } from 'types/collection';
 import ShortcutButton from './ShortcutButton';
+import { ArchiveOutlined } from '@mui/icons-material';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;
@@ -36,7 +36,7 @@ export default function ShortcutSection({
                 onClick={openTrashSection}
             />
             <ShortcutButton
-                startIcon={<VisibilityOffIcon />}
+                startIcon={<ArchiveOutlined />}
                 label={constants.ARCHIVE_SECTION_NAME}
                 count={collectionSummaries.get(ARCHIVE_SECTION)?.fileCount}
                 onClick={openArchiveSection}
