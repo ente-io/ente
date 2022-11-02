@@ -104,7 +104,7 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     debugPrint("building app bar");
-    Set<int> hiddenCollections =
+    final Set<int> hiddenCollections =
         CollectionsService.instance.getHiddenCollections();
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
