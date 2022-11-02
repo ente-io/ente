@@ -4,6 +4,7 @@ import {
     sendNotification,
     showOnTray,
     updateAndRestart,
+    skipAppVersion,
 } from './api/system';
 import {
     showUploadDirsDialog,
@@ -90,4 +91,5 @@ windowObject['ElectronAPIs'] = {
     openLogDirectory,
     registerUpdateEventListener,
     updateAndRestart,
+    skipAppVersion,
 };

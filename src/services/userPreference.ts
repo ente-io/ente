@@ -1,10 +1,16 @@
 import { userPreferencesStore } from '../stores/userPreferences.store';
 
 export function getHideDockIconPreference() {
-    const shouldHideDockIcon = userPreferencesStore.get('hideDockIcon');
-    return shouldHideDockIcon;
+    return userPreferencesStore.get('hideDockIcon');
 }
 
 export function setHideDockIconPreference(shouldHideDockIcon: boolean) {
     userPreferencesStore.set('hideDockIcon', shouldHideDockIcon);
+}
+
+export function getSkipAppVersion() {
+    return userPreferencesStore.get('skipAppVersion');
+}
+export function setSkipAppVersion(version: string) {
+    userPreferencesStore.set('skipAppVersion', version);
 }

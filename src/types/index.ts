@@ -56,4 +56,14 @@ export interface SafeStorageStoreType {
 
 export interface UserPreferencesType {
     hideDockIcon: boolean;
+    skipAppVersion: string;
+}
+
+export interface AppUpdateInfo {
+    autoUpdatable: boolean;
+    version: string;
+}
+
+export interface GetFeatureFlagResponse {
+    desktopCutoffVersion?: string;
 }

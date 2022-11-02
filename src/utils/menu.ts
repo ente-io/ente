@@ -9,10 +9,9 @@ import {
     getHideDockIconPreference,
     setHideDockIconPreference,
 } from '../services/userPreference';
-import { isUpdateAvailable, setIsAppQuitting } from '../main';
+import { setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
-import { showUpdateDialog } from '../services/appUpdater';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -25,15 +24,6 @@ export function buildContextMenu(
         paused,
     } = args;
     const contextMenu = Menu.buildFromTemplate([
-        ...(isUpdateAvailable()
-            ? [
-                  {
-                      label: 'Update available',
-                      click: () => showUpdateDialog(mainWindow),
-                  },
-              ]
-            : []),
-        { type: 'separator' },
         ...(exportProgress
             ? [
                   {

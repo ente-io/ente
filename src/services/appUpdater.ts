@@ -1,31 +1,111 @@
-import { BrowserWindow, Tray } from 'electron';
+import { app, BrowserWindow } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
-import { buildContextMenu } from '../utils/menu';
+import semVerCmp from 'semver-compare';
+import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
+import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
+import fetch from 'node-fetch';
+import { isPlatformMac } from '../utils/main';
+import { logErrorSentry } from './sentry';
 
-class AppUpdater {
-    constructor() {
-        autoUpdater.logger = log;
-    }
+const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 
-    async checkForUpdate(tray: Tray, mainWindow: BrowserWindow) {
-        await autoUpdater.checkForUpdatesAndNotify();
-        autoUpdater.on('update-downloaded', () => {
-            showUpdateDialog(mainWindow);
-            setIsUpdateAvailable(true);
-            tray.setContextMenu(buildContextMenu(mainWindow));
-        });
-    }
-
-    updateAndRestart = () => {
-        setIsAppQuitting(true);
-        autoUpdater.quitAndInstall();
-    };
+export function setupAutoUpdater() {
+    autoUpdater.logger = log;
+    autoUpdater.autoDownload = false;
 }
 
-export default new AppUpdater();
+export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
+    try {
+        log.debug('checkForUpdateAndNotify called');
+        const updateCheckResult = await autoUpdater.checkForUpdates();
+        log.debug('update version', updateCheckResult.updateInfo.version);
+        if (
+            semVerCmp(updateCheckResult.updateInfo.version, app.getVersion()) <=
+            0
+        ) {
+            log.debug('already at latest version');
+            return;
+        }
+        const skipAppVersion = getSkipAppVersion();
+        if (
+            skipAppVersion &&
+            updateCheckResult.updateInfo.version === skipAppVersion
+        ) {
+            log.info(
+                'user chose to skip version ',
+                updateCheckResult.updateInfo.version
+            );
+            return;
+        }
+        const desktopCutoffVersion = await getDesktopCutoffVersion();
+        if (
+            desktopCutoffVersion &&
+            isPlatformMac() &&
+            semVerCmp(
+                updateCheckResult.updateInfo.version,
+                desktopCutoffVersion
+            ) > 0
+        ) {
+            log.debug('auto update not possible due to key change');
+            showUpdateDialog(mainWindow, {
+                autoUpdatable: false,
+                version: updateCheckResult.updateInfo.version,
+            });
+        } else {
+            let timeout: NodeJS.Timeout;
+            log.debug('attempting auto update');
+            autoUpdater.downloadUpdate();
+            autoUpdater.on('update-downloaded', () => {
+                timeout = setTimeout(
+                    () =>
+                        showUpdateDialog(mainWindow, {
+                            autoUpdatable: true,
+                            version: updateCheckResult.updateInfo.version,
+                        }),
+                    FIVE_MIN_IN_MICROSECOND
+                );
+            });
+            autoUpdater.on('error', (error) => {
+                clearTimeout(timeout);
+                logErrorSentry(error, 'auto update failed');
+                showUpdateDialog(mainWindow, {
+                    autoUpdatable: false,
+                    version: updateCheckResult.updateInfo.version,
+                });
+            });
+        }
+        setIsUpdateAvailable(true);
+    } catch (e) {
+        logErrorSentry(e, 'checkForUpdateAndNotify failed');
+    }
+}
 
-export const showUpdateDialog = (mainWindow: BrowserWindow): void => {
-    mainWindow.webContents.send('show-update-dialog');
-};
+export function updateAndRestart() {
+    setIsAppQuitting(true);
+    autoUpdater.quitAndInstall();
+}
+
+export function skipAppVersion(version: string) {
+    setSkipAppVersion(version);
+}
+
+async function getDesktopCutoffVersion() {
+    try {
+        const featureFlags = (
+            await fetch('https://static.ente.io/feature_flags.json')
+        ).json() as GetFeatureFlagResponse;
+        return featureFlags.desktopCutoffVersion;
+    } catch (e) {
+        logErrorSentry('failed to get feature flags');
+        return undefined;
+    }
+}
+
+function showUpdateDialog(
+    mainWindow: BrowserWindow,
+    updateInfo: AppUpdateInfo
+) {
+    mainWindow.webContents.send('show-update-dialog', updateInfo);
+}
