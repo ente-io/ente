@@ -66,7 +66,7 @@ export const syncFiles = async (
             continue;
         }
         if (isCollectionHidden(collection)) {
-            throw CustomError.HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED;
+            throw Error(CustomError.HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED);
         }
         const lastSyncTime = await getCollectionLastSyncTime(collection);
         if (collection.updationTime === lastSyncTime) {
