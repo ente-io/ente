@@ -69,6 +69,10 @@ extension HiddenService on CollectionsService {
       final Map<int, List<File>> collectionToFilesMap =
           await filesDB.getAllFilesGroupByCollectionID(uploadedIDs);
       for (MapEntry<int, List<File>> entry in collectionToFilesMap.entries) {
+        if (entry.key == defaultHiddenCollection.id) {
+          _logger.finest('file already part of hidden collection');
+          continue;
+        }
         await move(defaultHiddenCollection.id, entry.key, entry.value);
       }
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
