@@ -52,7 +52,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
           ),
         ),
         SizedBox(
-          height: 32,
+          height: 31,
           child: FittedBox(
             fit: BoxFit.contain,
             child: Switch.adaptive(
