@@ -17,7 +17,9 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
@@ -175,6 +177,23 @@ class FadingAppBarState extends State<FadingAppBar> {
               ),
             );
           }
+          if (widget.file.ownerID != null &&
+              widget.file.ownerID == widget.userID) {
+            items.add(
+              PopupMenuItem(
+                value: 4,
+                child: Row(
+                  children: const [
+                    Icon(Icons.visibility_off),
+                    Padding(
+                      padding: EdgeInsets.all(8),
+                    ),
+                    Text("Hide"),
+                  ],
+                ),
+              ),
+            );
+          }
           return items;
         },
         onSelected: (value) {
@@ -184,6 +203,8 @@ class FadingAppBarState extends State<FadingAppBar> {
             _showDeleteSheet(widget.file);
           } else if (value == 3) {
             _setAs(widget.file);
+          } else if (value == 4) {
+            _handleHideRequest(context);
           }
         },
       ),
@@ -195,6 +216,16 @@ class FadingAppBarState extends State<FadingAppBar> {
       elevation: 0,
       backgroundColor: const Color(0x00000000),
     );
+  }
+
+  Future<void> _handleHideRequest(BuildContext context) async {
+    try {
+      final hideResult =
+          await CollectionsService.instance.hideFiles(context, [widget.file]);
+    } catch (e, s) {
+      _logger.severe("failed to update file visibility", e, s);
+      await showGenericErrorDialog(context);
+    }
   }
 
   Widget _getFavoriteButton() {
