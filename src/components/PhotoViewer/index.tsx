@@ -300,6 +300,13 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
+    const refreshPhotoswipe = () => {
+        photoSwipe.invalidateCurrItems();
+        if (isOpen) {
+            photoSwipe.updateSize(true);
+        }
+    };
+
     const checkExifAvailable = async () => {
         setExif(null);
         await sleep(100);
@@ -480,6 +487,7 @@ function PhotoViewer(props: Iprops) {
                 metadata={metadata}
                 exif={exif}
                 scheduleUpdate={scheduleUpdate}
+                refreshPhotoswipe={refreshPhotoswipe}
             />
         </>
     );

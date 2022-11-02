@@ -32,6 +32,7 @@ interface Iprops {
     metadata: Metadata;
     exif: any;
     scheduleUpdate: () => void;
+    refreshPhotoswipe: () => void;
 }
 
 export function FileInfo({
@@ -43,6 +44,7 @@ export function FileInfo({
     metadata,
     exif,
     scheduleUpdate,
+    refreshPhotoswipe,
 }: Iprops) {
     const appContext = useContext(AppContext);
     const [location, setLocation] = useState<Location>(null);
@@ -83,6 +85,7 @@ export function FileInfo({
                     shouldDisableEdits={shouldDisableEdits}
                     file={items[photoSwipe?.getCurrentIndex()]}
                     scheduleUpdate={scheduleUpdate}
+                    refreshPhotoswipe={refreshPhotoswipe}
                 />
                 {metadata?.title && (
                     <RenderFileName

@@ -21,10 +21,12 @@ export function RenderCaption({
     shouldDisableEdits,
     file,
     scheduleUpdate,
+    refreshPhotoswipe,
 }: {
     shouldDisableEdits: boolean;
     file: EnteFile;
     scheduleUpdate: () => void;
+    refreshPhotoswipe: () => void;
 }) {
     const [caption, setCaption] = useState(
         file?.pubMagicMetadata?.data.caption
@@ -47,6 +49,8 @@ export function RenderCaption({
                     await updateFilePublicMagicMetadata([updatedFile])
                 )[0];
                 updateExistingFilePubMetadata(file, updatedFile);
+                file.title = file.pubMagicMetadata.data.caption;
+                refreshPhotoswipe();
                 scheduleUpdate();
             }
         } catch (e) {
