@@ -33,6 +33,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
+import { ChevronLeft } from '@mui/icons-material';
 
 interface Iprops {
     isOpen: boolean;
@@ -456,17 +457,13 @@ function PhotoViewer(props: Iprops) {
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
-                            title={constants.PREVIOUS}
-                            onClick={photoSwipe?.prev}>
-                            <ChevronRight
-                                sx={{ transform: 'rotate(180deg)' }}
-                            />
+                            title={constants.PREVIOUS}>
+                            <ChevronLeft sx={{ pointerEvents: 'none' }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
-                            title={constants.NEXT}
-                            onClick={photoSwipe?.next}>
-                            <ChevronRight />
+                            title={constants.NEXT}>
+                            <ChevronRight sx={{ pointerEvents: 'none' }} />
                         </button>
                         <div className="pswp__caption">
                             <div className="pswp__caption__center" />
