@@ -11,6 +11,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/file/file_info_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -82,6 +83,15 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
+    bool isUploadedByUser = widget.file.uploadedFileID != null &&
+        widget.file.ownerID == Configuration.instance.getUserID();
+    bool isFileHidden = false;
+    if (isUploadedByUser) {
+      isFileHidden = CollectionsService.instance
+              .getCollectionByID(widget.file.collectionID)
+              ?.isHidden() ??
+          false;
+    }
     if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
       if (widget.file.fileType == FileType.image ||
           widget.file.fileType == FileType.livePhoto) {
@@ -103,8 +113,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           ),
         );
       }
-      if (widget.file.uploadedFileID != null &&
-          widget.file.ownerID == Configuration.instance.getUserID()) {
+      if (isUploadedByUser && !isFileHidden) {
         final bool isArchived =
             widget.file.magicMetadata.visibility == visibilityArchive;
         children.add(

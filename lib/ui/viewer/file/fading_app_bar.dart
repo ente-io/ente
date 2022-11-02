@@ -104,13 +104,21 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     debugPrint("building app bar");
-    final Set<int> hiddenCollections =
-        CollectionsService.instance.getHiddenCollections();
+
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
+    final bool isOwnedByUser =
+        widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    bool isFileHidden = false;
+    if (isOwnedByUser && widget.file.uploadedFileID != null) {
+      isFileHidden = CollectionsService.instance
+              .getCollectionByID(widget.file.collectionID)
+              ?.isHidden() ??
+          false;
+    }
     // only show fav option for files owned by the user
-    if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
+    if (isOwnedByUser && !isFileHidden) {
       actions.add(_getFavoriteButton());
     }
     actions.add(
@@ -139,8 +147,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             );
           }
           // options for files owned by the user
-          if (widget.file.ownerID == null ||
-              widget.file.ownerID == widget.userID) {
+          if (isOwnedByUser) {
             items.add(
               PopupMenuItem(
                 value: 2,
@@ -182,11 +189,8 @@ class FadingAppBarState extends State<FadingAppBar> {
               ),
             );
           }
-          if (widget.file.ownerID != null &&
-              widget.file.ownerID == widget.userID) {
-            final bool isAlreadyHidden =
-                hiddenCollections.contains(widget.file.collectionID);
-            if (!isAlreadyHidden) {
+          if (isOwnedByUser) {
+            if (!isFileHidden) {
               items.add(
                 PopupMenuItem(
                   value: 4,
