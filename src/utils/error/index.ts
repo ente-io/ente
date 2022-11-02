@@ -47,6 +47,7 @@ export enum CustomError {
     INCORRECT_PASSWORD = 'incorrect password',
     UPLOAD_CANCELLED = 'upload cancelled',
     REQUEST_TIMEOUT = 'request taking too long',
+    HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED = 'hidden collection sync file attempted',
 }
 
 function parseUploadErrorCodes(error) {
