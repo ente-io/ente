@@ -463,13 +463,14 @@ export default function Uploader(props: Props) {
                     subtext: constants.STORAGE_QUOTA_EXCEEDED,
                     message: constants.UPGRADE_NOW,
                     onClick: () => galleryContext.showPlanSelectorModal(),
-                    startIcon: <DiscFullIcon fontSize="large" />,
+                    startIcon: <DiscFullIcon />,
                 };
                 break;
             default:
                 notification = {
                     variant: 'danger',
                     message: constants.UNKNOWN_ERROR,
+                    onClick: () => null,
                 };
         }
         appContext.setNotificationAttributes(notification);

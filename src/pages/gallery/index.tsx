@@ -666,7 +666,6 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-
                 <PhotoFrame
                     files={files}
                     syncWithRemote={syncWithRemote}

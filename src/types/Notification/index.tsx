@@ -6,7 +6,7 @@ export interface NotificationAttributes {
     variant: ButtonProps['color'];
     message: JSX.Element | string;
     subtext?: JSX.Element | string;
-    onClick?: () => void;
+    onClick: () => void;
     endIcon?: ReactNode;
 }
 

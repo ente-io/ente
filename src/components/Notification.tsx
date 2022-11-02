@@ -1,5 +1,6 @@
 import CloseIcon from '@mui/icons-material/Close';
 import {
+    Box,
     Button,
     ButtonProps,
     IconButton,
@@ -30,7 +31,7 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
     };
 
     const handleClick = () => {
-        attributes?.onClick();
+        attributes.onClick();
         onClose();
     };
     return (
@@ -55,7 +56,9 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                     spacing={2}
                     direction="row"
                     alignItems={'center'}>
-                    {attributes?.startIcon ?? <InfoIcon />}
+                    <Box sx={{ svg: { fontSize: '36px' } }}>
+                        {attributes.startIcon ?? <InfoIcon />}
+                    </Box>
 
                     <Stack
                         direction={'column'}
@@ -74,8 +77,10 @@ export default function Notification({ open, onClose, attributes }: Iprops) {
                         )}
                     </Stack>
 
-                    {attributes?.endIcon ? (
-                        <IconButton onClick={attributes.onClick}>
+                    {attributes.endIcon ? (
+                        <IconButton
+                            onClick={attributes.onClick}
+                            sx={{ fontSize: '36px' }}>
                             {attributes?.endIcon}
                         </IconButton>
                     ) : (
