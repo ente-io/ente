@@ -61,6 +61,7 @@ class CollectionPage extends StatelessWidget {
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
+        EventType.hide,
       },
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
