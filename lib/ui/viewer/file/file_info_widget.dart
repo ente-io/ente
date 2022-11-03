@@ -11,6 +11,7 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/info_item_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
@@ -92,6 +93,10 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     final listTiles = <Widget>[
+      const Padding(
+        padding: EdgeInsets.only(top: 8, bottom: 4),
+        child: InfoItemWidget(),
+      ),
       ListTile(
         leading: const Padding(
           padding: EdgeInsets.only(top: 8, left: 6),
