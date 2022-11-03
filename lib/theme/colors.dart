@@ -84,7 +84,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   backgroundElevatedLight,
   backgroundElevated2Light,
   backdropBaseLight,
-  backdropBaseMuteLight,
+  backdropMutedLight,
   textBaseLight,
   textMutedLight,
   textFaintLight,
@@ -107,7 +107,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   backgroundElevatedDark,
   backgroundElevated2Dark,
   backdropBaseDark,
-  backdropBaseMuteDark,
+  backdropMutedDark,
   textBaseDark,
   textMutedDark,
   textFaintDark,
@@ -136,10 +136,10 @@ const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
 
 // Backdrop Colors
 const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.75);
-const Color backdropBaseMuteLight = Color.fromRGBO(255, 255, 255, 0.30);
+const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.30);
 
 const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.65);
-const Color backdropBaseMuteDark = Color.fromRGBO(0, 0, 0, 0.20);
+const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.20);
 
 // Text Colors
 const Color textBaseLight = Color.fromRGBO(0, 0, 0, 1);
