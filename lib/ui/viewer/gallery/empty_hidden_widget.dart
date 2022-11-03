@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/theme/text_style.dart';
 
 class EmptyHiddenWidget extends StatelessWidget {
   const EmptyHiddenWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final EnteTextTheme enteTextTheme = getEnteTextTheme(context);
+    final EnteColorScheme enteColorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -13,19 +17,15 @@ class EmptyHiddenWidget extends StatelessWidget {
         children: [
           Icon(
             Icons.visibility_off,
-            color: Theme.of(context).iconTheme.color!.withOpacity(0.1),
-            size: 32,
+            color: enteColorScheme.strokeMuted,
+            size: 24,
           ),
           const SizedBox(height: 10),
           Text(
             "No hidden photos or videos",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Theme.of(context)
-                  .colorScheme
-                  .defaultTextColor
-                  .withOpacity(0.2),
-              fontSize: 16,
+            style: enteTextTheme.body.copyWith(
+              color: enteColorScheme.textMuted,
             ),
           ),
           const SizedBox(height: 36),
@@ -53,10 +53,7 @@ class EmptyHiddenWidget extends StatelessWidget {
                           const SizedBox(width: 4),
                           Icon(
                             Icons.visibility_off,
-                            color: Theme.of(context)
-                                .iconTheme
-                                .color!
-                                .withOpacity(0.7),
+                            color: enteColorScheme.strokeBase,
                             size: 16,
                           ),
                           const Padding(
@@ -65,10 +62,7 @@ class EmptyHiddenWidget extends StatelessWidget {
                           Text(
                             "Hide",
                             style: TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .defaultTextColor
-                                  .withOpacity(0.7),
+                              color: enteColorScheme.textBase,
                             ),
                           ),
                         ],
@@ -99,7 +93,7 @@ class EmptyHiddenTextWidget extends StatelessWidget {
       text,
       textAlign: TextAlign.center,
       style: TextStyle(
-        color: Theme.of(context).colorScheme.defaultTextColor.withOpacity(0.35),
+        color: getEnteColorScheme(context).textFaint,
       ),
     );
   }
