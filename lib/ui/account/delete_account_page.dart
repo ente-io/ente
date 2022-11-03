@@ -152,9 +152,10 @@ class DeleteAccountPage extends StatelessWidget {
     if (hasAuthenticated) {
       final choice = await showChoiceDialog(
         context,
-        'Are you sure you want to delete your account?',
-        'Your uploaded data will be scheduled for deletion, and your account '
-            'will be permanently deleted. \n\nThis action is not reversible.',
+        'Are you sure you want to delete your ente account?',
+        'Your uploaded data, across all apps '
+            '(Photos and Authenticator both), will be scheduled for deletion,'
+            'and your account will be permanently deleted.',
         firstAction: 'Cancel',
         secondAction: 'Delete',
         firstActionColor: Theme.of(context).colorScheme.onSurface,
