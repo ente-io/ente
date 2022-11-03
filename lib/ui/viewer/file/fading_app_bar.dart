@@ -258,8 +258,11 @@ class FadingAppBarState extends State<FadingAppBar> {
     try {
       final hideResult =
           await CollectionsService.instance.hideFiles(context, [widget.file]);
+
       if (hideResult) {
-        // Navigator.of(context, rootNavigator: true).pop();
+        // delay to avoid black screen
+        await Future.delayed(const Duration(milliseconds: 300));
+        Navigator.of(context).pop();
       }
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
