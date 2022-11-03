@@ -19,6 +19,7 @@ export interface FileMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
 export interface FilePublicMagicMetadataProps {
     editedTime?: number;
     editedName?: string;
+    caption?: string;
 }
 
 export interface FilePublicMagicMetadata
@@ -43,6 +44,7 @@ export interface EnteFile {
     html: string;
     w: number;
     h: number;
+    title: string;
     isDeleted: boolean;
     isTrashed?: boolean;
     deleteBy?: number;

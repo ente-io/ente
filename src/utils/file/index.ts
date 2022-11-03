@@ -408,6 +408,19 @@ export async function changeFileName(file: EnteFile, editedName: string) {
     return file;
 }
 
+export async function changeCaption(file: EnteFile, caption: string) {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
+        caption,
+    };
+
+    file.pubMagicMetadata = await updateMagicMetadataProps(
+        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
+        updatedPublicMagicMetadataProps
+    );
+    return file;
+}
+
 export function isSharedFile(user: User, file: EnteFile) {
     if (!user?.id || !file?.ownerID) {
         return false;

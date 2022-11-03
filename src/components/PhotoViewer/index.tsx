@@ -33,6 +33,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
+import { ChevronLeft } from '@mui/icons-material';
 
 interface Iprops {
     isOpen: boolean;
@@ -299,6 +300,13 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
+    const refreshPhotoswipe = () => {
+        photoSwipe.invalidateCurrItems();
+        if (isOpen) {
+            photoSwipe.updateSize(true);
+        }
+    };
+
     const checkExifAvailable = async () => {
         setExif(null);
         await sleep(100);
@@ -456,20 +464,16 @@ function PhotoViewer(props: Iprops) {
                         </div>
                         <button
                             className="pswp__button pswp__button--arrow--left"
-                            title={constants.PREVIOUS}
-                            onClick={photoSwipe?.prev}>
-                            <ChevronRight
-                                sx={{ transform: 'rotate(180deg)' }}
-                            />
+                            title={constants.PREVIOUS}>
+                            <ChevronLeft sx={{ pointerEvents: 'none' }} />
                         </button>
                         <button
                             className="pswp__button pswp__button--arrow--right"
-                            title={constants.NEXT}
-                            onClick={photoSwipe?.next}>
-                            <ChevronRight />
+                            title={constants.NEXT}>
+                            <ChevronRight sx={{ pointerEvents: 'none' }} />
                         </button>
-                        <div className="pswp__caption">
-                            <div />
+                        <div className="pswp__caption pswp-custom-caption-container">
+                            <div className="pswp-custom-caption"></div>
                         </div>
                     </div>
                 </div>
@@ -483,6 +487,7 @@ function PhotoViewer(props: Iprops) {
                 metadata={metadata}
                 exif={exif}
                 scheduleUpdate={scheduleUpdate}
+                refreshPhotoswipe={refreshPhotoswipe}
             />
         </>
     );

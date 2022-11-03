@@ -11,6 +11,7 @@ import { AppContext } from 'pages/_app';
 import { Location, Metadata } from 'types/upload';
 import Photoswipe from 'photoswipe';
 import { getEXIFLocation } from 'services/upload/exifService';
+import { RenderCaption } from './RenderCaption';
 
 const FileInfoDialog = styled(Dialog)(({ theme }) => ({
     zIndex: 1501,
@@ -31,6 +32,7 @@ interface Iprops {
     metadata: Metadata;
     exif: any;
     scheduleUpdate: () => void;
+    refreshPhotoswipe: () => void;
 }
 
 export function FileInfo({
@@ -42,6 +44,7 @@ export function FileInfo({
     metadata,
     exif,
     scheduleUpdate,
+    refreshPhotoswipe,
 }: Iprops) {
     const appContext = useContext(AppContext);
     const [location, setLocation] = useState<Location>(null);
@@ -78,11 +81,12 @@ export function FileInfo({
                 <Typography variant="subtitle" mb={1}>
                     {constants.METADATA}
                 </Typography>
-
-                {RenderInfoItem(
-                    constants.FILE_ID,
-                    items[photoSwipe?.getCurrentIndex()]?.id
-                )}
+                <RenderCaption
+                    shouldDisableEdits={shouldDisableEdits}
+                    file={items[photoSwipe?.getCurrentIndex()]}
+                    scheduleUpdate={scheduleUpdate}
+                    refreshPhotoswipe={refreshPhotoswipe}
+                />
                 {metadata?.title && (
                     <RenderFileName
                         shouldDisableEdits={shouldDisableEdits}

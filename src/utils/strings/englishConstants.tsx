@@ -435,6 +435,7 @@ const englishConstants = {
     INFO: 'Info',
     FILE_ID: 'File ID',
     FILE_NAME: 'File name',
+    CAPTION: 'Caption',
     CREATION_TIME: 'Creation time',
     UPDATED_ON: 'Updated on',
     LOCATION: 'Location',
@@ -622,6 +623,7 @@ const englishConstants = {
         <>File time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
+    CAPTION_CHARACTER_LIMIT: '280 characters max',
 
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
