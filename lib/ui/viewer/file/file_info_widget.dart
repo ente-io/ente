@@ -14,7 +14,7 @@ import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
-import 'package:photos/ui/viewer/file/raw_exif_button.dart';
+import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -245,45 +245,41 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             )
           : const SizedBox.shrink(),
       _isImage
-          ? Padding(
-              padding: const EdgeInsets.fromLTRB(0, 24, 0, 16),
-              child: SafeArea(
-                child: RawExifButton(_exif, widget.file),
-              ),
-            )
-          : const SizedBox(
-              height: 12,
-            )
+          ? RawExifListTileWidget(_exif, widget.file)
+          : const SizedBox.shrink(),
     ];
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: CustomScrollView(
-        shrinkWrap: true,
-        slivers: <Widget>[
-          TitleBarWidget(
-            isFlexibleSpaceDisabled: true,
-            title: "Details",
-            isOnTopOfScreen: false,
-            leading: IconButtonWidget(
-              icon: Icons.close_outlined,
-              iconButtonType: IconButtonType.primary,
-              onTap: () => Navigator.pop(context),
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: CustomScrollView(
+          shrinkWrap: true,
+          slivers: <Widget>[
+            TitleBarWidget(
+              isFlexibleSpaceDisabled: true,
+              title: "Details",
+              isOnTopOfScreen: false,
+              leading: IconButtonWidget(
+                icon: Icons.close_outlined,
+                iconButtonType: IconButtonType.primary,
+                onTap: () => Navigator.pop(context),
+              ),
             ),
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                if (index.isOdd) {
-                  return const DividerWidget(dividerType: DividerType.menu);
-                } else {
-                  return listTiles[index ~/ 2];
-                }
-              },
-              childCount: (listTiles.length * 2) - 1,
-            ),
-          )
-        ],
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  if (index.isOdd) {
+                    return const DividerWidget(dividerType: DividerType.menu);
+                  } else {
+                    return listTiles[index ~/ 2];
+                  }
+                },
+                childCount: (listTiles.length * 2) - 1,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
