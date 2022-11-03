@@ -207,7 +207,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ],
               ),
             )
-          : const SizedBox.shrink(),
+          : null,
       SizedBox(
         height: 62,
         child: ListTile(
@@ -243,11 +243,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                     ),
               ),
             )
-          : const SizedBox.shrink(),
-      _isImage
-          ? RawExifListTileWidget(_exif, widget.file)
-          : const SizedBox.shrink(),
+          : null,
+      _isImage ? RawExifListTileWidget(_exif, widget.file) : null,
     ];
+
+    listTiles.removeWhere(
+      (element) => element == null,
+    );
 
     return SafeArea(
       top: false,
