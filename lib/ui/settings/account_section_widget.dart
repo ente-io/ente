@@ -37,46 +37,42 @@ class AccountSectionWidget extends StatelessWidget {
 
   Column _getSectionOptions(BuildContext context) {
     List<Widget> children = [];
-    if (Configuration.instance.getRecoveryKey() != null) {
-      children.addAll([
-        sectionOptionSpacing,
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Recovery key",
-          ),
-          pressedColor: getEnteColorScheme(context).fillFaint,
-          trailingIcon: Icons.chevron_right_outlined,
-          trailingIconIsMuted: true,
-          onTap: () async {
-            final hasAuthenticated = await LocalAuthenticationService.instance
-                .requestLocalAuthentication(
-              context,
-              "Please authenticate to view your recovery key",
-            );
-            if (hasAuthenticated) {
-              String recoveryKey;
-              try {
-                recoveryKey =
-                    Sodium.bin2base64(Configuration.instance.getRecoveryKey());
-              } catch (e) {
-                showGenericErrorDialog(context);
-                return;
-              }
-              routeToPage(
-                context,
-                RecoveryKeyPage(
-                  recoveryKey,
-                  "OK",
-                  showAppBar: true,
-                  onDone: () {},
-                ),
-              );
-            }
-          },
-        ),
-      ]);
-    }
     children.addAll([
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Recovery key",
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          final hasAuthenticated = await LocalAuthenticationService.instance
+              .requestLocalAuthentication(
+            context,
+            "Please authenticate to view your recovery key",
+          );
+          if (hasAuthenticated) {
+            String recoveryKey;
+            try {
+              recoveryKey =
+                  Sodium.bin2base64(Configuration.instance.getRecoveryKey());
+            } catch (e) {
+              showGenericErrorDialog(context);
+              return;
+            }
+            routeToPage(
+              context,
+              RecoveryKeyPage(
+                recoveryKey,
+                "OK",
+                showAppBar: true,
+                onDone: () {},
+              ),
+            );
+          }
+        },
+      ),
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
