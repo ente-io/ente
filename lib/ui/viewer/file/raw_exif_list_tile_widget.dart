@@ -45,7 +45,6 @@ class RawExifListTileWidget extends StatelessWidget {
                   showShortToast(context, "This image has no exif data");
                 }
               : null,
-
       child: ListTile(
         leading: const Padding(
           padding: EdgeInsets.only(top: 8, left: 6),
@@ -66,55 +65,6 @@ class RawExifListTileWidget extends StatelessWidget {
               ),
         ),
       ),
-      //  Container(
-      //   height: 40,
-      //   width: 140,
-      //   decoration: BoxDecoration(
-      //     color: Theme.of(context)
-      //         .colorScheme
-      //         .inverseBackgroundColor
-      //         .withOpacity(0.12),
-      //     borderRadius: const BorderRadius.all(
-      //       Radius.circular(20),
-      //     ),
-      //   ),
-      //   child: Center(
-      //     child: exifStatus == Status.loading
-      //         ? Row(
-      //             mainAxisAlignment: MainAxisAlignment.center,
-      //             children: const [
-      //               CupertinoActivityIndicator(
-      //                 radius: 8,
-      //               ),
-      //               SizedBox(
-      //                 width: 8,
-      //               ),
-      //               Text('EXIF')
-      //             ],
-      //           )
-      //         : exifStatus == Status.exifIsAvailable
-      //             ? Row(
-      //                 mainAxisAlignment: MainAxisAlignment.center,
-      //                 children: const [
-      //                   Icon(Icons.feed_outlined),
-      //                   SizedBox(
-      //                     width: 8,
-      //                   ),
-      //                   Text('Raw EXIF'),
-      //                 ],
-      //               )
-      //             : Row(
-      //                 mainAxisAlignment: MainAxisAlignment.center,
-      //                 children: const [
-      //                   Icon(Icons.feed_outlined),
-      //                   SizedBox(
-      //                     width: 8,
-      //                   ),
-      //                   Text('No EXIF'),
-      //                 ],
-      //               ),
-      //   ),
-      // ),
     );
   }
 }
