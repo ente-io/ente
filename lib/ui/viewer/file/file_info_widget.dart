@@ -9,7 +9,9 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
-import 'package:photos/ui/common/DividerWithPadding.dart';
+import 'package:photos/ui/components/divider_widget.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/raw_exif_button.dart';
@@ -121,7 +123,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               )
             : const SizedBox.shrink(),
       ),
-      const DividerWithPadding(left: 70, right: 20),
       ListTile(
         leading: _isImage
             ? const Padding(
@@ -169,7 +170,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 icon: const Icon(Icons.edit),
               ),
       ),
-      const DividerWithPadding(left: 70, right: 20),
       showExifListTile
           ? ListTile(
               leading: const Padding(
@@ -208,9 +208,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
             )
           : const SizedBox.shrink(),
-      showExifListTile
-          ? const DividerWithPadding(left: 70, right: 20)
-          : const SizedBox.shrink(),
       SizedBox(
         height: 62,
         child: ListTile(
@@ -223,7 +220,6 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
         ),
       ),
-      const DividerWithPadding(left: 70, right: 20),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
               leading: const Padding(
@@ -260,35 +256,35 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             )
     ];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.close,
-                ),
-              ),
-              const SizedBox(width: 6),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  "Details",
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-              ),
-            ],
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: CustomScrollView(
+        shrinkWrap: true,
+        slivers: <Widget>[
+          TitleBarWidget(
+            isFlexibleSpaceDisabled: true,
+            title: "Details",
+            isOnTopOfScreen: false,
+            leading: IconButtonWidget(
+              icon: Icons.close_outlined,
+              iconButtonType: IconButtonType.primary,
+              onTap: () => Navigator.pop(context),
+            ),
           ),
-        ),
-        ...listTiles
-      ],
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                if (index.isOdd) {
+                  return const DividerWidget(dividerType: DividerType.menu);
+                } else {
+                  return listTiles[index ~/ 2];
+                }
+              },
+              childCount: (listTiles.length * 2) - 1,
+            ),
+          )
+        ],
+      ),
     );
   }
 

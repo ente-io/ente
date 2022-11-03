@@ -12,6 +12,7 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/file/file_info_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -244,6 +245,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
 
   Future<void> _displayInfo(File file) async {
     return showMaterialModalBottomSheet(
+      backgroundColor: getEnteColorScheme(context).backgroundBase,
       context: context,
       builder: (BuildContext context) {
         return FileInfoWidget(file);
