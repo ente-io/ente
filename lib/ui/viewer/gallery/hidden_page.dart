@@ -1,7 +1,6 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
-
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -62,7 +61,7 @@ class HiddenPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
-      emptyState: const HiddenEmptyWidget(),
+      emptyState: const EmptyHiddenWidget(),
     );
     return Scaffold(
       appBar: PreferredSize(
@@ -87,8 +86,8 @@ class HiddenPage extends StatelessWidget {
   }
 }
 
-class HiddenEmptyWidget extends StatelessWidget {
-  const HiddenEmptyWidget({Key key}) : super(key: key);
+class EmptyHiddenWidget extends StatelessWidget {
+  const EmptyHiddenWidget({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -118,16 +117,16 @@ class HiddenEmptyWidget extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const HiddenEmptyStateTextWidget("To hide a photo or video"),
+              const EmptyHiddenTextWidget("To hide a photo or video"),
               const SizedBox(height: 4),
               Padding(
                 padding: const EdgeInsets.only(left: 6),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const HiddenEmptyStateTextWidget("• Open the item"),
+                    const EmptyHiddenTextWidget("• Open the item"),
                     const SizedBox(height: 2),
-                    const HiddenEmptyStateTextWidget(
+                    const EmptyHiddenTextWidget(
                       "• Click on the overflow menu",
                     ),
                     const SizedBox(height: 2),
@@ -135,7 +134,7 @@ class HiddenEmptyWidget extends StatelessWidget {
                       width: 120,
                       child: Row(
                         children: [
-                          const HiddenEmptyStateTextWidget("• Click "),
+                          const EmptyHiddenTextWidget("• Click "),
                           const SizedBox(width: 4),
                           Icon(
                             Icons.visibility_off,
@@ -171,10 +170,10 @@ class HiddenEmptyWidget extends StatelessWidget {
   }
 }
 
-class HiddenEmptyStateTextWidget extends StatelessWidget {
+class EmptyHiddenTextWidget extends StatelessWidget {
   final String text;
 
-  const HiddenEmptyStateTextWidget(
+  const EmptyHiddenTextWidget(
     this.text, {
     Key key,
   }) : super(key: key);
