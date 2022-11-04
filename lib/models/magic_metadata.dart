@@ -7,6 +7,7 @@ const magicKeyVisibility = 'visibility';
 
 const pubMagicKeyEditedTime = 'editedTime';
 const pubMagicKeyEditedName = 'editedName';
+const pubMagicKeyCaption = "caption";
 
 class MagicMetadata {
   // 0 -> visible

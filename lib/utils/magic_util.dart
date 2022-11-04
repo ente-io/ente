@@ -120,7 +120,21 @@ Future<bool> editFilename(
     );
     return true;
   } catch (e) {
-    showToast(context, 'something went wrong');
+    showToast(context, 'Something went wrong');
+    return false;
+  }
+}
+
+Future<bool> editFileCaption(
+  BuildContext context,
+  File file,
+  String caption,
+) async {
+  try {
+    await _updatePublicMetadata(context, [file], pubMagicKeyCaption, caption);
+    return true;
+  } catch (e) {
+    showToast(context, "Something went wrong");
     return false;
   }
 }
