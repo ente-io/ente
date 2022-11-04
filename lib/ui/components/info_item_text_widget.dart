@@ -1,23 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/utils/magic_util.dart';
 
-class InfoItemWidget extends StatefulWidget {
+class InfoItemTextWidget extends StatefulWidget {
   final String hintText;
-  const InfoItemWidget({this.hintText = '', super.key});
+  final File file;
+  const InfoItemTextWidget({required this.file, this.hintText = '', super.key});
 
   @override
-  State<InfoItemWidget> createState() => _InfoItemWidgetState();
+  State<InfoItemTextWidget> createState() => _InfoItemTextWidgetState();
 }
 
-class _InfoItemWidgetState extends State<InfoItemWidget> {
+class _InfoItemTextWidgetState extends State<InfoItemTextWidget> {
   int maxLength = 280;
   int currentLength = 0;
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
+  String caption = "";
 
   @override
   void dispose() {
-    // save caption here
     _textController.dispose();
     super.dispose();
   }
@@ -28,7 +31,7 @@ class _InfoItemWidgetState extends State<InfoItemWidget> {
     final textTheme = getEnteTextTheme(context);
     return TextField(
       onEditingComplete: () {
-        //save caption here
+        editCaption();
         _focusNode.unfocus();
       },
       controller: _textController,
@@ -57,8 +60,15 @@ class _InfoItemWidgetState extends State<InfoItemWidget> {
       onChanged: (value) {
         setState(() {
           currentLength = value.length;
+          caption = value;
         });
       },
     );
+  }
+
+  void editCaption() {
+    if (caption.isNotEmpty) {
+      editFileCaption(context, widget.file, caption);
+    }
   }
 }
