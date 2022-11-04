@@ -253,7 +253,11 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       barrierColor: backdropFaintDark,
       context: context,
       builder: (BuildContext context) {
-        return FileInfoWidget(file);
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: FileInfoWidget(file),
+        );
       },
     );
   }
