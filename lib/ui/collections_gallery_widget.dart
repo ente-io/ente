@@ -13,6 +13,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/collections/archived_collections_button_widget.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
 import 'package:photos/ui/collections/hidden_collections_button_widget.dart';
 import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
@@ -85,7 +86,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         await collectionsService.getLatestCollectionFiles();
     for (final file in latestCollectionFiles) {
       final c = collectionsService.getCollectionByID(file.collectionID);
-      if (c.owner.id == userID) {
+      if (c.owner.id == userID && !c.isHidden()) {
         collectionsWithThumbnail.add(CollectionWithThumbnail(c, file));
       }
     }
@@ -155,9 +156,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  TrashButtonWidget(trashAndHiddenTextStyle),
+                  ArchivedCollectionsButtonWidget(trashAndHiddenTextStyle),
                   const SizedBox(height: 12),
                   HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
+                  const SizedBox(height: 12),
+                  TrashButtonWidget(trashAndHiddenTextStyle),
                 ],
               ),
             ),

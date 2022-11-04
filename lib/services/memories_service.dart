@@ -74,11 +74,11 @@ class MemoriesService extends ChangeNotifier {
           date.add(const Duration(days: daysAfter)).microsecondsSinceEpoch;
       durations.add([startCreationTime, endCreationTime]);
     }
-    final archivedCollectionIds =
-        CollectionsService.instance.getArchivedCollections();
+    final ignoredCollections =
+        CollectionsService.instance.collectionsHiddenFromTimeline();
     final files = await _filesDB.getFilesCreatedWithinDurations(
       durations,
-      archivedCollectionIds,
+      ignoredCollections,
     );
     final seenTimes = await _memoriesDB.getSeenTimes();
     final List<Memory> memories = [];

@@ -46,6 +46,17 @@ class Collection {
     return mMdVersion > 0 && magicMetadata.visibility == visibilityArchive;
   }
 
+  bool isHidden() {
+    if (isDefaultHidden()) {
+      return true;
+    }
+    return mMdVersion > 0 && (magicMetadata.visibility == visibilityHidden);
+  }
+
+  bool isDefaultHidden() {
+    return (magicMetadata.subType ?? 0) == subTypeDefaultHidden;
+  }
+
   static CollectionType typeFromString(String type) {
     switch (type) {
       case "folder":

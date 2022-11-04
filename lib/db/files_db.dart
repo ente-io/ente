@@ -627,6 +627,43 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
+  Future<FileLoadResult> getFilesInCollections(
+    List<int> collectionIDs,
+    int startTime,
+    int endTime,
+    int userID, {
+    int limit,
+    bool asc,
+  }) async {
+    if (collectionIDs.isEmpty) {
+      return FileLoadResult(<File>[], false);
+    }
+    String inParam = "";
+    for (final id in collectionIDs) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    String whereClause =
+        '$columnCollectionID  IN ($inParam) AND $columnCreationTime >= ? AND '
+        '$columnCreationTime <= ? AND $columnOwnerID = ?';
+    final List<Object> whereArgs = [startTime, endTime, userID];
+
+    final results = await db.query(
+      filesTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = convertToFiles(results);
+    final dedupeResult = _deduplicatedAndFilterIgnoredFiles(files, {});
+    _logger.info("Fetched " + dedupeResult.length.toString() + " files");
+    return FileLoadResult(files, files.length == limit);
+  }
+
   Future<List<File>> getFilesCreatedWithinDurations(
     List<List<int>> durations,
     Set<int> ignoredCollectionIDs, {
@@ -1223,6 +1260,32 @@ class FilesDB {
     return result;
   }
 
+  Future<Map<int, List<File>>> getAllFilesGroupByCollectionID(
+      List<int> ids) async {
+    final result = <int, List<File>>{};
+    if (ids.isEmpty) {
+      return result;
+    }
+    String inParam = "";
+    for (final id in ids) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnUploadedFileID IN ($inParam)',
+    );
+    final files = convertToFiles(results);
+    for (File eachFile in files) {
+      if (!result.containsKey(eachFile.collectionID)) {
+        result[eachFile.collectionID] = <File>[];
+      }
+      result[eachFile.collectionID].add(eachFile);
+    }
+    return result;
+  }
+
   Future<Set<int>> getAllCollectionIDsOfFile(
     int uploadedFileID,
   ) async {
@@ -1249,12 +1312,12 @@ class FilesDB {
     return files;
   }
 
-  Future<List<File>> getAllFilesFromDB() async {
+  Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> result = await db.query(filesTable);
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, null);
+        _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
     return deduplicatedFiles;
   }
 

@@ -6,22 +6,23 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/gallery_type.dart';
-import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/viewer/gallery/empty_hidden_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
-class ArchivePage extends StatelessWidget {
+class HiddenPage extends StatelessWidget {
   final String tagPrefix;
   final GalleryType appBarType;
   final GalleryType overlayType;
   final _selectedFiles = SelectedFiles();
 
-  ArchivePage({
-    this.tagPrefix = "archived_page",
-    this.appBarType = GalleryType.archive,
-    this.overlayType = GalleryType.archive,
+  HiddenPage({
+    this.tagPrefix = "hidden_page",
+    this.appBarType = GalleryType.hidden,
+    this.overlayType = GalleryType.hidden,
     Key key,
   }) : super(key: key);
 
@@ -29,11 +30,11 @@ class ArchivePage extends StatelessWidget {
   Widget build(Object context) {
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
-        return FilesDB.instance.getAllPendingOrUploadedFiles(
+        return FilesDB.instance.getFilesInCollections(
+          CollectionsService.instance.getHiddenCollections().toList(),
           creationStartTime,
           creationEndTime,
           Configuration.instance.getUserID(),
-          visibility: visibilityArchive,
           limit: limit,
           asc: asc,
         );
@@ -46,7 +47,7 @@ class ArchivePage extends StatelessWidget {
                 ) !=
                 null,
           ),
-      removalEventTypes: const {EventType.unarchived},
+      removalEventTypes: const {EventType.unhide},
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
@@ -60,13 +61,14 @@ class ArchivePage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: null,
+      emptyState: const EmptyHiddenWidget(),
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
           appBarType,
-          "Archive",
+          "Hidden",
           _selectedFiles,
         ),
       ),

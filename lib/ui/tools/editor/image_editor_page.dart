@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:extended_image/extended_image.dart';
@@ -370,13 +371,19 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         existingFiles[0].creationTime,
       ))
           .files;
+      // the index could be -1 if the files fetched doesn't contain the newly
+      // edited files
+      final selectionIndex =
+          files.indexWhere((file) => file.generatedID == newFile.generatedID);
+      if (selectionIndex == -1) {
+        files.add(newFile);
+      }
       replacePage(
         context,
         DetailPage(
           widget.detailPageConfig.copyWith(
             files: files,
-            selectedIndex: files
-                .indexWhere((file) => file.generatedID == newFile.generatedID),
+            selectedIndex: min(selectionIndex, files.length - 1),
           ),
         ),
       );

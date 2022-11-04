@@ -38,6 +38,7 @@ class DeviceFolderPage extends StatelessWidget {
       removalEventTypes: const {
         EventType.deletedFromDevice,
         EventType.deletedFromEverywhere,
+        EventType.hide,
       },
       tagPrefix: "device_folder:" + deviceCollection.name,
       selectedFiles: _selectedFiles,

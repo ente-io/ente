@@ -20,4 +20,6 @@ enum EventType {
   deletedFromEverywhere,
   archived,
   unarchived,
+  hide,
+  unhide,
 }

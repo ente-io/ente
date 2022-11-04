@@ -101,9 +101,7 @@ class File extends EnteFile {
         type = FileType.image;
         // PHAssetMediaSubtype.photoLive.rawValue is 8
         // This hack should go away once photos_manager support livePhotos
-        if (asset.subtype != null &&
-            asset.subtype > -1 &&
-            (asset.subtype & 8) != 0) {
+        if (asset.subtype > -1 && (asset.subtype & 8) != 0) {
           type = FileType.livePhoto;
         }
         break;
