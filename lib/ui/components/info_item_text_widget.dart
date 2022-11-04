@@ -21,6 +21,7 @@ class _InfoItemTextWidgetState extends State<InfoItemTextWidget> {
 
   @override
   void dispose() {
+    editCaption(fromDispose: true);
     _textController.dispose();
     super.dispose();
   }
@@ -66,9 +67,9 @@ class _InfoItemTextWidgetState extends State<InfoItemTextWidget> {
     );
   }
 
-  void editCaption() {
+  void editCaption({bool fromDispose = false}) {
     if (caption.isNotEmpty) {
-      editFileCaption(context, widget.file, caption);
+      editFileCaption(fromDispose ? null : context, widget.file, caption);
     }
   }
 }

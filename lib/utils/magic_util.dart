@@ -10,6 +10,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -134,7 +135,9 @@ Future<bool> editFileCaption(
     await _updatePublicMetadata(context, [file], pubMagicKeyCaption, caption);
     return true;
   } catch (e) {
-    showToast(context, "Something went wrong");
+    if (context != null) {
+      showToast(context, "Something went wrong");
+    }
     return false;
   }
 }
@@ -148,19 +151,27 @@ Future<void> _updatePublicMetadata(
   if (files.isEmpty) {
     return;
   }
-  final dialog = createProgressDialog(context, 'please wait...');
-  await dialog.show();
+  ProgressDialog dialog;
+  if (context != null) {
+    dialog = createProgressDialog(context, 'please wait...');
+    await dialog.show();
+  }
   try {
     final Map<String, dynamic> update = {key: value};
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
-    showShortToast(context, 'done');
-    await dialog.hide();
+    if (context != null) {
+      showShortToast(context, 'done');
+      await dialog.hide();
+    }
+
     if (_shouldReloadGallery(key)) {
       Bus.instance.fire(ForceReloadHomeGalleryEvent());
     }
   } catch (e, s) {
     _logger.severe("failed to update $key = $value", e, s);
-    await dialog.hide();
+    if (context != null) {
+      await dialog.hide();
+    }
     rethrow;
   }
 }
