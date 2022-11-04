@@ -98,8 +98,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         child: InfoItemWidget(),
       ),
       ListTile(
+        horizontalTitleGap: 2,
         leading: const Padding(
-          padding: EdgeInsets.only(top: 8, left: 6),
+          padding: EdgeInsets.only(top: 8),
           child: Icon(Icons.calendar_today_rounded),
         ),
         title: Text(
@@ -129,15 +130,16 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             : const SizedBox.shrink(),
       ),
       ListTile(
+        horizontalTitleGap: 2,
         leading: _isImage
             ? const Padding(
-                padding: EdgeInsets.only(top: 8, left: 6),
+                padding: EdgeInsets.only(top: 8),
                 child: Icon(
                   Icons.image,
                 ),
               )
             : const Padding(
-                padding: EdgeInsets.only(top: 8, left: 6),
+                padding: EdgeInsets.only(top: 8),
                 child: Icon(
                   Icons.video_camera_back,
                   size: 27,
@@ -177,10 +179,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       ),
       showExifListTile
           ? ListTile(
-              leading: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Icon(Icons.camera_rounded),
-              ),
+              horizontalTitleGap: 2,
+              leading: const Icon(Icons.camera_rounded),
               title: Text(_exifData["takenOnDevice"] ?? "--"),
               subtitle: Row(
                 children: [
@@ -216,10 +216,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       SizedBox(
         height: 62,
         child: ListTile(
-          leading: const Padding(
-            padding: EdgeInsets.only(left: 6),
-            child: Icon(Icons.folder_outlined),
-          ),
+          horizontalTitleGap: 0,
+          leading: const Icon(Icons.folder_outlined),
           title: fileIsBackedup
               ? CollectionsListOfFileWidget(allCollectionIDsOfFile)
               : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
@@ -227,8 +225,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       ),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
+              horizontalTitleGap: 2,
               leading: const Padding(
-                padding: EdgeInsets.only(top: 8, left: 6),
+                padding: EdgeInsets.only(top: 8),
                 child: Icon(Icons.cloud_upload_outlined),
               ),
               title: Text(

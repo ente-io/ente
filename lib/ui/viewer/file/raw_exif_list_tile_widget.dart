@@ -46,8 +46,9 @@ class RawExifListTileWidget extends StatelessWidget {
                 }
               : null,
       child: ListTile(
+        horizontalTitleGap: 2,
         leading: const Padding(
-          padding: EdgeInsets.only(top: 8, left: 6),
+          padding: EdgeInsets.only(top: 8),
           child: Icon(Icons.feed_outlined),
         ),
         title: const Text("EXIF"),
