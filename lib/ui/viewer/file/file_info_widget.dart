@@ -276,7 +276,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
                   if (index.isOdd) {
-                    return const DividerWidget(dividerType: DividerType.menu);
+                    return index == 1
+                        ? const SizedBox.shrink()
+                        : const DividerWidget(dividerType: DividerType.menu);
                   } else {
                     return listTiles[index ~/ 2];
                   }

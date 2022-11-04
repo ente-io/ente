@@ -21,7 +21,7 @@ class _InfoItemWidgetState extends State<InfoItemWidget> {
         counterStyle: textTheme.mini.copyWith(color: colorScheme.textMuted),
         counterText: currentLength > 99
             ? currentLength.toString() + " / " + maxLength.toString()
-            : " ",
+            : "",
         contentPadding: const EdgeInsets.all(16),
         border: InputBorder.none,
         focusedBorder: InputBorder.none,
