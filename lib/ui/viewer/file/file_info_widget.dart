@@ -257,36 +257,41 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
 
     return SafeArea(
       top: false,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CustomScrollView(
-          shrinkWrap: true,
-          slivers: <Widget>[
-            TitleBarWidget(
-              isFlexibleSpaceDisabled: true,
-              title: "Details",
-              isOnTopOfScreen: false,
-              leading: IconButtonWidget(
-                icon: Icons.close_outlined,
-                iconButtonType: IconButtonType.primary,
-                onTap: () => Navigator.pop(context),
+      child: Scrollbar(
+        thickness: 4,
+        radius: const Radius.circular(2),
+        thumbVisibility: true,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CustomScrollView(
+            shrinkWrap: true,
+            slivers: <Widget>[
+              TitleBarWidget(
+                isFlexibleSpaceDisabled: true,
+                title: "Details",
+                isOnTopOfScreen: false,
+                leading: IconButtonWidget(
+                  icon: Icons.close_outlined,
+                  iconButtonType: IconButtonType.primary,
+                  onTap: () => Navigator.pop(context),
+                ),
               ),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index.isOdd) {
-                    return index == 1
-                        ? const SizedBox.shrink()
-                        : const DividerWidget(dividerType: DividerType.menu);
-                  } else {
-                    return listTiles[index ~/ 2];
-                  }
-                },
-                childCount: (listTiles.length * 2) - 1,
-              ),
-            )
-          ],
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index.isOdd) {
+                      return index == 1
+                          ? const SizedBox.shrink()
+                          : const DividerWidget(dividerType: DividerType.menu);
+                    } else {
+                      return listTiles[index ~/ 2];
+                    }
+                  },
+                  childCount: (listTiles.length * 2) - 1,
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
