@@ -156,14 +156,14 @@ Future<void> _updatePublicMetadata(
   }
   ProgressDialog dialog;
   if (context != null) {
-    dialog = createProgressDialog(context, 'please wait...');
+    dialog = createProgressDialog(context, 'Please wait...');
     await dialog.show();
   }
   try {
     final Map<String, dynamic> update = {key: value};
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
     if (context != null) {
-      showShortToast(context, 'done');
+      showShortToast(context, 'Done');
       await dialog.hide();
     }
 
