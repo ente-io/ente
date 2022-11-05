@@ -93,10 +93,13 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     final listTiles = <Widget>[
-      Padding(
-        padding: const EdgeInsets.only(top: 8, bottom: 4),
-        child: FileCaptionWidget(file: widget.file),
-      ),
+      widget.file.uploadedFileID == null ||
+              Configuration.instance.getUserID() != file.ownerID
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              child: FileCaptionWidget(file: widget.file),
+            ),
       ListTile(
         horizontalTitleGap: 2,
         leading: const Padding(
