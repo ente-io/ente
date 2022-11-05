@@ -415,47 +415,86 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
-    final FileType type = file.fileType;
-    // save and track image for livePhoto/image and video for FileType.video
-    final io.File fileToSave = await getFile(file);
-    final savedAsset = type == FileType.video
-        ? (await PhotoManager.editor.saveVideo(fileToSave, title: file.title))
-        : (await PhotoManager.editor
-            .saveImageWithPath(fileToSave.path, title: file.title));
-    // immediately track assetID to avoid duplicate upload
-    await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
-    file.localID = savedAsset.id;
-    await FilesDB.instance.insert(file);
+    try {
+      final FileType type = file.fileType;
+      final bool downloadLivePhotoOnDroid =
+          type == FileType.livePhoto && Platform.isAndroid;
+      AssetEntity savedAsset;
+      final io.File fileToSave = await getFile(file);
+      if (type == FileType.image) {
+        savedAsset = await PhotoManager.editor
+            .saveImageWithPath(fileToSave.path, title: file.title);
+      } else if (type == FileType.video) {
+        savedAsset =
+            await PhotoManager.editor.saveVideo(fileToSave, title: file.title);
+      } else if (type == FileType.livePhoto) {
+        final io.File liveVideoFile =
+            await getFileFromServer(file, liveVideo: true);
+        if (liveVideoFile == null) {
+          throw AssertionError("Live video can not be null");
+        }
+        if (downloadLivePhotoOnDroid) {
+          await _saveLivePhotoOnDroid(fileToSave, liveVideoFile, file);
+        } else {
+          savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
+            imageFile: fileToSave,
+            videoFile: liveVideoFile,
+            title: file.title,
+          );
+        }
+      }
 
-    if (type == FileType.livePhoto) {
-      final io.File liveVideo = await getFileFromServer(file, liveVideo: true);
-      if (liveVideo == null) {
-        _logger.warning("Failed to find live video" + file.tag);
-      } else {
-        final videoTitle = file_path.basenameWithoutExtension(file.title) +
-            file_path.extension(liveVideo.path);
-        final savedAsset = (await PhotoManager.editor.saveVideo(
-          liveVideo,
-          title: videoTitle,
-        ));
+      if (savedAsset != null) {
+        // immediately track assetID to avoid duplicate upload
+        await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
         final ignoreVideoFile = IgnoredFile(
           savedAsset.id,
-          savedAsset.title ?? videoTitle,
+          savedAsset.title ?? "",
           savedAsset.relativePath ?? 'remoteDownload',
           "remoteDownload",
         );
         debugPrint("IgnoreFile for auto-upload ${ignoreVideoFile.toString()}");
         await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
+        file.localID = savedAsset.id;
+        await FilesDB.instance.insert(file);
+        Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
+      } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
+        _logger.severe('Failed to save assert of type $type');
       }
-    }
-
-    Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
-    await dialog.hide();
-    if (file.fileType == FileType.livePhoto) {
-      showToast(context, "Photo and video saved to gallery");
-    } else {
       showToast(context, "File saved to gallery");
+      await dialog.hide();
+    } catch (e) {
+      _logger.warning("Failed to save file", e);
+      await dialog.hide();
+      showGenericErrorDialog(context);
     }
+  }
+
+  Future<void> _saveLivePhotoOnDroid(
+      io.File image, io.File video, File enteFile) async {
+    debugPrint("Downloading LivePhoto on Droid");
+    AssetEntity savedAsset = await PhotoManager.editor
+        .saveImageWithPath(image.path, title: enteFile.title);
+    IgnoredFile ignoreVideoFile = IgnoredFile(
+      savedAsset.id,
+      savedAsset.title ?? '',
+      savedAsset.relativePath ?? 'remoteDownload',
+      "remoteDownload",
+    );
+    await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
+    final videoTitle = file_path.basenameWithoutExtension(enteFile.title) +
+        file_path.extension(video.path);
+    savedAsset = (await PhotoManager.editor.saveVideo(
+      video,
+      title: videoTitle,
+    ));
+    ignoreVideoFile = IgnoredFile(
+      savedAsset.id,
+      savedAsset.title ?? videoTitle,
+      savedAsset.relativePath ?? 'remoteDownload',
+      "remoteDownload",
+    );
+    await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
   }
 
   Future<void> _setAs(File file) async {
