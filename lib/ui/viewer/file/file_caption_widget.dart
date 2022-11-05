@@ -20,7 +20,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
 
   @override
   void dispose() {
-    editCaption(fromDispose: true);
+    editFileCaption(null, widget.file, editedCaption);
     _textController.dispose();
     super.dispose();
   }
@@ -32,7 +32,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     final caption = widget.file.caption;
     return TextField(
       onEditingComplete: () {
-        editCaption();
+        editFileCaption(context, widget.file, editedCaption);
         _focusNode.unfocus();
       },
       controller: _textController,
@@ -65,11 +65,5 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         });
       },
     );
-  }
-
-  void editCaption({bool fromDispose = false}) {
-    if (editedCaption.isNotEmpty) {
-      editFileCaption(fromDispose ? null : context, widget.file, editedCaption);
-    }
   }
 }
