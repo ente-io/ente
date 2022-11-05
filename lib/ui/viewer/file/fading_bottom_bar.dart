@@ -194,7 +194,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  widget.file.caption.isNotEmpty
+                  widget.file.caption?.isNotEmpty ?? false
                       ? Padding(
                           padding: const EdgeInsets.fromLTRB(
                             16,
