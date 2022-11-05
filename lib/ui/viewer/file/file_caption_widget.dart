@@ -19,9 +19,18 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   String editedCaption = "";
 
   @override
+  void initState() {
+    _focusNode.addListener(() {
+      _focusNode.hasFocus ? _textController.text = widget.file.caption : null;
+    });
+    super.initState();
+  }
+
+  @override
   void dispose() {
     editFileCaption(null, widget.file, editedCaption);
     _textController.dispose();
+    _focusNode.removeListener(() {});
     super.dispose();
   }
 
