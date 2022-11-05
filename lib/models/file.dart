@@ -211,6 +211,10 @@ class File extends EnteFile {
     }
   }
 
+  String? get caption {
+    return pubMagicMetadata?.caption;
+  }
+
   String get thumbnailUrl {
     final endpoint = Configuration.instance.getHttpEndpoint();
     if (endpoint != kDefaultProductionEndpoint ||
