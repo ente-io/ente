@@ -98,7 +98,7 @@ async function getDesktopCutoffVersion() {
         ).json() as GetFeatureFlagResponse;
         return featureFlags.desktopCutoffVersion;
     } catch (e) {
-        logErrorSentry('failed to get feature flags');
+        logErrorSentry(e, 'failed to get feature flags');
         return undefined;
     }
 }
