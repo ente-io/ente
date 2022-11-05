@@ -2,6 +2,7 @@ import { getLocalFiles } from 'services/fileService';
 import { getLocalCollections } from 'services/collectionService';
 import { getUserDetailsV2 } from 'services/userService';
 import { groupFilesBasedOnCollectionID } from 'utils/file';
+import { FILE_TYPE } from 'constants/file';
 
 export async function testUpload() {
     if (!process.env.NEXT_PUBLIC_EXPECTED_JSON_PATH) {
@@ -21,7 +22,9 @@ export async function testUpload() {
         await totalCollectionCountCheck(expectedState);
         await collectionWiseFileCount(expectedState);
         await thumbnailGenerationFailedFilesCheck(expectedState);
+        await livePhotoClubbingCheck(expectedState);
         await exifDataParsingCheck(expectedState);
+        await googleMetadataReadingCheck(expectedState);
     } catch (e) {
         console.log(e);
     }
@@ -119,7 +122,38 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
             }
         }
     );
-    console.log('thumbnail generation failure test passed ✅');
+    console.log('thumbnail generation failure check passed ✅');
+}
+
+async function livePhotoClubbingCheck(expectedState) {
+    const files = await getLocalFiles();
+    const livePhotos = files.filter(
+        (file) => file.metadata.fileType === FILE_TYPE.LIVE_PHOTO
+    );
+
+    const fileIDSet = new Set();
+    const uniqueLivePhotos = livePhotos.filter(
+        (file) => !fileIDSet.has(file.id)
+    );
+    const livePhotoFileNames = uniqueLivePhotos.map(
+        (file) => file.metadata.title
+    );
+
+    if (expectedState['live_photo']['count'] !== livePhotoFileNames.length) {
+        throw Error(
+            `livePhotoClubbing Check failed ❌
+                expected: ${expectedState['live_photo']['count']},  got: ${livePhotoFileNames.length}`
+        );
+    }
+    expectedState['live_photo']['files'].forEach((fileName) => {
+        if (!livePhotoFileNames.includes(fileName)) {
+            throw Error(
+                `livePhotoClubbing Check failed ❌
+                        expected: ${expectedState['live_photo']['files']},  got: ${livePhotoFileNames}`
+            );
+        }
+    });
+    console.log('live-photo clubbing check passed ✅');
 }
 
 async function exifDataParsingCheck(expectedState) {
@@ -141,18 +175,67 @@ async function exifDataParsingCheck(expectedState) {
         }
         if (
             exifValues['location'] &&
-            (exifValues['location']['latitude'] !==
-                matchingFile.metadata.latitude ||
-                exifValues['location']['longitude'] !==
-                    matchingFile.metadata.longitude)
+            (Math.abs(
+                exifValues['location']['latitude'] -
+                    matchingFile.metadata.latitude
+            ) > 1 ||
+                Math.abs(
+                    exifValues['location']['longitude'] -
+                        matchingFile.metadata.longitude
+                ) > 1)
         ) {
             throw Error(`exifDataParsingCheck failed ❌  ,
                             for ${fileName}
                             expected: ${JSON.stringify(exifValues['location'])}
                             got: [${matchingFile.metadata.latitude},${
-                matchingFile.metadata.latitude
+                matchingFile.metadata.longitude
             }]`);
         }
     });
     console.log('exif data parsing check passed ✅');
+}
+
+async function googleMetadataReadingCheck(expectedState) {
+    const files = await getLocalFiles();
+    Object.entries(expectedState['google_import']).map(
+        ([fileName, metadata]) => {
+            const matchingFile = files.find(
+                (file) => file.metadata.title === fileName
+            );
+            if (!matchingFile) {
+                throw Error(
+                    `exifDataParsingCheck failed , ${fileName} missing`
+                );
+            }
+            if (
+                metadata['creation_time'] &&
+                metadata['creation_time'] !== matchingFile.metadata.creationTime
+            ) {
+                throw Error(`googleMetadataJSON reading check failed ❌ ,
+                for ${fileName}
+                expected: ${metadata['creation_time']} got: ${matchingFile.metadata.creationTime}`);
+            }
+            if (
+                metadata['location'] &&
+                (Math.abs(
+                    metadata['location']['latitude'] -
+                        matchingFile.metadata.latitude
+                ) > 1 ||
+                    Math.abs(
+                        metadata['location']['longitude'] -
+                            matchingFile.metadata.longitude
+                    ) > 1)
+            ) {
+                throw Error(`googleMetadataJSON reading check failed ❌  ,
+                                for ${fileName}
+                                expected: ${JSON.stringify(
+                                    metadata['location']
+                                )}
+                                got: [${matchingFile.metadata.latitude},${
+                    matchingFile.metadata.longitude
+                }]`);
+            }
+        }
+    );
+    console.log('googleMetadataJSON reading check passed ✅');
 }
