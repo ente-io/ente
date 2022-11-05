@@ -3,16 +3,16 @@ import 'package:photos/models/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/magic_util.dart';
 
-class InfoItemTextWidget extends StatefulWidget {
+class FileCaptionWidget extends StatefulWidget {
   final String hintText;
   final File file;
-  const InfoItemTextWidget({required this.file, this.hintText = '', super.key});
+  const FileCaptionWidget({required this.file, this.hintText = '', super.key});
 
   @override
-  State<InfoItemTextWidget> createState() => _InfoItemTextWidgetState();
+  State<FileCaptionWidget> createState() => _FileCaptionWidgetState();
 }
 
-class _InfoItemTextWidgetState extends State<InfoItemTextWidget> {
+class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   int maxLength = 280;
   int currentLength = 0;
   final _textController = TextEditingController();

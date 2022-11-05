@@ -11,10 +11,10 @@ import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/components/info_item_text_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
+import 'package:photos/ui/viewer/file/file_caption_widget.dart';
 import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
@@ -95,7 +95,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final listTiles = <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 8, bottom: 4),
-        child: InfoItemTextWidget(file: widget.file),
+        child: FileCaptionWidget(file: widget.file),
       ),
       ListTile(
         horizontalTitleGap: 2,
