@@ -16,7 +16,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   int currentLength = 0;
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
-  String editedCaption = "";
+  String? editedCaption;
 
   @override
   void initState() {
@@ -27,12 +27,15 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         editedCaption = caption;
       }
     });
+    editedCaption = widget.file.caption;
     super.initState();
   }
 
   @override
   void dispose() {
-    editFileCaption(null, widget.file, editedCaption);
+    if (editedCaption != null) {
+      editFileCaption(null, widget.file, editedCaption);
+    }
     _textController.dispose();
     _focusNode.removeListener(() {});
     super.dispose();
@@ -45,7 +48,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     final caption = widget.file.caption;
     return TextField(
       onEditingComplete: () {
-        editFileCaption(context, widget.file, editedCaption);
+        if (editedCaption != null) {
+          editFileCaption(context, widget.file, editedCaption);
+        }
         _focusNode.unfocus();
       },
       controller: _textController,
