@@ -179,9 +179,30 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             ),
             child: Padding(
               padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: children,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  widget.file.caption.isNotEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            16,
+                            28,
+                            16,
+                            12,
+                          ),
+                          child: Text(
+                            widget.file.caption,
+                            style: getEnteTextTheme(context)
+                                .small
+                                .copyWith(color: textBaseDark),
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: children,
+                  ),
+                ],
               ),
             ),
           ),
