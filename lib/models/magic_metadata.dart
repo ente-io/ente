@@ -39,6 +39,7 @@ class MagicMetadata {
 class PubMagicMetadata {
   int? editedTime;
   String? editedName;
+  String? caption;
 
   PubMagicMetadata({this.editedTime, this.editedName});
 
