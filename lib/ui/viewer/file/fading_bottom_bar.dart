@@ -75,8 +75,13 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
               color: Colors.white,
             ),
-            onPressed: () {
-              _displayInfo(widget.file);
+            onPressed: () async {
+              await _displayInfo(widget.file);
+              safeRefresh(); //to instantly show the new caption if keypad is closed after pressing 'done' - here the caption will be updated before the bottom sheet is closed
+              await Future.delayed(
+                const Duration(milliseconds: 500),
+              ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
+              safeRefresh();
             },
           ),
         ),
