@@ -207,6 +207,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
                             style: getEnteTextTheme(context)
                                 .small
                                 .copyWith(color: textBaseDark),
+                            textAlign: TextAlign.center,
                           ),
                         )
                       : const SizedBox.shrink(),
