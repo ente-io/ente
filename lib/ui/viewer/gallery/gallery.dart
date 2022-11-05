@@ -37,6 +37,7 @@ class Gallery extends StatefulWidget {
   final String tagPrefix;
   final Widget header;
   final Widget footer;
+  final Widget emptyState;
   final bool smallerTodayFont;
   final String albumName;
   final double scrollBottomSafeArea;
@@ -51,6 +52,7 @@ class Gallery extends StatefulWidget {
     this.removalEventTypes = const {},
     this.header,
     this.footer = const SizedBox(height: 120),
+    this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.smallerTodayFont = false,
     this.albumName = '',
@@ -209,8 +211,8 @@ class _GalleryState extends State<Gallery> {
           children.add(widget.header);
         }
         children.add(
-          const Expanded(
-            child: EmptyState(),
+          Expanded(
+            child: widget.emptyState,
           ),
         );
         if (widget.footer != null) {

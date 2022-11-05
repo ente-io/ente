@@ -33,8 +33,8 @@ class HomeGalleryWidget extends StatelessWidget {
         final ownerID = Configuration.instance.getUserID();
         final hasSelectedAllForBackup =
             Configuration.instance.hasSelectedAllFoldersForBackup();
-        final archivedCollectionIds =
-            CollectionsService.instance.getArchivedCollections();
+        final collectionsToHide =
+            CollectionsService.instance.collectionsHiddenFromTimeline();
         FileLoadResult result;
         if (hasSelectedAllForBackup) {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
@@ -43,7 +43,7 @@ class HomeGalleryWidget extends StatelessWidget {
             ownerID,
             limit: limit,
             asc: asc,
-            ignoredCollectionIDs: archivedCollectionIds,
+            ignoredCollectionIDs: collectionsToHide,
           );
         } else {
           result = await FilesDB.instance.getAllPendingOrUploadedFiles(
@@ -52,7 +52,7 @@ class HomeGalleryWidget extends StatelessWidget {
             ownerID,
             limit: limit,
             asc: asc,
-            ignoredCollectionIDs: archivedCollectionIds,
+            ignoredCollectionIDs: collectionsToHide,
           );
         }
 
@@ -70,6 +70,7 @@ class HomeGalleryWidget extends StatelessWidget {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.archived,
+        EventType.hide,
       },
       forceReloadEvents: [
         Bus.instance.on<BackupFoldersUpdatedEvent>(),

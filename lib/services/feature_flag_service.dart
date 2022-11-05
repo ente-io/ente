@@ -73,10 +73,8 @@ class FeatureFlagService {
           .getDio()
           .get("https://static.ente.io/feature_flags.json");
       final flagsResponse = FeatureFlags.fromMap(response.data);
-      if (flagsResponse != null) {
-        _prefs.setString(_featureFlagsKey, flagsResponse.toJson());
-        _featureFlags = flagsResponse;
-      }
+      _prefs.setString(_featureFlagsKey, flagsResponse.toJson());
+      _featureFlags = flagsResponse;
     } catch (e) {
       _logger.severe("Failed to sync feature flags ", e);
     }

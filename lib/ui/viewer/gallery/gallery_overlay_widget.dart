@@ -17,6 +17,7 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -29,6 +30,7 @@ class GalleryOverlayWidget extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final String path;
   final Collection collection;
+
   const GalleryOverlayWidget(
     this.type,
     this.selectedFiles, {
@@ -118,6 +120,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
   StreamSubscription _userAuthEventSubscription;
   Function() _selectedFilesListener;
   final GlobalKey shareButtonKey = GlobalKey();
+
   @override
   void initState() {
     _selectedFilesListener = () {
@@ -228,7 +231,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     widget.selectedFiles.clearAll();
   }
 
-  Future<void> _createAlbum() async {
+  Future<void> _createCollectionAction(CollectionActionType type) async {
     Navigator.push(
       context,
       PageTransition(
@@ -236,6 +239,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         child: CreateCollectionPage(
           widget.selectedFiles,
           null,
+          actionType: type,
         ),
       ),
     );
@@ -263,22 +267,39 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     }
     // skip add button for incoming collection till this feature is implemented
     if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type != GalleryType.sharedCollection) {
-      String msg = "Add";
+        widget.type != GalleryType.sharedCollection &&
+        widget.type != GalleryType.hidden) {
+      String msg = "Add to album";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
       if (widget.type == GalleryType.localFolder) {
-        msg = "Upload";
+        msg = "Upload to album";
         iconData = Icons.cloud_upload_outlined;
       }
       actions.add(
         Tooltip(
-          message: msg,
+          message: "add",
           child: IconButton(
             color: Theme.of(context).colorScheme.iconColor,
             icon: Icon(iconData),
+            onPressed: () async {
+              await onActionSelected("add");
+            },
+          ),
+        ),
+      );
+    }
+
+    if (Configuration.instance.hasConfiguredAccount() &&
+        widget.type == GalleryType.hidden) {
+      actions.add(
+        Tooltip(
+          message: "Unhide",
+          child: IconButton(
+            color: Theme.of(context).colorScheme.iconColor,
+            icon: const Icon(Icons.visibility),
             onPressed: () {
-              _createAlbum();
+              _createCollectionAction(CollectionActionType.unHide);
             },
           ),
         ),
@@ -298,7 +319,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                   : CupertinoIcons.arrow_right,
             ),
             onPressed: () {
-              _moveFiles();
+              onActionSelected('move');
             },
           ),
         ),
@@ -319,6 +340,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     );
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive ||
+        widget.type == GalleryType.hidden ||
         widget.type == GalleryType.localFolder ||
         widget.type == GalleryType.searchResults) {
       actions.add(
@@ -371,25 +393,64 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (widget.type == GalleryType.homepage ||
         widget.type == GalleryType.archive) {
       final bool showArchive = widget.type == GalleryType.homepage;
-      actions.add(
-        Tooltip(
-          message: showArchive ? "Hide" : "Unhide",
-          child: IconButton(
-            color: Theme.of(context).colorScheme.iconColor,
-            icon: Icon(
-              showArchive ? Icons.visibility_off : Icons.visibility,
+      if (showArchive) {
+        actions.add(
+          Tooltip(
+            message: 'Archive',
+            child: IconButton(
+              color: Theme.of(context).colorScheme.iconColor,
+              icon: const Icon(
+                Icons.archive_outlined,
+              ),
+              onPressed: () {
+                onActionSelected('archive');
+              },
             ),
-            onPressed: () {
-              _handleVisibilityChangeRequest(
-                context,
-                showArchive ? visibilityArchive : visibilityVisible,
-              );
-            },
           ),
-        ),
-      );
+        );
+      } else {
+        actions.insert(
+          0,
+          Tooltip(
+            message: 'Unarchive',
+            child: IconButton(
+              color: Theme.of(context).colorScheme.iconColor,
+              icon: const Icon(
+                Icons.unarchive,
+              ),
+              onPressed: () {
+                onActionSelected('unarchive');
+              },
+            ),
+          ),
+        );
+      }
     }
+
     return actions;
+  }
+
+  Future<void> onActionSelected(String value) async {
+    debugPrint("Action Selected $value");
+    switch (value.toLowerCase()) {
+      case 'hide':
+        await _handleHideRequest(context);
+        break;
+      case 'add':
+        await _createCollectionAction(CollectionActionType.addFiles);
+        break;
+      case 'move':
+        await _moveFiles();
+        break;
+      case 'archive':
+        await _handleVisibilityChangeRequest(context, visibilityArchive);
+        break;
+      case 'unarchive':
+        await _handleVisibilityChangeRequest(context, visibilityVisible);
+        break;
+      default:
+        break;
+    }
   }
 
   void _addTrashAction(List<Widget> actions) {
@@ -453,6 +514,21 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       await showGenericErrorDialog(context);
     } finally {
       _clearSelectedFiles();
+    }
+  }
+
+  // note: Keeping this method here so that it can be used whenever we move to
+  // to bottom UI
+  Future<void> _handleHideRequest(BuildContext context) async {
+    try {
+      final hideResult = await CollectionsService.instance
+          .hideFiles(context, widget.selectedFiles.files.toList());
+      if (hideResult) {
+        _clearSelectedFiles();
+      }
+    } catch (e, s) {
+      _logger.severe("failed to update file visibility", e, s);
+      await showGenericErrorDialog(context);
     }
   }
 

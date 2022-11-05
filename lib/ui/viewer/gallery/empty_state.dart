@@ -16,6 +16,7 @@ class EmptyState extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Text(
           text,
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: Theme.of(context)
                 .colorScheme

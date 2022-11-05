@@ -21,6 +21,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
 import 'package:photos/models/file.dart';
@@ -50,6 +51,7 @@ class CollectionsService {
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
+  Collection cachedDefaultHiddenCollection;
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
@@ -77,6 +79,15 @@ class CollectionsService {
     });
   }
 
+  Configuration get config => _config;
+
+  Map<int, Collection> get collectionIDToCollections =>
+      _collectionIDToCollections;
+
+  FilesDB get filesDB => _filesDB;
+
+  // sync method fetches just sync the collections, not the individual files
+  // within the collection.
   Future<List<Collection>> sync() async {
     _logger.info("Syncing collections");
     final lastCollectionUpdationTime =
@@ -140,6 +151,22 @@ class CollectionsService {
     return _collectionIDToCollections.values
         .toList()
         .where((element) => element.isArchived())
+        .map((e) => e.id)
+        .toSet();
+  }
+
+  Set<int> getHiddenCollections() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isHidden())
+        .map((e) => e.id)
+        .toSet();
+  }
+
+  Set<int> collectionsHiddenFromTimeline() {
+    return _collectionIDToCollections.values
+        .toList()
+        .where((element) => element.isHidden() || element.isArchived())
         .map((e) => e.id)
         .toSet();
   }
@@ -276,6 +303,7 @@ class CollectionsService {
   }
 
   Uint8List _getDecryptedKey(Collection collection) {
+    debugPrint("Finding collection decryption key for ${collection.id}");
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
     if (collection.owner.id == _config.getUserID()) {
       if (_config.getKey() == null) {
@@ -798,17 +826,17 @@ class CollectionsService {
     List<File> files,
   ) {
     if (toCollectionID == fromCollectionID) {
-      throw AssertionError("can't move to same album");
+      throw AssertionError("Can't move to same album");
     }
     for (final file in files) {
       if (file.uploadedFileID == null) {
-        throw AssertionError("can only move uploaded memories");
+        throw AssertionError("Can only move uploaded memories");
       }
       if (file.collectionID != fromCollectionID) {
-        throw AssertionError("all memories should belong to the same album");
+        throw AssertionError("All memories should belong to the same album");
       }
       if (file.ownerID != Configuration.instance.getUserID()) {
-        throw AssertionError("can only move memories uploaded by you");
+        throw AssertionError("Can only move memories uploaded by you");
       }
     }
   }
@@ -832,11 +860,16 @@ class CollectionsService {
     RemoteSyncService.instance.sync(silently: true);
   }
 
-  Future<Collection> createAndCacheCollection(Collection collection) async {
+  Future<Collection> createAndCacheCollection(
+    Collection collection, {
+    CreateRequest createRequest,
+  }) async {
+    final dynamic payload =
+        createRequest != null ? createRequest.toJson() : collection.toMap();
     return _enteDio
         .post(
       "/collections",
-      data: collection.toMap(),
+      data: payload,
     )
         .then((response) {
       final collection = Collection.fromMap(response.data["collection"]);
