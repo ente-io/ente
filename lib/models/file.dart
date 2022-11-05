@@ -9,6 +9,7 @@ import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/utils/date_time_util.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/exif_util.dart';
 // ignore: import_of_legacy_library_into_null_safe
@@ -74,7 +75,7 @@ class File extends EnteFile {
     file.location = Location(asset.latitude, asset.longitude);
     file.fileType = _fileTypeFromAsset(asset);
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
-    if (file.creationTime == null || (file.creationTime! <= 31580904000000)) {
+    if (file.creationTime == null || (file.creationTime! <= jan011991Time)) {
       try {
         final parsedDateTime =
             parseDateFromFileName(basenameWithoutExtension(file.title ?? ""));
@@ -279,25 +280,5 @@ class File extends EnteFile {
   String cacheKey() {
     // todo: Neeraj: 19thJuly'22: evaluate and add fileHash as the key?
     return localID ?? uploadedFileID?.toString() ?? generatedID.toString();
-  }
-
-  static DateTime? parseDateFromFileName(String fileName) {
-    if (fileName.startsWith('IMG-') || fileName.startsWith('VID-')) {
-      // Whatsapp media files
-      return DateTime.tryParse(fileName.split('-')[1]);
-    } else if (fileName.startsWith("Screenshot_")) {
-      // Screenshots on droid
-      return DateTime.tryParse(
-        (fileName).replaceAll('Screenshot_', '').replaceAll('-', 'T'),
-      );
-    } else {
-      return DateTime.tryParse(
-        (fileName)
-            .replaceAll("IMG_", "")
-            .replaceAll("VID_", "")
-            .replaceAll("DCIM_", "")
-            .replaceAll("_", " "),
-      );
-    }
   }
 }
