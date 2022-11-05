@@ -21,7 +21,11 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   @override
   void initState() {
     _focusNode.addListener(() {
-      _focusNode.hasFocus ? _textController.text = widget.file.caption : null;
+      final caption = widget.file.caption;
+      if (_focusNode.hasFocus && caption != null) {
+        _textController.text = caption;
+        editedCaption = caption;
+      }
     });
     super.initState();
   }
@@ -56,7 +60,8 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         focusedBorder: InputBorder.none,
         filled: true,
         fillColor: colorScheme.fillFaint,
-        hintText: caption.isEmpty ? "Add a caption" : caption,
+        hintText:
+            caption == null || caption.isEmpty ? "Add a caption" : caption,
         hintStyle: getEnteTextTheme(context)
             .small
             .copyWith(color: colorScheme.textMuted),
