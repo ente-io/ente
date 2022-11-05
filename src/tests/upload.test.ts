@@ -17,6 +17,7 @@ export async function testUpload() {
         await totalCollectionCountCheck(expectedState);
         await collectionWiseFileCount(expectedState);
         await thumbnailGenerationFailedFilesCheck(expectedState);
+        await exifDataParsingCheck(expectedState);
     } catch (e) {
         console.log(e);
     }
@@ -115,4 +116,39 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
         }
     );
     console.log('thumbnail generation failure test passed ✅');
+}
+
+async function exifDataParsingCheck(expectedState) {
+    const files = await getLocalFiles();
+    Object.entries(expectedState['exif']).map(([fileName, exifValues]) => {
+        const matchingFile = files.find(
+            (file) => file.metadata.title === fileName
+        );
+        if (!matchingFile) {
+            throw Error(`exifDataParsingCheck failed , ${fileName} missing`);
+        }
+        if (
+            exifValues['creation_time'] &&
+            exifValues['creation_time'] !== matchingFile.metadata.creationTime
+        ) {
+            throw Error(`exifDataParsingCheck failed ❌ , 
+                            for ${fileName}
+                            expected: ${exifValues['creation_time']} got: ${matchingFile.metadata.creationTime}`);
+        }
+        if (
+            exifValues['location'] &&
+            (exifValues['location']['latitude'] !==
+                matchingFile.metadata.latitude ||
+                exifValues['location']['longitude'] !==
+                    matchingFile.metadata.longitude)
+        ) {
+            throw Error(`exifDataParsingCheck failed ❌  , 
+                            for ${fileName}
+                            expected: ${JSON.stringify(exifValues['location'])} 
+                            got: [${matchingFile.metadata.latitude},${
+                matchingFile.metadata.latitude
+            }]`);
+        }
+    });
+    console.log('exif data parsing check passed ✅');
 }
