@@ -47,9 +47,12 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     final textTheme = getEnteTextTheme(context);
     final caption = widget.file.caption;
     return TextField(
-      onEditingComplete: () {
+      onEditingComplete: () async {
         if (editedCaption != null) {
-          editFileCaption(context, widget.file, editedCaption);
+          await editFileCaption(context, widget.file, editedCaption);
+          if (mounted) {
+            setState(() {});
+          }
         }
         _focusNode.unfocus();
       },
@@ -65,8 +68,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         focusedBorder: InputBorder.none,
         filled: true,
         fillColor: colorScheme.fillFaint,
-        hintText:
-            caption == null || caption.isEmpty ? "Add a caption" : caption,
+        hintText: caption == null || caption.isEmpty
+            ? "Add a description..."
+            : caption,
         hintStyle: getEnteTextTheme(context)
             .small
             .copyWith(color: colorScheme.textMuted),
