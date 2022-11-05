@@ -99,7 +99,6 @@ import useFileInput from 'hooks/useFileInput';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
-import { testUpload } from 'tests/upload.test';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -218,7 +217,6 @@ export default function Gallery() {
         });
 
     useEffect(() => {
-        testUpload();
         appContext.showNavBar(true);
         const key = getKey(SESSION_KEYS.ENCRYPTION_KEY);
         if (!key) {

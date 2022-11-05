@@ -9,6 +9,7 @@ import { User } from 'types/user';
 import { getSentryUserID } from 'utils/user';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
+import { testUpload } from 'tests/upload.test';
 
 export default function DebugLogs() {
     const appContext = useContext(AppContext);
@@ -43,11 +44,14 @@ export default function DebugLogs() {
     };
 
     return (
-        <SidebarButton
-            onClick={confirmLogDownload}
-            typographyVariant="caption"
-            sx={{ fontWeight: 'normal', color: 'text.secondary' }}>
-            {constants.DOWNLOAD_UPLOAD_LOGS}
-        </SidebarButton>
+        <>
+            <SidebarButton onClick={testUpload}>test-upload</SidebarButton>
+            <SidebarButton
+                onClick={confirmLogDownload}
+                typographyVariant="caption"
+                sx={{ fontWeight: 'normal', color: 'text.secondary' }}>
+                {constants.DOWNLOAD_UPLOAD_LOGS}
+            </SidebarButton>
+        </>
     );
 }
