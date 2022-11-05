@@ -17,6 +17,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
   String? editedCaption;
+  String? hintText = "Add a description...";
 
   @override
   void initState() {
@@ -28,6 +29,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       }
     });
     editedCaption = widget.file.caption;
+    if (editedCaption != null && editedCaption!.isNotEmpty) {
+      hintText = editedCaption;
+    }
     super.initState();
   }
 
@@ -45,7 +49,6 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final caption = widget.file.caption;
     return TextField(
       onEditingComplete: () async {
         if (editedCaption != null) {
@@ -68,9 +71,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         focusedBorder: InputBorder.none,
         filled: true,
         fillColor: colorScheme.fillFaint,
-        hintText: caption == null || caption.isEmpty
-            ? "Add a description..."
-            : caption,
+        hintText: hintText,
         hintStyle: getEnteTextTheme(context)
             .small
             .copyWith(color: colorScheme.textMuted),
@@ -83,6 +84,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       keyboardType: TextInputType.text,
       onChanged: (value) {
         setState(() {
+          hintText = "Add a description...";
           currentLength = value.length;
           editedCaption = value;
         });
