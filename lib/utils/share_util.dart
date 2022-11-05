@@ -10,6 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
 import 'package:photos/utils/file_util.dart';
@@ -111,7 +112,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
   return localFiles;
 }
 
-DateTime parseDateFromFileName(String fileName) {
+DateTime parseDateFromFileNam1e(String fileName) {
   if (fileName.startsWith('IMG-') || fileName.startsWith('VID-')) {
     // Whatsapp media files
     return DateTime.tryParse(fileName.split('-')[1]);
