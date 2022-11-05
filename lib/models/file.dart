@@ -233,6 +233,14 @@ class File extends EnteFile {
     return title ?? '';
   }
 
+  String get caption {
+    if (pubMagicMetadata != null && pubMagicMetadata!.caption != null) {
+      return pubMagicMetadata!.caption!;
+    } else {
+      return '';
+    }
+  }
+
   // returns true if the file isn't available in the user's gallery
   bool get isRemoteFile {
     return localID == null && uploadedFileID != null;

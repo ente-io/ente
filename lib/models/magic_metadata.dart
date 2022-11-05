@@ -33,8 +33,9 @@ class MagicMetadata {
 class PubMagicMetadata {
   int? editedTime;
   String? editedName;
+  String? caption;
 
-  PubMagicMetadata({this.editedTime, this.editedName});
+  PubMagicMetadata({this.editedTime, this.editedName, this.caption});
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
       PubMagicMetadata.fromJson(jsonDecode(encodedJson));
@@ -47,6 +48,7 @@ class PubMagicMetadata {
     return PubMagicMetadata(
       editedTime: map[pubMagicKeyEditedTime],
       editedName: map[pubMagicKeyEditedName],
+      caption: map[pubMagicKeyCaption],
     );
   }
 }

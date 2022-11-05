@@ -4,9 +4,8 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/magic_util.dart';
 
 class FileCaptionWidget extends StatefulWidget {
-  final String hintText;
   final File file;
-  const FileCaptionWidget({required this.file, this.hintText = '', super.key});
+  const FileCaptionWidget({required this.file, super.key});
 
   @override
   State<FileCaptionWidget> createState() => _FileCaptionWidgetState();
@@ -17,7 +16,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   int currentLength = 0;
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
-  String caption = "";
+  String editedCaption = "";
 
   @override
   void dispose() {
@@ -30,6 +29,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    final caption = widget.file.caption;
     return TextField(
       onEditingComplete: () {
         editCaption();
@@ -47,7 +47,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         focusedBorder: InputBorder.none,
         filled: true,
         fillColor: colorScheme.fillFaint,
-        hintText: widget.hintText,
+        hintText: caption.isEmpty ? "Add a caption" : caption,
         hintStyle: getEnteTextTheme(context)
             .small
             .copyWith(color: colorScheme.textMuted),
@@ -61,15 +61,15 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       onChanged: (value) {
         setState(() {
           currentLength = value.length;
-          caption = value;
+          editedCaption = value;
         });
       },
     );
   }
 
   void editCaption({bool fromDispose = false}) {
-    if (caption.isNotEmpty) {
-      editFileCaption(fromDispose ? null : context, widget.file, caption);
+    if (editedCaption.isNotEmpty) {
+      editFileCaption(fromDispose ? null : context, widget.file, editedCaption);
     }
   }
 }
