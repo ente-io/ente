@@ -55,6 +55,7 @@ analyzer:
     prefer_const_constructors: warning
     prefer_const_declarations: warning
     prefer_const_constructors_in_immutables: warning
+    prefer_final_locals: warning
     unnecessary_const: error
     cancel_subscriptions: error
 

@@ -505,7 +505,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     await dialog.show();
     try {
       final io.File fileToSave = await getFile(file);
-      var m = MediaExtension();
+      final m = MediaExtension();
       final bool result = await m.setAs("file://${fileToSave.path}", "image/*");
       if (result == false) {
         showShortToast(context, "Something went wrong");
