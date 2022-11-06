@@ -34,7 +34,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
     return Hero(
       tag: "search_icon",
       child: IconButtonWidget(
-        isPrimary: true,
+        iconButtonType: IconButtonType.primary,
         icon: Icons.search,
         onTap: () {
           Navigator.push(
@@ -195,6 +195,9 @@ class _SearchWidgetState extends State<SearchWidget> {
       final fileTypeSearchResults =
           await _searchService.getFileTypeResults(query);
       allResults.addAll(fileTypeSearchResults);
+
+      final fileCaptionResults = await _searchService.getCaptionResults(query);
+      allResults.addAll(fileCaptionResults);
 
       final fileExtnResult =
           await _searchService.getFileExtensionResults(query);

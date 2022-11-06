@@ -3,6 +3,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 
 class TitleBarWidget extends StatelessWidget {
+  final IconButtonWidget? leading;
   final String? title;
   final String? caption;
   final Widget? flexibleSpaceTitle;
@@ -10,7 +11,9 @@ class TitleBarWidget extends StatelessWidget {
   final List<Widget>? actionIcons;
   final bool isTitleH2WithoutLeading;
   final bool isFlexibleSpaceDisabled;
+  final bool isOnTopOfScreen;
   const TitleBarWidget({
+    this.leading,
     this.title,
     this.caption,
     this.flexibleSpaceTitle,
@@ -18,6 +21,7 @@ class TitleBarWidget extends StatelessWidget {
     this.actionIcons,
     this.isTitleH2WithoutLeading = false,
     this.isFlexibleSpaceDisabled = false,
+    this.isOnTopOfScreen = true,
     super.key,
   });
 
@@ -27,13 +31,14 @@ class TitleBarWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorTheme = getEnteColorScheme(context);
     return SliverAppBar(
+      primary: isOnTopOfScreen ? true : false,
       toolbarHeight: toolbarHeight,
       leadingWidth: 48,
       automaticallyImplyLeading: false,
       pinned: true,
-      expandedHeight: 102,
+      expandedHeight: isFlexibleSpaceDisabled ? toolbarHeight : 102,
       centerTitle: false,
-      titleSpacing: 0,
+      titleSpacing: 4,
       title: Padding(
         padding: EdgeInsets.only(left: isTitleH2WithoutLeading ? 16 : 0),
         child: Column(
@@ -67,13 +72,14 @@ class TitleBarWidget extends StatelessWidget {
       ],
       leading: isTitleH2WithoutLeading
           ? null
-          : IconButtonWidget(
-              icon: Icons.arrow_back_outlined,
-              isPrimary: true,
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
+          : leading ??
+              IconButtonWidget(
+                icon: Icons.arrow_back_outlined,
+                iconButtonType: IconButtonType.primary,
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
       flexibleSpace: isFlexibleSpaceDisabled
           ? null
           : FlexibleSpaceBar(

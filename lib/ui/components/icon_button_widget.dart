@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 
+enum IconButtonType {
+  primary,
+  secondary,
+  rounded,
+}
+
 class IconButtonWidget extends StatefulWidget {
-  final bool isPrimary;
-  final bool isSecondary;
-  final bool isRounded;
+  final IconButtonType iconButtonType;
   final IconData icon;
   final bool disableGestureDetector;
   final VoidCallback? onTap;
@@ -14,9 +18,7 @@ class IconButtonWidget extends StatefulWidget {
   final Color? iconColor;
   const IconButtonWidget({
     required this.icon,
-    this.isPrimary = false,
-    this.isSecondary = false,
-    this.isRounded = false,
+    required this.iconButtonType,
     this.disableGestureDetector = false,
     this.onTap,
     this.defaultColor,
@@ -41,13 +43,12 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.isPrimary && !widget.isRounded && !widget.isSecondary) {
-      return const SizedBox.shrink();
-    }
     final colorTheme = getEnteColorScheme(context);
     iconStateColor ??
         (iconStateColor = widget.defaultColor ??
-            (widget.isRounded ? colorTheme.fillFaint : null));
+            (widget.iconButtonType == IconButtonType.rounded
+                ? colorTheme.fillFaint
+                : null));
     return widget.disableGestureDetector
         ? _iconButton(colorTheme)
         : GestureDetector(
@@ -72,7 +73,7 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
         child: Icon(
           widget.icon,
           color: widget.iconColor ??
-              (widget.isSecondary
+              (widget.iconButtonType == IconButtonType.secondary
                   ? colorTheme.strokeMuted
                   : colorTheme.strokeBase),
           size: 24,
@@ -85,7 +86,9 @@ class _IconButtonWidgetState extends State<IconButtonWidget> {
     final colorTheme = getEnteColorScheme(context);
     setState(() {
       iconStateColor = widget.pressedColor ??
-          (widget.isRounded ? colorTheme.fillMuted : colorTheme.fillFaint);
+          (widget.iconButtonType == IconButtonType.rounded
+              ? colorTheme.fillMuted
+              : colorTheme.fillFaint);
     });
   }
 

@@ -125,6 +125,8 @@ class SearchResultWidget extends StatelessWidget {
         return "Type";
       case ResultType.fileExtension:
         return "File Extension";
+      case ResultType.fileCaption:
+        return "Description";
       default:
         return type.name.toUpperCase();
     }

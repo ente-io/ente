@@ -29,7 +29,7 @@ class BackupSettingsScreen extends StatelessWidget {
             actionIcons: [
               IconButtonWidget(
                 icon: Icons.close_outlined,
-                isSecondary: true,
+                iconButtonType: IconButtonType.secondary,
                 onTap: () {
                   Navigator.pop(context);
                   Navigator.pop(context);

@@ -20,7 +20,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButtonWidget(
-          isPrimary: true,
+          iconButtonType: IconButtonType.primary,
           icon: Icons.menu_outlined,
           onTap: () {
             Scaffold.of(context).openDrawer();

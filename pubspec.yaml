@@ -79,6 +79,7 @@ dependencies:
   lottie: ^1.2.2
   media_extension:
     git: "https://github.com/ente-io/media_extension.git"
+  modal_bottom_sheet: ^2.1.2
   motionphoto:
     git: "https://github.com/ente-io/motionphoto.git"
   move_to_background: ^1.0.2
@@ -91,7 +92,7 @@ dependencies:
   path: #dart
   path_provider: ^2.0.1
   pedantic: ^1.9.2
-  photo_manager: ^2.4.1
+  photo_manager: ^2.5.0
   photo_view: ^0.14.0
   pinput: ^1.2.2
   provider: ^6.0.0

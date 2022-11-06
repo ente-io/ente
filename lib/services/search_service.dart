@@ -209,6 +209,30 @@ class SearchService {
     return searchResults;
   }
 
+  Future<List<GenericSearchResult>> getCaptionResults(
+    String query,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    if (query.isEmpty) {
+      return searchResults;
+    }
+    final RegExp pattern = RegExp(query, caseSensitive: false);
+    final List<File> allFiles = await _getAllFiles();
+    final matchedFiles = allFiles
+        .where((e) => e.caption != null && pattern.hasMatch(e.caption))
+        .toList();
+    if (matchedFiles.isNotEmpty) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.fileCaption,
+          query,
+          matchedFiles,
+        ),
+      );
+    }
+    return searchResults;
+  }
+
   Future<List<GenericSearchResult>> getFileExtensionResults(
     String query,
   ) async {
