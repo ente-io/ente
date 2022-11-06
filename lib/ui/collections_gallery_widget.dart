@@ -22,8 +22,7 @@ import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
-
-import '../utils/local_settings.dart';
+import 'package:photos/utils/local_settings.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
   const CollectionsGalleryWidget({Key key}) : super(key: key);
