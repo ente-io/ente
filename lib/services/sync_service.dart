@@ -60,8 +60,8 @@ class SyncService {
 
   static final SyncService instance = SyncService._privateConstructor();
 
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future<void> init(SharedPreferences preferences) async {
+    _prefs = preferences;
     if (Platform.isIOS) {
       _logger.info("Clearing file cache");
       await PhotoManager.clearFileCache();

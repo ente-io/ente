@@ -70,8 +70,8 @@ class FileUploader {
   }
   static FileUploader instance = FileUploader._privateConstructor();
 
-  Future<void> init(bool isBackground) async {
-    _prefs = await SharedPreferences.getInstance();
+  Future<void> init(SharedPreferences preferences, bool isBackground) async {
+    _prefs = preferences;
     _isBackground = isBackground;
     _processType =
         isBackground ? ProcessType.background : ProcessType.foreground;

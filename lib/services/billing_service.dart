@@ -38,7 +38,7 @@ class BillingService {
 
   Future<BillingPlans> _future;
 
-  Future<void> init() async {
+  void init() {
     // if (Platform.isIOS && kDebugMode) {
     //   await FlutterInappPurchase.instance.initConnection;
     //   FlutterInappPurchase.instance.clearTransactionIOS();

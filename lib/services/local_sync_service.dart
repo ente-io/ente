@@ -47,8 +47,8 @@ class LocalSyncService {
   static final LocalSyncService instance =
       LocalSyncService._privateConstructor();
 
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future<void> init(SharedPreferences preferences) async {
+    _prefs = preferences;
     if (!AppLifecycleService.instance.isForeground) {
       await PhotoManager.setIgnorePermissionCheck(true);
     }
