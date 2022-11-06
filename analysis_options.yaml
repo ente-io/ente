@@ -40,7 +40,7 @@ analyzer:
     curly_braces_in_flow_control_structures: error
     directives_ordering: error
     require_trailing_commas: warning
-    always_use_package_imports: error
+    always_use_package_imports: warning
     prefer_final_fields: error
     unused_import: error
     camel_case_types: error
