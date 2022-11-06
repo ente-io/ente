@@ -82,7 +82,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
           ),
         ),
         filled: true,
-        fillColor: colorScheme.fillMuted,
+        fillColor: colorScheme.fillFaint,
         hintText: hintText,
         hintStyle: getEnteTextTheme(context)
             .small
