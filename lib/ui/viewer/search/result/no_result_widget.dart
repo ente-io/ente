@@ -29,14 +29,13 @@ class NoResultWidget extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                child: const Text(
-                  "No results found",
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
+            Container(
+              margin: const EdgeInsets.only(top: 8),
+              child: const Text(
+                "No results found",
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  fontSize: 16,
                 ),
               ),
             ),
@@ -61,6 +60,7 @@ class NoResultWidget extends StatelessWidget {
 \u2022 Types of files (e.g. "Videos", ".gif")
 \u2022 Years and months (e.g. "2022", "January")
 \u2022 Holidays (e.g. "Christmas")
+\u2022 Photo descriptions (e.g. “#fun”)
 ''',
                 style: TextStyle(
                   fontSize: 14,
