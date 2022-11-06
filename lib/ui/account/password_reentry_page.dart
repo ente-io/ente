@@ -1,5 +1,7 @@
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -128,13 +130,15 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           }
           await dialog.hide();
           Bus.instance.fire(SubscriptionPurchasedEvent());
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-              builder: (BuildContext context) {
-                return const HomeWidget();
-              },
+          unawaited(
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (BuildContext context) {
+                  return const HomeWidget();
+                },
+              ),
+              (route) => false,
             ),
-            (route) => false,
           );
         },
       ),

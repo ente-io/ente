@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -17,10 +19,12 @@ class PreserveFooterWidget extends StatelessWidget {
           if (LocalSyncService.instance.hasGrantedLimitedPermissions()) {
             await PhotoManager.presentLimited();
           } else {
-            routeToPage(
-              context,
-              const BackupFolderSelectionPage(
-                buttonText: "Preserve",
+            unawaited(
+              routeToPage(
+                context,
+                const BackupFolderSelectionPage(
+                  buttonText: "Preserve",
+                ),
               ),
             );
           }

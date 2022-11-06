@@ -188,7 +188,9 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 Future<void> _scheduleHeartBeat(
-    SharedPreferences prefs, bool isBackground) async {
+  SharedPreferences prefs,
+  bool isBackground,
+) async {
   await prefs.setInt(
     isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
     DateTime.now().microsecondsSinceEpoch,

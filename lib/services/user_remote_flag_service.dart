@@ -30,13 +30,13 @@ class UserRemoteFlagService {
   bool shouldShowRecoveryVerification() {
     if (!_prefs.containsKey(needRecoveryKeyVerification)) {
       // fetch the status from remote
-      unawaited(_refreshRecoveryVerificationFlag());
+      _refreshRecoveryVerificationFlag().ignore();
       return false;
     } else {
       final bool shouldShow = _prefs.getBool(needRecoveryKeyVerification)!;
       if (shouldShow) {
         // refresh the status to check if user marked it as done on another device
-        unawaited(_refreshRecoveryVerificationFlag());
+        _refreshRecoveryVerificationFlag().ignore();
       }
       return shouldShow;
     }

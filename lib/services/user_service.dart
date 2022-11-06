@@ -531,7 +531,7 @@ class UserService {
       );
     } catch (e) {
       await dialog.hide();
-      showErrorDialog(
+      await showErrorDialog(
         context,
         "Incorrect recovery key",
         "The recovery key you entered is incorrect",

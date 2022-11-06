@@ -1,5 +1,7 @@
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/services/local_authentication_service.dart';
@@ -49,16 +51,18 @@ class AccountSectionWidget extends StatelessWidget {
               try {
                 recoveryKey = await _getOrCreateRecoveryKey(context);
               } catch (e) {
-                showGenericErrorDialog(context);
+                await showGenericErrorDialog(context);
                 return;
               }
-              routeToPage(
-                context,
-                RecoveryKeyPage(
-                  recoveryKey,
-                  "OK",
-                  showAppBar: true,
-                  onDone: () {},
+              unawaited(
+                routeToPage(
+                  context,
+                  RecoveryKeyPage(
+                    recoveryKey,
+                    "OK",
+                    showAppBar: true,
+                    onDone: () {},
+                  ),
                 ),
               );
             }

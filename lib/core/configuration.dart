@@ -537,7 +537,7 @@ class Configuration {
   Future<void> setBackupOverMobileData(bool value) async {
     await _preferences.setBool(keyShouldBackupOverMobileData, value);
     if (value) {
-      SyncService.instance.sync();
+      SyncService.instance.sync().ignore();
     }
   }
 
@@ -562,7 +562,7 @@ class Configuration {
   Future<void> setShouldBackupVideos(bool value) async {
     await _preferences.setBool(keyShouldBackupVideos, value);
     if (value) {
-      SyncService.instance.sync();
+      SyncService.instance.sync().ignore();
     } else {
       SyncService.instance.onVideoBackupPaused();
     }

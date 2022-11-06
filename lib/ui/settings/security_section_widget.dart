@@ -265,7 +265,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ],
       );
 
-      showDialog(
+      await showDialog(
         context: context,
         builder: (BuildContext context) {
           return alert;

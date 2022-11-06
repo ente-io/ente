@@ -162,7 +162,8 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   if (cachedThumbnail.existsSync()) {
     await cachedThumbnail.delete();
   }
-  cachedThumbnail.writeAsBytes(data);
+  // data is already cached in-memory, no need to await on dist write
+  unawaited(cachedThumbnail.writeAsBytes(data));
   if (_map.containsKey(file.uploadedFileID)) {
     try {
       item.completer.complete(data);
