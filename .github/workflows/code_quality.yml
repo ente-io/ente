@@ -24,6 +24,6 @@ jobs:
         run: flutter pub get
 
       - name: Run Linter
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
 #      - name: Run Test :sed:
 #        run: flutter test
