@@ -9,7 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
+      - uses: actions/cache@v2
+        with:
+          path: ${{ runner.tool_cache }}/flutter
+          key: flutter-3.0.0-stable
       # Setup the flutter environment.
       - uses: subosito/flutter-action@v2.3.0
         with:
