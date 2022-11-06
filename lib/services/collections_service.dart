@@ -62,8 +62,8 @@ class CollectionsService {
   static final CollectionsService instance =
       CollectionsService._privateConstructor();
 
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  Future<void> init(SharedPreferences preferences) async {
+    _prefs = preferences;
     final collections = await _db.getAllCollections();
 
     for (final collection in collections) {

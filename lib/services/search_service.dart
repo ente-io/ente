@@ -32,7 +32,7 @@ class SearchService {
 
   static final SearchService instance = SearchService._privateConstructor();
 
-  Future<void> init() async {
+  void init() {
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;

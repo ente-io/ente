@@ -32,8 +32,8 @@ class TrashSyncService {
       TrashSyncService._privateConstructor();
   final _enteDio = Network.instance.enteDio;
 
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  void init(SharedPreferences preferences) {
+    _prefs = preferences;
   }
 
   Future<void> syncTrash() async {

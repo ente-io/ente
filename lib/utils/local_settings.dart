@@ -13,8 +13,8 @@ class LocalSettings {
   static const kCollectionSortPref = "collection_sort_pref";
   late SharedPreferences _prefs;
 
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  void init(SharedPreferences preferences) {
+    _prefs = preferences;
   }
 
   AlbumSortKey albumSortKey() {

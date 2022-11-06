@@ -28,8 +28,8 @@ class LocalFileUpdateService {
     _fileUpdationDB = FileUpdationDB.instance;
   }
 
-  Future<void> init() async {
-    _prefs = await SharedPreferences.getInstance();
+  void init(SharedPreferences preferences) async {
+    _prefs = preferences;
   }
 
   static LocalFileUpdateService instance =

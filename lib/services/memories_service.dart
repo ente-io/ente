@@ -25,7 +25,7 @@ class MemoriesService extends ChangeNotifier {
 
   static final MemoriesService instance = MemoriesService._privateConstructor();
 
-  Future<void> init() async {
+  void init() {
     addListener(() {
       _cachedMemories = null;
     });
