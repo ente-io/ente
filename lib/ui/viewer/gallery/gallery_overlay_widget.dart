@@ -246,14 +246,16 @@ class _OverlayWidgetState extends State<OverlayWidget> {
   }
 
   Future<void> _moveFiles() async {
-    Navigator.push(
-      context,
-      PageTransition(
-        type: PageTransitionType.bottomToTop,
-        child: CreateCollectionPage(
-          widget.selectedFiles,
-          null,
-          actionType: CollectionActionType.moveFiles,
+    unawaited(
+      Navigator.push(
+        context,
+        PageTransition(
+          type: PageTransitionType.bottomToTop,
+          child: CreateCollectionPage(
+            widget.selectedFiles,
+            null,
+            actionType: CollectionActionType.moveFiles,
+          ),
         ),
       ),
     );

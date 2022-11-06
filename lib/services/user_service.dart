@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -40,6 +41,7 @@ class UserService {
   ValueNotifier<String> emailValueNotifier;
 
   UserService._privateConstructor();
+
   static final UserService instance = UserService._privateConstructor();
 
   Future<void> init() async {
@@ -62,32 +64,40 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (BuildContext context) {
-              return OTTVerificationPage(
-                email,
-                isChangeEmail: isChangeEmail,
-                isCreateAccountScreen: isCreateAccountScreen,
-              );
-            },
+        unawaited(
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return OTTVerificationPage(
+                  email,
+                  isChangeEmail: isChangeEmail,
+                  isCreateAccountScreen: isCreateAccountScreen,
+                );
+              },
+            ),
           ),
         );
         return;
       }
-      showGenericErrorDialog(context);
+      unawaited(showGenericErrorDialog(context));
     } on DioError catch (e) {
       await dialog.hide();
       _logger.info(e);
       if (e.response != null && e.response.statusCode == 403) {
-        showErrorDialog(context, "Oops", "This email is already in use");
+        unawaited(
+          showErrorDialog(
+            context,
+            "Oops",
+            "This email is already in use",
+          ),
+        );
       } else {
-        showGenericErrorDialog(context);
+        unawaited(showGenericErrorDialog(context));
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      showGenericErrorDialog(context);
+      unawaited(showGenericErrorDialog(context));
     }
   }
 
@@ -595,11 +605,13 @@ class UserService {
     try {
       final response = await _enteDio.post("/users/two-factor/setup");
       await dialog.hide();
-      routeToPage(
-        context,
-        TwoFactorSetupPage(
-          response.data["secretCode"],
-          response.data["qrCode"],
+      unawaited(
+        routeToPage(
+          context,
+          TwoFactorSetupPage(
+            response.data["secretCode"],
+            response.data["qrCode"],
+          ),
         ),
       );
     } catch (e) {
@@ -672,11 +684,16 @@ class UserService {
       );
       Bus.instance.fire(TwoFactorStatusChangeEvent(false));
       await dialog.hide();
-      showToast(context, "Two-factor authentication has been disabled");
+      unawaited(
+        showToast(
+          context,
+          "Two-factor authentication has been disabled",
+        ),
+      );
     } catch (e) {
       await dialog.hide();
       _logger.severe("Failed to disabled 2FA", e);
-      showErrorDialog(
+      await showErrorDialog(
         context,
         "Something went wrong",
         "Please contact support if the problem persists",
