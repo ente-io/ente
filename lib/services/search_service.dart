@@ -32,20 +32,14 @@ class SearchService {
   static final SearchService instance = SearchService._privateConstructor();
 
   Future<void> init() async {
-    // Intention of delay is to give more CPU cycles to other tasks
-    // 8 is just a magic number
-    Future.delayed(const Duration(seconds: 8), () async {
-      /* In case home screen loads before 8 seconds and user starts search,
-       future will not be null.So here getAllFiles won't run again in that case. */
-      if (_cachedFilesFuture == null) {
-        _getAllFiles();
-      }
-    });
-
     Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
       // only invalidate, let the load happen on demand
       _cachedFilesFuture = null;
     });
+  }
+
+  Set<int> ignoreCollections() {
+    return CollectionsService.instance.getHiddenCollections();
   }
 
   Future<List<File>> _getAllFiles() async {
@@ -53,7 +47,8 @@ class SearchService {
       return _cachedFilesFuture;
     }
     _logger.fine("Reading all files from db");
-    _cachedFilesFuture = FilesDB.instance.getAllFilesFromDB();
+    _cachedFilesFuture =
+        FilesDB.instance.getAllFilesFromDB(ignoreCollections());
     return _cachedFilesFuture;
   }
 
@@ -133,7 +128,11 @@ class SearchService {
       if (collectionSearchResults.length >= _maximumResultsLimit) {
         break;
       }
-      if (c.collection.name.toLowerCase().contains(query.toLowerCase())) {
+
+      if (!c.collection.isHidden() &&
+          c.collection.name.toLowerCase().contains(
+                query.toLowerCase(),
+              )) {
         collectionSearchResults.add(AlbumSearchResult(c));
       }
     }
@@ -172,7 +171,7 @@ class SearchService {
         final matchedFiles =
             await FilesDB.instance.getFilesCreatedWithinDurations(
           _getDurationsForCalendarDateInEveryYear(holiday.day, holiday.month),
-          null,
+          ignoreCollections(),
           order: 'DESC',
         );
         if (matchedFiles.isNotEmpty) {
@@ -205,6 +204,30 @@ class SearchService {
           );
         }
       }
+    }
+    return searchResults;
+  }
+
+  Future<List<GenericSearchResult>> getCaptionResults(
+    String query,
+  ) async {
+    final List<GenericSearchResult> searchResults = [];
+    if (query.isEmpty) {
+      return searchResults;
+    }
+    final RegExp pattern = RegExp(query, caseSensitive: false);
+    final List<File> allFiles = await _getAllFiles();
+    final matchedFiles = allFiles
+        .where((e) => e.caption != null && pattern.hasMatch(e.caption))
+        .toList();
+    if (matchedFiles.isNotEmpty) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.fileCaption,
+          query,
+          matchedFiles,
+        ),
+      );
     }
     return searchResults;
   }
@@ -248,7 +271,7 @@ class SearchService {
       final matchedFiles =
           await FilesDB.instance.getFilesCreatedWithinDurations(
         _getDurationsOfMonthInEveryYear(month.monthNumber),
-        null,
+        ignoreCollections(),
         order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
@@ -277,7 +300,7 @@ class SearchService {
       final matchedFiles =
           await FilesDB.instance.getFilesCreatedWithinDurations(
         _getDurationsForCalendarDateInEveryYear(day, month, year: year),
-        null,
+        ignoreCollections(),
         order: 'DESC',
       );
       if (matchedFiles.isNotEmpty) {
@@ -305,7 +328,7 @@ class SearchService {
   Future<List<File>> _getFilesInYear(List<int> durationOfYear) async {
     return await FilesDB.instance.getFilesCreatedWithinDurations(
       [durationOfYear],
-      null,
+      ignoreCollections(),
       order: "DESC",
     );
   }

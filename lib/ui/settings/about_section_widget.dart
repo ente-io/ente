@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
@@ -47,6 +48,7 @@ class AboutSectionWidget extends StatelessWidget {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Source code",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -61,6 +63,7 @@ class AboutSectionWidget extends StatelessWidget {
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Check for updates",
                     ),
+                    pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingIcon: Icons.chevron_right_outlined,
                     trailingIconIsMuted: true,
                     onTap: () async {
@@ -111,6 +114,7 @@ class AboutMenuItemWidget extends StatelessWidget {
       captionedTextWidget: CaptionedTextWidget(
         title: title,
       ),
+      pressedColor: getEnteColorScheme(context).fillFaint,
       trailingIcon: Icons.chevron_right_outlined,
       trailingIconIsMuted: true,
       onTap: () async {

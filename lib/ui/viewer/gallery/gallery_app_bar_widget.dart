@@ -164,7 +164,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         Tooltip(
           message: "Share",
           child: IconButton(
-            icon: Icon(Icons.adaptive.share),
+            icon: const Icon(Icons.people_outlined),
             onPressed: () async {
               final bool showHiddenWarning =
                   await _shouldShowHiddenFilesWarning(widget.collection);
@@ -212,11 +212,11 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           value: 2,
           child: Row(
             children: [
-              Icon(isArchived ? Icons.visibility : Icons.visibility_off),
+              Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
               const Padding(
                 padding: EdgeInsets.all(8),
               ),
-              Text(isArchived ? "Unhide album" : "Hide album"),
+              Text(isArchived ? "Unarchive album" : "Archive album"),
             ],
           ),
         ),
@@ -255,33 +255,34 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         ),
       );
     }
-
-    actions.add(
-      PopupMenuButton(
-        itemBuilder: (context) {
-          return items;
-        },
-        onSelected: (value) async {
-          if (value == 1) {
-            await _renameAlbum(context);
-          } else if (value == 2) {
-            await changeCollectionVisibility(
-              context,
-              widget.collection,
-              widget.collection.isArchived()
-                  ? visibilityVisible
-                  : visibilityArchive,
-            );
-          } else if (value == 3) {
-            await _trashCollection();
-          } else if (value == 4) {
-            await _leaveAlbum(context);
-          } else {
-            showToast(context, "Something went wrong");
-          }
-        },
-      ),
-    );
+    if (items.isNotEmpty) {
+      actions.add(
+        PopupMenuButton(
+          itemBuilder: (context) {
+            return items;
+          },
+          onSelected: (value) async {
+            if (value == 1) {
+              await _renameAlbum(context);
+            } else if (value == 2) {
+              await changeCollectionVisibility(
+                context,
+                widget.collection,
+                widget.collection.isArchived()
+                    ? visibilityVisible
+                    : visibilityArchive,
+              );
+            } else if (value == 3) {
+              await _trashCollection();
+            } else if (value == 4) {
+              await _leaveAlbum(context);
+            } else {
+              showToast(context, "Something went wrong");
+            }
+          },
+        ),
+      );
+    }
 
     return actions;
   }

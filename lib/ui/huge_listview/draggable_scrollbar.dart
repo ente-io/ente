@@ -15,6 +15,7 @@ class DraggableScrollbar extends StatefulWidget {
   final EdgeInsetsGeometry padding;
   final int totalCount;
   final int initialScrollIndex;
+  final double bottomSafeArea;
   final int currentFirstIndex;
   final ValueChanged<double> onChange;
   final String Function(int) labelTextBuilder;
@@ -26,6 +27,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.backgroundColor = Colors.white,
     this.drawColor = Colors.grey,
     this.heightScrollThumb = 80.0,
+    this.bottomSafeArea = 120,
     this.padding,
     this.totalCount = 1,
     this.initialScrollIndex = 0,
@@ -49,7 +51,8 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
 
   double get thumbMin => 0.0;
 
-  double get thumbMax => context.size.height - widget.heightScrollThumb;
+  double get thumbMax =>
+      context.size.height - widget.heightScrollThumb - widget.bottomSafeArea;
 
   AnimationController _thumbAnimationController;
   Animation<double> _thumbAnimation;

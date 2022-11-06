@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:path/path.dart' as file_path;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
@@ -16,11 +17,15 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/ignored_file.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -99,11 +104,21 @@ class FadingAppBarState extends State<FadingAppBar> {
 
   AppBar _buildAppBar() {
     debugPrint("building app bar");
+
     final List<Widget> actions = [];
     final isTrashedFile = widget.file is TrashFile;
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
+    final bool isOwnedByUser =
+        widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    bool isFileHidden = false;
+    if (isOwnedByUser && widget.file.uploadedFileID != null) {
+      isFileHidden = CollectionsService.instance
+              .getCollectionByID(widget.file.collectionID)
+              ?.isHidden() ??
+          false;
+    }
     // only show fav option for files owned by the user
-    if (widget.file.ownerID == null || widget.file.ownerID == widget.userID) {
+    if (isOwnedByUser && !isFileHidden) {
       actions.add(_getFavoriteButton());
     }
     actions.add(
@@ -132,8 +147,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             );
           }
           // options for files owned by the user
-          if (widget.file.ownerID == null ||
-              widget.file.ownerID == widget.userID) {
+          if (isOwnedByUser) {
             items.add(
               PopupMenuItem(
                 value: 2,
@@ -169,11 +183,50 @@ class FadingAppBarState extends State<FadingAppBar> {
                     const Padding(
                       padding: EdgeInsets.all(8),
                     ),
-                    const Text("Use as"),
+                    const Text("Set as"),
                   ],
                 ),
               ),
             );
+          }
+          if (isOwnedByUser) {
+            if (!isFileHidden) {
+              items.add(
+                PopupMenuItem(
+                  value: 4,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.visibility_off,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      const Text("Hide"),
+                    ],
+                  ),
+                ),
+              );
+            } else {
+              items.add(
+                PopupMenuItem(
+                  value: 5,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.visibility,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.all(8),
+                      ),
+                      const Text("Unhide"),
+                    ],
+                  ),
+                ),
+              );
+            }
           }
           return items;
         },
@@ -184,6 +237,10 @@ class FadingAppBarState extends State<FadingAppBar> {
             _showDeleteSheet(widget.file);
           } else if (value == 3) {
             _setAs(widget.file);
+          } else if (value == 4) {
+            _handleHideRequest(context);
+          } else if (value == 5) {
+            _handleUnHideRequest(context);
           }
         },
       ),
@@ -194,6 +251,38 @@ class FadingAppBarState extends State<FadingAppBar> {
       actions: shouldShowActions ? actions : [],
       elevation: 0,
       backgroundColor: const Color(0x00000000),
+    );
+  }
+
+  Future<void> _handleHideRequest(BuildContext context) async {
+    try {
+      final hideResult =
+          await CollectionsService.instance.hideFiles(context, [widget.file]);
+
+      if (hideResult) {
+        // delay to avoid black screen
+        await Future.delayed(const Duration(milliseconds: 300));
+        Navigator.of(context).pop();
+      }
+    } catch (e, s) {
+      _logger.severe("failed to update file visibility", e, s);
+      await showGenericErrorDialog(context);
+    }
+  }
+
+  Future<void> _handleUnHideRequest(BuildContext context) async {
+    final s = SelectedFiles();
+    s.files.add(widget.file);
+    Navigator.push(
+      context,
+      PageTransition(
+        type: PageTransitionType.bottomToTop,
+        child: CreateCollectionPage(
+          s,
+          null,
+          actionType: CollectionActionType.unHide,
+        ),
+      ),
     );
   }
 
@@ -326,47 +415,89 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
-    final FileType type = file.fileType;
-    // save and track image for livePhoto/image and video for FileType.video
-    final io.File fileToSave = await getFile(file);
-    final savedAsset = type == FileType.video
-        ? (await PhotoManager.editor.saveVideo(fileToSave, title: file.title))
-        : (await PhotoManager.editor
-            .saveImageWithPath(fileToSave.path, title: file.title));
-    // immediately track assetID to avoid duplicate upload
-    await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
-    file.localID = savedAsset.id;
-    await FilesDB.instance.insert(file);
+    try {
+      final FileType type = file.fileType;
+      final bool downloadLivePhotoOnDroid =
+          type == FileType.livePhoto && Platform.isAndroid;
+      AssetEntity savedAsset;
+      final io.File fileToSave = await getFile(file);
+      if (type == FileType.image) {
+        savedAsset = await PhotoManager.editor
+            .saveImageWithPath(fileToSave.path, title: file.title);
+      } else if (type == FileType.video) {
+        savedAsset =
+            await PhotoManager.editor.saveVideo(fileToSave, title: file.title);
+      } else if (type == FileType.livePhoto) {
+        final io.File liveVideoFile =
+            await getFileFromServer(file, liveVideo: true);
+        if (liveVideoFile == null) {
+          throw AssertionError("Live video can not be null");
+        }
+        if (downloadLivePhotoOnDroid) {
+          await _saveLivePhotoOnDroid(fileToSave, liveVideoFile, file);
+        } else {
+          savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
+            imageFile: fileToSave,
+            videoFile: liveVideoFile,
+            title: file.title,
+          );
+        }
+      }
 
-    if (type == FileType.livePhoto) {
-      final io.File liveVideo = await getFileFromServer(file, liveVideo: true);
-      if (liveVideo == null) {
-        _logger.warning("Failed to find live video" + file.tag);
-      } else {
-        final videoTitle = file_path.basenameWithoutExtension(file.title) +
-            file_path.extension(liveVideo.path);
-        final savedAsset = (await PhotoManager.editor.saveVideo(
-          liveVideo,
-          title: videoTitle,
-        ));
+      if (savedAsset != null) {
+        // immediately track assetID to avoid duplicate upload
+        await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
         final ignoreVideoFile = IgnoredFile(
           savedAsset.id,
-          savedAsset.title ?? videoTitle,
+          savedAsset.title ?? "",
           savedAsset.relativePath ?? 'remoteDownload',
           "remoteDownload",
         );
         debugPrint("IgnoreFile for auto-upload ${ignoreVideoFile.toString()}");
         await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
+        file.localID = savedAsset.id;
+        await FilesDB.instance.insert(file);
+        Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
+      } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
+        _logger.severe('Failed to save assert of type $type');
       }
-    }
-
-    Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
-    await dialog.hide();
-    if (file.fileType == FileType.livePhoto) {
-      showToast(context, "Photo and video saved to gallery");
-    } else {
       showToast(context, "File saved to gallery");
+      await dialog.hide();
+    } catch (e) {
+      _logger.warning("Failed to save file", e);
+      await dialog.hide();
+      showGenericErrorDialog(context);
     }
+  }
+
+  Future<void> _saveLivePhotoOnDroid(
+    io.File image,
+    io.File video,
+    File enteFile,
+  ) async {
+    debugPrint("Downloading LivePhoto on Droid");
+    AssetEntity savedAsset = await PhotoManager.editor
+        .saveImageWithPath(image.path, title: enteFile.title);
+    IgnoredFile ignoreVideoFile = IgnoredFile(
+      savedAsset.id,
+      savedAsset.title ?? '',
+      savedAsset.relativePath ?? 'remoteDownload',
+      "remoteDownload",
+    );
+    await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
+    final videoTitle = file_path.basenameWithoutExtension(enteFile.title) +
+        file_path.extension(video.path);
+    savedAsset = (await PhotoManager.editor.saveVideo(
+      video,
+      title: videoTitle,
+    ));
+    ignoreVideoFile = IgnoredFile(
+      savedAsset.id,
+      savedAsset.title ?? videoTitle,
+      savedAsset.relativePath ?? 'remoteDownload',
+      "remoteDownload",
+    );
+    await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
   }
 
   Future<void> _setAs(File file) async {
@@ -374,7 +505,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     await dialog.show();
     try {
       final io.File fileToSave = await getFile(file);
-      var m = MediaExtension();
+      final m = MediaExtension();
       final bool result = await m.setAs("file://${fileToSave.path}", "image/*");
       if (result == false) {
         showShortToast(context, "Something went wrong");

@@ -63,142 +63,148 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
             : 120;
 
     return Scaffold(
-        appBar: widget.showProgressBar
-            ? AppBar(
-                elevation: 0,
-                title: Hero(
-                  tag: "recovery_key",
-                  child: StepProgressIndicator(
-                    totalSteps: 4,
-                    currentStep: 3,
-                    selectedColor:
-                        Theme.of(context).colorScheme.greenAlternative,
-                    roundedEdges: const Radius.circular(10),
-                    unselectedColor: Theme.of(context)
-                        .colorScheme
-                        .stepProgressUnselectedColor,
-                  ),
+      appBar: widget.showProgressBar
+          ? AppBar(
+              elevation: 0,
+              title: Hero(
+                tag: "recovery_key",
+                child: StepProgressIndicator(
+                  totalSteps: 4,
+                  currentStep: 3,
+                  selectedColor: Theme.of(context).colorScheme.greenAlternative,
+                  roundedEdges: const Radius.circular(10),
+                  unselectedColor:
+                      Theme.of(context).colorScheme.stepProgressUnselectedColor,
                 ),
-              )
-            : widget.showAppBar
-                ? AppBar(
-                    elevation: 0,
-                    title: Text(widget.title ?? "Recovery key"),
-                  )
-                : null,
-        body: Padding(
-          padding: EdgeInsets.fromLTRB(20, topPadding, 20, 20),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                      minWidth: constraints.maxWidth,
-                      minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        widget.showAppBar
-                            ? const SizedBox.shrink()
-                            : Text(
-                                widget.title ?? "Recovery key",
-                                style: Theme.of(context).textTheme.headline4,
-                              ),
-                        Padding(
-                            padding:
-                                EdgeInsets.all(widget.showAppBar ? 0 : 12)),
-                        Text(
-                          widget.text ??
-                              "If you forget your password, the only way you can recover your data is with this key.",
-                          style: Theme.of(context).textTheme.subtitle1,
-                        ),
-                        const Padding(padding: EdgeInsets.only(top: 24)),
-                        DottedBorder(
-                          color: const Color.fromRGBO(17, 127, 56, 1),
-                          //color of dotted/dash line
-                          strokeWidth: 1,
-                          //thickness of dash/dots
-                          dashPattern: const [6, 6],
-                          radius: const Radius.circular(8),
-                          //dash patterns, 10 is dash width, 6 is space width
-                          child: SizedBox(
-                            //inner container
-                            // height: 120, //height of inner container
-                            width: double
-                                .infinity, //width to 100% match to parent container.
-                            // ignore: prefer_const_literals_to_create_immutables
-                            child: Column(
-                              children: [
-                                GestureDetector(
-                                  onTap: () async {
-                                    await Clipboard.setData(
-                                      ClipboardData(text: recoveryKey),
-                                    );
-                                    showToast(context,
-                                        "Recovery key copied to clipboard");
-                                    setState(() {
-                                      _hasTriedToSave = true;
-                                    });
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      border: Border.all(
-                                        color: const Color.fromRGBO(
-                                            49, 155, 86, .2),
+              ),
+            )
+          : widget.showAppBar
+              ? AppBar(
+                  elevation: 0,
+                  title: Text(widget.title ?? "Recovery key"),
+                )
+              : null,
+      body: Padding(
+        padding: EdgeInsets.fromLTRB(20, topPadding, 20, 20),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: constraints.maxWidth,
+                  minHeight: constraints.maxHeight,
+                ),
+                child: IntrinsicHeight(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      widget.showAppBar
+                          ? const SizedBox.shrink()
+                          : Text(
+                              widget.title ?? "Recovery key",
+                              style: Theme.of(context).textTheme.headline4,
+                            ),
+                      Padding(
+                        padding: EdgeInsets.all(widget.showAppBar ? 0 : 12),
+                      ),
+                      Text(
+                        widget.text ??
+                            "If you forget your password, the only way you can recover your data is with this key.",
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                      const Padding(padding: EdgeInsets.only(top: 24)),
+                      DottedBorder(
+                        color: const Color.fromRGBO(17, 127, 56, 1),
+                        //color of dotted/dash line
+                        strokeWidth: 1,
+                        //thickness of dash/dots
+                        dashPattern: const [6, 6],
+                        radius: const Radius.circular(8),
+                        //dash patterns, 10 is dash width, 6 is space width
+                        child: SizedBox(
+                          //inner container
+                          // height: 120, //height of inner container
+                          width: double
+                              .infinity, //width to 100% match to parent container.
+                          // ignore: prefer_const_literals_to_create_immutables
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  await Clipboard.setData(
+                                    ClipboardData(text: recoveryKey),
+                                  );
+                                  showToast(
+                                    context,
+                                    "Recovery key copied to clipboard",
+                                  );
+                                  setState(() {
+                                    _hasTriedToSave = true;
+                                  });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromRGBO(
+                                        49,
+                                        155,
+                                        86,
+                                        .2,
                                       ),
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(2),
-                                      ),
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .recoveryKeyBoxColor,
                                     ),
-                                    padding: const EdgeInsets.all(20),
-                                    width: double.infinity,
-                                    child: Text(
-                                      recoveryKey,
-                                      style:
-                                          Theme.of(context).textTheme.bodyText1,
+                                    borderRadius: const BorderRadius.all(
+                                      Radius.circular(2),
                                     ),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .recoveryKeyBoxColor,
+                                  ),
+                                  padding: const EdgeInsets.all(20),
+                                  width: double.infinity,
+                                  child: Text(
+                                    recoveryKey,
+                                    style:
+                                        Theme.of(context).textTheme.bodyText1,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(
-                          height: 80,
+                      ),
+                      SizedBox(
+                        height: 80,
+                        width: double.infinity,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 20),
+                          child: Text(
+                            widget.subText ??
+                                "We don’t store this key, please save this in a safe place.",
+                            style: Theme.of(context).textTheme.bodyText1,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          alignment: Alignment.bottomCenter,
                           width: double.infinity,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20),
-                            child: Text(
-                              widget.subText ??
-                                  "We don’t store this key, please save this in a safe place.",
-                              style: Theme.of(context).textTheme.bodyText1,
-                            ),
+                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 42),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: _saveOptions(context, recoveryKey),
                           ),
                         ),
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.bottomCenter,
-                            width: double.infinity,
-                            padding: const EdgeInsets.fromLTRB(10, 10, 10, 42),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: _saveOptions(context, recoveryKey),
-                            ),
-                          ),
-                        )
-                      ],
-                    ), // columnEnds
-                  ),
+                      )
+                    ],
+                  ), // columnEnds
                 ),
-              );
-            },
-          ),
-        ));
+              ),
+            );
+          },
+        ),
+      ),
+    );
   }
 
   List<Widget> _saveOptions(BuildContext context, String recoveryKey) {

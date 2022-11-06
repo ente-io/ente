@@ -44,32 +44,38 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
         MediaQuery.of(context).platformBrightness == Brightness.light
             ? enteColorScheme.backgroundElevated2
             : enteColorScheme.backgroundElevated;
-    return AnimatedContainer(
-      curve: Curves.ease,
-      duration: const Duration(milliseconds: 200),
-      decoration: BoxDecoration(
-        color: expandableController.value ? backgroundColor : null,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: ExpandableNotifier(
-        controller: expandableController,
-        child: ScrollOnExpand(
-          child: ExpandablePanel(
-            header: MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
-                title: widget.title,
-                makeTextBold: true,
+    return Padding(
+      padding: EdgeInsets.only(bottom: expandableController.value ? 8 : 0),
+      child: AnimatedContainer(
+        curve: Curves.ease,
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          color: expandableController.value ? backgroundColor : null,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: ExpandableNotifier(
+          controller: expandableController,
+          child: ScrollOnExpand(
+            child: ExpandablePanel(
+              header: MenuItemWidget(
+                captionedTextWidget: CaptionedTextWidget(
+                  title: widget.title,
+                  makeTextBold: true,
+                ),
+                isExpandable: true,
+                leadingIcon: widget.leadingIcon,
+                trailingIcon: Icons.expand_more,
+                menuItemColor: enteColorScheme.fillFaint,
+                expandableController: expandableController,
               ),
-              isHeaderOfExpansion: true,
-              leadingIcon: widget.leadingIcon,
-              trailingIcon: Icons.expand_more,
-              menuItemColor: enteColorScheme.fillFaint,
-              expandableController: expandableController,
+              collapsed: const SizedBox.shrink(),
+              expanded: Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: widget.selectionOptionsWidget,
+              ),
+              theme: getExpandableTheme(context),
+              controller: expandableController,
             ),
-            collapsed: const SizedBox.shrink(),
-            expanded: widget.selectionOptionsWidget,
-            theme: getExpandableTheme(context),
-            controller: expandableController,
           ),
         ),
       ),

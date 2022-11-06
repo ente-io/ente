@@ -9,10 +9,13 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
-import 'package:photos/ui/common/DividerWithPadding.dart';
+import 'package:photos/ui/components/divider_widget.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/viewer/file/collections_list_of_file_widget.dart';
 import 'package:photos/ui/viewer/file/device_folders_list_of_file_widget.dart';
-import 'package:photos/ui/viewer/file/raw_exif_button.dart';
+import 'package:photos/ui/viewer/file/file_caption_widget.dart';
+import 'package:photos/ui/viewer/file/raw_exif_list_tile_widget.dart';
 import "package:photos/utils/date_time_util.dart";
 import "package:photos/utils/exif_util.dart";
 import "package:photos/utils/file_util.dart";
@@ -51,9 +54,11 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
       getExif(widget.file).then((exif) {
-        setState(() {
-          _exif = exif;
-        });
+        if (mounted) {
+          setState(() {
+            _exif = exif;
+          });
+        }
       });
     }
     super.initState();
@@ -88,9 +93,17 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     final listTiles = <Widget>[
+      widget.file.uploadedFileID == null ||
+              Configuration.instance.getUserID() != file.ownerID
+          ? const SizedBox.shrink()
+          : Padding(
+              padding: const EdgeInsets.only(top: 8, bottom: 4),
+              child: FileCaptionWidget(file: widget.file),
+            ),
       ListTile(
+        horizontalTitleGap: 2,
         leading: const Padding(
-          padding: EdgeInsets.only(top: 8, left: 6),
+          padding: EdgeInsets.only(top: 8),
           child: Icon(Icons.calendar_today_rounded),
         ),
         title: Text(
@@ -119,17 +132,17 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               )
             : const SizedBox.shrink(),
       ),
-      const DividerWithPadding(left: 70, right: 20),
       ListTile(
+        horizontalTitleGap: 2,
         leading: _isImage
             ? const Padding(
-                padding: EdgeInsets.only(top: 8, left: 6),
+                padding: EdgeInsets.only(top: 8),
                 child: Icon(
                   Icons.image,
                 ),
               )
             : const Padding(
-                padding: EdgeInsets.only(top: 8, left: 6),
+                padding: EdgeInsets.only(top: 8),
                 child: Icon(
                   Icons.video_camera_back,
                   size: 27,
@@ -167,13 +180,10 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 icon: const Icon(Icons.edit),
               ),
       ),
-      const DividerWithPadding(left: 70, right: 20),
       showExifListTile
           ? ListTile(
-              leading: const Padding(
-                padding: EdgeInsets.only(left: 6),
-                child: Icon(Icons.camera_rounded),
-              ),
+              horizontalTitleGap: 2,
+              leading: const Icon(Icons.camera_rounded),
               title: Text(_exifData["takenOnDevice"] ?? "--"),
               subtitle: Row(
                 children: [
@@ -205,27 +215,22 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 ],
               ),
             )
-          : const SizedBox.shrink(),
-      showExifListTile
-          ? const DividerWithPadding(left: 70, right: 20)
-          : const SizedBox.shrink(),
+          : null,
       SizedBox(
         height: 62,
         child: ListTile(
-          leading: const Padding(
-            padding: EdgeInsets.only(left: 6),
-            child: Icon(Icons.folder_outlined),
-          ),
+          horizontalTitleGap: 0,
+          leading: const Icon(Icons.folder_outlined),
           title: fileIsBackedup
               ? CollectionsListOfFileWidget(allCollectionIDsOfFile)
               : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
         ),
       ),
-      const DividerWithPadding(left: 70, right: 20),
       (file.uploadedFileID != null && file.updationTime != null)
           ? ListTile(
+              horizontalTitleGap: 2,
               leading: const Padding(
-                padding: EdgeInsets.only(top: 8, left: 6),
+                padding: EdgeInsets.only(top: 8),
                 child: Icon(Icons.cloud_upload_outlined),
               ),
               title: Text(
@@ -245,48 +250,53 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                     ),
               ),
             )
-          : const SizedBox.shrink(),
-      _isImage
-          ? Padding(
-              padding: const EdgeInsets.fromLTRB(0, 24, 0, 16),
-              child: SafeArea(
-                child: RawExifButton(_exif, widget.file),
-              ),
-            )
-          : const SizedBox(
-              height: 12,
-            )
+          : null,
+      _isImage ? RawExifListTileWidget(_exif, widget.file) : null,
     ];
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                icon: const Icon(
-                  Icons.close,
+    listTiles.removeWhere(
+      (element) => element == null,
+    );
+
+    return SafeArea(
+      top: false,
+      child: Scrollbar(
+        thickness: 4,
+        radius: const Radius.circular(2),
+        thumbVisibility: true,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: CustomScrollView(
+            shrinkWrap: true,
+            slivers: <Widget>[
+              TitleBarWidget(
+                isFlexibleSpaceDisabled: true,
+                title: "Details",
+                isOnTopOfScreen: false,
+                leading: IconButtonWidget(
+                  icon: Icons.close_outlined,
+                  iconButtonType: IconButtonType.primary,
+                  onTap: () => Navigator.pop(context),
                 ),
               ),
-              const SizedBox(width: 6),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 2),
-                child: Text(
-                  "Details",
-                  style: Theme.of(context).textTheme.bodyText1,
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index.isOdd) {
+                      return index == 1
+                          ? const SizedBox.shrink()
+                          : const DividerWidget(dividerType: DividerType.menu);
+                    } else {
+                      return listTiles[index ~/ 2];
+                    }
+                  },
+                  childCount: (listTiles.length * 2) - 1,
                 ),
-              ),
+              )
             ],
           ),
         ),
-        ...listTiles
-      ],
+      ),
     );
   }
 

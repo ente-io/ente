@@ -9,6 +9,7 @@ import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/feature_flag_service.dart';
+import 'package:photos/utils/date_time_util.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/exif_util.dart';
 // ignore: import_of_legacy_library_into_null_safe
@@ -74,16 +75,13 @@ class File extends EnteFile {
     file.location = Location(asset.latitude, asset.longitude);
     file.fileType = _fileTypeFromAsset(asset);
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
-    if (file.creationTime == 0) {
+    if (file.creationTime == null || (file.creationTime! <= jan011991Time)) {
       try {
-        final parsedDateTime = DateTime.parse(
-          basenameWithoutExtension(file.title!)
-              .replaceAll("IMG_", "")
-              .replaceAll("VID_", "")
-              .replaceAll("DCIM_", "")
-              .replaceAll("_", " "),
-        );
-        file.creationTime = parsedDateTime.microsecondsSinceEpoch;
+        final parsedDateTime =
+            parseDateFromFileName(basenameWithoutExtension(file.title ?? ""));
+
+        file.creationTime = parsedDateTime?.microsecondsSinceEpoch ??
+            asset.modifiedDateTime.microsecondsSinceEpoch;
       } catch (e) {
         file.creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
       }
@@ -101,9 +99,7 @@ class File extends EnteFile {
         type = FileType.image;
         // PHAssetMediaSubtype.photoLive.rawValue is 8
         // This hack should go away once photos_manager support livePhotos
-        if (asset.subtype != null &&
-            asset.subtype > -1 &&
-            (asset.subtype & 8) != 0) {
+        if (asset.subtype > -1 && (asset.subtype & 8) != 0) {
           type = FileType.livePhoto;
         }
         break;
@@ -165,9 +161,9 @@ class File extends EnteFile {
         duration = asset.duration;
       }
     }
-    if (fileType == FileType.image) {
+    if (fileType == FileType.image && mediaUploadData.sourceFile != null) {
       final exifTime =
-          await getCreationTimeFromEXIF(mediaUploadData.sourceFile);
+          await getCreationTimeFromEXIF(mediaUploadData.sourceFile!);
       if (exifTime != null) {
         creationTime = exifTime.microsecondsSinceEpoch;
       }
@@ -213,6 +209,10 @@ class File extends EnteFile {
     } else {
       return "https://files.ente.io/?fileID=" + uploadedFileID.toString();
     }
+  }
+
+  String? get caption {
+    return pubMagicMetadata?.caption;
   }
 
   String get thumbnailUrl {

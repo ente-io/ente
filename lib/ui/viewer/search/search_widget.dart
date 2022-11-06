@@ -8,6 +8,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/services/search_service.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/viewer/search/result/no_result_widget.dart';
 import 'package:photos/ui/viewer/search/search_suffix_icon_widget.dart';
 import 'package:photos/ui/viewer/search/search_suggestions.dart';
@@ -32,9 +33,10 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
   Widget build(BuildContext context) {
     return Hero(
       tag: "search_icon",
-      child: IconButton(
-        visualDensity: const VisualDensity(horizontal: -2, vertical: -2),
-        onPressed: () {
+      child: IconButtonWidget(
+        iconButtonType: IconButtonType.primary,
+        icon: Icons.search,
+        onTap: () {
           Navigator.push(
             context,
             TransparentRoute(
@@ -42,7 +44,6 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
             ),
           );
         },
-        icon: const Icon(Icons.search),
       ),
     );
   }
@@ -75,7 +76,6 @@ class _SearchWidgetState extends State<SearchWidget> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               children: [
-                const SizedBox(height: 8),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
@@ -195,6 +195,9 @@ class _SearchWidgetState extends State<SearchWidget> {
       final fileTypeSearchResults =
           await _searchService.getFileTypeResults(query);
       allResults.addAll(fileTypeSearchResults);
+
+      final fileCaptionResults = await _searchService.getCaptionResults(query);
+      allResults.addAll(fileCaptionResults);
 
       final fileExtnResult =
           await _searchService.getFileExtensionResults(query);

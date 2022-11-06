@@ -37,15 +37,13 @@ class SettingsTitleBarWidget extends StatelessWidget {
                         ' on tree',
                   );
                   throw Error();
-                }
-                if (snapshot.hasData) {
+                } else if (snapshot.hasData) {
                   final userDetails = snapshot.data as UserDetails;
                   return Text(
                     "${NumberFormat().format(userDetails.fileCount)} memories",
                     style: getEnteTextTheme(context).largeBold,
                   );
-                }
-                if (snapshot.hasError) {
+                } else if (snapshot.hasError) {
                   logger.severe('failed to load user details');
                   return const EnteLoadingWidget();
                 } else {

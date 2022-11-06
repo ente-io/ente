@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
@@ -11,6 +12,9 @@ import 'package:photos/models/file_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/services/collections_service.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/file/file_info_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -72,8 +76,13 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               Platform.isAndroid ? Icons.info_outline : CupertinoIcons.info,
               color: Colors.white,
             ),
-            onPressed: () {
-              _displayInfo(widget.file);
+            onPressed: () async {
+              await _displayInfo(widget.file);
+              safeRefresh(); //to instantly show the new caption if keypad is closed after pressing 'done' - here the caption will be updated before the bottom sheet is closed
+              await Future.delayed(
+                const Duration(milliseconds: 500),
+              ); //Waiting for some time till the caption gets updated in db if the user closes the bottom sheet without pressing 'done'
+              safeRefresh();
             },
           ),
         ),
@@ -81,6 +90,15 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     );
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
+    }
+    final bool isUploadedByUser = widget.file.uploadedFileID != null &&
+        widget.file.ownerID == Configuration.instance.getUserID();
+    bool isFileHidden = false;
+    if (isUploadedByUser) {
+      isFileHidden = CollectionsService.instance
+              .getCollectionByID(widget.file.collectionID)
+              ?.isHidden() ??
+          false;
     }
     if (!widget.showOnlyInfoButton && widget.file is! TrashFile) {
       if (widget.file.fileType == FileType.image ||
@@ -103,20 +121,17 @@ class FadingBottomBarState extends State<FadingBottomBar> {
           ),
         );
       }
-      if (widget.file.uploadedFileID != null &&
-          widget.file.ownerID == Configuration.instance.getUserID()) {
+      if (isUploadedByUser && !isFileHidden) {
         final bool isArchived =
             widget.file.magicMetadata.visibility == visibilityArchive;
         children.add(
           Tooltip(
-            message: isArchived ? "Unhide" : "Hide",
+            message: isArchived ? "Unarchive" : "Archive",
             child: Padding(
               padding: const EdgeInsets.only(top: 12, bottom: 12),
               child: IconButton(
                 icon: Icon(
-                  isArchived
-                      ? Icons.visibility_outlined
-                      : Icons.visibility_off_outlined,
+                  isArchived ? Icons.unarchive : Icons.archive_outlined,
                   color: Colors.white,
                 ),
                 onPressed: () async {
@@ -176,9 +191,31 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             ),
             child: Padding(
               padding: EdgeInsets.only(bottom: safeAreaBottomPadding),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: children,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  widget.file.caption?.isNotEmpty ?? false
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            16,
+                            28,
+                            16,
+                            12,
+                          ),
+                          child: Text(
+                            widget.file.caption,
+                            style: getEnteTextTheme(context)
+                                .small
+                                .copyWith(color: textBaseDark),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : const SizedBox.shrink(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: children,
+                  ),
+                ],
               ),
             ),
           ),
@@ -242,11 +279,19 @@ class FadingBottomBarState extends State<FadingBottomBar> {
   }
 
   Future<void> _displayInfo(File file) async {
-    return showModalBottomSheet<void>(
+    final colorScheme = getEnteColorScheme(context);
+    return showBarModalBottomSheet(
+      topControl: const SizedBox.shrink(),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
+      backgroundColor: colorScheme.backgroundBase,
+      barrierColor: backdropFaintDark,
       context: context,
-      isScrollControlled: true,
       builder: (BuildContext context) {
-        return FileInfoWidget(file);
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: FileInfoWidget(file),
+        );
       },
     );
   }

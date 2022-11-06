@@ -4,11 +4,15 @@ import 'package:photos/ente_theme_data.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
-  final bool isHeaderOfExpansion;
-// leading icon can be passed without specifing size of icon, this component sets size to 20x20 irrespective of passed icon's size
+  final bool isExpandable;
+
+  /// leading icon can be passed without specifing size of icon,
+  /// this component sets size to 20x20 irrespective of passed icon's size
   final IconData? leadingIcon;
   final Color? leadingIconColor;
-// trailing icon can be passed without size as default size set by flutter is what this component expects
+
+  /// trailing icon can be passed without size as default size set by
+  /// flutter is what this component expects
   final IconData? trailingIcon;
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;
@@ -17,10 +21,16 @@ class MenuItemWidget extends StatefulWidget {
   final Color? menuItemColor;
   final bool alignCaptionedTextToLeft;
   final double borderRadius;
+  final Color? pressedColor;
   final ExpandableController? expandableController;
+  final bool isBottomBorderRadiusRemoved;
+  final bool isTopBorderRadiusRemoved;
+
+  /// disable gesture detector if not used
+  final bool isGestureDetectorDisabled;
   const MenuItemWidget({
     required this.captionedTextWidget,
-    this.isHeaderOfExpansion = false,
+    this.isExpandable = false,
     this.leadingIcon,
     this.leadingIconColor,
     this.trailingIcon,
@@ -31,7 +41,11 @@ class MenuItemWidget extends StatefulWidget {
     this.menuItemColor,
     this.alignCaptionedTextToLeft = false,
     this.borderRadius = 4.0,
+    this.pressedColor,
     this.expandableController,
+    this.isBottomBorderRadiusRemoved = false,
+    this.isTopBorderRadiusRemoved = false,
+    this.isGestureDetectorDisabled = false,
     Key? key,
   }) : super(key: key);
 
@@ -40,14 +54,22 @@ class MenuItemWidget extends StatefulWidget {
 }
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
+  Color? menuItemColor;
   @override
   void initState() {
+    menuItemColor = widget.menuItemColor;
     if (widget.expandableController != null) {
       widget.expandableController!.addListener(() {
         setState(() {});
       });
     }
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    menuItemColor = widget.menuItemColor;
+    super.didChangeDependencies();
   }
 
   @override
@@ -60,11 +82,14 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.isHeaderOfExpansion
+    return widget.isExpandable || widget.isGestureDetectorDisabled
         ? menuItemWidget(context)
         : GestureDetector(
             onTap: widget.onTap,
             onDoubleTap: widget.onDoubleTap,
+            onTapDown: _onTapDown,
+            onTapUp: _onTapUp,
+            onTapCancel: _onCancel,
             child: menuItemWidget(context),
           );
   }
@@ -73,21 +98,25 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final borderRadius = Radius.circular(widget.borderRadius);
     final isExpanded = widget.expandableController?.value;
-    final bottomBorderRadius = isExpanded != null && isExpanded
+    final bottomBorderRadius =
+        (isExpanded != null && isExpanded) || widget.isBottomBorderRadiusRemoved
+            ? const Radius.circular(0)
+            : borderRadius;
+    final topBorderRadius = widget.isTopBorderRadiusRemoved
         ? const Radius.circular(0)
         : borderRadius;
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 20),
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.only(left: 16, right: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.only(
-          topLeft: borderRadius,
-          topRight: borderRadius,
+          topLeft: topBorderRadius,
+          topRight: topBorderRadius,
           bottomLeft: bottomBorderRadius,
           bottomRight: bottomBorderRadius,
         ),
-        color: widget.menuItemColor,
+        color: menuItemColor,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -138,5 +167,26 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         ],
       ),
     );
+  }
+
+  void _onTapDown(details) {
+    setState(() {
+      menuItemColor = widget.pressedColor ?? widget.menuItemColor;
+    });
+  }
+
+  void _onTapUp(details) {
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () => setState(() {
+        menuItemColor = widget.menuItemColor;
+      }),
+    );
+  }
+
+  void _onCancel() {
+    setState(() {
+      menuItemColor = widget.menuItemColor;
+    });
   }
 }

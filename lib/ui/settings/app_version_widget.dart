@@ -15,7 +15,6 @@ class AppVersionWidget extends StatefulWidget {
 class _AppVersionWidgetState extends State<AppVersionWidget> {
   static const kTapThresholdForInspector = 5;
   static const kConsecutiveTapTimeWindowInMilliseconds = 2000;
-  static const kDummyDelayDurationInMilliseconds = 1500;
 
   int _lastTap;
   int _consecutiveTaps = 0;

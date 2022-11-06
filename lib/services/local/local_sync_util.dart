@@ -264,8 +264,10 @@ Future<List<AssetEntity>> _getAllAssetLists(AssetPathEntity pathEntity) async {
       size: assetFetchPageSize,
     );
     Bus.instance.fire(
-      LocalImportProgressEvent(pathEntity.name,
-          currentPage * assetFetchPageSize + currentPageResult.length),
+      LocalImportProgressEvent(
+        pathEntity.name,
+        currentPage * assetFetchPageSize + currentPageResult.length,
+      ),
     );
     result.addAll(currentPageResult);
     currentPage = currentPage + 1;

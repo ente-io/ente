@@ -3,6 +3,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
@@ -23,7 +24,7 @@ import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-enum CollectionActionType { addFiles, moveFiles, restoreFiles }
+enum CollectionActionType { addFiles, moveFiles, restoreFiles, unHide }
 
 String _actionName(CollectionActionType type, bool plural) {
   final titleSuffix = (plural ? "s" : "");
@@ -37,6 +38,9 @@ String _actionName(CollectionActionType type, bool plural) {
       break;
     case CollectionActionType.restoreFiles:
       text = "Restore file";
+      break;
+    case CollectionActionType.unHide:
+      text = "Unhide file";
       break;
   }
   return text + titleSuffix;
@@ -189,8 +193,16 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<List<CollectionWithThumbnail>> _getCollectionsWithThumbnail() async {
-    final List<CollectionWithThumbnail> collectionsWithThumbnail =
-        await CollectionsService.instance.getCollectionsWithThumbnails();
+    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
+    final latestCollectionFiles =
+        await CollectionsService.instance.getLatestCollectionFiles();
+    for (final file in latestCollectionFiles) {
+      final c =
+          CollectionsService.instance.getCollectionByID(file.collectionID);
+      if (c.owner.id == Configuration.instance.getUserID() && !c.isHidden()) {
+        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file));
+      }
+    }
     collectionsWithThumbnail.sort((first, second) {
       return compareAsciiLowerCaseNatural(
         first.collection.name ?? "",
@@ -273,6 +285,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         return _addToCollection(collectionID);
       case CollectionActionType.moveFiles:
         return _moveFilesToCollection(collectionID);
+      case CollectionActionType.unHide:
+        return _moveFilesToCollection(collectionID);
       case CollectionActionType.restoreFiles:
         return _restoreFilesToCollection(collectionID);
     }
@@ -280,7 +294,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
   }
 
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "Moving files to album...");
+    final String message = widget.actionType == CollectionActionType.moveFiles
+        ? "Moving files to album..."
+        : "Unhiding files to album";
+    final dialog = createProgressDialog(context, message);
     await dialog.show();
     try {
       final int fromCollectionID =

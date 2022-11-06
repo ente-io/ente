@@ -3,18 +3,17 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
-import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/backup_settings_screen.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
-import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -48,6 +47,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: "Backed up folders",
         ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () {
@@ -62,66 +62,28 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          title: "Backup over mobile data",
+          title: "Backup settings",
         ),
-        trailingSwitch: ToggleSwitchWidget(
-          value: Configuration.instance.shouldBackupOverMobileData(),
-          onChanged: (value) async {
-            Configuration.instance.setBackupOverMobileData(value);
-            setState(() {});
-          },
-        ),
-      ),
-      sectionOptionSpacing,
-      MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Backup videos",
-        ),
-        trailingSwitch: ToggleSwitchWidget(
-          value: Configuration.instance.shouldBackupVideos(),
-          onChanged: (value) async {
-            Configuration.instance.setShouldBackupVideos(value);
-            setState(() {});
-          },
-        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () {
+          routeToPage(
+            context,
+            const BackupSettingsScreen(),
+          );
+        },
       ),
       sectionOptionSpacing,
     ];
-    if (Platform.isIOS) {
-      sectionOptions.addAll([
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Disable auto lock",
-          ),
-          trailingSwitch: ToggleSwitchWidget(
-            value: Configuration.instance.shouldKeepDeviceAwake(),
-            onChanged: (value) async {
-              if (value) {
-                final choice = await showChoiceDialog(
-                  context,
-                  "Disable automatic screen lock when ente is running?",
-                  "This will ensure faster uploads by ensuring your device does not sleep when uploads are in progress.",
-                  firstAction: "No",
-                  secondAction: "Yes",
-                );
-                if (choice != DialogUserChoice.secondChoice) {
-                  return;
-                }
-              }
-              await Configuration.instance.setShouldKeepDeviceAwake(value);
-              setState(() {});
-            },
-          ),
-        ),
-        sectionOptionSpacing,
-      ]);
-    }
+
     sectionOptions.addAll(
       [
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             title: "Free up space",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
@@ -157,6 +119,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           captionedTextWidget: const CaptionedTextWidget(
             title: "Deduplicate files",
           ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {

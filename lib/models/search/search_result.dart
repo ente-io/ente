@@ -22,5 +22,6 @@ enum ResultType {
   year,
   fileType,
   fileExtension,
+  fileCaption,
   event
 }

@@ -55,7 +55,7 @@ class CollectionItem extends StatelessWidget {
               FutureBuilder<int>(
                 future: FilesDB.instance.collectionFileCount(c.collection.id),
                 builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data! > 0) {
+                  if (snapshot.hasData) {
                     return Text(
                       snapshot.data.toString(),
                       style: enteTextTheme.small.copyWith(

@@ -38,6 +38,10 @@ class HugeListView<T> extends StatefulWidget {
   /// Height of scroll thumb, defaults to 48.
   final double thumbHeight;
 
+  /// Height of bottomSafeArea so that scroll thumb does not become hidden
+  /// or un-clickable due to footer elements. Default value is 120
+  final double bottomSafeArea;
+
   /// Called to build an individual item with the specified [index].
   final HugeListViewItemBuilder<T> itemBuilder;
 
@@ -72,6 +76,7 @@ class HugeListView<T> extends StatefulWidget {
     this.thumbBackgroundColor = Colors.red, // Colors.white,
     this.thumbDrawColor = Colors.yellow, //Colors.grey,
     this.thumbHeight = 48.0,
+    this.bottomSafeArea = 120.0,
     this.isDraggableScrollbarEnabled = true,
     this.thumbPadding,
   }) : super(key: key);
@@ -83,6 +88,7 @@ class HugeListView<T> extends StatefulWidget {
 class HugeListViewState<T> extends State<HugeListView<T>> {
   final scrollKey = GlobalKey<DraggableScrollbarState>();
   final listener = ItemPositionsListener.create();
+  int lastIndexJump = -1;
   dynamic error;
 
   @override
@@ -131,13 +137,27 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
           totalCount: widget.totalCount,
           initialScrollIndex: widget.startIndex,
           onChange: (position) {
-            widget.controller
-                ?.jumpTo(index: (position * widget.totalCount).floor());
+            final int currentIndex = _currentFirst();
+            final int floorIndex = (position * widget.totalCount).floor();
+            final int cielIndex = (position * widget.totalCount).ceil();
+            int nextIndexToJump;
+            if (floorIndex != currentIndex && floorIndex > currentIndex) {
+              nextIndexToJump = floorIndex;
+            } else if (cielIndex != currentIndex && cielIndex < currentIndex) {
+              nextIndexToJump = floorIndex;
+            } else {
+              return;
+            }
+            if (lastIndexJump != nextIndexToJump) {
+              lastIndexJump = nextIndexToJump;
+              widget.controller?.jumpTo(index: nextIndexToJump);
+            }
           },
           labelTextBuilder: widget.labelTextBuilder,
           backgroundColor: widget.thumbBackgroundColor,
           drawColor: widget.thumbDrawColor,
           heightScrollThumb: widget.thumbHeight,
+          bottomSafeArea: widget.bottomSafeArea,
           currentFirstIndex: _currentFirst(),
           isEnabled: widget.isDraggableScrollbarEnabled,
           padding: widget.thumbPadding,

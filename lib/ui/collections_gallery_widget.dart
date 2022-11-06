@@ -14,8 +14,8 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/collections/archived_collections_button_widget.dart';
 import 'package:photos/ui/collections/device_folders_grid_view_widget.dart';
-import 'package:photos/ui/collections/ente_section_title.dart';
 import 'package:photos/ui/collections/hidden_collections_button_widget.dart';
 import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
 import 'package:photos/ui/collections/section_title.dart';
@@ -124,7 +124,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         child: Column(
           children: [
             const SizedBox(height: 12),
-            const SectionTitle("On device"),
+            const SectionTitle(title: "On device"),
             const SizedBox(height: 12),
             const DeviceFoldersGridViewWidget(),
             const Padding(padding: EdgeInsets.all(4)),
@@ -133,7 +133,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                const EnteSectionTitle(),
+                SectionTitle(titleWithBrand: getOnEnteSection(context)),
                 _sortMenu(),
               ],
             ),
@@ -148,9 +148,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
-                  TrashButtonWidget(trashAndHiddenTextStyle),
+                  ArchivedCollectionsButtonWidget(trashAndHiddenTextStyle),
                   const SizedBox(height: 12),
                   HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
+                  const SizedBox(height: 12),
+                  TrashButtonWidget(trashAndHiddenTextStyle),
                 ],
               ),
             ),

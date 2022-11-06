@@ -12,7 +12,6 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
-import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_migration/sqflite_migration.dart';
@@ -611,17 +610,9 @@ class FilesDB {
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    String whereClause;
-    List<Object> whereArgs;
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      whereClause =
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ? AND $columnMMdVisibility = ?';
-      whereArgs = [collectionID, startTime, endTime, visibility];
-    } else {
-      whereClause =
-          '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
-      whereArgs = [collectionID, startTime, endTime];
-    }
+    const String whereClause =
+        '$columnCollectionID = ? AND $columnCreationTime >= ? AND $columnCreationTime <= ?';
+    final List<Object> whereArgs = [collectionID, startTime, endTime];
 
     final results = await db.query(
       filesTable,
@@ -633,6 +624,43 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     _logger.info("Fetched " + files.length.toString() + " files");
+    return FileLoadResult(files, files.length == limit);
+  }
+
+  Future<FileLoadResult> getFilesInCollections(
+    List<int> collectionIDs,
+    int startTime,
+    int endTime,
+    int userID, {
+    int limit,
+    bool asc,
+  }) async {
+    if (collectionIDs.isEmpty) {
+      return FileLoadResult(<File>[], false);
+    }
+    String inParam = "";
+    for (final id in collectionIDs) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final order = (asc ?? false ? 'ASC' : 'DESC');
+    final String whereClause =
+        '$columnCollectionID  IN ($inParam) AND $columnCreationTime >= ? AND '
+        '$columnCreationTime <= ? AND $columnOwnerID = ?';
+    final List<Object> whereArgs = [startTime, endTime, userID];
+
+    final results = await db.query(
+      filesTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+      orderBy:
+          '$columnCreationTime ' + order + ', $columnModificationTime ' + order,
+      limit: limit,
+    );
+    final files = convertToFiles(results);
+    final dedupeResult = _deduplicatedAndFilterIgnoredFiles(files, {});
+    _logger.info("Fetched " + dedupeResult.length.toString() + " files");
     return FileLoadResult(files, files.length == limit);
   }
 
@@ -1080,7 +1108,9 @@ class FilesDB {
     final db = await instance.database;
     final count = Sqflite.firstIntValue(
       await db.rawQuery(
-        'SELECT COUNT(*) FROM $filesTable where $columnMMdVisibility = $visibility AND $columnOwnerID = $ownerID',
+        'SELECT COUNT(distinct($columnUploadedFileID)) FROM $filesTable where '
+        '$columnMMdVisibility'
+        ' = $visibility AND $columnOwnerID = $ownerID',
       ),
     );
     return count;
@@ -1143,25 +1173,7 @@ class FilesDB {
 
   Future<List<File>> getLatestCollectionFiles() async {
     debugPrint("Fetching latestCollectionFiles from db");
-    String query;
-    if (FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
-      query = '''
-      SELECT $filesTable.*
-      FROM $filesTable
-      INNER JOIN
-        (
-          SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
-          FROM $filesTable
-          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS 
-          NOT -1 AND $columnMMdVisibility = $visibilityVisible AND 
-          $columnUploadedFileID IS NOT -1)
-          GROUP BY $columnCollectionID
-        ) latest_files
-        ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
-        AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
-    ''';
-    } else {
-      query = '''
+    const String query = '''
       SELECT $filesTable.*
       FROM $filesTable
       INNER JOIN
@@ -1173,9 +1185,7 @@ class FilesDB {
         ) latest_files
         ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
         AND $filesTable.$columnCreationTime = latest_files.max_creation_time;
-
   ''';
-    }
     final db = await instance.database;
     final rows = await db.rawQuery(
       query,
@@ -1250,6 +1260,33 @@ class FilesDB {
     return result;
   }
 
+  Future<Map<int, List<File>>> getAllFilesGroupByCollectionID(
+    List<int> ids,
+  ) async {
+    final result = <int, List<File>>{};
+    if (ids.isEmpty) {
+      return result;
+    }
+    String inParam = "";
+    for (final id in ids) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnUploadedFileID IN ($inParam)',
+    );
+    final files = convertToFiles(results);
+    for (File eachFile in files) {
+      if (!result.containsKey(eachFile.collectionID)) {
+        result[eachFile.collectionID] = <File>[];
+      }
+      result[eachFile.collectionID].add(eachFile);
+    }
+    return result;
+  }
+
   Future<Set<int>> getAllCollectionIDsOfFile(
     int uploadedFileID,
   ) async {
@@ -1276,13 +1313,26 @@ class FilesDB {
     return files;
   }
 
-  Future<List<File>> getAllFilesFromDB() async {
+  Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {
     final db = await instance.database;
     final List<Map<String, dynamic>> result = await db.query(filesTable);
     final List<File> files = convertToFiles(result);
     final List<File> deduplicatedFiles =
-        _deduplicatedAndFilterIgnoredFiles(files, null);
+        _deduplicatedAndFilterIgnoredFiles(files, collectionsToIgnore);
     return deduplicatedFiles;
+  }
+
+  Future<Map<FileType, int>> fetchFilesCountbyType(int userID) async {
+    final db = await instance.database;
+    final result = await db.rawQuery(
+      "SELECT $columnFileType, COUNT(DISTINCT $columnUploadedFileID) FROM $filesTable WHERE $columnUploadedFileID != -1 AND $columnOwnerID == $userID GROUP BY $columnFileType",
+    );
+
+    final filesCount = <FileType, int>{};
+    for (var e in result) {
+      filesCount.addAll({getFileType(e[columnFileType]): e.values.last});
+    }
+    return filesCount;
   }
 
   Map<String, dynamic> _getRowForFile(File file) {

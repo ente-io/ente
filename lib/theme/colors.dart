@@ -11,11 +11,13 @@ class EnteColorScheme {
   // Backdrop Colors
   final Color backdropBase;
   final Color backdropBaseMute;
+  final Color backdropFaint;
 
   // Text Colors
   final Color textBase;
   final Color textMuted;
   final Color textFaint;
+  final Color blurTextBase;
 
   // Fill Colors
   final Color fillBase;
@@ -27,6 +29,9 @@ class EnteColorScheme {
   final Color strokeMuted;
   final Color strokeFaint;
   final Color strokeFainter;
+  final Color blurStrokeBase;
+  final Color blurStrokeFaint;
+  final Color blurStrokePressed;
 
   // Fixed Colors
   final Color primary700;
@@ -49,9 +54,11 @@ class EnteColorScheme {
     this.backgroundElevated2,
     this.backdropBase,
     this.backdropBaseMute,
+    this.backdropFaint,
     this.textBase,
     this.textMuted,
     this.textFaint,
+    this.blurTextBase,
     this.fillBase,
     this.fillMuted,
     this.fillFaint,
@@ -59,6 +66,9 @@ class EnteColorScheme {
     this.strokeMuted,
     this.strokeFaint,
     this.strokeFainter,
+    this.blurStrokeBase,
+    this.blurStrokeFaint,
+    this.blurStrokePressed,
     this.tabIcon, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
@@ -76,10 +86,12 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   backgroundElevatedLight,
   backgroundElevated2Light,
   backdropBaseLight,
-  backdropBaseMuteLight,
+  backdropMutedLight,
+  backdropFaintLight,
   textBaseLight,
   textMutedLight,
   textFaintLight,
+  blurTextBaseLight,
   fillBaseLight,
   fillMutedLight,
   fillFaintLight,
@@ -87,6 +99,9 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   strokeMutedLight,
   strokeFaintLight,
   strokeFainterLight,
+  blurStrokeBaseLight,
+  blurStrokeFaintLight,
+  blurStrokePressedLight,
   tabIconLight,
 );
 
@@ -95,10 +110,12 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   backgroundElevatedDark,
   backgroundElevated2Dark,
   backdropBaseDark,
-  backdropBaseMuteDark,
+  backdropMutedDark,
+  backdropFaintDark,
   textBaseDark,
   textMutedDark,
   textFaintDark,
+  blurTextBaseDark,
   fillBaseDark,
   fillMutedDark,
   fillFaintDark,
@@ -106,6 +123,9 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   strokeMutedDark,
   strokeFaintDark,
   strokeFainterDark,
+  blurStrokeBaseDark,
+  blurStrokeFaintDark,
+  blurStrokePressedDark,
   tabIconDark,
 );
 
@@ -120,19 +140,23 @@ const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
 
 // Backdrop Colors
 const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.75);
-const Color backdropBaseMuteLight = Color.fromRGBO(255, 255, 255, 0.30);
+const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.30);
+const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.15);
 
 const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.65);
-const Color backdropBaseMuteDark = Color.fromRGBO(0, 0, 0, 0.20);
+const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.20);
+const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.08);
 
 // Text Colors
 const Color textBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color textMutedLight = Color.fromRGBO(0, 0, 0, 0.6);
 const Color textFaintLight = Color.fromRGBO(0, 0, 0, 0.5);
+const Color blurTextBaseLight = Color.fromRGBO(0, 0, 0, 0.65);
 
 const Color textBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color textMutedDark = Color.fromRGBO(255, 255, 255, 0.7);
 const Color textFaintDark = Color.fromRGBO(255, 255, 255, 0.5);
+const Color blurTextBaseDark = Color.fromRGBO(255, 255, 255, 0.95);
 
 // Fill Colors
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
@@ -148,11 +172,17 @@ const Color strokeBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color strokeMutedLight = Color.fromRGBO(0, 0, 0, 0.24);
 const Color strokeFaintLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color strokeFainterLight = Color.fromRGBO(0, 0, 0, 0.06);
+const Color blurStrokeBaseLight = Color.fromRGBO(0, 0, 0, 0.65);
+const Color blurStrokeFaintLight = Color.fromRGBO(0, 0, 0, 0.08);
+const Color blurStrokePressedLight = Color.fromRGBO(0, 0, 0, 0.50);
 
 const Color strokeBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color strokeFainterDark = Color.fromRGBO(255, 255, 255, 0.08);
+const Color blurStrokeBaseDark = Color.fromRGBO(0, 0, 0, 0.90);
+const Color blurStrokeFaintDark = Color.fromRGBO(0, 0, 0, 0.08);
+const Color blurStrokePressedDark = Color.fromRGBO(0, 0, 0, 0.50);
 
 // Other colors
 const Color tabIconLight = Color.fromRGBO(0, 0, 0, 0.85);

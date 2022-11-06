@@ -129,6 +129,7 @@ class RemoteSyncService {
           // session are not processed now
           sync();
         } else {
+          debugPrint("Fire backup completed event");
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
         }
       } else {
@@ -259,7 +260,6 @@ class RemoteSyncService {
         await _db.getDevicePathIDToLocalIDMap();
     bool moreFilesMarkedForBackup = false;
     for (final deviceCollection in deviceCollections) {
-      _logger.fine("processing ${deviceCollection.name}");
       final Set<String> localIDsToSync =
           pathIdToLocalIDs[deviceCollection.id] ?? {};
       if (deviceCollection.uploadStrategy == UploadStrategy.ifMissing) {
@@ -360,16 +360,20 @@ class RemoteSyncService {
       if (pendingUploads.isEmpty) {
         continue;
       } else {
-        _logger.info("RemovingFiles $collectionIDs: pendingUploads "
-            "${pendingUploads.length}");
+        _logger.info(
+          "RemovingFiles $collectionIDs: pendingUploads "
+          "${pendingUploads.length}",
+        );
       }
       final Set<String> localIDsInOtherFileEntries =
           await _db.getLocalIDsPresentInEntries(
         pendingUploads,
         collectionID,
       );
-      _logger.info("RemovingFiles $collectionIDs: filesInOtherCollection "
-          "${localIDsInOtherFileEntries.length}");
+      _logger.info(
+        "RemovingFiles $collectionIDs: filesInOtherCollection "
+        "${localIDsInOtherFileEntries.length}",
+      );
       final List<File> entriesToUpdate = [];
       final List<int> entriesToDelete = [];
       for (File pendingUpload in pendingUploads) {
@@ -400,7 +404,7 @@ class RemoteSyncService {
         if (collectionByID == null || collectionByID.isDeleted) {
           _logger.info(
             "Collection $deviceCollectionID either deleted or missing "
-            "for path ${deviceCollection.name}",
+            "for path ${deviceCollection.id}",
           );
           deviceCollectionID = -1;
         }

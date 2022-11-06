@@ -188,7 +188,8 @@ class FileUploader {
       _queue.remove(id).completer.completeError(reason);
     }
     _logger.info(
-        'number of enteries removed from queue ${uploadsToBeRemoved.length}');
+      'number of enteries removed from queue ${uploadsToBeRemoved.length}',
+    );
     _totalCountInUploadSession -= uploadsToBeRemoved.length;
   }
 

@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
@@ -38,7 +37,6 @@ class StripeSubscriptionPage extends StatefulWidget {
 }
 
 class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
-  final _logger = Logger("StripeSubscriptionPage");
   final _billingService = BillingService.instance;
   final _userService = UserService.instance;
   Subscription _currentSubscription;

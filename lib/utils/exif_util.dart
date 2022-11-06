@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io' as io;
 
 import 'package:exif/exif.dart';
@@ -29,18 +27,16 @@ Future<Map<String, IfdTag>> getExif(File file) async {
   }
 }
 
-Future<DateTime> getCreationTimeFromEXIF(io.File file) async {
+Future<DateTime?> getCreationTimeFromEXIF(io.File file) async {
   try {
     final exif = await readExifFromFile(file);
-    if (exif != null) {
-      final exifTime = exif.containsKey(kDateTimeOriginal)
-          ? exif[kDateTimeOriginal].printable
-          : exif.containsKey(kImageDateTime)
-              ? exif[kImageDateTime].printable
-              : null;
-      if (exifTime != null && exifTime != kEmptyExifDateTime) {
-        return DateFormat(kExifDateTimePattern).parse(exifTime);
-      }
+    final exifTime = exif.containsKey(kDateTimeOriginal)
+        ? exif[kDateTimeOriginal]!.printable
+        : exif.containsKey(kImageDateTime)
+            ? exif[kImageDateTime]!.printable
+            : null;
+    if (exifTime != null && exifTime != kEmptyExifDateTime) {
+      return DateFormat(kExifDateTimePattern).parse(exifTime);
     }
   } catch (e) {
     _logger.severe("failed to getCreationTimeFromEXIF", e);
