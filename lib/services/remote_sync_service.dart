@@ -360,16 +360,20 @@ class RemoteSyncService {
       if (pendingUploads.isEmpty) {
         continue;
       } else {
-        _logger.info("RemovingFiles $collectionIDs: pendingUploads "
-            "${pendingUploads.length}");
+        _logger.info(
+          "RemovingFiles $collectionIDs: pendingUploads "
+          "${pendingUploads.length}",
+        );
       }
       final Set<String> localIDsInOtherFileEntries =
           await _db.getLocalIDsPresentInEntries(
         pendingUploads,
         collectionID,
       );
-      _logger.info("RemovingFiles $collectionIDs: filesInOtherCollection "
-          "${localIDsInOtherFileEntries.length}");
+      _logger.info(
+        "RemovingFiles $collectionIDs: filesInOtherCollection "
+        "${localIDsInOtherFileEntries.length}",
+      );
       final List<File> entriesToUpdate = [];
       final List<int> entriesToDelete = [];
       for (File pendingUpload in pendingUploads) {

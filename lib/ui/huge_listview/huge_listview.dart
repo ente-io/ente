@@ -1,6 +1,6 @@
 // @dart=2.9
 
-import 'dart:math' show max, min;
+import 'dart:math' show max;
 
 import 'package:flutter/material.dart';
 import 'package:photos/ui/huge_listview/draggable_scrollbar.dart';

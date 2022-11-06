@@ -41,8 +41,10 @@ class _HomeBottomNavigationBarState extends State<HomeBottomNavigationBar> {
     _tabChangedEventSubscription =
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.tabBar) {
-        debugPrint('${(TabChangedEvent).toString()} index changed  from '
-            '$currentTabIndex to ${event.selectedIndex} via ${event.source}');
+        debugPrint(
+          '${(TabChangedEvent).toString()} index changed  from '
+          '$currentTabIndex to ${event.selectedIndex} via ${event.source}',
+        );
         if (mounted) {
           setState(() {
             currentTabIndex = event.selectedIndex;

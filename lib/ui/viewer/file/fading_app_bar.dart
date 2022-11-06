@@ -471,7 +471,10 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Future<void> _saveLivePhotoOnDroid(
-      io.File image, io.File video, File enteFile) async {
+    io.File image,
+    io.File video,
+    File enteFile,
+  ) async {
     debugPrint("Downloading LivePhoto on Droid");
     AssetEntity savedAsset = await PhotoManager.editor
         .saveImageWithPath(image.path, title: enteFile.title);

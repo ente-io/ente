@@ -1261,7 +1261,8 @@ class FilesDB {
   }
 
   Future<Map<int, List<File>>> getAllFilesGroupByCollectionID(
-      List<int> ids) async {
+    List<int> ids,
+  ) async {
     final result = <int, List<File>>{};
     if (ids.isEmpty) {
       return result;
