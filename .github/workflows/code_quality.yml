@@ -5,6 +5,7 @@ on:
       - master
 jobs:
   test:
+    if: github.event.pull_request.draft == 'false'
     name: Check the source code
     runs-on: ubuntu-latest
     steps:
