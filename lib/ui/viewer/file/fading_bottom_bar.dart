@@ -91,7 +91,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     if (widget.file is TrashFile) {
       _addTrashOptions(children);
     }
-    bool isUploadedByUser = widget.file.uploadedFileID != null &&
+    final bool isUploadedByUser = widget.file.uploadedFileID != null &&
         widget.file.ownerID == Configuration.instance.getUserID();
     bool isFileHidden = false;
     if (isUploadedByUser) {

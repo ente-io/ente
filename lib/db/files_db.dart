@@ -645,7 +645,7 @@ class FilesDB {
     inParam = inParam.substring(0, inParam.length - 1);
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
-    String whereClause =
+    final String whereClause =
         '$columnCollectionID  IN ($inParam) AND $columnCreationTime >= ? AND '
         '$columnCreationTime <= ? AND $columnOwnerID = ?';
     final List<Object> whereArgs = [startTime, endTime, userID];
@@ -1261,7 +1261,8 @@ class FilesDB {
   }
 
   Future<Map<int, List<File>>> getAllFilesGroupByCollectionID(
-      List<int> ids) async {
+    List<int> ids,
+  ) async {
     final result = <int, List<File>>{};
     if (ids.isEmpty) {
       return result;

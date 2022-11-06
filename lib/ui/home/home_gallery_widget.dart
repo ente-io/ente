@@ -27,7 +27,7 @@ class HomeGalleryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    final double bottomSafeArea = MediaQuery.of(context).padding.bottom;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final ownerID = Configuration.instance.getUserID();

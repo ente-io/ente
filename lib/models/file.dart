@@ -161,9 +161,9 @@ class File extends EnteFile {
         duration = asset.duration;
       }
     }
-    if (fileType == FileType.image) {
+    if (fileType == FileType.image && mediaUploadData.sourceFile != null) {
       final exifTime =
-          await getCreationTimeFromEXIF(mediaUploadData.sourceFile);
+          await getCreationTimeFromEXIF(mediaUploadData.sourceFile!);
       if (exifTime != null) {
         creationTime = exifTime.microsecondsSinceEpoch;
       }

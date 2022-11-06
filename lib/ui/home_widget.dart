@@ -89,7 +89,8 @@ class _HomeWidgetState extends State<HomeWidget> {
         Bus.instance.on<TabChangedEvent>().listen((event) {
       if (event.source != TabChangedEventSource.pageView) {
         debugPrint(
-            "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}");
+          "TabChange going from $_selectedTabIndex to ${event.selectedIndex} souce: ${event.source}",
+        );
         _selectedTabIndex = event.selectedIndex;
         // _pageController.jumpToPage(_selectedTabIndex);
         _pageController.animateToPage(
