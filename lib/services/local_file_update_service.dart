@@ -28,7 +28,7 @@ class LocalFileUpdateService {
     _fileUpdationDB = FileUpdationDB.instance;
   }
 
-  void init(SharedPreferences preferences) async {
+  void init(SharedPreferences preferences) {
     _prefs = preferences;
   }
 
