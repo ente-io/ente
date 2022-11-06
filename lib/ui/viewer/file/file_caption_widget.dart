@@ -67,10 +67,22 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
             ? currentLength.toString() + " / " + maxLength.toString()
             : "",
         contentPadding: const EdgeInsets.all(16),
-        border: InputBorder.none,
-        focusedBorder: InputBorder.none,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(
+            width: 0,
+            style: BorderStyle.none,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(2),
+          borderSide: const BorderSide(
+            width: 0,
+            style: BorderStyle.none,
+          ),
+        ),
         filled: true,
-        fillColor: colorScheme.fillFaint,
+        fillColor: colorScheme.fillMuted,
         hintText: hintText,
         hintStyle: getEnteTextTheme(context)
             .small
