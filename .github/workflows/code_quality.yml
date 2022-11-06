@@ -1,0 +1,29 @@
+name: Check Linter Rules
+on:
+  pull_request:
+    branches:
+      - master
+jobs:
+  test:
+    name: Check the source code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      # Setup the flutter environment.
+      - uses: subosito/flutter-action@v2.3.0
+        with:
+          channel: 'stable'
+          flutter-version: '3.0.0'
+
+      # Fetch sub modules
+      - run: git submodule update --init --recursive
+
+      # Get flutter dependencies.
+      - name: Install packages
+        run: flutter pub get
+
+      - name: Run Linter
+        run: flutter analyze
+#      - name: Run Test :sed:
+#        run: flutter test
