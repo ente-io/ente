@@ -267,6 +267,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: CustomScrollView(
+            physics: const ClampingScrollPhysics(),
             shrinkWrap: true,
             slivers: <Widget>[
               TitleBarWidget(

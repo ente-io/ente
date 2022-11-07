@@ -22,6 +22,7 @@ const String sharedMediaIdentifier = 'ente-shared-media://';
 
 const int maxLivePhotoToastCount = 2;
 const String livePhotoToastCounterKey = "show_live_photo_toast";
+const String fileCaptionDefaultHint = "Add a description...";
 
 const thumbnailDiskLoadDeferDuration = Duration(milliseconds: 40);
 const thumbnailServerLoadDeferDuration = Duration(milliseconds: 80);

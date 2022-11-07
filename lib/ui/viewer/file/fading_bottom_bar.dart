@@ -284,7 +284,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
       topControl: const SizedBox.shrink(),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
       backgroundColor: colorScheme.backgroundBase,
-      barrierColor: backdropFaintDark,
+      barrierColor: backdropMutedDark,
       context: context,
       builder: (BuildContext context) {
         return Padding(
