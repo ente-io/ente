@@ -50,14 +50,14 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return TextField(
-      onEditingComplete: () async {
+      onSubmitted: (value) async {
         if (editedCaption != null) {
-          await editFileCaption(context, widget.file, editedCaption);
-          if (mounted) {
-            setState(() {});
+          final isSuccesful =
+              await editFileCaption(context, widget.file, editedCaption);
+          if (isSuccesful) {
+            Navigator.pop(context);
           }
         }
-        _focusNode.unfocus();
       },
       controller: _textController,
       focusNode: _focusNode,
