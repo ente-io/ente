@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -17,7 +18,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
   String? editedCaption;
-  String? hintText = "Add a description...";
+  String hintText = fileCaptionDefaultHint;
 
   @override
   void initState() {
@@ -30,7 +31,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     });
     editedCaption = widget.file.caption;
     if (editedCaption != null && editedCaption!.isNotEmpty) {
-      hintText = editedCaption;
+      hintText = editedCaption!;
     }
     super.initState();
   }
@@ -84,11 +85,11 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         filled: true,
         fillColor: colorScheme.fillFaint,
         hintText: hintText,
-        hintStyle: getEnteTextTheme(context)
-            .small
-            .copyWith(color: colorScheme.textMuted),
+        hintStyle: hintText == fileCaptionDefaultHint
+            ? textTheme.small.copyWith(color: colorScheme.textMuted)
+            : textTheme.small,
       ),
-      style: getEnteTextTheme(context).small,
+      style: textTheme.small,
       cursorWidth: 1.5,
       maxLength: maxLength,
       minLines: 1,
@@ -97,7 +98,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       keyboardType: TextInputType.text,
       onChanged: (value) {
         setState(() {
-          hintText = "Add a description...";
+          hintText = fileCaptionDefaultHint;
           currentLength = value.length;
           editedCaption = value;
         });
