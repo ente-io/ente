@@ -56,7 +56,9 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
           final isSuccesful =
               await editFileCaption(context, widget.file, editedCaption);
           if (isSuccesful) {
-            Navigator.pop(context);
+            if (mounted) {
+              Navigator.pop(context);
+            }
           }
         }
       },
