@@ -135,7 +135,13 @@ Future<bool> editFileCaption(
   String caption,
 ) async {
   try {
-    await _updatePublicMetadata(context, [file], pubMagicKeyCaption, caption);
+    await _updatePublicMetadata(
+      context,
+      [file],
+      pubMagicKeyCaption,
+      caption,
+      showDoneToast: false,
+    );
     return true;
   } catch (e) {
     if (context != null) {
@@ -149,8 +155,9 @@ Future<void> _updatePublicMetadata(
   BuildContext context,
   List<File> files,
   String key,
-  dynamic value,
-) async {
+  dynamic value, {
+  bool showDoneToast = true,
+}) async {
   if (files.isEmpty) {
     return;
   }
@@ -163,7 +170,9 @@ Future<void> _updatePublicMetadata(
     final Map<String, dynamic> update = {key: value};
     await FileMagicService.instance.updatePublicMagicMetadata(files, update);
     if (context != null) {
-      showShortToast(context, 'Done');
+      if (showDoneToast) {
+        showShortToast(context, 'Done');
+      }
       await dialog.hide();
     }
 
