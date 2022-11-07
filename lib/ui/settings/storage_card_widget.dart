@@ -120,16 +120,16 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     const hundredMBinBytes = 107374182;
     const oneTBinBytes = 1073741824000;
 
-    final usedStorageInBytes =
-        userDetails.getFamilyOrPersonalUsage() - userDetails.getFreeStorage();
+    final usedStorageInBytes = userDetails.getFamilyOrPersonalUsage();
     final totalStorageInBytes = userDetails.getTotalStorage();
     final freeStorageInBytes = totalStorageInBytes - usedStorageInBytes;
 
     final isMobileScreenSmall = MediaQuery.of(context).size.width <= 360;
     final shouldShowFreeSpaceInMBs = freeStorageInBytes <= hundredMBinBytes;
     final shouldShowFreeSpaceInTBs = freeStorageInBytes >= oneTBinBytes;
-    final shouldShowUsedSpaceInTBs = usedStorageInBytes >= oneTBinBytes;
-    final shouldShowTotalSpaceInTBs = totalStorageInBytes >= oneTBinBytes;
+    final shouldShowUsedStorageInTBs = usedStorageInBytes >= oneTBinBytes;
+    final shouldShowTotalStorageInTBs = totalStorageInBytes >= oneTBinBytes;
+    final shouldShowUsedStorageInMBs = usedStorageInBytes < hundredMBinBytes;
 
     final usedStorageInGB = roundBytesUsedToGBs(
       usedStorageInBytes,
@@ -171,8 +171,10 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                         .copyWith(color: textBaseDark),
                     children: storageDetails(
                       isMobileScreenSmall: isMobileScreenSmall,
-                      shouldShowTotalSpaceInTBs: shouldShowTotalSpaceInTBs,
-                      shouldShowUsedSpaceInTBs: shouldShowUsedSpaceInTBs,
+                      shouldShowTotalStorageInTBs: shouldShowTotalStorageInTBs,
+                      shouldShowUsedStorageInTBs: shouldShowUsedStorageInTBs,
+                      shouldShowUsedStorageInMBs: shouldShowUsedStorageInMBs,
+                      usedStorageInBytes: usedStorageInBytes,
                       usedStorageInGB: usedStorageInGB,
                       totalStorageInTB: totalStorageInTB,
                       usedStorageInTB: usedStorageInTB,
@@ -303,8 +305,10 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
   List<TextSpan> storageDetails({
     @required isMobileScreenSmall,
-    @required shouldShowUsedSpaceInTBs,
-    @required shouldShowTotalSpaceInTBs,
+    @required shouldShowUsedStorageInTBs,
+    @required shouldShowTotalStorageInTBs,
+    @required shouldShowUsedStorageInMBs,
+    @required usedStorageInBytes,
     @required usedStorageInGB,
     @required totalStorageInGB,
     @required usedStorageInTB,
@@ -319,12 +323,14 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
     return [
       TextSpan(
-        text: shouldShowUsedSpaceInTBs
+        text: shouldShowUsedStorageInTBs
             ? usedStorageInTB.toString() + " TB of "
-            : usedStorageInGB.toString() + " GB of ",
+            : shouldShowUsedStorageInMBs
+                ? convertBytesToMBs(usedStorageInBytes).toString() + " MB of "
+                : usedStorageInGB.toString() + " GB of ",
       ),
       TextSpan(
-        text: shouldShowTotalSpaceInTBs
+        text: shouldShowTotalStorageInTBs
             ? totalStorageInTB.toString() + " TB used"
             : totalStorageInGB.toString() + " GB used",
       ),
