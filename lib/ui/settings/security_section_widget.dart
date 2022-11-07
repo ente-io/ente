@@ -83,7 +83,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                           );
                           if (hasAuthenticated) {
                             if (!snapshot.data) {
-                              UserService.instance.setupTwoFactor(context);
+                              await UserService.instance
+                                  .setupTwoFactor(context);
                             } else {
                               _disableTwoFactor();
                             }
@@ -151,11 +152,13 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             "Please authenticate to view your active sessions",
           );
           if (hasAuthenticated) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return const SessionsPage();
-                },
+            unawaited(
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) {
+                    return const SessionsPage();
+                  },
+                ),
               ),
             );
           }
@@ -265,7 +268,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ],
       );
 
-      showDialog(
+      await showDialog(
         context: context,
         builder: (BuildContext context) {
           return alert;

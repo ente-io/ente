@@ -60,7 +60,7 @@ Future<void> _runInForeground() async {
   return await _runWithLogs(() async {
     _logger.info("Starting app in foreground");
     await _init(false, via: 'mainMethod');
-    _scheduleFGSync('appStart in FG');
+    unawaited(_scheduleFGSync('appStart in FG'));
     runApp(
       AppLock(
         builder: (args) => const EnteApp(_runBackgroundTask, _killBGTask),
@@ -188,7 +188,9 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 Future<void> _scheduleHeartBeat(
-    SharedPreferences prefs, bool isBackground) async {
+  SharedPreferences prefs,
+  bool isBackground,
+) async {
   await prefs.setInt(
     isBackground ? kLastBGTaskHeartBeatTime : kLastFGTaskHeartBeatTime,
     DateTime.now().microsecondsSinceEpoch,
@@ -201,7 +203,7 @@ Future<void> _scheduleHeartBeat(
 Future<void> _scheduleFGSync(String caller) async {
   await _sync(caller);
   Future.delayed(kFGSyncFrequency, () async {
-    _scheduleFGSync('fgSyncCron');
+    unawaited(_scheduleFGSync('fgSyncCron'));
   });
 }
 

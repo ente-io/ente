@@ -249,12 +249,12 @@ class CollectionsService {
       _collectionIDToCollections[collectionID]
           .sharees
           .removeWhere((user) => user.email == email);
-      _db.insert([_collectionIDToCollections[collectionID]]);
+      unawaited(_db.insert([_collectionIDToCollections[collectionID]]));
     } catch (e) {
       _logger.severe(e);
       rethrow;
     }
-    RemoteSyncService.instance.sync(silently: true);
+    RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
   Future<void> trashCollection(Collection collection) async {
@@ -279,7 +279,7 @@ class CollectionsService {
       await _filesDB.deleteCollection(collection.id);
       final deletedCollection = collection.copyWith(isDeleted: true);
       _collectionIDToCollections[collection.id] = deletedCollection;
-      _db.insert([deletedCollection]);
+      unawaited(_db.insert([deletedCollection]));
       unawaited(LocalSyncService.instance.syncAll());
     } catch (e) {
       _logger.severe('failed to trash collection', e);
@@ -857,7 +857,7 @@ class CollectionsService {
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
     Bus.instance.fire(LocalPhotosUpdatedEvent(files));
-    RemoteSyncService.instance.sync(silently: true);
+    RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
   Future<Collection> createAndCacheCollection(

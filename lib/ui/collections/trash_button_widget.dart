@@ -116,7 +116,7 @@ class _TrashButtonWidgetState extends State<TrashButtonWidget> {
           ),
         ),
       ),
-      onPressed: () async {
+      onPressed: () {
         routeToPage(
           context,
           TrashPage(),
