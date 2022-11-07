@@ -36,18 +36,16 @@ import { getTrashFileMessage } from 'utils/ui';
 import { ChevronLeft } from '@mui/icons-material';
 import { styled } from '@mui/material';
 
-const CaptionContainer = styled('div')(
-    ({ theme }) => `
-    padding: 16px;
-    word-break: break-word;
-    text-align: right;
-    max-width: 375px;
-    font-size: 14px;
-    line-height: 17px;
-    background-color: ${theme.palette.backdrop.light};
-    backdrop-filter: blur(96px);
-`
-);
+const CaptionContainer = styled('div')(({ theme }) => ({
+    padding: theme.spacing(2),
+    wordBreak: 'break-word',
+    textAlign: 'right',
+    maxWidth: '375px',
+    fontSize: '14px',
+    lineHeight: '17px',
+    backgroundColor: theme.palette.backdrop.light,
+    backdropFilter: `blur(${theme.palette.blur.base})`,
+}));
 interface Iprops {
     isOpen: boolean;
     items: any[];
