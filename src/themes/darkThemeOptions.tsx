@@ -11,14 +11,14 @@ declare module '@mui/material/styles' {
     }
 
     interface BlurStrength {
-        base: number;
-        muted: number;
-        faint: number;
+        base: string;
+        muted: string;
+        faint: string;
     }
     interface BlurStrengthOptions {
-        base?: number;
-        muted?: number;
-        faint?: number;
+        base?: string;
+        muted?: string;
+        faint?: string;
     }
     interface Palette {
         accent: PaletteColor;
@@ -291,9 +291,9 @@ const darkThemeOptions = createTheme({
         },
 
         blur: {
-            base: 96,
-            muted: 48,
-            faint: 24,
+            base: '96px',
+            muted: '48px',
+            faint: '24px',
         },
         text: {
             primary: '#fff',
