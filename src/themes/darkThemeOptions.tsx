@@ -9,10 +9,22 @@ declare module '@mui/material/styles' {
     interface TypeBackground {
         overPaper?: string;
     }
+
+    interface BlurStrength {
+        base: number;
+        muted: number;
+        faint: number;
+    }
+    interface BlurStrengthOptions {
+        base?: number;
+        muted?: number;
+        faint?: number;
+    }
     interface Palette {
         accent: PaletteColor;
         fill: PaletteColor;
-        glass: PaletteColor;
+        backdrop: PaletteColor;
+        blur: BlurStrength;
         danger: PaletteColor;
         stroke: TypeText;
     }
@@ -20,7 +32,8 @@ declare module '@mui/material/styles' {
         accent?: PaletteColorOptions;
         danger?: PaletteColorOptions;
         fill?: PaletteColorOptions;
-        glass?: PaletteColorOptions;
+        backdrop?: PaletteColorOptions;
+        blur?: BlurStrengthOptions;
         stroke?: Partial<TypeText>;
     }
 
@@ -272,11 +285,15 @@ const darkThemeOptions = createTheme({
             dark: 'rgba(256, 256, 256, 0.12)',
             light: 'rgba(256, 256, 256)',
         },
-        glass: {
-            main: 'rgba(256, 256, 256, 0.7)',
-            dark: 'rgba(256, 256, 256, 0.9)',
-            light: 'rgba(256, 256, 256,0.3)',
-            contrastText: '#000',
+        backdrop: {
+            main: 'rgba(256, 256, 256, 0.65)',
+            light: 'rgba(0, 0, 0,0.2)',
+        },
+
+        blur: {
+            base: 96,
+            muted: 48,
+            faint: 24,
         },
         text: {
             primary: '#fff',
