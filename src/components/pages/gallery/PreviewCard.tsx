@@ -251,7 +251,12 @@ export default function PreviewCard(props: IProps) {
             if (thumbs.has(file.id)) {
                 const thumbImgSrc = thumbs.get(file.id);
                 setImgSrc(thumbImgSrc);
-                file.msrc = thumbImgSrc;
+                const newFile = updateURL(thumbImgSrc);
+                file.msrc = newFile.msrc;
+                file.html = newFile.html;
+                file.src = newFile.src;
+                file.w = newFile.w;
+                file.h = newFile.h;
             } else {
                 main();
             }
