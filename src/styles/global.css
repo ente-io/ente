@@ -120,12 +120,6 @@ html, body {
     margin-right: 20px;
 }
 
-.pswp-custom-caption {
-    text-align: right;
-    width: 375px;
-    font-size:14px;
-    line-height: 17px;
-}
 
 .pswp-custom-caption-container {
     width: 100%;
@@ -133,7 +127,10 @@ html, body {
     justify-content: flex-end;
     bottom: 56px;
     background-color: transparent !important;
-    padding:16px;
+}
+
+.pswp__caption--empty{
+    display: none;
 }
 
 .bg-upload-progress-bar {
