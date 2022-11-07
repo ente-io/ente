@@ -34,7 +34,20 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
 import { ChevronLeft } from '@mui/icons-material';
+import { styled } from '@mui/material';
 
+const CaptionContainer = styled('div')(
+    ({ theme }) => `
+    padding: 16px;
+    word-break: break-word;
+    text-align: right;
+    max-width: 375px;
+    font-size: 14px;
+    line-height: 17px;
+    background-color: ${theme.palette.backdrop.light};
+    backdrop-filter: blur(96px);
+`
+);
 interface Iprops {
     isOpen: boolean;
     items: any[];
@@ -473,7 +486,7 @@ function PhotoViewer(props: Iprops) {
                             <ChevronRight sx={{ pointerEvents: 'none' }} />
                         </button>
                         <div className="pswp__caption pswp-custom-caption-container">
-                            <div className="pswp-custom-caption"></div>
+                            <CaptionContainer />
                         </div>
                     </div>
                 </div>
