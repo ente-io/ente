@@ -283,7 +283,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     return showBarModalBottomSheet(
       topControl: const SizedBox.shrink(),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-      backgroundColor: colorScheme.backgroundBase,
+      backgroundColor: colorScheme.backgroundElevated,
       barrierColor: backdropMutedDark,
       context: context,
       builder: (BuildContext context) {

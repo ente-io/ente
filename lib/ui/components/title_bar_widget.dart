@@ -12,6 +12,7 @@ class TitleBarWidget extends StatelessWidget {
   final bool isTitleH2WithoutLeading;
   final bool isFlexibleSpaceDisabled;
   final bool isOnTopOfScreen;
+  final Color? backgroundColor;
   const TitleBarWidget({
     this.leading,
     this.title,
@@ -22,6 +23,7 @@ class TitleBarWidget extends StatelessWidget {
     this.isTitleH2WithoutLeading = false,
     this.isFlexibleSpaceDisabled = false,
     this.isOnTopOfScreen = true,
+    this.backgroundColor,
     super.key,
   });
 
@@ -31,6 +33,7 @@ class TitleBarWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     final colorTheme = getEnteColorScheme(context);
     return SliverAppBar(
+      backgroundColor: backgroundColor,
       primary: isOnTopOfScreen ? true : false,
       toolbarHeight: toolbarHeight,
       leadingWidth: 48,
