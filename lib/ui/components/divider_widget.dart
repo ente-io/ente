@@ -20,6 +20,7 @@ class DividerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dividerColor = getEnteColorScheme(context).blurStrokeFaint;
+
     if (dividerType == DividerType.solid) {
       return Container(
         color: getEnteColorScheme(context).strokeFaint,

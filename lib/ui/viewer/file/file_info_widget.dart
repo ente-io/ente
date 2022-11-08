@@ -286,7 +286,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                     if (index.isOdd) {
                       return index == 1
                           ? const SizedBox.shrink()
-                          : const DividerWidget(dividerType: DividerType.menu);
+                          : const DividerWidget(
+                              dividerType: DividerType.menu,
+                            );
                     } else {
                       return listTiles[index ~/ 2];
                     }
