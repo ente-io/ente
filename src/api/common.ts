@@ -9,6 +9,8 @@ export const selectRootDirectory = async (): Promise<string> => {
     }
 };
 
-export { logToDisk, openLogDirectory } from '../services/logging';
-
-export { getSentryUserID } from '../services/sentry';
+export {
+    logToDisk,
+    openLogDirectory,
+    getSentryUserID,
+} from '../services/logging';
