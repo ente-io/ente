@@ -36,25 +36,27 @@ class DividerWidget extends StatelessWidget {
       );
     }
 
-    return Row(
-      children: [
-        Container(
-          color: bgColor,
-          width: dividerType == DividerType.menu
-              ? 48
-              : dividerType == DividerType.menuNoIcon
-                  ? 16
-                  : 0,
-          height: 1,
-        ),
-        Expanded(
-          child: Container(
-            color: dividerColor,
+    return Container(
+      color: bgColor,
+      child: Row(
+        children: [
+          SizedBox(
+            width: dividerType == DividerType.menu
+                ? 48
+                : dividerType == DividerType.menuNoIcon
+                    ? 16
+                    : 0,
             height: 1,
-            width: double.infinity,
           ),
-        ),
-      ],
+          Expanded(
+            child: Container(
+              color: dividerColor,
+              height: 1,
+              width: double.infinity,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
