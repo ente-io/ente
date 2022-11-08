@@ -65,11 +65,11 @@ if (!gotTheLock) {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', async () => {
+        initSentry();
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);
         setupMacWindowOnDockIconClick();
-        initSentry();
         setupMainMenu();
         setupIpcComs(tray, mainWindow, watcher);
         handleUpdates(mainWindow);
