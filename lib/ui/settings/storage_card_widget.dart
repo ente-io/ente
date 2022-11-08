@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/user_details.dart';
@@ -261,7 +263,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                       children: [
                         TextSpan(
                           text:
-                              "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeStorageInBytes) : _roundedFreeSpace(totalStorageInGB, usedStorageInGB)}",
+                              "${shouldShowFreeSpaceInMBs ? max(0, convertBytesToMBs(freeStorageInBytes)) : _roundedFreeSpace(totalStorageInGB, usedStorageInGB)}",
                         ),
                         TextSpan(
                           text: shouldShowFreeSpaceInTBs
