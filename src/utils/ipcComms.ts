@@ -10,7 +10,7 @@ import {
 } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
-import { logErrorSentry } from '../services/sentry';
+import { getSentryUserID, logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
@@ -113,5 +113,8 @@ export default function setupIpcComs(
     });
     ipcMain.on('skip-app-version', (_, version) => {
         skipAppVersion(version);
+    });
+    ipcMain.handle('get-sentry-id', () => {
+        return getSentryUserID();
     });
 }

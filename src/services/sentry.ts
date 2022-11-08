@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/electron/dist/main';
+import { makeID } from '../utils/logging';
 import { keysStore } from '../stores/keys.store';
 
 import { isDev } from '../utils/common';
@@ -38,7 +39,7 @@ export function logErrorSentry(
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,
-        user: { id: getUserAnonymizedID() },
+        user: { id: getSentryUserID() },
         contexts: {
             ...(info && {
                 info: info,
@@ -57,24 +58,11 @@ function errorWithContext(originalError: Error, context: string) {
     return errorWithContext;
 }
 
-function getUserAnonymizedID() {
+export function getSentryUserID() {
     let anonymizeUserID = keysStore.get('AnonymizeUserID')?.id;
     if (!anonymizeUserID) {
         anonymizeUserID = makeID(6);
         keysStore.set('AnonymizeUserID', { id: anonymizeUserID });
     }
     return anonymizeUserID;
-}
-
-function makeID(length: number) {
-    let result = '';
-    const characters =
-        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    const charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(
-            Math.floor(Math.random() * charactersLength)
-        );
-    }
-    return result;
 }

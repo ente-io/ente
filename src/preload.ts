@@ -39,7 +39,12 @@ import {
     setExportRecord,
     exists,
 } from './api/export';
-import { selectRootDirectory, logToDisk, openLogDirectory } from './api/common';
+import {
+    selectRootDirectory,
+    logToDisk,
+    openLogDirectory,
+    getSentryUserID,
+} from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
 import { convertHEIC } from './api/heicConvert';
@@ -92,4 +97,5 @@ windowObject['ElectronAPIs'] = {
     registerUpdateEventListener,
     updateAndRestart,
     skipAppVersion,
+    getSentryUserID,
 };
