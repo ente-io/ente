@@ -158,11 +158,9 @@ export default function App({ Component, err }) {
             }
         );
         clearLogsIfLocalStorageLimitExceeded();
-        addLogLine(
-            'latest commit id :' + process.env.NEXT_PUBLIC_LATEST_COMMIT_HASH
-        );
-        addLogLine(`user sentry id ${getSentryUserID()}`);
-        addLogLine(`ente userID ${(getData(LS_KEYS.USER) as User)?.id}`);
+        addLogLine(`userID ${(getData(LS_KEYS.USER) as User)?.id}`);
+        addLogLine(`sentryID ${getSentryUserID()}`);
+        addLogLine('sentry release ID:' + process.env.SENTRY_RELEASE);
     }, []);
 
     useEffect(() => {
