@@ -26,7 +26,10 @@ import {
     getRoadmapRedirectURL,
 } from 'services/userService';
 import { CustomError } from 'utils/error';
-import { clearLogsIfLocalStorageLimitExceeded } from 'utils/logging';
+import {
+    addLogLine,
+    clearLogsIfLocalStorageLimitExceeded,
+} from 'utils/logging';
 import isElectron from 'is-electron';
 import ElectronUpdateService from 'services/electron/update';
 import {
@@ -40,6 +43,8 @@ import {
 } from 'types/Notification';
 import ArrowForward from '@mui/icons-material/ArrowForward';
 import { AppUpdateInfo } from 'types/electron';
+import { getSentryUserID } from 'utils/user';
+import { User } from 'types/user';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -153,6 +158,12 @@ export default function App({ Component, err }) {
             }
         );
         clearLogsIfLocalStorageLimitExceeded();
+        const main = async () => {
+            addLogLine(`userID: ${(getData(LS_KEYS.USER) as User)?.id}`);
+            addLogLine(`sentryID: ${await getSentryUserID()}`);
+            addLogLine(`sentry release ID: ${process.env.SENTRY_RELEASE}`);
+        };
+        main();
     }, []);
 
     useEffect(() => {

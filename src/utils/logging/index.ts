@@ -69,7 +69,6 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
                 addLogLine(`app started`);
             } catch (e) {
                 deleteLogs();
-                logError(e, 'failed to log test log');
             }
         }
         addLogLine(`logs size: ${convertBytesToHumanReadable(logSize)}`);

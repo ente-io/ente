@@ -3,7 +3,7 @@ import { isDEVSentryENV } from 'constants/sentry';
 import { addLogLine } from 'utils/logging';
 import { getSentryUserID } from 'utils/user';
 
-export const logError = (
+export const logError = async (
     error: any,
     msg: string,
     info?: Record<string, unknown>,
@@ -25,7 +25,7 @@ export const logError = (
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,
-        user: { id: getSentryUserID() },
+        user: { id: await getSentryUserID() },
         contexts: {
             ...(info && {
                 info: info,
