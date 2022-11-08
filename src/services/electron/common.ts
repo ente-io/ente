@@ -23,6 +23,12 @@ class ElectronService {
             this.electronAPIs.openLogDirectory();
         }
     }
+
+    getSentryUserID() {
+        if (this.electronAPIs?.getSentryUserID) {
+            return this.electronAPIs.getSentryUserID();
+        }
+    }
 }
 
 export default new ElectronService();

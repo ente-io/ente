@@ -1,5 +1,7 @@
+import isElectron from 'is-electron';
 import { UserDetails } from 'types/user';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import ElectronService from 'services/electron/common';
 
 export function makeID(length) {
     let result = '';
@@ -15,12 +17,16 @@ export function makeID(length) {
 }
 
 export function getSentryUserID() {
-    let anonymizeUserID = getData(LS_KEYS.AnonymizedUserID)?.id;
-    if (!anonymizeUserID) {
-        anonymizeUserID = makeID(6);
-        setData(LS_KEYS.AnonymizedUserID, { id: anonymizeUserID });
+    if (isElectron()) {
+        return ElectronService.getSentryUserID();
+    } else {
+        let anonymizeUserID = getData(LS_KEYS.AnonymizedUserID)?.id;
+        if (!anonymizeUserID) {
+            anonymizeUserID = makeID(6);
+            setData(LS_KEYS.AnonymizedUserID, { id: anonymizeUserID });
+        }
+        return anonymizeUserID;
     }
-    return anonymizeUserID;
 }
 
 export function getLocalUserDetails(): UserDetails {
