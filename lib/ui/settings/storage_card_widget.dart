@@ -127,7 +127,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     final freeStorageInBytes = totalStorageInBytes - usedStorageInBytes;
 
     final isMobileScreenSmall = MediaQuery.of(context).size.width <= 360;
-    final shouldShowFreeSpaceInMBs = freeStorageInBytes <= hundredMBinBytes;
+    final shouldShowFreeSpaceInMBs = freeStorageInBytes < hundredMBinBytes;
     final shouldShowFreeSpaceInTBs = freeStorageInBytes >= oneTBinBytes;
     final shouldShowUsedStorageInTBs = usedStorageInBytes >= oneTBinBytes;
     final shouldShowTotalStorageInTBs = totalStorageInBytes >= oneTBinBytes;
@@ -171,7 +171,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                     style: getEnteTextTheme(context)
                         .h3Bold
                         .copyWith(color: textBaseDark),
-                    children: storageDetails(
+                    children: _usedStorageDetails(
                       isMobileScreenSmall: isMobileScreenSmall,
                       shouldShowTotalStorageInTBs: shouldShowTotalStorageInTBs,
                       shouldShowUsedStorageInTBs: shouldShowUsedStorageInTBs,
@@ -305,7 +305,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     return num.parse(freeStorage.toStringAsFixed(fractionDigits));
   }
 
-  List<TextSpan> storageDetails({
+  List<TextSpan> _usedStorageDetails({
     @required isMobileScreenSmall,
     @required shouldShowUsedStorageInTBs,
     @required shouldShowTotalStorageInTBs,
