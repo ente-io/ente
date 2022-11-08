@@ -38,3 +38,13 @@ num convertBytesToGBs(int bytes) {
 int convertBytesToMBs(int bytes) {
   return (bytes / pow(1024, 2)).round();
 }
+
+//Eg: 1TB, 1.3TB, 2.9TB, 3TB
+roundGBsToTBs(sizeInGBs) {
+  final num sizeInTBs = num.parse((sizeInGBs / 1000).toStringAsFixed(1));
+  if (sizeInTBs % 1 == 0) {
+    return sizeInTBs.truncate();
+  } else {
+    return sizeInTBs;
+  }
+}

@@ -345,8 +345,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   }
 
   Widget _getFileSize() {
+    Future<int> fileSizeFuture;
+    if (widget.file.fileSize != null) {
+      fileSizeFuture = Future.value(widget.file.fileSize);
+    } else {
+      fileSizeFuture = getFile(widget.file).then((f) => f.length());
+    }
     return FutureBuilder(
-      future: getFile(widget.file).then((f) => f.length()),
+      future: fileSizeFuture,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return Text(

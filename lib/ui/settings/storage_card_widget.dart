@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/models/user_details.dart';
@@ -118,17 +120,27 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
 
   Widget userDetails(UserDetails userDetails) {
     const hundredMBinBytes = 107374182;
+    const oneTBinBytes = 1073741824000;
 
-    final isMobileScreenSmall = MediaQuery.of(context).size.width <= 365;
-    final freeSpaceInBytes = userDetails.getFreeStorage();
-    final shouldShowFreeSpaceInMBs = freeSpaceInBytes < hundredMBinBytes;
+    final usedStorageInBytes = userDetails.getFamilyOrPersonalUsage();
+    final totalStorageInBytes = userDetails.getTotalStorage();
+    final freeStorageInBytes = totalStorageInBytes - usedStorageInBytes;
 
-    final usedSpaceInGB = roundBytesUsedToGBs(
-      userDetails.getFamilyOrPersonalUsage(),
-      userDetails.getFreeStorage(),
+    final isMobileScreenSmall = MediaQuery.of(context).size.width <= 360;
+    final shouldShowFreeSpaceInMBs = freeStorageInBytes < hundredMBinBytes;
+    final shouldShowFreeSpaceInTBs = freeStorageInBytes >= oneTBinBytes;
+    final shouldShowUsedStorageInTBs = usedStorageInBytes >= oneTBinBytes;
+    final shouldShowTotalStorageInTBs = totalStorageInBytes >= oneTBinBytes;
+    final shouldShowUsedStorageInMBs = usedStorageInBytes < hundredMBinBytes;
+
+    final usedStorageInGB = roundBytesUsedToGBs(
+      usedStorageInBytes,
+      freeStorageInBytes,
     );
-    final totalStorageInGB =
-        convertBytesToGBs(userDetails.getTotalStorage()).truncate();
+    final totalStorageInGB = convertBytesToGBs(totalStorageInBytes).truncate();
+
+    final usedStorageInTB = roundGBsToTBs(usedStorageInGB);
+    final totalStorageInTB = roundGBsToTBs(totalStorageInGB);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -159,12 +171,17 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                     style: getEnteTextTheme(context)
                         .h3Bold
                         .copyWith(color: textBaseDark),
-                    children: [
-                      TextSpan(text: usedSpaceInGB.toString()),
-                      TextSpan(text: isMobileScreenSmall ? "/" : " GB of "),
-                      TextSpan(text: totalStorageInGB.toString() + " GB"),
-                      TextSpan(text: isMobileScreenSmall ? "" : " used"),
-                    ],
+                    children: _usedStorageDetails(
+                      isMobileScreenSmall: isMobileScreenSmall,
+                      shouldShowTotalStorageInTBs: shouldShowTotalStorageInTBs,
+                      shouldShowUsedStorageInTBs: shouldShowUsedStorageInTBs,
+                      shouldShowUsedStorageInMBs: shouldShowUsedStorageInMBs,
+                      usedStorageInBytes: usedStorageInBytes,
+                      usedStorageInGB: usedStorageInGB,
+                      totalStorageInTB: totalStorageInTB,
+                      usedStorageInTB: usedStorageInTB,
+                      totalStorageInGB: totalStorageInGB,
+                    ),
                   ),
                 ),
               ],
@@ -246,12 +263,14 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
                       children: [
                         TextSpan(
                           text:
-                              "${shouldShowFreeSpaceInMBs ? convertBytesToMBs(freeSpaceInBytes) : _roundedFreeSpace(totalStorageInGB, usedSpaceInGB)}",
+                              "${shouldShowFreeSpaceInMBs ? max(0, convertBytesToMBs(freeStorageInBytes)) : _roundedFreeSpace(totalStorageInGB, usedStorageInGB)}",
                         ),
                         TextSpan(
-                          text: shouldShowFreeSpaceInMBs
-                              ? " MB free"
-                              : " GB free",
+                          text: shouldShowFreeSpaceInTBs
+                              ? " TB free"
+                              : shouldShowFreeSpaceInMBs
+                                  ? " MB free"
+                                  : " GB free",
                         )
                       ],
                     ),
@@ -265,20 +284,58 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     );
   }
 
-  num _roundedFreeSpace(num totalStorageInGB, num usedSpaceInGB) {
+  num _roundedFreeSpace(num totalStorageInGB, num usedStorageInGB) {
     int fractionDigits;
     //subtracting usedSpace from totalStorage in GB instead of converting from bytes so that free space and used space adds up in the UI
-    final freeSpace = totalStorageInGB - usedSpaceInGB;
+    final freeStorage = totalStorageInGB - usedStorageInGB;
+
+    if (freeStorage >= 1000) {
+      return roundGBsToTBs(freeStorage);
+    }
     //show one decimal place if free space is less than 10GB
-    if (freeSpace < 10) {
+    if (freeStorage < 10) {
       fractionDigits = 1;
     } else {
       fractionDigits = 0;
     }
     //omit decimal if decimal is 0
-    if (fractionDigits == 1 && freeSpace.remainder(1) == 0) {
+    if (fractionDigits == 1 && freeStorage.remainder(1) == 0) {
       fractionDigits = 0;
     }
-    return num.parse(freeSpace.toStringAsFixed(fractionDigits));
+    return num.parse(freeStorage.toStringAsFixed(fractionDigits));
+  }
+
+  List<TextSpan> _usedStorageDetails({
+    @required isMobileScreenSmall,
+    @required shouldShowUsedStorageInTBs,
+    @required shouldShowTotalStorageInTBs,
+    @required shouldShowUsedStorageInMBs,
+    @required usedStorageInBytes,
+    @required usedStorageInGB,
+    @required totalStorageInGB,
+    @required usedStorageInTB,
+    @required totalStorageInTB,
+  }) {
+    if (isMobileScreenSmall) {
+      return [
+        TextSpan(text: usedStorageInGB.toString() + "/"),
+        TextSpan(text: totalStorageInGB.toString() + " GB"),
+      ];
+    }
+
+    return [
+      TextSpan(
+        text: shouldShowUsedStorageInTBs
+            ? usedStorageInTB.toString() + " TB of "
+            : shouldShowUsedStorageInMBs
+                ? convertBytesToMBs(usedStorageInBytes).toString() + " MB of "
+                : usedStorageInGB.toString() + " GB of ",
+      ),
+      TextSpan(
+        text: shouldShowTotalStorageInTBs
+            ? totalStorageInTB.toString() + " TB used"
+            : totalStorageInGB.toString() + " GB used",
+      ),
+    ];
   }
 }
