@@ -75,5 +75,5 @@ export interface ElectronAPIs {
     ) => void;
     updateAndRestart: () => void;
     skipAppVersion: (version: string) => void;
-    getSentryUserID: () => string;
+    getSentryUserID: () => Promise<string>;
 }

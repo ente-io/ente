@@ -158,9 +158,12 @@ export default function App({ Component, err }) {
             }
         );
         clearLogsIfLocalStorageLimitExceeded();
-        addLogLine(`userID ${(getData(LS_KEYS.USER) as User)?.id}`);
-        addLogLine(`sentryID ${getSentryUserID()}`);
-        addLogLine('sentry release ID:' + process.env.SENTRY_RELEASE);
+        const main = async () => {
+            addLogLine(`userID: ${(getData(LS_KEYS.USER) as User)?.id}`);
+            addLogLine(`sentryID: ${await getSentryUserID()}`);
+            addLogLine(`sentry release ID: ${process.env.SENTRY_RELEASE}`);
+        };
+        main();
     }, []);
 
     useEffect(() => {

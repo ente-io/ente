@@ -16,9 +16,9 @@ export function makeID(length) {
     return result;
 }
 
-export function getSentryUserID() {
+export async function getSentryUserID() {
     if (isElectron()) {
-        return ElectronService.getSentryUserID();
+        return await ElectronService.getSentryUserID();
     } else {
         let anonymizeUserID = getData(LS_KEYS.AnonymizedUserID)?.id;
         if (!anonymizeUserID) {
