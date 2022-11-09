@@ -59,11 +59,10 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
   StreamSubscription<int> _currentIndexSubscription;
   bool _shouldRender;
-  final ValueNotifier<bool> _shouldSelectAll = ValueNotifier(true);
+  final ValueNotifier<bool> _shouldSelectAll = ValueNotifier(false);
 
   @override
   void initState() {
-    _shouldSelectAll.value = false;
     //this is for updating the 'select all from day' icon on canceling selected files
     widget.selectedFiles.addListener(() {
       if (widget.selectedFiles.files.isEmpty) {
@@ -141,6 +140,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   void dispose() {
     _reloadEventSubscription.cancel();
     _currentIndexSubscription.cancel();
+    widget.selectedFiles.removeListener(() {});
+    _shouldSelectAll.removeListener(() {});
     super.dispose();
   }
 
@@ -212,7 +213,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           widget.selectedFiles,
           index == 0,
           _files.length > kRecycleLimit,
-          shouldSelectAll: _shouldSelectAll,
+          _shouldSelectAll,
         ),
       );
     }
@@ -238,8 +239,8 @@ class LazyLoadingGridView extends StatefulWidget {
     this.asyncLoader,
     this.selectedFiles,
     this.shouldRender,
-    this.shouldRecycle, {
-    @required this.shouldSelectAll,
+    this.shouldRecycle,
+    this.shouldSelectAll, {
     Key key,
   }) : super(key: key ?? UniqueKey());
 
