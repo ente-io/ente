@@ -11,6 +11,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -149,18 +150,30 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     if (_files.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          getDayWidget(
-            context,
-            _files[0].creationTime,
-            widget.smallerTodayFont,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 14, 12, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              getDayWidget(
+                context,
+                _files[0].creationTime,
+                widget.smallerTodayFont,
+              ),
+              GestureDetector(
+                child: Icon(
+                  Icons.check_circle_outlined,
+                  color: getEnteColorScheme(context).strokeMuted,
+                  size: 18,
+                ),
+              )
+            ],
           ),
-          _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
-        ],
-      ),
+        ),
+        _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
+      ],
     );
   }
 

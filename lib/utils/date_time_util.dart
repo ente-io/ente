@@ -196,7 +196,6 @@ Widget getDayWidget(
   bool smallerTodayFont,
 ) {
   return Container(
-    padding: const EdgeInsets.fromLTRB(4, 14, 0, 8),
     alignment: Alignment.centerLeft,
     child: Text(
       getDayTitle(timestamp),
