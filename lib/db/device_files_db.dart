@@ -209,6 +209,7 @@ extension DeviceFiles on FilesDB {
               "cover_id": localID,
               "should_backup": shouldBackup ? _sqlBoolTrue : _sqlBoolFalse
             },
+            conflictAlgorithm: ConflictAlgorithm.ignore,
           );
         }
       }
