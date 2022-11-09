@@ -258,14 +258,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       if (widget.shouldSelectAll.value && mounted) {
         setState(() {
           widget.selectedFiles.files.addAll(widget.files);
-          widget.selectedFiles.lastSelections.addAll(widget.files);
           widget.selectedFiles.notifyListeners();
         });
       } else {
         if (mounted) {
           setState(() {
-            widget.selectedFiles.files.clear();
-            widget.selectedFiles.lastSelections.clear();
+            widget.selectedFiles.files.removeAll(widget.files.toSet());
             widget.selectedFiles.notifyListeners();
           });
         }
