@@ -8,6 +8,7 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
 
@@ -52,10 +53,17 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
               ),
             ),
             Expanded(child: _getChangeLog()),
-            const SizedBox(height: 16),
+            const DividerWidget(
+              dividerType: DividerType.solid,
+            ),
             SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.only(
+                  left: 16.0,
+                  right: 16,
+                  top: 16,
+                  bottom: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -69,37 +77,40 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                         text: "Let's go",
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        children: [
-                          const TextSpan(
-                            text: "If you like ente, ",
-                          ),
-                          TextSpan(
-                            text: "let others know",
-                            style: enteTextTheme.small.copyWith(
-                              color: enteColorScheme.primary700,
-                              decoration: TextDecoration.underline,
+                    Padding(
+                      padding: const EdgeInsets.only(
+                          left: 12, top: 12, right: 12, bottom: 6),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          children: [
+                            const TextSpan(
+                              text: "If you like ente, ",
                             ),
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                // Single tapped.
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (BuildContext context) {
-                                      return const WebPage(
-                                        "Spread the word",
-                                        "https://ente.io/share/",
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                          ),
-                        ],
-                        style: enteTextTheme.small,
+                            TextSpan(
+                              text: "let others know",
+                              style: enteTextTheme.small.copyWith(
+                                color: enteColorScheme.primary700,
+                                decoration: TextDecoration.underline,
+                              ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  // Single tapped.
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) {
+                                        return const WebPage(
+                                          "Spread the word",
+                                          "https://ente.io/share/",
+                                        );
+                                      },
+                                    ),
+                                  );
+                                },
+                            ),
+                          ],
+                          style: enteTextTheme.small,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -174,6 +185,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
               child: ChangeLogEntryWidget(entry: items[index]),
             );
           },
+          physics: const ClampingScrollPhysics(),
           itemCount: items.length,
           shrinkWrap: true,
         ),

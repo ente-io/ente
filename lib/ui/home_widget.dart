@@ -429,7 +429,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   showChangeLog(BuildContext context) async {
     final bool show = await UpdateService.instance.showChangeLog();
-    if (!show) {
+    if (!show || !Configuration.instance.isLoggedIn()) {
       return;
     }
     final colorScheme = getEnteColorScheme(context);
@@ -452,5 +452,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         );
       },
     );
+    // Do not show change dialog again
+    UpdateService.instance.hideChangeLog().ignore();
   }
 }
