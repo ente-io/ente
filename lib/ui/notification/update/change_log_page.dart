@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -62,6 +63,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       width: double.infinity,
                       child: GradientButton(
                         onTap: () async {
+                          await UpdateService.instance.hideChangeLog();
                           Navigator.of(context).pop();
                         },
                         text: "Let's go",

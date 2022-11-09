@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:move_to_background/move_to_background.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -26,6 +27,7 @@ import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
@@ -39,6 +41,7 @@ import 'package:photos/ui/home/landing_page_widget.dart';
 import 'package:photos/ui/home/preserve_footer_widget.dart';
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
+import 'package:photos/ui/notification/update/change_log_page.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
@@ -172,6 +175,15 @@ class _HomeWidgetState extends State<HomeWidget> {
     });
     // For sharing images coming from outside the app while the app is in the memory
     _initMediaShareSubscription();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => Future.delayed(
+        const Duration(seconds: 1),
+        () => {
+          if (mounted) {showChangeLog(context)}
+        },
+      ),
+    );
+
     super.initState();
   }
 
@@ -413,5 +425,32 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     final ott = Uri.parse(link).queryParameters["ott"];
     UserService.instance.verifyEmail(context, ott);
+  }
+
+  showChangeLog(BuildContext context) async {
+    final bool show = await UpdateService.instance.showChangeLog();
+    if (!show) {
+      return;
+    }
+    final colorScheme = getEnteColorScheme(context);
+    showBarModalBottomSheet(
+      topControl: const SizedBox.shrink(),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(5),
+          topRight: Radius.circular(5),
+        ),
+      ),
+      backgroundColor: colorScheme.backgroundElevated,
+      barrierColor: backdropMutedDark,
+      context: context,
+      builder: (BuildContext context) {
+        return Padding(
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+          child: const ChangeLogPage(),
+        );
+      },
+    );
   }
 }
