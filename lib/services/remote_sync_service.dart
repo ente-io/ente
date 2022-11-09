@@ -580,6 +580,8 @@ class RemoteSyncService {
       File existingFile;
       if (remoteDiff.generatedID != null) {
         // Case [1] Check and clear local cache when uploadedFile already exist
+        // Note: Existing file can be null here if it's replaced by the time we
+        // reach here
         existingFile = await _db.getFile(remoteDiff.generatedID);
         if (_shouldClearCache(remoteDiff, existingFile)) {
           needsGalleryReload = true;
@@ -692,10 +694,10 @@ class RemoteSyncService {
   }
 
   bool _shouldClearCache(File remoteFile, File existingFile) {
-    if (remoteFile.hash != null && existingFile.hash != null) {
+    if (remoteFile.hash != null && existingFile?.hash != null) {
       return remoteFile.hash != existingFile.hash;
     }
-    return remoteFile.updationTime != (existingFile.updationTime ?? 0);
+    return remoteFile.updationTime != (existingFile?.updationTime ?? 0);
   }
 
   bool _shouldReloadHomeGallery(File remoteFile, File existingFile) {
