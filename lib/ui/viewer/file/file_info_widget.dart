@@ -9,6 +9,7 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
@@ -274,6 +275,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 isFlexibleSpaceDisabled: true,
                 title: "Details",
                 isOnTopOfScreen: false,
+                backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 leading: IconButtonWidget(
                   icon: Icons.close_outlined,
                   iconButtonType: IconButtonType.primary,
@@ -286,7 +288,9 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                     if (index.isOdd) {
                       return index == 1
                           ? const SizedBox.shrink()
-                          : const DividerWidget(dividerType: DividerType.menu);
+                          : const DividerWidget(
+                              dividerType: DividerType.menu,
+                            );
                     } else {
                       return listTiles[index ~/ 2];
                     }

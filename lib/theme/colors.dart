@@ -180,9 +180,9 @@ const Color strokeBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color strokeFainterDark = Color.fromRGBO(255, 255, 255, 0.08);
-const Color blurStrokeBaseDark = Color.fromRGBO(0, 0, 0, 0.90);
-const Color blurStrokeFaintDark = Color.fromRGBO(0, 0, 0, 0.08);
-const Color blurStrokePressedDark = Color.fromRGBO(0, 0, 0, 0.50);
+const Color blurStrokeBaseDark = Color.fromRGBO(255, 255, 255, 0.90);
+const Color blurStrokeFaintDark = Color.fromRGBO(255, 255, 255, 0.08);
+const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
 // Other colors
 const Color tabIconLight = Color.fromRGBO(0, 0, 0, 0.85);
