@@ -59,9 +59,11 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
   StreamSubscription<int> _currentIndexSubscription;
   bool _shouldRender;
+  final ValueNotifier<bool> _shouldSelectAll = ValueNotifier(true);
 
   @override
   void initState() {
+    _shouldSelectAll.value = false;
     super.initState();
     _init();
   }
@@ -168,6 +170,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                   color: getEnteColorScheme(context).strokeMuted,
                   size: 18,
                 ),
+                onTap: () {
+                  _shouldSelectAll.value = !_shouldSelectAll.value;
+                },
               )
             ],
           ),
@@ -191,6 +196,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           widget.selectedFiles,
           index == 0,
           _files.length > kRecycleLimit,
+          shouldSelectAll: _shouldSelectAll,
         ),
       );
     }
@@ -208,6 +214,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final bool shouldRender;
   final bool shouldRecycle;
+  final ValueNotifier shouldSelectAll;
 
   LazyLoadingGridView(
     this.tag,
@@ -216,6 +223,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.selectedFiles,
     this.shouldRender,
     this.shouldRecycle, {
+    @required this.shouldSelectAll,
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -230,6 +238,22 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void initState() {
     super.initState();
     _shouldRender = widget.shouldRender;
+    widget.shouldSelectAll.addListener(() {
+      if (widget.shouldSelectAll.value) {
+        widget.selectedFiles.files.addAll(widget.files);
+        widget.selectedFiles.lastSelections.addAll(widget.files);
+        setState(() {
+          widget.selectedFiles.notifyListeners();
+        });
+      } else {
+        widget.selectedFiles.files.clear();
+        widget.selectedFiles.lastSelections.clear();
+        setState(() {
+          widget.selectedFiles.notifyListeners();
+        });
+      }
+    });
+
     widget.selectedFiles.addListener(() {
       bool shouldRefresh = false;
       for (final file in widget.files) {
