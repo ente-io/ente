@@ -165,10 +165,20 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                 widget.smallerTodayFont,
               ),
               GestureDetector(
-                child: Icon(
-                  Icons.check_circle_outlined,
-                  color: getEnteColorScheme(context).strokeMuted,
-                  size: 18,
+                child: ValueListenableBuilder(
+                  valueListenable: _shouldSelectAll,
+                  builder: (context, value, _) {
+                    return value
+                        ? const Icon(
+                            Icons.check_circle,
+                            size: 18,
+                          )
+                        : Icon(
+                            Icons.check_circle_outlined,
+                            color: getEnteColorScheme(context).strokeMuted,
+                            size: 18,
+                          );
+                  },
                 ),
                 onTap: () {
                   _shouldSelectAll.value = !_shouldSelectAll.value;
