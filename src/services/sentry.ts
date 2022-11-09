@@ -1,14 +1,9 @@
 import * as Sentry from '@sentry/electron/dist/main';
 import { makeID } from '../utils/logging';
 import { keysStore } from '../stores/keys.store';
-
+import { SENTRY_DSN, RELEASE_VERSION } from '../config';
 import { isDev } from '../utils/common';
 import { logToDisk } from './logging';
-
-const SENTRY_DSN = 'https://e9268b784d1042a7a116f53c58ad2165@sentry.ente.io/5';
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const version = require('../../package.json').version;
 
 const ENV_DEVELOPMENT = 'development';
 
@@ -18,7 +13,7 @@ const isDEVSentryENV = () =>
 export function initSentry(): void {
     Sentry.init({
         dsn: SENTRY_DSN,
-        release: version,
+        release: RELEASE_VERSION,
         environment: isDev ? 'development' : 'production',
     });
 }
