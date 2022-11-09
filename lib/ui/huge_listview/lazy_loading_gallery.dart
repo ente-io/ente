@@ -246,21 +246,22 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   @override
   void initState() {
-    super.initState();
     _shouldRender = widget.shouldRender;
     widget.shouldSelectAll.addListener(() {
-      if (widget.shouldSelectAll.value) {
-        widget.selectedFiles.files.addAll(widget.files);
-        widget.selectedFiles.lastSelections.addAll(widget.files);
+      if (widget.shouldSelectAll.value && mounted) {
         setState(() {
+          widget.selectedFiles.files.addAll(widget.files);
+          widget.selectedFiles.lastSelections.addAll(widget.files);
           widget.selectedFiles.notifyListeners();
         });
       } else {
-        widget.selectedFiles.files.clear();
-        widget.selectedFiles.lastSelections.clear();
-        setState(() {
-          widget.selectedFiles.notifyListeners();
-        });
+        if (mounted) {
+          setState(() {
+            widget.selectedFiles.files.clear();
+            widget.selectedFiles.lastSelections.clear();
+            widget.selectedFiles.notifyListeners();
+          });
+        }
       }
     });
 
@@ -275,6 +276,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         setState(() {});
       }
     });
+    super.initState();
   }
 
   @override
