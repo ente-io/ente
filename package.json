@@ -75,7 +75,7 @@
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "concurrently": "^7.0.0",
-    "electron": "^15.3.0",
+    "electron": "^21.2.2",
     "electron-builder": "^23.0.3",
     "electron-builder-notarize": "^1.2.0",
     "electron-download": "^4.1.1",
