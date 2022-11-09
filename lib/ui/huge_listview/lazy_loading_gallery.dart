@@ -64,6 +64,12 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   @override
   void initState() {
     _shouldSelectAll.value = false;
+    //this is for updating the 'select all from day' icon on canceling selected files
+    widget.selectedFiles.addListener(() {
+      if (widget.selectedFiles.files.isEmpty) {
+        _shouldSelectAll.value = false;
+      }
+    });
     super.initState();
     _init();
   }
