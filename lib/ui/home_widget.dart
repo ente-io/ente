@@ -433,7 +433,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       return;
     }
     final colorScheme = getEnteColorScheme(context);
-    showBarModalBottomSheet(
+    await showBarModalBottomSheet(
       topControl: const SizedBox.shrink(),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
