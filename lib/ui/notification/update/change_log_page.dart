@@ -79,7 +79,11 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
-                          left: 12, top: 12, right: 12, bottom: 6),
+                        left: 12,
+                        top: 12,
+                        right: 12,
+                        bottom: 6,
+                      ),
                       child: RichText(
                         textAlign: TextAlign.center,
                         text: TextSpan(
