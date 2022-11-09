@@ -29,6 +29,9 @@ class UpdateService {
   }
 
   Future<bool> showChangeLog() async {
+    if (isIndependent()) {
+      return false;
+    }
     // fetch the change log version which was last shown to user.
     final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
     return lastShownAtVersion < currentChangeLogVersion;
