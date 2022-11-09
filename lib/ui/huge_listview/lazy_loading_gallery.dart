@@ -60,6 +60,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   StreamSubscription<int> _currentIndexSubscription;
   bool _shouldRender;
   final ValueNotifier<bool> _shouldSelectAll = ValueNotifier(false);
+  final ValueNotifier<bool> _showSelectAllButton = ValueNotifier(false);
 
   @override
   void initState() {
@@ -67,6 +68,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     widget.selectedFiles.addListener(() {
       if (widget.selectedFiles.files.isEmpty) {
         _shouldSelectAll.value = false;
+        _showSelectAllButton.value = false;
+      } else {
+        _showSelectAllButton.value = true;
       }
     });
     super.initState();
@@ -171,24 +175,32 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                 _files[0].creationTime,
                 widget.smallerTodayFont,
               ),
-              GestureDetector(
-                child: ValueListenableBuilder(
-                  valueListenable: _shouldSelectAll,
-                  builder: (context, value, _) {
-                    return value
-                        ? const Icon(
-                            Icons.check_circle,
-                            size: 18,
-                          )
-                        : Icon(
-                            Icons.check_circle_outlined,
-                            color: getEnteColorScheme(context).strokeMuted,
-                            size: 18,
-                          );
-                  },
-                ),
-                onTap: () {
-                  _shouldSelectAll.value = !_shouldSelectAll.value;
+              ValueListenableBuilder(
+                valueListenable: _showSelectAllButton,
+                builder: (context, value, _) {
+                  return widget.selectedFiles.files.isEmpty
+                      ? const SizedBox.shrink()
+                      : GestureDetector(
+                          child: ValueListenableBuilder(
+                            valueListenable: _shouldSelectAll,
+                            builder: (context, value, _) {
+                              return value
+                                  ? const Icon(
+                                      Icons.check_circle,
+                                      size: 18,
+                                    )
+                                  : Icon(
+                                      Icons.check_circle_outlined,
+                                      color: getEnteColorScheme(context)
+                                          .strokeMuted,
+                                      size: 18,
+                                    );
+                            },
+                          ),
+                          onTap: () {
+                            _shouldSelectAll.value = !_shouldSelectAll.value;
+                          },
+                        );
                 },
               )
             ],
