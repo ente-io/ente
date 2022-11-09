@@ -69,6 +69,11 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       if (widget.selectedFiles.files.isEmpty) {
         _shouldSelectAll.value = false;
         _showSelectAllButton.value = false;
+        //Needs rebuilding for removing the 'select all from day' button on canceling all
+        //selections after scrolling considerably down
+        if (mounted) {
+          setState(() {});
+        }
       } else {
         _showSelectAllButton.value = true;
       }
