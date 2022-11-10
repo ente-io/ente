@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:test/test.dart';
 
@@ -27,5 +28,13 @@ void main() {
         debugPrint("Parsed $val as ${parsedValue?.toIso8601String()}");
       }
     }
+  });
+
+  test("verify constants", () {
+    expect(
+      jan011991Time,
+      DateTime(1991, 1, 1).toUtc().microsecondsSinceEpoch,
+      reason: "constant mismatch",
+    );
   });
 }
