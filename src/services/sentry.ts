@@ -16,6 +16,7 @@ export function initSentry(): void {
         release: RELEASE_VERSION,
         environment: isDev ? 'development' : 'production',
     });
+    Sentry.setUser({ id: getSentryUserID() });
 }
 
 export function logErrorSentry(
