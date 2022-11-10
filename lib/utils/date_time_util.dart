@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -268,6 +269,7 @@ bool isValidDate({
   return true;
 }
 
+@Deprecated("Use parseDateTimeV2 ")
 DateTime? parseDateFromFileName(String fileName) {
   if (fileName.startsWith('IMG-') || fileName.startsWith('VID-')) {
 // Whatsapp media files
@@ -286,4 +288,45 @@ DateTime? parseDateFromFileName(String fileName) {
           .replaceAll("_", " "),
     );
   }
+}
+
+final RegExp exp = RegExp('[A-Za-z]');
+
+DateTime? parseDateTimeFromFileNameV2(String fileName) {
+  String val = fileName.replaceAll(exp, '');
+  if (val.isNotEmpty && !isNumeric(val[0])) {
+    val = val.substring(1, val.length);
+  }
+  if (val.isNotEmpty && !isNumeric(val[val.length - 1])) {
+    val = val.substring(0, val.length - 1);
+  }
+  final int countOfHyphen = val.split("-").length - 1;
+  final int countUnderScore = val.split("_").length - 1;
+  String valForParser = val;
+  if (countOfHyphen == 1) {
+    valForParser = val.replaceAll("-", "T");
+  } else if (countUnderScore == 1 || countUnderScore == 2) {
+    valForParser = val.replaceFirst("_", "T");
+    if (countUnderScore == 2) {
+      valForParser = valForParser.split("_")[0];
+    }
+  } else if (countOfHyphen == 2) {
+    valForParser = val.replaceAll(".", ":");
+  } else if (countOfHyphen == 6) {
+    final splits = val.split("-");
+    valForParser =
+        "${splits[0]}${splits[1]}${splits[2]}T${splits[3]}${splits[4]}${splits[5]}";
+  }
+  final result = DateTime.tryParse(valForParser);
+  if (kDebugMode && result == null) {
+    debugPrint("Failed to parse $fileName dateTime from $valForParser");
+  }
+  return result;
+}
+
+bool isNumeric(String? s) {
+  if (s == null) {
+    return false;
+  }
+  return double.tryParse(s) != null;
 }

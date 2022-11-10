@@ -15,6 +15,8 @@ class UpdateService {
 
   static final UpdateService instance = UpdateService._privateConstructor();
   static const kUpdateAvailableShownTimeKey = "update_available_shown_time_key";
+  static const changeLogVersionKey = "update_change_log_key";
+  static const currentChangeLogVersion = 1;
 
   LatestVersionInfo _latestVersion;
   final _logger = Logger("UpdateService");
@@ -24,6 +26,20 @@ class UpdateService {
   Future<void> init() async {
     _packageInfo = await PackageInfo.fromPlatform();
     _prefs = await SharedPreferences.getInstance();
+  }
+
+  Future<bool> showChangeLog() async {
+    // fetch the change log version which was last shown to user.
+    final lastShownAtVersion = _prefs.getInt(changeLogVersionKey) ?? 0;
+    return lastShownAtVersion < currentChangeLogVersion;
+  }
+
+  Future<bool> hideChangeLog() async {
+    return _prefs.setInt(changeLogVersionKey, currentChangeLogVersion);
+  }
+
+  Future<bool> resetChangeLog() {
+    return _prefs.remove(changeLogVersionKey);
   }
 
   Future<bool> shouldUpdate() async {
