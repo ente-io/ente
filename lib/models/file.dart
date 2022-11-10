@@ -77,8 +77,8 @@ class File extends EnteFile {
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
     if (file.creationTime == null || (file.creationTime! <= jan011991Time)) {
       try {
-        final parsedDateTime =
-            parseDateFromFileName(basenameWithoutExtension(file.title ?? ""));
+        final parsedDateTime = parseDateTimeFromFileNameV2(
+            basenameWithoutExtension(file.title ?? ""));
 
         file.creationTime = parsedDateTime?.microsecondsSinceEpoch ??
             asset.modifiedDateTime.microsecondsSinceEpoch;
