@@ -29,5 +29,5 @@ jobs:
 
       - name: Run Linter
         run: flutter analyze --no-fatal-infos
-#      - name: Run Test :sed:
-#        run: flutter test
+      - name: Run Test
+        run: flutter test
