@@ -1,14 +1,27 @@
 import { AppContext } from 'pages/_app';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { downloadAsFile } from 'utils/file';
 import constants from 'utils/strings/constants';
 import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
+import Typography from '@mui/material/Typography';
 
-export default function DebugLogs() {
+export default function DebugSection() {
     const appContext = useContext(AppContext);
+    const [appVersion, setAppVersion] = useState<string>(null);
+
+    useEffect(() => {
+        const main = async () => {
+            if (isElectron()) {
+                const appVersion = await ElectronService.getAppVersion();
+                setAppVersion(appVersion);
+            }
+        };
+        main();
+    });
+
     const confirmLogDownload = () =>
         appContext.setDialogMessage({
             title: constants.DOWNLOAD_LOGS,
@@ -35,11 +48,18 @@ export default function DebugLogs() {
     };
 
     return (
-        <SidebarButton
-            onClick={confirmLogDownload}
-            typographyVariant="caption"
-            sx={{ fontWeight: 'normal', color: 'text.secondary' }}>
-            {constants.DOWNLOAD_UPLOAD_LOGS}
-        </SidebarButton>
+        <>
+            <SidebarButton
+                onClick={confirmLogDownload}
+                typographyVariant="caption"
+                sx={{ fontWeight: 'normal', color: 'text.secondary' }}>
+                {constants.DOWNLOAD_UPLOAD_LOGS}
+            </SidebarButton>
+            {appVersion && (
+                <Typography p={2} color="text.secondary" variant="caption">
+                    {appVersion}
+                </Typography>
+            )}
+        </>
     );
 }
