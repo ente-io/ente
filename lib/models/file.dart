@@ -88,10 +88,10 @@ class File extends EnteFile {
       // During upload, this might get overridden with exif Creation time
       return creationTime;
     } else {
-      if (asset.modifiedDateTime.millisecondsSinceEpoch >= jan011991Time) {
-        creationTime = asset.modifiedDateTime.millisecondsSinceEpoch;
+      if (asset.modifiedDateTime.microsecondsSinceEpoch >= jan011991Time) {
+        creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
       } else {
-        creationTime = DateTime.now().toUtc().millisecondsSinceEpoch;
+        creationTime = DateTime.now().toUtc().microsecondsSinceEpoch;
       }
       try {
         final parsedDateTime = parseDateTimeFromFileNameV2(
