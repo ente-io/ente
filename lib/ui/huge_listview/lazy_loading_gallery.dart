@@ -231,11 +231,6 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     if (widget.selectedFiles.files.isEmpty) {
       _shouldSelectAll.value = false;
       _showSelectAllButton.value = false;
-      //Needs rebuilding for removing the 'select all from day' button on canceling all
-      //selections after scrolling considerably down
-      if (mounted) {
-        setState(() {});
-      }
     } else {
       _showSelectAllButton.value = true;
     }
@@ -367,6 +362,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   Widget _buildFile(BuildContext context, File file) {
+    print("rebuilding");
     return GestureDetector(
       onTap: () {
         if (widget.selectedFiles.files.isNotEmpty) {
@@ -444,7 +440,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _selectedFilesListener() {
     bool shouldRefresh = false;
     for (final file in widget.files) {
-      if (widget.selectedFiles.isPartOfLastSection(file)) {
+      if (widget.selectedFiles.isPartOfLastSelectedGrid(file)) {
         shouldRefresh = true;
       }
     }

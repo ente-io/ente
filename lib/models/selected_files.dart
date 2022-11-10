@@ -30,7 +30,7 @@ class SelectedFiles extends ChangeNotifier {
     return alreadySelected != null;
   }
 
-  bool isPartOfLastSection(File file) {
+  bool isPartOfLastSelectedGrid(File file) {
     final File? alreadySelected = lastSelections.firstWhereOrNull(
       (element) => element.generatedID == file.generatedID,
     );
