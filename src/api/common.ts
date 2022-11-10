@@ -9,6 +9,15 @@ export const selectRootDirectory = async (): Promise<string> => {
     }
 };
 
+export const getAppVersion = async (): Promise<string> => {
+    try {
+        return await ipcRenderer.invoke('get-app-version');
+    } catch (e) {
+        logError(e, 'failed to get release version');
+        throw e;
+    }
+};
+
 export {
     logToDisk,
     openLogDirectory,

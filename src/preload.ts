@@ -44,6 +44,7 @@ import {
     logToDisk,
     openLogDirectory,
     getSentryUserID,
+    getAppVersion,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
@@ -98,4 +99,5 @@ windowObject['ElectronAPIs'] = {
     updateAndRestart,
     skipAppVersion,
     getSentryUserID,
+    getAppVersion,
 };
