@@ -15,7 +15,11 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
 import { convertHEIC } from '../services/heicConvertor';
-import { skipAppVersion, updateAndRestart } from '../services/appUpdater';
+import {
+    getAppVersion,
+    skipAppVersion,
+    updateAndRestart,
+} from '../services/appUpdater';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -116,5 +120,9 @@ export default function setupIpcComs(
     });
     ipcMain.handle('get-sentry-id', () => {
         return getSentryUserID();
+    });
+
+    ipcMain.handle('get-app-version', () => {
+        return getAppVersion();
     });
 }

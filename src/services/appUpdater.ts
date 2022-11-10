@@ -87,6 +87,10 @@ export function updateAndRestart() {
     autoUpdater.quitAndInstall();
 }
 
+export function getAppVersion() {
+    return `v${app.getVersion()}`;
+}
+
 export function skipAppVersion(version: string) {
     setSkipAppVersion(version);
 }
