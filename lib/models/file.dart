@@ -74,14 +74,14 @@ class File extends EnteFile {
     file.deviceFolder = pathName;
     file.location = Location(asset.latitude, asset.longitude);
     file.fileType = _fileTypeFromAsset(asset);
-    file.creationTime = fileCreationTime(file.title, asset);
+    file.creationTime = parseFileCreationTime(file.title, asset);
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
     file.metadataVersion = kCurrentMetadataVersion;
     return file;
   }
 
-  static int fileCreationTime(String? fileTitle, AssetEntity asset) {
+  static int parseFileCreationTime(String? fileTitle, AssetEntity asset) {
     int creationTime = asset.createDateTime.microsecondsSinceEpoch;
     if (creationTime >= jan011981Time) {
       // assuming that fileSystem is returning correct creationTime.
