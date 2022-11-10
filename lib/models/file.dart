@@ -74,22 +74,38 @@ class File extends EnteFile {
     file.deviceFolder = pathName;
     file.location = Location(asset.latitude, asset.longitude);
     file.fileType = _fileTypeFromAsset(asset);
-    file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
-    if (file.creationTime == null || (file.creationTime! <= jan011991Time)) {
-      try {
-        final parsedDateTime =
-            parseDateFromFileName(basenameWithoutExtension(file.title ?? ""));
-
-        file.creationTime = parsedDateTime?.microsecondsSinceEpoch ??
-            asset.modifiedDateTime.microsecondsSinceEpoch;
-      } catch (e) {
-        file.creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
-      }
-    }
+    file.creationTime = parseFileCreationTime(file.title, asset);
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
     file.fileSubType = asset.subtype;
     file.metadataVersion = kCurrentMetadataVersion;
     return file;
+  }
+
+  static int parseFileCreationTime(String? fileTitle, AssetEntity asset) {
+    int creationTime = asset.createDateTime.microsecondsSinceEpoch;
+    if (creationTime >= jan011981Time) {
+      // assuming that fileSystem is returning correct creationTime.
+      // During upload, this might get overridden with exif Creation time
+      return creationTime;
+    } else {
+      if (asset.modifiedDateTime.microsecondsSinceEpoch >= jan011981Time) {
+        creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
+      } else {
+        creationTime = DateTime.now().toUtc().microsecondsSinceEpoch;
+      }
+      try {
+        final parsedDateTime = parseDateTimeFromFileNameV2(
+          basenameWithoutExtension(fileTitle ?? ""),
+        );
+        if (parsedDateTime != null) {
+          creationTime = parsedDateTime.microsecondsSinceEpoch;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return creationTime;
   }
 
   static FileType _fileTypeFromAsset(AssetEntity asset) {

@@ -99,7 +99,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
       final parsedDateTime =
-          parseDateFromFileName(basenameWithoutExtension(media.path));
+          parseDateTimeFromFileNameV2(basenameWithoutExtension(media.path));
       if (parsedDateTime != null) {
         enteFile.creationTime = parsedDateTime.microsecondsSinceEpoch;
       } else {
