@@ -65,19 +65,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   @override
   void initState() {
     //this is for removing the 'select all from day' icon on unselecting all files with 'cancel'
-    widget.selectedFiles.addListener(() {
-      if (widget.selectedFiles.files.isEmpty) {
-        _shouldSelectAll.value = false;
-        _showSelectAllButton.value = false;
-        //Needs rebuilding for removing the 'select all from day' button on canceling all
-        //selections after scrolling considerably down
-        if (mounted) {
-          setState(() {});
-        }
-      } else {
-        _showSelectAllButton.value = true;
-      }
-    });
+    widget.selectedFiles.addListener(_selectedFilesListener);
     super.initState();
     _init();
   }
@@ -149,8 +137,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   void dispose() {
     _reloadEventSubscription.cancel();
     _currentIndexSubscription.cancel();
-    widget.selectedFiles.removeListener(() {});
-    _shouldSelectAll.removeListener(() {});
+    widget.selectedFiles.removeListener(_selectedFilesListener);
     super.dispose();
   }
 
@@ -239,6 +226,20 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       children: childGalleries,
     );
   }
+
+  void _selectedFilesListener() {
+    if (widget.selectedFiles.files.isEmpty) {
+      _shouldSelectAll.value = false;
+      _showSelectAllButton.value = false;
+      //Needs rebuilding for removing the 'select all from day' button on canceling all
+      //selections after scrolling considerably down
+      if (mounted) {
+        setState(() {});
+      }
+    } else {
+      _showSelectAllButton.value = true;
+    }
+  }
 }
 
 class LazyLoadingGridView extends StatefulWidget {
@@ -287,18 +288,14 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       }
     });
 
-    widget.selectedFiles.addListener(() {
-      bool shouldRefresh = false;
-      for (final file in widget.files) {
-        if (widget.selectedFiles.isPartOfLastSection(file)) {
-          shouldRefresh = true;
-        }
-      }
-      if (shouldRefresh && mounted) {
-        setState(() {});
-      }
-    });
+    widget.selectedFiles.addListener(_selectedFilesListener);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.selectedFiles.removeListener(_selectedFilesListener);
+    super.dispose();
   }
 
   @override
@@ -442,5 +439,17 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
+  }
+
+  void _selectedFilesListener() {
+    bool shouldRefresh = false;
+    for (final file in widget.files) {
+      if (widget.selectedFiles.isPartOfLastSection(file)) {
+        shouldRefresh = true;
+      }
+    }
+    if (shouldRefresh && mounted) {
+      setState(() {});
+    }
   }
 }
