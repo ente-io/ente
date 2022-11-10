@@ -75,15 +75,15 @@ class File extends EnteFile {
     file.location = Location(asset.latitude, asset.longitude);
     file.fileType = _fileTypeFromAsset(asset);
     file.creationTime = asset.createDateTime.microsecondsSinceEpoch;
-    if (file.creationTime == null || (file.creationTime! <= jan011991Time)) {
+    if (file.creationTime == null || (file.creationTime! <= jan011971Time)) {
       try {
         final parsedDateTime = parseDateTimeFromFileNameV2(
-            basenameWithoutExtension(file.title ?? ""));
-
+          basenameWithoutExtension(file.title ?? ""),
+        );
         file.creationTime = parsedDateTime?.microsecondsSinceEpoch ??
-            asset.modifiedDateTime.microsecondsSinceEpoch;
+            DateTime.now().millisecondsSinceEpoch;
       } catch (e) {
-        file.creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
+        file.creationTime = DateTime.now().millisecondsSinceEpoch;
       }
     }
     file.modificationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
