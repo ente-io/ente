@@ -32,8 +32,8 @@ void main() {
 
   test("verify constants", () {
     expect(
-      jan011991Time,
-      DateTime(1991, 1, 1).toUtc().microsecondsSinceEpoch,
+      jan011981Time,
+      DateTime(1981, 1, 1).toUtc().microsecondsSinceEpoch,
       reason: "constant mismatch",
     );
   });

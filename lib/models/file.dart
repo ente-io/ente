@@ -83,12 +83,12 @@ class File extends EnteFile {
 
   static int fileCreationTime(String? fileTitle, AssetEntity asset) {
     int creationTime = asset.createDateTime.microsecondsSinceEpoch;
-    if (creationTime >= jan011991Time) {
+    if (creationTime >= jan011981Time) {
       // assuming that fileSystem is returning correct creationTime.
       // During upload, this might get overridden with exif Creation time
       return creationTime;
     } else {
-      if (asset.modifiedDateTime.microsecondsSinceEpoch >= jan011991Time) {
+      if (asset.modifiedDateTime.microsecondsSinceEpoch >= jan011981Time) {
         creationTime = asset.modifiedDateTime.microsecondsSinceEpoch;
       } else {
         creationTime = DateTime.now().toUtc().microsecondsSinceEpoch;
