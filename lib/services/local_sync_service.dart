@@ -232,7 +232,10 @@ class LocalSyncService {
     );
     if (hasAnyMappingChanged || hasUnsyncedFiles) {
       Bus.instance.fire(
-        LocalPhotosUpdatedEvent(localDiffResult.uniqueLocalFiles),
+        LocalPhotosUpdatedEvent(
+          localDiffResult.uniqueLocalFiles,
+          source: "syncAllChange",
+        ),
       );
     }
     _logger.info("syncAll took ${stopwatch.elapsed.inMilliseconds}ms ");
@@ -359,7 +362,9 @@ class LocalSyncService {
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
       _logger.info("Inserted " + files.length.toString() + " files.");
-      Bus.instance.fire(LocalPhotosUpdatedEvent(allFiles));
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
+      );
     }
     await _prefs.setInt(kDbUpdationTimeKey, toTime);
   }

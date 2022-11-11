@@ -103,7 +103,12 @@ class CollectionsService {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(
+            List<File>.empty(),
+            source: "syncCollectionDeleted",
+          ),
+        );
       }
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection?.owner?.id) {
@@ -876,7 +881,7 @@ class CollectionsService {
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
     Bus.instance
         .fire(CollectionUpdatedEvent(collectionID, files, "removeFrom"));
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "removeFrom"));
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 

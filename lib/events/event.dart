@@ -1,3 +1,3 @@
 class Event {
-  String get reason => toString();
+  String get reason => '$runtimeType';
 }

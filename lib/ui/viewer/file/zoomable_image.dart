@@ -183,6 +183,7 @@ class _ZoomableImageState extends State<ZoomableImage>
               LocalPhotosUpdatedEvent(
                 [_photo],
                 type: EventType.deletedFromDevice,
+                source: "zoomPreview",
               ),
             );
           }
