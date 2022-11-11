@@ -13,7 +13,6 @@ import "package:ente_auth/onboarding/view/onboarding_page.dart";
 import 'package:ente_auth/ui/home_page.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import "package:flutter_localizations/flutter_localizations.dart";
 
 class App extends StatefulWidget {
@@ -62,7 +61,6 @@ class _AppState extends State<App> {
           theme: lightTheme,
           darkTheme: dartTheme,
           debugShowCheckedModeBanner: false,
-          builder: EasyLoading.init(),
           supportedLocales: AppLocalizations.supportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
@@ -80,7 +78,6 @@ class _AppState extends State<App> {
         theme: lightThemeData,
         darkTheme: darkThemeData,
         debugShowCheckedModeBanner: false,
-        builder: EasyLoading.init(),
         supportedLocales: AppLocalizations.supportedLocales,
         localizationsDelegates: const [
           AppLocalizations.delegate,

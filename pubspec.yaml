@@ -46,7 +46,7 @@ dependencies:
   #  sentry_flutter:
   #      path: thirdparty/sentry-dart/flutter
   json_annotation: ^4.5.0
-  fluttertoast: ^8.0.6
+  fluttertoast: ^8.1.1
   google_nav_bar: ^5.0.5 #supported
   http: ^0.13.4
   move_to_background: ^1.0.2
@@ -58,7 +58,6 @@ dependencies:
   share_plus: ^4.4.0
   package_info_plus: ^1.0.1
   shared_preferences: ^2.0.5
-  flutter_easyloading: ^3.0.5
   uuid: ^3.0.4
   url_launcher: ^6.1.5
   logging: ^1.0.1
