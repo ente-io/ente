@@ -15,8 +15,7 @@ class SetupEnterSecretKeyPage extends StatefulWidget {
 
 class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
   final _accountController = TextEditingController();
-  final _secretController =
-      TextEditingController(text: kDebugMode ? "JBSWY3DPEHPK3PXP" : "");
+  final _secretController = TextEditingController(text: "");
 
   @override
   Widget build(BuildContext context) {
