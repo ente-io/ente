@@ -45,11 +45,12 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
   void initState() {
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _logger.info("Files updated");
+      debugPrint("SetState Shared Collections on LocalPhotosUpdatedEvent");
       setState(() {});
     });
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      debugPrint("SetState Shared Collections on CollectionUpdatedEvent");
       setState(() {});
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
