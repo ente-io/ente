@@ -72,75 +72,79 @@ class _CodeWidgetState extends State<CodeWidget> {
             borderRadius: BorderRadius.circular(8),
             child: Container(
               color: Theme.of(context).colorScheme.codeCardBackgroundColor,
-              child: InkWell(
-                customBorder: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                onTap: () {
-                  FlutterClipboard.copy(_getTotp()).then(
-                    (value) => showToast(context, "Copied to clipboard"),
-                  );
-                },
-                child: SizedBox(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      FAProgressBar(
-                        currentValue: _timeRemaining / widget.code.period * 100,
-                        size: 4,
-                        animatedDuration: const Duration(milliseconds: 200),
-                        progressColor: Colors.orange,
-                        changeColorValue: 40,
-                        changeProgressColor: Colors.green,
-                      ),
-                      const SizedBox(
-                        height: 16,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 16, right: 16),
-                        child: Text(
-                          Uri.decodeFull(widget.code.issuer),
-                          style: Theme.of(context).textTheme.headline6,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  customBorder: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  onTap: () {
+                    FlutterClipboard.copy(_getTotp()).then(
+                      (value) => showToast(context, "Copied to clipboard"),
+                    );
+                  },
+                  child: SizedBox(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        FAProgressBar(
+                          currentValue:
+                              _timeRemaining / widget.code.period * 100,
+                          size: 4,
+                          animatedDuration: const Duration(milliseconds: 200),
+                          progressColor: Colors.orange,
+                          changeColorValue: 40,
+                          changeProgressColor: Colors.green,
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text(
-                              "next",
-                              style: Theme.of(context).textTheme.caption,
-                            ),
-                          ],
+                        const SizedBox(
+                          height: 16,
                         ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.only(left: 16, right: 16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _getTotp(),
-                                style: const TextStyle(fontSize: 24),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, right: 16),
+                          child: Text(
+                            Uri.decodeFull(widget.code.issuer),
+                            style: Theme.of(context).textTheme.headline6,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.only(right: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                "next",
+                                style: Theme.of(context).textTheme.caption,
                               ),
-                            ),
-                            Text(
-                              _getNextTotp(),
-                              style: const TextStyle(
-                                fontSize: 24,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                    ],
+                        Container(
+                          padding: const EdgeInsets.only(left: 16, right: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _getTotp(),
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ),
+                              Text(
+                                _getNextTotp(),
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
