@@ -4,6 +4,7 @@ import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
+import 'package:logging/logging.dart';
 
 class CodeStore {
   static final CodeStore instance = CodeStore._privateConstructor();
@@ -11,6 +12,7 @@ class CodeStore {
   CodeStore._privateConstructor();
 
   late AuthenticatorService _authenticatorService;
+  final _logger = Logger("CodeStore");
 
   Future<void> init() async {
     _authenticatorService = AuthenticatorService.instance;
@@ -30,6 +32,13 @@ class CodeStore {
   }
 
   Future<void> addCode(Code code) async {
+    final codes = await getAllCodes();
+    for (final existingCode in codes) {
+      if (existingCode == code) {
+        _logger.info("Found duplicate code, skipping add");
+        return;
+      }
+    }
     code.id = await _authenticatorService.addEntry(jsonEncode(code.rawData));
     Bus.instance.fire(CodesUpdatedEvent());
   }
