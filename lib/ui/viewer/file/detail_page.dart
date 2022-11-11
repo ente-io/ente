@@ -154,7 +154,6 @@ class _DetailPageState extends State<DetailPage> {
           },
           playbackCallback: (isPlaying) {
             _shouldHideAppBar = isPlaying;
-            _keepScreenAliveOnPlaying(isPlaying);
             Future.delayed(Duration.zero, () {
               _toggleFullScreen();
             });
