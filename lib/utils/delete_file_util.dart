@@ -115,6 +115,7 @@ Future<void> deleteFilesFromEverywhere(
           deletedFiles
               .where((file) => file.collectionID == collectionID)
               .toList(),
+          "deleteFilesEverywhere",
           type: EventType.deletedFromEverywhere,
         ),
       );
@@ -176,6 +177,7 @@ Future<void> deleteFilesFromRemoteOnly(
       CollectionUpdatedEvent(
         collectionID,
         files.where((file) => file.collectionID == collectionID).toList(),
+        "deleteFromRemoteOnly",
         type: EventType.deletedFromRemote,
       ),
     );
@@ -266,8 +268,13 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
     await TrashSyncService.instance.deleteFromTrash(files);
     showShortToast(context, "Successfully deleted");
     await dialog.hide();
-    Bus.instance
-        .fire(FilesUpdatedEvent(files, type: EventType.deletedFromEverywhere));
+    Bus.instance.fire(
+      FilesUpdatedEvent(
+        files,
+        type: EventType.deletedFromEverywhere,
+        source: "deleteFromTrash",
+      ),
+    );
     return true;
   } catch (e, s) {
     _logger.info("failed to delete from trash", e, s);

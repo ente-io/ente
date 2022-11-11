@@ -1,7 +1,10 @@
-
-
 import 'package:photos/events/event.dart';
 
 class ForceReloadHomeGalleryEvent extends Event {
-  ForceReloadHomeGalleryEvent();
+  final String message;
+
+  ForceReloadHomeGalleryEvent(this.message);
+
+  @override
+  String get reason => 'ForceReloadHomeGalleryEvent - $message';
 }

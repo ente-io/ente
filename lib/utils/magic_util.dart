@@ -61,7 +61,7 @@ Future<void> changeCollectionVisibility(
     final Map<String, dynamic> update = {magicKeyVisibility: newVisibility};
     await CollectionsService.instance.updateMagicMetadata(collection, update);
     // Force reload home gallery to pull in the now unarchived files
-    Bus.instance.fire(ForceReloadHomeGalleryEvent());
+    Bus.instance.fire(ForceReloadHomeGalleryEvent("CollectionArchiveChange"));
     showShortToast(
       context,
       newVisibility == visibilityArchive
@@ -177,7 +177,7 @@ Future<void> _updatePublicMetadata(
     }
 
     if (_shouldReloadGallery(key)) {
-      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      Bus.instance.fire(ForceReloadHomeGalleryEvent("FileMetadataChange-$key"));
     }
   } catch (e, s) {
     _logger.severe("failed to update $key = $value", e, s);
