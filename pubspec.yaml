@@ -29,7 +29,7 @@ dependencies:
   flutter_secure_storage: ^6.0.0
   flutter_animation_progress_bar: ^2.2.1
   flutter_slidable: ^2.0.0
-
+  file_picker: ^4.6.1
   flutter:
     sdk: flutter
   flutter_bloc: ^8.0.1
