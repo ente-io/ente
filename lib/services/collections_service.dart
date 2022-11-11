@@ -755,7 +755,7 @@ class CollectionsService {
         await _filesDB.deleteUnSyncedLocalFiles(localIDs);
       }
       // Force reload home gallery to pull in the restored files
-      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;

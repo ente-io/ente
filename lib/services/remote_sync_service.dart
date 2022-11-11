@@ -325,8 +325,8 @@ class RemoteSyncService {
       }
     }
     if (moreFilesMarkedForBackup && !_config.hasSelectedAllFoldersForBackup()) {
-      debugPrint("force reload due to display new files");
-      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      // "force reload due to display new files"
+      Bus.instance.fire(ForceReloadHomeGalleryEvent("newFilesDisplay"));
     }
   }
 
@@ -688,8 +688,8 @@ class RemoteSyncService {
           " remoteFiles seen first time",
     );
     if (needsGalleryReload) {
-      _logger.fine('force reload home gallery');
-      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      // 'force reload home gallery'
+      Bus.instance.fire(ForceReloadHomeGalleryEvent("remoteSync"));
     }
   }
 

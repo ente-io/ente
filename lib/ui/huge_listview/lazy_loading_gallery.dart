@@ -98,7 +98,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       if (kDebugMode) {
         _logger.info(
           filesUpdatedThisDay.length.toString() +
-              " files were updated due to ${event.type} on " +
+              " files were updated due to ${event.type.name} on " +
               getDayTitle(galleryDate.microsecondsSinceEpoch),
         );
       }

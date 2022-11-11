@@ -75,7 +75,7 @@ extension HiddenService on CollectionsService {
         }
         await move(defaultHiddenCollection.id, entry.key, entry.value);
       }
-      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      Bus.instance.fire(ForceReloadHomeGalleryEvent("hideFiles"));
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(filesToHide, type: EventType.unarchived),
       );
