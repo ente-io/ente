@@ -6,7 +6,5 @@ class ForceReloadHomeGalleryEvent extends Event {
   ForceReloadHomeGalleryEvent(this.message);
 
   @override
-  String toString() {
-    return 'ForceReloadHomeGalleryEvent{message: $message}';
-  }
+  String get reason => 'ForceReloadHomeGalleryEvent - $message';
 }

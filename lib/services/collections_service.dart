@@ -124,8 +124,13 @@ class CollectionsService {
       _cacheCollectionAttributes(collection);
     }
     if (fetchedCollections.isNotEmpty) {
-      _logger.info("Collections updated");
-      Bus.instance.fire(CollectionUpdatedEvent(null, List<File>.empty()));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          null,
+          List<File>.empty(),
+          "collections_updated",
+        ),
+      );
     }
     return collections;
   }
@@ -428,7 +433,9 @@ class CollectionsService {
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
-      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(collection.id, <File>[], "shareUrL"),
+      );
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -455,7 +462,8 @@ class CollectionsService {
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
-      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collection.id, <File>[], "updateUrl"));
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -475,7 +483,13 @@ class CollectionsService {
       collection.publicURLs.clear();
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
-      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collection.id,
+          <File>[],
+          "disableShareUrl",
+        ),
+      );
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
@@ -665,7 +679,7 @@ class CollectionsService {
         data: params,
       );
       await _filesDB.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files, "addTo"));
     } catch (e) {
       rethrow;
     }
@@ -741,8 +755,10 @@ class CollectionsService {
       await _filesDB.insertMultiple(files);
       await TrashDB.instance
           .delete(files.map((e) => e.uploadedFileID).toList());
-      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
-      Bus.instance.fire(FilesUpdatedEvent(files));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(toCollectionID, files, "restore"),
+      );
+      Bus.instance.fire(FilesUpdatedEvent(files, source: "restore"));
       // Remove imported local files which are imported but not uploaded.
       // This handles the case where local file was trashed -> imported again
       // but not uploaded automatically as it was trashed.
@@ -807,6 +823,7 @@ class CollectionsService {
       CollectionUpdatedEvent(
         fromCollectionID,
         files,
+        "moveFrom",
         type: EventType.deletedFromRemote,
       ),
     );
@@ -817,7 +834,9 @@ class CollectionsService {
       (element) => existingUploadedIDs.contains(element.uploadedFileID),
     );
     await _filesDB.insertMultiple(files);
-    Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
+    Bus.instance.fire(
+      CollectionUpdatedEvent(toCollectionID, files, "moveTo"),
+    );
   }
 
   void _validateMoveRequest(
@@ -855,7 +874,8 @@ class CollectionsService {
       data: params,
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-    Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
+    Bus.instance
+        .fire(CollectionUpdatedEvent(collectionID, files, "removeFrom"));
     Bus.instance.fire(LocalPhotosUpdatedEvent(files));
     RemoteSyncService.instance.sync(silently: true).ignore();
   }

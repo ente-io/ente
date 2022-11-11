@@ -109,7 +109,8 @@ class _GalleryState extends State<Gallery> {
       for (final event in widget.forceReloadEvents) {
         _forceReloadEventSubscriptions.add(
           event.listen((event) async {
-            _logger.info("Force reload $event");
+            _logger.info(event.reason);
+
             final result = await _loadFiles();
             _setFilesAndReload(result.files);
           }),
