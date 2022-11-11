@@ -110,8 +110,9 @@ class FadingAppBarState extends State<FadingAppBar> {
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    final bool isFileUploaded = widget.file.isRemoteFile;
     bool isFileHidden = false;
-    if (isOwnedByUser && widget.file.uploadedFileID != null) {
+    if (isOwnedByUser && isFileUploaded) {
       isFileHidden = CollectionsService.instance
               .getCollectionByID(widget.file.collectionID)
               ?.isHidden() ??
@@ -189,7 +190,7 @@ class FadingAppBarState extends State<FadingAppBar> {
               ),
             );
           }
-          if (isOwnedByUser) {
+          if (isOwnedByUser && widget.file.isUploaded) {
             if (!isFileHidden) {
               items.add(
                 PopupMenuItem(
