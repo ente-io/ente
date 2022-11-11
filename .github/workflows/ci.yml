@@ -61,7 +61,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: release-checksum
-          path: build/app/outputs/flutter-apk/checksum
+          path: build/app/outputs/flutter-apk/sha256sum
 
       # Create a Github release
       - uses: ncipollo/release-action@v1
