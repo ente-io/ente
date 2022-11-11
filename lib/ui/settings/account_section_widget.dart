@@ -312,25 +312,23 @@ class AccountSectionWidget extends StatelessWidget {
     if (result == null) {
       return;
     }
-    File file = File(result.files.single.path);
-    final codes = await file.readAsString();
-    List<String> splitCodes = codes.split(",");
-    if (splitCodes.length == 1) {
-      splitCodes = codes.split("\n");
-    }
-    int errors = 0;
-    final parsedCodes = [];
-    for (final code in splitCodes) {
-      try {
-        parsedCodes.add(Code.fromRawData(code));
-      } catch (e) {
-        _logger.severe("Could not parse code", e);
-        errors++;
-      }
-    }
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
+      File file = File(result.files.single.path);
+      final codes = await file.readAsString();
+      List<String> splitCodes = codes.split(",");
+      if (splitCodes.length == 1) {
+        splitCodes = codes.split("\n");
+      }
+      final parsedCodes = [];
+      for (final code in splitCodes) {
+        try {
+          parsedCodes.add(Code.fromRawData(code));
+        } catch (e) {
+          _logger.severe("Could not parse code", e);
+        }
+      }
       for (final code in parsedCodes) {
         await CodeStore.instance.addCode(code, shouldSync: false);
       }
@@ -367,8 +365,11 @@ class AccountSectionWidget extends StatelessWidget {
       );
     } catch (e) {
       await dialog.hide();
-      showErrorDialog(context, "Oops", "Something went wrong");
+      await showErrorDialog(
+        context,
+        "Sorry",
+        "Could not parse the selected file.\nPlease write to support@ente.io if you need help!",
+      );
     }
-    _logger.info(parsedCodes);
   }
 }
