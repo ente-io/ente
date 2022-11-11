@@ -31,7 +31,10 @@ class CodeStore {
     return codes;
   }
 
-  Future<void> addCode(Code code) async {
+  Future<void> addCode(
+    Code code, {
+    bool shouldSync = true,
+  }) async {
     final codes = await getAllCodes();
     for (final existingCode in codes) {
       if (existingCode == code) {
@@ -39,7 +42,10 @@ class CodeStore {
         return;
       }
     }
-    code.id = await _authenticatorService.addEntry(jsonEncode(code.rawData));
+    code.id = await _authenticatorService.addEntry(
+      jsonEncode(code.rawData),
+      shouldSync,
+    );
     Bus.instance.fire(CodesUpdatedEvent());
   }
 

@@ -62,7 +62,7 @@ class AuthenticatorService {
     return entries;
   }
 
-  Future<int> addEntry(String plainText) async {
+  Future<int> addEntry(String plainText, bool shouldSync) async {
     var key = await getOrCreateAuthDataKey();
     final encryptedKeyData = await CryptoUtil.encryptChaCha(
       utf8.encode(plainText) as Uint8List,
@@ -71,7 +71,9 @@ class AuthenticatorService {
     String encryptedData = Sodium.bin2base64(encryptedKeyData.encryptedData!);
     String header = Sodium.bin2base64(encryptedKeyData.header!);
     final insertedID = await _db.insert(encryptedData, header);
-    unawaited(sync());
+    if (shouldSync) {
+      unawaited(sync());
+    }
     return insertedID;
   }
 
