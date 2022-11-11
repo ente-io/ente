@@ -1,8 +1,13 @@
 // @dart=2.9
 
+import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -15,11 +20,15 @@ import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
+import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 
 class AccountSectionWidget extends StatelessWidget {
+  final _logger = Logger("AccountSectionWidget");
+
   final _codeFile = File(
     Configuration.instance.getTempDirectory() + "ente-authenticator-codes.txt",
   );
@@ -129,13 +138,25 @@ class AccountSectionWidget extends StatelessWidget {
       sectionOptionSpacing,
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          title: "Export secrets",
+          title: "Import codes",
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,
         trailingIconIsMuted: true,
         onTap: () async {
-          _showWarningDialog(context);
+          _showImportInstructionDialog(context);
+        },
+      ),
+      sectionOptionSpacing,
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Export codes",
+        ),
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        trailingIcon: Icons.chevron_right_outlined,
+        trailingIconIsMuted: true,
+        onTap: () async {
+          _showExportWarningDialog(context);
         },
       ),
       sectionOptionSpacing,
@@ -145,7 +166,79 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _showWarningDialog(BuildContext context) async {
+  Future<void> _showImportInstructionDialog(BuildContext context) async {
+    final AlertDialog alert = AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      title: Text(
+        "Import codes",
+        style: Theme.of(context).textTheme.headline6,
+      ),
+      content: SingleChildScrollView(
+        child: Column(
+          children: [
+            const Text(
+              "Please select a file that contains a list of secrets in the following format",
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Container(
+              color: Theme.of(context).colorScheme.gNavBackgroundColor,
+              child: Padding(
+                padding: const EdgeInsets.all(8),
+                child: Text(
+                  "otpauth://totp/provider.com:you@email.com?secret=YOUR_SECRET",
+                  style: TextStyle(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                    fontFamily: Platform.isIOS ? "Courier" : "monospace",
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            const Text(
+              "The secrets can be separated by a comma or a new line",
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: const Text(
+            "Cancel",
+            style: TextStyle(
+              color: Colors.red,
+            ),
+          ),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+          },
+        ),
+        TextButton(
+          child: const Text(
+            "Select file",
+          ),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop('dialog');
+            _pickImportFile(context);
+          },
+        ),
+      ],
+    );
+
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+      barrierColor: Colors.black12,
+    );
+  }
+
+  Future<void> _showExportWarningDialog(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       title: Text(
@@ -212,5 +305,70 @@ class AccountSectionWidget extends StatelessWidget {
         _codeFile.deleteSync();
       }
     });
+  }
+
+  Future<void> _pickImportFile(BuildContext context) async {
+    FilePickerResult result = await FilePicker.platform.pickFiles();
+    if (result == null) {
+      return;
+    }
+    File file = File(result.files.single.path);
+    final codes = await file.readAsString();
+    List<String> splitCodes = codes.split(",");
+    if (splitCodes.length == 1) {
+      splitCodes = codes.split("\n");
+    }
+    int errors = 0;
+    final parsedCodes = [];
+    for (final code in splitCodes) {
+      try {
+        parsedCodes.add(Code.fromRawData(code));
+      } catch (e) {
+        _logger.severe("Could not parse code", e);
+        errors++;
+      }
+    }
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      for (final code in parsedCodes) {
+        await CodeStore.instance.addCode(code, shouldSync: false);
+      }
+      unawaited(AuthenticatorService.instance.sync());
+      await dialog.hide();
+      await showConfettiDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            title: Text(
+              "Yay!",
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            content: Text(
+              "You have imported " + parsedCodes.length.toString() + " codes!",
+            ),
+            actions: [
+              TextButton(
+                child: Text(
+                  "Okay",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop('dialog');
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      await dialog.hide();
+      showErrorDialog(context, "Oops", "Something went wrong");
+    }
+    _logger.info(parsedCodes);
   }
 }
