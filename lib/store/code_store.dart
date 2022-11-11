@@ -30,9 +30,7 @@ class CodeStore {
   }
 
   Future<void> addCode(Code code) async {
-    final codes = await getAllCodes();
     code.id = await _authenticatorService.addEntry(jsonEncode(code.rawData));
-    codes.add(code);
     Bus.instance.fire(CodesUpdatedEvent());
   }
 
