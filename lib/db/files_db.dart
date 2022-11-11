@@ -623,7 +623,6 @@ class FilesDB {
       limit: limit,
     );
     final files = convertToFiles(results);
-    _logger.info("Fetched " + files.length.toString() + " files");
     return FileLoadResult(files, files.length == limit);
   }
 
