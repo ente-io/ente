@@ -87,6 +87,12 @@ declare module '@mui/material/Alert' {
     }
 }
 
+declare module '@mui/material/CircularProgress' {
+    export interface CircularProgressPropsColorOverrides {
+        accent: true;
+    }
+}
+
 // Create a theme instance.
 const darkThemeOptions = createTheme({
     components: {
