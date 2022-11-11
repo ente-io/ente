@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:chewie/chewie.dart';
@@ -16,6 +17,7 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
+import 'package:wakelock/wakelock.dart';
 
 class VideoWidget extends StatefulWidget {
   final File file;
@@ -41,6 +43,7 @@ class _VideoWidgetState extends State<VideoWidget> {
   ChewieController _chewieController;
   double _progress;
   bool _isPlaying;
+  bool _wakeLockEnabledHere = false;
 
   @override
   void initState() {
@@ -112,6 +115,13 @@ class _VideoWidgetState extends State<VideoWidget> {
     }
     if (_chewieController != null) {
       _chewieController.dispose();
+    }
+    if (_wakeLockEnabledHere) {
+      unawaited(
+        Wakelock.enabled.then((isEnabled) {
+          isEnabled ? Wakelock.disable() : null;
+        }),
+      );
     }
     super.dispose();
   }
@@ -198,6 +208,22 @@ class _VideoWidgetState extends State<VideoWidget> {
     );
   }
 
+  Future<void> _keepScreenAliveOnPlaying(bool isPlaying) async {
+    if (isPlaying) {
+      return Wakelock.enabled.then((value) {
+        if (value == false) {
+          Wakelock.enable();
+          //wakeLockEnabledHere will not be set to true if wakeLock is already enabled from settings on iOS.
+          //We shouldn't disable when video is not playing if it was enabled manually by the user from ente settings by user.
+          _wakeLockEnabledHere = true;
+        }
+      });
+    }
+    if (_wakeLockEnabledHere && !isPlaying) {
+      return Wakelock.disable();
+    }
+  }
+
   Widget _getVideoPlayer() {
     _videoPlayerController.addListener(() {
       if (_isPlaying != _videoPlayerController.value.isPlaying) {
@@ -205,6 +231,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         if (widget.playbackCallback != null) {
           widget.playbackCallback(_isPlaying);
         }
+        unawaited(_keepScreenAliveOnPlaying(_isPlaying));
       }
     });
     _chewieController = ChewieController(
