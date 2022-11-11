@@ -177,7 +177,7 @@ class AccountSectionWidget extends StatelessWidget {
         child: Column(
           children: [
             const Text(
-              "Please select a file that contains a list of secrets in the following format",
+              "Please select a file that contains a list of your codes in the following format",
             ),
             const SizedBox(
               height: 20,
@@ -200,7 +200,7 @@ class AccountSectionWidget extends StatelessWidget {
               height: 20,
             ),
             const Text(
-              "The secrets can be separated by a comma or a new line",
+              "The codes can be separated by a comma or a new line",
             ),
           ],
         ),
