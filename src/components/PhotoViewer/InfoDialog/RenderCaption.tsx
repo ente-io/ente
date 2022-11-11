@@ -70,7 +70,7 @@ export function RenderCaption({
                                 <FreeFlowText>{caption}</FreeFlowText>
                             ) : (
                                 <Typography color="text.secondary">
-                                    Add a caption
+                                    {constants}
                                 </Typography>
                             )}
                         </Value>
