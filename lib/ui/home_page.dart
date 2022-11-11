@@ -152,8 +152,8 @@ class _HomePageState extends State<HomePage> {
       childPadding: const EdgeInsets.all(5),
       spaceBetweenChildren: 4,
       tooltip: 'Add Code',
-      foregroundColor: Theme.of(context).colorScheme.background,
-      backgroundColor: Theme.of(context).colorScheme.inverseBackgroundColor,
+      foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+      backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
       overlayOpacity: 0.5,
       overlayColor: Theme.of(context).colorScheme.background,
       elevation: 8.0,
@@ -161,16 +161,16 @@ class _HomePageState extends State<HomePage> {
       children: [
         SpeedDialChild(
           child: const Icon(Icons.qr_code),
-          foregroundColor: Theme.of(context).colorScheme.background,
-          backgroundColor: Theme.of(context).colorScheme.inverseBackgroundColor,
-          label: 'Scan a QR Code',
+          foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+          backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+          labelWidget: const SpeedDialLabelWidget("Scan a QR Code"),
           onTap: _redirectToScannerPage,
         ),
         SpeedDialChild(
           child: const Icon(Icons.keyboard),
-          foregroundColor: Theme.of(context).colorScheme.background,
-          backgroundColor: Theme.of(context).colorScheme.inverseBackgroundColor,
-          label: 'Enter details manually',
+          foregroundColor: Theme.of(context).colorScheme.fabForegroundColor,
+          backgroundColor: Theme.of(context).colorScheme.fabBackgroundColor,
+          labelWidget: const SpeedDialLabelWidget("Enter details manually"),
           onTap: _redirectToManualEntryPage,
         ),
       ],
@@ -219,6 +219,33 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class SpeedDialLabelWidget extends StatelessWidget {
+  final String label;
+
+  const SpeedDialLabelWidget(
+    this.label, {
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: Theme.of(context).colorScheme.fabBackgroundColor,
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.fabForegroundColor,
         ),
       ),
     );

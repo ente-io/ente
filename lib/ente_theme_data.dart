@@ -224,6 +224,14 @@ extension CustomColorScheme on ColorScheme {
   Color get inverseBackgroundColor =>
       brightness != Brightness.light ? backgroundBaseLight : backgroundBaseDark;
 
+  Color get fabForegroundColor => brightness == Brightness.light
+      ? const Color.fromRGBO(255, 255, 255, 1)
+      : const Color.fromRGBO(40, 40, 40, 1);
+
+  Color get fabBackgroundColor => brightness != Brightness.light
+      ? const Color.fromRGBO(255, 255, 255, 1)
+      : const Color.fromRGBO(40, 40, 40, 1);
+
   Color get defaultTextColor =>
       brightness == Brightness.light ? textBaseLight : textBaseDark;
 
