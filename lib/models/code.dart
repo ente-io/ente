@@ -1,3 +1,5 @@
+import 'package:ente_auth/utils/totp_util.dart';
+
 class Code {
   static const defaultDigits = 6;
   static const defaultPeriod = 30;
@@ -51,7 +53,7 @@ class Code {
       _getIssuer(uri),
       _getDigits(uri),
       _getPeriod(uri),
-      uri.queryParameters['secret']!,
+      getSanitizedSecret(uri.queryParameters['secret']!),
       _getAlgorithm(uri),
       _getType(uri),
       rawData,

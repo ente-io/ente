@@ -3,7 +3,7 @@ import 'package:otp/otp.dart' as otp;
 
 String getTotp(Code code) {
   return otp.OTP.generateTOTPCodeString(
-    code.secret,
+    getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch,
     length: code.digits,
     interval: code.period,
@@ -14,7 +14,7 @@ String getTotp(Code code) {
 
 String getNextTotp(Code code) {
   return otp.OTP.generateTOTPCodeString(
-    code.secret,
+    getSanitizedSecret(code.secret),
     DateTime.now().millisecondsSinceEpoch + code.period * 1000,
     length: code.digits,
     interval: code.period,
@@ -32,4 +32,8 @@ otp.Algorithm _getAlgorithm(Code code) {
     default:
       return otp.Algorithm.SHA1;
   }
+}
+
+String getSanitizedSecret(String secret) {
+  return secret.toUpperCase().trim();
 }
