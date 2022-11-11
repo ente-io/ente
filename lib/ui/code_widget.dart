@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:clipboard/clipboard.dart';
+import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/utils/toast_util.dart';
@@ -48,86 +49,103 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Slidable(
-      key: ValueKey(widget.code.hashCode),
-      endActionPane: ActionPane(
-        motion: const ScrollMotion(),
-        children: [
-          SlidableAction(
-            onPressed: _onDeletePressed,
-            backgroundColor: Colors.grey.withOpacity(0.1),
-            borderRadius: const BorderRadius.all(Radius.circular(12.0)),
-            foregroundColor: const Color(0xFFFE4A49),
-            icon: Icons.delete,
-            label: 'Delete',
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () {
-          FlutterClipboard.copy(_getTotp())
-              .then((value) => showToast(context, "Copied to clipboard"));
-        },
-        child: SizedBox(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FAProgressBar(
-                currentValue: _timeRemaining / widget.code.period * 100,
-                size: 4,
-                animatedDuration: const Duration(milliseconds: 200),
-                progressColor: Colors.orange,
-                changeColorValue: 40,
-                changeProgressColor: Colors.green,
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 16, right: 16),
-                child: Text(
-                  Uri.decodeFull(widget.code.issuer),
-                  style: Theme.of(context).textTheme.headline6,
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
+      child: Slidable(
+        key: ValueKey(widget.code.hashCode),
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          children: [
+            SlidableAction(
+              onPressed: _onDeletePressed,
+              backgroundColor: Colors.grey.withOpacity(0.1),
+              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              foregroundColor: const Color(0xFFFE4A49),
+              icon: Icons.delete,
+              label: 'Delete',
+              padding: const EdgeInsets.only(left: 0, right: 0),
+            ),
+          ],
+        ),
+        child: Container(
+          margin: const EdgeInsets.only(right: 10),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              color: Theme.of(context).colorScheme.codeCardBackgroundColor,
+              child: InkWell(
+                customBorder: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ),
-              Container(
-                padding: const EdgeInsets.only(right: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      "next",
-                      style: Theme.of(context).textTheme.caption,
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.only(left: 16, right: 16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        _getTotp(),
-                        style: const TextStyle(fontSize: 24),
+                onTap: () {
+                  FlutterClipboard.copy(_getTotp()).then(
+                    (value) => showToast(context, "Copied to clipboard"),
+                  );
+                },
+                child: SizedBox(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FAProgressBar(
+                        currentValue: _timeRemaining / widget.code.period * 100,
+                        size: 4,
+                        animatedDuration: const Duration(milliseconds: 200),
+                        progressColor: Colors.orange,
+                        changeColorValue: 40,
+                        changeProgressColor: Colors.green,
                       ),
-                    ),
-                    Text(
-                      _getNextTotp(),
-                      style: const TextStyle(
-                        fontSize: 24,
-                        color: Colors.grey,
+                      const SizedBox(
+                        height: 16,
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.only(left: 16, right: 16),
+                        child: Text(
+                          Uri.decodeFull(widget.code.issuer),
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text(
+                              "next",
+                              style: Theme.of(context).textTheme.caption,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(left: 16, right: 16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _getTotp(),
+                                style: const TextStyle(fontSize: 24),
+                              ),
+                            ),
+                            Text(
+                              _getNextTotp(),
+                              style: const TextStyle(
+                                fontSize: 24,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(
-                height: 32,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -194,17 +212,5 @@ class _CodeWidgetState extends State<CodeWidget> {
     } catch (e) {
       return "Error";
     }
-  }
-
-  Color _getProgressColor() {
-    final progress = _timeRemaining / widget.code.period;
-    if (progress > 0.6) {
-      return Colors.green;
-    } else if (progress > 0.4) {
-      return Colors.yellow;
-    } else if (progress > 2) {
-      return Colors.orange;
-    }
-    return Colors.red;
   }
 }

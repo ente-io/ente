@@ -344,6 +344,10 @@ extension CustomColorScheme on ColorScheme {
       ? Colors.black.withOpacity(0.32)
       : Colors.black.withOpacity(0.64);
 
+  Color get codeCardBackgroundColor => brightness == Brightness.light
+      ? const Color.fromRGBO(246, 246, 246, 1)
+      : const Color.fromRGBO(40, 40, 40, 0.6);
+
   EnteTheme get enteTheme =>
       brightness == Brightness.light ? lightTheme : darkTheme;
 }
