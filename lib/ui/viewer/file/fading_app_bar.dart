@@ -119,7 +119,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           false;
     }
     // only show fav option for files owned by the user
-    if (isOwnedByUser && !isFileHidden) {
+    if (isOwnedByUser && !isFileHidden && isFileUploaded) {
       actions.add(_getFavoriteButton());
     }
     actions.add(
