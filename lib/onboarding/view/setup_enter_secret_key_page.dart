@@ -2,7 +2,6 @@ import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
-import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 
 class SetupEnterSecretKeyPage extends StatefulWidget {
