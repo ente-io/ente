@@ -586,8 +586,6 @@ export function PhotoList({
         return <></>;
     }
 
-    console.log(timeStampList);
-
     return (
         <List
             key={`${activeCollection}`}
