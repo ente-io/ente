@@ -31,7 +31,7 @@ void main() {
   });
 
   test("verify constants", () {
-    final date = DateTime.fromMicrosecondsSinceEpoch(jan011981Time);
+    final date = DateTime.fromMicrosecondsSinceEpoch(jan011981Time).toUtc();
     expect(
       date.year == 1981 && date.month == 1,
       true,
