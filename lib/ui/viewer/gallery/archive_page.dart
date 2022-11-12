@@ -8,6 +8,7 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
@@ -27,6 +28,8 @@ class ArchivePage extends StatelessWidget {
 
   @override
   Widget build(Object context) {
+    final Set<int> hiddenCollectionIDs =
+        CollectionsService.instance.getHiddenCollections();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getAllPendingOrUploadedFiles(
@@ -36,6 +39,7 @@ class ArchivePage extends StatelessWidget {
           visibility: visibilityArchive,
           limit: limit,
           asc: asc,
+          ignoredCollectionIDs: hiddenCollectionIDs,
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
