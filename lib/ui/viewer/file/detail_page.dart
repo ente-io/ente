@@ -110,7 +110,7 @@ class _DetailPageState extends State<DetailPage> {
     return Scaffold(
       appBar: FadingAppBar(
         _files[_selectedIndex],
-        _onFileDeleted,
+        _onFileRemoved,
         Configuration.instance.getUserID(),
         100,
         widget.config.mode == DetailPageMode.full,
@@ -251,7 +251,7 @@ class _DetailPageState extends State<DetailPage> {
     }
   }
 
-  Future<void> _onFileDeleted(File file) async {
+  Future<void> _onFileRemoved(File file) async {
     final totalFiles = _files.length;
     if (totalFiles == 1) {
       // Deleted the only file
