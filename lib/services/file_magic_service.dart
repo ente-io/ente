@@ -37,11 +37,21 @@ class FileMagicService {
     if (visibility == visibilityVisible) {
       // Force reload home gallery to pull in the now unarchived files
       Bus.instance.fire(ForceReloadHomeGalleryEvent("unarchivedFiles"));
-      Bus.instance
-          .fire(LocalPhotosUpdatedEvent(files, type: EventType.unarchived));
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          files,
+          type: EventType.unarchived,
+          source: "vizChange",
+        ),
+      );
     } else {
-      Bus.instance
-          .fire(LocalPhotosUpdatedEvent(files, type: EventType.archived));
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          files,
+          type: EventType.archived,
+          source: "vizChange",
+        ),
+      );
     }
   }
 

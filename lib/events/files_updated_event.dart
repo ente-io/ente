@@ -15,7 +15,7 @@ class FilesUpdatedEvent extends Event {
   });
 
   @override
-  String get reason => '${toString()}{type: ${type.name}, "via": $source}';
+  String get reason => '$runtimeType{type: ${type.name}, "via": $source}';
 }
 
 enum EventType {

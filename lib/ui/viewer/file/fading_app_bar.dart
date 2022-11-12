@@ -458,7 +458,12 @@ class FadingAppBarState extends State<FadingAppBar> {
         await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
         file.localID = savedAsset.id;
         await FilesDB.instance.insert(file);
-        Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(
+            [file],
+            source: "download",
+          ),
+        );
       } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
         _logger.severe('Failed to save assert of type $type');
       }

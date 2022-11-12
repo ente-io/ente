@@ -126,6 +126,7 @@ Future<void> deleteFilesFromEverywhere(
       LocalPhotosUpdatedEvent(
         deletedFiles,
         type: EventType.deletedFromEverywhere,
+        source: "deleteFilesEverywhere",
       ),
     );
     if (hasLocalOnlyFiles && Platform.isAndroid) {
@@ -182,8 +183,13 @@ Future<void> deleteFilesFromRemoteOnly(
       ),
     );
   }
-  Bus.instance
-      .fire(LocalPhotosUpdatedEvent(files, type: EventType.deletedFromRemote));
+  Bus.instance.fire(
+    LocalPhotosUpdatedEvent(
+      files,
+      type: EventType.deletedFromRemote,
+      source: "deleteFromRemoteOnly",
+    ),
+  );
   SyncService.instance.sync();
   await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
@@ -245,6 +251,7 @@ Future<void> deleteFilesOnDeviceOnly(
       LocalPhotosUpdatedEvent(
         deletedFiles,
         type: EventType.deletedFromDevice,
+        source: "deleteFilesOnDeviceOnly",
       ),
     );
   }
@@ -343,7 +350,9 @@ Future<bool> deleteLocalFiles(
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
     await FilesDB.instance.deleteLocalFiles(deletedIDs);
     _logger.info(deletedFiles.length.toString() + " files deleted locally");
-    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+    );
     return true;
   } else {
     showToast(context, "Could not free up space");

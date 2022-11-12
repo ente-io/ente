@@ -176,6 +176,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
               LocalPhotosUpdatedEvent(
                 [widget.file],
                 type: EventType.deletedFromDevice,
+                source: "thumbFileDeleted",
               ),
             );
           }

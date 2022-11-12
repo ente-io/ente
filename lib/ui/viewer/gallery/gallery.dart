@@ -89,9 +89,16 @@ class _GalleryState extends State<Gallery> {
     _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent.listen((event) async {
-        _logger.info("Reloading ALL files on ${event.type.name} event");
+        // In soft refresh, setState is called for entire gallery only when
+        // number of child change
+        _logger.finest("Soft refresh all files on ${event.reason} ");
         final result = await _loadFiles();
-        _onFilesLoaded(result.files);
+        final bool hasReloaded = _onFilesLoaded(result.files);
+        if (hasReloaded && kDebugMode) {
+          _logger.finest(
+            "Reloaded gallery on soft refresh all files on ${event.reason}",
+          );
+        }
       });
     }
     _tabDoubleTapEvent =
@@ -109,8 +116,7 @@ class _GalleryState extends State<Gallery> {
       for (final event in widget.forceReloadEvents) {
         _forceReloadEventSubscriptions.add(
           event.listen((event) async {
-            _logger.info(event.reason);
-
+            _logger.finest("Force refresh all files on ${event.reason}");
             final result = await _loadFiles();
             _setFilesAndReload(result.files);
           }),
@@ -138,7 +144,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   Future<FileLoadResult> _loadFiles({int limit}) async {
-    _logger.info("Loading files");
+    _logger.info("Loading ${limit ?? "all"} files");
     try {
       final startTime = DateTime.now().microsecondsSinceEpoch;
       final result = await widget.asyncLoader(
