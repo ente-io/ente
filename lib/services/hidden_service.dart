@@ -7,7 +7,6 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
-import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
@@ -75,7 +74,6 @@ extension HiddenService on CollectionsService {
         }
         await move(defaultHiddenCollection.id, entry.key, entry.value);
       }
-      Bus.instance.fire(ForceReloadHomeGalleryEvent("hideFiles"));
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           filesToHide,

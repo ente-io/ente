@@ -34,14 +34,14 @@ import 'package:photos/utils/toast_util.dart';
 
 class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
   final File file;
-  final Function(File) onFileDeleted;
+  final Function(File) onFileRemoved;
   final double height;
   final bool shouldShowActions;
   final int userID;
 
   const FadingAppBar(
     this.file,
-    this.onFileDeleted,
+    this.onFileRemoved,
     this.userID,
     this.height,
     this.shouldShowActions, {
@@ -259,11 +259,8 @@ class FadingAppBarState extends State<FadingAppBar> {
     try {
       final hideResult =
           await CollectionsService.instance.hideFiles(context, [widget.file]);
-
       if (hideResult) {
-        // delay to avoid black screen
-        await Future.delayed(const Duration(milliseconds: 300));
-        Navigator.of(context).pop();
+        widget.onFileRemoved(widget.file);
       }
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
@@ -355,7 +352,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
-            widget.onFileDeleted(file);
+            widget.onFileRemoved(file);
           },
           child: const Text("Everywhere"),
         ),
@@ -394,7 +391,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
-            widget.onFileDeleted(file);
+            widget.onFileRemoved(file);
           },
           child: const Text("Everywhere"),
         ),
