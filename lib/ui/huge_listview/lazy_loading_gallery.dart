@@ -98,7 +98,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
       if (kDebugMode) {
         _logger.info(
           filesUpdatedThisDay.length.toString() +
-              " files were updated due to ${event.type.name} on " +
+              " files were updated due to ${event.reason} on " +
               getDayTitle(galleryDate.microsecondsSinceEpoch),
         );
       }
@@ -116,13 +116,27 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         }
       } else if (widget.removalEventTypes.contains(event.type)) {
         // Files were removed
-        final updateFileIDs = <int>{};
+        final generatedFileIDs = <int>{};
+        final uploadedFileIds = <int>{};
         for (final file in filesUpdatedThisDay) {
-          updateFileIDs.add(file.generatedID);
+          if (file.generatedID != null) {
+            generatedFileIDs.add(file.generatedID);
+          } else if (file.uploadedFileID != null) {
+            uploadedFileIds.add(file.uploadedFileID);
+          }
         }
         final List<File> files = [];
         files.addAll(_files);
-        files.removeWhere((file) => updateFileIDs.contains(file.generatedID));
+        files.removeWhere(
+          (file) =>
+              generatedFileIDs.contains(file.generatedID) ||
+              uploadedFileIds.contains(file.uploadedFileID),
+        );
+        if (kDebugMode) {
+          _logger.finest(
+            "removed ${_files.length - files.length} due to ${event.reason}",
+          );
+        }
         if (mounted) {
           setState(() {
             _files = files;
