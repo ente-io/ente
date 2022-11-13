@@ -312,30 +312,38 @@ class CollectionsService {
         fetchCollectionByID(collectionID);
         throw AssertionError('collectionID $collectionID is not cached');
       }
-      _cachedKeys[collectionID] = _getDecryptedKey(collection);
+      _cachedKeys[collectionID] = _getAndCacheDecryptedKey(collection);
     }
     return _cachedKeys[collectionID];
   }
 
-  Uint8List _getDecryptedKey(Collection collection) {
-    debugPrint("Finding collection decryption key for ${collection.id}");
+  Uint8List _getAndCacheDecryptedKey(Collection collection) {
+    if (_cachedKeys.containsKey(collection.id)) {
+      return _cachedKeys[collection.id];
+    }
+    debugPrint("Compute collection decryption key for ${collection.id}");
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
+    Uint8List collectionKey;
     if (collection.owner.id == _config.getUserID()) {
       if (_config.getKey() == null) {
         throw Exception("key can not be null");
       }
-      return CryptoUtil.decryptSync(
+      collectionKey = CryptoUtil.decryptSync(
         encryptedKey,
         _config.getKey(),
         Sodium.base642bin(collection.keyDecryptionNonce),
       );
     } else {
-      return CryptoUtil.openSealSync(
+      collectionKey = CryptoUtil.openSealSync(
         encryptedKey,
         Sodium.base642bin(_config.getKeyAttributes().publicKey),
         _config.getSecretKey(),
       );
     }
+    if (collectionKey != null) {
+      _cachedKeys[collection.id] = collectionKey;
+    }
+    return collectionKey;
   }
 
   Future<void> rename(Collection collection, String newName) async {
@@ -521,7 +529,7 @@ class CollectionsService {
         for (final collectionData in c) {
           final collection = Collection.fromMap(collectionData);
           if (collectionData['magicMetadata'] != null) {
-            final decryptionKey = _getDecryptedKey(collection);
+            final decryptionKey = _getAndCacheDecryptedKey(collection);
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
               Sodium.base642bin(collectionData['magicMetadata']['data']),
               decryptionKey,
@@ -582,7 +590,7 @@ class CollectionsService {
       final collectionData = response.data["collection"];
       final collection = Collection.fromMap(collectionData);
       if (collectionData['magicMetadata'] != null) {
-        final decryptionKey = _getDecryptedKey(collection);
+        final decryptionKey = _getAndCacheDecryptedKey(collection);
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
           Sodium.base642bin(collectionData['magicMetadata']['data']),
           decryptionKey,
@@ -922,7 +930,7 @@ class CollectionsService {
 
   String decryptCollectionPath(Collection collection) {
     final key = collection.attributes.version == 1
-        ? _getDecryptedKey(collection)
+        ? getCollectionKey(collection.id)
         : _config.getKey();
     return utf8.decode(
       CryptoUtil.decryptSync(
@@ -944,7 +952,7 @@ class CollectionsService {
       try {
         final result = CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedName),
-          _getDecryptedKey(collection),
+          _getAndCacheDecryptedKey(collection),
           Sodium.base642bin(collection.nameDecryptionNonce),
         );
         name = utf8.decode(result);
