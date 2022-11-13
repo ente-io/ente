@@ -1,7 +1,9 @@
 // @dart=2.9
 
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/user_details_changed_event.dart';
@@ -620,6 +622,14 @@ class UserService {
     await dialog.show();
     String secret;
     try {
+      if (recoveryKey.contains(' ')) {
+        if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
+          throw AssertionError(
+            'recovery code should have $mnemonicKeyWordCount words',
+          );
+        }
+        recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+      }
       secret = Sodium.bin2base64(
         await CryptoUtil.decrypt(
           Sodium.base642bin(encryptedSecret),
