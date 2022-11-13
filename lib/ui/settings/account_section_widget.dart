@@ -48,7 +48,7 @@ class AccountSectionWidget extends StatelessWidget {
             String recoveryKey;
             try {
               recoveryKey =
-                  Sodium.bin2base64(Configuration.instance.getRecoveryKey());
+                  Sodium.bin2hex(Configuration.instance.getRecoveryKey());
             } catch (e) {
               showGenericErrorDialog(context);
               return;
