@@ -34,7 +34,7 @@ class _LockScreenState extends State<LockScreen> {
               alignment: Alignment.center,
               children: [
                 Opacity(
-                  opacity: 0.2,
+                  opacity: 0.3,
                   child: Image.asset('assets/loading_photos_background.png'),
                 ),
                 SizedBox(
