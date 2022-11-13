@@ -16,6 +16,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/backup_folders_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/sync_status_update_event.dart';
+import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
 import 'package:photos/services/local/local_sync_util.dart';
@@ -184,7 +185,7 @@ class LocalSyncService {
   }
 
   Future<bool> syncAll() async {
-    final stopwatch = Stopwatch()..start();
+    final stopwatch = EnteWatch("localSyncAll")..start();
     final localAssets = await getAllLocalAssets();
     _logger.info(
       "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
