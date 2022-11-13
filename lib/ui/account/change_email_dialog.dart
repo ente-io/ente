@@ -61,7 +61,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
           child: const Text(
             "Verify",
             style: TextStyle(
-              color: Colors.green,
+              color: Colors.purple,
             ),
           ),
           onPressed: () {
