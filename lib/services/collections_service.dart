@@ -21,6 +21,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
@@ -90,12 +91,14 @@ class CollectionsService {
   // within the collection.
   Future<List<Collection>> sync() async {
     _logger.info("Syncing collections");
+    final EnteWatch watch = EnteWatch("syncCollection")..start();
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime);
+    watch.log("remote fetch");
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
@@ -124,10 +127,12 @@ class CollectionsService {
     }
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
+    watch.logAndReset("till DB insertion");
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
     }
+    watch.log("collection cache refresh");
     if (fetchedCollections.isNotEmpty) {
       Bus.instance.fire(
         CollectionUpdatedEvent(

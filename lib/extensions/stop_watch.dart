@@ -1,12 +1,16 @@
 import 'package:flutter/foundation.dart';
 
-extension StopWatchExtension on Stopwatch {
+class EnteWatch extends Stopwatch {
+  final String context;
+
+  EnteWatch(this.context) : super();
+
   void log(String msg) {
-    debugPrint("$msg took ${elapsed.inMilliseconds} ms");
+    debugPrint("[$context]: $msg took ${elapsed.inMilliseconds} ms");
   }
 
   void logAndReset(String msg) {
-    debugPrint("$msg took ${elapsed.inMilliseconds} ms");
+    debugPrint("[$context]: $msg took ${elapsed.inMilliseconds} ms");
     reset();
   }
 }
