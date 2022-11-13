@@ -2,11 +2,13 @@
 
 import 'dart:typed_data';
 
+import 'package:bip39/bip39.dart' as bip39;
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/public_keys_db.dart';
@@ -522,6 +524,14 @@ class UserService {
     await dialog.show();
     String secret;
     try {
+      if (recoveryKey.contains(' ')) {
+        if (recoveryKey.split(' ').length != mnemonicKeyWordCount) {
+          throw AssertionError(
+            'recovery code should have $mnemonicKeyWordCount words',
+          );
+        }
+        recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
+      }
       secret = Sodium.bin2base64(
         await CryptoUtil.decrypt(
           Sodium.base642bin(encryptedSecret),
