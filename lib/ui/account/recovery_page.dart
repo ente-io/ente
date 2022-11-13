@@ -68,7 +68,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
             );
           } catch (e) {
             await dialog.hide();
-            String errMessage = 'the recovery key you entered is incorrect';
+            String errMessage = "The recovery key you entered is incorrect";
             if (e is AssertionError) {
               errMessage = '$errMessage : ${e.message}';
             }
