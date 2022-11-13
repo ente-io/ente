@@ -1,8 +1,5 @@
 // @dart=2.9
 
-import 'dart:io';
-
-import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -33,19 +30,6 @@ class SocialSectionWidget extends StatelessWidget {
       const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
       sectionOptionSpacing,
     ];
-    if (!UpdateService.instance.isIndependent()) {
-      options.addAll(
-        [
-          SocialsMenuItemWidget(
-            "Rate us! ✨",
-            Platform.isAndroid
-                ? "https://play.google.com/store/apps/details?id=io.ente.photos"
-                : "https://apps.apple.com/in/app/ente-photos/id1542026904",
-          ),
-          sectionOptionSpacing,
-        ],
-      );
-    }
     return Column(children: options);
   }
 }
