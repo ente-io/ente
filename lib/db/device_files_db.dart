@@ -145,7 +145,7 @@ extension DeviceFiles on FilesDB {
             "?",
             [localPathAsset.pathName, localPathAsset.pathID],
           );
-        } else {
+        } else if (localPathAsset.localIDs.isNotEmpty) {
           batch.insert(
             "device_collections",
             {
