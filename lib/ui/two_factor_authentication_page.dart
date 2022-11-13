@@ -20,10 +20,6 @@ class TwoFactorAuthenticationPage extends StatefulWidget {
 class _TwoFactorAuthenticationPageState
     extends State<TwoFactorAuthenticationPage> {
   final _pinController = TextEditingController();
-  final _pinPutDecoration = BoxDecoration(
-    border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
-    borderRadius: BorderRadius.circular(15.0),
-  );
   String _code = "";
   LifecycleEventHandler _lifecycleEventHandler;
 
@@ -62,6 +58,16 @@ class _TwoFactorAuthenticationPageState
   }
 
   Widget _getBody() {
+    final pinPutDecoration = BoxDecoration(
+      border: Border.all(
+        color: Theme.of(context)
+            .inputDecorationTheme
+            .focusedBorder
+            .borderSide
+            .color,
+      ),
+      borderRadius: BorderRadius.circular(15.0),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisAlignment: MainAxisAlignment.center,
@@ -89,15 +95,12 @@ class _TwoFactorAuthenticationPageState
               });
             },
             controller: _pinController,
-            submittedFieldDecoration: _pinPutDecoration.copyWith(
+            submittedFieldDecoration: pinPutDecoration.copyWith(
               borderRadius: BorderRadius.circular(20.0),
             ),
-            selectedFieldDecoration: _pinPutDecoration,
-            followingFieldDecoration: _pinPutDecoration.copyWith(
+            selectedFieldDecoration: pinPutDecoration,
+            followingFieldDecoration: pinPutDecoration.copyWith(
               borderRadius: BorderRadius.circular(5.0),
-              border: Border.all(
-                color: const Color.fromRGBO(45, 194, 98, 0.5),
-              ),
             ),
             inputDecoration: const InputDecoration(
               focusedBorder: InputBorder.none,
