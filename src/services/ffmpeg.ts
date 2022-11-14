@@ -3,12 +3,10 @@ import path from 'path';
 const shellescape = require('any-shell-escape');
 import util from 'util';
 const exec = util.promisify(require('child_process').exec);
-import { getElectronFile } from './fs';
 import log from 'electron-log';
-import { rmSync } from 'promise-fs';
+import { readFile, rmSync } from 'promise-fs';
 import { logErrorSentry } from './sentry';
 import { generateTempName, getTempDirPath } from '../utils/temp';
-import { ElectronFile } from '../types';
 
 export const INPUT_PATH_PLACEHOLDER = 'INPUT';
 export const FFMPEG_PLACEHOLDER = 'FFMPEG';
@@ -20,7 +18,7 @@ function getFFmpegStaticPath() {
 
 export async function runFFmpegCmd(
     cmd: string[],
-    inputFile: ElectronFile,
+    inputFilePath: string,
     outputFileName: string
 ) {
     let tempOutputFilePath: string;
@@ -36,7 +34,7 @@ export async function runFFmpegCmd(
             if (cmdPart === FFMPEG_PLACEHOLDER) {
                 return getFFmpegStaticPath();
             } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
-                return inputFile.path;
+                return inputFilePath;
             } else if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
                 return tempOutputFilePath;
             } else {
@@ -46,11 +44,10 @@ export async function runFFmpegCmd(
         cmd = shellescape(cmd);
         log.info('cmd', cmd);
         await exec(cmd);
-
-        const outputFile = await getElectronFile(tempOutputFilePath);
-        return outputFile;
+        return new Uint8Array(await readFile(tempOutputFilePath));
     } catch (e) {
         logErrorSentry(e, 'ffmpeg run command error');
+        throw e;
     } finally {
         try {
             rmSync(tempOutputFilePath);

@@ -21,7 +21,6 @@ import {
     updateAndRestart,
 } from '../services/appUpdater';
 import { runFFmpegCmd } from '../services/ffmpeg';
-import { ElectronFile } from '../types';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -130,8 +129,8 @@ export default function setupIpcComs(
 
     ipcMain.handle(
         'run-ffmpeg-cmd',
-        (_, cmd: string[], inputFile: ElectronFile, outputFileName: string) => {
-            return runFFmpegCmd(cmd, inputFile, outputFileName);
+        (_, cmd: string[], inputFilePath: string, outputFileName: string) => {
+            return runFFmpegCmd(cmd, inputFilePath, outputFileName);
         }
     );
 }
