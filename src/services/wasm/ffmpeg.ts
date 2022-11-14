@@ -80,7 +80,7 @@ export class WasmFFmpeg {
                     return cmdPart;
                 }
             });
-            console.log(cmd);
+            addLogLine(`${cmd}`);
             await this.ffmpeg.run(...cmd);
             addLogLine(`ffmpeg execute completed for ${inputFile.name}`);
             return new File(
