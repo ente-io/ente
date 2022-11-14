@@ -10,7 +10,11 @@ export class ElectronFFmpeg implements IFFmpeg {
         this.electronAPIs = runningInBrowser() && globalThis['ElectronAPIs'];
     }
 
-    async run(cmd: string[], inputFile: ElectronFile, outputFilename: string) {
+    async run(
+        cmd: string[],
+        inputFile: ElectronFile | File,
+        outputFilename: string
+    ) {
         if (this.electronAPIs?.runFFmpegCmd) {
             return this.electronAPIs.runFFmpegCmd(
                 cmd,

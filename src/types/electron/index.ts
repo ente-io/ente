@@ -79,7 +79,7 @@ export interface ElectronAPIs {
     getAppVersion: () => Promise<string>;
     runFFmpegCmd: (
         cmd: string[],
-        inputFile: ElectronFile,
-        outputFIlename: string
-    ) => Promise<ElectronFile>;
+        inputFile: File | ElectronFile,
+        outputFileName: string
+    ) => Promise<File>;
 }
