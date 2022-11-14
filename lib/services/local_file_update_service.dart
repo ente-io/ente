@@ -167,10 +167,16 @@ class LocalFileUpdateService {
       if (generatedIDs.isNotEmpty) {
         final List<int> genIdIntList =
             generatedIDs.map((e) => int.tryParse(e)).toList();
+
         final filesWithBadTime =
-            await FilesDB.instance.getFilesFromGeneratedIDs(genIdIntList);
-        await FilesService.instance.bulkEditTime(
-            filesWithBadTime.values.toList(), EditTimeSource.fileName);
+            (await FilesDB.instance.getFilesFromGeneratedIDs(genIdIntList))
+                .values
+                .toList();
+        filesWithBadTime.removeWhere(
+          (e) => e.isUploaded && e.pubMagicMetadata?.editedTime != null,
+        );
+        await FilesService.instance
+            .bulkEditTime(filesWithBadTime, EditTimeSource.fileName);
       } else {
         // everything is done
         await _prefs.setBool(isBadCreationTimeMigrationComplete, true);
