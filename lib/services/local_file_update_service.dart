@@ -6,9 +6,13 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/file.dart' as ente;
+import 'package:photos/services/files_service.dart';
 import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -21,6 +25,9 @@ class LocalFileUpdateService {
   Logger _logger;
   static const isLocationMigrationComplete = "fm_isLocationMigrationComplete";
   static const isLocalImportDone = "fm_IsLocalImportDone";
+  static const isBadCreationTimeImportDone = 'fm_badCreationTime';
+  static const isBadCreationTimeMigrationComplete =
+      'fm_badCreationTimeCompleted';
   Completer<void> _existingMigration;
 
   LocalFileUpdateService._privateConstructor() {
@@ -35,8 +42,8 @@ class LocalFileUpdateService {
   static LocalFileUpdateService instance =
       LocalFileUpdateService._privateConstructor();
 
-  bool isLocationMigrationCompleted() {
-    return _prefs.get(isLocationMigrationComplete) ?? false;
+  bool isBadCreationMigrationCompleted() {
+    return _prefs.get(isBadCreationTimeMigrationComplete) ?? false;
   }
 
   Future<void> markUpdatedFilesForReUpload() async {
@@ -47,6 +54,9 @@ class LocalFileUpdateService {
     _existingMigration = Completer<void>();
     try {
       await _markFilesWhichAreActuallyUpdated();
+      if (Platform.isAndroid) {
+        await _migrationForFixingBadCreationTime();
+      }
     } catch (e, s) {
       _logger.severe('failed to perform migration', e, s);
     } finally {
@@ -140,5 +150,55 @@ class LocalFileUpdateService {
       await mediaUploadData.sourceFile.delete();
     }
     return mediaUploadData;
+  }
+
+  Future<void> _migrationForFixingBadCreationTime() async {
+    if (_prefs.containsKey(isBadCreationTimeMigrationComplete)) {
+      return;
+    }
+    await _importFilesWithBadCreationTime();
+    const int singleRunLimit = 100;
+    try {
+      final generatedIDs =
+          await _fileUpdationDB.getLocalIDsForPotentialReUpload(
+        singleRunLimit,
+        FileUpdationDB.badCreationTime,
+      );
+      if (generatedIDs.isNotEmpty) {
+        final List<int> genIdIntList =
+            generatedIDs.map((e) => int.tryParse(e)).toList();
+        final filesWithBadTime =
+            await FilesDB.instance.getFilesFromGeneratedIDs(genIdIntList);
+        await FilesService.instance.bulkEditTime(
+            filesWithBadTime.values.toList(), EditTimeSource.fileName);
+      } else {
+        // everything is done
+        await _prefs.setBool(isBadCreationTimeMigrationComplete, true);
+      }
+      await _fileUpdationDB.deleteByLocalIDs(
+        generatedIDs,
+        FileUpdationDB.badCreationTime,
+      );
+    } catch (e) {
+      _logger.severe("Failed to fix bad creationTime", e);
+    }
+  }
+
+  Future<void> _importFilesWithBadCreationTime() async {
+    if (_prefs.containsKey(isBadCreationTimeImportDone) ||
+        !Platform.isAndroid) {
+      return;
+    }
+    _logger.info('_importFilesWithBadCreationTime');
+    final EnteWatch watch = EnteWatch("_importFilesWithBadCreationTime");
+    final int ownerID = Configuration.instance.getUserID();
+    final filesGeneratedID = await FilesDB.instance
+        .getGeneratedIDForFilesOlderThan(jan011981Time, ownerID);
+    await _fileUpdationDB.insertMultiple(
+      filesGeneratedID,
+      FileUpdationDB.badCreationTime,
+    );
+    watch.log("imported ${filesGeneratedID.length} files");
+    _prefs.setBool(isBadCreationTimeImportDone, true);
   }
 }
