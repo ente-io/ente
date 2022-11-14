@@ -20,8 +20,6 @@ class SelectedFiles extends ChangeNotifier {
     }
     lastSelections.clear();
     lastSelections.add(file);
-    print("number of selected files : ${files.length}");
-
     notifyListeners();
   }
 
@@ -45,11 +43,11 @@ class SelectedFiles extends ChangeNotifier {
     return alreadySelected != null;
   }
 
-  bool isPartOfLastSelectedGrid(File file) {
-    final File? alreadySelected = lastSelections.firstWhereOrNull(
+  bool isPartOfLastSelected(File file) {
+    final File? matchedFile = lastSelections.firstWhereOrNull(
       (element) => element.generatedID == file.generatedID,
     );
-    return alreadySelected != null;
+    return matchedFile != null;
   }
 
   void clearAll() {

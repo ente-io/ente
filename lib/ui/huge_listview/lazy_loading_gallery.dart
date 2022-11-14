@@ -366,7 +366,6 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   Widget _getGridView() {
-    print("getting grid view");
     return GridView.builder(
       shrinkWrap: true,
       physics:
@@ -383,7 +382,6 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   Widget _buildFile(BuildContext context, File file) {
-    print("rebuilding");
     return GestureDetector(
       onTap: () {
         if (widget.selectedFiles.files.isNotEmpty) {
@@ -459,12 +457,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _selectedFilesListener() {
-    print("inside");
     bool shouldRefresh = false;
     for (final file in widget.files) {
-      if (widget.selectedFiles.isPartOfLastSelectedGrid(file)) {
+      if (widget.selectedFiles.isPartOfLastSelected(file)) {
         shouldRefresh = true;
-        print("here");
       }
     }
     if (shouldRefresh && mounted) {
