@@ -5,7 +5,7 @@ import { existsSync, mkdir } from 'promise-fs';
 
 const ENTE_TEMP_DIRECTORY = 'ente';
 
-const ALPHABETS =
+const CHARACTERS =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 export async function getTempDirPath() {
@@ -26,9 +26,9 @@ export async function clearEnteTempFolder() {
 export function generateTempName(length: number) {
     let result = '';
 
-    const charactersLength = ALPHABETS.length;
+    const charactersLength = CHARACTERS.length;
     for (let i = 0; i < length; i++) {
-        result += ALPHABETS.charAt(
+        result += CHARACTERS.charAt(
             Math.floor(Math.random() * charactersLength)
         );
     }

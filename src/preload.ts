@@ -50,7 +50,7 @@ import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
 import { convertHEIC } from './api/heicConvert';
 import { setupLogging } from './utils/logging';
-import { generateVideoThumbnail } from './api/video';
+import { runFFmpegCmd } from './api/ffmpeg';
 
 fixHotReloadNext12();
 setupLogging();
@@ -101,5 +101,5 @@ windowObject['ElectronAPIs'] = {
     skipAppVersion,
     getSentryUserID,
     getAppVersion,
-    generateVideoThumbnail,
+    runFFmpegCmd,
 };
