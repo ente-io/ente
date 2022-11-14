@@ -22,7 +22,7 @@ jobs:
             - name: Install Node.js, NPM and Yarn
               uses: actions/setup-node@v2.1.5
               with:
-                  node-version: 14
+                  node-version: 16
 
             - name: Prepare for app notarization
               if: startsWith(matrix.os, 'macos')
