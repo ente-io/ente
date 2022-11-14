@@ -1,4 +1,5 @@
 import { CustomError } from 'utils/error';
+import { addLocalLog } from 'utils/logging';
 
 interface RequestQueueItem {
     request: (canceller?: RequestCanceller) => Promise<any>;
@@ -60,6 +61,7 @@ export default class QueueProcessor<T> {
 
     private async processQueue() {
         while (this.requestQueue.length > 0) {
+            addLocalLog(() => `processQueue called`);
             const queueItem =
                 this.processingStrategy === PROCESSING_STRATEGY.LIFO
                     ? this.requestQueue.pop()
@@ -76,7 +78,9 @@ export default class QueueProcessor<T> {
                     queueItem.failureCallback(e);
                 }
             }
+            addLocalLog(() => `processQueue finished`);
         }
+        addLocalLog(() => `nothing left to process`);
         this.requestInProcessing--;
     }
 }

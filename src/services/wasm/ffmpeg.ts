@@ -2,8 +2,7 @@ import { createFFmpeg, FFmpeg } from 'ffmpeg-wasm';
 import QueueProcessor from 'services/queueProcessor';
 import { getUint8ArrayView } from 'services/readerService';
 import { promiseWithTimeout } from 'utils/common';
-import { CustomError } from 'utils/error';
-
+import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 import { generateTempName } from 'utils/temp';
 
@@ -34,6 +33,7 @@ export class WasmFFmpeg {
     }
 
     async run(cmd: string[], inputFile: File, outputFileName: string) {
+        addLogLine(`ffmpeg run called for ${inputFile.name}`);
         const response = this.ffmpegTaskQueue.queueUpRequest(() =>
             promiseWithTimeout(
                 this.execute(cmd, inputFile, outputFileName),
@@ -43,13 +43,11 @@ export class WasmFFmpeg {
         try {
             return await response.promise;
         } catch (e) {
-            if (e.message === CustomError.REQUEST_CANCELLED) {
-                // ignore
-                return null;
-            } else {
-                logError(e, 'ffmpeg run failed');
-                throw e;
-            }
+            logError(e, 'ffmpeg run failed');
+            addLogLine(`ffmpeg run failed for ${inputFile.name}`);
+            throw e;
+        } finally {
+            addLogLine(`ffmpeg run completed for ${inputFile.name}`);
         }
     }
 
@@ -58,6 +56,7 @@ export class WasmFFmpeg {
         inputFile: File,
         outputFileName: string
     ) {
+        addLogLine(`ffmpeg execute called for ${inputFile.name}`);
         let tempInputFilePath: string;
         let tempOutputFilePath: string;
         try {
@@ -82,7 +81,11 @@ export class WasmFFmpeg {
                 }
             });
             await this.ffmpeg.run(...cmd);
+            addLogLine(`ffmpeg execute completed for ${inputFile.name}`);
             return this.ffmpeg.FS('readFile', tempOutputFilePath);
+        } catch (e) {
+            addLogLine(`ffmpeg execute failed for ${inputFile.name}`);
+            throw e;
         } finally {
             try {
                 this.ffmpeg.FS('unlink', tempInputFilePath);
