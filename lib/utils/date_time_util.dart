@@ -291,7 +291,7 @@ DateTime? parseDateFromFileName(String fileName) {
   }
 }
 
-final RegExp exp = RegExp('[A-Za-z]');
+final RegExp exp = RegExp('[\\.A-Za-z]*');
 
 DateTime? parseDateTimeFromFileNameV2(String fileName) {
   String val = fileName.replaceAll(exp, '');
