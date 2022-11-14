@@ -2,11 +2,12 @@ import pathToFfmpeg from 'ffmpeg-static';
 import path from 'path';
 const shellescape = require('any-shell-escape');
 import util from 'util';
-const exec = util.promisify(require('child_process').exec);
 import log from 'electron-log';
 import { readFile, rmSync } from 'promise-fs';
 import { logErrorSentry } from './sentry';
 import { generateTempName, getTempDirPath } from '../utils/temp';
+
+const execAsync = util.promisify(require('child_process').exec);
 
 export const INPUT_PATH_PLACEHOLDER = 'INPUT';
 export const FFMPEG_PLACEHOLDER = 'FFMPEG';
@@ -43,7 +44,7 @@ export async function runFFmpegCmd(
         });
         cmd = shellescape(cmd);
         log.info('cmd', cmd);
-        await exec(cmd);
+        await execAsync(cmd);
         return new Uint8Array(await readFile(tempOutputFilePath));
     } catch (e) {
         logErrorSentry(e, 'ffmpeg run command error');
