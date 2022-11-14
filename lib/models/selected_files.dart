@@ -20,6 +20,21 @@ class SelectedFiles extends ChangeNotifier {
     }
     lastSelections.clear();
     lastSelections.add(file);
+    print("number of selected files : ${files.length}");
+
+    notifyListeners();
+  }
+
+  void selectAll(Set<File> selectedFiles) {
+    files.addAll(selectedFiles);
+    lastSelections.clear();
+    lastSelections.addAll(selectedFiles);
+    notifyListeners();
+  }
+
+  void unSelectAll(Set<File> selectedFiles) {
+    files.removeAll(selectedFiles);
+    lastSelections.clear();
     notifyListeners();
   }
 

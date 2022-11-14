@@ -270,14 +270,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     widget.shouldSelectAll.addListener(() {
       if (widget.shouldSelectAll.value && mounted) {
         setState(() {
-          widget.selectedFiles.files.addAll(widget.files);
-          widget.selectedFiles.notifyListeners();
+          widget.selectedFiles.selectAll(widget.files.toSet());
         });
       } else {
         if (mounted) {
           setState(() {
-            widget.selectedFiles.files.removeAll(widget.files.toSet());
-            widget.selectedFiles.notifyListeners();
+            widget.selectedFiles.unSelectAll(widget.files.toSet());
           });
         }
       }
@@ -346,6 +344,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   Widget _getGridView() {
+    print("getting grid view");
     return GridView.builder(
       shrinkWrap: true,
       physics:
@@ -438,10 +437,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _selectedFilesListener() {
+    print("inside");
     bool shouldRefresh = false;
     for (final file in widget.files) {
       if (widget.selectedFiles.isPartOfLastSelectedGrid(file)) {
         shouldRefresh = true;
+        print("here");
       }
     }
     if (shouldRefresh && mounted) {
