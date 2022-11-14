@@ -28,6 +28,9 @@ class CodeStore {
       code.id = entry.key;
       codes.add(code);
     }
+    codes.sort((c1, c2) {
+      return c1.issuer.toLowerCase().compareTo(c2.issuer.toLowerCase());
+    });
     return codes;
   }
 
