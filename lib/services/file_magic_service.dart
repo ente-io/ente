@@ -79,7 +79,7 @@ class FileMagicService {
             ? metadataUpdateMap[file.uploadedFileID]
             : newMetadataUpdate;
         assert(
-          newUpdates == null || newUpdates.isEmpty,
+          newUpdates != null && newUpdates.isNotEmpty,
           "can not apply empty updates",
         );
         final Map<String, dynamic> jsonToUpdate =

@@ -64,14 +64,14 @@ class FilesService {
       // discard files not owned by user and also dedupe already processed
       // files
       if (remoteFile.ownerID != _config.getUserID()! ||
-          fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID)) {
+          fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID!)) {
         continue;
       }
       final timeResult = _parseTime(remoteFile, source);
       if (timeResult != null) {
         remoteFilesToUpdate.add(remoteFile);
         fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
-          pubMagicKeyEditedTime: timeResult!,
+          pubMagicKeyEditedTime: timeResult,
         };
       }
     }

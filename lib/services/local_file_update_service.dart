@@ -191,8 +191,7 @@ class LocalFileUpdateService {
   }
 
   Future<void> _importFilesWithBadCreationTime() async {
-    if (_prefs.containsKey(isBadCreationTimeImportDone) ||
-        !Platform.isAndroid) {
+    if (_prefs.containsKey(isBadCreationTimeImportDone)) {
       return;
     }
     _logger.info('_importFilesWithBadCreationTime');
