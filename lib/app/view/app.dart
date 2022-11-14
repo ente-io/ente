@@ -10,7 +10,9 @@ import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/signed_out_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import "package:ente_auth/onboarding/view/onboarding_page.dart";
+import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/ui/home_page.dart';
+import 'package:ente_auth/ui/settings/app_update_dialog.dart';
 import 'package:flutter/foundation.dart';
 import "package:flutter/material.dart";
 import "package:flutter_localizations/flutter_localizations.dart";
@@ -36,6 +38,21 @@ class _AppState extends State<App> {
     _signedInEvent = Bus.instance.on<SignedInEvent>().listen((event) {
       if (mounted) {
         setState(() {});
+      }
+    });
+    UpdateService.instance.shouldUpdate().then((shouldUpdate) {
+      if (shouldUpdate) {
+        Future.delayed(Duration.zero, () {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AppUpdateDialog(
+                UpdateService.instance.getLatestVersionInfo(),
+              );
+            },
+            barrierColor: Colors.black.withOpacity(0.85),
+          );
+        });
       }
     });
     super.initState();

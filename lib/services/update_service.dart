@@ -2,7 +2,9 @@
 
 import 'dart:io';
 
+import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/network.dart';
+import 'package:ente_auth/services/notification_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -55,33 +57,33 @@ class UpdateService {
     return _latestVersion;
   }
 
-  // Future<void> showUpdateNotification() async {
-  //   if (!isIndependent()) {
-  //     return;
-  //   }
-  //   final shouldUpdate = await this.shouldUpdate();
-  //   final lastNotificationShownTime =
-  //       _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
-  //   final now = DateTime.now().microsecondsSinceEpoch;
-  //   final hasBeen3DaysSinceLastNotification =
-  //       (now - lastNotificationShownTime) > (3 * microSecondsInDay);
-  //   if (shouldUpdate &&
-  //       hasBeen3DaysSinceLastNotification &&
-  //       _latestVersion.shouldNotify) {
-  //     NotificationService.instance.showNotification(
-  //       "update available",
-  //       "click to install our best version yet",
-  //     );
-  //     await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
-  //   } else {
-  //     _logger.info("Debouncing notification");
-  //   }
-  // }
+  Future<void> showUpdateNotification() async {
+    if (!isIndependent()) {
+      return;
+    }
+    final shouldUpdate = await this.shouldUpdate();
+    final lastNotificationShownTime =
+        _prefs.getInt(kUpdateAvailableShownTimeKey) ?? 0;
+    final now = DateTime.now().microsecondsSinceEpoch;
+    final hasBeen3DaysSinceLastNotification =
+        (now - lastNotificationShownTime) > (3 * microSecondsInDay);
+    if (shouldUpdate &&
+        hasBeen3DaysSinceLastNotification &&
+        _latestVersion.shouldNotify) {
+      NotificationService.instance.showNotification(
+        "Update available",
+        "Click to install our best version yet",
+      );
+      await _prefs.setInt(kUpdateAvailableShownTimeKey, now);
+    } else {
+      _logger.info("Debouncing notification");
+    }
+  }
 
   Future<LatestVersionInfo> _getLatestVersionInfo() async {
     final response = await Network.instance
         .getDio()
-        .get("https://ente.io/release-info/independent.json");
+        .get("https://ente.io/release-info/auth-independent.json");
     return LatestVersionInfo.fromMap(response.data["latestVersion"]);
   }
 
@@ -89,18 +91,7 @@ class UpdateService {
     if (Platform.isIOS) {
       return false;
     }
-    if (!kDebugMode &&
-        _packageInfo.packageName != "io.ente.auth.independent") {
-      return false;
-    }
-    return true;
-  }
-
-  bool isIndependentFlavor() {
-    if (Platform.isIOS) {
-      return false;
-    }
-    return _packageInfo.packageName.startsWith("io.ente.auth.independent");
+    return kDebugMode || _packageInfo.packageName.endsWith("independent");
   }
 }
 
