@@ -138,7 +138,9 @@ extension DeviceFiles on FilesDB {
       final batch = db.batch();
       final Set<String> existingPathIds = await getDevicePathIDs();
       for (LocalPathAsset localPathAsset in localPathAssets) {
-        pathIDToLocalIDsMap[localPathAsset.pathID] = localPathAsset.localIDs;
+        if (localPathAsset.localIDs.isNotEmpty) {
+          pathIDToLocalIDsMap[localPathAsset.pathID] = localPathAsset.localIDs;
+        }
         if (existingPathIds.contains(localPathAsset.pathID)) {
           batch.rawUpdate(
             "UPDATE device_collections SET name = ? where id = "

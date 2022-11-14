@@ -974,6 +974,9 @@ class CollectionsService {
   }
 
   Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
+    if(collections.isEmpty) {
+      return;
+    }
     try {
       await _db.insert(collections);
     } catch (e) {
