@@ -3,7 +3,7 @@ import path from 'path';
 const shellescape = require('any-shell-escape');
 import util from 'util';
 import log from 'electron-log';
-import { readFile, rmSync } from 'promise-fs';
+import { readFile, rmSync, writeFile } from 'promise-fs';
 import { logErrorSentry } from './sentry';
 import { generateTempName, getTempDirPath } from '../utils/temp';
 
@@ -20,13 +20,22 @@ function getFFmpegStaticPath() {
 export async function runFFmpegCmd(
     cmd: string[],
     inputFilePath: string,
+    inputFileData: Uint8Array,
+    inputFileName: string,
     outputFileName: string
 ) {
-    let tempOutputFilePath: string;
+    let outputFilePath: string;
     try {
         const tempDirPath = await getTempDirPath();
         const tempName = generateTempName(10);
-        tempOutputFilePath = path.join(
+        if (!inputFilePath) {
+            inputFilePath = path.join(
+                tempDirPath,
+                tempName + '-' + inputFileName
+            );
+            await writeFile(inputFilePath, inputFileData);
+        }
+        outputFilePath = path.join(
             tempDirPath,
             tempName + '-' + outputFileName
         );
@@ -37,7 +46,7 @@ export async function runFFmpegCmd(
             } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
                 return inputFilePath;
             } else if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
-                return tempOutputFilePath;
+                return outputFilePath;
             } else {
                 return cmdPart;
             }
@@ -45,13 +54,13 @@ export async function runFFmpegCmd(
         cmd = shellescape(cmd);
         log.info('cmd', cmd);
         await execAsync(cmd);
-        return new Uint8Array(await readFile(tempOutputFilePath));
+        return new Uint8Array(await readFile(outputFilePath));
     } catch (e) {
         logErrorSentry(e, 'ffmpeg run command error');
         throw e;
     } finally {
         try {
-            rmSync(tempOutputFilePath);
+            rmSync(outputFilePath);
         } catch (e) {
             logErrorSentry(e, 'failed to remove tempOutputFile');
         }

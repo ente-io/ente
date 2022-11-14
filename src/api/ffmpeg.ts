@@ -3,14 +3,22 @@ import { ElectronFile } from '../types';
 
 export async function runFFmpegCmd(
     cmd: string[],
-    inputFile: ElectronFile,
+    inputFile: File | ElectronFile,
     outputFileName: string
 ) {
-    const fileData = await ipcRenderer.invoke(
+    let inputFilePath = null;
+    let inputFileData = null;
+    if (inputFile instanceof File) {
+        inputFileData = new Uint8Array(await inputFile.arrayBuffer());
+    } else {
+        inputFilePath = inputFile.path;
+    }
+    const outputFileData = await ipcRenderer.invoke(
         'run-ffmpeg-cmd',
         cmd,
-        inputFile.path,
+        inputFilePath,
+        inputFileData,
         outputFileName
     );
-    return new File([fileData], outputFileName);
+    return new File([outputFileData], outputFileName);
 }
