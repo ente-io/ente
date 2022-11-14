@@ -41,7 +41,6 @@ class _HomePageState extends State<HomePage> {
     _loadCodes();
     _streamSubscription = Bus.instance.on<CodesUpdatedEvent>().listen((event) {
       _loadCodes();
-      setState(() {});
     });
   }
 
