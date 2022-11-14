@@ -1,14 +1,6 @@
-import constants from 'utils/strings/constants';
 import { CustomError } from 'utils/error';
 
 export const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
-
-export function checkConnectivity() {
-    if (navigator.onLine) {
-        return true;
-    }
-    throw new Error(constants.NO_INTERNET_CONNECTION);
-}
 
 export function runningInBrowser() {
     return typeof window !== 'undefined';
