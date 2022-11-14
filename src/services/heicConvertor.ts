@@ -1,9 +1,13 @@
-import { exec, ExecException } from 'child_process';
+import util from 'util';
+import { exec } from 'child_process';
+
 import { rmSync } from 'fs';
 import path from 'path';
 import { readFile, writeFile } from 'promise-fs';
 import { generateTempName, getTempDirPath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
+
+const asyncExec = util.promisify(exec);
 
 export async function convertHEIC(
     heicFileData: Uint8Array
@@ -19,24 +23,9 @@ export async function convertHEIC(
 
         await writeFile(tempInputFilePath, heicFileData);
 
-        await new Promise((resolve, reject) => {
-            exec(
-                `sips -s format jpeg ${tempInputFilePath} --out ${tempOutputFilePath}`,
-                (
-                    error: ExecException | null,
-                    stdout: string,
-                    stderr: string
-                ) => {
-                    if (error) {
-                        reject(error);
-                    } else if (stderr) {
-                        reject(stderr);
-                    } else {
-                        resolve(stdout);
-                    }
-                }
-            );
-        });
+        await asyncExec(
+            `sips -s format jpeg ${tempInputFilePath} --out ${tempOutputFilePath}`
+        );
         const convertedFileData = new Uint8Array(
             await readFile(tempOutputFilePath)
         );
