@@ -15,14 +15,14 @@ class FFmpegFactory {
     private client: IFFmpeg;
 
     async getFFmpegClient() {
-        if (this.client) {
-            return this.client;
+        if (!this.client) {
+            if (isElectron()) {
+                this.client = new ElectronFFmpeg();
+            } else {
+                this.client = await new FFmpegWorker();
+            }
         }
-        if (isElectron()) {
-            this.client = new ElectronFFmpeg();
-        } else {
-            this.client = await new FFmpegWorker();
-        }
+        return this.client;
     }
 }
 export default new FFmpegFactory();
