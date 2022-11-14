@@ -1,31 +1,29 @@
 # ente Authenticator
 
-ente's Authenticator app helps you generate and store 2 step verification (2FA)
-tokens on your mobile device.
-
-<br/>
+ente's Authenticator helps you generate and store 2 step verification (2FA)
+tokens on your mobile devices.
 
 ## ✨ Features
 
-### 🛡 Secure Backups
+### Secure Backups
 
 ente provides end-to-end encrypted cloud backups so that you don't have to worry
 about losing your tokens. We use the same protocols [ente
 Photos](https://ente.io/photos) uses to encrypt and preserve your data.
 
 
-### 📲 Multi Device Synchronization
+### Multi Device Synchronization
 
 ente will automatically sync the 2FA tokens you add to your account, across all
 your devices. Every new device you sign into will have access to these tokens.
 
 
-### 📶 Offline Mode
+### Offline Mode
 
 ente generates 2FA tokens offline, so your network connectivity will not get in
 the way of your workflow.
 
-### 🔄 Import and Export Tokens
+### Import and Export Tokens
 
 You can add tokens to ente by one of the following methods:
 1. Scanning a QR code
