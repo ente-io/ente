@@ -79,9 +79,10 @@ class _CodeWidgetState extends State<CodeWidget> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                   onTap: () {
-                    FlutterClipboard.copy(_getTotp()).then(
-                      (value) => showToast(context, "Copied to clipboard"),
-                    );
+                    _copyToClipboard();
+                  },
+                  onLongPress: () {
+                    _copyToClipboard();
                   },
                   child: SizedBox(
                     child: Column(
@@ -152,6 +153,12 @@ class _CodeWidgetState extends State<CodeWidget> {
           ),
         ),
       ),
+    );
+  }
+
+  void _copyToClipboard() {
+    FlutterClipboard.copy(_getTotp()).then(
+      (value) => showToast(context, "Copied to clipboard"),
     );
   }
 
