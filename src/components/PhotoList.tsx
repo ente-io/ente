@@ -249,6 +249,8 @@ export function PhotoList({
         publicCollectionGalleryContext.accessedThroughSharedURL,
         galleryContext.photoListHeader,
         publicCollectionGalleryContext.photoListHeader,
+        deduplicateContext.isOnDeduplicatePage,
+        deduplicateContext.fileSizeMap,
     ]);
 
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {

@@ -24,6 +24,8 @@ import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { styled } from '@mui/material';
 import { syncCollections } from 'services/collectionService';
+import EnteSpinner from 'components/EnteSpinner';
+import VerticallyCentered from 'components/Container';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -143,8 +145,14 @@ export default function Deduplicate() {
         setSelected({ count: 0, collectionID: 0 });
     };
 
-    if (!duplicateFiles) {
-        return <></>;
+    if (!duplicateFiles?.length) {
+        return (
+            <VerticallyCentered>
+                <EnteSpinner>
+                    <span className="sr-only">Loading...</span>
+                </EnteSpinner>
+            </VerticallyCentered>
+        );
     }
 
     return (
