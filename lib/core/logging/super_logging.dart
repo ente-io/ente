@@ -252,8 +252,16 @@ class SuperLogging {
     }
 
     // add error to sentry queue
-    if (sentryIsEnabled && rec.error != null) {
-      _sendErrorToSentry(rec.error, null);
+    if (sentryIsEnabled) {
+      if (rec.error != null) {
+        _sendErrorToSentry(rec.error, null);
+      } else if (rec.level == Level.SEVERE || rec.level == Level.SHOUT) {
+        if (rec.error != null) {
+          _sendErrorToSentry(rec.error, null);
+        } else {
+          _sendErrorToSentry(rec.message, null);
+        }
+      }
     }
   }
 
