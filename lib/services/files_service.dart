@@ -44,10 +44,6 @@ class FilesService {
     List<File> files,
     EditTimeSource source,
   ) async {
-    assert(
-      source == EditTimeSource.fileName,
-      "edit source ${source.name} is not supported yet",
-    );
     final ListMatch<File> result = files.splitMatch(
       (element) => element.isUploaded,
     );
@@ -55,11 +51,9 @@ class FilesService {
     // editTime For LocalFiles
     final List<File> localOnlyFiles = result.unmatched;
     for (File localFile in localOnlyFiles) {
-      final timeResult = parseDateTimeFromFileNameV2(
-        basenameWithoutExtension(localFile.title ?? ""),
-      );
+      final timeResult = _parseTime(localFile, source);
       if (timeResult != null) {
-        localFile.creationTime = timeResult.microsecondsSinceEpoch;
+        localFile.creationTime = timeResult;
       }
     }
     await _filesDB.insertMultiple(localOnlyFiles);
@@ -73,13 +67,11 @@ class FilesService {
           fileIDToUpdateMetadata.containsKey(remoteFile.uploadedFileID)) {
         continue;
       }
-      final timeResult = parseDateTimeFromFileNameV2(
-        basenameWithoutExtension(remoteFile.title ?? ""),
-      );
+      final timeResult = _parseTime(remoteFile, source);
       if (timeResult != null) {
         remoteFilesToUpdate.add(remoteFile);
         fileIDToUpdateMetadata[remoteFile.uploadedFileID!] = {
-          pubMagicKeyEditedTime: timeResult.microsecondsSinceEpoch,
+          pubMagicKeyEditedTime: timeResult!,
         };
       }
     }
@@ -90,6 +82,17 @@ class FilesService {
         metadataUpdateMap: fileIDToUpdateMetadata,
       );
     }
+  }
+
+  int? _parseTime(File file, EditTimeSource source) {
+    assert(
+      source == EditTimeSource.fileName,
+      "edit source ${source.name} is not supported yet",
+    );
+    final timeResult = parseDateTimeFromFileNameV2(
+      basenameWithoutExtension(file.title ?? ""),
+    );
+    return timeResult?.microsecondsSinceEpoch;
   }
 }
 
