@@ -47,17 +47,15 @@ export async function generateThumbnail(
                         )}`
                     );
 
-                    const thumb = await FFmpegService.generateThumbnail(file);
+                    const thumbFile = await FFmpegService.generateThumbnail(
+                        file
+                    );
                     addLogLine(
                         `ffmpeg thumbnail successfully generated ${getFileNameSize(
                             file
                         )}`
                     );
-                    const dummyImageFile = new File([thumb], file.name);
-                    canvas = await generateImageThumbnail(
-                        dummyImageFile,
-                        false
-                    );
+                    canvas = await generateImageThumbnail(thumbFile, false);
                 } catch (e) {
                     addLogLine(
                         `ffmpeg thumbnail generated failed  ${getFileNameSize(
@@ -99,7 +97,10 @@ export async function generateThumbnail(
     }
 }
 
-export async function generateImageThumbnail(file: File, isHEIC: boolean) {
+export async function generateImageThumbnail(
+    file: File | ElectronFile,
+    isHEIC: boolean
+) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
@@ -108,11 +109,14 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
 
     if (isHEIC) {
         addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
-        file = new File([await HeicConversionService.convert(file)], file.name);
+        const convertedBlob = await HeicConversionService.convert(
+            new Blob([await file.arrayBuffer()])
+        );
+        file = new File([convertedBlob], file.name);
         addLogLine(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
-    imageURL = URL.createObjectURL(file);
+    imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
     image.setAttribute('src', imageURL);
     await new Promise((resolve, reject) => {
         image.onload = () => {
