@@ -26,3 +26,16 @@ class FilesService {
     }
   }
 }
+
+enum EditTimeSource {
+  // parse the time from fileName
+  fileName,
+  // parse the time from exif data of file.
+  exif,
+  // use the which user provided as input
+  manualFix,
+  // adjust the time of selected photos by +/- time.
+  // required for cases when the original device in which photos were taken
+  // had incorrect time (quite common with physical cameras)
+  manualAdjusted,
+}
