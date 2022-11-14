@@ -1,10 +1,18 @@
 import isElectron from 'is-electron';
 import { ElectronFFmpeg } from 'services/electron/ffmpeg';
-import { WasmFFmpeg } from 'services/wasm/ffmpeg';
+import { ElectronFile } from 'types/upload';
 import { FFmpegWorker } from 'utils/comlink';
 
+export interface IFFmpeg {
+    run: (
+        cmd: string[],
+        inputFile: File | ElectronFile,
+        outputFilename: string
+    ) => Promise<File | ElectronFile>;
+}
+
 class FFmpegFactory {
-    private client: ElectronFFmpeg | WasmFFmpeg;
+    private client: IFFmpeg;
 
     async getFFmpegClient() {
         if (this.client) {

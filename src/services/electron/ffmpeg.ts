@@ -1,8 +1,9 @@
+import { IFFmpeg } from 'services/ffmpeg/ffmpegFactory';
 import { ElectronAPIs } from 'types/electron';
 import { ElectronFile } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 
-export class ElectronFFmpeg {
+export class ElectronFFmpeg implements IFFmpeg {
     private electronAPIs: ElectronAPIs;
 
     constructor() {
