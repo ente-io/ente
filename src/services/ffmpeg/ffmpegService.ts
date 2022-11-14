@@ -5,9 +5,10 @@ import {
 import { ElectronFile } from 'types/upload';
 import ffmpegFactory from './ffmpegFactory';
 
-export async function generateThumbnail(file: File | ElectronFile) {
+export async function generateThumbnail(
+    file: File | ElectronFile
+): Promise<File | ElectronFile> {
     let seekTime = 1.0;
-    const thumb = null;
     const ffmpegClient = await ffmpegFactory.getFFmpegClient();
     while (seekTime > 0) {
         try {
@@ -30,7 +31,7 @@ export async function generateThumbnail(file: File | ElectronFile) {
             seekTime = Number((seekTime / 10).toFixed(3));
         }
     }
-    return thumb;
+    throw Error('Thumbnail generation failed');
 }
 
 //     async extractVideoMetadata(file: File) {
