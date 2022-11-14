@@ -47,7 +47,7 @@ export class WasmFFmpeg {
                 // ignore
                 return null;
             } else {
-                logError(e, 'ffmpeg thumbnail generation failed');
+                logError(e, 'ffmpeg run failed');
                 throw e;
             }
         }
