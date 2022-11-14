@@ -115,6 +115,7 @@ Future<void> deleteFilesFromEverywhere(
           deletedFiles
               .where((file) => file.collectionID == collectionID)
               .toList(),
+          "deleteFilesEverywhere",
           type: EventType.deletedFromEverywhere,
         ),
       );
@@ -125,6 +126,7 @@ Future<void> deleteFilesFromEverywhere(
       LocalPhotosUpdatedEvent(
         deletedFiles,
         type: EventType.deletedFromEverywhere,
+        source: "deleteFilesEverywhere",
       ),
     );
     if (hasLocalOnlyFiles && Platform.isAndroid) {
@@ -176,12 +178,18 @@ Future<void> deleteFilesFromRemoteOnly(
       CollectionUpdatedEvent(
         collectionID,
         files.where((file) => file.collectionID == collectionID).toList(),
+        "deleteFromRemoteOnly",
         type: EventType.deletedFromRemote,
       ),
     );
   }
-  Bus.instance
-      .fire(LocalPhotosUpdatedEvent(files, type: EventType.deletedFromRemote));
+  Bus.instance.fire(
+    LocalPhotosUpdatedEvent(
+      files,
+      type: EventType.deletedFromRemote,
+      source: "deleteFromRemoteOnly",
+    ),
+  );
   SyncService.instance.sync();
   await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
@@ -243,6 +251,7 @@ Future<void> deleteFilesOnDeviceOnly(
       LocalPhotosUpdatedEvent(
         deletedFiles,
         type: EventType.deletedFromDevice,
+        source: "deleteFilesOnDeviceOnly",
       ),
     );
   }
@@ -266,8 +275,13 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
     await TrashSyncService.instance.deleteFromTrash(files);
     showShortToast(context, "Successfully deleted");
     await dialog.hide();
-    Bus.instance
-        .fire(FilesUpdatedEvent(files, type: EventType.deletedFromEverywhere));
+    Bus.instance.fire(
+      FilesUpdatedEvent(
+        files,
+        type: EventType.deletedFromEverywhere,
+        source: "deleteFromTrash",
+      ),
+    );
     return true;
   } catch (e, s) {
     _logger.info("failed to delete from trash", e, s);
@@ -336,7 +350,9 @@ Future<bool> deleteLocalFiles(
     final deletedFiles = await FilesDB.instance.getLocalFiles(deletedIDs);
     await FilesDB.instance.deleteLocalFiles(deletedIDs);
     _logger.info(deletedFiles.length.toString() + " files deleted locally");
-    Bus.instance.fire(LocalPhotosUpdatedEvent(deletedFiles));
+    Bus.instance.fire(
+      LocalPhotosUpdatedEvent(deletedFiles, source: "deleteLocal"),
+    );
     return true;
   } else {
     showToast(context, "Could not free up space");

@@ -28,6 +28,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
   final SelectedFiles selectedFiles;
   final String tag;
+  final String logTag;
   final Stream<int> currentIndexStream;
   final bool smallerTodayFont;
 
@@ -41,6 +42,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.tag,
     this.currentIndexStream, {
     this.smallerTodayFont,
+    this.logTag = "",
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -53,7 +55,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   static const kRecycleLimit = 400;
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
-  static final Logger _logger = Logger("LazyLoadingGallery");
+  Logger _logger;
 
   List<File> _files;
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
@@ -71,9 +73,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   void _init() {
+    _logger = Logger("LazyLoading_${widget.logTag}");
     _shouldRender = true;
     _files = widget.files;
-
     _reloadEventSubscription = widget.reloadEvent.listen((e) => _onReload(e));
 
     _currentIndexSubscription =
@@ -98,11 +100,13 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           fileDate.day == galleryDate.day;
     });
     if (filesUpdatedThisDay.isNotEmpty) {
-      _logger.info(
-        filesUpdatedThisDay.length.toString() +
-            " files were updated on " +
-            getDayTitle(galleryDate.microsecondsSinceEpoch),
-      );
+      if (kDebugMode) {
+        _logger.info(
+          filesUpdatedThisDay.length.toString() +
+              " files were updated due to ${event.reason} on " +
+              getDayTitle(galleryDate.microsecondsSinceEpoch),
+        );
+      }
       if (event.type == EventType.addedOrUpdated) {
         final dayStartTime =
             DateTime(galleryDate.year, galleryDate.month, galleryDate.day);
@@ -117,17 +121,35 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         }
       } else if (widget.removalEventTypes.contains(event.type)) {
         // Files were removed
-        final updateFileIDs = <int>{};
+        final generatedFileIDs = <int>{};
+        final uploadedFileIds = <int>{};
         for (final file in filesUpdatedThisDay) {
-          updateFileIDs.add(file.generatedID);
+          if (file.generatedID != null) {
+            generatedFileIDs.add(file.generatedID);
+          } else if (file.uploadedFileID != null) {
+            uploadedFileIds.add(file.uploadedFileID);
+          }
         }
         final List<File> files = [];
         files.addAll(_files);
-        files.removeWhere((file) => updateFileIDs.contains(file.generatedID));
+        files.removeWhere(
+          (file) =>
+              generatedFileIDs.contains(file.generatedID) ||
+              uploadedFileIds.contains(file.uploadedFileID),
+        );
+        if (kDebugMode) {
+          _logger.finest(
+            "removed ${_files.length - files.length} due to ${event.reason}",
+          );
+        }
         if (mounted) {
           setState(() {
             _files = files;
           });
+        }
+      } else {
+        if (kDebugMode) {
+          debugPrint("Unexpected event ${event.type.name}");
         }
       }
     }

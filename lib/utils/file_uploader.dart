@@ -448,7 +448,12 @@ class FileUploader {
         await FilesDB.instance.update(remoteFile);
       }
       if (!_isBackground) {
-        Bus.instance.fire(LocalPhotosUpdatedEvent([remoteFile]));
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(
+            [remoteFile],
+            source: "downloadComplete",
+          ),
+        );
       }
       _logger.info("File upload complete for " + remoteFile.toString());
       uploadCompleted = true;
@@ -533,7 +538,8 @@ class FileUploader {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           [fileToUpload],
-          type: EventType.deletedFromEverywhere, //
+          type: EventType.deletedFromEverywhere,
+          source: "sameLocalSameCollection", //
         ),
       );
       return Tuple2(true, sameLocalSameCollection);
@@ -562,6 +568,7 @@ class FileUploader {
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(
           [fileToUpload],
+          source: "alreadyUploadedInSameCollection",
           type: EventType.deletedFromEverywhere, //
         ),
       );

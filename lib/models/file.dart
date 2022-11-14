@@ -254,6 +254,10 @@ class File extends EnteFile {
     return localID == null && uploadedFileID != null;
   }
 
+  bool get isUploaded {
+    return uploadedFileID != null;
+  }
+
   bool get isSharedMediaToAppSandbox {
     return localID != null &&
         (localID!.startsWith(oldSharedMediaIdentifier) ||

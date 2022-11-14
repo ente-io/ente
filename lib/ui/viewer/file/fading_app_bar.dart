@@ -34,14 +34,14 @@ import 'package:photos/utils/toast_util.dart';
 
 class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
   final File file;
-  final Function(File) onFileDeleted;
+  final Function(File) onFileRemoved;
   final double height;
   final bool shouldShowActions;
   final int userID;
 
   const FadingAppBar(
     this.file,
-    this.onFileDeleted,
+    this.onFileRemoved,
     this.userID,
     this.height,
     this.shouldShowActions, {
@@ -110,15 +110,16 @@ class FadingAppBarState extends State<FadingAppBar> {
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
+    final bool isFileUploaded = widget.file.isRemoteFile;
     bool isFileHidden = false;
-    if (isOwnedByUser && widget.file.uploadedFileID != null) {
+    if (isOwnedByUser && isFileUploaded) {
       isFileHidden = CollectionsService.instance
               .getCollectionByID(widget.file.collectionID)
               ?.isHidden() ??
           false;
     }
     // only show fav option for files owned by the user
-    if (isOwnedByUser && !isFileHidden) {
+    if (isOwnedByUser && !isFileHidden && isFileUploaded) {
       actions.add(_getFavoriteButton());
     }
     actions.add(
@@ -189,7 +190,7 @@ class FadingAppBarState extends State<FadingAppBar> {
               ),
             );
           }
-          if (isOwnedByUser) {
+          if (isOwnedByUser && widget.file.isUploaded) {
             if (!isFileHidden) {
               items.add(
                 PopupMenuItem(
@@ -258,11 +259,8 @@ class FadingAppBarState extends State<FadingAppBar> {
     try {
       final hideResult =
           await CollectionsService.instance.hideFiles(context, [widget.file]);
-
       if (hideResult) {
-        // delay to avoid black screen
-        await Future.delayed(const Duration(milliseconds: 300));
-        Navigator.of(context).pop();
+        widget.onFileRemoved(widget.file);
       }
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
@@ -354,7 +352,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
-            widget.onFileDeleted(file);
+            widget.onFileRemoved(file);
           },
           child: const Text("Everywhere"),
         ),
@@ -393,7 +391,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           onPressed: () async {
             await deleteFilesFromEverywhere(context, [file]);
             Navigator.of(context, rootNavigator: true).pop();
-            widget.onFileDeleted(file);
+            widget.onFileRemoved(file);
           },
           child: const Text("Everywhere"),
         ),
@@ -457,7 +455,12 @@ class FadingAppBarState extends State<FadingAppBar> {
         await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
         file.localID = savedAsset.id;
         await FilesDB.instance.insert(file);
-        Bus.instance.fire(LocalPhotosUpdatedEvent([file]));
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(
+            [file],
+            source: "download",
+          ),
+        );
       } else if (!downloadLivePhotoOnDroid && savedAsset == null) {
         _logger.severe('Failed to save assert of type $type');
       }

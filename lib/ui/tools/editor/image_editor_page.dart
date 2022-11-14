@@ -360,7 +360,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
       await LocalSyncService.instance.trackEditedFile(newFile);
-      Bus.instance.fire(LocalPhotosUpdatedEvent([newFile]));
+      Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       SyncService.instance.sync();
       showToast(context, "Edits saved");
       _logger.info("Original file " + widget.originalFile.toString());

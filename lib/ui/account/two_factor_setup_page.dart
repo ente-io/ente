@@ -272,10 +272,10 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         "OK",
         showAppBar: true,
         onDone: () {},
-        title: "⚡ setup complete",
-        text: "save your recovery key if you haven't already",
+        title: "Setup complete",
+        text: "Save your recovery key if you haven't already",
         subText:
-            "this can be used to recover your account if you lose your second factor",
+            "This can be used to recover your account if you lose your second factor",
       ),
     );
   }

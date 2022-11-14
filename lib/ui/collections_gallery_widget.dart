@@ -33,7 +33,7 @@ class CollectionsGalleryWidget extends StatefulWidget {
 
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     with AutomaticKeepAliveClientMixin {
-  final _logger = Logger("CollectionsGallery");
+  final _logger = Logger((_CollectionsGalleryWidgetState).toString());
   StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
   StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
   StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
@@ -44,16 +44,16 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   void initState() {
     _localFilesSubscription =
         Bus.instance.on<LocalPhotosUpdatedEvent>().listen((event) {
-      _loadReason = (LocalPhotosUpdatedEvent).toString();
+      _loadReason = event.reason;
       setState(() {});
     });
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
-      _loadReason = (CollectionUpdatedEvent).toString();
+      _loadReason = event.reason;
       setState(() {});
     });
     _loggedOutEvent = Bus.instance.on<UserLoggedOutEvent>().listen((event) {
-      _loadReason = (UserLoggedOutEvent).toString();
+      _loadReason = event.reason;
       setState(() {});
     });
     sortKey = LocalSettings.instance.albumSortKey();

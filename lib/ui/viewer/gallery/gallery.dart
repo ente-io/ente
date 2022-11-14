@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -77,18 +78,27 @@ class _GalleryState extends State<Gallery> {
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
   StreamSubscription<TabDoubleTapEvent> _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
+  String _logTag;
 
   @override
   void initState() {
-    _logger = Logger("Gallery_" + widget.tagPrefix);
+    _logTag =
+        "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName : ""}";
+    _logger = Logger(_logTag);
+    _logger.finest("init Gallery");
     _itemScroller = ItemScrollController();
-
-    _logger.info("initState");
     if (widget.reloadEvent != null) {
       _reloadEventSubscription = widget.reloadEvent.listen((event) async {
-        _logger.info("Building gallery because reload event fired");
+        // In soft refresh, setState is called for entire gallery only when
+        // number of child change
+        _logger.finest("Soft refresh all files on ${event.reason} ");
         final result = await _loadFiles();
-        _onFilesLoaded(result.files);
+        final bool hasReloaded = _onFilesLoaded(result.files);
+        if (hasReloaded && kDebugMode) {
+          _logger.finest(
+            "Reloaded gallery on soft refresh all files on ${event.reason}",
+          );
+        }
       });
     }
     _tabDoubleTapEvent =
@@ -106,7 +116,7 @@ class _GalleryState extends State<Gallery> {
       for (final event in widget.forceReloadEvents) {
         _forceReloadEventSubscriptions.add(
           event.listen((event) async {
-            _logger.info("Force reload triggered");
+            _logger.finest("Force refresh all files on ${event.reason}");
             final result = await _loadFiles();
             _setFilesAndReload(result.files);
           }),
@@ -134,7 +144,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   Future<FileLoadResult> _loadFiles({int limit}) async {
-    _logger.info("Loading files");
+    _logger.info("Loading ${limit ?? "all"} files");
     try {
       final startTime = DateTime.now().microsecondsSinceEpoch;
       final result = await widget.asyncLoader(
@@ -160,18 +170,18 @@ class _GalleryState extends State<Gallery> {
 
   // Collates files and returns `true` if it resulted in a gallery reload
   bool _onFilesLoaded(List<File> files) {
-    final collatedFiles = _collateFiles(files);
-    if (_collatedFiles.length != collatedFiles.length ||
+    final updatedCollatedFiles = _collateFiles(files);
+    if (_collatedFiles.length != updatedCollatedFiles.length ||
         _collatedFiles.isEmpty) {
       if (mounted) {
         setState(() {
           _hasLoadedFiles = true;
-          _collatedFiles = collatedFiles;
+          _collatedFiles = updatedCollatedFiles;
         });
       }
       return true;
     } else {
-      _collatedFiles = collatedFiles;
+      _collatedFiles = updatedCollatedFiles;
       return false;
     }
   }
@@ -188,7 +198,7 @@ class _GalleryState extends State<Gallery> {
 
   @override
   Widget build(BuildContext context) {
-    _logger.info("Building " + widget.tagPrefix);
+    _logger.finest("Building Gallery  ${widget.tagPrefix}");
     if (!_hasLoadedFiles) {
       return const EnteLoadingWidget();
     }
@@ -238,6 +248,7 @@ class _GalleryState extends State<Gallery> {
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
           smallerTodayFont: widget.smallerTodayFont,
+          logTag: _logTag,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header, gallery]);

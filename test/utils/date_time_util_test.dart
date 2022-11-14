@@ -31,10 +31,11 @@ void main() {
   });
 
   test("verify constants", () {
+    final date = DateTime.fromMicrosecondsSinceEpoch(jan011981Time).toUtc();
     expect(
-      jan011981Time,
-      DateTime(1981, 1, 1).toUtc().microsecondsSinceEpoch,
-      reason: "constant mismatch",
+      date.year == 1981 && date.month == 1,
+      true,
+      reason: "constant mismatch : ${date.toIso8601String()}",
     );
   });
 }

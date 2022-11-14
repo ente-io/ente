@@ -21,6 +21,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
@@ -90,12 +91,14 @@ class CollectionsService {
   // within the collection.
   Future<List<Collection>> sync() async {
     _logger.info("Syncing collections");
+    final EnteWatch watch = EnteWatch("syncCollection")..start();
     final lastCollectionUpdationTime =
         _prefs.getInt(_collectionsSyncTimeKey) ?? 0;
 
     // Might not have synced the collection fully
     final fetchedCollections =
         await _fetchCollections(lastCollectionUpdationTime);
+    watch.log("remote fetch");
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
@@ -103,7 +106,12 @@ class CollectionsService {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        Bus.instance.fire(LocalPhotosUpdatedEvent(List<File>.empty()));
+        Bus.instance.fire(
+          LocalPhotosUpdatedEvent(
+            List<File>.empty(),
+            source: "syncCollectionDeleted",
+          ),
+        );
       }
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection?.owner?.id) {
@@ -119,13 +127,20 @@ class CollectionsService {
     }
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
+    watch.logAndReset("till DB insertion");
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
     }
+    watch.log("collection cache refresh");
     if (fetchedCollections.isNotEmpty) {
-      _logger.info("Collections updated");
-      Bus.instance.fire(CollectionUpdatedEvent(null, List<File>.empty()));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          null,
+          List<File>.empty(),
+          "collections_updated",
+        ),
+      );
     }
     return collections;
   }
@@ -297,30 +312,38 @@ class CollectionsService {
         fetchCollectionByID(collectionID);
         throw AssertionError('collectionID $collectionID is not cached');
       }
-      _cachedKeys[collectionID] = _getDecryptedKey(collection);
+      _cachedKeys[collectionID] = _getAndCacheDecryptedKey(collection);
     }
     return _cachedKeys[collectionID];
   }
 
-  Uint8List _getDecryptedKey(Collection collection) {
-    debugPrint("Finding collection decryption key for ${collection.id}");
+  Uint8List _getAndCacheDecryptedKey(Collection collection) {
+    if (_cachedKeys.containsKey(collection.id)) {
+      return _cachedKeys[collection.id];
+    }
+    debugPrint("Compute collection decryption key for ${collection.id}");
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
+    Uint8List collectionKey;
     if (collection.owner.id == _config.getUserID()) {
       if (_config.getKey() == null) {
         throw Exception("key can not be null");
       }
-      return CryptoUtil.decryptSync(
+      collectionKey = CryptoUtil.decryptSync(
         encryptedKey,
         _config.getKey(),
         Sodium.base642bin(collection.keyDecryptionNonce),
       );
     } else {
-      return CryptoUtil.openSealSync(
+      collectionKey = CryptoUtil.openSealSync(
         encryptedKey,
         Sodium.base642bin(_config.getKeyAttributes().publicKey),
         _config.getSecretKey(),
       );
     }
+    if (collectionKey != null) {
+      _cachedKeys[collection.id] = collectionKey;
+    }
+    return collectionKey;
   }
 
   Future<void> rename(Collection collection, String newName) async {
@@ -428,7 +451,9 @@ class CollectionsService {
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
-      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(collection.id, <File>[], "shareUrL"),
+      );
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -455,7 +480,8 @@ class CollectionsService {
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
-      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collection.id, <File>[], "updateUrl"));
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
@@ -475,7 +501,13 @@ class CollectionsService {
       collection.publicURLs.clear();
       await _db.insert(List.from([collection]));
       _cacheCollectionAttributes(collection);
-      Bus.instance.fire(CollectionUpdatedEvent(collection.id, <File>[]));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collection.id,
+          <File>[],
+          "disableShareUrl",
+        ),
+      );
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
@@ -497,7 +529,7 @@ class CollectionsService {
         for (final collectionData in c) {
           final collection = Collection.fromMap(collectionData);
           if (collectionData['magicMetadata'] != null) {
-            final decryptionKey = _getDecryptedKey(collection);
+            final decryptionKey = _getAndCacheDecryptedKey(collection);
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
               Sodium.base642bin(collectionData['magicMetadata']['data']),
               decryptionKey,
@@ -558,7 +590,7 @@ class CollectionsService {
       final collectionData = response.data["collection"];
       final collection = Collection.fromMap(collectionData);
       if (collectionData['magicMetadata'] != null) {
-        final decryptionKey = _getDecryptedKey(collection);
+        final decryptionKey = _getAndCacheDecryptedKey(collection);
         final utfEncodedMmd = await CryptoUtil.decryptChaCha(
           Sodium.base642bin(collectionData['magicMetadata']['data']),
           decryptionKey,
@@ -665,7 +697,7 @@ class CollectionsService {
         data: params,
       );
       await _filesDB.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files, "addTo"));
     } catch (e) {
       rethrow;
     }
@@ -741,8 +773,10 @@ class CollectionsService {
       await _filesDB.insertMultiple(files);
       await TrashDB.instance
           .delete(files.map((e) => e.uploadedFileID).toList());
-      Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
-      Bus.instance.fire(FilesUpdatedEvent(files));
+      Bus.instance.fire(
+        CollectionUpdatedEvent(toCollectionID, files, "restore"),
+      );
+      Bus.instance.fire(FilesUpdatedEvent(files, source: "restore"));
       // Remove imported local files which are imported but not uploaded.
       // This handles the case where local file was trashed -> imported again
       // but not uploaded automatically as it was trashed.
@@ -755,7 +789,7 @@ class CollectionsService {
         await _filesDB.deleteUnSyncedLocalFiles(localIDs);
       }
       // Force reload home gallery to pull in the restored files
-      Bus.instance.fire(ForceReloadHomeGalleryEvent());
+      Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));
     } catch (e, s) {
       _logger.severe("failed to restore files", e, s);
       rethrow;
@@ -807,6 +841,7 @@ class CollectionsService {
       CollectionUpdatedEvent(
         fromCollectionID,
         files,
+        "moveFrom",
         type: EventType.deletedFromRemote,
       ),
     );
@@ -817,7 +852,9 @@ class CollectionsService {
       (element) => existingUploadedIDs.contains(element.uploadedFileID),
     );
     await _filesDB.insertMultiple(files);
-    Bus.instance.fire(CollectionUpdatedEvent(toCollectionID, files));
+    Bus.instance.fire(
+      CollectionUpdatedEvent(toCollectionID, files, "moveTo"),
+    );
   }
 
   void _validateMoveRequest(
@@ -855,8 +892,9 @@ class CollectionsService {
       data: params,
     );
     await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-    Bus.instance.fire(CollectionUpdatedEvent(collectionID, files));
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files));
+    Bus.instance
+        .fire(CollectionUpdatedEvent(collectionID, files, "removeFrom"));
+    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "removeFrom"));
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
@@ -892,7 +930,7 @@ class CollectionsService {
 
   String decryptCollectionPath(Collection collection) {
     final key = collection.attributes.version == 1
-        ? _getDecryptedKey(collection)
+        ? getCollectionKey(collection.id)
         : _config.getKey();
     return utf8.decode(
       CryptoUtil.decryptSync(
@@ -914,7 +952,7 @@ class CollectionsService {
       try {
         final result = CryptoUtil.decryptSync(
           Sodium.base642bin(collection.encryptedName),
-          _getDecryptedKey(collection),
+          _getAndCacheDecryptedKey(collection),
           Sodium.base642bin(collection.nameDecryptionNonce),
         );
         name = utf8.decode(result);

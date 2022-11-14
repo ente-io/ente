@@ -46,7 +46,8 @@ class FavoritesService {
     if (file.uploadedFileID == null) {
       file.collectionID = collectionID;
       await _filesDB.insert(file);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, [file]));
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collectionID, [file], "addTFav"));
     } else {
       await _collectionsService.addToCollection(collectionID, [file]);
     }
