@@ -53,7 +53,7 @@ export async function runFFmpegCmd(
         try {
             rmSync(tempOutputFilePath);
         } catch (e) {
-            logErrorSentry(e, 'failed to remove tempInputFile');
+            logErrorSentry(e, 'failed to remove tempOutputFile');
         }
     }
 }
