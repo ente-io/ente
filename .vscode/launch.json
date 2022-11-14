@@ -29,11 +29,18 @@
       "args": ["--dart-define", "endpoint=http://192.168.1.30:8080"]
     },
     {
-      "name": "Prod",
+      "name": "iOS Prod",
       "request": "launch",
       "type": "dart",
       "program": "lib/main.dart",
       "args": ["--target", "lib/main.dart"]
+    },
+    {
+      "name": "Android Prod",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--target", "lib/main.dart", "--flavor", "independent"]
     }
   ]
 }
