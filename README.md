@@ -1,6 +1,6 @@
 # ente Authenticator
 
-ente's Authenticator helps you generate and store 2 step verification (2FA)
+ente's Authenticator app helps you generate and store 2 step verification (2FA)
 tokens on your mobile devices.
 
 ## ✨ Features
@@ -38,15 +38,12 @@ The codes maybe separated by new lines or commas.
 You can also export the codes you have added to ente, to an **unencrypted** text
 file, that adheres to the above format.
 
-<br/>
 
-## 🙋‍♂️ Support
+## 🔩 Architecture
 
-If you need help, please reach out to support@ente.io, and a human will get in touch with you.
+The architecture that powers end-to-end encrypted storage and sync of your
+tokens has been documented [here](architecture/index.md).
 
-On the other hand, if you wish to support us, please [star](https://github.com/ente-io/auth/stargazers) this project.
-
-<br/>
 
 ## 🧑‍💻 Building from source
 
@@ -56,7 +53,15 @@ On the other hand, if you wish to support us, please [star](https://github.com/e
 4. For Android, run `flutter build apk --release --flavor independent`
 5. For iOS, run `flutter build ios` 
 
-<br/>
+
+## 🙋‍♂️ Support
+
+If you need help, please reach out to support@ente.io, and a human will get in
+touch with you.
+
+On the other hand, if you wish to support us, please
+[star](https://github.com/ente-io/auth/stargazers) this project.
+
 
 ## 💜 Community
 - Follow us on [Twitter](https://twitter.com/enteio)
