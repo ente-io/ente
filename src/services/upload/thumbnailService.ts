@@ -2,7 +2,7 @@ import { FILE_TYPE } from 'constants/file';
 import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
-import FFmpegService from 'services/ffmpeg/ffmpegService';
+import * as FFmpegService from 'services/ffmpeg/ffmpegService';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { isExactTypeHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';

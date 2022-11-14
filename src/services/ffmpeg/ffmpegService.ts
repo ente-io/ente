@@ -1,4 +1,3 @@
-// import { getUint8ArrayView } from 'services/readerService';
 import {
     INPUT_PATH_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
@@ -6,10 +5,10 @@ import {
 import { ElectronFile } from 'types/upload';
 import ffmpegFactory from './ffmpegFactory';
 
-export async function generateThumbnail(file: File & ElectronFile) {
+export async function generateThumbnail(file: File | ElectronFile) {
     let seekTime = 1.0;
     const thumb = null;
-    const ffmpegClient = ffmpegFactory.getFFmpegClient();
+    const ffmpegClient = await ffmpegFactory.getFFmpegClient();
     while (seekTime > 0) {
         try {
             return await ffmpegClient.run(
