@@ -1,9 +1,8 @@
 import { exec, ExecException } from 'child_process';
-import { app } from 'electron';
-import { existsSync, rmSync } from 'fs';
+import { rmSync } from 'fs';
 import path from 'path';
-import { mkdir, readFile, writeFile } from 'promise-fs';
-import { generateRandomName } from '../utils/common';
+import { readFile, writeFile } from 'promise-fs';
+import { generateTempName, getTempDirPath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
 
 export async function convertHEIC(
@@ -12,14 +11,11 @@ export async function convertHEIC(
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
-        const tempDir = path.join(app.getPath('temp'), 'ente');
-        if (!existsSync(tempDir)) {
-            await mkdir(tempDir);
-        }
-        const tempName = generateRandomName(10);
+        const tempDirPath = await getTempDirPath();
+        const tempName = generateTempName(10);
 
-        tempInputFilePath = path.join(tempDir, tempName + '.heic');
-        tempOutputFilePath = path.join(tempDir, tempName + '.jpeg');
+        tempInputFilePath = path.join(tempDirPath, tempName + '.heic');
+        tempOutputFilePath = path.join(tempDirPath, tempName + '.jpeg');
 
         await writeFile(tempInputFilePath, heicFileData);
 
