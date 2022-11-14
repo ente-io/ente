@@ -44,9 +44,8 @@ export async function generateThumbnail(
                         )}`
                     );
 
-                    const thumbFile = await FFmpegService.generateThumbnail(
-                        file
-                    );
+                    const thumbFile =
+                        await FFmpegService.generateVideoThumbnail(file);
                     addLogLine(
                         `ffmpeg thumbnail successfully generated ${getFileNameSize(
                             file

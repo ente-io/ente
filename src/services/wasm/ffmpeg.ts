@@ -35,7 +35,7 @@ export class WasmFFmpeg {
     async run(cmd: string[], inputFile: File, outputFileName: string) {
         addLogLine(`ffmpeg run called for ${inputFile.name}`);
         const response = this.ffmpegTaskQueue.queueUpRequest(() =>
-            promiseWithTimeout(
+            promiseWithTimeout<File>(
                 this.execute(cmd, inputFile, outputFileName),
                 FFMPEG_EXECUTION_WAIT_TIME
             )
