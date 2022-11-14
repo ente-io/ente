@@ -15,7 +15,7 @@ const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
 export class WasmFFmpeg {
     private ffmpeg: FFmpeg;
     private ready: Promise<void> = null;
-    private ffmpegTaskQueue = new QueueProcessor<any>(1);
+    private ffmpegTaskQueue = new QueueProcessor<File>(1);
 
     constructor() {
         this.ffmpeg = createFFmpeg({
@@ -69,7 +69,7 @@ export class WasmFFmpeg {
             );
             tempOutputFilePath = `${generateTempName(10)}-${outputFileName}`;
 
-            cmd.map((cmdPart) => {
+            cmd = cmd.map((cmdPart) => {
                 if (cmdPart === FFMPEG_PLACEHOLDER) {
                     return '';
                 } else if (cmdPart === INPUT_PATH_PLACEHOLDER) {
@@ -80,9 +80,13 @@ export class WasmFFmpeg {
                     return cmdPart;
                 }
             });
+            console.log(cmd);
             await this.ffmpeg.run(...cmd);
             addLogLine(`ffmpeg execute completed for ${inputFile.name}`);
-            return this.ffmpeg.FS('readFile', tempOutputFilePath);
+            return new File(
+                [this.ffmpeg.FS('readFile', tempOutputFilePath)],
+                outputFileName
+            );
         } catch (e) {
             addLogLine(`ffmpeg execute failed for ${inputFile.name}`);
             throw e;
