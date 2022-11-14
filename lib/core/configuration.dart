@@ -4,9 +4,10 @@ import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:ente_auth/core/constants.dart';
-// import 'package:ente_auth/core/error-reporting/super_logging.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/signed_out_event.dart';
 import 'package:ente_auth/models/key_attributes.dart';
@@ -14,7 +15,6 @@ import 'package:ente_auth/models/key_gen_result.dart';
 import 'package:ente_auth/models/private_key_attributes.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
-// import 'package:ente_auth/utils/validator_util.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
@@ -120,7 +120,7 @@ class Configuration {
       }
       await _migrateSecurityStorageToFirstUnlock();
     }
-    // SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
+    SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
   }
 
   Future<void> logout({bool autoLogout = false}) async {

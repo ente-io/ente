@@ -1,6 +1,7 @@
 // @dart=2.9
 import "package:ente_auth/app/view/app.dart";
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -47,6 +48,8 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
       body: function,
       logDirPath: (await getApplicationSupportDirectory()).path + "/logs",
       maxLogFiles: 5,
+      sentryDsn: sentryDSN,
+      tunnel: sentryTunnel,
       enableInDebugMode: true,
       prefix: prefix,
     ),

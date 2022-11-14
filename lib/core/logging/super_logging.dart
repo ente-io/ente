@@ -7,13 +7,16 @@ import 'dart:collection';
 import 'dart:core';
 import 'dart:io';
 
+import 'package:ente_auth/core/logging/tunneled_transport.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 typedef FutureOrVoidCallback = FutureOr<void> Function();
 
@@ -189,17 +192,17 @@ class SuperLogging {
     if (config.body == null) return;
 
     if (enable && sentryIsEnabled) {
-      // await SentryFlutter.init(
-      //   (options) {
-      //     options.dsn = config.sentryDsn;
-      //     options.httpClient = http.Client();
-      //     if (config.tunnel != null) {
-      //       options.transport =
-      //           TunneledTransport(Uri.parse(config.tunnel), options);
-      //     }
-      //   },
-      //   appRunner: () => config.body(),
-      // );
+      await SentryFlutter.init(
+        (options) {
+          options.dsn = config.sentryDsn;
+          options.httpClient = http.Client();
+          if (config.tunnel != null) {
+            options.transport =
+                TunneledTransport(Uri.parse(config.tunnel), options);
+          }
+        },
+        appRunner: () => config.body(),
+      );
     } else {
       await config.body();
     }
@@ -207,21 +210,21 @@ class SuperLogging {
 
   static void setUserID(String userID) async {
     if (config?.sentryDsn != null) {
-      // Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
+      Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
       $.info("setting sentry user ID to: $userID");
     }
   }
 
   static Future<void> _sendErrorToSentry(Object error, StackTrace stack) async {
-    // try {
-    //   await Sentry.captureException(
-    //     error,
-    //     stackTrace: stack,
-    //   );
-    // } catch (e) {
-    //   $.info('Sending report to sentry.io failed: $e');
-    //   $.info('Original error: $error');
-    // }
+    try {
+      await Sentry.captureException(
+        error,
+        stackTrace: stack,
+      );
+    } catch (e) {
+      $.info('Sending report to sentry.io failed: $e');
+      $.info('Original error: $error');
+    }
   }
 
   static String _lastExtraLines = '';
@@ -286,16 +289,16 @@ class SuperLogging {
 
   static Future<void> setupSentry() async {
     await for (final error in sentryQueueControl.stream.asBroadcastStream()) {
-      // try {
-      //   Sentry.captureException(
-      //     error,
-      //   );
-      // } catch (e) {
-      //   $.fine(
-      //     "sentry upload failed; will retry after ${config.sentryRetryDelay}",
-      //   );
-      //   doSentryRetry(error);
-      // }
+      try {
+        Sentry.captureException(
+          error,
+        );
+      } catch (e) {
+        $.fine(
+          "sentry upload failed; will retry after ${config.sentryRetryDelay}",
+        );
+        doSentryRetry(error);
+      }
     }
   }
 
@@ -372,6 +375,6 @@ class SuperLogging {
       return false;
     }
     final pkgName = (await PackageInfo.fromPlatform()).packageName;
-    return pkgName.startsWith("io.ente.photos.fdroid");
+    return pkgName.endsWith("fdroid");
   }
 }

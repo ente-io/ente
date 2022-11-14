@@ -35,7 +35,7 @@
         <meta-data android:name="flutterEmbedding" android:value="2"/>
 
         <meta-data android:name="io.sentry.dsn"
-                   android:value="https://8aeb7f013be74f829f8b73b46b3d7a80@sentry.ente.io/8"/>
+                   android:value="https://ed4ddd6309b847ba8849935e26e9b648@sentry.ente.io/9"/>
     </application>
 
     <queries>

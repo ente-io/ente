@@ -41,10 +41,8 @@ dependencies:
   flutter_windowmanager: ^0.2.0
   flutter_localizations:
     sdk: flutter
-  #  sentry:
-  #    path: thirdparty/sentry-dart/dart
-  #  sentry_flutter:
-  #      path: thirdparty/sentry-dart/flutter
+  sentry: ^6.12.1
+  sentry_flutter: ^6.12.1
   json_annotation: ^4.5.0
   fluttertoast: ^8.1.1
   google_nav_bar: ^5.0.5 #supported
