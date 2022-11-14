@@ -33,7 +33,6 @@ export class WasmFFmpeg {
     }
 
     async run(cmd: string[], inputFile: File, outputFileName: string) {
-        addLogLine(`ffmpeg run called for ${inputFile.name}`);
         const response = this.ffmpegTaskQueue.queueUpRequest(() =>
             promiseWithTimeout<File>(
                 this.execute(cmd, inputFile, outputFileName),
@@ -44,10 +43,7 @@ export class WasmFFmpeg {
             return await response.promise;
         } catch (e) {
             logError(e, 'ffmpeg run failed');
-            addLogLine(`ffmpeg run failed for ${inputFile.name}`);
             throw e;
-        } finally {
-            addLogLine(`ffmpeg run completed for ${inputFile.name}`);
         }
     }
 
@@ -56,7 +52,6 @@ export class WasmFFmpeg {
         inputFile: File,
         outputFileName: string
     ) {
-        addLogLine(`ffmpeg execute called for ${inputFile.name}`);
         let tempInputFilePath: string;
         let tempOutputFilePath: string;
         try {
@@ -82,14 +77,10 @@ export class WasmFFmpeg {
             });
             addLogLine(`${cmd}`);
             await this.ffmpeg.run(...cmd);
-            addLogLine(`ffmpeg execute completed for ${inputFile.name}`);
             return new File(
                 [this.ffmpeg.FS('readFile', tempOutputFilePath)],
                 outputFileName
             );
-        } catch (e) {
-            addLogLine(`ffmpeg execute failed for ${inputFile.name}`);
-            throw e;
         } finally {
             try {
                 this.ffmpeg.FS('unlink', tempInputFilePath);
