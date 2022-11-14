@@ -361,7 +361,7 @@ class CollectionsService {
         },
       );
       // trigger sync to fetch the latest name from server
-      sync();
+      sync().ignore();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
       rethrow;
@@ -374,7 +374,7 @@ class CollectionsService {
         "/collections/leave/${collection.id}",
       );
       // trigger sync to fetch the latest name from server
-      sync();
+      sync().ignore();
     } catch (e, s) {
       _logger.severe("failed to leave collection", e, s);
       rethrow;
@@ -427,11 +427,11 @@ class CollectionsService {
       collection.mMdVersion = currentVersion + 1;
       _cacheCollectionAttributes(collection);
       // trigger sync to fetch the latest collection state from server
-      sync();
+      sync().ignore();
     } on DioError catch (e) {
       if (e.response != null && e.response.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
-        sync();
+        sync().ignore();
       }
       rethrow;
     } catch (e, s) {
