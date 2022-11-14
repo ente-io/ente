@@ -33,9 +33,6 @@ export async function generateThumbnail(
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
         try {
-            if (!(file instanceof File)) {
-                file = new File([await file.blob()], file.name);
-            }
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
                 const isHEIC = isExactTypeHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(file, isHEIC);
@@ -117,8 +114,8 @@ export async function generateImageThumbnail(
     }
     let image = new Image();
     imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
-    image.setAttribute('src', imageURL);
     await new Promise((resolve, reject) => {
+        image.setAttribute('src', imageURL);
         image.onload = () => {
             try {
                 URL.revokeObjectURL(imageURL);
@@ -158,16 +155,18 @@ export async function generateImageThumbnail(
     return canvas;
 }
 
-export async function generateVideoThumbnail(file: File) {
+export async function generateVideoThumbnail(file: File | ElectronFile) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
-    let videoURL = null;
     let timeout = null;
+    let videoURL = null;
 
+    let video = document.createElement('video');
+    videoURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
     await new Promise((resolve, reject) => {
-        let video = document.createElement('video');
-        videoURL = URL.createObjectURL(file);
+        video.preload = 'metadata';
+        video.src = videoURL;
         video.addEventListener('loadeddata', function () {
             try {
                 URL.revokeObjectURL(videoURL);
@@ -202,8 +201,6 @@ export async function generateVideoThumbnail(file: File) {
                 reject(err);
             }
         });
-        video.preload = 'metadata';
-        video.src = videoURL;
         timeout = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             WAIT_TIME_THUMBNAIL_GENERATION
