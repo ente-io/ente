@@ -12,7 +12,7 @@ extension ListExtension<E> on List<E> {
   // splitMatch, based on the matchFunction, split the input list in two
   // lists. result.matched contains items which matched and result.unmatched
   // contains remaining items.
-  ListMatch<E> splitMatch(bool Function(E element) matchFunction) {
+  ListMatch<E> splitMatch(bool Function(E e) matchFunction) {
     final listMatch = ListMatch<E>();
     for (final element in this) {
       if (matchFunction(element)) {
