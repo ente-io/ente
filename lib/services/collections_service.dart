@@ -106,13 +106,16 @@ class CollectionsService {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(
-            List<File>.empty(),
-            source: "syncCollectionDeleted",
-          ),
-        );
+        if (_collectionIDToCollections.containsKey(collection.id)) {
+          Bus.instance.fire(
+            LocalPhotosUpdatedEvent(
+              List<File>.empty(),
+              source: "syncCollectionDeleted",
+            ),
+          );
+        }
       }
+
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection?.owner?.id) {
         await _db.deleteCollection(collection.id);
