@@ -1,4 +1,5 @@
 import {
+    FFMPEG_PLACEHOLDER,
     INPUT_PATH_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
 } from 'constants/ffmpeg';
@@ -14,6 +15,7 @@ export async function generateThumbnail(
         try {
             return await ffmpegClient.run(
                 [
+                    FFMPEG_PLACEHOLDER,
                     '-i',
                     INPUT_PATH_PLACEHOLDER,
                     '-ss',
