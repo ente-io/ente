@@ -103,27 +103,35 @@ class _CodeWidgetState extends State<CodeWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 16, right: 16),
-                          child: Text(
-                            Uri.decodeFull(widget.code.issuer),
-                            style: Theme.of(context).textTheme.headline6,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(right: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "next",
-                                style: Theme.of(context).textTheme.caption,
+                                Uri.decodeFull(widget.code.issuer).trim(),
+                                style: Theme.of(context).textTheme.headline6,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                Uri.decodeFull(
+                                  widget.code.account,
+                                ).trim(),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .caption
+                                    ?.copyWith(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
                               ),
                             ],
                           ),
                         ),
+                        const SizedBox(height: 4),
                         Container(
                           padding: const EdgeInsets.only(left: 16, right: 16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Expanded(
                                 child: Text(
@@ -131,12 +139,21 @@ class _CodeWidgetState extends State<CodeWidget> {
                                   style: const TextStyle(fontSize: 24),
                                 ),
                               ),
-                              Text(
-                                _getNextTotp(),
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  color: Colors.grey,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "next",
+                                    style: Theme.of(context).textTheme.caption,
+                                  ),
+                                  Text(
+                                    _getNextTotp(),
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
