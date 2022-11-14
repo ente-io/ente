@@ -106,13 +106,16 @@ class CollectionsService {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(
-            List<File>.empty(),
-            source: "syncCollectionDeleted",
-          ),
-        );
+        if (_collectionIDToCollections.containsKey(collection.id)) {
+          Bus.instance.fire(
+            LocalPhotosUpdatedEvent(
+              List<File>.empty(),
+              source: "syncCollectionDeleted",
+            ),
+          );
+        }
       }
+
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection?.owner?.id) {
         await _db.deleteCollection(collection.id);
@@ -361,7 +364,7 @@ class CollectionsService {
         },
       );
       // trigger sync to fetch the latest name from server
-      sync();
+      sync().ignore();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
       rethrow;
@@ -374,7 +377,7 @@ class CollectionsService {
         "/collections/leave/${collection.id}",
       );
       // trigger sync to fetch the latest name from server
-      sync();
+      sync().ignore();
     } catch (e, s) {
       _logger.severe("failed to leave collection", e, s);
       rethrow;
@@ -427,11 +430,11 @@ class CollectionsService {
       collection.mMdVersion = currentVersion + 1;
       _cacheCollectionAttributes(collection);
       // trigger sync to fetch the latest collection state from server
-      sync();
+      sync().ignore();
     } on DioError catch (e) {
       if (e.response != null && e.response.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
-        sync();
+        sync().ignore();
       }
       rethrow;
     } catch (e, s) {
@@ -971,6 +974,9 @@ class CollectionsService {
   }
 
   Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
+    if(collections.isEmpty) {
+      return;
+    }
     try {
       await _db.insert(collections);
     } catch (e) {
