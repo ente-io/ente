@@ -56,8 +56,10 @@ class BackupSettingsScreen extends StatelessWidget {
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
                                 value: () {
-                                  return Configuration.instance
-                                      .shouldBackupOverMobileData();
+                                  return Future.value(
+                                    Configuration.instance
+                                        .shouldBackupOverMobileData(),
+                                  );
                                 },
                                 onChanged: () async {
                                   await Configuration.instance
@@ -82,8 +84,9 @@ class BackupSettingsScreen extends StatelessWidget {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value: () =>
-                                    Configuration.instance.shouldBackupVideos(),
+                                value: () => Future.value(
+                                  Configuration.instance.shouldBackupVideos(),
+                                ),
                                 onChanged: () => Configuration.instance
                                     .setShouldBackupVideos(
                                   !Configuration.instance.shouldBackupVideos(),
@@ -107,8 +110,10 @@ class BackupSettingsScreen extends StatelessWidget {
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingSwitch: ToggleSwitchWidget(
-                                      value: () => Configuration.instance
-                                          .shouldKeepDeviceAwake(),
+                                      value: () => Future.value(
+                                        Configuration.instance
+                                            .shouldKeepDeviceAwake(),
+                                      ),
                                       onChanged: () {
                                         return Configuration.instance
                                             .setShouldKeepDeviceAwake(

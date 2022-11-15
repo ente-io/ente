@@ -13,7 +13,6 @@ import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/sessions_page.dart';
-import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -64,38 +63,30 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       children.addAll(
         [
           sectionOptionSpacing,
-          FutureBuilder(
-            future: UserService.instance.fetchTwoFactorStatus(),
-            builder: (_, snapshot) {
-              return MenuItemWidget(
-                captionedTextWidget: const CaptionedTextWidget(
-                  title: "Two-factor",
-                ),
-                trailingSwitch: snapshot.hasData
-                    ? ToggleSwitchWidget(
-                        value: () => snapshot.data,
-                        onChanged: () async {
-                          final hasAuthenticated =
-                              await LocalAuthenticationService.instance
-                                  .requestLocalAuthentication(
-                            context,
-                            "Please authenticate to configure two-factor authentication",
-                          );
-                          if (hasAuthenticated) {
-                            if (!snapshot.data) {
-                              await UserService.instance
-                                  .setupTwoFactor(context);
-                            } else {
-                              _disableTwoFactor();
-                            }
-                          }
-                        },
-                      )
-                    : snapshot.hasError
-                        ? const Icon(Icons.error_outline_outlined)
-                        : const EnteLoadingWidget(),
-              );
-            },
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Two-factor",
+            ),
+            trailingSwitch: ToggleSwitchWidget(
+              value: () => UserService.instance.fetchTwoFactorStatus(),
+              onChanged: () async {
+                final hasAuthenticated = await LocalAuthenticationService
+                    .instance
+                    .requestLocalAuthentication(
+                  context,
+                  "Please authenticate to configure two-factor authentication",
+                );
+                final isTwoFactorEnabled =
+                    await UserService.instance.fetchTwoFactorStatus();
+                if (hasAuthenticated) {
+                  if (isTwoFactorEnabled) {
+                    _disableTwoFactor();
+                  } else {
+                    await UserService.instance.setupTwoFactor(context);
+                  }
+                }
+              },
+            ),
           ),
           sectionOptionSpacing,
         ],
@@ -107,7 +98,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           title: "Lockscreen",
         ),
         trailingSwitch: ToggleSwitchWidget(
-          value: () => _config.shouldShowLockScreen(),
+          value: () => Future.value(_config.shouldShowLockScreen()),
           onChanged: () async {
             await LocalAuthenticationService.instance
                 .requestLocalAuthForLockScreen(
@@ -129,7 +120,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               title: "Hide from recents",
             ),
             trailingSwitch: ToggleSwitchWidget(
-              value: () => _config.shouldHideFromRecents(),
+              value: () => Future.value(_config.shouldHideFromRecents()),
               onChanged: _hideFromRecentsOnChanged,
             ),
           ),
