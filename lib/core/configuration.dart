@@ -130,6 +130,7 @@ class Configuration {
     _key = null;
     _cachedToken = null;
     _secretKey = null;
+    _authSecretKey = null;
     Bus.instance.fire(SignedOutEvent());
   }
 
