@@ -13,6 +13,7 @@ class Code {
   final Algorithm algorithm;
   final Type type;
   final String rawData;
+  bool? hasSynced;
 
   Code(
     this.account,

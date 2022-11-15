@@ -11,6 +11,7 @@ import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/gateway/authenticator.dart';
 import 'package:ente_auth/models/authenticator/auth_entity.dart';
 import 'package:ente_auth/models/authenticator/auth_key.dart';
+import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
@@ -44,11 +45,11 @@ class AuthenticatorService {
     });
   }
 
-  Future<Map<int, String>> getAllIDtoStringMap() async {
+  Future<List<EntityResult>> getEntities() async {
     final List<LocalAuthEntity> result = await _db.getAll();
-    final Map<int, String> entries = <int, String>{};
+    final List<EntityResult> entities = [];
     if (result.isEmpty) {
-      return entries;
+      return entities;
     }
     final key = await getOrCreateAuthDataKey();
     for (LocalAuthEntity e in result) {
@@ -58,12 +59,18 @@ class AuthenticatorService {
           key,
           Sodium.base642bin(e.header),
         );
-        entries[e.generatedID] = utf8.decode(decryptedValue);
+        entities.add(
+          EntityResult(
+            e.generatedID,
+            utf8.decode(decryptedValue),
+            e.id != null,
+          ),
+        );
       } catch (e, s) {
         _logger.severe(e, s);
       }
     }
-    return entries;
+    return entities;
   }
 
   Future<int> addEntry(String plainText, bool shouldSync) async {

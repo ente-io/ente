@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/events/codes_updated_event.dart';
+import 'package:ente_auth/models/authenticator/entity_result.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:logging/logging.dart';
@@ -19,13 +20,14 @@ class CodeStore {
   }
 
   Future<List<Code>> getAllCodes() async {
-    final Map<int, String> rawCodesMap =
-        await _authenticatorService.getAllIDtoStringMap();
+    final List<EntityResult> entities =
+        await _authenticatorService.getEntities();
     final List<Code> codes = [];
-    for (final entry in rawCodesMap.entries) {
-      final decodeJson = jsonDecode(entry.value);
+    for (final entity in entities) {
+      final decodeJson = jsonDecode(entity.rawData);
       final code = Code.fromRawData(decodeJson);
-      code.id = entry.key;
+      code.id = entity.generatedID;
+      code.hasSynced = entity.hasSynced;
       codes.add(code);
     }
     codes.sort((c1, c2) {

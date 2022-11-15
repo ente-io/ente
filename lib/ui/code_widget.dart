@@ -103,26 +103,41 @@ class _CodeWidgetState extends State<CodeWidget> {
                         ),
                         Padding(
                           padding: const EdgeInsets.only(left: 16, right: 16),
-                          child: Column(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                Uri.decodeFull(widget.code.issuer).trim(),
-                                style: Theme.of(context).textTheme.headline6,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    Uri.decodeFull(widget.code.issuer).trim(),
+                                    style:
+                                        Theme.of(context).textTheme.headline6,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    Uri.decodeFull(
+                                      widget.code.account,
+                                    ).trim(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .caption
+                                        ?.copyWith(
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                Uri.decodeFull(
-                                  widget.code.account,
-                                ).trim(),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .caption
-                                    ?.copyWith(
-                                      fontSize: 12,
-                                      color: Colors.grey,
+                              widget.code.hasSynced != null &&
+                                      widget.code.hasSynced!
+                                  ? Container()
+                                  : const Icon(
+                                      Icons.sync_disabled,
+                                      size: 20,
+                                      color: Colors.amber,
                                     ),
-                              ),
                             ],
                           ),
                         ),
