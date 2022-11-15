@@ -15,9 +15,11 @@ typedef FutureValueCallBack = Future<bool> Function();
 class ToggleSwitchWidget extends StatefulWidget {
   final FutureValueCallBack value;
   final OnChangedCallBack onChanged;
+  final bool initialValue;
   const ToggleSwitchWidget({
     required this.value,
     required this.onChanged,
+    required this.initialValue,
     Key? key,
   }) : super(key: key);
 
@@ -33,8 +35,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   @override
   void initState() {
     futureToggleValue = widget.value.call();
-//need to assign correct intiial value of toggleValue here
-    toggleValue = true;
+    toggleValue = widget.initialValue;
     super.initState();
   }
 

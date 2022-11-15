@@ -68,6 +68,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                         .shouldBackupOverMobileData(),
                                   );
                                 },
+                                initialValue: Configuration.instance
+                                    .shouldBackupOverMobileData(),
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
@@ -91,6 +93,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                     .setShouldBackupVideos(
                                   !Configuration.instance.shouldBackupVideos(),
                                 ),
+                                initialValue:
+                                    Configuration.instance.shouldBackupVideos(),
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
@@ -121,6 +125,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                               .shouldKeepDeviceAwake(),
                                         );
                                       },
+                                      initialValue: Configuration.instance
+                                          .shouldKeepDeviceAwake(),
                                     ),
                                     borderRadius: 8,
                                     alignCaptionedTextToLeft: true,

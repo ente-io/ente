@@ -69,6 +69,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             ),
             trailingSwitch: ToggleSwitchWidget(
               value: () => UserService.instance.fetchTwoFactorStatus(),
+              initialValue: false,
               onChanged: () async {
                 final hasAuthenticated = await LocalAuthenticationService
                     .instance
@@ -108,6 +109,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
             );
           },
+          initialValue: _config.shouldShowLockScreen(),
         ),
       ),
       sectionOptionSpacing,
@@ -122,6 +124,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             trailingSwitch: ToggleSwitchWidget(
               value: () => Future.value(_config.shouldHideFromRecents()),
               onChanged: _hideFromRecentsOnChanged,
+              initialValue: _config.shouldHideFromRecents(),
             ),
           ),
           sectionOptionSpacing,
