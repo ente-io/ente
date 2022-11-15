@@ -43,3 +43,5 @@ class FFDefault {
 }
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
+
+const int intMaxValue = 9223372036854775807;

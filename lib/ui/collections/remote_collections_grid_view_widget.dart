@@ -8,6 +8,15 @@ import 'package:photos/ui/collections/collection_item_widget.dart';
 import 'package:photos/ui/collections/create_new_album_widget.dart';
 
 class RemoteCollectionsGridViewWidget extends StatelessWidget {
+  /*
+  Aspect ratio 1:1 Max width 224 Fixed gap 8
+  Width changes dynamically with screen width such that we can fit 2 in one row.
+  Keep the width integral (center the albums to distribute excess pixels)
+   */
+  static const maxThumbnailWidth = 224.0;
+  static const fixedGapBetweenAlbum = 8.0;
+  static const minGapForHorizontalPadding = 8.0;
+
   final List<CollectionWithThumbnail> collections;
 
   const RemoteCollectionsGridViewWidget(
@@ -17,13 +26,18 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double horizontalPaddingOfGridRow = 16;
-    const double crossAxisSpacingOfGrid = 9;
-    final Size size = MediaQuery.of(context).size;
-    final int albumsCountInOneRow = max(size.width ~/ 220.0, 2);
-    final double sideOfThumbnail = (size.width / albumsCountInOneRow) -
-        horizontalPaddingOfGridRow -
-        ((crossAxisSpacingOfGrid / 2) * (albumsCountInOneRow - 1));
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final int albumsCountInOneRow = max(screenWidth ~/ maxThumbnailWidth, 2);
+    final double gapBetweenAlbums =
+        (albumsCountInOneRow - 1) * fixedGapBetweenAlbum;
+    // gapOnSizeOfAlbums will be
+    final double gapOnSizeOfAlbums = minGapForHorizontalPadding +
+        (screenWidth - gapBetweenAlbums - (2 * minGapForHorizontalPadding)) %
+            albumsCountInOneRow;
+
+    final double sideOfThumbnail =
+        (screenWidth - gapOnSizeOfAlbums - gapBetweenAlbums) /
+            albumsCountInOneRow;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -33,7 +47,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         // to disable GridView's scrolling
         itemBuilder: (context, index) {
           if (index < collections.length) {
-            return CollectionItem(collections[index]);
+            return CollectionItem(collections[index], sideOfThumbnail);
           } else {
             return const CreateNewAlbumWidget();
           }
@@ -42,9 +56,9 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         // To include the + button
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,
-          mainAxisSpacing: 12,
-          crossAxisSpacing: crossAxisSpacingOfGrid,
-          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 24),
+          mainAxisSpacing: 4,
+          crossAxisSpacing: gapBetweenAlbums,
+          childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 50),
         ), //24 is height of album title
       ),
     );
