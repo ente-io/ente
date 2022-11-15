@@ -52,12 +52,16 @@ class AuthenticatorService {
     }
     final key = await getOrCreateAuthDataKey();
     for (LocalAuthEntity e in result) {
-      final decryptedValue = await CryptoUtil.decryptChaCha(
-        Sodium.base642bin(e.encryptedData),
-        key,
-        Sodium.base642bin(e.header),
-      );
-      entries[e.generatedID] = utf8.decode(decryptedValue);
+      try {
+        final decryptedValue = await CryptoUtil.decryptChaCha(
+          Sodium.base642bin(e.encryptedData),
+          key,
+          Sodium.base642bin(e.header),
+        );
+        entries[e.generatedID] = utf8.decode(decryptedValue);
+      } catch (e, s) {
+        _logger.severe(e);
+      }
     }
     return entries;
   }
