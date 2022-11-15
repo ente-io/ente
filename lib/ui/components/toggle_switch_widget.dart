@@ -14,6 +14,8 @@ typedef FutureValueCallBack = Future<bool> Function();
 
 class ToggleSwitchWidget extends StatefulWidget {
   final FutureValueCallBack value;
+
+  ///Make sure to use completer if onChanged callback has other async functions inside
   final OnChangedCallBack onChanged;
   final bool initialValue;
   const ToggleSwitchWidget({
@@ -32,6 +34,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   late bool toggleValue;
   ExecutionState executionState = ExecutionState.idle;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
+
   @override
   void initState() {
     futureToggleValue = widget.value.call();
@@ -90,10 +93,6 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
 
                     widget.value.call().then((newValue) {
                       setState(() {
-                        //if onchanged on toggle is successful
-                        // print('here');
-                        // print(toggleValue);
-                        // print("newValue : $newValue");
                         if (toggleValue == newValue) {
                           if (executionState == ExecutionState.inProgress) {
                             executionState = ExecutionState.successful;

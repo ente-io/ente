@@ -58,6 +58,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {
       children.addAll(
@@ -69,7 +70,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             ),
             trailingSwitch: ToggleSwitchWidget(
               value: () => UserService.instance.fetchTwoFactorStatus(),
-              initialValue: false,
+              initialValue: _config.hasEnabledTwoFactor(),
               onChanged: () async {
                 final hasAuthenticated = await LocalAuthenticationService
                     .instance
@@ -81,10 +82,12 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     await UserService.instance.fetchTwoFactorStatus();
                 if (hasAuthenticated) {
                   if (isTwoFactorEnabled) {
-                    _disableTwoFactor();
+                    _disableTwoFactor(completer);
                   } else {
-                    await UserService.instance.setupTwoFactor(context);
+                    await UserService.instance
+                        .setupTwoFactor(context, completer);
                   }
+                  return completer.future;
                 }
               },
             ),
@@ -165,7 +168,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  void _disableTwoFactor() {
+  void _disableTwoFactor(Completer completer) {
     final AlertDialog alert = AlertDialog(
       title: const Text("Disable two-factor"),
       content: const Text(
@@ -181,6 +184,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
+            completer.complete();
           },
         ),
         TextButton(
@@ -193,6 +197,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           onPressed: () async {
             await UserService.instance.disableTwoFactor(context);
             Navigator.of(context, rootNavigator: true).pop('dialog');
+            completer.complete();
           },
         ),
       ],

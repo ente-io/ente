@@ -609,7 +609,7 @@ class UserService {
     }
   }
 
-  Future<void> setupTwoFactor(BuildContext context) async {
+  Future<void> setupTwoFactor(BuildContext context, Completer completer) async {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
@@ -621,12 +621,14 @@ class UserService {
           TwoFactorSetupPage(
             response.data["secretCode"],
             response.data["qrCode"],
+            completer,
           ),
         ),
       );
     } catch (e) {
       await dialog.hide();
       _logger.severe("Failed to setup tfa", e);
+      completer.complete();
       rethrow;
     }
   }
