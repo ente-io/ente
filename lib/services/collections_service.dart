@@ -321,6 +321,15 @@ class CollectionsService {
       await _filesDB.deleteCollection(collection.id);
       final deletedCollection = collection.copyWith(isDeleted: true);
       _collectionIDToCollections[collection.id] = deletedCollection;
+      Bus.instance.fire(
+        CollectionUpdatedEvent(
+          collection.id,
+          <File>[],
+          "delete_Collection",
+          type: EventType.deletedFromRemote,
+        ),
+      );
+      sync().ignore();
       unawaited(_db.insert([deletedCollection]));
       unawaited(LocalSyncService.instance.syncAll());
     } catch (e) {
@@ -998,7 +1007,7 @@ class CollectionsService {
   }
 
   Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
-    if(collections.isEmpty) {
+    if (collections.isEmpty) {
       return;
     }
     try {
