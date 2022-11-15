@@ -18,8 +18,8 @@ class AlbumSearchResult extends SearchResult {
   }
 
   @override
-  File previewThumbnail() {
-    return collectionWithThumbnail.thumbnail!;
+  File? previewThumbnail() {
+    return collectionWithThumbnail.thumbnail;
   }
 
   @override

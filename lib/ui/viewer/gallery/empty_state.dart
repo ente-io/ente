@@ -1,12 +1,10 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class EmptyState extends StatelessWidget {
   final String text;
 
-  const EmptyState({Key key, this.text = "Nothing to see here! 👀"})
+  const EmptyState({Key? key, this.text = "Nothing to see here! 👀"})
       : super(key: key);
 
   @override
