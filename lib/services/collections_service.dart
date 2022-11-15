@@ -318,15 +318,28 @@ class CollectionsService {
       await _enteDio.delete(
         "/collections/v2/${collection.id}",
       );
-      await _filesDB.deleteCollection(collection.id);
-      final deletedCollection = collection.copyWith(isDeleted: true);
-      _collectionIDToCollections[collection.id] = deletedCollection;
-      unawaited(_db.insert([deletedCollection]));
-      unawaited(LocalSyncService.instance.syncAll());
+      await _handleCollectionDeletion(collection);
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;
     }
+  }
+
+  Future<void> _handleCollectionDeletion(Collection collection) async {
+    await _filesDB.deleteCollection(collection.id);
+    final deletedCollection = collection.copyWith(isDeleted: true);
+    _collectionIDToCollections[collection.id] = deletedCollection;
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        collection.id,
+        <File>[],
+        "delete_collection",
+        type: EventType.deletedFromRemote,
+      ),
+    );
+    sync().ignore();
+    unawaited(_db.insert([deletedCollection]));
+    unawaited(LocalSyncService.instance.syncAll());
   }
 
   Uint8List getCollectionKey(int collectionID) {
@@ -400,8 +413,7 @@ class CollectionsService {
       await _enteDio.post(
         "/collections/leave/${collection.id}",
       );
-      // trigger sync to fetch the latest name from server
-      sync().ignore();
+      await _handleCollectionDeletion(collection);
     } catch (e, s) {
       _logger.severe("failed to leave collection", e, s);
       rethrow;
@@ -998,7 +1010,7 @@ class CollectionsService {
   }
 
   Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
-    if(collections.isEmpty) {
+    if (collections.isEmpty) {
       return;
     }
     try {
