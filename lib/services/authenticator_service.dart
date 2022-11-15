@@ -60,7 +60,7 @@ class AuthenticatorService {
         );
         entries[e.generatedID] = utf8.decode(decryptedValue);
       } catch (e, s) {
-        _logger.severe(e);
+        _logger.severe(e, s);
       }
     }
     return entries;
