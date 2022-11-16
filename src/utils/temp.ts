@@ -1,5 +1,4 @@
 import { app } from 'electron';
-import { emptyDir } from 'fs-extra';
 import path from 'path';
 import { existsSync, mkdir } from 'promise-fs';
 
@@ -14,13 +13,6 @@ export async function getTempDirPath() {
         await mkdir(tempDirPath);
     }
     return tempDirPath;
-}
-
-export async function clearEnteTempFolder() {
-    const tempDirPath = await this.getTempDirPath();
-    if (existsSync(tempDirPath)) {
-        await emptyDir(tempDirPath);
-    }
 }
 
 export function generateTempName(length: number) {
