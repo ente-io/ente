@@ -4,6 +4,9 @@ import * as fs from 'promise-fs';
 import { ElectronFile } from '../types';
 import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
+import { getTempDirPath, generateTempName } from '../utils/temp';
+import { rmSync } from 'promise-fs';
+import { logErrorSentry } from './sentry';
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -187,4 +190,27 @@ export function writeStream(filePath: string, fileStream: any) {
 
 export async function readTextFile(filePath: string) {
     return await fs.readFile(filePath, 'utf-8');
+}
+
+export async function writeTempFile(fileStream: Uint8Array, fileName: string) {
+    const tempDirPath = await getTempDirPath();
+    const namePrefix = generateTempName(10);
+    const tempFilePath = path.join(tempDirPath, namePrefix + fileName);
+    await fs.writeFile(tempFilePath, fileStream);
+    return tempFilePath;
+}
+
+export async function deleteTempFile(tempFilePath: string) {
+    const tempDirPath = await getTempDirPath();
+    if (tempFilePath.startsWith(tempDirPath)) {
+        logErrorSentry(
+            Error('not a temp file'),
+            'tried to delete a non temp file'
+        );
+    }
+    try {
+        rmSync(tempFilePath);
+    } catch (e) {
+        logErrorSentry(e, 'failed to deleteTempFile');
+    }
 }
