@@ -208,9 +208,5 @@ export async function deleteTempFile(tempFilePath: string) {
             'tried to delete a non temp file'
         );
     }
-    try {
-        rmSync(tempFilePath);
-    } catch (e) {
-        logErrorSentry(e, 'failed to deleteTempFile');
-    }
+    rmSync(tempFilePath);
 }
