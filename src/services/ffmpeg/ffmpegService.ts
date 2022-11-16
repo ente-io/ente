@@ -33,10 +33,12 @@ export async function generateVideoThumbnail(
                     'thumb.jpeg'
                 );
             } catch (e) {
-                seekTime = Number((seekTime / 10).toFixed(3));
+                if (seekTime <= 0) {
+                    throw e;
+                }
             }
+            seekTime = Number((seekTime / 10).toFixed(3));
         }
-        throw Error('Thumbnail generation failed');
     } catch (e) {
         logError(e, 'ffmpeg generateVideoThumbnail failed');
         throw e;
@@ -78,6 +80,7 @@ export async function extractVideoMetadata(file: File | ElectronFile) {
 export async function convertToMP4(file: File | ElectronFile) {
     try {
         const ffmpegClient = await ffmpegFactory.getFFmpegClient();
+        console.log('convertToMP4');
         return await ffmpegClient.run(
             [
                 FFMPEG_PLACEHOLDER,
