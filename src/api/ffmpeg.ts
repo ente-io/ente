@@ -8,8 +8,10 @@ export async function runFFmpegCmd(
 ) {
     let inputFilePath = null;
     let inputFileData = null;
-    if (inputFile instanceof File) {
+    let inputFileName = null;
+    if (!inputFile.path) {
         inputFileData = new Uint8Array(await inputFile.arrayBuffer());
+        inputFileName = inputFile.name;
     } else {
         inputFilePath = inputFile.path;
     }
@@ -18,6 +20,7 @@ export async function runFFmpegCmd(
         cmd,
         inputFilePath,
         inputFileData,
+        inputFileName,
         outputFileName
     );
     return new File([outputFileData], outputFileName);

@@ -131,7 +131,7 @@ export default function setupIpcComs(
         'run-ffmpeg-cmd',
         (
             _,
-            cmd: string[],
+            cmd,
             inputFilePath,
             inputFileData,
             inputFileName,
