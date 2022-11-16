@@ -8,4 +8,24 @@ extension ListExtension<E> on List<E> {
     }
     return result;
   }
+
+  // splitMatch, based on the matchFunction, split the input list in two
+  // lists. result.matched contains items which matched and result.unmatched
+  // contains remaining items.
+  ListMatch<E> splitMatch(bool Function(E e) matchFunction) {
+    final listMatch = ListMatch<E>();
+    for (final element in this) {
+      if (matchFunction(element)) {
+        listMatch.matched.add(element);
+      } else {
+        listMatch.unmatched.add(element);
+      }
+    }
+    return listMatch;
+  }
+}
+
+class ListMatch<T> {
+  List<T> matched = <T>[];
+  List<T> unmatched = <T>[];
 }

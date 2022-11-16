@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
@@ -79,17 +80,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Future<List<CollectionWithThumbnail>> _getCollections() async {
-    final collectionsService = CollectionsService.instance;
-    final userID = Configuration.instance.getUserID();
-    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
-    final latestCollectionFiles =
-        await collectionsService.getLatestCollectionFiles();
-    for (final file in latestCollectionFiles) {
-      final c = collectionsService.getCollectionByID(file.collectionID);
-      if (c.owner.id == userID && !c.isHidden()) {
-        collectionsWithThumbnail.add(CollectionWithThumbnail(c, file));
-      }
-    }
+    final List<CollectionWithThumbnail> collectionsWithThumbnail =
+        await CollectionsService.instance.getCollectionsWithThumbnails();
     collectionsWithThumbnail.sort(
       (first, second) {
         if (second.collection.type == CollectionType.favorites &&
@@ -105,8 +97,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
             second.collection.name,
           );
         } else if (sortKey == AlbumSortKey.newestPhoto) {
-          return second.thumbnail.creationTime
-              .compareTo(first.thumbnail.creationTime);
+          return (second.thumbnail?.creationTime ?? -1 * intMaxValue)
+              .compareTo(first.thumbnail?.creationTime ?? -1 * intMaxValue);
         } else {
           return second.collection.updationTime
               .compareTo(first.collection.updationTime);

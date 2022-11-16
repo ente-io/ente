@@ -16,6 +16,7 @@ class FileUpdationDB {
   static const columnReason = 'reason';
   static const missingLocation = 'missing_location';
   static const modificationTimeUpdated = 'modificationTimeUpdated';
+  static const badCreationTime = 'badCreationTime';
 
   // SQL code to create the database table
   static List<String> _createTable() {

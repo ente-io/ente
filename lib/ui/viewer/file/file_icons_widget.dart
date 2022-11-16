@@ -1,12 +1,10 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/utils/date_time_util.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
-  const ThumbnailPlaceHolder({Key key}) : super(key: key);
+  const ThumbnailPlaceHolder({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +16,7 @@ class ThumbnailPlaceHolder extends StatelessWidget {
 }
 
 class UnSyncedIcon extends StatelessWidget {
-  const UnSyncedIcon({Key key}) : super(key: key);
+  const UnSyncedIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +48,7 @@ class UnSyncedIcon extends StatelessWidget {
 }
 
 class VideoOverlayIcon extends StatelessWidget {
-  const VideoOverlayIcon({Key key}) : super(key: key);
+  const VideoOverlayIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +64,7 @@ class VideoOverlayIcon extends StatelessWidget {
 }
 
 class LivePhotoOverlayIcon extends StatelessWidget {
-  const LivePhotoOverlayIcon({Key key}) : super(key: key);
+  const LivePhotoOverlayIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +85,7 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 class TrashedFileOverlayText extends StatelessWidget {
   final TrashFile file;
 
-  const TrashedFileOverlayText(this.file, {Key key}) : super(key: key);
+  const TrashedFileOverlayText(this.file, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +103,7 @@ class TrashedFileOverlayText extends StatelessWidget {
         daysLeft(file.deleteBy),
         style: Theme.of(context)
             .textTheme
-            .subtitle2
+            .subtitle2!
             .copyWith(color: Colors.white), //same for both themes
       ),
     );
@@ -113,7 +111,7 @@ class TrashedFileOverlayText extends StatelessWidget {
 }
 
 class ArchiveOverlayIcon extends StatelessWidget {
-  const ArchiveOverlayIcon({Key key}) : super(key: key);
+  const ArchiveOverlayIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

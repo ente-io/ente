@@ -25,6 +25,7 @@ import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_file_item.dart';
+import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/app_lifecycle_service.dart';
@@ -106,13 +107,16 @@ class CollectionsService {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
-        Bus.instance.fire(
-          LocalPhotosUpdatedEvent(
-            List<File>.empty(),
-            source: "syncCollectionDeleted",
-          ),
-        );
+        if (_collectionIDToCollections.containsKey(collection.id)) {
+          Bus.instance.fire(
+            LocalPhotosUpdatedEvent(
+              List<File>.empty(),
+              source: "syncCollectionDeleted",
+            ),
+          );
+        }
       }
+
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection?.owner?.id) {
         await _db.deleteCollection(collection.id);
@@ -213,6 +217,29 @@ class CollectionsService {
         .toList();
   }
 
+  Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
+    bool includedOwnedByOthers = false,
+  }) async {
+    final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
+    final usersCollection = getActiveCollections();
+    // remove any hidden collection to avoid accidental rendering on UI
+    usersCollection.removeWhere((element) => element.isHidden());
+    if (!includedOwnedByOthers) {
+      final userID = Configuration.instance.getUserID();
+      usersCollection.removeWhere((c) => c.owner.id != userID);
+    }
+    final latestCollectionFiles = await getLatestCollectionFiles();
+    final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
+      latestCollectionFiles.map((e) => MapEntry(e.collectionID, e)),
+    );
+
+    for (final c in usersCollection) {
+      final File thumbnail = collectionToThumbnailMap[c.id];
+      collectionsWithThumbnail.add(CollectionWithThumbnail(c, thumbnail));
+    }
+    return collectionsWithThumbnail;
+  }
+
   Future<List<User>> getSharees(int collectionID) {
     return _enteDio.get(
       "/collections/sharees",
@@ -291,15 +318,28 @@ class CollectionsService {
       await _enteDio.delete(
         "/collections/v2/${collection.id}",
       );
-      await _filesDB.deleteCollection(collection.id);
-      final deletedCollection = collection.copyWith(isDeleted: true);
-      _collectionIDToCollections[collection.id] = deletedCollection;
-      unawaited(_db.insert([deletedCollection]));
-      unawaited(LocalSyncService.instance.syncAll());
+      await _handleCollectionDeletion(collection);
     } catch (e) {
       _logger.severe('failed to trash collection', e);
       rethrow;
     }
+  }
+
+  Future<void> _handleCollectionDeletion(Collection collection) async {
+    await _filesDB.deleteCollection(collection.id);
+    final deletedCollection = collection.copyWith(isDeleted: true);
+    _collectionIDToCollections[collection.id] = deletedCollection;
+    Bus.instance.fire(
+      CollectionUpdatedEvent(
+        collection.id,
+        <File>[],
+        "delete_collection",
+        type: EventType.deletedFromRemote,
+      ),
+    );
+    sync().ignore();
+    unawaited(_db.insert([deletedCollection]));
+    unawaited(LocalSyncService.instance.syncAll());
   }
 
   Uint8List getCollectionKey(int collectionID) {
@@ -361,7 +401,7 @@ class CollectionsService {
         },
       );
       // trigger sync to fetch the latest name from server
-      sync();
+      sync().ignore();
     } catch (e, s) {
       _logger.severe("failed to rename collection", e, s);
       rethrow;
@@ -373,8 +413,7 @@ class CollectionsService {
       await _enteDio.post(
         "/collections/leave/${collection.id}",
       );
-      // trigger sync to fetch the latest name from server
-      sync();
+      await _handleCollectionDeletion(collection);
     } catch (e, s) {
       _logger.severe("failed to leave collection", e, s);
       rethrow;
@@ -427,11 +466,11 @@ class CollectionsService {
       collection.mMdVersion = currentVersion + 1;
       _cacheCollectionAttributes(collection);
       // trigger sync to fetch the latest collection state from server
-      sync();
+      sync().ignore();
     } on DioError catch (e) {
       if (e.response != null && e.response.statusCode == 409) {
         _logger.severe('collection magic data out of sync');
-        sync();
+        sync().ignore();
       }
       rethrow;
     } catch (e, s) {
@@ -971,6 +1010,9 @@ class CollectionsService {
   }
 
   Future _updateDB(List<Collection> collections, {int attempt = 1}) async {
+    if (collections.isEmpty) {
+      return;
+    }
     try {
       await _db.insert(collections);
     } catch (e) {

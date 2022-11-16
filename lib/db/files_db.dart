@@ -1259,6 +1259,28 @@ class FilesDB {
     return result;
   }
 
+  Future<Map<int, File>> getFilesFromGeneratedIDs(List<int> ids) async {
+    final result = <int, File>{};
+    if (ids.isEmpty) {
+      return result;
+    }
+    String inParam = "";
+    for (final id in ids) {
+      inParam += "'" + id.toString() + "',";
+    }
+    inParam = inParam.substring(0, inParam.length - 1);
+    final db = await instance.database;
+    final results = await db.query(
+      filesTable,
+      where: '$columnGeneratedID IN ($inParam)',
+    );
+    final files = convertToFiles(results);
+    for (final file in files) {
+      result[file.generatedID] = file;
+    }
+    return result;
+  }
+
   Future<Map<int, List<File>>> getAllFilesGroupByCollectionID(
     List<int> ids,
   ) async {
@@ -1310,6 +1332,26 @@ class FilesDB {
       files.add(_getFileFromRow(result));
     }
     return files;
+  }
+
+  Future<List<String>> getGeneratedIDForFilesOlderThan(
+    int cutOffTime,
+    int ownerID,
+  ) async {
+    final db = await instance.database;
+    final rows = await db.query(
+      filesTable,
+      columns: [columnGeneratedID],
+      distinct: true,
+      where:
+          '$columnCreationTime <= ? AND  ($columnOwnerID IS NULL OR $columnOwnerID = ?)',
+      whereArgs: [cutOffTime, ownerID],
+    );
+    final result = <String>[];
+    for (final row in rows) {
+      result.add(row[columnGeneratedID].toString());
+    }
+    return result;
   }
 
   Future<List<File>> getAllFilesFromDB(Set<int> collectionsToIgnore) async {

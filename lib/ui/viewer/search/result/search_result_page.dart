@@ -51,7 +51,7 @@ class SearchResultPage extends StatelessWidget {
       },
       tagPrefix: searchResult.heroTag(),
       selectedFiles: _selectedFiles,
-      initialFiles: [searchResult.previewThumbnail()],
+      initialFiles: [],
     );
     return Scaffold(
       appBar: PreferredSize(
