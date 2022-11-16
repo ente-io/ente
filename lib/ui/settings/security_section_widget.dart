@@ -82,7 +82,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 if (hasAuthenticated) {
                   if (isTwoFactorEnabled) {
                     await _disableTwoFactor();
-                    completer.complete();
+                    completer.isCompleted ? null : completer.complete();
                   } else {
                     await UserService.instance
                         .setupTwoFactor(context, completer);
