@@ -295,20 +295,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   @override
   void initState() {
     _shouldRender = widget.shouldRender;
-    widget.shouldSelectAll.addListener(() {
-      if (widget.shouldSelectAll.value && mounted) {
-        setState(() {
-          widget.selectedFiles.selectAll(widget.files.toSet());
-        });
-      } else {
-        if (mounted) {
-          setState(() {
-            widget.selectedFiles.unSelectAll(widget.files.toSet());
-          });
-        }
-      }
-    });
-
+    widget.shouldSelectAll.addListener(_shouldSelectAllListener);
     widget.selectedFiles.addListener(_selectedFilesListener);
     super.initState();
   }
@@ -316,6 +303,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   @override
   void dispose() {
     widget.selectedFiles.removeListener(_selectedFilesListener);
+    widget.shouldSelectAll.removeListener(_shouldSelectAllListener);
     super.dispose();
   }
 
@@ -471,6 +459,20 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     }
     if (shouldRefresh && mounted) {
       setState(() {});
+    }
+  }
+
+  void _shouldSelectAllListener() {
+    if (widget.shouldSelectAll.value && mounted) {
+      setState(() {
+        widget.selectedFiles.selectAll(widget.files.toSet());
+      });
+    } else {
+      if (mounted) {
+        setState(() {
+          widget.selectedFiles.unSelectAll(widget.files.toSet());
+        });
+      }
     }
   }
 }
