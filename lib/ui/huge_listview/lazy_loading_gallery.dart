@@ -250,8 +250,14 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   void _selectedFilesListener() {
-    if (widget.selectedFiles.files.isEmpty) {
+    final filesOfGirdAsSet = widget.files.toSet();
+    //to disable the 'all selected' state of the icon when every file is
+    //unselected one by one after selecting all using the icon
+    if (!widget.selectedFiles.files
+        .any((element) => filesOfGirdAsSet.contains(element))) {
       _shouldSelectAll.value = false;
+    }
+    if (widget.selectedFiles.files.isEmpty) {
       _showSelectAllButton.value = false;
     } else {
       _showSelectAllButton.value = true;
