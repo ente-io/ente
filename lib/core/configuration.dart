@@ -40,7 +40,6 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/sync_service.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,8 +68,6 @@ class Configuration {
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
-  static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
-
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const nameKey = "name";
   static const secretKeyKey = "secret_key";
@@ -151,7 +148,6 @@ class Configuration {
       await _migrateSecurityStorageToFirstUnlock();
     }
     SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
-    setTwoFactor(fetchTwoFactorStatus: true);
   }
 
   Future<void> logout({bool autoLogout = false}) async {
@@ -610,20 +606,6 @@ class Configuration {
 
   bool hasSelectedAllFoldersForBackup() {
     return _preferences.getBool(hasSelectedAllFoldersForBackupKey) ?? false;
-  }
-
-  Future<void> setTwoFactor({
-    bool value = false,
-    bool fetchTwoFactorStatus = false,
-  }) async {
-    if (fetchTwoFactorStatus) {
-      value = await UserService.instance.fetchTwoFactorStatus();
-    }
-    _preferences.setBool(keyHasEnabledTwoFactor, value);
-  }
-
-  bool? hasEnabledTwoFactor() {
-    return _preferences.getBool(keyHasEnabledTwoFactor);
   }
 
   Future<void> setSelectAllFoldersForBackup(bool value) async {

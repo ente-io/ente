@@ -69,7 +69,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               title: "Two-factor",
             ),
             trailingSwitch: ToggleSwitchWidget(
-              value: () => _config.hasEnabledTwoFactor(),
+              value: () => UserService.instance.hasEnabledTwoFactor(),
               onChanged: () async {
                 final hasAuthenticated = await LocalAuthenticationService
                     .instance
@@ -77,7 +77,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   context,
                   "Please authenticate to configure two-factor authentication",
                 );
-                final isTwoFactorEnabled = _config.hasEnabledTwoFactor();
+                final isTwoFactorEnabled =
+                    UserService.instance.hasEnabledTwoFactor();
                 if (hasAuthenticated) {
                   if (isTwoFactorEnabled) {
                     await _disableTwoFactor();
