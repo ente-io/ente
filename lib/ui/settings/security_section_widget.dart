@@ -77,11 +77,10 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                   context,
                   "Please authenticate to configure two-factor authentication",
                 );
-                final isTwoFactorEnabled =
-                    await UserService.instance.fetchTwoFactorStatus();
+                final isTwoFactorEnabled = _config.hasEnabledTwoFactor();
                 if (hasAuthenticated) {
                   if (isTwoFactorEnabled) {
-                    _disableTwoFactor(completer);
+                    await _disableTwoFactor(completer);
                   } else {
                     await UserService.instance
                         .setupTwoFactor(context, completer);
@@ -165,7 +164,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  void _disableTwoFactor(Completer completer) {
+  Future<void> _disableTwoFactor(Completer completer) async {
     final AlertDialog alert = AlertDialog(
       title: const Text("Disable two-factor"),
       content: const Text(
@@ -200,7 +199,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       ],
     );
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;
