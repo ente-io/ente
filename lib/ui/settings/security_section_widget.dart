@@ -80,7 +80,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                 final isTwoFactorEnabled = _config.hasEnabledTwoFactor();
                 if (hasAuthenticated) {
                   if (isTwoFactorEnabled) {
-                    await _disableTwoFactor(completer);
+                    await _disableTwoFactor();
+                    completer.complete();
                   } else {
                     await UserService.instance
                         .setupTwoFactor(context, completer);
@@ -164,7 +165,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  Future<void> _disableTwoFactor(Completer completer) async {
+  Future<void> _disableTwoFactor() async {
     final AlertDialog alert = AlertDialog(
       title: const Text("Disable two-factor"),
       content: const Text(
@@ -180,7 +181,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            completer.complete();
           },
         ),
         TextButton(
@@ -193,7 +193,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           onPressed: () async {
             await UserService.instance.disableTwoFactor(context);
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            completer.complete();
           },
         ),
       ],
