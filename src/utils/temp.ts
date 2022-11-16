@@ -15,7 +15,7 @@ export async function getTempDirPath() {
     return tempDirPath;
 }
 
-export function generateTempName(length: number) {
+function generateTempName(length: number) {
     let result = '';
 
     const charactersLength = CHARACTERS.length;
@@ -25,4 +25,14 @@ export function generateTempName(length: number) {
         );
     }
     return result;
+}
+
+export async function generateTempFilePath(formatSuffix: string) {
+    const tempDirPath = await getTempDirPath();
+    const namePrefix = generateTempName(10);
+    const tempFilePath = path.join(
+        tempDirPath,
+        namePrefix + '-' + formatSuffix
+    );
+    return tempFilePath;
 }
