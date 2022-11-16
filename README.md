@@ -9,7 +9,7 @@ tokens on your mobile devices.
 
 ente provides end-to-end encrypted cloud backups so that you don't have to worry
 about losing your tokens. We use the same protocols [ente
-Photos](https://ente.io/photos) uses to encrypt and preserve your data.
+Photos](https://ente.io) uses to encrypt and preserve your data.
 
 
 ### Multi Device Synchronization
