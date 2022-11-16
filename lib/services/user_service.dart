@@ -54,7 +54,7 @@ class UserService {
     emailValueNotifier =
         ValueNotifier<String>(Configuration.instance.getEmail());
     _preferences = await SharedPreferences.getInstance();
-    setTwoFactor(fetchTwoFactorStatus: true);
+    setTwoFactor(fetchTwoFactorStatus: true).ignore();
     Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) {
       setTwoFactor(value: event.status);
     });
