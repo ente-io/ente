@@ -10,18 +10,14 @@ enum ExecutionState {
 }
 
 typedef FutureVoidCallBack = Future<void> Function();
-typedef FutureBoolCallBack = Future<bool> Function();
+typedef BoolCallBack = bool Function();
 
 class ToggleSwitchWidget extends StatefulWidget {
-  final FutureBoolCallBack value;
-
-  ///Make sure to use completer if onChanged callback has other async functions inside
+  final BoolCallBack value;
   final FutureVoidCallBack onChanged;
-  final bool initialValue;
   const ToggleSwitchWidget({
     required this.value,
     required this.onChanged,
-    required this.initialValue,
     Key? key,
   }) : super(key: key);
 
@@ -30,15 +26,13 @@ class ToggleSwitchWidget extends StatefulWidget {
 }
 
 class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
-  late Future<bool> futureToggleValue;
   late bool toggleValue;
   ExecutionState executionState = ExecutionState.idle;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
 
   @override
   void initState() {
-    futureToggleValue = widget.value.call();
-    toggleValue = widget.initialValue;
+    toggleValue = widget.value.call();
     super.initState();
   }
 
@@ -47,74 +41,68 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final Widget stateIcon = _stateIcon(enteColorScheme);
 
-    return FutureBuilder(
-      future: futureToggleValue,
-      builder: (context, snapshot) {
-        return Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 2),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 175),
-                switchInCurve: Curves.easeInExpo,
-                switchOutCurve: Curves.easeOutExpo,
-                child: stateIcon,
-              ),
-            ),
-            SizedBox(
-              height: 31,
-              child: FittedBox(
-                fit: BoxFit.contain,
-                child: Switch.adaptive(
-                  activeColor: enteColorScheme.primary400,
-                  inactiveTrackColor: enteColorScheme.fillMuted,
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  value: toggleValue,
-                  onChanged: (negationOfToggleValue) async {
-                    setState(() {
-                      toggleValue = negationOfToggleValue;
-                      //start showing inProgress statu icons if toggle takes more than debounce time
-                      _debouncer.run(
-                        () => Future(
-                          () {
-                            setState(() {
-                              executionState = ExecutionState.inProgress;
-                            });
-                          },
-                        ),
-                      );
-                    });
-                    final Stopwatch stopwatch = Stopwatch()..start();
-                    await widget.onChanged.call();
-                    //for toggle feedback on short unsuccessful onChanged
-                    await _feedbackOnUnsuccessfulToggle(stopwatch);
-                    //debouncer gets canceled if onChanged takes less than debounce time
-                    _debouncer.cancelDebounce();
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(right: 2),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 175),
+            switchInCurve: Curves.easeInExpo,
+            switchOutCurve: Curves.easeOutExpo,
+            child: stateIcon,
+          ),
+        ),
+        SizedBox(
+          height: 31,
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: Switch.adaptive(
+              activeColor: enteColorScheme.primary400,
+              inactiveTrackColor: enteColorScheme.fillMuted,
+              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              value: toggleValue,
+              onChanged: (negationOfToggleValue) async {
+                setState(() {
+                  toggleValue = negationOfToggleValue;
+                  //start showing inProgress statu icons if toggle takes more than debounce time
+                  _debouncer.run(
+                    () => Future(
+                      () {
+                        setState(() {
+                          executionState = ExecutionState.inProgress;
+                        });
+                      },
+                    ),
+                  );
+                });
+                final Stopwatch stopwatch = Stopwatch()..start();
+                await widget.onChanged.call();
+                //for toggle feedback on short unsuccessful onChanged
+                await _feedbackOnUnsuccessfulToggle(stopwatch);
+                //debouncer gets canceled if onChanged takes less than debounce time
+                _debouncer.cancelDebounce();
 
-                    widget.value.call().then((newValue) {
-                      setState(() {
-                        if (toggleValue == newValue) {
-                          if (executionState == ExecutionState.inProgress) {
-                            executionState = ExecutionState.successful;
-                            Future.delayed(const Duration(seconds: 2), () {
-                              setState(() {
-                                executionState = ExecutionState.idle;
-                              });
-                            });
-                          }
-                        } else {
-                          toggleValue = !toggleValue;
+                final newValue = widget.value.call();
+                setState(() {
+                  if (toggleValue == newValue) {
+                    if (executionState == ExecutionState.inProgress) {
+                      executionState = ExecutionState.successful;
+                      Future.delayed(const Duration(seconds: 2), () {
+                        setState(() {
                           executionState = ExecutionState.idle;
-                        }
+                        });
                       });
-                    });
-                  },
-                ),
-              ),
+                    }
+                  } else {
+                    toggleValue = !toggleValue;
+                    executionState = ExecutionState.idle;
+                  }
+                });
+              },
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 

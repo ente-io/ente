@@ -69,8 +69,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               title: "Two-factor",
             ),
             trailingSwitch: ToggleSwitchWidget(
-              value: () => UserService.instance.fetchTwoFactorStatus(),
-              initialValue: _config.hasEnabledTwoFactor(),
+              value: () => _config.hasEnabledTwoFactor(),
               onChanged: () async {
                 final hasAuthenticated = await LocalAuthenticationService
                     .instance
@@ -102,7 +101,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
           title: "Lockscreen",
         ),
         trailingSwitch: ToggleSwitchWidget(
-          value: () => Future.value(_config.shouldShowLockScreen()),
+          value: () => _config.shouldShowLockScreen(),
           onChanged: () async {
             await LocalAuthenticationService.instance
                 .requestLocalAuthForLockScreen(
@@ -112,7 +111,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               "To enable lockscreen, please setup device passcode or screen lock in your system settings.",
             );
           },
-          initialValue: _config.shouldShowLockScreen(),
         ),
       ),
       sectionOptionSpacing,
@@ -125,9 +123,8 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
               title: "Hide from recents",
             ),
             trailingSwitch: ToggleSwitchWidget(
-              value: () => Future.value(_config.shouldHideFromRecents()),
+              value: () => _config.shouldHideFromRecents(),
               onChanged: _hideFromRecentsOnChanged,
-              initialValue: _config.shouldHideFromRecents(),
             ),
           ),
           sectionOptionSpacing,

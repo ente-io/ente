@@ -55,12 +55,8 @@ class BackupSettingsScreen extends StatelessWidget {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value: () {
-                                  return Future.value(
-                                    Configuration.instance
-                                        .shouldBackupOverMobileData(),
-                                  );
-                                },
+                                value: () => Configuration.instance
+                                    .shouldBackupOverMobileData(),
                                 onChanged: () async {
                                   await Configuration.instance
                                       .setBackupOverMobileData(
@@ -68,8 +64,6 @@ class BackupSettingsScreen extends StatelessWidget {
                                         .shouldBackupOverMobileData(),
                                   );
                                 },
-                                initialValue: Configuration.instance
-                                    .shouldBackupOverMobileData(),
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
@@ -86,15 +80,12 @@ class BackupSettingsScreen extends StatelessWidget {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value: () => Future.value(
-                                  Configuration.instance.shouldBackupVideos(),
-                                ),
+                                value: () =>
+                                    Configuration.instance.shouldBackupVideos(),
                                 onChanged: () => Configuration.instance
                                     .setShouldBackupVideos(
                                   !Configuration.instance.shouldBackupVideos(),
                                 ),
-                                initialValue:
-                                    Configuration.instance.shouldBackupVideos(),
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
@@ -114,10 +105,8 @@ class BackupSettingsScreen extends StatelessWidget {
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
                                     trailingSwitch: ToggleSwitchWidget(
-                                      value: () => Future.value(
-                                        Configuration.instance
-                                            .shouldKeepDeviceAwake(),
-                                      ),
+                                      value: () => Configuration.instance
+                                          .shouldKeepDeviceAwake(),
                                       onChanged: () {
                                         return Configuration.instance
                                             .setShouldKeepDeviceAwake(
@@ -125,8 +114,6 @@ class BackupSettingsScreen extends StatelessWidget {
                                               .shouldKeepDeviceAwake(),
                                         );
                                       },
-                                      initialValue: Configuration.instance
-                                          .shouldKeepDeviceAwake(),
                                     ),
                                     borderRadius: 8,
                                     alignCaptionedTextToLeft: true,
