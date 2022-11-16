@@ -11,6 +11,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import 'package:photos/extensions/list.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/services/collections_service.dart';
@@ -82,7 +83,10 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Future<List<CollectionWithThumbnail>> _getCollections() async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail =
         await CollectionsService.instance.getCollectionsWithThumbnails();
-    collectionsWithThumbnail.sort(
+    final result = collectionsWithThumbnail.splitMatch(
+      (element) => element.collection.type == CollectionType.favorites,
+    );
+    result.unmatched.sort(
       (first, second) {
         if (second.collection.type == CollectionType.favorites &&
             first.collection.type != CollectionType.favorites) {
@@ -105,7 +109,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         }
       },
     );
-    return collectionsWithThumbnail;
+    return result.matched + result.unmatched;
   }
 
   Widget _getCollectionsGalleryWidget(
