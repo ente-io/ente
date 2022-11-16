@@ -76,7 +76,9 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                   );
                 });
                 final Stopwatch stopwatch = Stopwatch()..start();
-                await widget.onChanged.call();
+                await widget.onChanged.call().onError(
+                      (error, stackTrace) => _debouncer.cancelDebounce(),
+                    );
                 //for toggle feedback on short unsuccessful onChanged
                 await _feedbackOnUnsuccessfulToggle(stopwatch);
                 //debouncer gets canceled if onChanged takes less than debounce time
