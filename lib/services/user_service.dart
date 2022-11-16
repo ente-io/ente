@@ -55,6 +55,9 @@ class UserService {
         ValueNotifier<String>(Configuration.instance.getEmail());
     _preferences = await SharedPreferences.getInstance();
     setTwoFactor(fetchTwoFactorStatus: true);
+    Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) {
+      setTwoFactor(value: event.status);
+    });
   }
 
   Future<void> sendOtt(
@@ -700,8 +703,8 @@ class UserService {
       await _enteDio.post(
         "/users/two-factor/disable",
       );
-      Bus.instance.fire(TwoFactorStatusChangeEvent(false));
       await dialog.hide();
+      Bus.instance.fire(TwoFactorStatusChangeEvent(false));
       unawaited(
         showToast(
           context,
