@@ -88,13 +88,6 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
     result.unmatched.sort(
       (first, second) {
-        if (second.collection.type == CollectionType.favorites &&
-            first.collection.type != CollectionType.favorites) {
-          return 1;
-        } else if (first.collection.type == CollectionType.favorites &&
-            second.collection.type != CollectionType.favorites) {
-          return 0;
-        }
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
             first.collection.name,
