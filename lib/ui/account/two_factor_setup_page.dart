@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -17,9 +18,14 @@ import 'package:pinput/pin_put/pin_put.dart';
 class TwoFactorSetupPage extends StatefulWidget {
   final String secretCode;
   final String qrCode;
+  final Completer completer;
 
-  const TwoFactorSetupPage(this.secretCode, this.qrCode, {Key key})
-      : super(key: key);
+  const TwoFactorSetupPage(
+    this.secretCode,
+    this.qrCode,
+    this.completer, {
+    Key key,
+  }) : super(key: key);
 
   @override
   State<TwoFactorSetupPage> createState() => _TwoFactorSetupPageState();
@@ -260,6 +266,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
         .enableTwoFactor(context, widget.secretCode, code);
     if (success) {
       _showSuccessPage();
+      widget.completer.complete();
     }
   }
 

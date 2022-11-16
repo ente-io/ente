@@ -55,10 +55,8 @@ class BackupSettingsScreen extends StatelessWidget {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingSwitch: ToggleSwitchWidget(
-                                value: () {
-                                  return Configuration.instance
-                                      .shouldBackupOverMobileData();
-                                },
+                                value: () => Configuration.instance
+                                    .shouldBackupOverMobileData(),
                                 onChanged: () async {
                                   await Configuration.instance
                                       .setBackupOverMobileData(

@@ -13,7 +13,6 @@ import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/sessions_page.dart';
-import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -59,43 +58,39 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final Completer completer = Completer();
     final List<Widget> children = [];
     if (_config.hasConfiguredAccount()) {
       children.addAll(
         [
           sectionOptionSpacing,
-          FutureBuilder(
-            future: UserService.instance.fetchTwoFactorStatus(),
-            builder: (_, snapshot) {
-              return MenuItemWidget(
-                captionedTextWidget: const CaptionedTextWidget(
-                  title: "Two-factor",
-                ),
-                trailingSwitch: snapshot.hasData
-                    ? ToggleSwitchWidget(
-                        value: () => snapshot.data,
-                        onChanged: () async {
-                          final hasAuthenticated =
-                              await LocalAuthenticationService.instance
-                                  .requestLocalAuthentication(
-                            context,
-                            "Please authenticate to configure two-factor authentication",
-                          );
-                          if (hasAuthenticated) {
-                            if (!snapshot.data) {
-                              await UserService.instance
-                                  .setupTwoFactor(context);
-                            } else {
-                              _disableTwoFactor();
-                            }
-                          }
-                        },
-                      )
-                    : snapshot.hasError
-                        ? const Icon(Icons.error_outline_outlined)
-                        : const EnteLoadingWidget(),
-              );
-            },
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Two-factor",
+            ),
+            trailingSwitch: ToggleSwitchWidget(
+              value: () => UserService.instance.hasEnabledTwoFactor(),
+              onChanged: () async {
+                final hasAuthenticated = await LocalAuthenticationService
+                    .instance
+                    .requestLocalAuthentication(
+                  context,
+                  "Please authenticate to configure two-factor authentication",
+                );
+                final isTwoFactorEnabled =
+                    UserService.instance.hasEnabledTwoFactor();
+                if (hasAuthenticated) {
+                  if (isTwoFactorEnabled) {
+                    await _disableTwoFactor();
+                    completer.isCompleted ? null : completer.complete();
+                  } else {
+                    await UserService.instance
+                        .setupTwoFactor(context, completer);
+                  }
+                  return completer.future;
+                }
+              },
+            ),
           ),
           sectionOptionSpacing,
         ],
@@ -171,7 +166,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     );
   }
 
-  void _disableTwoFactor() {
+  Future<void> _disableTwoFactor() async {
     final AlertDialog alert = AlertDialog(
       title: const Text("Disable two-factor"),
       content: const Text(
@@ -204,7 +199,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
       ],
     );
 
-    showDialog(
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return alert;

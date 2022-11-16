@@ -9,12 +9,12 @@ enum ExecutionState {
   successful,
 }
 
-typedef OnChangedCallBack = Future<void> Function();
-typedef ValueCallBack = bool Function();
+typedef FutureVoidCallBack = Future<void> Function();
+typedef BoolCallBack = bool Function();
 
 class ToggleSwitchWidget extends StatefulWidget {
-  final ValueCallBack value;
-  final OnChangedCallBack onChanged;
+  final BoolCallBack value;
+  final FutureVoidCallBack onChanged;
   const ToggleSwitchWidget({
     required this.value,
     required this.onChanged,
@@ -29,6 +29,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
   late bool toggleValue;
   ExecutionState executionState = ExecutionState.idle;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
+
   @override
   void initState() {
     toggleValue = widget.value.call();
@@ -75,14 +76,16 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                   );
                 });
                 final Stopwatch stopwatch = Stopwatch()..start();
-                await widget.onChanged.call();
+                await widget.onChanged.call().onError(
+                      (error, stackTrace) => _debouncer.cancelDebounce(),
+                    );
                 //for toggle feedback on short unsuccessful onChanged
                 await _feedbackOnUnsuccessfulToggle(stopwatch);
                 //debouncer gets canceled if onChanged takes less than debounce time
                 _debouncer.cancelDebounce();
+
+                final newValue = widget.value.call();
                 setState(() {
-                  final newValue = widget.value.call();
-                  //if onchanged on toggle is successful
                   if (toggleValue == newValue) {
                     if (executionState == ExecutionState.inProgress) {
                       executionState = ExecutionState.successful;
