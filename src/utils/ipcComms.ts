@@ -129,21 +129,8 @@ export default function setupIpcComs(
 
     ipcMain.handle(
         'run-ffmpeg-cmd',
-        (
-            _,
-            cmd,
-            inputFilePath,
-            inputFileData,
-            inputFileName,
-            outputFileName
-        ) => {
-            return runFFmpegCmd(
-                cmd,
-                inputFilePath,
-                inputFileData,
-                inputFileName,
-                outputFileName
-            );
+        (_, cmd, inputFilePath, outputFileName) => {
+            return runFFmpegCmd(cmd, inputFilePath, outputFileName);
         }
     );
 }
