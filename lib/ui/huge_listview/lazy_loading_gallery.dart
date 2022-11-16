@@ -11,6 +11,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/huge_listview/place_holder_widget.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -60,9 +61,13 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
   StreamSubscription<int> _currentIndexSubscription;
   bool _shouldRender;
+  final ValueNotifier<bool> _shouldSelectAll = ValueNotifier(false);
+  final ValueNotifier<bool> _showSelectAllButton = ValueNotifier(false);
 
   @override
   void initState() {
+    //this is for removing the 'select all from day' icon on unselecting all files with 'cancel'
+    widget.selectedFiles.addListener(_selectedFilesListener);
     super.initState();
     _init();
   }
@@ -154,6 +159,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   void dispose() {
     _reloadEventSubscription.cancel();
     _currentIndexSubscription.cancel();
+    widget.selectedFiles.removeListener(_selectedFilesListener);
     super.dispose();
   }
 
@@ -171,18 +177,51 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     if (_files.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        children: [
-          getDayWidget(
-            context,
-            _files[0].creationTime,
-            widget.smallerTodayFont,
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 14, 12, 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              getDayWidget(
+                context,
+                _files[0].creationTime,
+                widget.smallerTodayFont,
+              ),
+              ValueListenableBuilder(
+                valueListenable: _showSelectAllButton,
+                builder: (context, value, _) {
+                  return widget.selectedFiles.files.isEmpty
+                      ? const SizedBox.shrink()
+                      : GestureDetector(
+                          child: ValueListenableBuilder(
+                            valueListenable: _shouldSelectAll,
+                            builder: (context, value, _) {
+                              return value
+                                  ? const Icon(
+                                      Icons.check_circle,
+                                      size: 18,
+                                    )
+                                  : Icon(
+                                      Icons.check_circle_outlined,
+                                      color: getEnteColorScheme(context)
+                                          .strokeMuted,
+                                      size: 18,
+                                    );
+                            },
+                          ),
+                          onTap: () {
+                            _shouldSelectAll.value = !_shouldSelectAll.value;
+                          },
+                        );
+                },
+              )
+            ],
           ),
-          _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
-        ],
-      ),
+        ),
+        _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
+      ],
     );
   }
 
@@ -200,6 +239,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           widget.selectedFiles,
           index == 0,
           _files.length > kRecycleLimit,
+          _shouldSelectAll,
         ),
       );
     }
@@ -207,6 +247,21 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     return Column(
       children: childGalleries,
     );
+  }
+
+  void _selectedFilesListener() {
+    final filesOfGirdAsSet = widget.files.toSet();
+    //to disable the 'all selected' state of the icon when every file is
+    //unselected one by one after selecting all using the icon
+    if (!widget.selectedFiles.files
+        .any((element) => filesOfGirdAsSet.contains(element))) {
+      _shouldSelectAll.value = false;
+    }
+    if (widget.selectedFiles.files.isEmpty) {
+      _showSelectAllButton.value = false;
+    } else {
+      _showSelectAllButton.value = true;
+    }
   }
 }
 
@@ -217,6 +272,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final SelectedFiles selectedFiles;
   final bool shouldRender;
   final bool shouldRecycle;
+  final ValueNotifier shouldSelectAll;
 
   LazyLoadingGridView(
     this.tag,
@@ -224,7 +280,8 @@ class LazyLoadingGridView extends StatefulWidget {
     this.asyncLoader,
     this.selectedFiles,
     this.shouldRender,
-    this.shouldRecycle, {
+    this.shouldRecycle,
+    this.shouldSelectAll, {
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -237,19 +294,17 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   @override
   void initState() {
-    super.initState();
     _shouldRender = widget.shouldRender;
-    widget.selectedFiles.addListener(() {
-      bool shouldRefresh = false;
-      for (final file in widget.files) {
-        if (widget.selectedFiles.isPartOfLastSection(file)) {
-          shouldRefresh = true;
-        }
-      }
-      if (shouldRefresh && mounted) {
-        setState(() {});
-      }
-    });
+    widget.shouldSelectAll.addListener(_shouldSelectAllListener);
+    widget.selectedFiles.addListener(_selectedFilesListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.selectedFiles.removeListener(_selectedFilesListener);
+    widget.shouldSelectAll.removeListener(_shouldSelectAllListener);
+    super.dispose();
   }
 
   @override
@@ -393,5 +448,31 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       ),
     );
     routeToPage(context, page, forceCustomPageRoute: true);
+  }
+
+  void _selectedFilesListener() {
+    bool shouldRefresh = false;
+    for (final file in widget.files) {
+      if (widget.selectedFiles.isPartOfLastSelected(file)) {
+        shouldRefresh = true;
+      }
+    }
+    if (shouldRefresh && mounted) {
+      setState(() {});
+    }
+  }
+
+  void _shouldSelectAllListener() {
+    if (widget.shouldSelectAll.value && mounted) {
+      setState(() {
+        widget.selectedFiles.selectAll(widget.files.toSet());
+      });
+    } else {
+      if (mounted) {
+        setState(() {
+          widget.selectedFiles.unSelectAll(widget.files.toSet());
+        });
+      }
+    }
   }
 }

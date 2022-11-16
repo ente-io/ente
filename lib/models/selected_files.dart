@@ -23,6 +23,19 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
+  void selectAll(Set<File> selectedFiles) {
+    files.addAll(selectedFiles);
+    lastSelections.clear();
+    lastSelections.addAll(selectedFiles);
+    notifyListeners();
+  }
+
+  void unSelectAll(Set<File> selectedFiles) {
+    files.removeAll(selectedFiles);
+    lastSelections.clear();
+    notifyListeners();
+  }
+
   bool isFileSelected(File file) {
     final File? alreadySelected = files.firstWhereOrNull(
       (element) => element.generatedID == file.generatedID,
@@ -30,11 +43,11 @@ class SelectedFiles extends ChangeNotifier {
     return alreadySelected != null;
   }
 
-  bool isPartOfLastSection(File file) {
-    final File? alreadySelected = lastSelections.firstWhereOrNull(
+  bool isPartOfLastSelected(File file) {
+    final File? matchedFile = lastSelections.firstWhereOrNull(
       (element) => element.generatedID == file.generatedID,
     );
-    return alreadySelected != null;
+    return matchedFile != null;
   }
 
   void clearAll() {
