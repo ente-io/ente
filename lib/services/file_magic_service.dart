@@ -57,8 +57,9 @@ class FileMagicService {
 
   Future<void> updatePublicMagicMetadata(
     List<File> files,
-    Map<String, dynamic> newMetadataUpdate,
-  ) async {
+    Map<String, dynamic> newMetadataUpdate, {
+    Map<int, Map<String, dynamic>> metadataUpdateMap,
+  }) async {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID();
@@ -74,9 +75,16 @@ class FileMagicService {
         // read the existing magic metadata and apply new updates to existing data
         // current update is simple replace. This will be enhanced in the future,
         // as required.
+        final newUpdates = metadataUpdateMap != null
+            ? metadataUpdateMap[file.uploadedFileID]
+            : newMetadataUpdate;
+        assert(
+          newUpdates != null && newUpdates.isNotEmpty,
+          "can not apply empty updates",
+        );
         final Map<String, dynamic> jsonToUpdate =
             jsonDecode(file.pubMmdEncodedJson);
-        newMetadataUpdate.forEach((key, value) {
+        newUpdates.forEach((key, value) {
           jsonToUpdate[key] = value;
         });
 
