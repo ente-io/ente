@@ -12,6 +12,7 @@ import {
 import { setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
+import ElectronLog from 'electron-log';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -76,6 +77,7 @@ export function buildContextMenu(
         {
             label: 'Quit ente',
             click: function () {
+                ElectronLog.log('user quit the app');
                 setIsAppQuitting(true);
                 app.quit();
             },
