@@ -933,21 +933,24 @@ class CollectionsService {
 
   Future<void> removeFromCollection(int collectionID, List<File> files) async {
     final params = <String, dynamic>{};
+    params["fileIDs"] = <int>[];
     params["collectionID"] = collectionID;
-    for (final file in files) {
-      if (params["fileIDs"] == null) {
-        params["fileIDs"] = <int>[];
+    final batchedFiles = files.chunks(1000);
+    for (final batch in batchedFiles) {
+      for (final file in batch) {
+        params["fileIDs"].add(file.uploadedFileID);
       }
-      params["fileIDs"].add(file.uploadedFileID);
+      await _enteDio.post(
+        "/collections/v2/remove-files",
+        data: params,
+      );
+
+      await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
+      params["fileIDs"] = <int>[];
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));
     }
-    await _enteDio.post(
-      "/collections/v2/remove-files",
-      data: params,
-    );
-    await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-    Bus.instance
-        .fire(CollectionUpdatedEvent(collectionID, files, "removeFrom"));
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "removeFrom"));
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
