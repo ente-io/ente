@@ -51,6 +51,7 @@ import { isFolder, getDirFiles } from './api/fs';
 import { convertHEIC } from './api/heicConvert';
 import { setupLogging } from './utils/logging';
 import { setupRendererProcessStatsLogger } from './utils/memory';
+import { runFFmpegCmd } from './api/ffmpeg';
 
 fixHotReloadNext12();
 setupLogging(true);
@@ -102,4 +103,5 @@ windowObject['ElectronAPIs'] = {
     skipAppVersion,
     getSentryUserID,
     getAppVersion,
+    runFFmpegCmd,
 };
