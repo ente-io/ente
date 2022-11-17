@@ -18,7 +18,7 @@ import {
 import { initSentry } from './services/sentry';
 import { setupLogging } from './utils/logging';
 import { isDev } from './utils/common';
-import { setupMainProcessStatsLogger } from './utils/memory';
+import { setupMainProcessStatsLogger } from './utils/processStats';
 
 let mainWindow: BrowserWindow;
 
