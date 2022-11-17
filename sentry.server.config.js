@@ -21,4 +21,8 @@ Sentry.init({
     autoSessionTracking: false,
 });
 
-Sentry.setUser({ id: await getSentryUserID() });
+const main = async () => {
+    Sentry.setUser({ id: await getSentryUserID() });
+};
+
+main();

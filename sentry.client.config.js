@@ -39,4 +39,8 @@ Sentry.init({
     // that it will also get attached to your source maps
 });
 
-Sentry.setUser({ id: await getSentryUserID() });
+const main = async () => {
+    Sentry.setUser({ id: await getSentryUserID() });
+};
+
+main();
