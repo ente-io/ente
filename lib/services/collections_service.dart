@@ -21,6 +21,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
@@ -850,26 +851,31 @@ class CollectionsService {
     params["toCollectionID"] = toCollectionID;
     params["fromCollectionID"] = fromCollectionID;
     params["files"] = [];
-    for (final file in files) {
-      final fileKey = decryptFileKey(file);
-      file.generatedID = null; // So that a new entry is created in the FilesDB
-      file.collectionID = toCollectionID;
-      final encryptedKeyData =
-          CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
-      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
-      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
-      params["files"].add(
-        CollectionFileItem(
-          file.uploadedFileID,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-        ).toMap(),
+    final batchedFiles = files.chunks(1000);
+    for (final batch in batchedFiles) {
+      for (final file in batch) {
+        final fileKey = decryptFileKey(file);
+        file.generatedID =
+            null; // So that a new entry is created in the FilesDB
+        file.collectionID = toCollectionID;
+        final encryptedKeyData =
+            CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
+        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID,
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+          ).toMap(),
+        );
+      }
+      await _enteDio.post(
+        "/collections/move-files",
+        data: params,
       );
+      params["files"] = [];
     }
-    await _enteDio.post(
-      "/collections/move-files",
-      data: params,
-    );
 
     // remove files from old collection
     await _filesDB.removeFromCollection(
