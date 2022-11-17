@@ -297,17 +297,19 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             )
             ?.thumbnail ==
         null;
-    final result = await showChoiceDialog(
-      context,
-      "Delete album?",
-      "Files that are unique to this album "
-          "will be moved to trash, and this album will be deleted.",
-      firstAction: "Cancel",
-      secondAction: "Delete album",
-      secondActionColor: Colors.red,
-    );
-    if (result != DialogUserChoice.secondChoice) {
-      return;
+    if (!isEmptyCollection) {
+      final result = await showChoiceDialog(
+        context,
+        "Delete album?",
+        "Files that are unique to this album "
+            "will be moved to trash, and this album will be deleted.",
+        firstAction: "Cancel",
+        secondAction: "Delete album",
+        secondActionColor: Colors.red,
+      );
+      if (result != DialogUserChoice.secondChoice) {
+        return;
+      }
     }
     final dialog = createProgressDialog(
       context,
@@ -324,7 +326,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       _logger.severe("failed to trash collection", e, s);
       await dialog.hide();
       showGenericErrorDialog(context);
-      rethrow;
     }
   }
 
