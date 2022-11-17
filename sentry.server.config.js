@@ -6,6 +6,8 @@ import {
     getIsSentryEnabled,
 } from 'constants/sentry';
 
+import { getSentryUserID } from 'utils/user';
+
 const SENTRY_DSN = getSentryDSN();
 const SENTRY_ENV = getSentryENV();
 const SENTRY_RELEASE = getSentryRelease();
@@ -18,3 +20,9 @@ Sentry.init({
     release: SENTRY_RELEASE,
     autoSessionTracking: false,
 });
+
+const main = async () => {
+    Sentry.setUser({ id: await getSentryUserID() });
+};
+
+main();
