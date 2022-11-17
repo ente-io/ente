@@ -161,7 +161,10 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
                 width: 64,
                 key: Key("collection_item:" + (item.thumbnail?.tag ?? "")),
                 child: item.thumbnail != null
-                    ? ThumbnailWidget(item.thumbnail)
+                    ? ThumbnailWidget(
+                        item.thumbnail,
+                        showFavForAlbumOnly: true,
+                      )
                     : const NoThumbnailWidget(),
               ),
             ),

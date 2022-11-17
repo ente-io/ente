@@ -13,6 +13,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/services/favorites_service.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
@@ -22,6 +23,7 @@ class ThumbnailWidget extends StatefulWidget {
   final BoxFit fit;
   final bool shouldShowSyncStatus;
   final bool shouldShowArchiveStatus;
+  final bool showFavForAlbumOnly;
   final bool shouldShowLivePhotoOverlay;
   final Duration diskLoadDeferDuration;
   final Duration serverLoadDeferDuration;
@@ -33,6 +35,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowSyncStatus = true,
     this.shouldShowLivePhotoOverlay = false,
     this.shouldShowArchiveStatus = false,
+    this.showFavForAlbumOnly = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
   }) : super(key: key ?? Key(file.tag));
@@ -94,6 +97,12 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     Widget content;
     if (image != null) {
       final List<Widget> contentChildren = [image];
+      if (FavoritesService.instance.isFavoriteCache(
+        widget.file,
+        checkOnlyAlbum: widget.showFavForAlbumOnly,
+      )) {
+        contentChildren.add(const FavoriteOverlayIcon());
+      }
       if (widget.file.fileType == FileType.video) {
         contentChildren.add(const VideoOverlayIcon());
       } else if (widget.file.fileType == FileType.livePhoto &&
