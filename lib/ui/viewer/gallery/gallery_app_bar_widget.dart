@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -288,6 +289,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _trashCollection() async {
+    final collectionWithThumbnail =
+        await CollectionsService.instance.getCollectionsWithThumbnails();
+    final bool isEmptyCollection = collectionWithThumbnail
+            .firstWhereOrNull(
+              (element) => element.collection.id == widget.collection.id,
+            )
+            ?.thumbnail ==
+        null;
     final result = await showChoiceDialog(
       context,
       "Delete album?",
@@ -306,8 +315,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     );
     await dialog.show();
     try {
-      await CollectionsService.instance.trashCollection(widget.collection);
-
+      await CollectionsService.instance
+          .trashCollection(widget.collection, isEmptyCollection);
       showShortToast(context, "Successfully deleted album");
       await dialog.hide();
       Navigator.of(context).pop();
