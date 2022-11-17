@@ -54,7 +54,7 @@ import { setupRendererProcessStatsLogger } from './utils/processStats';
 import { runFFmpegCmd } from './api/ffmpeg';
 
 fixHotReloadNext12();
-setupLogging(true);
+setupLogging();
 setupRendererProcessStatsLogger();
 
 const windowObject: any = window;
