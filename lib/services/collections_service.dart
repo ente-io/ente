@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -711,35 +710,39 @@ class CollectionsService {
 
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
-    for (final file in files) {
-      final key = decryptFileKey(file);
-      file.generatedID = null; // So that a new entry is created in the FilesDB
-      file.collectionID = collectionID;
-      final encryptedKeyData =
-          CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
-      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
-      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
-      if (params["files"] == null) {
+    params["files"] = [];
+    final batchedFiles = files.chunks(1000);
+    for (final batch in batchedFiles) {
+      for (final file in batch) {
+        final key = decryptFileKey(file);
+        file.generatedID =
+            null; // So that a new entry is created in the FilesDB
+        file.collectionID = collectionID;
+        final encryptedKeyData =
+            CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
+        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID,
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+          ).toMap(),
+        );
+      }
+
+      try {
+        await _enteDio.post(
+          "/collections/add-files",
+          data: params,
+        );
+        await _filesDB.insertMultiple(batch);
+        Bus.instance.fire(CollectionUpdatedEvent(collectionID, batch, "addTo"));
+      } catch (e) {
+        rethrow;
+      } finally {
         params["files"] = [];
       }
-      params["files"].add(
-        CollectionFileItem(
-          file.uploadedFileID,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-        ).toMap(),
-      );
-    }
-
-    try {
-      await _enteDio.post(
-        "/collections/add-files",
-        data: params,
-      );
-      await _filesDB.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files, "addTo"));
-    } catch (e) {
-      rethrow;
     }
   }
 
