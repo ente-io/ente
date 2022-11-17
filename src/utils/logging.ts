@@ -6,7 +6,7 @@ export function setupLogging() {
     log.transports.file.maxSize = MAX_LOG_SIZE;
     log.transports.console.level = false;
     log.transports.file.format =
-        '[{y}-{m}-{d} {h}:{i}:{s}.{ms} UTC-{z}] [{level}]{scope} {text}';
+        '[{y}-{m}-{d}T{h}:{i}:{s}{z}] [{level}]{scope} {text}';
 }
 
 export function makeID(length: number) {
