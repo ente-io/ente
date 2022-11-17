@@ -10,13 +10,19 @@ import { isPlatformMac } from '../utils/main';
 import { logErrorSentry } from './sentry';
 
 const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
+const ONE_DAY_IN_MICROSECOND = 1 * 24 * 60 * 60 * 1000;
 
-export function setupAutoUpdater() {
+export function setupAutoUpdater(mainWindow: BrowserWindow) {
     autoUpdater.logger = log;
     autoUpdater.autoDownload = false;
+    checkForUpdateAndNotify(mainWindow);
+    setInterval(
+        () => checkForUpdateAndNotify(mainWindow),
+        ONE_DAY_IN_MICROSECOND
+    );
 }
 
-export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
+async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
     try {
         log.debug('checkForUpdateAndNotify called');
         const updateCheckResult = await autoUpdater.checkForUpdates();

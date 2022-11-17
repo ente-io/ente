@@ -8,15 +8,11 @@ import { isDev } from './common';
 import { buildContextMenu, buildMenuBar } from './menu';
 import autoLauncher from '../services/autoLauncher';
 import { getHideDockIconPreference } from '../services/userPreference';
-import {
-    checkForUpdateAndNotify,
-    setupAutoUpdater,
-} from '../services/appUpdater';
+import { setupAutoUpdater } from '../services/appUpdater';
 
 export function handleUpdates(mainWindow: BrowserWindow) {
     if (!isDev) {
-        setupAutoUpdater();
-        checkForUpdateAndNotify(mainWindow);
+        setupAutoUpdater(mainWindow);
     }
 }
 export function setupTrayItem(mainWindow: BrowserWindow) {
