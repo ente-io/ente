@@ -10,6 +10,7 @@ import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/events/trash_updated_event.dart';
+import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
@@ -113,20 +114,15 @@ class TrashSyncService {
         includedFileIDs.add(item.fileID);
       }
     }
-    int currentBatchSize = 0;
     final requestData = <String, dynamic>{};
     requestData["items"] = [];
-    for (final item in uniqueItems) {
-      currentBatchSize++;
-      requestData["items"].add(item.toJson());
-      if (currentBatchSize >= kTrashBatchSize) {
-        await _trashFiles(requestData);
-        requestData["items"] = [];
-        currentBatchSize = 0;
+    final batchedItems = uniqueItems.chunks(1000);
+    for (final batch in batchedItems) {
+      for (final item in batch) {
+        requestData["items"].add(item.toJson());
       }
-    }
-    if (currentBatchSize > 0) {
-      return await _trashFiles(requestData);
+      await _trashFiles(requestData);
+      requestData["items"] = [];
     }
   }
 
