@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
@@ -13,9 +14,12 @@ import {
     enableSharedArrayBufferSupport,
     handleDockIconHideOnAutoLaunch,
     handleUpdates,
+    logSystemInfo,
 } from './utils/main';
 import { initSentry } from './services/sentry';
 import { setupLogging } from './utils/logging';
+import { isDev } from './utils/common';
+import { setupMainProcessStatsLogger } from './utils/memory';
 
 let mainWindow: BrowserWindow;
 
@@ -42,7 +46,7 @@ setupMainHotReload();
 
 setupNextElectronServe();
 
-setupLogging();
+setupLogging(isDev);
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -65,6 +69,8 @@ if (!gotTheLock) {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', async () => {
+        logSystemInfo();
+        setupMainProcessStatsLogger();
         initSentry();
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);

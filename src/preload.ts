@@ -50,9 +50,11 @@ import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
 import { convertHEIC } from './api/heicConvert';
 import { setupLogging } from './utils/logging';
+import { setupRendererProcessStatsLogger } from './utils/memory';
 
 fixHotReloadNext12();
-setupLogging();
+setupLogging(true);
+setupRendererProcessStatsLogger();
 
 const windowObject: any = window;
 
