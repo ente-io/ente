@@ -505,26 +505,6 @@ class FilesDB {
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
-  Future<Set<int>> getCollectionIDsOfHiddenFiles(
-    int ownerID, {
-    int visibility = visibilityArchive,
-  }) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where:
-          '$columnOwnerID = ? AND $columnMMdVisibility = ? AND $columnCollectionID != -1',
-      columns: [columnCollectionID],
-      whereArgs: [ownerID, visibility],
-      distinct: true,
-    );
-    final Set<int> collectionIDsOfHiddenFiles = {};
-    for (var result in results) {
-      collectionIDsOfHiddenFiles.add(result['collection_id']);
-    }
-    return collectionIDsOfHiddenFiles;
-  }
-
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
     int startTime,
     int endTime,
