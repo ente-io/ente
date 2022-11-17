@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/utils/date_time_util.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
@@ -68,14 +69,33 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.topRight,
+    return const Align(
+      alignment: Alignment.bottomRight,
       child: Padding(
-        padding: const EdgeInsets.only(right: 8, top: 4),
+        padding: EdgeInsets.only(right: 4, bottom: 4),
         child: Icon(
-          Icons.wb_sunny_outlined,
+          Icons.album_outlined,
           size: 14,
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white, // fixed
+        ),
+      ),
+    );
+  }
+}
+
+class FavoriteOverlayIcon extends StatelessWidget {
+  const FavoriteOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+      alignment: Alignment.bottomLeft,
+      child: Padding(
+        padding: EdgeInsets.only(left: 4, bottom: 4),
+        child: Icon(
+          Icons.favorite_rounded,
+          size: 20,
+          color: Colors.white, // fixed
         ),
       ),
     );
@@ -115,14 +135,14 @@ class ArchiveOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomRight,
+    return const Align(
+      alignment: Alignment.bottomLeft,
       child: Padding(
-        padding: const EdgeInsets.only(right: 8, bottom: 8),
+        padding: EdgeInsets.only(left: 4, bottom: 4),
         child: Icon(
-          Icons.visibility_off,
-          size: 24,
-          color: Colors.white.withOpacity(0.9),
+          Icons.archive_outlined,
+          size: 20,
+          color: strokeMutedDark,
         ),
       ),
     );
