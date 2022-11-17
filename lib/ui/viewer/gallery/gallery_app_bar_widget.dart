@@ -208,20 +208,24 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         );
       }
       final bool isArchived = widget.collection.isArchived();
-      items.add(
-        PopupMenuItem(
-          value: 2,
-          child: Row(
-            children: [
-              Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
-              const Padding(
-                padding: EdgeInsets.all(8),
-              ),
-              Text(isArchived ? "Unarchive album" : "Archive album"),
-            ],
+      // Do not show archive option for favorite collection. If collection is
+      // already archived, allow user to unarchive that collection.
+      if (isArchived || widget.collection.type != CollectionType.favorites) {
+        items.add(
+          PopupMenuItem(
+            value: 2,
+            child: Row(
+              children: [
+                Icon(isArchived ? Icons.unarchive : Icons.archive_outlined),
+                const Padding(
+                  padding: EdgeInsets.all(8),
+                ),
+                Text(isArchived ? "Unarchive album" : "Archive album"),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      }
       if (widget.collection.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
