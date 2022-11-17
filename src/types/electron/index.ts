@@ -77,4 +77,9 @@ export interface ElectronAPIs {
     skipAppVersion: (version: string) => void;
     getSentryUserID: () => Promise<string>;
     getAppVersion: () => Promise<string>;
+    runFFmpegCmd: (
+        cmd: string[],
+        inputFile: File | ElectronFile,
+        outputFileName: string
+    ) => Promise<File>;
 }

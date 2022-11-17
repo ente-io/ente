@@ -1,20 +1,14 @@
 import * as Comlink from 'comlink';
-import FFmpegClient from 'services/ffmpeg/ffmpegClient';
+import { WasmFFmpeg } from 'services/wasm/ffmpeg';
 
 export class FFmpeg {
-    ffmpegClient;
+    wasmFFmpeg;
     constructor() {
-        this.ffmpegClient = new FFmpegClient();
-    }
-    async generateThumbnail(file) {
-        return this.ffmpegClient.generateThumbnail(file);
-    }
-    async extractVideoMetadata(file) {
-        return this.ffmpegClient.extractVideoMetadata(file);
+        this.wasmFFmpeg = new WasmFFmpeg();
     }
 
-    async convertToMP4(file, inputFileName) {
-        return this.ffmpegClient.convertToMP4(file, inputFileName);
+    run(cmd, inputFile, outputFileName) {
+        return this.wasmFFmpeg.run(cmd, inputFile, outputFileName);
     }
 }
 
