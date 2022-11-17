@@ -1077,7 +1077,8 @@ class FilesDB {
     final db = await instance.database;
     final count = Sqflite.firstIntValue(
       await db.rawQuery(
-        'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = $collectionID',
+        'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = '
+        '$collectionID AND $columnUploadedFileID IS NOT -1',
       ),
     );
     return count;
@@ -1159,7 +1160,10 @@ class FilesDB {
         (
           SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
           FROM $filesTable
-          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)
+          WHERE 
+          ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
+           AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
+           NOT -1)
           GROUP BY $columnCollectionID
         ) latest_files
         ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID
