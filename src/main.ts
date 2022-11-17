@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { app, BrowserWindow } from 'electron';
 import { createWindow } from './utils/createWindow';
 import setupIpcComs from './utils/ipcComms';
