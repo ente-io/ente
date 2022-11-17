@@ -793,49 +793,54 @@ class CollectionsService {
     params["collectionID"] = toCollectionID;
     params["files"] = [];
     final toCollectionKey = getCollectionKey(toCollectionID);
-    for (final file in files) {
-      final key = decryptFileKey(file);
-      file.generatedID = null; // So that a new entry is created in the FilesDB
-      file.collectionID = toCollectionID;
-      final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
-      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
-      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
-      params["files"].add(
-        CollectionFileItem(
-          file.uploadedFileID,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-        ).toMap(),
-      );
-    }
-    try {
-      await _enteDio.post(
-        "/collections/restore-files",
-        data: params,
-      );
-      await _filesDB.insertMultiple(files);
-      await TrashDB.instance
-          .delete(files.map((e) => e.uploadedFileID).toList());
-      Bus.instance.fire(
-        CollectionUpdatedEvent(toCollectionID, files, "restore"),
-      );
-      Bus.instance.fire(FilesUpdatedEvent(files, source: "restore"));
-      // Remove imported local files which are imported but not uploaded.
-      // This handles the case where local file was trashed -> imported again
-      // but not uploaded automatically as it was trashed.
-      final localIDs = files
-          .where((e) => e.localID != null)
-          .map((e) => e.localID)
-          .toSet()
-          .toList();
-      if (localIDs.isNotEmpty) {
-        await _filesDB.deleteUnSyncedLocalFiles(localIDs);
+    final batchedFiles = files.chunks(1000);
+    for (final batch in batchedFiles) {
+      for (final file in batch) {
+        final key = decryptFileKey(file);
+        file.generatedID =
+            null; // So that a new entry is created in the FilesDB
+        file.collectionID = toCollectionID;
+        final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
+        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID,
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+          ).toMap(),
+        );
       }
-      // Force reload home gallery to pull in the restored files
-      Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));
-    } catch (e, s) {
-      _logger.severe("failed to restore files", e, s);
-      rethrow;
+      try {
+        await _enteDio.post(
+          "/collections/restore-files",
+          data: params,
+        );
+        await _filesDB.insertMultiple(batch);
+        await TrashDB.instance
+            .delete(batch.map((e) => e.uploadedFileID).toList());
+        params["files"] = [];
+        Bus.instance.fire(
+          CollectionUpdatedEvent(toCollectionID, batch, "restore"),
+        );
+        Bus.instance.fire(FilesUpdatedEvent(batch, source: "restore"));
+        // Remove imported local files which are imported but not uploaded.
+        // This handles the case where local file was trashed -> imported again
+        // but not uploaded automatically as it was trashed.
+        final localIDs = batch
+            .where((e) => e.localID != null)
+            .map((e) => e.localID)
+            .toSet()
+            .toList();
+        if (localIDs.isNotEmpty) {
+          await _filesDB.deleteUnSyncedLocalFiles(localIDs);
+        }
+        // Force reload home gallery to pull in the restored files
+        Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));
+      } catch (e, s) {
+        _logger.severe("failed to restore files", e, s);
+        rethrow;
+      }
     }
   }
 
