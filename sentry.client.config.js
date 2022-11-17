@@ -13,7 +13,6 @@ const SENTRY_ENV = getSentryENV();
 const SENTRY_RELEASE = getSentryRelease();
 const IS_ENABLED = getIsSentryEnabled();
 
-Sentry.setUser({ id: getSentryUserID() });
 Sentry.init({
     dsn: SENTRY_DSN,
     enabled: IS_ENABLED,
@@ -39,3 +38,5 @@ Sentry.init({
     // `release` value here - use the environment variable `SENTRY_RELEASE`, so
     // that it will also get attached to your source maps
 });
+
+Sentry.setUser({ id: await getSentryUserID() });
