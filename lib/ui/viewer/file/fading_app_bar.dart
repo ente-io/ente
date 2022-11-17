@@ -110,7 +110,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     final shouldShowActions = widget.shouldShowActions && !isTrashedFile;
     final bool isOwnedByUser =
         widget.file.ownerID == null || widget.file.ownerID == widget.userID;
-    final bool isFileUploaded = widget.file.isRemoteFile;
+    final bool isFileUploaded = widget.file.isUploaded;
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {
       isFileHidden = CollectionsService.instance
