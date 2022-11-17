@@ -82,6 +82,25 @@ class LivePhotoOverlayIcon extends StatelessWidget {
   }
 }
 
+class FavoriteOverlayIcon extends StatelessWidget {
+  const FavoriteOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Align(
+      alignment: Alignment.bottomLeft,
+      child: Padding(
+        padding: EdgeInsets.only(left: 4, bottom: 4),
+        child: Icon(
+          Icons.favorite_rounded,
+          size: 20,
+          color: Colors.white, // fixed
+        ),
+      ),
+    );
+  }
+}
+
 class TrashedFileOverlayText extends StatelessWidget {
   final TrashFile file;
 
