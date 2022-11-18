@@ -26,11 +26,18 @@ export function dateStringWithMMH(unixTimeInMicroSeconds: number): string {
 
 export function formatDateShort(date: number | Date) {
     const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        year: '2-digit',
+        weekday: 'short',
         month: 'short',
         day: 'numeric',
     });
     return dateTimeFormat.format(date);
+}
+
+export function formatTime(date: number | Date) {
+    const timeFormat = new Intl.DateTimeFormat('en-IN', {
+        timeStyle: 'short',
+    });
+    return timeFormat.format(date);
 }
 
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
@@ -168,7 +175,7 @@ export function formatDateTime(date: number | Date) {
     const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
         weekday: 'short',
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric',
     });
     const timeFormat = new Intl.DateTimeFormat('en-IN', {

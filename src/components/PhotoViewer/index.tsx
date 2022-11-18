@@ -19,7 +19,7 @@ import { sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
-import { FileInfo } from './InfoDialog';
+import { FileInfo } from './FileInfo';
 import {
     defaultLivePhotoDefaultOptions,
     photoSwipeV4Events,

@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
 import { Col, Form, FormControl } from 'react-bootstrap';
-import { Value } from 'components/Container';
-import CloseIcon from '@mui/icons-material/Close';
-import TickIcon from '@mui/icons-material/Done';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { MAX_CAPTION_SIZE } from 'constants/file';
-import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
-import { IconButton } from '@mui/material';
 
 export interface formValues {
     caption: string;
 }
 
-export const CaptionEditForm = ({ caption, saveEdits, discardEdits }) => {
+export const CaptionEditForm = ({ isInEditMode, caption, saveEdits }) => {
     const [loading, setLoading] = useState(false);
 
     const onSubmit = async (values: formValues) => {
@@ -39,37 +34,21 @@ export const CaptionEditForm = ({ caption, saveEdits, discardEdits }) => {
             {({ values, errors, handleChange, handleSubmit }) => (
                 <Form noValidate onSubmit={handleSubmit}>
                     <Form.Row>
-                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={9}>
+                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={12}>
                             <Form.Control
                                 as="textarea"
-                                placeholder={constants.CAPTION}
+                                placeholder={constants.CAPTION_PLACEHOLDER}
                                 value={values.caption}
                                 onChange={handleChange('caption')}
                                 isInvalid={Boolean(errors.caption)}
                                 autoFocus
-                                disabled={loading}
+                                disabled={loading || !isInEditMode}
                             />
                             <FormControl.Feedback
                                 type="invalid"
                                 style={{ textAlign: 'center' }}>
                                 {errors.caption}
                             </FormControl.Feedback>
-                        </Form.Group>
-                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={3}>
-                            <Value width={'16.67%'}>
-                                <IconButton type="submit" disabled={loading}>
-                                    {loading ? (
-                                        <SmallLoadingSpinner />
-                                    ) : (
-                                        <TickIcon />
-                                    )}
-                                </IconButton>
-                                <IconButton
-                                    onClick={discardEdits}
-                                    disabled={loading}>
-                                    <CloseIcon />
-                                </IconButton>
-                            </Value>
                         </Form.Group>
                     </Form.Row>
                 </Form>

@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import constants from 'utils/strings/constants';
 import {
     changeFileName,
     splitFilenameAndExtension,
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import EditIcon from '@mui/icons-material/Edit';
-import { FreeFlowText, Label, Row, Value } from 'components/Container';
+import { FlexWrapper, FreeFlowText, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
 import { FileNameEditForm } from './FileNameEditForm';
 import { IconButton } from '@mui/material';
+import { FILE_TYPE } from 'constants/file';
+import { PhotoOutlined, VideoFileOutlined } from '@mui/icons-material';
 
 export const getFileTitle = (filename, extension) => {
     if (extension) {
@@ -61,38 +62,40 @@ export function RenderFileName({
         }
     };
     return (
-        <>
-            <Row>
-                <Label width="30%">{constants.FILE_NAME}</Label>
-                {!isInEditMode ? (
-                    <>
-                        <Value width={!shouldDisableEdits ? '60%' : '70%'}>
-                            <FreeFlowText>
-                                {getFileTitle(filename, extension)}
-                            </FreeFlowText>
+        <FlexWrapper>
+            {file.metadata.fileType === FILE_TYPE.IMAGE ? (
+                <PhotoOutlined />
+            ) : (
+                <VideoFileOutlined />
+            )}
+            {!isInEditMode ? (
+                <>
+                    <Value width={!shouldDisableEdits ? '60%' : '70%'}>
+                        <FreeFlowText>
+                            {getFileTitle(filename, extension)}
+                        </FreeFlowText>
+                    </Value>
+                    {!shouldDisableEdits && (
+                        <Value
+                            width="10%"
+                            style={{
+                                cursor: 'pointer',
+                                marginLeft: '10px',
+                            }}>
+                            <IconButton onClick={openEditMode}>
+                                <EditIcon />
+                            </IconButton>
                         </Value>
-                        {!shouldDisableEdits && (
-                            <Value
-                                width="10%"
-                                style={{
-                                    cursor: 'pointer',
-                                    marginLeft: '10px',
-                                }}>
-                                <IconButton onClick={openEditMode}>
-                                    <EditIcon />
-                                </IconButton>
-                            </Value>
-                        )}
-                    </>
-                ) : (
-                    <FileNameEditForm
-                        extension={extension}
-                        filename={filename}
-                        saveEdits={saveEdits}
-                        discardEdits={closeEditMode}
-                    />
-                )}
-            </Row>
-        </>
+                    )}
+                </>
+            ) : (
+                <FileNameEditForm
+                    extension={extension}
+                    filename={filename}
+                    saveEdits={saveEdits}
+                    discardEdits={closeEditMode}
+                />
+            )}
+        </FlexWrapper>
     );
 }
