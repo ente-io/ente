@@ -27,7 +27,7 @@ import { checkSubscriptionPurchase } from 'utils/billing';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
-import { checkConnectivity, preloadImage } from 'utils/common';
+import { preloadImage } from 'utils/common';
 import {
     isFirstLogin,
     justSignedUp,
@@ -99,6 +99,7 @@ import useFileInput from 'hooks/useFileInput';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
+import { checkConnectivity } from 'utils/error/ui';
 
 export const DeadCenter = styled('div')`
     flex: 1;

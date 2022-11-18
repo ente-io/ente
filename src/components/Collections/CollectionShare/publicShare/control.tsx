@@ -8,7 +8,7 @@ import {
     deleteShareableURL,
 } from 'services/collectionService';
 import { Collection, PublicURL } from 'types/collection';
-import { handleSharingErrors } from 'utils/error';
+import { handleSharingErrors } from 'utils/error/ui';
 import constants from 'utils/strings/constants';
 import PublicShareSwitch from './switch';
 interface Iprops {

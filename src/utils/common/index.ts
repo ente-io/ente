@@ -1,14 +1,6 @@
-import constants from 'utils/strings/constants';
 import { CustomError } from 'utils/error';
 
 export const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
-
-export function checkConnectivity() {
-    if (navigator.onLine) {
-        return true;
-    }
-    throw new Error(constants.NO_INTERNET_CONNECTION);
-}
 
 export function runningInBrowser() {
     return typeof window !== 'undefined';
@@ -36,12 +28,12 @@ export function initiateEmail(email: string) {
     a.rel = 'noreferrer noopener';
     a.click();
 }
-export const promiseWithTimeout = async (
-    request: Promise<any>,
+export const promiseWithTimeout = async <T>(
+    request: Promise<T>,
     timeout: number
-) => {
+): Promise<T> => {
     const timeoutRef = { current: null };
-    const rejectOnTimeout = new Promise((_, reject) => {
+    const rejectOnTimeout = new Promise<null>((_, reject) => {
         timeoutRef.current = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             timeout

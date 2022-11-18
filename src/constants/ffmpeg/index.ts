@@ -1,0 +1,3 @@
+export const INPUT_PATH_PLACEHOLDER = 'INPUT';
+export const FFMPEG_PLACEHOLDER = 'FFMPEG';
+export const OUTPUT_PATH_PLACEHOLDER = 'OUTPUT';

@@ -4,7 +4,7 @@ import ShortcutSection from './ShortcutSection';
 import UtilitySection from './UtilitySection';
 import HelpSection from './HelpSection';
 import ExitSection from './ExitSection';
-import DebugLogs from './DebugLogs';
+import DebugSection from './DebugSection';
 import { DrawerSidebar } from './styledComponents';
 import HeaderSection from './Header';
 import { CollectionSummaries } from 'types/collection';
@@ -37,7 +37,7 @@ export default function Sidebar({
                 <Divider />
                 <ExitSection />
                 <Divider />
-                <DebugLogs />
+                <DebugSection />
             </Stack>
         </DrawerSidebar>
     );

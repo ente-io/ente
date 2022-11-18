@@ -1,93 +1,99 @@
-import { CustomError } from 'utils/error';
+import {
+    FFMPEG_PLACEHOLDER,
+    INPUT_PATH_PLACEHOLDER,
+    OUTPUT_PATH_PLACEHOLDER,
+} from 'constants/ffmpeg';
+import { ElectronFile } from 'types/upload';
+import { parseFFmpegExtractedMetadata } from 'utils/ffmpeg';
 import { logError } from 'utils/sentry';
-import QueueProcessor from 'services/queueProcessor';
-import { ParsedExtractedMetadata } from 'types/upload';
+import ffmpegFactory from './ffmpegFactory';
 
-import { FFmpegWorker } from 'utils/comlink';
-import { promiseWithTimeout } from 'utils/common';
-
-const FFMPEG_EXECUTION_WAIT_TIME = 30 * 1000;
-
-class FFmpegService {
-    private ffmpegWorker = null;
-    private ffmpegTaskQueue = new QueueProcessor<any>(1);
-
-    async init() {
-        this.ffmpegWorker = await new FFmpegWorker();
-    }
-
-    async generateThumbnail(file: File): Promise<Uint8Array> {
-        if (!this.ffmpegWorker) {
-            await this.init();
-        }
-
-        const response = this.ffmpegTaskQueue.queueUpRequest(() =>
-            promiseWithTimeout(
-                this.ffmpegWorker.generateThumbnail(file),
-                FFMPEG_EXECUTION_WAIT_TIME
-            )
-        );
-        try {
-            return await response.promise;
-        } catch (e) {
-            if (e.message === CustomError.REQUEST_CANCELLED) {
-                // ignore
-                return null;
-            } else {
-                logError(e, 'ffmpeg thumbnail generation failed');
-                throw e;
+export async function generateVideoThumbnail(
+    file: File | ElectronFile
+): Promise<File | ElectronFile> {
+    try {
+        let seekTime = 1.0;
+        const ffmpegClient = await ffmpegFactory.getFFmpegClient();
+        while (seekTime > 0) {
+            try {
+                return await ffmpegClient.run(
+                    [
+                        FFMPEG_PLACEHOLDER,
+                        '-i',
+                        INPUT_PATH_PLACEHOLDER,
+                        '-ss',
+                        `00:00:0${seekTime.toFixed(3)}`,
+                        '-vframes',
+                        '1',
+                        '-vf',
+                        'scale=-1:720',
+                        OUTPUT_PATH_PLACEHOLDER,
+                    ],
+                    file,
+                    'thumb.jpeg'
+                );
+            } catch (e) {
+                if (seekTime <= 0) {
+                    throw e;
+                }
             }
+            seekTime = Number((seekTime / 10).toFixed(3));
         }
-    }
-
-    async extractMetadata(file: File): Promise<ParsedExtractedMetadata> {
-        if (!this.ffmpegWorker) {
-            await this.init();
-        }
-
-        const response = this.ffmpegTaskQueue.queueUpRequest(() =>
-            promiseWithTimeout(
-                this.ffmpegWorker.extractVideoMetadata(file),
-                FFMPEG_EXECUTION_WAIT_TIME
-            )
-        );
-        try {
-            return await response.promise;
-        } catch (e) {
-            if (e.message === CustomError.REQUEST_CANCELLED) {
-                // ignore
-                return null;
-            } else {
-                logError(e, 'ffmpeg metadata extraction failed');
-                throw e;
-            }
-        }
-    }
-
-    async convertToMP4(
-        file: Uint8Array,
-        fileName: string
-    ): Promise<Uint8Array> {
-        if (!this.ffmpegWorker) {
-            await this.init();
-        }
-
-        const response = this.ffmpegTaskQueue.queueUpRequest(
-            async () => await this.ffmpegWorker.convertToMP4(file, fileName)
-        );
-
-        try {
-            return await response.promise;
-        } catch (e) {
-            if (e.message === CustomError.REQUEST_CANCELLED) {
-                // ignore
-                return null;
-            } else {
-                logError(e, 'ffmpeg MP4 conversion failed');
-                throw e;
-            }
-        }
+    } catch (e) {
+        logError(e, 'ffmpeg generateVideoThumbnail failed');
+        throw e;
     }
 }
 
-export default new FFmpegService();
+export async function extractVideoMetadata(file: File | ElectronFile) {
+    try {
+        const ffmpegClient = await ffmpegFactory.getFFmpegClient();
+        // https://stackoverflow.com/questions/9464617/retrieving-and-saving-media-metadata-using-ffmpeg
+        // -c [short for codex] copy[(stream_specifier)[ffmpeg.org/ffmpeg.html#Stream-specifiers]] => copies all the stream without re-encoding
+        // -map_metadata [http://ffmpeg.org/ffmpeg.html#Advanced-options search for map_metadata] => copies all stream metadata to the out
+        // -f ffmetadata [https://ffmpeg.org/ffmpeg-formats.html#Metadata-1] => dump metadata from media files into a simple UTF-8-encoded INI-like text file
+        const metadata = await ffmpegClient.run(
+            [
+                FFMPEG_PLACEHOLDER,
+                '-i',
+                INPUT_PATH_PLACEHOLDER,
+                '-c',
+                'copy',
+                '-map_metadata',
+                '0',
+                '-f',
+                'ffmetadata',
+                OUTPUT_PATH_PLACEHOLDER,
+            ],
+            file,
+            `metadata.txt`
+        );
+        return parseFFmpegExtractedMetadata(
+            new Uint8Array(await metadata.arrayBuffer())
+        );
+    } catch (e) {
+        logError(e, 'ffmpeg extractVideoMetadata failed');
+        throw e;
+    }
+}
+
+export async function convertToMP4(file: File | ElectronFile) {
+    try {
+        const ffmpegClient = await ffmpegFactory.getFFmpegClient();
+        return await ffmpegClient.run(
+            [
+                FFMPEG_PLACEHOLDER,
+                '-i',
+                INPUT_PATH_PLACEHOLDER,
+                '-preset',
+                'ultrafast',
+                OUTPUT_PATH_PLACEHOLDER,
+            ],
+            file,
+            'output.mp4'
+        );
+    } catch (e) {
+        logError(e, 'ffmpeg convertToMP4 failed');
+        throw e;
+    }
+}

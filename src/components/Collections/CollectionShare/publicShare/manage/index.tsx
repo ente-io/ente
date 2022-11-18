@@ -8,13 +8,13 @@ import React, { useContext, useState } from 'react';
 import { updateShareableURL } from 'services/collectionService';
 import { UpdatePublicURL } from 'types/collection';
 import { sleep } from 'utils/common';
-import { handleSharingErrors } from 'utils/error';
 import constants from 'utils/strings/constants';
 import {
     ManageSectionLabel,
     ManageSectionOptions,
 } from '../../styledComponents';
 import { ManageDownloadAccess } from './downloadAccess';
+import { handleSharingErrors } from 'utils/error/ui';
 
 export default function PublicShareManage({
     publicShareProp,
