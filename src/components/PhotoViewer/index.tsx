@@ -35,6 +35,7 @@ import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
 import { ChevronLeft } from '@mui/icons-material';
 import { styled } from '@mui/material';
+import { addLocalLog } from 'utils/logging';
 
 const CaptionContainer = styled('div')(({ theme }) => ({
     padding: theme.spacing(2),
@@ -101,13 +102,19 @@ function PhotoViewer(props: Iprops) {
             if (!isOpen) {
                 return;
             }
-            console.log(
-                'Event: ' + event.key + ' isShiftPressedx: ' + event.shiftKey
+            addLocalLog(
+                () =>
+                    'Event: ' +
+                    event.key +
+                    ' isShiftPressedx: ' +
+                    event.shiftKey
             );
             switch (event.key) {
                 case 'i':
-                    if (isOpen && !showInfo) {
+                    if (!showInfo) {
                         setShowInfo(true);
+                    } else {
+                        setShowInfo(false);
                     }
                     break;
                 case 'Backspace':
@@ -126,10 +133,10 @@ function PhotoViewer(props: Iprops) {
 
         window.addEventListener('keyup', handleKeyUp);
         return () => {
-            console.log('Removing listner');
+            addLocalLog(() => 'Removing listener');
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isOpen, photoSwipe?.currItem]);
+    }, [isOpen, photoSwipe?.currItem, showInfo]);
 
     useEffect(() => {
         updateItems(items);
