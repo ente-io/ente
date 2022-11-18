@@ -271,11 +271,9 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type != GalleryType.sharedCollection &&
         widget.type != GalleryType.hidden) {
-      String msg = "Add to album";
       IconData iconData = Platform.isAndroid ? Icons.add : CupertinoIcons.add;
       // show upload icon instead of add for files selected in local gallery
       if (widget.type == GalleryType.localFolder) {
-        msg = "Upload to album";
         iconData = Icons.cloud_upload_outlined;
       }
       actions.add(

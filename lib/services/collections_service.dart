@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -21,6 +22,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/extensions/list.dart';
 import 'package:photos/extensions/stop_watch.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
@@ -719,35 +721,37 @@ class CollectionsService {
 
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
-    for (final file in files) {
-      final key = decryptFileKey(file);
-      file.generatedID = null; // So that a new entry is created in the FilesDB
-      file.collectionID = collectionID;
-      final encryptedKeyData =
-          CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
-      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
-      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
-      if (params["files"] == null) {
-        params["files"] = [];
+    final batchedFiles = files.chunks(batchSize);
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        final key = decryptFileKey(file);
+        file.generatedID =
+            null; // So that a new entry is created in the FilesDB
+        file.collectionID = collectionID;
+        final encryptedKeyData =
+            CryptoUtil.encryptSync(key, getCollectionKey(collectionID));
+        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID,
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+          ).toMap(),
+        );
       }
-      params["files"].add(
-        CollectionFileItem(
-          file.uploadedFileID,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-        ).toMap(),
-      );
-    }
 
-    try {
-      await _enteDio.post(
-        "/collections/add-files",
-        data: params,
-      );
-      await _filesDB.insertMultiple(files);
-      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files, "addTo"));
-    } catch (e) {
-      rethrow;
+      try {
+        await _enteDio.post(
+          "/collections/add-files",
+          data: params,
+        );
+        await _filesDB.insertMultiple(batch);
+        Bus.instance.fire(CollectionUpdatedEvent(collectionID, batch, "addTo"));
+      } catch (e) {
+        rethrow;
+      }
     }
   }
 
@@ -796,51 +800,55 @@ class CollectionsService {
   Future<void> restore(int toCollectionID, List<File> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
-    params["files"] = [];
     final toCollectionKey = getCollectionKey(toCollectionID);
-    for (final file in files) {
-      final key = decryptFileKey(file);
-      file.generatedID = null; // So that a new entry is created in the FilesDB
-      file.collectionID = toCollectionID;
-      final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
-      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
-      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
-      params["files"].add(
-        CollectionFileItem(
-          file.uploadedFileID,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-        ).toMap(),
-      );
-    }
-    try {
-      await _enteDio.post(
-        "/collections/restore-files",
-        data: params,
-      );
-      await _filesDB.insertMultiple(files);
-      await TrashDB.instance
-          .delete(files.map((e) => e.uploadedFileID).toList());
-      Bus.instance.fire(
-        CollectionUpdatedEvent(toCollectionID, files, "restore"),
-      );
-      Bus.instance.fire(FilesUpdatedEvent(files, source: "restore"));
-      // Remove imported local files which are imported but not uploaded.
-      // This handles the case where local file was trashed -> imported again
-      // but not uploaded automatically as it was trashed.
-      final localIDs = files
-          .where((e) => e.localID != null)
-          .map((e) => e.localID)
-          .toSet()
-          .toList();
-      if (localIDs.isNotEmpty) {
-        await _filesDB.deleteUnSyncedLocalFiles(localIDs);
+    final batchedFiles = files.chunks(batchSize);
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        final key = decryptFileKey(file);
+        file.generatedID =
+            null; // So that a new entry is created in the FilesDB
+        file.collectionID = toCollectionID;
+        final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
+        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID,
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+          ).toMap(),
+        );
       }
-      // Force reload home gallery to pull in the restored files
-      Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));
-    } catch (e, s) {
-      _logger.severe("failed to restore files", e, s);
-      rethrow;
+      try {
+        await _enteDio.post(
+          "/collections/restore-files",
+          data: params,
+        );
+        await _filesDB.insertMultiple(batch);
+        await TrashDB.instance
+            .delete(batch.map((e) => e.uploadedFileID).toList());
+        Bus.instance.fire(
+          CollectionUpdatedEvent(toCollectionID, batch, "restore"),
+        );
+        Bus.instance.fire(FilesUpdatedEvent(batch, source: "restore"));
+        // Remove imported local files which are imported but not uploaded.
+        // This handles the case where local file was trashed -> imported again
+        // but not uploaded automatically as it was trashed.
+        final localIDs = batch
+            .where((e) => e.localID != null)
+            .map((e) => e.localID)
+            .toSet()
+            .toList();
+        if (localIDs.isNotEmpty) {
+          await _filesDB.deleteUnSyncedLocalFiles(localIDs);
+        }
+        // Force reload home gallery to pull in the restored files
+        Bus.instance.fire(ForceReloadHomeGalleryEvent("restoredFromTrash"));
+      } catch (e, s) {
+        _logger.severe("failed to restore files", e, s);
+        rethrow;
+      }
     }
   }
 
@@ -858,27 +866,31 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["toCollectionID"] = toCollectionID;
     params["fromCollectionID"] = fromCollectionID;
-    params["files"] = [];
-    for (final file in files) {
-      final fileKey = decryptFileKey(file);
-      file.generatedID = null; // So that a new entry is created in the FilesDB
-      file.collectionID = toCollectionID;
-      final encryptedKeyData =
-          CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
-      file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
-      file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
-      params["files"].add(
-        CollectionFileItem(
-          file.uploadedFileID,
-          file.encryptedKey,
-          file.keyDecryptionNonce,
-        ).toMap(),
+    final batchedFiles = files.chunks(batchSize);
+    for (final batch in batchedFiles) {
+      params["files"] = [];
+      for (final file in batch) {
+        final fileKey = decryptFileKey(file);
+        file.generatedID =
+            null; // So that a new entry is created in the FilesDB
+        file.collectionID = toCollectionID;
+        final encryptedKeyData =
+            CryptoUtil.encryptSync(fileKey, getCollectionKey(toCollectionID));
+        file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData);
+        file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce);
+        params["files"].add(
+          CollectionFileItem(
+            file.uploadedFileID,
+            file.encryptedKey,
+            file.keyDecryptionNonce,
+          ).toMap(),
+        );
+      }
+      await _enteDio.post(
+        "/collections/move-files",
+        data: params,
       );
     }
-    await _enteDio.post(
-      "/collections/move-files",
-      data: params,
-    );
 
     // remove files from old collection
     await _filesDB.removeFromCollection(
@@ -929,20 +941,22 @@ class CollectionsService {
   Future<void> removeFromCollection(int collectionID, List<File> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
-    for (final file in files) {
-      if (params["fileIDs"] == null) {
-        params["fileIDs"] = <int>[];
+    final batchedFiles = files.chunks(batchSize);
+    for (final batch in batchedFiles) {
+      params["fileIDs"] = <int>[];
+      for (final file in batch) {
+        params["fileIDs"].add(file.uploadedFileID);
       }
-      params["fileIDs"].add(file.uploadedFileID);
+      await _enteDio.post(
+        "/collections/v2/remove-files",
+        data: params,
+      );
+
+      await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
+      Bus.instance
+          .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
+      Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));
     }
-    await _enteDio.post(
-      "/collections/v2/remove-files",
-      data: params,
-    );
-    await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-    Bus.instance
-        .fire(CollectionUpdatedEvent(collectionID, files, "removeFrom"));
-    Bus.instance.fire(LocalPhotosUpdatedEvent(files, source: "removeFrom"));
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 

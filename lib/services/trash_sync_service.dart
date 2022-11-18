@@ -4,12 +4,14 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/events/trash_updated_event.dart';
+import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/ignored_file.dart';
 import 'package:photos/models/trash_file.dart';
@@ -23,7 +25,6 @@ class TrashSyncService {
   final _diffFetcher = TrashDiffFetcher();
   final _trashDB = TrashDB.instance;
   static const kLastTrashSyncTime = "last_trash_sync_time";
-  static const kTrashBatchSize = 999;
   SharedPreferences _prefs;
 
   TrashSyncService._privateConstructor();
@@ -113,20 +114,14 @@ class TrashSyncService {
         includedFileIDs.add(item.fileID);
       }
     }
-    int currentBatchSize = 0;
     final requestData = <String, dynamic>{};
-    requestData["items"] = [];
-    for (final item in uniqueItems) {
-      currentBatchSize++;
-      requestData["items"].add(item.toJson());
-      if (currentBatchSize >= kTrashBatchSize) {
-        await _trashFiles(requestData);
-        requestData["items"] = [];
-        currentBatchSize = 0;
+    final batchedItems = uniqueItems.chunks(batchSize);
+    for (final batch in batchedItems) {
+      requestData["items"] = [];
+      for (final item in batch) {
+        requestData["items"].add(item.toJson());
       }
-    }
-    if (currentBatchSize > 0) {
-      return await _trashFiles(requestData);
+      await _trashFiles(requestData);
     }
   }
 
@@ -142,23 +137,26 @@ class TrashSyncService {
   Future<void> deleteFromTrash(List<File> files) async {
     final params = <String, dynamic>{};
     final uniqueFileIds = files.map((e) => e.uploadedFileID).toSet().toList();
-    params["fileIDs"] = [];
-    for (final fileID in uniqueFileIds) {
-      params["fileIDs"].add(fileID);
+    final batchedFileIDs = uniqueFileIds.chunks(batchSize);
+    for (final batch in batchedFileIDs) {
+      params["fileIDs"] = [];
+      for (final fileID in batch) {
+        params["fileIDs"].add(fileID);
+      }
+      try {
+        await _enteDio.post(
+          "/trash/delete",
+          data: params,
+        );
+        await _trashDB.delete(batch);
+        Bus.instance.fire(TrashUpdatedEvent());
+      } catch (e, s) {
+        _logger.severe("failed to delete from trash", e, s);
+        rethrow;
+      }
     }
-    try {
-      await _enteDio.post(
-        "/trash/delete",
-        data: params,
-      );
-      await _trashDB.delete(uniqueFileIds);
-      Bus.instance.fire(TrashUpdatedEvent());
-      // no need to await on syncing trash from remote
-      unawaited(syncTrash());
-    } catch (e, s) {
-      _logger.severe("failed to delete from trash", e, s);
-      rethrow;
-    }
+    // no need to await on syncing trash from remote
+    unawaited(syncTrash());
   }
 
   Future<void> emptyTrash() async {

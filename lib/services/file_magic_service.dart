@@ -6,12 +6,14 @@ import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/extensions/list.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/remote_sync_service.dart';
@@ -132,53 +134,57 @@ class FileMagicService {
     Map<String, dynamic> newMetadataUpdate,
   ) async {
     final params = <String, dynamic>{};
-    params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID();
+    final batchedFiles = files.chunks(batchSize);
     try {
-      for (final file in files) {
-        if (file.uploadedFileID == null) {
-          throw AssertionError(
-            "operation is only supported on backed up files",
+      for (final batch in batchedFiles) {
+        params['metadataList'] = [];
+        for (final file in batch) {
+          if (file.uploadedFileID == null) {
+            throw AssertionError(
+              "operation is only supported on backed up files",
+            );
+          } else if (file.ownerID != ownerID) {
+            throw AssertionError("cannot modify memories not owned by you");
+          }
+          // read the existing magic metadata and apply new updates to existing data
+          // current update is simple replace. This will be enhanced in the future,
+          // as required.
+          final Map<String, dynamic> jsonToUpdate =
+              jsonDecode(file.mMdEncodedJson);
+          newMetadataUpdate.forEach((key, value) {
+            jsonToUpdate[key] = value;
+          });
+
+          // update the local information so that it's reflected on UI
+          file.mMdEncodedJson = jsonEncode(jsonToUpdate);
+          file.magicMetadata = MagicMetadata.fromJson(jsonToUpdate);
+
+          final fileKey = decryptFileKey(file);
+          final encryptedMMd = await CryptoUtil.encryptChaCha(
+            utf8.encode(jsonEncode(jsonToUpdate)),
+            fileKey,
           );
-        } else if (file.ownerID != ownerID) {
-          throw AssertionError("cannot modify memories not owned by you");
-        }
-        // read the existing magic metadata and apply new updates to existing data
-        // current update is simple replace. This will be enhanced in the future,
-        // as required.
-        final Map<String, dynamic> jsonToUpdate =
-            jsonDecode(file.mMdEncodedJson);
-        newMetadataUpdate.forEach((key, value) {
-          jsonToUpdate[key] = value;
-        });
-
-        // update the local information so that it's reflected on UI
-        file.mMdEncodedJson = jsonEncode(jsonToUpdate);
-        file.magicMetadata = MagicMetadata.fromJson(jsonToUpdate);
-
-        final fileKey = decryptFileKey(file);
-        final encryptedMMd = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(jsonToUpdate)),
-          fileKey,
-        );
-        params['metadataList'].add(
-          UpdateMagicMetadataRequest(
-            id: file.uploadedFileID,
-            magicMetadata: MetadataRequest(
-              version: file.mMdVersion,
-              count: jsonToUpdate.length,
-              data: Sodium.bin2base64(encryptedMMd.encryptedData),
-              header: Sodium.bin2base64(encryptedMMd.header),
+          params['metadataList'].add(
+            UpdateMagicMetadataRequest(
+              id: file.uploadedFileID,
+              magicMetadata: MetadataRequest(
+                version: file.mMdVersion,
+                count: jsonToUpdate.length,
+                data: Sodium.bin2base64(encryptedMMd.encryptedData),
+                header: Sodium.bin2base64(encryptedMMd.header),
+              ),
             ),
-          ),
-        );
-        file.mMdVersion = file.mMdVersion + 1;
+          );
+          file.mMdVersion = file.mMdVersion + 1;
+        }
+
+        await _enteDio.put("/files/magic-metadata", data: params);
+        await _filesDB.insertMultiple(files);
       }
 
-      await _enteDio.put("/files/magic-metadata", data: params);
       // update the state of the selected file. Same file in other collection
       // should be eventually synced after remote sync has completed
-      await _filesDB.insertMultiple(files);
       RemoteSyncService.instance.sync(silently: true);
     } on DioError catch (e) {
       if (e.response != null && e.response.statusCode == 409) {
