@@ -267,7 +267,6 @@ class RemoteSyncService {
     // smallest album marked for backup. This is to ensure that photo is
     // first attempted to upload in a non-recent album.
     deviceCollections.sort((a, b) => a.count.compareTo(b.count));
-    await _createCollectionsForDevicePath(deviceCollections);
     final Map<String, Set<String>> pathIdToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
     bool moreFilesMarkedForBackup = false;
@@ -283,6 +282,8 @@ class RemoteSyncService {
       if (localIDsToSync.isEmpty || deviceCollection.collectionID == -1) {
         continue;
       }
+      await _createCollectionForDevicePath(deviceCollection);
+
       moreFilesMarkedForBackup = true;
       await _db.setCollectionIDForUnMappedLocalFiles(
         deviceCollection.collectionID,
@@ -407,28 +408,26 @@ class RemoteSyncService {
     }
   }
 
-  Future<void> _createCollectionsForDevicePath(
-    List<DeviceCollection> deviceCollections,
+  Future<void> _createCollectionForDevicePath(
+    DeviceCollection deviceCollection,
   ) async {
-    for (var deviceCollection in deviceCollections) {
-      int deviceCollectionID = deviceCollection.collectionID;
-      if (deviceCollectionID != -1) {
-        final collectionByID =
-            _collectionsService.getCollectionByID(deviceCollectionID);
-        if (collectionByID == null || collectionByID.isDeleted) {
-          _logger.info(
-            "Collection $deviceCollectionID either deleted or missing "
-            "for path ${deviceCollection.id}",
-          );
-          deviceCollectionID = -1;
-        }
+    int deviceCollectionID = deviceCollection.collectionID;
+    if (deviceCollectionID != -1) {
+      final collectionByID =
+          _collectionsService.getCollectionByID(deviceCollectionID);
+      if (collectionByID == null || collectionByID.isDeleted) {
+        _logger.info(
+          "Collection $deviceCollectionID either deleted or missing "
+          "for path ${deviceCollection.id}",
+        );
+        deviceCollectionID = -1;
       }
-      if (deviceCollectionID == -1) {
-        final collection =
-            await _collectionsService.getOrCreateForPath(deviceCollection.name);
-        await _db.updateDeviceCollection(deviceCollection.id, collection.id);
-        deviceCollection.collectionID = collection.id;
-      }
+    }
+    if (deviceCollectionID == -1) {
+      final collection =
+          await _collectionsService.getOrCreateForPath(deviceCollection.name);
+      await _db.updateDeviceCollection(deviceCollection.id, collection.id);
+      deviceCollection.collectionID = collection.id;
     }
   }
 

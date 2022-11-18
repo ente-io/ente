@@ -22,25 +22,27 @@ class UnSyncedIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          // background: linear-gradient(73.58deg, rgba(0, 0, 0, 0.3) -6.66%, rgba(255, 255, 255, 0) 44.44%);
           colors: [
+            Color.fromRGBO(255, 255, 255, 0),
             Colors.transparent,
-            Colors.black.withOpacity(0.6),
+            // Color.fromRGBO(0, 0, 0, 0.3),
           ],
-          stops: const [0.75, 1],
+          stops: [-0.067, 0.445],
         ),
       ),
-      child: Align(
-        alignment: Alignment.bottomRight,
+      child: const Align(
+        alignment: Alignment.bottomLeft,
         child: Padding(
-          padding: const EdgeInsets.only(right: 8, bottom: 4),
+          padding: EdgeInsets.only(left: 4, bottom: 4),
           child: Icon(
             Icons.cloud_off_outlined,
             size: 18,
-            color: Colors.white.withOpacity(0.9),
+            color: fixedStrokeMutedWhite,
           ),
         ),
       ),
@@ -142,7 +144,7 @@ class ArchiveOverlayIcon extends StatelessWidget {
         child: Icon(
           Icons.archive_outlined,
           size: 20,
-          color: strokeMutedDark,
+          color: fixedStrokeMutedWhite,
         ),
       ),
     );
