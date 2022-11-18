@@ -1,12 +1,15 @@
 // @dart=2.9
 
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -18,16 +21,66 @@ class FavoritesService {
   CollectionsService _collectionsService;
   FilesDB _filesDB;
   int _cachedFavoritesCollectionID;
+  final Set<int> _cachedFavUploadedIDs = {};
+  final Set<String> _cachedPendingLocalIDs = {};
+  StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
 
   FavoritesService._privateConstructor() {
     _config = Configuration.instance;
     _collectionsService = CollectionsService.instance;
     _filesDB = FilesDB.instance;
+    _collectionUpdatesSubscription =
+        Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
+      if (event.collectionID != null &&
+          _cachedFavoritesCollectionID != null &&
+          _cachedFavoritesCollectionID == event.collectionID) {
+        if (event.type == EventType.addedOrUpdated) {
+          _updateFavoriteFilesCache(event.updatedFiles, favFlag: true);
+        } else if (event.type == EventType.deletedFromEverywhere ||
+            event.type == EventType.deletedFromRemote) {
+          _updateFavoriteFilesCache(event.updatedFiles, favFlag: false);
+        }
+      }
+    });
   }
+  Future<void> initFav() async {
+    await _warmUpCache();
+  }
+
+  void dispose() {
+    _collectionUpdatesSubscription.cancel();
+  }
+
+  Future<void> _warmUpCache() async {
+    final favCollection = await _getFavoritesCollection();
+    if (favCollection != null) {
+      final uploadedIDs =
+          await FilesDB.instance.getUploadedFileIDs(favCollection.id);
+      _cachedFavUploadedIDs.addAll(uploadedIDs);
+    }
+  }
+
   static FavoritesService instance = FavoritesService._privateConstructor();
 
   void clearCache() {
     _cachedFavoritesCollectionID = null;
+  }
+
+  bool isFavoriteCache(File file, {bool checkOnlyAlbum = false}) {
+    if (file.collectionID != null &&
+        _cachedFavoritesCollectionID != null &&
+        file.collectionID == _cachedFavoritesCollectionID) {
+      return true;
+    }
+    if(checkOnlyAlbum) {
+      return false;
+    }
+    if (file.uploadedFileID != null) {
+      return _cachedFavUploadedIDs.contains(file.uploadedFileID);
+    } else if (file.localID != null) {
+      return _cachedPendingLocalIDs.contains(file.localID);
+    }
+    return false;
   }
 
   Future<bool> isFavorite(File file) async {
@@ -41,16 +94,38 @@ class FavoritesService {
     );
   }
 
+  void _updateFavoriteFilesCache(List<File> files, {@required bool favFlag}) {
+    final Set<int> updatedIDs = {};
+    final Set<String> localIDs = {};
+    for (var file in files) {
+      if (file.uploadedFileID != null) {
+        updatedIDs.add(file.uploadedFileID);
+      } else if (file.localID != null || file.localID != "") {
+        /* Note: Favorite un-uploaded files
+        For such files, as we don't have uploaded IDs yet, we will cache
+        cache the local ID for showing the fav icon in the gallery
+         */
+        localIDs.add(file.localID);
+      }
+    }
+    if (favFlag) {
+      _cachedFavUploadedIDs.addAll(updatedIDs);
+    } else {
+      _cachedFavUploadedIDs.removeAll(updatedIDs);
+    }
+  }
+
   Future<void> addToFavorites(File file) async {
     final collectionID = await _getOrCreateFavoriteCollectionID();
+    final List<File> files = [file];
     if (file.uploadedFileID == null) {
       file.collectionID = collectionID;
       await _filesDB.insert(file);
-      Bus.instance
-          .fire(CollectionUpdatedEvent(collectionID, [file], "addTFav"));
+      Bus.instance.fire(CollectionUpdatedEvent(collectionID, files, "addTFav"));
     } else {
-      await _collectionsService.addToCollection(collectionID, [file]);
+      await _collectionsService.addToCollection(collectionID, files);
     }
+    _updateFavoriteFilesCache(files, favFlag: true);
     RemoteSyncService.instance.sync(silently: true);
   }
 
@@ -62,6 +137,7 @@ class FavoritesService {
     } else {
       await _collectionsService.removeFromCollection(collectionID, [file]);
     }
+    _updateFavoriteFilesCache([file], favFlag: false);
   }
 
   Future<Collection> _getFavoritesCollection() async {

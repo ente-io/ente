@@ -505,26 +505,6 @@ class FilesDB {
     return FileLoadResult(deduplicatedFiles, files.length == limit);
   }
 
-  Future<Set<int>> getCollectionIDsOfHiddenFiles(
-    int ownerID, {
-    int visibility = visibilityArchive,
-  }) async {
-    final db = await instance.database;
-    final results = await db.query(
-      filesTable,
-      where:
-          '$columnOwnerID = ? AND $columnMMdVisibility = ? AND $columnCollectionID != -1',
-      columns: [columnCollectionID],
-      whereArgs: [ownerID, visibility],
-      distinct: true,
-    );
-    final Set<int> collectionIDsOfHiddenFiles = {};
-    for (var result in results) {
-      collectionIDsOfHiddenFiles.add(result['collection_id']);
-    }
-    return collectionIDsOfHiddenFiles;
-  }
-
   Future<FileLoadResult> getAllLocalAndUploadedFiles(
     int startTime,
     int endTime,
@@ -1097,7 +1077,8 @@ class FilesDB {
     final db = await instance.database;
     final count = Sqflite.firstIntValue(
       await db.rawQuery(
-        'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = $collectionID',
+        'SELECT COUNT(*) FROM $filesTable where $columnCollectionID = '
+        '$collectionID AND $columnUploadedFileID IS NOT -1',
       ),
     );
     return count;
@@ -1179,7 +1160,10 @@ class FilesDB {
         (
           SELECT $columnCollectionID, MAX($columnCreationTime) AS max_creation_time
           FROM $filesTable
-          WHERE ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1)
+          WHERE 
+          ($columnCollectionID IS NOT NULL AND $columnCollectionID IS NOT -1
+           AND $columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS 
+           NOT -1)
           GROUP BY $columnCollectionID
         ) latest_files
         ON $filesTable.$columnCollectionID = latest_files.$columnCollectionID

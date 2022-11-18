@@ -27,22 +27,27 @@ class CollectionItem extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: SizedBox(
-              height: sideOfThumbnail,
-              width: sideOfThumbnail,
-              child: Hero(
-                tag: heroTag,
-                child: c.thumbnail != null
-                    ? ThumbnailWidget(
-                        c.thumbnail,
-                        shouldShowArchiveStatus: c.collection.isArchived(),
-                        key: Key(heroTag),
-                      )
-                    : const NoThumbnailWidget(),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: SizedBox(
+                  height: sideOfThumbnail,
+                  width: sideOfThumbnail,
+                  child: Hero(
+                    tag: heroTag,
+                    child: c.thumbnail != null
+                        ? ThumbnailWidget(
+                            c.thumbnail,
+                            shouldShowArchiveStatus: c.collection.isArchived(),
+                            showFavForAlbumOnly: true,
+                            key: Key(heroTag),
+                          )
+                        : const NoThumbnailWidget(),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -300,21 +300,30 @@ class CollectionsService {
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
-  Future<void> trashCollection(Collection collection) async {
+  Future<void> trashCollection(
+    Collection collection,
+    bool isEmptyCollection,
+  ) async {
     try {
-      final deviceCollections = await _filesDB.getDeviceCollections();
-      final Map<String, bool> deivcePathIDsToUnsync = Map.fromEntries(
-        deviceCollections
-            .where((e) => e.shouldBackup && e.collectionID == collection.id)
-            .map((e) => MapEntry(e.id, false)),
-      );
-
-      if (deivcePathIDsToUnsync.isNotEmpty) {
-        _logger.info(
-          'turning off backup status for folders $deivcePathIDsToUnsync',
+      // Turn off automatic back-up for the on device folder only when the
+      // collection is non-empty. This is to handle the case when the existing
+      // files in the on-device folders where automatically uploaded in some
+      // other collection or from different device
+      if (!isEmptyCollection) {
+        final deviceCollections = await _filesDB.getDeviceCollections();
+        final Map<String, bool> deivcePathIDsToUnsync = Map.fromEntries(
+          deviceCollections
+              .where((e) => e.shouldBackup && e.collectionID == collection.id)
+              .map((e) => MapEntry(e.id, false)),
         );
-        await RemoteSyncService.instance
-            .updateDeviceFolderSyncStatus(deivcePathIDsToUnsync);
+
+        if (deivcePathIDsToUnsync.isNotEmpty) {
+          _logger.info(
+            'turning off backup status for folders $deivcePathIDsToUnsync',
+          );
+          await RemoteSyncService.instance
+              .updateDeviceFolderSyncStatus(deivcePathIDsToUnsync);
+        }
       }
       await _enteDio.delete(
         "/collections/v2/${collection.id}",
