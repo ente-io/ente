@@ -1,5 +1,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/models/file.dart';
 
 class SelectedFiles extends ChangeNotifier {
@@ -51,6 +53,7 @@ class SelectedFiles extends ChangeNotifier {
   }
 
   void clearAll() {
+    Bus.instance.fire(const ClearSelectionEvent());
     lastSelections.addAll(files);
     files.clear();
     notifyListeners();

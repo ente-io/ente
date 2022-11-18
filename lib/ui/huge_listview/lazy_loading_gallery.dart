@@ -5,9 +5,11 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
@@ -291,12 +293,19 @@ class LazyLoadingGridView extends StatefulWidget {
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool _shouldRender;
+  StreamSubscription<ClearSelectionEvent> _clearSelectionEvent;
 
   @override
   void initState() {
     _shouldRender = widget.shouldRender;
     widget.shouldSelectAll.addListener(_shouldSelectAllListener);
     widget.selectedFiles.addListener(_selectedFilesListener);
+    _clearSelectionEvent =
+        Bus.instance.on<ClearSelectionEvent>().listen((event) {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     super.initState();
   }
 
@@ -304,6 +313,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void dispose() {
     widget.selectedFiles.removeListener(_selectedFilesListener);
     widget.shouldSelectAll.removeListener(_shouldSelectAllListener);
+    _clearSelectionEvent.cancel();
     super.dispose();
   }
 
