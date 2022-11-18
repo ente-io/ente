@@ -25,15 +25,13 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
   final expandableController = ExpandableController(initialExpanded: false);
   @override
   void initState() {
-    expandableController.addListener(() {
-      setState(() {});
-    });
+    expandableController.addListener(_expandableControllerListener);
     super.initState();
   }
 
   @override
   void dispose() {
-    expandableController.removeListener(() {});
+    expandableController.removeListener(_expandableControllerListener);
     super.dispose();
   }
 
@@ -80,5 +78,9 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
         ),
       ),
     );
+  }
+
+  void _expandableControllerListener() {
+    setState(() {});
   }
 }
