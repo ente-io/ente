@@ -18,6 +18,8 @@ import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
+import { isCollectionHidden } from 'utils/collection';
+import { CustomError } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -62,6 +64,9 @@ export const syncFiles = async (
     for (const collection of collections) {
         if (!getToken()) {
             continue;
+        }
+        if (isCollectionHidden(collection)) {
+            throw Error(CustomError.HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED);
         }
         const lastSyncTime = await getCollectionLastSyncTime(collection);
         if (collection.updationTime === lastSyncTime) {

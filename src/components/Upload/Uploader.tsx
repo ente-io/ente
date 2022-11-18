@@ -452,32 +452,28 @@ export default function Uploader(props: Props) {
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: 'danger',
-                    message: constants.SUBSCRIPTION_EXPIRED,
-                    action: {
-                        text: constants.RENEW_NOW,
-                        callback: () =>
-                            billingService.redirectToCustomerPortal(),
-                    },
+                    subtext: constants.SUBSCRIPTION_EXPIRED,
+                    message: constants.RENEW_NOW,
+                    onClick: () => billingService.redirectToCustomerPortal(),
                 };
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 notification = {
                     variant: 'danger',
-                    message: constants.STORAGE_QUOTA_EXCEEDED,
-                    action: {
-                        text: constants.UPGRADE_NOW,
-                        callback: galleryContext.showPlanSelectorModal,
-                    },
-                    icon: <DiscFullIcon fontSize="large" />,
+                    subtext: constants.STORAGE_QUOTA_EXCEEDED,
+                    message: constants.UPGRADE_NOW,
+                    onClick: () => galleryContext.showPlanSelectorModal(),
+                    startIcon: <DiscFullIcon />,
                 };
                 break;
             default:
                 notification = {
                     variant: 'danger',
                     message: constants.UNKNOWN_ERROR,
+                    onClick: () => null,
                 };
         }
-        galleryContext.setNotificationAttributes(notification);
+        appContext.setNotificationAttributes(notification);
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {

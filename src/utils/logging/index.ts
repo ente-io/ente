@@ -34,6 +34,10 @@ export function addLogLine(log: string) {
             });
         }
     } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+            deleteLogs();
+            addLogLine('logs cleared');
+        }
         logError(e, 'failed to addLogLine', undefined, true);
         // ignore
     }
@@ -65,7 +69,6 @@ export const clearLogsIfLocalStorageLimitExceeded = () => {
                 addLogLine(`app started`);
             } catch (e) {
                 deleteLogs();
-                logError(e, 'failed to log test log');
             }
         }
         addLogLine(`logs size: ${convertBytesToHumanReadable(logSize)}`);

@@ -373,7 +373,6 @@ const englishConstants = {
             <p>All files will be queued for download sequentially</p>
         </>
     ),
-    ARCHIVED_ALBUM: 'Archived album',
     DOWNLOAD_COLLECTION_FAILED: 'Album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'Failed to create album , please try again',
 
@@ -436,6 +435,8 @@ const englishConstants = {
     INFO: 'Info',
     FILE_ID: 'File ID',
     FILE_NAME: 'File name',
+    CAPTION: 'Description',
+    CAPTION_PLACEHOLDER: 'Add a description',
     CREATION_TIME: 'Creation time',
     UPDATED_ON: 'Updated on',
     LOCATION: 'Location',
@@ -511,7 +512,7 @@ const englishConstants = {
     EMAIl_ALREADY_OWNED: 'Email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
     UPLOAD_FAILED: 'Upload failed',
-    ETAGS_BLOCKED: (url: string) => (
+    ETAGS_BLOCKED: (link: string) => (
         <>
             <Box mb={1}>
                 We were unable to upload the following files because of your
@@ -520,13 +521,9 @@ const englishConstants = {
             <Box>
                 Please disable any addons that might be preventing ente from
                 using <code>eTags</code> to upload large files, or use our{' '}
-                <a
-                    href={url}
-                    style={{ color: '#51cd7c', textDecoration: 'underline' }}
-                    target="_blank"
-                    rel="noreferrer">
+                <Link href={link} target="_blank">
                     desktop app
-                </a>{' '}
+                </Link>{' '}
                 for a more reliable import experience.
             </Box>
         </>
@@ -556,11 +553,11 @@ const englishConstants = {
     THUMBNAIL_GENERATION_FAILED_INFO:
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
-    ARCHIVE: 'Hide',
-    ARCHIVE_SECTION_NAME: 'Hidden',
+    ARCHIVE: 'Archive',
+    ARCHIVE_SECTION_NAME: 'Archive',
     ALL_SECTION_NAME: 'All',
     MOVE_TO_COLLECTION: 'Move to album',
-    UNARCHIVE: 'Unhide',
+    UNARCHIVE: 'Unarchive',
     MOVE: 'Move',
     ADD: 'Add',
     SORT: 'Sort',
@@ -627,6 +624,7 @@ const englishConstants = {
         <>File time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
+    CAPTION_CHARACTER_LIMIT: '280 characters max',
 
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
@@ -825,6 +823,15 @@ const englishConstants = {
     UPLOADED_TO_SINGLE_COLLECTION: 'Uploaded to single collection',
     UPLOADED_TO_SEPARATE_COLLECTIONS: 'Uploaded to separate collections',
     NEVERMIND: 'Nevermind',
+    UPDATE_AVAILABLE: 'Update available',
+    UPDATE_INSTALLABLE_MESSAGE:
+        'A new version of ente is ready to be installed.',
+    INSTALL_NOW: `Install now`,
+    INSTALL_ON_NEXT_LAUNCH: 'Install on next launch',
+    UPDATE_AVAILABLE_MESSAGE:
+        'A new version of ente has been released, but it cannot be automatically downloaded and installed.',
+    DOWNLOAD_AND_INSTALL: 'Download and install',
+    IGNORE_THIS_VERSION: 'Ignore this version',
 };
 
 export default englishConstants;

@@ -13,6 +13,7 @@ import DialogTitleWithCloseButton, {
 } from './TitleWithCloseButton';
 import DialogBoxBase from './base';
 import { DialogBoxAttributes } from 'types/dialogBox';
+import DialogIcon from './DialogIcon';
 
 type IProps = React.PropsWithChildren<
     Omit<DialogProps, 'onClose' | 'maxSize'> & {
@@ -48,6 +49,7 @@ export default function DialogBox({
             maxWidth={size}
             onClose={handleClose}
             {...props}>
+            {attributes.icon && <DialogIcon icon={attributes.icon} />}
             {attributes.title && (
                 <DialogTitleWithCloseButton
                     onClose={

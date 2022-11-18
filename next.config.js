@@ -41,7 +41,6 @@ module.exports = (phase) =>
                     },
                     env: {
                         SENTRY_RELEASE: GIT_SHA,
-                        NEXT_PUBLIC_LATEST_COMMIT_HASH: GIT_SHA,
                     },
                     workbox: WORKBOX_CONFIG,
 

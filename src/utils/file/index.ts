@@ -22,7 +22,7 @@ import {
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
-import ffmpegService from 'services/ffmpeg/ffmpegService';
+import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
@@ -319,10 +319,9 @@ async function getRenderableLivePhoto(
 
 async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
     const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-        video,
-        videoNameTitle
+        new File([video], videoNameTitle)
     );
-    return new Blob([mp4ConvertedVideo]);
+    return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
 }
 
 async function getRenderableImage(fileName: string, imageBlob: Blob) {
@@ -398,6 +397,19 @@ export async function changeFileCreationTime(
 export async function changeFileName(file: EnteFile, editedName: string) {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
+    };
+
+    file.pubMagicMetadata = await updateMagicMetadataProps(
+        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
+        updatedPublicMagicMetadataProps
+    );
+    return file;
+}
+
+export async function changeCaption(file: EnteFile, caption: string) {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
+        caption,
     };
 
     file.pubMagicMetadata = await updateMagicMetadataProps(

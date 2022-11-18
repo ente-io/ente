@@ -118,6 +118,7 @@ const PhotoFrame = ({
                 dataIndex: index,
                 w: window.innerWidth,
                 h: window.innerHeight,
+                title: item.pubMagicMetadata?.data.caption,
             }))
             .filter((item) => {
                 if (

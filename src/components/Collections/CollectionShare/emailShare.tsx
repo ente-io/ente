@@ -5,7 +5,7 @@ import { GalleryContext } from 'pages/gallery';
 import React, { useContext } from 'react';
 import { shareCollection } from 'services/collectionService';
 import { User } from 'types/user';
-import { handleSharingErrors } from 'utils/error';
+import { handleSharingErrors } from 'utils/error/ui';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import constants from 'utils/strings/constants';
 import { CollectionShareSharees } from './sharees';

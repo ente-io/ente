@@ -1,6 +1,11 @@
 import { ElectronFile } from 'types/upload';
 import { WatchMapping } from 'types/watchFolder';
 
+export interface AppUpdateInfo {
+    autoUpdatable: boolean;
+    version: string;
+}
+
 export interface ElectronAPIs {
     exists: (path: string) => boolean;
     checkExistsAndCreateCollectionDir: (dirPath: string) => Promise<void>;
@@ -65,4 +70,16 @@ export interface ElectronAPIs {
     logToDisk: (msg: string) => void;
     convertHEIC(fileData: Uint8Array): Promise<Uint8Array>;
     openLogDirectory: () => void;
+    registerUpdateEventListener: (
+        showUpdateDialog: (updateInfo: AppUpdateInfo) => void
+    ) => void;
+    updateAndRestart: () => void;
+    skipAppVersion: (version: string) => void;
+    getSentryUserID: () => Promise<string>;
+    getAppVersion: () => Promise<string>;
+    runFFmpegCmd: (
+        cmd: string[],
+        inputFile: File | ElectronFile,
+        outputFileName: string
+    ) => Promise<File>;
 }

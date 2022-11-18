@@ -1,7 +1,11 @@
 import { User } from 'types/user';
 import { EnteFile } from 'types/file';
 import { CollectionSummaryType, CollectionType } from 'constants/collection';
-import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
+import {
+    MagicMetadataCore,
+    SUB_TYPE,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 
 export interface Collection {
     id: number;
@@ -82,6 +86,7 @@ export interface RemoveFromCollectionRequest {
 
 export interface CollectionMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
+    subType?: SUB_TYPE;
 }
 
 export interface CollectionMagicMetadata

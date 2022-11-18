@@ -1,5 +1,3 @@
-import constants from 'utils/strings/constants';
-
 export const ServerErrorCodes = {
     SESSION_EXPIRED: '401',
     NO_ACTIVE_SUBSCRIPTION: '402',
@@ -14,7 +12,6 @@ export const ServerErrorCodes = {
 };
 
 export enum CustomError {
-    UNKNOWN_ERROR = 'unknown error',
     SUBSCRIPTION_VERIFICATION_ERROR = 'Subscription verification failed',
     THUMBNAIL_GENERATION_FAILED = 'thumbnail generation failed',
     VIDEO_PLAYBACK_FAILED = 'video playback failed',
@@ -47,6 +44,8 @@ export enum CustomError {
     INCORRECT_PASSWORD = 'incorrect password',
     UPLOAD_CANCELLED = 'upload cancelled',
     REQUEST_TIMEOUT = 'request taking too long',
+    HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED = 'hidden collection sync file attempted',
+    UNKNOWN_ERROR = 'Something went wrong, please try again',
 }
 
 function parseUploadErrorCodes(error) {
@@ -67,7 +66,7 @@ function parseUploadErrorCodes(error) {
                 parsedMessage = CustomError.FILE_TOO_LARGE;
                 break;
             default:
-                parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
+                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
         }
     } else {
         parsedMessage = error.message;
@@ -120,29 +119,10 @@ export const parseSharingErrorCodes = (error) => {
                 parsedMessage = CustomError.TOO_MANY_REQUESTS;
                 break;
             default:
-                parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
+                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
         }
     } else {
         parsedMessage = error.message;
     }
     return new Error(parsedMessage);
-};
-
-export const handleSharingErrors = (error) => {
-    const parsedError = parseSharingErrorCodes(error);
-    let errorMessage = '';
-    switch (parsedError.message) {
-        case CustomError.BAD_REQUEST:
-            errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
-            break;
-        case CustomError.SUBSCRIPTION_NEEDED:
-            errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
-            break;
-        case CustomError.NOT_FOUND:
-            errorMessage = constants.USER_DOES_NOT_EXIST;
-            break;
-        default:
-            errorMessage = parsedError.message;
-    }
-    return errorMessage;
 };
