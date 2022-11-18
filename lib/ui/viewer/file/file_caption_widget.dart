@@ -22,13 +22,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
 
   @override
   void initState() {
-    _focusNode.addListener(() {
-      final caption = widget.file.caption;
-      if (_focusNode.hasFocus && caption != null) {
-        _textController.text = caption;
-        editedCaption = caption;
-      }
-    });
+    _focusNode.addListener(_focusNodeListener);
     editedCaption = widget.file.caption;
     if (editedCaption != null && editedCaption!.isNotEmpty) {
       hintText = editedCaption!;
@@ -42,7 +36,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       editFileCaption(null, widget.file, editedCaption);
     }
     _textController.dispose();
-    _focusNode.removeListener(() {});
+    _focusNode.removeListener(_focusNodeListener);
     super.dispose();
   }
 
@@ -106,5 +100,13 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
         });
       },
     );
+  }
+
+  void _focusNodeListener() {
+    final caption = widget.file.caption;
+    if (_focusNode.hasFocus && caption != null) {
+      _textController.text = caption;
+      editedCaption = caption;
+    }
   }
 }
