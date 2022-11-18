@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/files_db.dart';
@@ -135,7 +136,7 @@ class FileMagicService {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID();
-    final batchedFiles = files.chunks(1000);
+    final batchedFiles = files.chunks(batchSize);
     try {
       for (final batch in batchedFiles) {
         for (final file in batch) {

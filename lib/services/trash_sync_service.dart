@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/trash_db.dart';
@@ -116,7 +117,7 @@ class TrashSyncService {
     }
     final requestData = <String, dynamic>{};
     requestData["items"] = [];
-    final batchedItems = uniqueItems.chunks(1000);
+    final batchedItems = uniqueItems.chunks(batchSize);
     for (final batch in batchedItems) {
       for (final item in batch) {
         requestData["items"].add(item.toJson());
@@ -139,7 +140,7 @@ class TrashSyncService {
     final params = <String, dynamic>{};
     final uniqueFileIds = files.map((e) => e.uploadedFileID).toSet().toList();
     params["fileIDs"] = [];
-    final batchedFileIDs = uniqueFileIds.chunks(1000);
+    final batchedFileIDs = uniqueFileIds.chunks(batchSize);
     for (final batch in batchedFileIDs) {
       for (final fileID in batch) {
         params["fileIDs"].add(fileID);

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -711,7 +712,7 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
     params["files"] = [];
-    final batchedFiles = files.chunks(1000);
+    final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       for (final file in batch) {
         final key = decryptFileKey(file);
@@ -793,7 +794,7 @@ class CollectionsService {
     params["collectionID"] = toCollectionID;
     params["files"] = [];
     final toCollectionKey = getCollectionKey(toCollectionID);
-    final batchedFiles = files.chunks(1000);
+    final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       for (final file in batch) {
         final key = decryptFileKey(file);
@@ -819,7 +820,6 @@ class CollectionsService {
         await _filesDB.insertMultiple(batch);
         await TrashDB.instance
             .delete(batch.map((e) => e.uploadedFileID).toList());
-        params["files"] = [];
         Bus.instance.fire(
           CollectionUpdatedEvent(toCollectionID, batch, "restore"),
         );
@@ -840,6 +840,8 @@ class CollectionsService {
       } catch (e, s) {
         _logger.severe("failed to restore files", e, s);
         rethrow;
+      } finally {
+        params["files"] = [];
       }
     }
   }
@@ -859,7 +861,7 @@ class CollectionsService {
     params["toCollectionID"] = toCollectionID;
     params["fromCollectionID"] = fromCollectionID;
     params["files"] = [];
-    final batchedFiles = files.chunks(1000);
+    final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       for (final file in batch) {
         final fileKey = decryptFileKey(file);
@@ -935,7 +937,7 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["fileIDs"] = <int>[];
     params["collectionID"] = collectionID;
-    final batchedFiles = files.chunks(1000);
+    final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       for (final file in batch) {
         params["fileIDs"].add(file.uploadedFileID);
