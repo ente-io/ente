@@ -720,9 +720,9 @@ class CollectionsService {
 
     final params = <String, dynamic>{};
     params["collectionID"] = collectionID;
-    params["files"] = [];
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
+      params["files"] = [];
       for (final file in batch) {
         final key = decryptFileKey(file);
         file.generatedID =
@@ -750,8 +750,6 @@ class CollectionsService {
         Bus.instance.fire(CollectionUpdatedEvent(collectionID, batch, "addTo"));
       } catch (e) {
         rethrow;
-      } finally {
-        params["files"] = [];
       }
     }
   }
@@ -801,10 +799,10 @@ class CollectionsService {
   Future<void> restore(int toCollectionID, List<File> files) async {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
-    params["files"] = [];
     final toCollectionKey = getCollectionKey(toCollectionID);
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
+      params["files"] = [];
       for (final file in batch) {
         final key = decryptFileKey(file);
         file.generatedID =
@@ -849,8 +847,6 @@ class CollectionsService {
       } catch (e, s) {
         _logger.severe("failed to restore files", e, s);
         rethrow;
-      } finally {
-        params["files"] = [];
       }
     }
   }
@@ -869,9 +865,9 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["toCollectionID"] = toCollectionID;
     params["fromCollectionID"] = fromCollectionID;
-    params["files"] = [];
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
+      params["files"] = [];
       for (final file in batch) {
         final fileKey = decryptFileKey(file);
         file.generatedID =
@@ -893,7 +889,6 @@ class CollectionsService {
         "/collections/move-files",
         data: params,
       );
-      params["files"] = [];
     }
 
     // remove files from old collection
@@ -944,10 +939,10 @@ class CollectionsService {
 
   Future<void> removeFromCollection(int collectionID, List<File> files) async {
     final params = <String, dynamic>{};
-    params["fileIDs"] = <int>[];
     params["collectionID"] = collectionID;
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
+      params["fileIDs"] = <int>[];
       for (final file in batch) {
         params["fileIDs"].add(file.uploadedFileID);
       }
@@ -957,7 +952,6 @@ class CollectionsService {
       );
 
       await _filesDB.removeFromCollection(collectionID, params["fileIDs"]);
-      params["fileIDs"] = <int>[];
       Bus.instance
           .fire(CollectionUpdatedEvent(collectionID, batch, "removeFrom"));
       Bus.instance.fire(LocalPhotosUpdatedEvent(batch, source: "removeFrom"));

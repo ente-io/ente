@@ -134,11 +134,11 @@ class FileMagicService {
     Map<String, dynamic> newMetadataUpdate,
   ) async {
     final params = <String, dynamic>{};
-    params['metadataList'] = [];
     final int ownerID = Configuration.instance.getUserID();
     final batchedFiles = files.chunks(batchSize);
     try {
       for (final batch in batchedFiles) {
+        params['metadataList'] = [];
         for (final file in batch) {
           if (file.uploadedFileID == null) {
             throw AssertionError(
@@ -181,7 +181,6 @@ class FileMagicService {
 
         await _enteDio.put("/files/magic-metadata", data: params);
         await _filesDB.insertMultiple(files);
-        params["metadataList"] = [];
       }
 
       // update the state of the selected file. Same file in other collection

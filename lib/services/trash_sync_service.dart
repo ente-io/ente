@@ -25,7 +25,6 @@ class TrashSyncService {
   final _diffFetcher = TrashDiffFetcher();
   final _trashDB = TrashDB.instance;
   static const kLastTrashSyncTime = "last_trash_sync_time";
-  static const kTrashBatchSize = 999;
   SharedPreferences _prefs;
 
   TrashSyncService._privateConstructor();
@@ -116,14 +115,13 @@ class TrashSyncService {
       }
     }
     final requestData = <String, dynamic>{};
-    requestData["items"] = [];
     final batchedItems = uniqueItems.chunks(batchSize);
     for (final batch in batchedItems) {
+      requestData["items"] = [];
       for (final item in batch) {
         requestData["items"].add(item.toJson());
       }
       await _trashFiles(requestData);
-      requestData["items"] = [];
     }
   }
 
@@ -139,9 +137,9 @@ class TrashSyncService {
   Future<void> deleteFromTrash(List<File> files) async {
     final params = <String, dynamic>{};
     final uniqueFileIds = files.map((e) => e.uploadedFileID).toSet().toList();
-    params["fileIDs"] = [];
     final batchedFileIDs = uniqueFileIds.chunks(batchSize);
     for (final batch in batchedFileIDs) {
+      params["fileIDs"] = [];
       for (final fileID in batch) {
         params["fileIDs"].add(fileID);
       }
@@ -155,8 +153,6 @@ class TrashSyncService {
       } catch (e, s) {
         _logger.severe("failed to delete from trash", e, s);
         rethrow;
-      } finally {
-        params["fileIDs"] = <int>[];
       }
     }
     // no need to await on syncing trash from remote
