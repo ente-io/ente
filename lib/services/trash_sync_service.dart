@@ -139,22 +139,27 @@ class TrashSyncService {
     final params = <String, dynamic>{};
     final uniqueFileIds = files.map((e) => e.uploadedFileID).toSet().toList();
     params["fileIDs"] = [];
-    for (final fileID in uniqueFileIds) {
-      params["fileIDs"].add(fileID);
+    final batchedFileIDs = uniqueFileIds.chunks(1000);
+    for (final batch in batchedFileIDs) {
+      for (final fileID in batch) {
+        params["fileIDs"].add(fileID);
+      }
+      try {
+        await _enteDio.post(
+          "/trash/delete",
+          data: params,
+        );
+        await _trashDB.delete(batch);
+        Bus.instance.fire(TrashUpdatedEvent());
+      } catch (e, s) {
+        _logger.severe("failed to delete from trash", e, s);
+        rethrow;
+      } finally {
+        params["fileIDs"] = <int>[];
+      }
     }
-    try {
-      await _enteDio.post(
-        "/trash/delete",
-        data: params,
-      );
-      await _trashDB.delete(uniqueFileIds);
-      Bus.instance.fire(TrashUpdatedEvent());
-      // no need to await on syncing trash from remote
-      unawaited(syncTrash());
-    } catch (e, s) {
-      _logger.severe("failed to delete from trash", e, s);
-      rethrow;
-    }
+    // no need to await on syncing trash from remote
+    unawaited(syncTrash());
   }
 
   Future<void> emptyTrash() async {
