@@ -128,15 +128,18 @@ export const dedupe = (files: any[]) => {
 
 export const getGoogleLikeMetadataFile = (
     fileSaveName: string,
-    metadata: Metadata
+    file: EnteFile
 ) => {
+    const metadata: Metadata = file.metadata;
     const creationTime = Math.floor(metadata.creationTime / 1000000);
     const modificationTime = Math.floor(
         (metadata.modificationTime ?? metadata.creationTime) / 1000000
     );
+    const captionValue: string = file?.pubMagicMetadata?.data?.caption ?? '';
     return JSON.stringify(
         {
             title: fileSaveName,
+            caption: captionValue,
             creationTime: {
                 timestamp: creationTime,
                 formatted: formatDate(creationTime * 1000),
