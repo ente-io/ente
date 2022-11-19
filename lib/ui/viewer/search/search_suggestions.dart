@@ -25,7 +25,7 @@ class SearchSuggestionsWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        margin: const EdgeInsets.only(top: 8),
+        margin: const EdgeInsets.only(top: 6),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.searchResultsColor,
           borderRadius: BorderRadius.circular(8),

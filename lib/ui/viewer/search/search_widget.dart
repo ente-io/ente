@@ -73,12 +73,13 @@ class _SearchWidgetState extends State<SearchWidget> {
         color: Theme.of(context).colorScheme.searchResultsBackgroundColor,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             child: Column(
               children: [
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Container(
+                    height: 44,
                     color: Theme.of(context).colorScheme.defaultBackgroundColor,
                     child: TextFormField(
                       style: Theme.of(context).textTheme.subtitle1,
@@ -91,14 +92,25 @@ class _SearchWidgetState extends State<SearchWidget> {
                         hintText: "Albums, months, days, years, ...",
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
+                          vertical: 10,
                         ),
                         border: const UnderlineInputBorder(
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: const UnderlineInputBorder(
                           borderSide: BorderSide.none,
+                        ),
+                        prefixIconConstraints: const BoxConstraints(
+                          maxHeight: 44,
+                          maxWidth: 44,
+                          minHeight: 44,
+                          minWidth: 44,
+                        ),
+                        suffixIconConstraints: const BoxConstraints(
+                          maxHeight: 44,
+                          maxWidth: 44,
+                          minHeight: 44,
+                          minWidth: 44,
                         ),
                         prefixIcon: Hero(
                           tag: "search_icon",
