@@ -35,6 +35,7 @@ class _SearchSuffixIconState extends State<SearchSuffixIcon>
               ),
             )
           : IconButton(
+              visualDensity: const VisualDensity(horizontal: -1, vertical: -1),
               onPressed: () {
                 Navigator.pop(context);
               },
