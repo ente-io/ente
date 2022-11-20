@@ -206,19 +206,17 @@ class User {
   int? id;
   String email;
   String? name;
+  String role;
 
   User({
     this.id,
     required this.email,
     this.name,
+    this.role,
   });
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'email': email,
-      'name': name,
-    };
+    return {'id': id, 'email': email, 'name': name, 'role': role};
   }
 
   static fromMap(Map<String, dynamic>? map) {
@@ -228,6 +226,7 @@ class User {
       id: map['id'],
       email: map['email'],
       name: map['name'],
+      role: map['role'] ?? 'VIEWER',
     );
   }
 
