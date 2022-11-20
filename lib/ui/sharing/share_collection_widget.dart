@@ -12,9 +12,8 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -43,6 +42,8 @@ class _SharingDialogState extends State<SharingDialog> {
   List<User> _sharees;
   String _email;
   final Logger _logger = Logger("SharingDialogState");
+  final CollectionSharingActions sharingActions =
+      CollectionSharingActions(CollectionsService.instance);
 
   @override
   Widget build(BuildContext context) {
@@ -155,25 +156,13 @@ class _SharingDialogState extends State<SharingDialog> {
               routeToPage(
                 context,
                 ManageSharedLinkWidget(collection: widget.collection),
+              ).then(
+                (value) => {
+                  if (mounted) {setState(() => {})}
+                },
               );
             },
             isTopBorderRadiusRemoved: true,
-          ),
-          const SizedBox(
-            height: 24,
-          ),
-          MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Remove link",
-              textColor: warning500,
-            ),
-            leadingIcon: Icons.remove_circle_outline,
-            leadingIconColor: warning500,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            onTap: () async {
-              await _publicLinkToggle(false);
-            },
           ),
         ],
       );
@@ -187,7 +176,14 @@ class _SharingDialogState extends State<SharingDialog> {
           menuItemColor: getEnteColorScheme(context).fillFaint,
           pressedColor: getEnteColorScheme(context).fillFaint,
           onTap: () async {
-            await _publicLinkToggle(true);
+            final bool result = await sharingActions.publicLinkToggle(
+              context,
+              widget.collection,
+              true,
+            );
+            if (result && mounted) {
+              setState(() => {});
+            }
           },
         ),
       );
@@ -209,44 +205,6 @@ class _SharingDialogState extends State<SharingDialog> {
         ),
       ),
     );
-  }
-
-  Future<void> _publicLinkToggle(bool enable) async {
-    // confirm if user wants to disable the url
-    if (!enable) {
-      final choice = await showChoiceDialog(
-        context,
-        'Remove public link?',
-        'This will remove the public link for accessing "${widget.collection.name}".',
-        firstAction: 'Yes, remove',
-        secondAction: 'Cancel',
-        actionType: ActionType.critical,
-      );
-      if (choice != DialogUserChoice.firstChoice) {
-        return;
-      }
-    }
-    final dialog = createProgressDialog(
-      context,
-      enable ? "Creating link..." : "Disabling link...",
-    );
-    try {
-      await dialog.show();
-      enable
-          ? await CollectionsService.instance.createShareUrl(widget.collection)
-          : await CollectionsService.instance
-              .disableShareUrl(widget.collection);
-      dialog.hide();
-      setState(() {});
-    } catch (e) {
-      dialog.hide();
-      if (e is SharingNotPermittedForFreeAccountsError) {
-        _showUnSupportedAlert();
-      } else {
-        _logger.severe("failed to share collection", e);
-        showGenericErrorDialog(context);
-      }
-    }
   }
 
   Widget _getEmailField() {

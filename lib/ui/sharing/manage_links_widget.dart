@@ -9,7 +9,9 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -45,6 +47,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   Tuple3<int, String, int> _selectedExpiry;
   int _selectedDeviceLimitIndex = 0;
+  final CollectionSharingActions sharingActions =
+      CollectionSharingActions(CollectionsService.instance);
 
   @override
   void initState() {
@@ -55,7 +59,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
+    final int validTill = widget.collection?.publicURLs?.first?.validTill ?? 0;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -192,6 +196,30 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         setState(() {});
                       },
                     ),
+                  ),
+                  const SizedBox(
+                    height: 24,
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: "Remove link",
+                      textColor: warning500,
+                    ),
+                    leadingIcon: Icons.remove_circle_outline,
+                    leadingIconColor: warning500,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    onTap: () async {
+                      final bool result = await sharingActions.publicLinkToggle(
+                        context,
+                        widget.collection,
+                        false,
+                      );
+                      if (result && mounted) {
+                        Navigator.of(context).pop();
+                        // setState(() => {});
+                      }
+                    },
                   ),
                 ],
               ),
