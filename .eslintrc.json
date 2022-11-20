@@ -53,6 +53,7 @@
         "@typescript-eslint/no-unnecessary-type-assertion": "warn",
         "react-hooks/rules-of-hooks": "warn",
         "react-hooks/exhaustive-deps": "warn",
-        "@next/next/no-img-element": "warn"
+        "@next/next/no-img-element": "warn",
+        "@typescript-eslint/no-unsafe-argument": "warn"
     }
 }
