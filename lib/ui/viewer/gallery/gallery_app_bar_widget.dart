@@ -17,7 +17,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
-import 'package:photos/ui/sharing/share_collection_widget.dart';
+import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -334,7 +334,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       unawaited(
         routeToPage(
           context,
-          SharingDialog(collection),
+          ShareCollectionPage(collection),
         ),
       );
       /*return showDialog<void>(

@@ -28,16 +28,16 @@ import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class SharingDialog extends StatefulWidget {
+class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
 
-  const SharingDialog(this.collection, {Key key}) : super(key: key);
+  const ShareCollectionPage(this.collection, {Key key}) : super(key: key);
 
   @override
-  State<SharingDialog> createState() => _SharingDialogState();
+  State<ShareCollectionPage> createState() => _ShareCollectionPageState();
 }
 
-class _SharingDialogState extends State<SharingDialog> {
+class _ShareCollectionPageState extends State<ShareCollectionPage> {
   bool _showEntryField = false;
   List<User> _sharees;
   String _email;
