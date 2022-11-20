@@ -47,6 +47,12 @@
         "@typescript-eslint/no-var-requires": "warn",
         "@typescript-eslint/no-empty-interface": "warn",
         "@typescript-eslint/no-misused-promises": "warn",
-        "@typescript-eslint/no-empty-function": "warn"
+        "@typescript-eslint/no-empty-function": "warn",
+        "@typescript-eslint/explicit-module-boundary-types": "warn",
+        "@typescript-eslint/no-explicit-any": "warn",
+        "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+        "react-hooks/rules-of-hooks": "warn",
+        "react-hooks/exhaustive-deps": "warn",
+        "@next/next/no-img-element": "warn"
     }
 }
