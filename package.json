@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@date-io/date-fns": "^2.14.0",
-    "@ente-io/next-with-workbox": "^1.0.3",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.2",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
@@ -54,11 +53,6 @@
     "react-window": "^1.8.6",
     "sanitize-filename": "^1.6.3",
     "styled-components": "^5.3.5",
-    "workbox-precaching": "^6.1.5",
-    "workbox-recipes": "^6.1.5",
-    "workbox-routing": "^6.1.5",
-    "workbox-strategies": "^6.1.5",
-    "workbox-window": "^6.1.5",
     "xml-js": "^1.6.11",
     "yup": "^0.29.3"
   },

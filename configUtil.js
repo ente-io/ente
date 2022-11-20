@@ -37,11 +37,6 @@ module.exports = {
         'report-to': ' https://csp-reporter.ente.io/local',
     },
 
-    WORKBOX_CONFIG: {
-        swSrc: 'src/serviceWorker.js',
-        exclude: [/manifest\.json$/i],
-    },
-
     ALL_ROUTES: '/(.*)',
 
     buildCSPHeader: (directives) => ({
