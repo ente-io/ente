@@ -84,12 +84,6 @@
   "standard": {
     "parser": "babel-eslint"
   },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write --ignore-unknown"
-    ]
-  },
   "resolutions": {
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   }
