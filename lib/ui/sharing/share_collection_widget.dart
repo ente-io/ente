@@ -14,9 +14,13 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -24,6 +28,7 @@ import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
@@ -90,8 +95,24 @@ class _SharingDialogState extends State<SharingDialog> {
 
     final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
     children.addAll([
-      const Padding(padding: EdgeInsets.all(16)),
-      const Divider(height: 1),
+      const SizedBox(
+        height: 24,
+      ),
+      const MenuSectionTitle(
+        title: "Share a public link",
+        iconData: Icons.public,
+      ),
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Create public link",
+        ),
+        leadingIcon: Icons.link,
+        menuItemColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        onTap: () async {
+          launchUrl(Uri.parse("https://github.com/ente-io/frame"));
+        },
+      ),
       const Padding(padding: EdgeInsets.all(12)),
       SizedBox(
         height: 36,
@@ -154,13 +175,14 @@ class _SharingDialogState extends State<SharingDialog> {
       children.add(_getShareableUrlWidget(context));
     }
 
-    return AlertDialog(
-      title: const Text("Sharing"),
-      content: SingleChildScrollView(
+    return Scaffold(
+      appBar: AppBar(title: const Text("Sharing")),
+      body: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.all(4.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 16),
               child: Column(
                 children: children,
               ),
@@ -168,7 +190,6 @@ class _SharingDialogState extends State<SharingDialog> {
           ],
         ),
       ),
-      contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 4),
     );
   }
 

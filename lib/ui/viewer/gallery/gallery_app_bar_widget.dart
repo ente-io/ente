@@ -20,6 +20,7 @@ import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/sharing/share_collection_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class GalleryAppBarWidget extends StatefulWidget {
@@ -330,14 +331,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         collection = collection.copyWith(sharees: sharees);
       }
       await dialog.hide();
-      return showDialog<void>(
+      unawaited(
+        routeToPage(
+          context,
+          SharingDialog(collection),
+        ),
+      );
+      /*return showDialog<void>(
         context: context,
         builder: (BuildContext context) {
           return SharingDialog(
             collection,
           );
         },
-      );
+      );*/
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
