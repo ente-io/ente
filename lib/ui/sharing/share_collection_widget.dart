@@ -216,10 +216,10 @@ class _SharingDialogState extends State<SharingDialog> {
     if (!enable) {
       final choice = await showChoiceDialog(
         context,
-        'Disable link',
-        'Are you sure that you want to disable the album link?',
-        firstAction: 'Yes, disable',
-        secondAction: 'No',
+        'Remove public link?',
+        'This will remove the public link for accessing "${widget.collection.name}".',
+        firstAction: 'Yes, remove',
+        secondAction: 'Cancel',
         actionType: ActionType.critical,
       );
       if (choice != DialogUserChoice.firstChoice) {
