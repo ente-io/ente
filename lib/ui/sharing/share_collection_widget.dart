@@ -1,7 +1,5 @@
 // @dart=2.9
 
-import 'dart:ui';
-
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,11 +12,13 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/payment/subscription.dart';
@@ -28,7 +28,6 @@ import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SharingDialog extends StatefulWidget {
   final Collection collection;
@@ -98,81 +97,100 @@ class _SharingDialogState extends State<SharingDialog> {
       const SizedBox(
         height: 24,
       ),
-      const MenuSectionTitle(
-        title: "Share a public link",
+      MenuSectionTitle(
+        title: hasUrl ? "Public link enabled" : "Share a public link",
         iconData: Icons.public,
       ),
-      MenuItemWidget(
-        captionedTextWidget: const CaptionedTextWidget(
-          title: "Create public link",
-        ),
-        leadingIcon: Icons.link,
-        menuItemColor: getEnteColorScheme(context).fillFaint,
-        pressedColor: getEnteColorScheme(context).fillFaint,
-        onTap: () async {
-          launchUrl(Uri.parse("https://github.com/ente-io/frame"));
-        },
-      ),
-      const Padding(padding: EdgeInsets.all(12)),
-      SizedBox(
-        height: 36,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text("Public link"),
-            Switch(
-              value: hasUrl,
-              onChanged: (enable) async {
-                // confirm if user wants to disable the url
-                if (!enable) {
-                  final choice = await showChoiceDialog(
-                    context,
-                    'Disable link',
-                    'Are you sure that you want to disable the album link?',
-                    firstAction: 'Yes, disable',
-                    secondAction: 'No',
-                    actionType: ActionType.critical,
-                  );
-                  if (choice != DialogUserChoice.firstChoice) {
-                    return;
-                  }
-                }
-                final dialog = createProgressDialog(
-                  context,
-                  enable ? "Creating link..." : "Disabling link...",
-                );
-                try {
-                  await dialog.show();
-                  enable
-                      ? await CollectionsService.instance
-                          .createShareUrl(widget.collection)
-                      : await CollectionsService.instance
-                          .disableShareUrl(widget.collection);
-                  dialog.hide();
-                  setState(() {});
-                } catch (e) {
-                  dialog.hide();
-                  if (e is SharingNotPermittedForFreeAccountsError) {
-                    _showUnSupportedAlert();
-                  } else {
-                    _logger.severe("failed to share collection", e);
-                    showGenericErrorDialog(context);
-                  }
-                }
-              },
-            ),
-          ],
-        ),
-      ),
-      const Padding(padding: EdgeInsets.all(8)),
     ]);
-    if (widget.collection.publicURLs?.isNotEmpty ?? false) {
+    if (hasUrl) {
+      final String collectionKey = Base58Encode(
+        CollectionsService.instance.getCollectionKey(widget.collection.id),
+      );
+      final String url =
+          "${widget.collection.publicURLs.first.url}#$collectionKey";
+      children.addAll(
+        [
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Copy link",
+            ),
+            leadingIcon: Icons.copy,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            onTap: () async {
+              await Clipboard.setData(ClipboardData(text: url));
+              showToast(context, "Link copied to clipboard");
+            },
+            isBottomBorderRadiusRemoved: true,
+          ),
+          DividerWidget(
+            dividerType: DividerType.menu,
+            bgColor: getEnteColorScheme(context).blurStrokeFaint,
+          ),
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Send link",
+            ),
+            leadingIcon: Icons.adaptive.share,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            onTap: () async {
+              shareText(url);
+            },
+            isTopBorderRadiusRemoved: true,
+          ),
+          DividerWidget(
+            dividerType: DividerType.menu,
+            bgColor: getEnteColorScheme(context).blurStrokeFaint,
+          ),
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Manage link",
+            ),
+            leadingIcon: Icons.link,
+            trailingIcon: Icons.navigate_next,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            onTap: () async {
+              routeToPage(
+                context,
+                ManageSharedLinkWidget(collection: widget.collection),
+              );
+            },
+            isTopBorderRadiusRemoved: true,
+          ),
+          const SizedBox(
+            height: 24,
+          ),
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: "Remove link",
+              textColor: warning500,
+            ),
+            leadingIcon: Icons.remove_circle_outline,
+            leadingIconColor: warning500,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            onTap: () async {
+              await _publicLinkToggle(false);
+            },
+          ),
+        ],
+      );
+    } else {
       children.add(
-        const Padding(
-          padding: EdgeInsets.all(2),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Create public link",
+          ),
+          leadingIcon: Icons.link,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          onTap: () async {
+            await _publicLinkToggle(true);
+          },
         ),
       );
-      children.add(_getShareableUrlWidget(context));
     }
 
     return Scaffold(
@@ -191,6 +209,44 @@ class _SharingDialogState extends State<SharingDialog> {
         ),
       ),
     );
+  }
+
+  Future<void> _publicLinkToggle(bool enable) async {
+    // confirm if user wants to disable the url
+    if (!enable) {
+      final choice = await showChoiceDialog(
+        context,
+        'Disable link',
+        'Are you sure that you want to disable the album link?',
+        firstAction: 'Yes, disable',
+        secondAction: 'No',
+        actionType: ActionType.critical,
+      );
+      if (choice != DialogUserChoice.firstChoice) {
+        return;
+      }
+    }
+    final dialog = createProgressDialog(
+      context,
+      enable ? "Creating link..." : "Disabling link...",
+    );
+    try {
+      await dialog.show();
+      enable
+          ? await CollectionsService.instance.createShareUrl(widget.collection)
+          : await CollectionsService.instance
+              .disableShareUrl(widget.collection);
+      dialog.hide();
+      setState(() {});
+    } catch (e) {
+      dialog.hide();
+      if (e is SharingNotPermittedForFreeAccountsError) {
+        _showUnSupportedAlert();
+      } else {
+        _logger.severe("failed to share collection", e);
+        showGenericErrorDialog(context);
+      }
+    }
   }
 
   Widget _getEmailField() {
@@ -231,102 +287,6 @@ class _SharingDialogState extends State<SharingDialog> {
                 );
               },
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _getShareableUrlWidget(BuildContext parentContext) {
-    final String collectionKey = Base58Encode(
-      CollectionsService.instance.getCollectionKey(widget.collection.id),
-    );
-    final String url =
-        "${widget.collection.publicURLs.first.url}#$collectionKey";
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(padding: EdgeInsets.all(4)),
-          GestureDetector(
-            onTap: () async {
-              await Clipboard.setData(ClipboardData(text: url));
-              showToast(context, "Link copied to clipboard");
-            },
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.02),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Flexible(
-                    child: Text(
-                      url,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.68),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ),
-                  const Padding(padding: EdgeInsets.all(2)),
-                  const Icon(
-                    Icons.copy,
-                    size: 18,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const Padding(padding: EdgeInsets.all(2)),
-          TextButton(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.adaptive.share,
-                    color: Theme.of(context).colorScheme.greenAlternative,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.all(4),
-                  ),
-                  Text(
-                    "Share link",
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.greenAlternative,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            onPressed: () {
-              shareText(url);
-            },
-          ),
-          const Padding(padding: EdgeInsets.all(4)),
-          TextButton(
-            child: Center(
-              child: Text(
-                "Manage link",
-                style: TextStyle(
-                  color: Theme.of(context).primaryColorLight,
-                  decoration: TextDecoration.underline,
-                ),
-              ),
-            ),
-            onPressed: () async {
-              routeToPage(
-                parentContext,
-                ManageSharedLinkWidget(collection: widget.collection),
-              );
-            },
           ),
         ],
       ),
