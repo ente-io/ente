@@ -85,6 +85,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       subTitle: (validTill == 0
                           ? "Never"
                           : (hasLinkExpired ? "Expired" : "Enabled")),
+                      subTitleColor: hasLinkExpired ? warning500 : null,
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
