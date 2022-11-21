@@ -1,6 +1,5 @@
-import { Link, LinkProps } from '@mui/material';
+import { ButtonProps, Link, LinkProps } from '@mui/material';
 import React, { FC } from 'react';
-import { ButtonProps } from 'react-bootstrap';
 
 export enum ButtonVariant {
     success = 'success',
