@@ -47,6 +47,7 @@ class EnteColorScheme {
 
   //other colors
   final Color tabIcon;
+  final List<Color> avatarColors;
 
   const EnteColorScheme(
     this.backgroundBase,
@@ -69,7 +70,8 @@ class EnteColorScheme {
     this.blurStrokeBase,
     this.blurStrokeFaint,
     this.blurStrokePressed,
-    this.tabIcon, {
+    this.tabIcon,
+    this.avatarColors, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -82,28 +84,28 @@ class EnteColorScheme {
 }
 
 const EnteColorScheme lightScheme = EnteColorScheme(
-  backgroundBaseLight,
-  backgroundElevatedLight,
-  backgroundElevated2Light,
-  backdropBaseLight,
-  backdropMutedLight,
-  backdropFaintLight,
-  textBaseLight,
-  textMutedLight,
-  textFaintLight,
-  blurTextBaseLight,
-  fillBaseLight,
-  fillMutedLight,
-  fillFaintLight,
-  strokeBaseLight,
-  strokeMutedLight,
-  strokeFaintLight,
-  strokeFainterLight,
-  blurStrokeBaseLight,
-  blurStrokeFaintLight,
-  blurStrokePressedLight,
-  tabIconLight,
-);
+    backgroundBaseLight,
+    backgroundElevatedLight,
+    backgroundElevated2Light,
+    backdropBaseLight,
+    backdropMutedLight,
+    backdropFaintLight,
+    textBaseLight,
+    textMutedLight,
+    textFaintLight,
+    blurTextBaseLight,
+    fillBaseLight,
+    fillMutedLight,
+    fillFaintLight,
+    strokeBaseLight,
+    strokeMutedLight,
+    strokeFaintLight,
+    strokeFainterLight,
+    blurStrokeBaseLight,
+    blurStrokeFaintLight,
+    blurStrokePressedLight,
+    tabIconLight,
+    avatarLight);
 
 const EnteColorScheme darkScheme = EnteColorScheme(
   backgroundBaseDark,
@@ -127,6 +129,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurStrokeFaintDark,
   blurStrokePressedDark,
   tabIconDark,
+  avatarDark,
 );
 
 // Background Colors
@@ -204,3 +207,35 @@ const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning400 = Color.fromRGBO(255, 111, 111, 1);
 
 const Color _caution500 = Color.fromRGBO(255, 194, 71, 1);
+
+const List<Color> avatarLight = [
+  Color.fromRGBO(118, 84, 154, 1),
+  Color.fromRGBO(223, 120, 97, 1),
+  Color.fromRGBO(148, 180, 159, 1),
+  Color.fromRGBO(135, 162, 251, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(50, 82, 136, 1),
+  Color.fromRGBO(133, 180, 224, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(66, 97, 101, 1)
+];
+
+const List<Color> avatarDark = [
+  Color.fromRGBO(118, 84, 154, 1),
+  Color.fromRGBO(223, 120, 97, 1),
+  Color.fromRGBO(148, 180, 159, 1),
+  Color.fromRGBO(135, 162, 251, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(147, 125, 194, 1),
+  Color.fromRGBO(50, 82, 136, 1),
+  Color.fromRGBO(133, 180, 224, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(225, 160, 89, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(107, 119, 178, 1),
+  Color.fromRGBO(149, 127, 239, 1),
+];
