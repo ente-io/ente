@@ -392,7 +392,7 @@ extension DeviceFiles on FilesDB {
     final db = await database;
     final fileRows = await db.rawQuery(
       '''SELECT * FROM FILES  f JOIN device_files df on f.local_id = df.id 
-      and df.path_id= ? order by f.modification_time DESC limit 1;
+      and df.path_id= ? order by f.creation_time DESC limit 1;
           ''',
       [pathID],
     );
