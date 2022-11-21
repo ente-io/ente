@@ -9,7 +9,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
@@ -20,6 +19,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -392,21 +392,10 @@ class IncomingCollectionItem extends StatelessWidget {
                   ),
                   Align(
                     alignment: Alignment.bottomRight,
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      margin: const EdgeInsets.fromLTRB(0, 0, 4, 0),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .defaultBackgroundColor,
-                      ),
-                      child: Text(
-                        c.collection.owner.name == null ||
-                                c.collection.owner.name.isEmpty
-                            ? c.collection.owner.email.substring(0, 1)
-                            : c.collection.owner.name.substring(0, 1),
-                        textAlign: TextAlign.center,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
+                      child: UserAvatarWidget(
+                        c.collection.owner,
                       ),
                     ),
                   ),
