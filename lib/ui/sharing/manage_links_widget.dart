@@ -59,9 +59,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final int validTill = widget.collection?.publicURLs?.first?.validTill ?? 0;
-    final bool hasLinkExpired =
-        validTill != 0 && validTill < DateTime.now().microsecondsSinceEpoch;
+    final PublicURL url = widget.collection?.publicURLs?.first;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -82,10 +80,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
                       title: "Link expiry",
-                      subTitle: (validTill == 0
-                          ? "Never"
-                          : (hasLinkExpired ? "Expired" : "Enabled")),
-                      subTitleColor: hasLinkExpired ? warning500 : null,
+                      subTitle: (url.hasExpiry
+                          ? (url.isExpired ? "Expired" : "Enabled")
+                          : "Never"),
+                      subTitleColor: url.isExpired ? warning500 : null,
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
@@ -93,12 +91,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                       await showPicker();
                     },
                   ),
-                  validTill != 0
+                  url.hasExpiry
                       ? MenuSectionDescriptionWidget(
-                          content: hasLinkExpired
+                          content: url.isExpired
                               ? "This link has expired. Please select a new expiry time or disable link expiry."
                               : 'Link will expire on '
-                                  '${getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill))}',
+                                  '${getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(url.validTill))}',
                         )
                       : const SizedBox.shrink(),
                   const Padding(padding: EdgeInsets.only(top: 24)),
