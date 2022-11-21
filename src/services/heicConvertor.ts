@@ -1,10 +1,12 @@
-import { exec, ExecException } from 'child_process';
-import { app } from 'electron';
-import { existsSync, rmSync } from 'fs';
-import path from 'path';
-import { mkdir, readFile, writeFile } from 'promise-fs';
-import { generateRandomName } from '../utils/common';
+import util from 'util';
+import { exec } from 'child_process';
+
+import { rmSync } from 'fs';
+import { readFile, writeFile } from 'promise-fs';
+import { generateTempFilePath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
+
+const asyncExec = util.promisify(exec);
 
 export async function convertHEIC(
     heicFileData: Uint8Array
@@ -12,35 +14,14 @@ export async function convertHEIC(
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
-        const tempDir = path.join(app.getPath('temp'), 'ente');
-        if (!existsSync(tempDir)) {
-            await mkdir(tempDir);
-        }
-        const tempName = generateRandomName(10);
-
-        tempInputFilePath = path.join(tempDir, tempName + '.heic');
-        tempOutputFilePath = path.join(tempDir, tempName + '.jpeg');
+        tempInputFilePath = await generateTempFilePath('.heic');
+        tempOutputFilePath = await generateTempFilePath('.jpeg');
 
         await writeFile(tempInputFilePath, heicFileData);
 
-        await new Promise((resolve, reject) => {
-            exec(
-                `sips -s format jpeg ${tempInputFilePath} --out ${tempOutputFilePath}`,
-                (
-                    error: ExecException | null,
-                    stdout: string,
-                    stderr: string
-                ) => {
-                    if (error) {
-                        reject(error);
-                    } else if (stderr) {
-                        reject(stderr);
-                    } else {
-                        resolve(stdout);
-                    }
-                }
-            );
-        });
+        await asyncExec(
+            `sips -s format jpeg ${tempInputFilePath} --out ${tempOutputFilePath}`
+        );
         const convertedFileData = new Uint8Array(
             await readFile(tempOutputFilePath)
         );

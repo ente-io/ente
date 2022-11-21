@@ -44,11 +44,13 @@ import {
     logToDisk,
     openLogDirectory,
     getSentryUserID,
+    getAppVersion,
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
 import { convertHEIC } from './api/heicConvert';
 import { setupLogging } from './utils/logging';
+import { runFFmpegCmd } from './api/ffmpeg';
 
 fixHotReloadNext12();
 setupLogging();
@@ -98,4 +100,6 @@ windowObject['ElectronAPIs'] = {
     updateAndRestart,
     skipAppVersion,
     getSentryUserID,
+    getAppVersion,
+    runFFmpegCmd,
 };
