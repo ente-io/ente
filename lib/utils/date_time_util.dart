@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
 const Set<int> monthWith30Days = {4, 6, 9, 11};
@@ -194,19 +195,16 @@ bool isLeapYear(DateTime dateTime) {
 Widget getDayWidget(
   BuildContext context,
   int timestamp,
-  bool smallerTodayFont,
 ) {
+  final colorScheme = getEnteColorScheme(context);
+  final textTheme = getEnteTextTheme(context);
   return Container(
     alignment: Alignment.centerLeft,
     child: Text(
       getDayTitle(timestamp),
-      style: (getDayTitle(timestamp) == "Today" && !smallerTodayFont)
-          ? Theme.of(context).textTheme.headline5
-          : Theme.of(context).textTheme.caption?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Inter-SemiBold',
-              ),
+      style: (getDayTitle(timestamp) == "Today")
+          ? textTheme.body
+          : textTheme.body.copyWith(color: colorScheme.textMuted),
     ),
   );
 }

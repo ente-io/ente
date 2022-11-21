@@ -33,7 +33,6 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final String logTag;
   final Stream<int> currentIndexStream;
-  final bool smallerTodayFont;
 
   LazyLoadingGallery(
     this.files,
@@ -44,7 +43,6 @@ class LazyLoadingGallery extends StatefulWidget {
     this.selectedFiles,
     this.tag,
     this.currentIndexStream, {
-    this.smallerTodayFont,
     this.logTag = "",
     Key key,
   }) : super(key: key ?? UniqueKey());
@@ -182,22 +180,26 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     }
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 14, 12, 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getDayWidget(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: getDayWidget(
                 context,
                 _files[0].creationTime,
-                widget.smallerTodayFont,
               ),
-              ValueListenableBuilder(
-                valueListenable: _showSelectAllButton,
-                builder: (context, value, _) {
-                  return widget.selectedFiles.files.isEmpty
-                      ? const SizedBox.shrink()
-                      : GestureDetector(
+            ),
+            ValueListenableBuilder(
+              valueListenable: _showSelectAllButton,
+              builder: (context, value, _) {
+                return widget.selectedFiles.files.isEmpty
+                    ? const SizedBox.shrink()
+                    : GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        child: SizedBox(
+                          width: 48,
+                          height: 44,
                           child: ValueListenableBuilder(
                             valueListenable: _shouldSelectAll,
                             builder: (context, value, _) {
@@ -214,14 +216,14 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                                     );
                             },
                           ),
-                          onTap: () {
-                            _shouldSelectAll.value = !_shouldSelectAll.value;
-                          },
-                        );
-                },
-              )
-            ],
-          ),
+                        ),
+                        onTap: () {
+                          _shouldSelectAll.value = !_shouldSelectAll.value;
+                        },
+                      );
+              },
+            )
+          ],
         ),
         _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
       ],
@@ -380,6 +382,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       },
       itemCount: widget.files.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
         crossAxisCount: 4,
       ),
       padding: const EdgeInsets.all(0),
@@ -399,47 +403,41 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         HapticFeedback.lightImpact();
         _selectFile(file);
       },
-      child: Container(
-        margin: const EdgeInsets.all(1.5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(3),
-          child: Stack(
-            children: [
-              Hero(
-                tag: widget.tag + file.tag,
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(
-                      widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
-                    ),
-                    BlendMode.darken,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(1),
+        child: Stack(
+          children: [
+            Hero(
+              tag: widget.tag + file.tag,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(
+                    widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
                   ),
-                  child: ThumbnailWidget(
-                    file,
-                    diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                    serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                    shouldShowLivePhotoOverlay: true,
-                    key: Key(widget.tag + file.tag),
-                  ),
+                  BlendMode.darken,
+                ),
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key(widget.tag + file.tag),
                 ),
               ),
-              Visibility(
-                visible: widget.selectedFiles.isFileSelected(file),
-                child: const Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    size: 20,
-                    color: Colors.white, //same for both themes
-                  ),
+            ),
+            Visibility(
+              visible: widget.selectedFiles.isFileSelected(file),
+              child: const Positioned(
+                right: 4,
+                top: 4,
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  size: 20,
+                  color: Colors.white, //same for both themes
                 ),
-              )
-            ],
-          ),
+              ),
+            )
+          ],
         ),
       ),
     );
