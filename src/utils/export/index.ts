@@ -135,7 +135,7 @@ export const getGoogleLikeMetadataFile = (
     const modificationTime = Math.floor(
         (metadata.modificationTime ?? metadata.creationTime) / 1000000
     );
-    const captionValue: string = file?.pubMagicMetadata?.data?.caption ?? '';
+    const captionValue: string = file?.pubMagicMetadata?.data?.caption;
     return JSON.stringify(
         {
             title: fileSaveName,
