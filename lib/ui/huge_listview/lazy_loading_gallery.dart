@@ -62,8 +62,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
   StreamSubscription<int> _currentIndexSubscription;
   bool _shouldRender;
-  final ValueNotifier<bool> _shouldSelectAll = ValueNotifier(false);
+  final ValueNotifier<bool> _toggleSelectAllFromDay = ValueNotifier(false);
   final ValueNotifier<bool> _showSelectAllButton = ValueNotifier(false);
+  final ValueNotifier<bool> _areAllFromDaySelected = ValueNotifier(false);
 
   @override
   void initState() {
@@ -161,6 +162,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     _reloadEventSubscription.cancel();
     _currentIndexSubscription.cancel();
     widget.selectedFiles.removeListener(_selectedFilesListener);
+
     super.dispose();
   }
 
@@ -193,7 +195,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             ValueListenableBuilder(
               valueListenable: _showSelectAllButton,
               builder: (context, value, _) {
-                return widget.selectedFiles.files.isEmpty
+                return !value
                     ? const SizedBox.shrink()
                     : GestureDetector(
                         behavior: HitTestBehavior.translucent,
@@ -201,7 +203,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                           width: 48,
                           height: 44,
                           child: ValueListenableBuilder(
-                            valueListenable: _shouldSelectAll,
+                            valueListenable: _areAllFromDaySelected,
                             builder: (context, value, _) {
                               return value
                                   ? const Icon(
@@ -218,7 +220,10 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                           ),
                         ),
                         onTap: () {
-                          _shouldSelectAll.value = !_shouldSelectAll.value;
+                          //this value has no significance
+                          //changing only to notify the listeners
+                          _toggleSelectAllFromDay.value =
+                              !_toggleSelectAllFromDay.value;
                         },
                       );
               },
@@ -244,7 +249,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           widget.selectedFiles,
           index == 0,
           _files.length > kRecycleLimit,
-          _shouldSelectAll,
+          _toggleSelectAllFromDay,
+          _areAllFromDaySelected,
         ),
       );
     }
@@ -255,13 +261,6 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   }
 
   void _selectedFilesListener() {
-    final filesOfGirdAsSet = widget.files.toSet();
-    //to disable the 'all selected' state of the icon when every file is
-    //unselected one by one after selecting all using the icon
-    if (!widget.selectedFiles.files
-        .any((element) => filesOfGirdAsSet.contains(element))) {
-      _shouldSelectAll.value = false;
-    }
     if (widget.selectedFiles.files.isEmpty) {
       _showSelectAllButton.value = false;
     } else {
@@ -272,21 +271,23 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
 class LazyLoadingGridView extends StatefulWidget {
   final String tag;
-  final List<File> files;
+  final List<File> filesInDay;
   final GalleryLoader asyncLoader;
   final SelectedFiles selectedFiles;
   final bool shouldRender;
   final bool shouldRecycle;
-  final ValueNotifier shouldSelectAll;
+  final ValueNotifier toggleSelectAllFromDay;
+  final ValueNotifier areAllFilesSelected;
 
   LazyLoadingGridView(
     this.tag,
-    this.files,
+    this.filesInDay,
     this.asyncLoader,
     this.selectedFiles,
     this.shouldRender,
     this.shouldRecycle,
-    this.shouldSelectAll, {
+    this.toggleSelectAllFromDay,
+    this.areAllFilesSelected, {
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -301,7 +302,6 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   @override
   void initState() {
     _shouldRender = widget.shouldRender;
-    widget.shouldSelectAll.addListener(_shouldSelectAllListener);
     widget.selectedFiles.addListener(_selectedFilesListener);
     _clearSelectionsEvent =
         Bus.instance.on<ClearSelectionsEvent>().listen((event) {
@@ -309,21 +309,23 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         setState(() {});
       }
     });
+    widget.toggleSelectAllFromDay.addListener(_toggleSelectAllFromDayListener);
     super.initState();
   }
 
   @override
   void dispose() {
     widget.selectedFiles.removeListener(_selectedFilesListener);
-    widget.shouldSelectAll.removeListener(_shouldSelectAllListener);
     _clearSelectionsEvent.cancel();
+    widget.toggleSelectAllFromDay
+        .removeListener(_toggleSelectAllFromDayListener);
     super.dispose();
   }
 
   @override
   void didUpdateWidget(LazyLoadingGridView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!listEquals(widget.files, oldWidget.files)) {
+    if (!listEquals(widget.filesInDay, oldWidget.filesInDay)) {
       _shouldRender = widget.shouldRender;
     }
   }
@@ -350,7 +352,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       },
       child: _shouldRender
           ? _getGridView()
-          : PlaceHolderWidget(widget.files.length),
+          : PlaceHolderWidget(widget.filesInDay.length),
     );
   }
 
@@ -365,7 +367,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
             });
           }
         },
-        child: PlaceHolderWidget(widget.files.length),
+        child: PlaceHolderWidget(widget.filesInDay.length),
       );
     } else {
       return _getGridView();
@@ -378,9 +380,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       physics:
           const NeverScrollableScrollPhysics(), // to disable GridView's scrolling
       itemBuilder: (context, index) {
-        return _buildFile(context, widget.files[index]);
+        return _buildFile(context, widget.filesInDay[index]);
       },
-      itemCount: widget.files.length,
+      itemCount: widget.filesInDay.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
@@ -450,9 +452,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(
       DetailPageConfiguration(
-        List.unmodifiable(widget.files),
+        List.unmodifiable(widget.filesInDay),
         widget.asyncLoader,
-        widget.files.indexOf(file),
+        widget.filesInDay.indexOf(file),
         widget.tag,
       ),
     );
@@ -460,8 +462,13 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _selectedFilesListener() {
+    if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
+      widget.areAllFilesSelected.value = true;
+    } else {
+      widget.areAllFilesSelected.value = false;
+    }
     bool shouldRefresh = false;
-    for (final file in widget.files) {
+    for (final file in widget.filesInDay) {
       if (widget.selectedFiles.isPartOfLastSelected(file)) {
         shouldRefresh = true;
       }
@@ -471,17 +478,13 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     }
   }
 
-  void _shouldSelectAllListener() {
-    if (widget.shouldSelectAll.value && mounted) {
+  void _toggleSelectAllFromDayListener() {
+    if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
       setState(() {
-        widget.selectedFiles.selectAll(widget.files.toSet());
+        widget.selectedFiles.unSelectAll(widget.filesInDay.toSet());
       });
     } else {
-      if (mounted) {
-        setState(() {
-          widget.selectedFiles.unSelectAll(widget.files.toSet());
-        });
-      }
+      widget.selectedFiles.selectAll(widget.filesInDay.toSet());
     }
   }
 }
