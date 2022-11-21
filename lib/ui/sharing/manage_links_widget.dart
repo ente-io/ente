@@ -204,6 +204,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     captionedTextWidget: const CaptionedTextWidget(
                       title: "Remove link",
                       textColor: warning500,
+                      makeTextBold: true,
                     ),
                     leadingIcon: Icons.remove_circle_outline,
                     leadingIconColor: warning500,
