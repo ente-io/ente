@@ -60,6 +60,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final int validTill = widget.collection?.publicURLs?.first?.validTill ?? 0;
+    final bool hasLinkExpired =
+        validTill != 0 && validTill < DateTime.now().microsecondsSinceEpoch;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -80,7 +82,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
                       title: "Link expiry",
-                      subTitle: (validTill == 0 ? "Never" : null),
+                      subTitle: (validTill == 0
+                          ? "Never"
+                          : (hasLinkExpired ? "Expired" : "Enabled")),
                     ),
                     trailingIcon: Icons.chevron_right,
                     menuItemColor: enteColorScheme.fillFaint,
@@ -90,8 +94,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   validTill != 0
                       ? MenuSectionDescriptionWidget(
-                          content:
-                              'Link will expire on ${getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill))}',
+                          content: hasLinkExpired
+                              ? "This link has expired. Please select a new expiry time or disable link expiry."
+                              : 'Link will expire on '
+                                  '${getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill))}',
                         )
                       : const SizedBox.shrink(),
                   const Padding(padding: EdgeInsets.only(top: 24)),
