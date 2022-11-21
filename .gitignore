@@ -15,6 +15,9 @@
 *.iws
 .idea/
 
+#Visual Studio Code related
+.vscode/settings.json
+
 # The .vscode folder contains launch configuration and tasks you configure in
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
