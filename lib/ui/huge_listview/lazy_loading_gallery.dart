@@ -182,22 +182,27 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     }
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(4, 14, 12, 8),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getDayWidget(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: getDayWidget(
                 context,
                 _files[0].creationTime,
                 widget.smallerTodayFont,
               ),
-              ValueListenableBuilder(
-                valueListenable: _showSelectAllButton,
-                builder: (context, value, _) {
-                  return widget.selectedFiles.files.isEmpty
-                      ? const SizedBox.shrink()
-                      : GestureDetector(
+            ),
+            ValueListenableBuilder(
+              valueListenable: _showSelectAllButton,
+              builder: (context, value, _) {
+                return widget.selectedFiles.files.isEmpty
+                    ? const SizedBox.shrink()
+                    : GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        child: SizedBox(
+                          width: 48,
+                          height: 44,
                           child: ValueListenableBuilder(
                             valueListenable: _shouldSelectAll,
                             builder: (context, value, _) {
@@ -214,14 +219,14 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                                     );
                             },
                           ),
-                          onTap: () {
-                            _shouldSelectAll.value = !_shouldSelectAll.value;
-                          },
-                        );
-                },
-              )
-            ],
-          ),
+                        ),
+                        onTap: () {
+                          _shouldSelectAll.value = !_shouldSelectAll.value;
+                        },
+                      );
+              },
+            )
+          ],
         ),
         _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
       ],
