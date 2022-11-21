@@ -2,17 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:tuple/tuple.dart';
+
+enum AvatarType { small, mini, tiny, extra }
 
 class UserAvatarWidget extends StatelessWidget {
   final User user;
-  final double size;
+  final AvatarType type;
   final int currentUserID;
 
   const UserAvatarWidget(
-    this.user,
-    this.currentUserID, {
+    this.user, {
     super.key,
-    this.size = 24,
+    this.currentUserID = -1,
+    this.type = AvatarType.mini,
   });
 
   @override
@@ -26,23 +29,47 @@ class UserAvatarWidget extends StatelessWidget {
         (user.id ?? 0).remainder(colorScheme.avatarColors.length)];
     final Color decorationColor =
         ((user.id ?? -1) == currentUserID) ? Colors.black : randomColor;
+
+    final avatarStyle = getAvatarStyle(context, type);
+    final double size = avatarStyle.item1;
+    final TextStyle textStyle = avatarStyle.item2;
     return Container(
       height: size,
       width: size,
-      padding: const EdgeInsets.all(2),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: decorationColor,
         border: Border.all(
-          color: colorScheme.strokeBase,
+          color: strokeBaseDark,
           width: 1.0,
         ),
       ),
-      child: Text(
-        displayChar.toUpperCase(),
-        style: enteTextTheme.mini.copyWith(color: textBaseLight),
-        textAlign: TextAlign.center,
+      child: CircleAvatar(
+        backgroundColor: decorationColor,
+        child: Text(
+          displayChar.toUpperCase(),
+          // fixed color
+          style: textStyle.copyWith(color: Colors.white),
+        ),
       ),
     );
+  }
+
+  Tuple2<double, TextStyle> getAvatarStyle(
+    BuildContext context,
+    AvatarType type,
+  ) {
+    final enteTextTheme = getEnteTextTheme(context);
+    switch (type) {
+      case AvatarType.small:
+        return Tuple2(36.0, enteTextTheme.small);
+      case AvatarType.mini:
+        return Tuple2(24.0, enteTextTheme.mini);
+      case AvatarType.tiny:
+        return Tuple2(18.0, enteTextTheme.tiny);
+      case AvatarType.extra:
+        return Tuple2(18.0, enteTextTheme.tiny);
+    }
   }
 }
