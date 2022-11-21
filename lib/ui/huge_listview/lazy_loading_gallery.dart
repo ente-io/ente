@@ -33,7 +33,6 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final String logTag;
   final Stream<int> currentIndexStream;
-  final bool smallerTodayFont;
 
   LazyLoadingGallery(
     this.files,
@@ -44,7 +43,6 @@ class LazyLoadingGallery extends StatefulWidget {
     this.selectedFiles,
     this.tag,
     this.currentIndexStream, {
-    this.smallerTodayFont,
     this.logTag = "",
     Key key,
   }) : super(key: key ?? UniqueKey());
@@ -190,7 +188,6 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
               child: getDayWidget(
                 context,
                 _files[0].creationTime,
-                widget.smallerTodayFont,
               ),
             ),
             ValueListenableBuilder(
