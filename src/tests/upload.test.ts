@@ -97,7 +97,14 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
 
     const fileIDSet = new Set();
     const uniqueFilesWithStaticThumbnail = filesWithStaticThumbnail.filter(
-        (file) => !fileIDSet.has(file.id)
+        (file) => {
+            if (fileIDSet.has(file.id)) {
+                return false;
+            } else {
+                fileIDSet.add(file.id);
+                return true;
+            }
+        }
     );
     const fileNamesWithStaticThumbnail = uniqueFilesWithStaticThumbnail.map(
         (file) => file.metadata.title
@@ -132,9 +139,15 @@ async function livePhotoClubbingCheck(expectedState) {
     );
 
     const fileIDSet = new Set();
-    const uniqueLivePhotos = livePhotos.filter(
-        (file) => !fileIDSet.has(file.id)
-    );
+    const uniqueLivePhotos = livePhotos.filter((file) => {
+        if (fileIDSet.has(file.id)) {
+            return false;
+        } else {
+            fileIDSet.add(file.id);
+            return true;
+        }
+    });
+
     const livePhotoFileNames = uniqueLivePhotos.map(
         (file) => file.metadata.title
     );
