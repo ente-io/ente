@@ -382,6 +382,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       },
       itemCount: widget.files.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
         crossAxisCount: 4,
       ),
       padding: const EdgeInsets.all(0),
@@ -401,47 +403,41 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         HapticFeedback.lightImpact();
         _selectFile(file);
       },
-      child: Container(
-        margin: const EdgeInsets.all(1.5),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(3),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(3),
-          child: Stack(
-            children: [
-              Hero(
-                tag: widget.tag + file.tag,
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withOpacity(
-                      widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
-                    ),
-                    BlendMode.darken,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(1),
+        child: Stack(
+          children: [
+            Hero(
+              tag: widget.tag + file.tag,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(
+                    widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
                   ),
-                  child: ThumbnailWidget(
-                    file,
-                    diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                    serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                    shouldShowLivePhotoOverlay: true,
-                    key: Key(widget.tag + file.tag),
-                  ),
+                  BlendMode.darken,
+                ),
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key(widget.tag + file.tag),
                 ),
               ),
-              Visibility(
-                visible: widget.selectedFiles.isFileSelected(file),
-                child: const Positioned(
-                  right: 4,
-                  top: 4,
-                  child: Icon(
-                    Icons.check_circle_rounded,
-                    size: 20,
-                    color: Colors.white, //same for both themes
-                  ),
+            ),
+            Visibility(
+              visible: widget.selectedFiles.isFileSelected(file),
+              child: const Positioned(
+                right: 4,
+                top: 4,
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  size: 20,
+                  color: Colors.white, //same for both themes
                 ),
-              )
-            ],
-          ),
+              ),
+            )
+          ],
         ),
       ),
     );
