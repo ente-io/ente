@@ -6,6 +6,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class CollectionSharingActions {
   final Logger _logger = Logger((CollectionSharingActions).toString());
@@ -51,6 +52,28 @@ class CollectionSharingActions {
         _logger.severe("failed to share collection", e);
         showGenericErrorDialog(context);
       }
+      return false;
+    }
+  }
+
+  // removeParticipant remove the user from a share album
+  Future<bool> removeParticipant(
+    BuildContext context,
+    Collection collection,
+    User user,
+  ) async {
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      await CollectionsService.instance.unshare(collection.id, user.email);
+      collection.sharees!.removeWhere((u) => u!.email == user.email);
+      await dialog.hide();
+      showToast(context, "Stopped sharing with " + user.email + ".");
+      return true;
+    } catch (e, s) {
+      Logger("EmailItemWidget").severe(e, s);
+      await dialog.hide();
+      await showGenericErrorDialog(context);
       return false;
     }
   }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -26,6 +28,9 @@ class ManageIndividualParticipant extends StatefulWidget {
 
 class _ManageIndividualParticipantState
     extends State<ManageIndividualParticipant> {
+  final CollectionSharingActions sharingActions =
+      CollectionSharingActions(CollectionsService.instance);
+
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -57,7 +62,7 @@ class _ManageIndividualParticipantState
                 ],
               ),
             ),
-            const SizedBox(height: 0),
+            const SizedBox(height: 12),
             const MenuSectionTitle(title: "Added as"),
             MenuItemWidget(
               captionedTextWidget: const CaptionedTextWidget(
@@ -68,7 +73,7 @@ class _ManageIndividualParticipantState
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isCollaborator ? Icons.check : null,
               onTap: () async {
-                showShortToast(context, "yet to implement");
+                showShortToast(context, "coming soon!");
               },
               isBottomBorderRadiusRemoved: true,
             ),
@@ -77,7 +82,7 @@ class _ManageIndividualParticipantState
               bgColor: getEnteColorScheme(context).blurStrokeFaint,
             ),
             MenuItemWidget(
-              captionedTextWidget: CaptionedTextWidget(
+              captionedTextWidget: const CaptionedTextWidget(
                 title: " Viewer",
               ),
               leadingIcon: Icons.photo,
@@ -85,7 +90,7 @@ class _ManageIndividualParticipantState
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isViewer ? Icons.check : null,
               onTap: () async {
-                showShortToast(context, "yet to implement");
+                // showShortToast(context, "yet to implement");
               },
               isTopBorderRadiusRemoved: true,
             ),
@@ -106,7 +111,14 @@ class _ManageIndividualParticipantState
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
-                showShortToast(context, "yet to implement");
+                final result = await sharingActions.removeParticipant(
+                  context,
+                  widget.collection,
+                  widget.user,
+                );
+                if (result && mounted) {
+                  Navigator.of(context).pop(true);
+                }
               },
             )
           ],
