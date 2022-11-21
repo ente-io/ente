@@ -62,7 +62,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
   StreamSubscription<int> _currentIndexSubscription;
   bool _shouldRender;
-  final ValueNotifier<bool> _selectAllFromDay = ValueNotifier(false);
+  final ValueNotifier<bool> _toggleSelectAllFromDay = ValueNotifier(false);
   final ValueNotifier<bool> _showSelectAllButton = ValueNotifier(false);
   final ValueNotifier<bool> _areAllFromDaySelected = ValueNotifier(false);
 
@@ -222,7 +222,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                         onTap: () {
                           //this value has no significance
                           //changing only to notify the listeners
-                          _selectAllFromDay.value = !_selectAllFromDay.value;
+                          _toggleSelectAllFromDay.value =
+                              !_toggleSelectAllFromDay.value;
                         },
                       );
               },
@@ -248,7 +249,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           widget.selectedFiles,
           index == 0,
           _files.length > kRecycleLimit,
-          _selectAllFromDay,
+          _toggleSelectAllFromDay,
           _areAllFromDaySelected,
         ),
       );
@@ -270,22 +271,22 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
 class LazyLoadingGridView extends StatefulWidget {
   final String tag;
-  final List<File> files;
+  final List<File> filesInDay;
   final GalleryLoader asyncLoader;
   final SelectedFiles selectedFiles;
   final bool shouldRender;
   final bool shouldRecycle;
-  final ValueNotifier selectAllFromDay;
+  final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
 
   LazyLoadingGridView(
     this.tag,
-    this.files,
+    this.filesInDay,
     this.asyncLoader,
     this.selectedFiles,
     this.shouldRender,
     this.shouldRecycle,
-    this.selectAllFromDay,
+    this.toggleSelectAllFromDay,
     this.areAllFilesSelected, {
     Key key,
   }) : super(key: key ?? UniqueKey());
@@ -308,7 +309,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         setState(() {});
       }
     });
-    widget.selectAllFromDay.addListener(_selectAllFromDayListener);
+    widget.toggleSelectAllFromDay.addListener(_toggleSelectAllFromDayListener);
     super.initState();
   }
 
@@ -316,14 +317,15 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void dispose() {
     widget.selectedFiles.removeListener(_selectedFilesListener);
     _clearSelectionsEvent.cancel();
-    widget.selectAllFromDay.removeListener(_selectAllFromDayListener);
+    widget.toggleSelectAllFromDay
+        .removeListener(_toggleSelectAllFromDayListener);
     super.dispose();
   }
 
   @override
   void didUpdateWidget(LazyLoadingGridView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!listEquals(widget.files, oldWidget.files)) {
+    if (!listEquals(widget.filesInDay, oldWidget.filesInDay)) {
       _shouldRender = widget.shouldRender;
     }
   }
@@ -350,7 +352,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       },
       child: _shouldRender
           ? _getGridView()
-          : PlaceHolderWidget(widget.files.length),
+          : PlaceHolderWidget(widget.filesInDay.length),
     );
   }
 
@@ -365,7 +367,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
             });
           }
         },
-        child: PlaceHolderWidget(widget.files.length),
+        child: PlaceHolderWidget(widget.filesInDay.length),
       );
     } else {
       return _getGridView();
@@ -378,9 +380,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       physics:
           const NeverScrollableScrollPhysics(), // to disable GridView's scrolling
       itemBuilder: (context, index) {
-        return _buildFile(context, widget.files[index]);
+        return _buildFile(context, widget.filesInDay[index]);
       },
-      itemCount: widget.files.length,
+      itemCount: widget.filesInDay.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
@@ -450,9 +452,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _routeToDetailPage(File file, BuildContext context) {
     final page = DetailPage(
       DetailPageConfiguration(
-        List.unmodifiable(widget.files),
+        List.unmodifiable(widget.filesInDay),
         widget.asyncLoader,
-        widget.files.indexOf(file),
+        widget.filesInDay.indexOf(file),
         widget.tag,
       ),
     );
@@ -460,13 +462,13 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   void _selectedFilesListener() {
-    if (widget.selectedFiles.files.containsAll(widget.files.toSet())) {
+    if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
       widget.areAllFilesSelected.value = true;
     } else {
       widget.areAllFilesSelected.value = false;
     }
     bool shouldRefresh = false;
-    for (final file in widget.files) {
+    for (final file in widget.filesInDay) {
       if (widget.selectedFiles.isPartOfLastSelected(file)) {
         shouldRefresh = true;
       }
@@ -476,13 +478,13 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     }
   }
 
-  void _selectAllFromDayListener() {
-    if (widget.selectedFiles.files.containsAll(widget.files.toSet())) {
+  void _toggleSelectAllFromDayListener() {
+    if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
       setState(() {
-        widget.selectedFiles.unSelectAll(widget.files.toSet());
+        widget.selectedFiles.unSelectAll(widget.filesInDay.toSet());
       });
     } else {
-      widget.selectedFiles.selectAll(widget.files.toSet());
+      widget.selectedFiles.selectAll(widget.filesInDay.toSet());
     }
   }
 }
