@@ -112,7 +112,7 @@ class _BackupConfigurationHeaderWidgetState
                         .withOpacity(0.7),
                   ),
                 ),
-          Switch(
+          Switch.adaptive(
             value: _isBackedUp,
             onChanged: (value) async {
               await RemoteSyncService.instance.updateDeviceFolderSyncStatus(
