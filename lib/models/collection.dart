@@ -206,7 +206,7 @@ class User {
   int? id;
   String email;
   String? name;
-  String role;
+  String? role;
 
   User({
     this.id,
@@ -214,6 +214,11 @@ class User {
     this.name,
     this.role,
   });
+
+  bool get isViewer => role == null || role?.toUpperCase() == 'VIEWER';
+
+  bool get isCollaborator =>
+      role != null && role?.toUpperCase() == 'COLLABORATOR';
 
   Map<String, dynamic> toMap() {
     return {'id': id, 'email': email, 'name': name, 'role': role};
