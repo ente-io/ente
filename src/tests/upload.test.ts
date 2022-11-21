@@ -18,13 +18,13 @@ export async function testUpload() {
     }
 
     try {
-        await totalFileCountCheck(expectedState);
         await totalCollectionCountCheck(expectedState);
         await collectionWiseFileCount(expectedState);
         await thumbnailGenerationFailedFilesCheck(expectedState);
         await livePhotoClubbingCheck(expectedState);
         await exifDataParsingCheck(expectedState);
         await googleMetadataReadingCheck(expectedState);
+        await totalFileCountCheck(expectedState);
     } catch (e) {
         console.log(e);
     }
