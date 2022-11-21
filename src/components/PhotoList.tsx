@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
-import { Box, styled } from '@mui/material';
+import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -15,7 +15,6 @@ import {
 import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
-import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from './Container';
@@ -410,15 +409,9 @@ export function PhotoList({
                 <FooterContainer span={columns}>
                     <p>
                         {constants.PRESERVED_BY}{' '}
-                        <a
-                            target="_blank"
-                            style={{
-                                color: getVariantColor(ButtonVariant.success),
-                            }}
-                            href={ENTE_WEBSITE_LINK}
-                            rel="noreferrer">
+                        <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {constants.ENTE_IO}
-                        </a>
+                        </Link>
                     </p>
                 </FooterContainer>
             ),
