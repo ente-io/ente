@@ -193,7 +193,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             ValueListenableBuilder(
               valueListenable: _showSelectAllButton,
               builder: (context, value, _) {
-                return widget.selectedFiles.files.isEmpty
+                return !value
                     ? const SizedBox.shrink()
                     : GestureDetector(
                         behavior: HitTestBehavior.translucent,
