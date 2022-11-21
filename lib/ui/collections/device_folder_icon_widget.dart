@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
+import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -27,7 +28,7 @@ class DeviceFolderIcon extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(1),
                 child: SizedBox(
                   height: 120,
                   width: 120,
@@ -52,17 +53,14 @@ class DeviceFolderIcon extends StatelessWidget {
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Text(
-                  deviceCollection.name,
-                  textAlign: TextAlign.left,
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle1
-                      .copyWith(fontSize: 12),
-                  overflow: TextOverflow.ellipsis,
-                ),
+              const SizedBox(
+                height: 2,
+              ),
+              Text(
+                deviceCollection.name,
+                textAlign: TextAlign.left,
+                style: Theme.of(context).colorScheme.enteTheme.textTheme.small,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
