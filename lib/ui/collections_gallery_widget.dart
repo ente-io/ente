@@ -102,7 +102,11 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         }
       },
     );
-    result.matched.removeWhere((element) => element.thumbnail == null);
+    result.matched.removeWhere(
+      (element) =>
+          element.thumbnail == null ||
+          (element.collection.publicURLs?.isNotEmpty ?? false),
+    );
     return result.matched + result.unmatched;
   }
 

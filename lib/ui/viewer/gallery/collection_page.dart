@@ -66,7 +66,6 @@ class CollectionPage extends StatelessWidget {
       tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
-      smallerTodayFont: true,
       albumName: c.collection.name,
     );
     return Scaffold(
