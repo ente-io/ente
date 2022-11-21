@@ -134,7 +134,8 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                             fit: BoxFit.contain,
                             child: Icon(
                               widget.leadingIcon,
-                              color: widget.leadingIconColor,
+                              color: widget.leadingIconColor ??
+                                  enteColorScheme.strokeBase,
                             ),
                           ),
                   ),

@@ -21,6 +21,7 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/payment/subscription.dart';
+import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -49,11 +50,25 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   Widget build(BuildContext context) {
     _sharees = widget.collection.sharees;
     final children = <Widget>[];
+    children.add(
+      MenuSectionTitle(
+        title: _sharees.isEmpty
+            ? "Share with specific people"
+            : "Shared with ${_sharees.length} people",
+        iconData: Icons.workspaces,
+      ),
+    );
     if (!_showEntryField && _sharees.isEmpty) {
       _showEntryField = true;
     } else {
       for (final user in _sharees) {
-        children.add(EmailItemWidget(widget.collection, user.email));
+        children.add(
+          EmailItemWidget(
+            widget.collection,
+            user.email,
+            user,
+          ),
+        );
       }
     }
     if (_showEntryField) {
@@ -114,6 +129,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
               title: "Copy link",
+              makeTextBold: true,
             ),
             leadingIcon: Icons.copy,
             menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -131,6 +147,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
               title: "Send link",
+              makeTextBold: true,
             ),
             leadingIcon: Icons.adaptive.share,
             menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -147,11 +164,13 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
               title: "Manage link",
+              makeTextBold: true,
             ),
             leadingIcon: Icons.link,
             trailingIcon: Icons.navigate_next,
             menuItemColor: getEnteColorScheme(context).fillFaint,
             pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIconIsMuted: true,
             onTap: () async {
               routeToPage(
                 context,
@@ -388,10 +407,12 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 class EmailItemWidget extends StatelessWidget {
   final Collection collection;
   final String email;
+  final User user;
 
   const EmailItemWidget(
     this.collection,
-    this.email, {
+    this.email,
+    this.user, {
     Key key,
   }) : super(key: key);
 
@@ -402,9 +423,17 @@ class EmailItemWidget extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-          child: Text(
-            email,
-            style: const TextStyle(fontSize: 16),
+          child: GestureDetector(
+            onTap: () async {
+              await routeToPage(
+                context,
+                ManageIndividualParticipant(collection: collection, user: user),
+              );
+            },
+            child: Text(
+              email,
+              style: const TextStyle(fontSize: 16),
+            ),
           ),
         ),
         const Expanded(child: SizedBox()),
