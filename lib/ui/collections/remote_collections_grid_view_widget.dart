@@ -56,7 +56,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         // To include the + button
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,
-          mainAxisSpacing: 6,
+          mainAxisSpacing: 14,
           crossAxisSpacing: gapBetweenAlbums,
           childAspectRatio: sideOfThumbnail / (sideOfThumbnail + 50),
         ), //24 is height of album title

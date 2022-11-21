@@ -288,7 +288,7 @@ class OutgoingCollectionItem extends StatelessWidget {
         child: Row(
           children: <Widget>[
             ClipRRect(
-              borderRadius: BorderRadius.circular(3),
+              borderRadius: BorderRadius.circular(1),
               child: SizedBox(
                 height: 60,
                 width: 60,
@@ -377,7 +377,7 @@ class IncomingCollectionItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           ClipRRect(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(1),
             child: SizedBox(
               height: sideOfThumbnail,
               width: sideOfThumbnail,
