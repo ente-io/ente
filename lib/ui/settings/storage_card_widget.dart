@@ -126,7 +126,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     final totalStorageInBytes = userDetails.getTotalStorage();
     final freeStorageInBytes = totalStorageInBytes - usedStorageInBytes;
 
-    final isMobileScreenSmall = MediaQuery.of(context).size.width <= 360;
+    final isMobileScreenSmall = MediaQuery.of(context).size.width <= 336;
     final shouldShowFreeSpaceInMBs = freeStorageInBytes < hundredMBinBytes;
     final shouldShowFreeSpaceInTBs = freeStorageInBytes >= oneTBinBytes;
     final shouldShowUsedStorageInTBs = usedStorageInBytes >= oneTBinBytes;
