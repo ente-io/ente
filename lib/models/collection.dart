@@ -181,6 +181,31 @@ enum CollectionType {
   album,
 }
 
+enum CollectionParticipantRole {
+  unknown,
+  viewer,
+  collaborator,
+  owner,
+}
+
+extension CollectionParticipantRoleExtn on CollectionParticipantRole {
+  static CollectionParticipantRole fromString(String? val) {
+    if ((val ?? '') == '') {
+      return CollectionParticipantRole.viewer;
+    }
+    for (var x in CollectionParticipantRole.values) {
+      if (x.name.toUpperCase() == val!.toUpperCase()) {
+        return x;
+      }
+    }
+    return CollectionParticipantRole.unknown;
+  }
+
+  String toStringVal() {
+    return name.toUpperCase();
+  }
+}
+
 class CollectionAttributes {
   final String? encryptedPath;
   final String? pathDecryptionNonce;
