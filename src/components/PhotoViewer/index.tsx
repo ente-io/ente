@@ -104,7 +104,7 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         if (!photoSwipe) return;
-        function handleKeyUp(event) {
+        function handleKeyUp(event: KeyboardEvent) {
             if (!isOpen || showInfo) {
                 return;
             }
