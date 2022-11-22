@@ -1,17 +1,24 @@
 // @dart=2.9
 
 import 'package:ente_auth/core/constants.dart';
+import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
 import 'package:ente_auth/ui/components/menu_item_widget.dart';
+import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
 
-class SupportSectionWidget extends StatelessWidget {
+class SupportSectionWidget extends StatefulWidget {
   const SupportSectionWidget({Key key}) : super(key: key);
 
+  @override
+  State<SupportSectionWidget> createState() => _SupportSectionWidgetState();
+}
+
+class _SupportSectionWidgetState extends State<SupportSectionWidget> {
   @override
   Widget build(BuildContext context) {
     return ExpandableMenuItemWidget(
@@ -51,6 +58,19 @@ class SupportSectionWidget extends StatelessWidget {
             final zipFilePath = await getZippedLogsFile(context);
             await shareLogs(context, "auth@ente.io", zipFilePath);
           },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Crash analytics",
+          ),
+          trailingSwitch: ToggleSwitchWidget(
+            value: SuperLogging.shouldReportErrors(),
+            onChanged: (value) async {
+              await SuperLogging.setShouldReportErrors(value);
+              setState(() {});
+            },
+          ),
         ),
         sectionOptionSpacing,
       ],

@@ -17,6 +17,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 typedef FutureOrVoidCallback = FutureOr<void> Function();
 
@@ -144,54 +146,51 @@ class SuperLogging {
   /// The current super logging configuration
   static LogConfig config;
 
+  static SharedPreferences _preferences;
+
+  static const keyShouldReportErrors = "should_report_errors";
+
+  static const keyAnonymousUserID = "anonymous_user_id";
+
   static Future<void> main([LogConfig config]) async {
     config ??= LogConfig();
+
     SuperLogging.config = config;
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    appVersion ??= await getAppVersion();
-    final isFDroidClient = await isFDroidBuild();
-    if (isFDroidClient) {
-      config.sentryDsn = null;
-      config.tunnel = null;
-    }
+    _preferences = await SharedPreferences.getInstance();
 
-    final enable = config.enableInDebugMode || kReleaseMode;
-    sentryIsEnabled = enable && config.sentryDsn != null && !isFDroidClient;
-    fileIsEnabled = enable && config.logDirPath != null;
+    appVersion ??= await getAppVersion();
+
+    final loggingEnabled = config.enableInDebugMode || kReleaseMode;
+    sentryIsEnabled =
+        loggingEnabled && config.sentryDsn != null && shouldReportErrors();
+    fileIsEnabled = loggingEnabled && config.logDirPath != null;
 
     if (fileIsEnabled) {
       await setupLogDir();
-    }
-    if (sentryIsEnabled) {
-      setupSentry();
     }
 
     Logger.root.level = Level.ALL;
     Logger.root.onRecord.listen(onLogRecord);
 
-    if (isFDroidClient) {
-      assert(
-        sentryIsEnabled == false,
-        "sentry dsn should be disabled for "
-        "f-droid config  ${config.sentryDsn} & ${config.tunnel}",
-      );
+    if (sentryIsEnabled) {
+      setupSentry();
+    } else {
+      $.info("Sentry is disabled");
     }
 
-    if (!enable) {
+    if (!loggingEnabled) {
       $.info("detected debug mode; sentry & file logging disabled.");
     }
     if (fileIsEnabled) {
       $.info("log file for today: $logFile with prefix ${config.prefix}");
     }
-    if (sentryIsEnabled) {
-      $.info("sentry uploader started");
-    }
 
     if (config.body == null) return;
 
-    if (enable && sentryIsEnabled) {
+    if (loggingEnabled && sentryIsEnabled) {
       await SentryFlutter.init(
         (options) {
           options.dsn = config.sentryDsn;
@@ -296,6 +295,8 @@ class SuperLogging {
   static bool sentryIsEnabled;
 
   static Future<void> setupSentry() async {
+    $.info("Setting up sentry");
+    SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
     await for (final error in sentryQueueControl.stream.asBroadcastStream()) {
       try {
         Sentry.captureException(
@@ -313,6 +314,26 @@ class SuperLogging {
   static void doSentryRetry(Error error) async {
     await Future.delayed(config.sentryRetryDelay);
     sentryQueueControl.add(error);
+  }
+
+  static bool shouldReportErrors() {
+    if (_preferences.containsKey(keyShouldReportErrors)) {
+      return _preferences.getBool(keyShouldReportErrors);
+    } else {
+      return false;
+    }
+  }
+
+  static Future<void> setShouldReportErrors(bool value) {
+    return _preferences.setBool(keyShouldReportErrors, value);
+  }
+
+  static Future<String> _getOrCreateAnonymousUserID() async {
+    if (!_preferences.containsKey(keyAnonymousUserID)) {
+      //ignore: prefer_const_constructors
+      await _preferences.setString(keyAnonymousUserID, Uuid().v4());
+    }
+    return _preferences.getString(keyAnonymousUserID);
   }
 
   /// The log file currently in use.
