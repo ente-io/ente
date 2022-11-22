@@ -28,6 +28,10 @@ import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
 import { makeHumanReadableStorage } from 'utils/billing';
+import { CustomError } from 'utils/error';
+
+const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
+
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -525,4 +529,45 @@ export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
         throw Error('user missing');
     }
     return files.filter((file) => file.isTrashed || file.ownerID === user.id);
+};
+
+export const copyFileToClipboard = async (fileUrl: string) => {
+    const canvas = document.createElement('canvas');
+    const canvasCTX = canvas.getContext('2d');
+    const image = new Image();
+
+    await new Promise((resolve, reject) => {
+        let timeout: NodeJS.Timeout = null;
+        try {
+            image.setAttribute('src', fileUrl);
+            image.onload = () => {
+                canvas.width = image.width;
+                canvas.height = image.height;
+                canvasCTX.drawImage(image, 0, 0, image.width, image.height);
+                resolve(null);
+                clearTimeout(timeout);
+            };
+        } catch (e) {
+            void logError(e, 'failed to copy to clipboard');
+        } finally {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            WAIT_TIME_IMAGE_CONVERSION
+        );
+    });
+
+    const { ClipboardItem } = window;
+    canvas.toBlob(
+        async (blob) => {
+            console.log(URL.createObjectURL(blob), blob.size);
+            await navigator.clipboard
+                .write([new ClipboardItem({ 'image/png': blob })])
+                .then(() => console.log('copied'))
+                .catch((e) => console.log(e));
+        },
+        'image/png',
+        1
+    );
 };
