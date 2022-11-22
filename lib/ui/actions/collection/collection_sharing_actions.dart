@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/utils/email_util.dart';
+import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class CollectionSharingActions {
@@ -89,6 +93,102 @@ class CollectionSharingActions {
       await dialog.hide();
       await showGenericErrorDialog(context);
       return false;
+    }
+  }
+
+  Future<bool?> addEmailToCollection(
+    BuildContext context,
+    Collection collection,
+    String email, {
+    String? publicKey,
+  }) async {
+    if (!isValidEmail(email)) {
+      await showErrorDialog(
+        context,
+        "Invalid email address",
+        "Please enter a valid email address.",
+      );
+      return null;
+    } else if (email == Configuration.instance.getEmail()) {
+      await showErrorDialog(context, "Oops", "You cannot share with yourself");
+      return null;
+    } else if (collection.getSharees().any((user) => user.email == email)) {
+      showErrorDialog(
+        context,
+        "Oops",
+        "You're already sharing this with " + email,
+      );
+      return null;
+    }
+    if (publicKey == null) {
+      final dialog = createProgressDialog(context, "Searching for user...");
+      await dialog.show();
+      try {
+        publicKey = await UserService.instance.getPublicKey(email);
+        await dialog.hide();
+      } catch (e) {
+        _logger.severe("Failed to get public key", e);
+        showGenericErrorDialog(context);
+        await dialog.hide();
+      }
+    }
+    // getPublicKey can return null
+    // ignore: unnecessary_null_comparison
+    if (publicKey == null || publicKey == '') {
+      Navigator.of(context, rootNavigator: true).pop('dialog');
+      final dialog = AlertDialog(
+        title: const Text("Invite to ente?"),
+        content: Text(
+          "Looks like " +
+              email +
+              " hasn't signed up for ente yet. would you like to invite them?",
+          style: const TextStyle(
+            height: 1.4,
+          ),
+        ),
+        actions: [
+          TextButton(
+            child: Text(
+              "Invite",
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.greenAlternative,
+              ),
+            ),
+            onPressed: () {
+              shareText(
+                "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.",
+              );
+            },
+          ),
+        ],
+      );
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return dialog;
+        },
+      );
+      return null;
+    } else {
+      final dialog = createProgressDialog(context, "Sharing...");
+      await dialog.show();
+      try {
+        await CollectionsService.instance
+            .share(collection.id, email, publicKey);
+        await dialog.hide();
+
+        showShortToast(context, "Shared successfully!");
+        return true;
+      } catch (e) {
+        await dialog.hide();
+        if (e is SharingNotPermittedForFreeAccountsError) {
+          _showUnSupportedAlert(context);
+        } else {
+          _logger.severe("failed to share collection", e);
+          showGenericErrorDialog(context);
+        }
+        return false;
+      }
     }
   }
 

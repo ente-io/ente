@@ -4,6 +4,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -29,6 +30,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   bool hideListOfEmails = false;
   bool _emailIsValid = false;
   bool isKeypadOpen = false;
+  late CollectionSharingActions sharingActions;
 
   // Focus nodes are necessary
   final textFieldFocusNode = FocusNode();
@@ -37,6 +39,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   @override
   void initState() {
     selectAsViewer = true;
+    sharingActions = CollectionSharingActions(CollectionsService.instance);
     super.initState();
   }
 
@@ -202,8 +205,18 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                         onTap: (selectedEmail == '' && !_emailIsValid)
                             ? null
                             : () async {
-                                showToast(context, "yet to implement");
-                                Navigator.of(context).pop();
+                                final emailToAdd = selectedEmail == ''
+                                    ? _email
+                                    : selectedEmail;
+                                final result =
+                                    await sharingActions.addEmailToCollection(
+                                  context,
+                                  widget.collection,
+                                  emailToAdd,
+                                );
+                                if (result != null && result && mounted) {
+                                  Navigator.of(context).pop(true);
+                                }
                               },
                         text:
                             selectAsViewer ? "Add viewer" : "Add collaborator",
