@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -173,7 +172,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           onTap: selectedEmail == ''
                               ? null
                               : () async {
-                                  await UpdateService.instance.hideChangeLog();
+                                  showToast(context, "yet to implement");
                                   Navigator.of(context).pop();
                                 },
                           text: selectAsViewer
