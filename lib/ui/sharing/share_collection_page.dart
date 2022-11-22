@@ -91,7 +91,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         menuItemColor: getEnteColorScheme(context).fillFaint,
         pressedColor: getEnteColorScheme(context).fillFaint,
         onTap: () async {
-          unawaited(routeToPage(context, AddParticipantPage()));
+          unawaited(
+              routeToPage(context, AddParticipantPage(widget.collection)));
         },
       ),
     );

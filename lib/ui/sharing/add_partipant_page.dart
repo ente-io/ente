@@ -14,7 +14,8 @@ import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class AddParticipantPage extends StatefulWidget {
-  const AddParticipantPage({super.key});
+  final Collection collection;
+  const AddParticipantPage(this.collection, {super.key});
 
   @override
   State<StatefulWidget> createState() => _AddParticipantPage();
@@ -35,10 +36,23 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final enteColorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
     final int ownerID = Configuration.instance.getUserID()!;
+    final Set<int> existingUserIDs = {};
+    for (final User? u in widget.collection?.sharees ?? []) {
+      if (u != null && u.id != null) {
+        existingUserIDs.add(u.id!);
+      }
+    }
     final List<String> emails = [];
     for (final c in CollectionsService.instance.getActiveCollections()) {
       if (c.owner?.id == ownerID) {
-        c.sharees?.forEach((e) => emails.add(e!.email));
+        c.sharees?.forEach(
+          (e) => {
+            if (existingUserIDs.contains(1))
+              {
+                emails.add(e!.email),
+              }
+          },
+        );
       } else {
         emails.add(c.owner!.email);
       }
