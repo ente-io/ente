@@ -57,6 +57,19 @@ class Collection {
     return (magicMetadata.subType ?? 0) == subTypeDefaultHidden;
   }
 
+  List<User> getSharees() {
+    final List<User> result = [];
+    if (sharees == null) {
+      return result;
+    }
+    for (final User? u in sharees!) {
+      if (u != null) {
+        result.add(u);
+      }
+    }
+    return result;
+  }
+
   static CollectionType typeFromString(String type) {
     switch (type) {
       case "folder":
