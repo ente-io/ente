@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "albums": "next dev -p 3002",
-    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint": "next lint",
     "prebuild": "yarn lint",
     "build": "next build",
     "postbuild": "next export",
@@ -15,7 +15,6 @@
   },
   "dependencies": {
     "@date-io/date-fns": "^2.14.0",
-    "@ente-io/next-with-workbox": "^1.0.3",
     "@mui/icons-material": "^5.6.2",
     "@mui/material": "^5.6.2",
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
@@ -54,11 +53,6 @@
     "react-window": "^1.8.6",
     "sanitize-filename": "^1.6.3",
     "styled-components": "^5.3.5",
-    "workbox-precaching": "^6.1.5",
-    "workbox-recipes": "^6.1.5",
-    "workbox-routing": "^6.1.5",
-    "workbox-strategies": "^6.1.5",
-    "workbox-window": "^6.1.5",
     "xml-js": "^1.6.11",
     "yup": "^0.29.3"
   },
@@ -76,16 +70,10 @@
     "@types/react-window-infinite-loader": "^1.0.3",
     "@types/styled-components": "^5.1.25",
     "@types/yup": "^0.29.7",
-    "@typescript-eslint/eslint-plugin": "^4.25.0",
-    "@typescript-eslint/parser": "^4.25.0",
-    "eslint": "^7.27.0",
-    "eslint-config-airbnb": "^18.2.1",
-    "eslint-config-google": "^0.14.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-import": "^2.23.3",
-    "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-react": "^7.23.2",
-    "eslint-plugin-react-hooks": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "eslint": "^8.28.0",
+    "eslint-config-next": "^13.0.4",
+    "eslint-config-prettier": "^8.5.0",
     "husky": "^7.0.1",
     "lint-staged": "^11.1.2",
     "prettier": "2.3.2",
@@ -94,12 +82,6 @@
   },
   "standard": {
     "parser": "babel-eslint"
-  },
-  "lint-staged": {
-    "src/**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write --ignore-unknown"
-    ]
   },
   "resolutions": {
     "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
