@@ -37,29 +37,29 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final enteTextTheme = getEnteTextTheme(context);
     final int ownerID = Configuration.instance.getUserID()!;
     final Set<int> existingUserIDs = {};
+    final List<User> suggestedUsers = [];
     for (final User? u in widget.collection?.sharees ?? []) {
       if (u != null && u.id != null) {
         existingUserIDs.add(u.id!);
       }
     }
-    final List<String> emails = [];
     for (final c in CollectionsService.instance.getActiveCollections()) {
       if (c.owner?.id == ownerID) {
-        c.sharees?.forEach(
-          (e) => {
-            if (existingUserIDs.contains(1))
-              {
-                emails.add(e!.email),
-              }
-          },
-        );
-      } else {
-        emails.add(c.owner!.email);
+        for (final User? u in c?.sharees ?? []) {
+          if (u != null && u.id != null && !existingUserIDs.contains(u.id)) {
+            existingUserIDs.add(u.id!);
+            suggestedUsers.add(u);
+          }
+        }
+      } else if (c.owner != null &&
+          c.owner!.id != null &&
+          !existingUserIDs.contains(c.owner!.id!)) {
+        existingUserIDs.add(c.owner!.id!);
+        suggestedUsers.add(c.owner!);
       }
     }
-    final List<String> finalList = emails.toSet().toList();
-    hideListOfEmails = finalList.isEmpty;
-    finalList.sort();
+    suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
+    hideListOfEmails = suggestedUsers.isEmpty;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Add people"),
@@ -89,19 +89,16 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                           Expanded(
                             child: ListView.builder(
                               itemBuilder: (context, index) {
-                                final currentEmail = finalList[index];
+                                final currentUser = suggestedUsers[index];
                                 return Column(
                                   children: [
                                     MenuItemWidget(
                                       captionedTextWidget: CaptionedTextWidget(
-                                        title: finalList[index],
+                                        title: currentUser.email,
                                       ),
                                       leadingIconSize: 24.0,
                                       leadingIconWidget: UserAvatarWidget(
-                                        User(
-                                          id: currentEmail.hashCode,
-                                          email: currentEmail,
-                                        ),
+                                        currentUser,
                                         type: AvatarType.mini,
                                       ),
                                       menuItemColor:
@@ -109,14 +106,15 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                       pressedColor:
                                           getEnteColorScheme(context).fillFaint,
                                       trailingIcon:
-                                          (selectedEmail == finalList[index])
+                                          (selectedEmail == currentUser.email)
                                               ? Icons.check
                                               : null,
                                       onTap: () async {
-                                        if (selectedEmail == finalList[index]) {
+                                        if (selectedEmail ==
+                                            currentUser.email) {
                                           selectedEmail = '';
                                         } else {
-                                          selectedEmail = finalList[index];
+                                          selectedEmail = currentUser.email;
                                         }
 
                                         setState(() => {});
@@ -124,9 +122,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                       },
                                       isTopBorderRadiusRemoved: index > 0,
                                       isBottomBorderRadiusRemoved:
-                                          index < (finalList.length - 1),
+                                          index < (suggestedUsers.length - 1),
                                     ),
-                                    (index == (finalList.length - 1))
+                                    (index == (suggestedUsers.length - 1))
                                         ? const SizedBox.shrink()
                                         : DividerWidget(
                                             dividerType: DividerType.menu,
@@ -136,7 +134,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                   ],
                                 );
                               },
-                              itemCount: finalList.length,
+                              itemCount: suggestedUsers.length,
 
                               // physics: const ClampingScrollPhysics(),
                             ),
