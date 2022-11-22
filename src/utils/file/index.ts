@@ -536,7 +536,7 @@ export const copyFileToClipboard = async (fileUrl: string) => {
     const canvasCTX = canvas.getContext('2d');
     const image = new Image();
 
-    await new Promise((resolve, reject) => {
+    const blobPromise = await new Promise<Blob>((resolve, reject) => {
         let timeout: NodeJS.Timeout = null;
         try {
             image.setAttribute('src', fileUrl);
@@ -544,11 +544,19 @@ export const copyFileToClipboard = async (fileUrl: string) => {
                 canvas.width = image.width;
                 canvas.height = image.height;
                 canvasCTX.drawImage(image, 0, 0, image.width, image.height);
-                resolve(null);
+                canvas.toBlob(
+                    (blob) => {
+                        resolve(blob);
+                    },
+                    'image/png',
+                    1
+                );
+
                 clearTimeout(timeout);
             };
         } catch (e) {
             void logError(e, 'failed to copy to clipboard');
+            reject(e);
         } finally {
             clearTimeout(timeout);
         }
@@ -559,16 +567,8 @@ export const copyFileToClipboard = async (fileUrl: string) => {
     });
 
     const { ClipboardItem } = window;
-    await new Promise((resolve) => {
-        canvas.toBlob(
-            async (blob) => {
-                await navigator.clipboard
-                    .write([new ClipboardItem({ 'image/png': blob })])
-                    .catch((e) => logError(e, 'failed to copy to clipboard'))
-                    .finally(() => resolve(null));
-            },
-            'image/png',
-            1
-        );
-    });
+
+    await navigator.clipboard
+        .write([new ClipboardItem({ 'image/png': blobPromise })])
+        .catch((e) => logError(e, 'failed to copy to clipboard'));
 };
