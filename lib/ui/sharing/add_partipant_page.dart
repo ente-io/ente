@@ -159,13 +159,14 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       captionedTextWidget: const CaptionedTextWidget(
                         title: "Collaborator",
                       ),
-                      leadingIcon: Icons.edit,
+                      leadingIcon: Icons.edit_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       pressedColor: getEnteColorScheme(context).fillFaint,
                       trailingIcon: !selectAsViewer ? Icons.check : null,
                       onTap: () async {
                         showShortToast(context, "coming soon!");
-                        setState(() => {selectAsViewer = false});
+                        // showShortToast(context, "coming soon!");
+                        // setState(() => {selectAsViewer = false});
                       },
                       isBottomBorderRadiusRemoved: true,
                     ),
@@ -177,7 +178,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       captionedTextWidget: const CaptionedTextWidget(
                         title: " Viewer",
                       ),
-                      leadingIcon: Icons.photo,
+                      leadingIcon: Icons.photo_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       pressedColor: getEnteColorScheme(context).fillFaint,
                       trailingIcon: selectAsViewer ? Icons.check : null,

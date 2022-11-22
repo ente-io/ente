@@ -68,7 +68,7 @@ class _ManageIndividualParticipantState
               captionedTextWidget: const CaptionedTextWidget(
                 title: "Collaborator",
               ),
-              leadingIcon: Icons.edit,
+              leadingIcon: Icons.edit_outlined,
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isCollaborator ? Icons.check : null,
@@ -85,7 +85,8 @@ class _ManageIndividualParticipantState
               captionedTextWidget: const CaptionedTextWidget(
                 title: " Viewer",
               ),
-              leadingIcon: Icons.photo,
+              leadingIcon: Icons.photo_outlined,
+              leadingIconColor: getEnteColorScheme(context).strokeBase,
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isViewer ? Icons.check : null,
