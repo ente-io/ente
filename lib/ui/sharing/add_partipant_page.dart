@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
@@ -24,7 +25,9 @@ class AddParticipantPage extends StatefulWidget {
 class _AddParticipantPage extends State<AddParticipantPage> {
   late bool selectAsViewer;
   String selectedEmail = '';
+  String _email = '';
   bool hideListOfEmails = false;
+  bool _emailIsValid = false;
 
   @override
   void initState() {
@@ -54,6 +57,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 "Add a new email",
                 style: enteTextTheme.body,
               ),
+              _getEmailField(),
               hideListOfEmails
                   ? const Expanded(child: SizedBox())
                   : Expanded(
@@ -189,6 +193,49 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _getEmailField() {
+    return TextFormField(
+      style: Theme.of(context).textTheme.subtitle1,
+      autofillHints: const [AutofillHints.email],
+      decoration: InputDecoration(
+        fillColor: getEnteColorScheme(context).fillFaint,
+        filled: true,
+        hintText: 'Email',
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: UnderlineInputBorder(
+          borderSide: BorderSide.none,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        suffixIcon: _emailIsValid
+            ? Icon(
+                Icons.check,
+                size: 20,
+                color: Theme.of(context)
+                    .inputDecorationTheme
+                    .focusedBorder
+                    ?.borderSide
+                    .color,
+              )
+            : null,
+      ),
+      onChanged: (value) {
+        _email = value.trim();
+        if (_emailIsValid != EmailValidator.validate(_email)) {
+          setState(() {
+            _emailIsValid = EmailValidator.validate(_email);
+          });
+        }
+      },
+      autocorrect: false,
+      keyboardType: TextInputType.emailAddress,
+      //initialValue: _email,
+      textInputAction: TextInputAction.next,
     );
   }
 
