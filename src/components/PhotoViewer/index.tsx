@@ -117,6 +117,7 @@ function PhotoViewer(props: Iprops) {
             );
             switch (event.key) {
                 case 'i':
+                case 'I':
                     if (!showInfo) {
                         setShowInfo(true);
                     } else {
