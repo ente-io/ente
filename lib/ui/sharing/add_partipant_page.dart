@@ -28,6 +28,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   String _email = '';
   bool hideListOfEmails = false;
   bool _emailIsValid = false;
+  bool isKeypadOpen = false;
+
+  // Focus nodes are necessary
+  final textFieldFocusNode = FocusNode();
+  final _textController = TextEditingController();
 
   @override
   void initState() {
@@ -35,12 +40,19 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _textController.dispose();
+  }
+
   Widget build(BuildContext context) {
+    isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final enteColorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
     final List<User> suggestedUsers = _getSuggestedUser();
     hideListOfEmails = suggestedUsers.isEmpty;
     return Scaffold(
+      resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
         title: const Text("Add people"),
       ),
@@ -57,8 +69,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 "Add a new email",
                 style: enteTextTheme.body,
               ),
+              const SizedBox(height: 4),
               _getEmailField(),
-              hideListOfEmails
+              (hideListOfEmails || isKeypadOpen)
                   ? const Expanded(child: SizedBox())
                   : Expanded(
                       child: Column(
@@ -91,6 +104,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                               ? Icons.check
                                               : null,
                                       onTap: () async {
+                                        textFieldFocusNode.unfocus();
                                         if (selectedEmail ==
                                             currentUser.email) {
                                           selectedEmail = '';
@@ -165,15 +179,17 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                         },
                         isTopBorderRadiusRemoved: true,
                       ),
-                      const MenuSectionDescriptionWidget(
-                        content:
-                            "Collaborators can add photos and videos to the shared album.",
-                      ),
+                      !isKeypadOpen
+                          ? const MenuSectionDescriptionWidget(
+                              content:
+                                  "Collaborators can add photos and videos to the shared album.",
+                            )
+                          : const SizedBox.shrink(),
                       const SizedBox(height: 12),
                       SizedBox(
                         width: double.infinity,
                         child: GradientButton(
-                          onTap: selectedEmail == ''
+                          onTap: (selectedEmail == '' && !_emailIsValid)
                               ? null
                               : () async {
                                   showToast(context, "yet to implement");
@@ -196,40 +212,62 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     );
   }
 
+  void clearFocus() {
+    _textController.clear();
+    _email = _textController.text;
+    _emailIsValid = false;
+    textFieldFocusNode.unfocus();
+    setState(() => {});
+  }
+
   Widget _getEmailField() {
     return TextFormField(
-      style: Theme.of(context).textTheme.subtitle1,
+      controller: _textController,
+      focusNode: textFieldFocusNode,
+      style: getEnteTextTheme(context).body,
       autofillHints: const [AutofillHints.email],
       decoration: InputDecoration(
+        focusedBorder: OutlineInputBorder(
+          borderRadius: const BorderRadius.all(Radius.circular(4.0)),
+          borderSide:
+              BorderSide(color: getEnteColorScheme(context).strokeMuted),
+        ),
         fillColor: getEnteColorScheme(context).fillFaint,
         filled: true,
-        hintText: 'Email',
+        hintText: 'Enter email',
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
         border: UnderlineInputBorder(
           borderSide: BorderSide.none,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(4),
         ),
-        suffixIcon: _emailIsValid
-            ? Icon(
-                Icons.check,
-                size: 20,
-                color: Theme.of(context)
-                    .inputDecorationTheme
-                    .focusedBorder
-                    ?.borderSide
-                    .color,
-              )
-            : null,
+        prefixIcon: Icon(
+          Icons.email_outlined,
+          color: getEnteColorScheme(context).strokeMuted,
+        ),
+        suffixIcon: _email == ''
+            ? null
+            : IconButton(
+                onPressed: clearFocus,
+                icon: Icon(
+                  Icons.cancel,
+                  color: getEnteColorScheme(context).strokeMuted,
+                ),
+              ),
       ),
       onChanged: (value) {
+        if (selectedEmail != '') {
+          selectedEmail = '';
+        }
         _email = value.trim();
         if (_emailIsValid != EmailValidator.validate(_email)) {
           setState(() {
             _emailIsValid = EmailValidator.validate(_email);
           });
+        } else if (_email.length < 2) {
+          setState(() {});
         }
       },
       autocorrect: false,
@@ -243,7 +281,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final List<User> suggestedUsers = [];
     final Set<int> existingUserIDs = {};
     final int ownerID = Configuration.instance.getUserID()!;
-    for (final User? u in widget.collection?.sharees ?? []) {
+    for (final User? u in widget.collection.sharees ?? []) {
       if (u != null && u.id != null) {
         existingUserIDs.add(u.id!);
       }
