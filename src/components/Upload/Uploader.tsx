@@ -203,7 +203,7 @@ export default function Uploader(props: Props) {
             if (uploadRunning.current) {
                 if (watchFolderService.isUploadRunning()) {
                     addLogLine(
-                        'watchFolder upload was running pausing it to run user upload'
+                        'watchFolder upload was running, pausing it to run user upload'
                     );
                     // pause watch folder service on user upload
                     watchFolderService.pauseRunningSync();
