@@ -1,29 +1,22 @@
 // @dart=2.9
 
-import 'dart:async';
-
 import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
-import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
-import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/ui/sharing/add_partipant_page.dart';
-import 'package:photos/ui/sharing/manage_album_participant.dart';
+import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
-import 'package:photos/utils/dialog_util.dart';
-import 'package:photos/utils/email_util.dart';
+import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -43,6 +36,16 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   final CollectionSharingActions sharingActions =
       CollectionSharingActions(CollectionsService.instance);
 
+  Future<void> _navigateToManageUser() async {
+    final result = await routeToPage(
+      context,
+      AlbumParticipantsPage(widget.collection),
+    );
+    if (mounted) {
+      setState(() => {});
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _sharees = widget.collection.sharees ?? [];
@@ -51,20 +54,17 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       MenuSectionTitle(
         title: _sharees.isEmpty
             ? "Share with specific people"
-            : "Shared with ${_sharees.length} people",
+            : "Shared with ${_sharees.length} ${_sharees.length == 1 ? 'person' : 'people'}",
         iconData: Icons.workspaces,
       ),
     );
 
-    for (final user in _sharees) {
-      children.add(
-        EmailItemWidget(
-          widget.collection,
-          user.email,
-          user,
-        ),
-      );
-    }
+    children.add(
+      EmailItemWidget(
+        widget.collection,
+        onTap: _navigateToManageUser,
+      ),
+    );
 
     children.add(
       MenuItemWidget(
@@ -75,9 +75,13 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         leadingIcon: Icons.add,
         menuItemColor: getEnteColorScheme(context).fillFaint,
         pressedColor: getEnteColorScheme(context).fillFaint,
+        borderRadius: 4.0,
         onTap: () async {
-          unawaited(
-              routeToPage(context, AddParticipantPage(widget.collection)));
+          routeToPage(context, AddParticipantPage(widget.collection)).then(
+            (value) => {
+              if (mounted) {setState(() => {})}
+            },
+          );
         },
       ),
     );
@@ -223,174 +227,75 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       ),
     );
   }
-
-  Future<void> _addEmailToCollection(
-    String email, {
-    String publicKey,
-  }) async {
-    if (!isValidEmail(email)) {
-      showErrorDialog(
-        context,
-        "Invalid email address",
-        "Please enter a valid email address.",
-      );
-      return;
-    } else if (email == Configuration.instance.getEmail()) {
-      showErrorDialog(context, "Oops", "You cannot share with yourself");
-      return;
-    } else if (widget.collection.sharees.any((user) => user.email == email)) {
-      showErrorDialog(
-        context,
-        "Oops",
-        "You're already sharing this with " + email,
-      );
-      return;
-    }
-    if (publicKey == null) {
-      final dialog = createProgressDialog(context, "Searching for user...");
-      await dialog.show();
-
-      publicKey = await UserService.instance.getPublicKey(email);
-      await dialog.hide();
-    }
-    if (publicKey == null) {
-      Navigator.of(context, rootNavigator: true).pop('dialog');
-      final dialog = AlertDialog(
-        title: const Text("Invite to ente?"),
-        content: Text(
-          "Looks like " +
-              email +
-              " hasn't signed up for ente yet. would you like to invite them?",
-          style: const TextStyle(
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              "Invite",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.greenAlternative,
-              ),
-            ),
-            onPressed: () {
-              shareText(
-                "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.",
-              );
-            },
-          ),
-        ],
-      );
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return dialog;
-        },
-      );
-    } else {
-      final dialog = createProgressDialog(context, "Sharing...");
-      await dialog.show();
-      try {
-        await CollectionsService.instance
-            .share(widget.collection.id, email, publicKey);
-        await dialog.hide();
-        showShortToast(context, "Shared successfully!");
-        setState(() {
-          _sharees.add(User(email: email));
-        });
-      } catch (e) {
-        await dialog.hide();
-        if (e is SharingNotPermittedForFreeAccountsError) {
-          _showUnSupportedAlert();
-        } else {
-          _logger.severe("failed to share collection", e);
-          showGenericErrorDialog(context);
-        }
-      }
-    }
-  }
-
-  void _showUnSupportedAlert() {
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Sorry"),
-      content: const Text(
-        "Sharing is not permitted for free accounts, please subscribe",
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            "Subscribe",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (BuildContext context) {
-                  return getSubscriptionPage();
-                },
-              ),
-            );
-          },
-        ),
-        TextButton(
-          child: Text(
-            "Ok",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop();
-          },
-        ),
-      ],
-    );
-
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
-  }
 }
 
 class EmailItemWidget extends StatelessWidget {
   final Collection collection;
-  final String email;
-  final User user;
+  final Function onTap;
 
   const EmailItemWidget(
-    this.collection,
-    this.email,
-    this.user, {
+    this.collection, {
+    this.onTap,
     Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-          child: GestureDetector(
-            onTap: () async {
-              await routeToPage(
-                context,
-                ManageIndividualParticipant(collection: collection, user: user),
-              );
-            },
-            child: Text(
-              email,
-              style: const TextStyle(fontSize: 16),
+    if (collection.getSharees().isEmpty) {
+      return const SizedBox.shrink();
+    } else if (collection.getSharees().length == 1) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          MenuItemWidget(
+            captionedTextWidget: CaptionedTextWidget(
+              title: collection.getSharees().firstOrNull?.email ?? '',
             ),
+            leadingIconWidget: UserAvatarWidget(collection.getSharees().first),
+            leadingIconSize: 24,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIconIsMuted: true,
+            trailingIcon: Icons.chevron_right,
+            onTap: () async {
+              if (onTap != null) {
+                onTap();
+              }
+            },
+            isBottomBorderRadiusRemoved: true,
           ),
-        ),
-        const Expanded(child: SizedBox()),
-      ],
-    );
+          DividerWidget(
+            dividerType: DividerType.menu,
+            bgColor: getEnteColorScheme(context).blurStrokeFaint,
+          ),
+        ],
+      );
+    } else {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          MenuItemWidget(
+            captionedTextWidget: const CaptionedTextWidget(
+              title: 'Manage',
+            ),
+            leadingIcon: Icons.people_outline,
+            menuItemColor: getEnteColorScheme(context).fillFaint,
+            pressedColor: getEnteColorScheme(context).fillFaint,
+            trailingIconIsMuted: true,
+            trailingIcon: Icons.chevron_right,
+            onTap: () async {
+              if (onTap != null) {
+                onTap();
+              }
+            },
+            isBottomBorderRadiusRemoved: true,
+          ),
+          DividerWidget(
+            dividerType: DividerType.menu,
+            bgColor: getEnteColorScheme(context).blurStrokeFaint,
+          ),
+        ],
+      );
+    }
   }
 }
