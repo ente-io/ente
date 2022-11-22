@@ -559,15 +559,16 @@ export const copyFileToClipboard = async (fileUrl: string) => {
     });
 
     const { ClipboardItem } = window;
-    canvas.toBlob(
-        async (blob) => {
-            console.log(URL.createObjectURL(blob), blob.size);
-            await navigator.clipboard
-                .write([new ClipboardItem({ 'image/png': blob })])
-                .then(() => console.log('copied'))
-                .catch((e) => console.log(e));
-        },
-        'image/png',
-        1
-    );
+    await new Promise((resolve) => {
+        canvas.toBlob(
+            async (blob) => {
+                await navigator.clipboard
+                    .write([new ClipboardItem({ 'image/png': blob })])
+                    .catch((e) => logError(e, 'failed to copy to clipboard'))
+                    .finally(() => resolve(null));
+            },
+            'image/png',
+            1
+        );
+    });
 };
