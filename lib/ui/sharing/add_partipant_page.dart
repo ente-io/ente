@@ -23,6 +23,7 @@ class AddParticipantPage extends StatefulWidget {
 class _AddParticipantPage extends State<AddParticipantPage> {
   late bool selectAsViewer;
   String selectedEmail = '';
+  bool hideListOfEmails = false;
 
   @override
   void initState() {
@@ -43,6 +44,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       }
     }
     final List<String> finalList = emails.toSet().toList();
+    hideListOfEmails = finalList.isEmpty;
     finalList.sort();
     return Scaffold(
       appBar: AppBar(
@@ -61,60 +63,73 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 "Add a new email",
                 style: enteTextTheme.body,
               ),
-              const SizedBox(height: 24),
-              const MenuSectionTitle(title: "or pick an existing one"),
-              Expanded(
-                child: ListView.builder(
-                  itemBuilder: (context, index) {
-                    final currentEmail = finalList[index];
-                    return Column(
-                      children: [
-                        MenuItemWidget(
-                          captionedTextWidget: CaptionedTextWidget(
-                            title: finalList[index],
+              hideListOfEmails
+                  ? const Expanded(child: SizedBox())
+                  : Expanded(
+                      child: Column(
+                        children: [
+                          const SizedBox(height: 24),
+                          const MenuSectionTitle(
+                            title: "or pick an existing one",
                           ),
-                          leadingIconSize: 24.0,
-                          leadingIconWidget: UserAvatarWidget(
-                            User(
-                              id: currentEmail.hashCode,
-                              email: currentEmail,
+                          Expanded(
+                            child: ListView.builder(
+                              itemBuilder: (context, index) {
+                                final currentEmail = finalList[index];
+                                return Column(
+                                  children: [
+                                    MenuItemWidget(
+                                      captionedTextWidget: CaptionedTextWidget(
+                                        title: finalList[index],
+                                      ),
+                                      leadingIconSize: 24.0,
+                                      leadingIconWidget: UserAvatarWidget(
+                                        User(
+                                          id: currentEmail.hashCode,
+                                          email: currentEmail,
+                                        ),
+                                        type: AvatarType.mini,
+                                      ),
+                                      menuItemColor:
+                                          getEnteColorScheme(context).fillFaint,
+                                      pressedColor:
+                                          getEnteColorScheme(context).fillFaint,
+                                      trailingIcon:
+                                          (selectedEmail == finalList[index])
+                                              ? Icons.check
+                                              : null,
+                                      onTap: () async {
+                                        if (selectedEmail == finalList[index]) {
+                                          selectedEmail = '';
+                                        } else {
+                                          selectedEmail = finalList[index];
+                                        }
+
+                                        setState(() => {});
+                                        // showShortToast(context, "yet to implement");
+                                      },
+                                      isTopBorderRadiusRemoved: index > 0,
+                                      isBottomBorderRadiusRemoved:
+                                          index < (finalList.length - 1),
+                                    ),
+                                    (index == (finalList.length - 1))
+                                        ? const SizedBox.shrink()
+                                        : DividerWidget(
+                                            dividerType: DividerType.menu,
+                                            bgColor: getEnteColorScheme(context)
+                                                .blurStrokeFaint,
+                                          ),
+                                  ],
+                                );
+                              },
+                              itemCount: finalList.length,
+
+                              // physics: const ClampingScrollPhysics(),
                             ),
-                            type: AvatarType.mini,
                           ),
-                          menuItemColor: getEnteColorScheme(context).fillFaint,
-                          pressedColor: getEnteColorScheme(context).fillFaint,
-                          trailingIcon: (selectedEmail == finalList[index])
-                              ? Icons.check
-                              : null,
-                          onTap: () async {
-                            if(selectedEmail == finalList[index]) {
-                              selectedEmail = '';
-                            } else {
-                              selectedEmail = finalList[index];
-                            }
-
-                            setState(() => {});
-                            // showShortToast(context, "yet to implement");
-                          },
-                          isTopBorderRadiusRemoved: index > 0,
-                          isBottomBorderRadiusRemoved:
-                              index < (finalList.length - 1),
-                        ),
-                        (index == (finalList.length - 1))
-                            ? const SizedBox.shrink()
-                            : DividerWidget(
-                                dividerType: DividerType.menu,
-                                bgColor:
-                                    getEnteColorScheme(context).blurStrokeFaint,
-                              ),
-                      ],
-                    );
-                  },
-                  itemCount: finalList.length,
-
-                  // physics: const ClampingScrollPhysics(),
-                ),
-              ),
+                        ],
+                      ),
+                    ),
               const DividerWidget(
                 dividerType: DividerType.solid,
               ),
