@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -59,7 +60,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final PublicURL url = widget.collection?.publicURLs?.first;
+    final PublicURL url = widget.collection?.publicURLs?.firstOrNull;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -128,9 +129,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingSwitch: Switch.adaptive(
-                      value:
-                          widget.collection.publicURLs?.first?.enableDownload ??
-                              true,
+                      value: widget.collection.publicURLs?.firstOrNull
+                              ?.enableDownload ??
+                          true,
                       onChanged: (value) async {
                         if (!value) {
                           final choice = await showChoiceDialog(
@@ -177,8 +178,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingSwitch: Switch.adaptive(
-                      value: widget
-                              .collection.publicURLs?.first?.passwordEnabled ??
+                      value: widget.collection.publicURLs?.firstOrNull
+                              ?.passwordEnabled ??
                           false,
                       onChanged: (enablePassword) async {
                         if (enablePassword) {
@@ -471,7 +472,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Text _getLinkExpiryTimeWidget() {
-    final int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
+    final int validTill =
+        widget.collection.publicURLs?.firstOrNull?.validTill ?? 0;
     if (validTill == 0) {
       return const Text(
         'Never',

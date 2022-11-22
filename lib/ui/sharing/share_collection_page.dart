@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -44,7 +45,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
   @override
   Widget build(BuildContext context) {
-    _sharees = widget.collection.sharees;
+    _sharees = widget.collection.sharees ?? [];
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
@@ -83,7 +84,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
     final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
     final bool hasExpired =
-        widget.collection.publicURLs?.first?.isExpired ?? false;
+        widget.collection?.publicURLs?.firstOrNull?.isExpired ?? false;
     children.addAll([
       const SizedBox(
         height: 24,

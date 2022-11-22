@@ -337,14 +337,6 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ShareCollectionPage(collection),
         ),
       );
-      /*return showDialog<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return SharingDialog(
-            collection,
-          );
-        },
-      );*/
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
