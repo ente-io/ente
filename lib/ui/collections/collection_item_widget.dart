@@ -30,7 +30,7 @@ class CollectionItem extends StatelessWidget {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(1),
                 child: SizedBox(
                   height: sideOfThumbnail,
                   width: sideOfThumbnail,
@@ -52,6 +52,7 @@ class CollectionItem extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 2),
               Text(
                 c.collection.name ?? "Unnamed",
                 style: enteTextTheme.small,

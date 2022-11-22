@@ -39,7 +39,6 @@ class Gallery extends StatefulWidget {
   final Widget header;
   final Widget footer;
   final Widget emptyState;
-  final bool smallerTodayFont;
   final String albumName;
   final double scrollBottomSafeArea;
 
@@ -55,7 +54,6 @@ class Gallery extends StatefulWidget {
     this.footer = const SizedBox(height: 120),
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
-    this.smallerTodayFont = false,
     this.albumName = '',
     Key key,
   }) : super(key: key);
@@ -247,7 +245,6 @@ class _GalleryState extends State<Gallery> {
               .on<GalleryIndexUpdatedEvent>()
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
-          smallerTodayFont: widget.smallerTodayFont,
           logTag: _logTag,
         );
         if (widget.header != null && index == 0) {
