@@ -1,11 +1,14 @@
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
 import "package:flutter/material.dart";
 
 class SetupEnterSecretKeyPage extends StatefulWidget {
-  SetupEnterSecretKeyPage({Key? key}) : super(key: key);
+  final Code? code;
+
+  SetupEnterSecretKeyPage({this.code, Key? key}) : super(key: key);
 
   @override
   State<SetupEnterSecretKeyPage> createState() =>
@@ -13,8 +16,21 @@ class SetupEnterSecretKeyPage extends StatefulWidget {
 }
 
 class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
-  final _accountController = TextEditingController();
-  final _secretController = TextEditingController(text: "");
+  late TextEditingController _accountController;
+  late TextEditingController _secretController;
+
+  @override
+  void initState() {
+    _accountController = TextEditingController(
+      text: widget.code != null
+          ? Uri.decodeFull(widget.code!.account).toString()
+          : null,
+    );
+    _secretController = TextEditingController(
+      text: widget.code != null ? widget.code!.secret : null,
+    );
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +94,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         );
                         // Verify the validity of the code
                         getTotp(code);
+                        if (widget.code != null) {
+                          code.id = widget.code!.id;
+                        }
                         Navigator.of(context).pop(code);
                       } catch (e) {
                         _showIncorrectDetailsDialog(context);

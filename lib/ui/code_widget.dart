@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/models/code.dart';
+import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:ente_auth/utils/totp_util.dart';
@@ -56,6 +57,20 @@ class _CodeWidgetState extends State<CodeWidget> {
           motion: const ScrollMotion(),
           children: [
             SlidableAction(
+              onPressed: _onEditPressed,
+              backgroundColor: Colors.grey.withOpacity(0.1),
+              borderRadius: const BorderRadius.all(Radius.circular(12.0)),
+              foregroundColor:
+                  Theme.of(context).colorScheme.inverseBackgroundColor,
+              icon: Icons.edit_outlined,
+              label: 'Edit',
+              padding: const EdgeInsets.only(left: 4, right: 0),
+              spacing: 8,
+            ),
+            const SizedBox(
+              width: 4,
+            ),
+            SlidableAction(
               onPressed: _onDeletePressed,
               backgroundColor: Colors.grey.withOpacity(0.1),
               borderRadius: const BorderRadius.all(Radius.circular(12.0)),
@@ -63,6 +78,7 @@ class _CodeWidgetState extends State<CodeWidget> {
               icon: Icons.delete,
               label: 'Delete',
               padding: const EdgeInsets.only(left: 0, right: 0),
+              spacing: 8,
             ),
           ],
         ),
@@ -192,6 +208,19 @@ class _CodeWidgetState extends State<CodeWidget> {
     FlutterClipboard.copy(_getTotp()).then(
       (value) => showToast(context, "Copied to clipboard"),
     );
+  }
+
+  Future<void> _onEditPressed(_) async {
+    final Code? code = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (BuildContext context) {
+          return SetupEnterSecretKeyPage(code: widget.code);
+        },
+      ),
+    );
+    if (code != null) {
+      CodeStore.instance.addCode(code);
+    }
   }
 
   void _onDeletePressed(_) {

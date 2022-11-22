@@ -88,7 +88,11 @@ class AuthenticatorService {
     return insertedID;
   }
 
-  Future<void> updateEntry(int generatedID, String plainText) async {
+  Future<void> updateEntry(
+    int generatedID,
+    String plainText,
+    bool shouldSync,
+  ) async {
     var key = await getOrCreateAuthDataKey();
     final encryptedKeyData = await CryptoUtil.encryptChaCha(
       utf8.encode(plainText) as Uint8List,
@@ -102,7 +106,9 @@ class AuthenticatorService {
       affectedRows == 1,
       "updateEntry should have updated exactly one row",
     );
-    unawaited(sync());
+    if (shouldSync) {
+      unawaited(sync());
+    }
   }
 
   Future<void> deleteEntry(int genID) async {

@@ -41,16 +41,28 @@ class CodeStore {
     bool shouldSync = true,
   }) async {
     final codes = await getAllCodes();
+    bool isExistingCode = false;
     for (final existingCode in codes) {
       if (existingCode == code) {
         _logger.info("Found duplicate code, skipping add");
         return;
+      } else if (existingCode.id == code.id) {
+        isExistingCode = true;
+        break;
       }
     }
-    code.id = await _authenticatorService.addEntry(
-      jsonEncode(code.rawData),
-      shouldSync,
-    );
+    if (isExistingCode) {
+      await _authenticatorService.updateEntry(
+        code.id!,
+        jsonEncode(code.rawData),
+        shouldSync,
+      );
+    } else {
+      code.id = await _authenticatorService.addEntry(
+        jsonEncode(code.rawData),
+        shouldSync,
+      );
+    }
     Bus.instance.fire(CodesUpdatedEvent());
   }
 
