@@ -10,7 +10,6 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class ManageIndividualParticipant extends StatefulWidget {
   final Collection collection;
@@ -72,9 +71,22 @@ class _ManageIndividualParticipantState
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isCollaborator ? Icons.check : null,
-              onTap: () async {
-                showShortToast(context, "Coming soon!");
-              },
+              onTap: widget.user.isCollaborator
+                  ? null
+                  : () async {
+                      final result = await sharingActions.addEmailToCollection(
+                        context,
+                        widget.collection,
+                        widget.user.email,
+                        role: CollectionParticipantRole.collaborator,
+                      );
+                      if ((result ?? false) && mounted) {
+                        widget.user.role = CollectionParticipantRole
+                            .collaborator
+                            .toStringVal();
+                        setState(() => {});
+                      }
+                    },
               isBottomBorderRadiusRemoved: true,
             ),
             DividerWidget(
@@ -90,9 +102,21 @@ class _ManageIndividualParticipantState
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isViewer ? Icons.check : null,
-              onTap: () async {
-                // showShortToast(context, "yet to implement");
-              },
+              onTap: widget.user.isViewer
+                  ? null
+                  : () async {
+                      final result = await sharingActions.addEmailToCollection(
+                        context,
+                        widget.collection,
+                        widget.user.email,
+                        role: CollectionParticipantRole.viewer,
+                      );
+                      if ((result ?? false) && mounted) {
+                        widget.user.role =
+                            CollectionParticipantRole.viewer.toStringVal();
+                        setState(() => {});
+                      }
+                    },
               isTopBorderRadiusRemoved: true,
             ),
             const MenuSectionDescriptionWidget(
