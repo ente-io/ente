@@ -99,7 +99,7 @@ function PhotoViewer(props: Iprops) {
     useEffect(() => {
         if (!photoSwipe?.currItem) return;
         function handleKeyUp(event) {
-            if (!isOpen) {
+            if (!isOpen || showInfo) {
                 return;
             }
             addLocalLog(
@@ -135,7 +135,7 @@ function PhotoViewer(props: Iprops) {
             addLocalLog(() => 'Removing listener');
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, [isOpen, photoSwipe?.currItem, showInfo]);
+    }, [isOpen, photoSwipe, showInfo]);
 
     useEffect(() => {
         updateItems(items);
