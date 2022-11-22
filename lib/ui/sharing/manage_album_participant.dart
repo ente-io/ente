@@ -116,7 +116,8 @@ class _ManageIndividualParticipantState
                   widget.collection,
                   widget.user,
                 );
-                if (result && mounted) {
+
+                if ((result ?? false) && mounted) {
                   Navigator.of(context).pop(true);
                 }
               },

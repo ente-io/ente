@@ -67,8 +67,7 @@ class CollectionSharingActions {
       context,
       "Remove?",
       "${user.email} will be removed "
-          "from this shared album.\n\nAny photos added by them will be "
-          "removed.",
+          "from this shared album.\n\nAny photos and videos added by them will also be removed from the album.",
       firstAction: "Yes, remove",
       secondAction: "Cancel",
       secondActionColor: getEnteColorScheme(context).strokeBase,
