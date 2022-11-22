@@ -26,7 +26,7 @@ class CodeStore {
     for (final entity in entities) {
       final decodeJson = jsonDecode(entity.rawData);
       final code = Code.fromRawData(decodeJson);
-      code.id = entity.generatedID;
+      code.generatedID = entity.generatedID;
       code.hasSynced = entity.hasSynced;
       codes.add(code);
     }
@@ -46,19 +46,19 @@ class CodeStore {
       if (existingCode == code) {
         _logger.info("Found duplicate code, skipping add");
         return;
-      } else if (existingCode.id == code.id) {
+      } else if (existingCode.generatedID == code.generatedID) {
         isExistingCode = true;
         break;
       }
     }
     if (isExistingCode) {
       await _authenticatorService.updateEntry(
-        code.id!,
+        code.generatedID!,
         jsonEncode(code.rawData),
         shouldSync,
       );
     } else {
-      code.id = await _authenticatorService.addEntry(
+      code.generatedID = await _authenticatorService.addEntry(
         jsonEncode(code.rawData),
         shouldSync,
       );
@@ -67,7 +67,7 @@ class CodeStore {
   }
 
   Future<void> removeCode(Code code) async {
-    await _authenticatorService.deleteEntry(code.id!);
+    await _authenticatorService.deleteEntry(code.generatedID!);
     Bus.instance.fire(CodesUpdatedEvent());
   }
 }

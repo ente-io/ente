@@ -4,7 +4,7 @@ class Code {
   static const defaultDigits = 6;
   static const defaultPeriod = 30;
 
-  int? id;
+  int? generatedID;
   final String account;
   final String issuer;
   final int digits;
@@ -24,10 +24,14 @@ class Code {
     this.algorithm,
     this.type,
     this.rawData, {
-    this.id,
+    this.generatedID,
   });
 
-  static Code fromAccountAndSecret(String account, String issuer, String secret) {
+  static Code fromAccountAndSecret(
+    String account,
+    String issuer,
+    String secret,
+  ) {
     return Code(
       account,
       issuer,

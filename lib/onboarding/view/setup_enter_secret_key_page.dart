@@ -118,7 +118,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         // Verify the validity of the code
                         getTotp(code);
                         if (widget.code != null) {
-                          code.id = widget.code!.id;
+                          code.generatedID = widget.code!.generatedID;
                         }
                         Navigator.of(context).pop(code);
                       } catch (e) {
