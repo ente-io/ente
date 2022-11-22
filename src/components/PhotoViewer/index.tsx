@@ -136,6 +136,10 @@ function PhotoViewer(props: Iprops) {
                 case 'F':
                     toggleFullscreen(photoSwipe);
                     break;
+                case 'l':
+                case 'L':
+                    onFavClick(photoSwipe?.currItem as EnteFile);
+                    break;
                 default:
                     break;
             }
