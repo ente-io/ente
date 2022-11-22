@@ -132,7 +132,7 @@ const englishConstants = {
     ALBUM_NAME: 'Album name',
     CREATE: 'Create',
     DOWNLOAD: 'Download (D)',
-    TOGGLE_FULLSCREEN: 'Toggle fullscreen',
+    TOGGLE_FULLSCREEN: 'Toggle fullscreen (F)',
     ZOOM_IN_OUT: 'Zoom in/out',
     PREVIOUS: 'Previous (←)',
     NEXT: 'Next (→)',

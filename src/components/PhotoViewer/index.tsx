@@ -37,6 +37,12 @@ import { ChevronLeft } from '@mui/icons-material';
 import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 
+interface PhotoswipeFullscreenAPI {
+    enter: () => void;
+    exit: () => void;
+    isFullscreen: () => boolean;
+}
+
 const CaptionContainer = styled('div')(({ theme }) => ({
     padding: theme.spacing(2),
     wordBreak: 'break-word',
@@ -97,7 +103,7 @@ function PhotoViewer(props: Iprops) {
     }, [isOpen]);
 
     useEffect(() => {
-        if (!photoSwipe?.currItem) return;
+        if (!photoSwipe) return;
         function handleKeyUp(event) {
             if (!isOpen || showInfo) {
                 return;
@@ -124,6 +130,10 @@ function PhotoViewer(props: Iprops) {
                 case 'd':
                 case 'D':
                     downloadFileHelper(photoSwipe?.currItem as EnteFile);
+                    break;
+                case 'f':
+                case 'F':
+                    toggleFullscreen(photoSwipe);
                     break;
                 default:
                     break;
@@ -410,6 +420,19 @@ function PhotoViewer(props: Iprops) {
                 publicCollectionGalleryContext.passwordToken
             );
             appContext.finishLoading();
+        }
+    };
+
+    const toggleFullscreen = (photoSwipe) => {
+        const fullScreenApi: PhotoswipeFullscreenAPI =
+            photoSwipe?.ui?.getFullscreenAPI();
+        if (!fullScreenApi) {
+            return;
+        }
+        if (fullScreenApi.isFullscreen()) {
+            fullScreenApi.exit();
+        } else {
+            fullScreenApi.enter();
         }
     };
     const scheduleUpdate = () => (needUpdate.current = true);
