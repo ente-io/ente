@@ -100,6 +100,7 @@ class CollectionSharingActions {
     BuildContext context,
     Collection collection,
     String email, {
+    CollectionParticipantRole role = CollectionParticipantRole.viewer,
     String? publicKey,
   }) async {
     if (!isValidEmail(email)) {
@@ -112,13 +113,15 @@ class CollectionSharingActions {
     } else if (email == Configuration.instance.getEmail()) {
       await showErrorDialog(context, "Oops", "You cannot share with yourself");
       return null;
-    } else if (collection.getSharees().any((user) => user.email == email)) {
-      showErrorDialog(
-        context,
-        "Oops",
-        "You're already sharing this with " + email,
-      );
-      return null;
+    } else {
+      // if (collection.getSharees().any((user) => user.email == email)) {
+      //   showErrorDialog(
+      //     context,
+      //     "Oops",
+      //     "You're already sharing this with " + email,
+      //   );
+      //   return null;
+      // }
     }
     if (publicKey == null) {
       final dialog = createProgressDialog(context, "Searching for user...");
@@ -174,7 +177,7 @@ class CollectionSharingActions {
       await dialog.show();
       try {
         await CollectionsService.instance
-            .share(collection.id, email, publicKey);
+            .share(collection.id, email, publicKey, role);
         collection.sharees?.add((User(email: email)));
         await dialog.hide();
 

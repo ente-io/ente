@@ -258,7 +258,12 @@ class CollectionsService {
     });
   }
 
-  Future<void> share(int collectionID, String email, String publicKey) async {
+  Future<void> share(
+    int collectionID,
+    String email,
+    String publicKey,
+    CollectionParticipantRole role,
+  ) async {
     final encryptedKey = CryptoUtil.sealSync(
       getCollectionKey(collectionID),
       Sodium.base642bin(publicKey),
@@ -270,6 +275,7 @@ class CollectionsService {
           "collectionID": collectionID,
           "email": email,
           "encryptedKey": Sodium.bin2base64(encryptedKey),
+          "role": role.toStringVal()
         },
       );
     } on DioError catch (e) {

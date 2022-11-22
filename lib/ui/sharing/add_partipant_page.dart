@@ -12,7 +12,6 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class AddParticipantPage extends StatefulWidget {
   final Collection collection;
@@ -168,9 +167,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       pressedColor: getEnteColorScheme(context).fillFaint,
                       trailingIcon: !selectAsViewer ? Icons.check : null,
                       onTap: () async {
-                        showShortToast(context, "Coming soon!");
-                        // showShortToast(context, "coming soon!");
-                        // setState(() => {selectAsViewer = false});
+                        setState(() => {selectAsViewer = false});
                       },
                       isBottomBorderRadiusRemoved: true,
                     ),
@@ -213,6 +210,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                   context,
                                   widget.collection,
                                   emailToAdd,
+                                  role: selectAsViewer
+                                      ? CollectionParticipantRole.viewer
+                                      : CollectionParticipantRole.collaborator,
                                 );
                                 if (result != null && result && mounted) {
                                   Navigator.of(context).pop(true);
