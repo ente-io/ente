@@ -15,6 +15,7 @@ import 'package:photos/utils/toast_util.dart';
 
 class AddParticipantPage extends StatefulWidget {
   final Collection collection;
+
   const AddParticipantPage(this.collection, {super.key});
 
   @override
@@ -35,30 +36,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
-    final int ownerID = Configuration.instance.getUserID()!;
-    final Set<int> existingUserIDs = {};
-    final List<User> suggestedUsers = [];
-    for (final User? u in widget.collection?.sharees ?? []) {
-      if (u != null && u.id != null) {
-        existingUserIDs.add(u.id!);
-      }
-    }
-    for (final c in CollectionsService.instance.getActiveCollections()) {
-      if (c.owner?.id == ownerID) {
-        for (final User? u in c?.sharees ?? []) {
-          if (u != null && u.id != null && !existingUserIDs.contains(u.id)) {
-            existingUserIDs.add(u.id!);
-            suggestedUsers.add(u);
-          }
-        }
-      } else if (c.owner != null &&
-          c.owner!.id != null &&
-          !existingUserIDs.contains(c.owner!.id!)) {
-        existingUserIDs.add(c.owner!.id!);
-        suggestedUsers.add(c.owner!);
-      }
-    }
-    suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
+    final List<User> suggestedUsers = _getSuggestedUser();
     hideListOfEmails = suggestedUsers.isEmpty;
     return Scaffold(
       appBar: AppBar(
@@ -213,5 +191,33 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         ),
       ),
     );
+  }
+
+  List<User> _getSuggestedUser() {
+    final List<User> suggestedUsers = [];
+    final Set<int> existingUserIDs = {};
+    final int ownerID = Configuration.instance.getUserID()!;
+    for (final User? u in widget.collection?.sharees ?? []) {
+      if (u != null && u.id != null) {
+        existingUserIDs.add(u.id!);
+      }
+    }
+    for (final c in CollectionsService.instance.getActiveCollections()) {
+      if (c.owner?.id == ownerID) {
+        for (final User? u in c?.sharees ?? []) {
+          if (u != null && u.id != null && !existingUserIDs.contains(u.id)) {
+            existingUserIDs.add(u.id!);
+            suggestedUsers.add(u);
+          }
+        }
+      } else if (c.owner != null &&
+          c.owner!.id != null &&
+          !existingUserIDs.contains(c.owner!.id!)) {
+        existingUserIDs.add(c.owner!.id!);
+        suggestedUsers.add(c.owner!);
+      }
+    }
+    suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
+    return suggestedUsers;
   }
 }
