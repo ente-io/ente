@@ -127,15 +127,9 @@ class AuthenticatorService {
   Future<void> sync() async {
     try {
       _logger.info("Sync");
-      _logger.info("State of DB before sync");
-      await _printDBState();
       await _remoteToLocalSync();
       _logger.info("remote fetch completed");
-      _logger.info("State of DB after remoteToLocal sync");
-      await _printDBState();
       await _localToRemoteSync();
-      _logger.info("State of DB after localToRemote sync");
-      await _printDBState();
       _logger.info("local push completed");
       Bus.instance.fire(CodesUpdatedEvent());
     } catch (e) {
@@ -146,24 +140,27 @@ class AuthenticatorService {
   Future<void> _remoteToLocalSync() async {
     _logger.info('Initiating remote to local sync');
     final int lastSyncTime = _prefs.getInt(_lastEntitySyncTime) ?? 0;
+    _logger.info("Current synctime is " + lastSyncTime.toString());
     const int fetchLimit = 500;
     final List<AuthEntity> result =
         await _gateway.getDiff(lastSyncTime, limit: fetchLimit);
+    _logger.info(result.length.toString() + " entries fetched from remote");
     if (result.isEmpty) {
       return;
-    } else {
-      _logger.info(result.length.toString() + " entries fetched from remote");
     }
     final maxSyncTime = result.map((e) => e.updatedAt).reduce(max);
     List<String> deletedIDs =
         result.where((element) => element.isDeleted).map((e) => e.id).toList();
+    _logger.info(deletedIDs.length.toString() + " entries deleted");
     result.removeWhere((element) => element.isDeleted);
     await _db.insertOrReplace(result);
     if (deletedIDs.isNotEmpty) {
       await _db.deleteByIDs(ids: deletedIDs);
     }
     _prefs.setInt(_lastEntitySyncTime, maxSyncTime);
+    _logger.info("Setting synctime to " + maxSyncTime.toString());
     if (result.length == fetchLimit) {
+      _logger.info("Diff limit reached, pulling again");
       await _remoteToLocalSync();
     }
   }
@@ -199,6 +196,7 @@ class AuthenticatorService {
       }
     }
     if (pendingUpdate.isNotEmpty) {
+      _logger.info("Initiating remote sync since local entries were pushed");
       await _remoteToLocalSync();
     }
   }
@@ -230,14 +228,5 @@ class AuthenticatorService {
       _logger.severe("Failed to getOrCreateAuthDataKey", e, s);
       rethrow;
     }
-  }
-
-  Future<void> _printDBState() async {
-    _logger.info("_____");
-    final entities = await _db.getAll();
-    for (final entity in entities) {
-      _logger.info(entity.id);
-    }
-    _logger.info("_____");
   }
 }
