@@ -30,11 +30,6 @@ class AboutSectionWidget extends StatelessWidget {
       children: [
         sectionOptionSpacing,
         const AboutMenuItemWidget(
-          title: "FAQ",
-          url: "https://ente.io/faq",
-        ),
-        sectionOptionSpacing,
-        const AboutMenuItemWidget(
           title: "Terms",
           url: "https://ente.io/terms",
         ),
