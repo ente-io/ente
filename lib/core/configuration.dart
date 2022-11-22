@@ -7,7 +7,6 @@ import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
 // ignore: import_of_legacy_library_into_null_safe
-import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/events/signed_in_event.dart';
 import 'package:ente_auth/events/signed_out_event.dart';
 import 'package:ente_auth/models/key_attributes.dart';
@@ -20,7 +19,6 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uuid/uuid.dart';
 
 class Configuration {
   Configuration._privateConstructor();
@@ -43,7 +41,6 @@ class Configuration {
   static const userIDKey = "user_id";
   static const hasMigratedSecureStorageToFirstUnlockKey =
       "has_migrated_secure_storage_to_first_unlock";
-  static const anonymousUserIDKey = "anonymous_user_id";
 
   final kTempFolderDeletionTimeBuffer = const Duration(days: 1).inMicroseconds;
 
@@ -120,7 +117,6 @@ class Configuration {
       }
       await _migrateSecurityStorageToFirstUnlock();
     }
-    SuperLogging.setUserID(await _getOrCreateAnonymousUserID());
   }
 
   Future<void> logout({bool autoLogout = false}) async {
@@ -494,13 +490,5 @@ class Configuration {
         true,
       );
     }
-  }
-
-  Future<String> _getOrCreateAnonymousUserID() async {
-    if (!_preferences.containsKey(anonymousUserIDKey)) {
-      //ignore: prefer_const_constructors
-      await _preferences.setString(anonymousUserIDKey, Uuid().v4());
-    }
-    return _preferences.getString(anonymousUserIDKey)!;
   }
 }
