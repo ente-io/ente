@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -57,11 +58,25 @@ class CollectionSharingActions {
   }
 
   // removeParticipant remove the user from a share album
-  Future<bool> removeParticipant(
+  Future<bool?> removeParticipant(
     BuildContext context,
     Collection collection,
     User user,
   ) async {
+    final result = await showChoiceDialog(
+      context,
+      "Remove?",
+      "${user.email} will be removed "
+          "from this shared album.\n\nAny photos added by them will be "
+          "removed.",
+      firstAction: "Yes, remove",
+      secondAction: "Cancel",
+      secondActionColor: getEnteColorScheme(context).strokeBase,
+      actionType: ActionType.critical,
+    );
+    if (result != DialogUserChoice.firstChoice) {
+      return Future.value(null);
+    }
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
