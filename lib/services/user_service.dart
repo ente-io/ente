@@ -55,7 +55,11 @@ class UserService {
         ValueNotifier<String>(Configuration.instance.getEmail());
     _preferences = await SharedPreferences.getInstance();
     if (Configuration.instance.isLoggedIn()) {
-      setTwoFactor(fetchTwoFactorStatus: true).ignore();
+      // add artificial delay in refreshing 2FA status
+      Future.delayed(
+        const Duration(seconds: 5),
+        () => {setTwoFactor(fetchTwoFactorStatus: true).ignore()},
+      );
     }
     Bus.instance.on<TwoFactorStatusChangeEvent>().listen((event) {
       setTwoFactor(value: event.status);
