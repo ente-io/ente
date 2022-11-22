@@ -104,17 +104,15 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         if (!photoSwipe) return;
+        function handleCopyEvent() {
+            copyToClipboardHelper(photoSwipe.currItem as EnteFile);
+        }
+
         function handleKeyUp(event: KeyboardEvent) {
             if (!isOpen || showInfo) {
                 return;
             }
-            addLocalLog(
-                () =>
-                    'Event: ' +
-                    event.key +
-                    ' isShiftPressedx: ' +
-                    event.shiftKey
-            );
+            addLocalLog(() => 'Event: ' + event.key);
             switch (event.key) {
                 case 'i':
                 case 'I':
@@ -140,19 +138,17 @@ function PhotoViewer(props: Iprops) {
                 case 'L':
                     onFavClick(photoSwipe?.currItem as EnteFile);
                     break;
-                case 'c':
-                case 'C':
-                    copyFileToClipboard(photoSwipe.currItem.src);
-                    break;
                 default:
                     break;
             }
         }
 
         window.addEventListener('keyup', handleKeyUp);
+        window.addEventListener('copy', handleCopyEvent);
         return () => {
             addLocalLog(() => 'Removing listener');
             window.removeEventListener('keyup', handleKeyUp);
+            window.removeEventListener('copy', handleCopyEvent);
         };
     }, [isOpen, photoSwipe, showInfo]);
 
