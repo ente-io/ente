@@ -58,22 +58,28 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       ),
       body: Container(
         color: enteColorScheme.backgroundElevated,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 12),
-              Text(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text(
                 "Add a new email",
                 style: enteTextTheme.body,
               ),
-              const SizedBox(height: 4),
-              _getEmailField(),
-              (hideListOfEmails || isKeypadOpen)
-                  ? const Expanded(child: SizedBox())
-                  : Expanded(
+            ),
+            const SizedBox(height: 4),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: _getEmailField(),
+            ),
+            (hideListOfEmails || isKeypadOpen)
+                ? const Expanded(child: SizedBox())
+                : Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
                         children: [
                           const SizedBox(height: 24),
@@ -137,76 +143,76 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                         ],
                       ),
                     ),
-              const DividerWidget(
-                dividerType: DividerType.solid,
-              ),
-              SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8, bottom: 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const MenuSectionTitle(title: "Add as"),
-                      MenuItemWidget(
-                        captionedTextWidget: const CaptionedTextWidget(
-                          title: "Collaborator",
-                        ),
-                        leadingIcon: Icons.edit,
-                        menuItemColor: getEnteColorScheme(context).fillFaint,
-                        pressedColor: getEnteColorScheme(context).fillFaint,
-                        trailingIcon: !selectAsViewer ? Icons.check : null,
-                        onTap: () async {
-                          showShortToast(context, "coming soon!");
-                          setState(() => {selectAsViewer = false});
-                        },
-                        isBottomBorderRadiusRemoved: true,
-                      ),
-                      DividerWidget(
-                        dividerType: DividerType.menu,
-                        bgColor: getEnteColorScheme(context).blurStrokeFaint,
-                      ),
-                      MenuItemWidget(
-                        captionedTextWidget: const CaptionedTextWidget(
-                          title: " Viewer",
-                        ),
-                        leadingIcon: Icons.photo,
-                        menuItemColor: getEnteColorScheme(context).fillFaint,
-                        pressedColor: getEnteColorScheme(context).fillFaint,
-                        trailingIcon: selectAsViewer ? Icons.check : null,
-                        onTap: () async {
-                          setState(() => {selectAsViewer = true});
-                          // showShortToast(context, "yet to implement");
-                        },
-                        isTopBorderRadiusRemoved: true,
-                      ),
-                      !isKeypadOpen
-                          ? const MenuSectionDescriptionWidget(
-                              content:
-                                  "Collaborators can add photos and videos to the shared album.",
-                            )
-                          : const SizedBox.shrink(),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: double.infinity,
-                        child: GradientButton(
-                          onTap: (selectedEmail == '' && !_emailIsValid)
-                              ? null
-                              : () async {
-                                  showToast(context, "yet to implement");
-                                  Navigator.of(context).pop();
-                                },
-                          text: selectAsViewer
-                              ? "Add viewer"
-                              : "Add collaborator",
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
                   ),
+            const DividerWidget(
+              dividerType: DividerType.solid,
+            ),
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                    top: 8, bottom: 8, left: 16, right: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const MenuSectionTitle(title: "Add as"),
+                    MenuItemWidget(
+                      captionedTextWidget: const CaptionedTextWidget(
+                        title: "Collaborator",
+                      ),
+                      leadingIcon: Icons.edit,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      pressedColor: getEnteColorScheme(context).fillFaint,
+                      trailingIcon: !selectAsViewer ? Icons.check : null,
+                      onTap: () async {
+                        showShortToast(context, "coming soon!");
+                        setState(() => {selectAsViewer = false});
+                      },
+                      isBottomBorderRadiusRemoved: true,
+                    ),
+                    DividerWidget(
+                      dividerType: DividerType.menu,
+                      bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                    ),
+                    MenuItemWidget(
+                      captionedTextWidget: const CaptionedTextWidget(
+                        title: " Viewer",
+                      ),
+                      leadingIcon: Icons.photo,
+                      menuItemColor: getEnteColorScheme(context).fillFaint,
+                      pressedColor: getEnteColorScheme(context).fillFaint,
+                      trailingIcon: selectAsViewer ? Icons.check : null,
+                      onTap: () async {
+                        setState(() => {selectAsViewer = true});
+                        // showShortToast(context, "yet to implement");
+                      },
+                      isTopBorderRadiusRemoved: true,
+                    ),
+                    !isKeypadOpen
+                        ? const MenuSectionDescriptionWidget(
+                            content:
+                                "Collaborators can add photos and videos to the shared album.",
+                          )
+                        : const SizedBox.shrink(),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: GradientButton(
+                        onTap: (selectedEmail == '' && !_emailIsValid)
+                            ? null
+                            : () async {
+                                showToast(context, "yet to implement");
+                                Navigator.of(context).pop();
+                              },
+                        text:
+                            selectAsViewer ? "Add viewer" : "Add collaborator",
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
