@@ -9,7 +9,7 @@ import {
 import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
-import { downloadFile } from 'utils/file';
+import { copyFileToClipboard, downloadFile } from 'utils/file';
 import { prettyPrintExif } from 'utils/exif';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
@@ -33,7 +33,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { ChevronLeft } from '@mui/icons-material';
+import { ChevronLeft, ContentCopy } from '@mui/icons-material';
 import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 
@@ -139,6 +139,10 @@ function PhotoViewer(props: Iprops) {
                 case 'l':
                 case 'L':
                     onFavClick(photoSwipe?.currItem as EnteFile);
+                    break;
+                case 'c':
+                case 'C':
+                    copyFileToClipboard(photoSwipe.currItem.src);
                     break;
                 default:
                     break;
@@ -428,6 +432,14 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
+    const copyToClipboardHelper = async (file: EnteFile) => {
+        if (props.enableDownload) {
+            appContext.startLoading();
+            await copyFileToClipboard(file.src);
+            appContext.finishLoading();
+        }
+    };
+
     const toggleFullscreen = (photoSwipe) => {
         const fullScreenApi: PhotoswipeFullscreenAPI =
             photoSwipe?.ui?.getFullscreenAPI();
@@ -477,11 +489,34 @@ function PhotoViewer(props: Iprops) {
                                 className="pswp__button pswp__button--close"
                                 title={constants.CLOSE}
                             />
+
+                            {props.enableDownload && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    title={constants.DOWNLOAD_OPTION}
+                                    onClick={() =>
+                                        downloadFileHelper(photoSwipe.currItem)
+                                    }>
+                                    <DownloadIcon fontSize="small" />
+                                </button>
+                            )}
+                            {props.enableDownload && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    title={constants.COPY_OPTION}
+                                    onClick={() =>
+                                        copyToClipboardHelper(
+                                            photoSwipe.currItem as EnteFile
+                                        )
+                                    }>
+                                    <ContentCopy fontSize="small" />
+                                </button>
+                            )}
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         className="pswp__button pswp__button--custom"
-                                        title={constants.DELETE}
+                                        title={constants.DELETE_OPTION}
                                         onClick={() => {
                                             confirmTrashFile(
                                                 photoSwipe?.currItem as EnteFile
@@ -490,32 +525,30 @@ function PhotoViewer(props: Iprops) {
                                         <DeleteIcon fontSize="small" />
                                     </button>
                                 )}
-
-                            {props.enableDownload && (
-                                <button
-                                    className="pswp__button pswp__button--custom"
-                                    title={constants.DOWNLOAD}
-                                    onClick={() =>
-                                        downloadFileHelper(photoSwipe.currItem)
-                                    }>
-                                    <DownloadIcon fontSize="small" />
-                                </button>
-                            )}
-                            <button
-                                className="pswp__button pswp__button--fs"
-                                title={constants.TOGGLE_FULLSCREEN}
-                            />
                             <button
                                 className="pswp__button pswp__button--zoom"
                                 title={constants.ZOOM_IN_OUT}
                             />
+                            <button
+                                className="pswp__button pswp__button--fs"
+                                title={constants.TOGGLE_FULLSCREEN}
+                            />
+
+                            {!props.isSharedCollection && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    title={constants.INFO}
+                                    onClick={handleOpenInfo}>
+                                    <InfoIcon fontSize="small" />
+                                </button>
+                            )}
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         title={
                                             isFav
-                                                ? constants.UNFAVORITE
-                                                : constants.FAVORITE
+                                                ? constants.UNFAVORITE_OPTION
+                                                : constants.FAVORITE_OPTION
                                         }
                                         className="pswp__button pswp__button--custom"
                                         onClick={() => {
@@ -529,14 +562,6 @@ function PhotoViewer(props: Iprops) {
                                     </button>
                                 )}
 
-                            {!props.isSharedCollection && (
-                                <button
-                                    className="pswp__button pswp__button--custom"
-                                    title={constants.INFO}
-                                    onClick={handleOpenInfo}>
-                                    <InfoIcon fontSize="small" />
-                                </button>
-                            )}
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
                                     <div className="pswp__preloader__cut">
