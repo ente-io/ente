@@ -1,7 +1,5 @@
 // @dart=2.9
 
-import 'dart:io';
-
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
@@ -24,8 +22,6 @@ class SupportSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final String bugsEmail =
-        Platform.isAndroid ? "android-bugs@ente.io" : "ios-bugs@ente.io";
     return Column(
       children: [
         sectionOptionSpacing,
@@ -49,11 +45,11 @@ class SupportSectionWidget extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await sendLogs(context, "Report bug", bugsEmail);
+            await sendLogs(context, "Report bug", "auth@ente.io");
           },
           onDoubleTap: () async {
             final zipFilePath = await getZippedLogsFile(context);
-            await shareLogs(context, bugsEmail, zipFilePath);
+            await shareLogs(context, "auth@ente.io", zipFilePath);
           },
         ),
         sectionOptionSpacing,
