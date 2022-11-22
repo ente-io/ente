@@ -59,11 +59,12 @@ class AuthenticatorService {
           key,
           Sodium.base642bin(e.header),
         );
+        final hasSynced = !(e.id == null || e.shouldSync);
         entities.add(
           EntityResult(
             e.generatedID,
             utf8.decode(decryptedValue),
-            e.id != null,
+            hasSynced,
           ),
         );
       } catch (e, s) {
@@ -196,6 +197,9 @@ class AuthenticatorService {
         );
         await _db.updateLocalEntity(entity.copyWith(shouldSync: false));
       }
+    }
+    if (pendingUpdate.isNotEmpty) {
+      await _remoteToLocalSync();
     }
   }
 
