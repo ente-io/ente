@@ -118,13 +118,12 @@ function PhotoViewer(props: Iprops) {
                     }
                     break;
                 case 'Backspace':
+                case 'Delete':
                     confirmTrashFile(photoSwipe?.currItem as EnteFile);
                     break;
                 case 'd':
                 case 'D':
-                    if (event.shiftKey) {
-                        downloadFileHelper(photoSwipe?.currItem as EnteFile);
-                    }
+                    downloadFileHelper(photoSwipe?.currItem as EnteFile);
                     break;
                 default:
                     break;
