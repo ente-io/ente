@@ -1,5 +1,7 @@
 // @dart=2.9
 
+import 'dart:async';
+
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,13 +16,13 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/payment/subscription.dart';
+import 'package:photos/ui/sharing/add_partipant_page.dart';
 import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -79,34 +81,20 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         padding: EdgeInsets.all(8),
       ),
     );
-    if (!_showEntryField) {
-      children.add(
-        SizedBox(
-          width: 220,
-          child: GradientButton(
-            onTap: () async {
-              setState(() {
-                _showEntryField = true;
-              });
-            },
-            iconData: Icons.add,
-          ),
+    children.add(
+      MenuItemWidget(
+        captionedTextWidget: CaptionedTextWidget(
+          title: _sharees.isEmpty ? "Add email" : "Add more",
+          makeTextBold: true,
         ),
-      );
-    } else {
-      children.add(
-        SizedBox(
-          width: 240,
-          height: 50,
-          child: OutlinedButton(
-            child: const Text("Add"),
-            onPressed: () {
-              _addEmailToCollection(_email?.trim() ?? '');
-            },
-          ),
-        ),
-      );
-    }
+        leadingIcon: Icons.add,
+        menuItemColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        onTap: () async {
+          unawaited(routeToPage(context, AddParticipantPage()));
+        },
+      ),
+    );
 
     final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
     children.addAll([
