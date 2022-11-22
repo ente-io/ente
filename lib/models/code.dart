@@ -27,21 +27,21 @@ class Code {
     this.id,
   });
 
-  static Code fromAccountAndSecret(String account, String secret) {
+  static Code fromAccountAndSecret(String account, String issuer, String secret) {
     return Code(
       account,
-      "",
+      issuer,
       defaultDigits,
       defaultPeriod,
       secret,
       Algorithm.sha1,
       Type.totp,
       "otpauth://totp/" +
-          account +
+          issuer +
           ":" +
           account +
           "?algorithm=SHA1&digits=6&issuer=" +
-          account +
+          issuer +
           "period=30&secret=" +
           secret,
     );

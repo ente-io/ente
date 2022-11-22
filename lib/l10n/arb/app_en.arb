@@ -11,12 +11,13 @@
   "importScanQrCode": "Scan a QR Code",
   "importEnterSetupKey": "Enter a setup key",
   "importAccountPageTitle": "Enter account details",
-  "accountNameHint": "Account name",
-  "accountKeyHint" : "Your key",
+  "codeIssuerHint": "Issuer",
+  "codeSecretKeyHint" : "Secret Key",
+  "codeAccountHint": "Account (you@domain.com)",
   "accountKeyType": "Type of key",
   "timeBasedKeyType": "Time based (TOTP)",
   "counterBasedKeyType": "Counter based (HOTP)",
-  "importAddAction": "Add",
+  "saveAction": "Save",
 
   "existingUser": "Existing User",
   "newUser" : "New to ente"

@@ -16,14 +16,20 @@ class SetupEnterSecretKeyPage extends StatefulWidget {
 }
 
 class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
+  late TextEditingController _issuerController;
   late TextEditingController _accountController;
   late TextEditingController _secretController;
 
   @override
   void initState() {
+    _issuerController = TextEditingController(
+      text: widget.code != null
+          ? Uri.decodeFull(widget.code!.issuer).trim()
+          : null,
+    );
     _accountController = TextEditingController(
       text: widget.code != null
-          ? Uri.decodeFull(widget.code!.account).toString()
+          ? Uri.decodeFull(widget.code!.account).trim()
           : null,
     );
     _secretController = TextEditingController(
@@ -54,9 +60,9 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     return null;
                   },
                   decoration: InputDecoration(
-                    hintText: l10n.accountNameHint,
+                    hintText: l10n.codeIssuerHint,
                   ),
-                  controller: _accountController,
+                  controller: _issuerController,
                   autofocus: true,
                 ),
                 const SizedBox(
@@ -71,9 +77,25 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                     return null;
                   },
                   decoration: InputDecoration(
-                    hintText: l10n.accountKeyHint,
+                    hintText: l10n.codeSecretKeyHint,
                   ),
                   controller: _secretController,
+                ),
+                const SizedBox(
+                  height: 20,
+                ),
+                TextFormField(
+                  // The validator receives the text that the user has entered.
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return "Please enter some text";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    hintText: l10n.codeAccountHint,
+                  ),
+                  controller: _accountController,
                 ),
                 const SizedBox(
                   height: 40,
@@ -90,6 +112,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                       try {
                         final code = Code.fromAccountAndSecret(
                           _accountController.text.trim(),
+                          _issuerController.text.trim(),
                           _secretController.text.trim(),
                         );
                         // Verify the validity of the code
@@ -107,7 +130,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         horizontal: 16.0,
                         vertical: 4,
                       ),
-                      child: Text(l10n.importAddAction),
+                      child: Text(l10n.saveAction),
                     ),
                   ),
                 )
