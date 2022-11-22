@@ -5,18 +5,14 @@ import 'dart:async';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/public_key.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -41,9 +37,7 @@ class ShareCollectionPage extends StatefulWidget {
 }
 
 class _ShareCollectionPageState extends State<ShareCollectionPage> {
-  bool _showEntryField = false;
   List<User> _sharees;
-  String _email;
   final Logger _logger = Logger("SharingDialogState");
   final CollectionSharingActions sharingActions =
       CollectionSharingActions(CollectionsService.instance);
@@ -60,27 +54,17 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         iconData: Icons.workspaces,
       ),
     );
-    if (!_showEntryField && _sharees.isEmpty) {
-      _showEntryField = true;
-    } else {
-      for (final user in _sharees) {
-        children.add(
-          EmailItemWidget(
-            widget.collection,
-            user.email,
-            user,
-          ),
-        );
-      }
+
+    for (final user in _sharees) {
+      children.add(
+        EmailItemWidget(
+          widget.collection,
+          user.email,
+          user,
+        ),
+      );
     }
-    if (_showEntryField) {
-      children.add(_getEmailField());
-    }
-    children.add(
-      const Padding(
-        padding: EdgeInsets.all(8),
-      ),
-    );
+
     children.add(
       MenuItemWidget(
         captionedTextWidget: CaptionedTextWidget(
@@ -215,50 +199,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     );
   }
 
-  Widget _getEmailField() {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TypeAheadField(
-              textFieldConfiguration: const TextFieldConfiguration(
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  border: InputBorder.none,
-                  hintText: "email@your-friend.com",
-                ),
-              ),
-              hideOnEmpty: true,
-              loadingBuilder: (context) {
-                return const EnteLoadingWidget();
-              },
-              suggestionsCallback: (pattern) async {
-                _email = pattern;
-                return PublicKeysDB.instance.searchByEmail(_email);
-              },
-              itemBuilder: (context, suggestion) {
-                return Container(
-                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
-                  child: Text(
-                    suggestion.email,
-                    overflow: TextOverflow.clip,
-                  ),
-                );
-              },
-              onSuggestionSelected: (PublicKey suggestion) {
-                _addEmailToCollection(
-                  suggestion.email,
-                  publicKey: suggestion.publicKey,
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _addEmailToCollection(
     String email, {
     String publicKey,
@@ -332,7 +272,6 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         showShortToast(context, "Shared successfully!");
         setState(() {
           _sharees.add(User(email: email));
-          _showEntryField = false;
         });
       } catch (e) {
         await dialog.hide();
@@ -426,25 +365,6 @@ class EmailItemWidget extends StatelessWidget {
           ),
         ),
         const Expanded(child: SizedBox()),
-        IconButton(
-          icon: const Icon(Icons.delete_forever),
-          color: Colors.redAccent,
-          onPressed: () async {
-            final dialog = createProgressDialog(context, "Please wait...");
-            await dialog.show();
-            try {
-              await CollectionsService.instance.unshare(collection.id, email);
-              collection.sharees.removeWhere((user) => user.email == email);
-              await dialog.hide();
-              showToast(context, "Stopped sharing with " + email + ".");
-              Navigator.of(context).pop();
-            } catch (e, s) {
-              Logger("EmailItemWidget").severe(e, s);
-              await dialog.hide();
-              showGenericErrorDialog(context);
-            }
-          },
-        ),
       ],
     );
   }
