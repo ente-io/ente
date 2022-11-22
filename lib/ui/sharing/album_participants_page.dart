@@ -9,9 +9,12 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import 'package:photos/ui/sharing/add_partipant_page.dart';
+import 'package:photos/ui/sharing/manage_album_participant.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
+import 'package:photos/utils/navigation_util.dart';
 
-class AlbumParticipantsPage extends StatelessWidget {
+class AlbumParticipantsPage extends StatefulWidget {
   final Collection collection;
 
   const AlbumParticipantsPage(
@@ -20,15 +23,52 @@ class AlbumParticipantsPage extends StatelessWidget {
   });
 
   @override
+  State<AlbumParticipantsPage> createState() => _AlbumParticipantsPageState();
+}
+
+class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
+  late int currentUserID;
+
+  @override
+  void initState() {
+    currentUserID = Configuration.instance.getUserID()!;
+    super.initState();
+  }
+
+  Future<void> _navigateToManageUser(User user) async {
+    if (user.id == currentUserID) {
+      return;
+    }
+    final result = await routeToPage(
+      context,
+      ManageIndividualParticipant(collection: widget.collection, user: user),
+    );
+    if (result != null && mounted) {
+      setState(() => {});
+    }
+  }
+
+  Future<void> _navigateToAddUser(bool addingViewer) async {
+    final result = await routeToPage(
+      context,
+      AddParticipantPage(widget.collection),
+    );
+    if (result != null && mounted) {
+      setState(() => {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final currentUserID = Configuration.instance.getUserID()!;
-    final int particpants = 1 + collection.getSharees().length;
-    final User owner = collection.owner!;
+    final int particpants = 1 + widget.collection.getSharees().length;
+    final User owner = widget.collection.owner!;
     if (owner.id == currentUserID && owner.email == "") {
       owner.email = Configuration.instance.getEmail()!;
     }
-    final splitResult = collection.getSharees().splitMatch((x) => x.isViewer);
+    final splitResult =
+        widget.collection.getSharees().splitMatch((x) => x.isViewer);
     final List<User> viewers = splitResult.matched;
     final List<User> collaborators = splitResult.unmatched;
 
@@ -38,7 +78,7 @@ class AlbumParticipantsPage extends StatelessWidget {
         slivers: <Widget>[
           TitleBarWidget(
             flexibleSpaceTitle: TitleBarTitleWidget(
-              title: "${collection.name}",
+              title: "${widget.collection.name}",
             ),
             flexibleSpaceCaption: "$particpants Participants",
           ),
@@ -106,7 +146,9 @@ class AlbumParticipantsPage extends StatelessWidget {
                           pressedColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: Icons.chevron_right,
                           trailingIconIsMuted: true,
-                          onTap: () async {},
+                          onTap: () async {
+                            await _navigateToManageUser(currentUser);
+                          },
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: true,
                           borderRadius: 8,
@@ -127,7 +169,9 @@ class AlbumParticipantsPage extends StatelessWidget {
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       pressedColor: getEnteColorScheme(context).fillFaint,
-                      onTap: () async {},
+                      onTap: () async {
+                        await _navigateToAddUser(false);
+                      },
                       isTopBorderRadiusRemoved: collaborators.isNotEmpty,
                       borderRadius: 8,
                     );
@@ -166,7 +210,9 @@ class AlbumParticipantsPage extends StatelessWidget {
                           pressedColor: getEnteColorScheme(context).fillFaint,
                           trailingIcon: Icons.chevron_right,
                           trailingIconIsMuted: true,
-                          onTap: () async {},
+                          onTap: () async {
+                            await _navigateToManageUser(currentUser);
+                          },
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: true,
                           borderRadius: 8,
@@ -186,18 +232,14 @@ class AlbumParticipantsPage extends StatelessWidget {
                       leadingIcon: Icons.add_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
                       pressedColor: getEnteColorScheme(context).fillFaint,
-                      onTap: () async {},
+                      onTap: () async {
+                        await _navigateToAddUser(true);
+                      },
                       isTopBorderRadiusRemoved: viewers.isNotEmpty,
                       borderRadius: 8,
                     );
                   }
-                  return const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                    child: MenuSectionTitle(
-                      title: "Viewer",
-                      iconData: Icons.photo_outlined,
-                    ),
-                  );
+                  return const Text("-----");
                 },
                 childCount: 1 + viewers.length + 1,
               ),
