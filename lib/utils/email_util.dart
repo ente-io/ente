@@ -89,7 +89,9 @@ Future<void> sendLogs(
   content.addAll(
     [
       const Text(
-        "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
+        "This will send across logs to help us debug your issue. "
+        "While we take precautions to ensure that sensitive information is not "
+        "logged, we encourage you to view these logs before sharing them.",
         style: TextStyle(
           height: 1.5,
           fontSize: 16,
