@@ -11,6 +11,10 @@ class MenuItemWidget extends StatefulWidget {
   final IconData? leadingIcon;
   final Color? leadingIconColor;
 
+  final Widget? leadingIconWidget;
+  // leadIconSize deafult value is 20.
+  final double leadingIconSize;
+
   /// trailing icon can be passed without size as default size set by
   /// flutter is what this component expects
   final IconData? trailingIcon;
@@ -28,11 +32,14 @@ class MenuItemWidget extends StatefulWidget {
 
   /// disable gesture detector if not used
   final bool isGestureDetectorDisabled;
+
   const MenuItemWidget({
     required this.captionedTextWidget,
     this.isExpandable = false,
     this.leadingIcon,
     this.leadingIconColor,
+    this.leadingIconSize = 20.0,
+    this.leadingIconWidget,
     this.trailingIcon,
     this.trailingSwitch,
     this.trailingIconIsMuted = false,
@@ -55,6 +62,7 @@ class MenuItemWidget extends StatefulWidget {
 
 class _MenuItemWidgetState extends State<MenuItemWidget> {
   Color? menuItemColor;
+
   @override
   void initState() {
     menuItemColor = widget.menuItemColor;
@@ -126,10 +134,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
               : Padding(
                   padding: const EdgeInsets.only(right: 10),
                   child: SizedBox(
-                    height: 20,
-                    width: 20,
+                    height: widget.leadingIconSize,
+                    width: widget.leadingIconSize,
                     child: widget.leadingIcon == null
-                        ? const SizedBox.shrink()
+                        ? (widget.leadingIconWidget != null
+                            ? FittedBox(
+                                fit: BoxFit.contain,
+                                child: widget.leadingIconWidget,
+                              )
+                            : const SizedBox.shrink())
                         : FittedBox(
                             fit: BoxFit.contain,
                             child: Icon(
