@@ -43,6 +43,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   @override
   void dispose() {
     _textController.dispose();
+    super.dispose();
   }
 
   Widget build(BuildContext context) {
