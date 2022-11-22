@@ -175,6 +175,7 @@ class CollectionSharingActions {
       try {
         await CollectionsService.instance
             .share(collection.id, email, publicKey);
+        collection.sharees?.add((User(email: email)));
         await dialog.hide();
 
         showShortToast(context, "Shared successfully!");
