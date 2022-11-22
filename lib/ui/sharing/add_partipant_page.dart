@@ -168,7 +168,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                       pressedColor: getEnteColorScheme(context).fillFaint,
                       trailingIcon: !selectAsViewer ? Icons.check : null,
                       onTap: () async {
-                        showShortToast(context, "coming soon!");
+                        showShortToast(context, "Coming soon!");
                         // showShortToast(context, "coming soon!");
                         // setState(() => {selectAsViewer = false});
                       },

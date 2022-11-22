@@ -73,7 +73,7 @@ class _ManageIndividualParticipantState
               pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isCollaborator ? Icons.check : null,
               onTap: () async {
-                showShortToast(context, "coming soon!");
+                showShortToast(context, "Coming soon!");
               },
               isBottomBorderRadiusRemoved: true,
             ),
