@@ -82,6 +82,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     );
 
     final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
+    final bool hasExpired =
+        widget.collection.publicURLs?.first?.isExpired ?? false;
     children.addAll([
       const SizedBox(
         height: 24,
@@ -92,44 +94,66 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
       ),
     ]);
     if (hasUrl) {
-      final String collectionKey = Base58Encode(
-        CollectionsService.instance.getCollectionKey(widget.collection.id),
-      );
-      final String url =
-          "${widget.collection.publicURLs.first.url}#$collectionKey";
-      children.addAll(
-        [
+      if (hasExpired) {
+        children.add(
           MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Copy link",
-              makeTextBold: true,
+            captionedTextWidget: CaptionedTextWidget(
+              title: "Link has expired",
+              textColor: getEnteColorScheme(context).warning500,
             ),
-            leadingIcon: Icons.copy,
+            leadingIcon: Icons.error_outline,
+            leadingIconColor: getEnteColorScheme(context).warning500,
             menuItemColor: getEnteColorScheme(context).fillFaint,
             pressedColor: getEnteColorScheme(context).fillFaint,
-            onTap: () async {
-              await Clipboard.setData(ClipboardData(text: url));
-              showToast(context, "Link copied to clipboard");
-            },
+            onTap: () async {},
             isBottomBorderRadiusRemoved: true,
           ),
-          DividerWidget(
-            dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).blurStrokeFaint,
-          ),
-          MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Send link",
-              makeTextBold: true,
+        );
+      } else {
+        final String collectionKey = Base58Encode(
+          CollectionsService.instance.getCollectionKey(widget.collection.id),
+        );
+        final String url =
+            "${widget.collection.publicURLs.first.url}#$collectionKey";
+        children.addAll(
+          [
+            MenuItemWidget(
+              captionedTextWidget: const CaptionedTextWidget(
+                title: "Copy link",
+                makeTextBold: true,
+              ),
+              leadingIcon: Icons.copy,
+              menuItemColor: getEnteColorScheme(context).fillFaint,
+              pressedColor: getEnteColorScheme(context).fillFaint,
+              onTap: () async {
+                await Clipboard.setData(ClipboardData(text: url));
+                showToast(context, "Link copied to clipboard");
+              },
+              isBottomBorderRadiusRemoved: true,
             ),
-            leadingIcon: Icons.adaptive.share,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
-            pressedColor: getEnteColorScheme(context).fillFaint,
-            onTap: () async {
-              shareText(url);
-            },
-            isTopBorderRadiusRemoved: true,
-          ),
+            DividerWidget(
+              dividerType: DividerType.menu,
+              bgColor: getEnteColorScheme(context).blurStrokeFaint,
+            ),
+            MenuItemWidget(
+              captionedTextWidget: const CaptionedTextWidget(
+                title: "Send link",
+                makeTextBold: true,
+              ),
+              leadingIcon: Icons.adaptive.share,
+              menuItemColor: getEnteColorScheme(context).fillFaint,
+              pressedColor: getEnteColorScheme(context).fillFaint,
+              onTap: () async {
+                shareText(url);
+              },
+              isTopBorderRadiusRemoved: true,
+            ),
+          ],
+        );
+      }
+
+      children.addAll(
+        [
           DividerWidget(
             dividerType: DividerType.menu,
             bgColor: getEnteColorScheme(context).blurStrokeFaint,
