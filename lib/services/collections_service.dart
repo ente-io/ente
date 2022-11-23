@@ -221,6 +221,7 @@ class CollectionsService {
 
   Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
     bool includedOwnedByOthers = false,
+    bool includeCollabCollections = false,
   }) async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final usersCollection = getActiveCollections();
@@ -228,7 +229,15 @@ class CollectionsService {
     usersCollection.removeWhere((element) => element.isHidden());
     if (!includedOwnedByOthers) {
       final userID = Configuration.instance.getUserID();
-      usersCollection.removeWhere((c) => c.owner.id != userID);
+      if (includeCollabCollections) {
+        usersCollection.removeWhere(
+          (c) =>
+              (c.owner.id != userID) &&
+              (c.getSharees().any((u) => (u.id ?? -1) == userID && u.isViewer)),
+        );
+      } else {
+        usersCollection.removeWhere((c) => c.owner.id != userID);
+      }
     }
     final latestCollectionFiles = await getLatestCollectionFiles();
     final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
