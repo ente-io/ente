@@ -1,11 +1,23 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
-import { CopyButtonWrapper } from './styledComponents';
 import DoneIcon from '@mui/icons-material/Done';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { Tooltip } from '@mui/material';
+import {
+    IconButton,
+    IconButtonProps,
+    SvgIconProps,
+    Tooltip,
+} from '@mui/material';
 
-export default function CopyButton({ code }) {
+export default function CopyButton({
+    code,
+    color,
+    size,
+}: {
+    code: string;
+    color?: IconButtonProps['color'];
+    size?: SvgIconProps['fontSize'];
+}) {
     const [copied, setCopied] = useState<boolean>(false);
 
     const copyToClipboardHelper = (text: string) => () => {
@@ -14,14 +26,18 @@ export default function CopyButton({ code }) {
         setTimeout(() => setCopied(false), 1000);
     };
     return (
-        <Tooltip arrow open={copied} title={constants.COPIED}>
-            <CopyButtonWrapper onClick={copyToClipboardHelper(code)}>
+        <Tooltip
+            arrow
+            open={copied}
+            title={constants.COPIED}
+            PopperProps={{ sx: { zIndex: 2000 } }}>
+            <IconButton onClick={copyToClipboardHelper(code)} color={color}>
                 {copied ? (
-                    <DoneIcon fontSize="small" />
+                    <DoneIcon fontSize={size ?? 'small'} />
                 ) : (
-                    <ContentCopyIcon fontSize="small" />
+                    <ContentCopyIcon fontSize={size ?? 'small'} />
                 )}
-            </CopyButtonWrapper>
+            </IconButton>
         </Tooltip>
     );
 }
