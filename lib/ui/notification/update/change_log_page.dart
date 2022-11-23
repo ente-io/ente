@@ -133,44 +133,43 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Hide your photos!",
-        "On popular demand, "
-            "ente now supports photos that are hidden behind a lock.\n\nThis "
-            "is in "
-            "addition to the existing functionality to archive your photos so "
-            "that they do not show in your timeline (but are otherwise visible)"
-            ".",
+        "Select all photos in a day",
+        "After you select a photo, you'll now see an option next to the date to select all photos from that day.",
       ),
     );
     items.add(
       ChangeLogEntry(
-        '''Add a description to your photos''',
-        "You can now add a caption / description to your photos and videos"
-            ".These will show up on the photo view.\n\nTo add a description, tap on the info icon to view the photo details and enter your text.",
+        '''Easier access to favorites''',
+        "Your favorites now have a special heart icon, and will appear first in the list of albums. Archived albums also get a new indicator.",
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        '''And search photos descriptions too''',
-        "Yes, it doesn't end there! You can also search your photos using "
-            "their descriptions.\n\nThis allows you to, for example, tag your"
-            " photos and quickly search for them.",
+        '''Export photo descriptions''',
+        "When you export data out of ente using the desktop app, any photo captions and descriptions that you added will also be exported.",
+      ),
+    );
+    items.add(
+      ChangeLogEntry(
+        '''Initial support for empty albums''',
+        "Any empty albums that you already have will now show up in ente. You can choose to delete them, or add more photos to them. In the future we'll support more workflows with empty albums.",
+        isFeature: false,
       ),
     );
     if (Platform.isIOS) {
       items.add(
         ChangeLogEntry(
-          '''Save live photos''',
-          "There are some small fixes, including an enhancement to download and save live photos.",
+          '''Tweak video uploads''',
+          "ente will now keep videos temporarily cached until they get successfully uploaded. This will make video uploads work better as long as the app is not force killed.",
           isFeature: false,
         ),
       );
     } else {
       items.add(
         ChangeLogEntry(
-          '''Better import of WhatsApp photos''',
-          "There are some small fixes, including an enhancement to use the creation time for photos imported from WhatsApp.",
+          '''Better timestamps for screenshots''',
+          "Added more cases when deducing photo dates from their file names. ente will also automatically apply these rules to fix photos that have already been imported without a valid date.",
           isFeature: false,
         ),
       );
