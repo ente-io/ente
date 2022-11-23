@@ -72,7 +72,9 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       child: GradientButton(
                         onTap: () async {
                           await UpdateService.instance.hideChangeLog();
-                          Navigator.of(context).pop();
+                          if (mounted && Navigator.of(context).canPop()) {
+                            Navigator.of(context).pop();
+                          }
                         },
                         text: "Let's go",
                       ),
