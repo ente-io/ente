@@ -30,9 +30,6 @@ module.exports = (phase) =>
     withSentryConfig(
         withBundleAnalyzer(
             withTM({
-                experimental: {
-                    esmExternals: false,
-                },
                 compiler: {
                     styledComponents: {
                         ssr: true,
