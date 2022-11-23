@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import constants from 'utils/strings/constants';
-import { Col, Form, FormControl } from 'react-bootstrap';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { MAX_CAPTION_SIZE } from 'constants/file';
-
+import { IconButton, TextField } from '@mui/material';
+import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
+import CloseIcon from '@mui/icons-material/Close';
+import TickIcon from '@mui/icons-material/Check';
+import { FlexWrapper } from 'components/Container';
 export interface formValues {
     caption: string;
 }
+interface Iprops {
+    openEditMode: () => void;
+    caption: string;
+    isInEditMode: boolean;
+    saveEdits: (caption: string) => Promise<void>;
+    discardEdits: () => void;
+}
 
-export const CaptionEditForm = ({ isInEditMode, caption, saveEdits }) => {
+export const CaptionEditForm = ({
+    openEditMode,
+    caption,
+    isInEditMode,
+    saveEdits,
+    discardEdits,
+}: Iprops): JSX.Element => {
     const [loading, setLoading] = useState(false);
 
     const onSubmit = async (values: formValues) => {
@@ -32,26 +48,37 @@ export const CaptionEditForm = ({ isInEditMode, caption, saveEdits }) => {
             validateOnBlur={false}
             onSubmit={onSubmit}>
             {({ values, errors, handleChange, handleSubmit }) => (
-                <Form noValidate onSubmit={handleSubmit}>
-                    <Form.Row>
-                        <Form.Group bsPrefix="ente-form-group" as={Col} xs={12}>
-                            <Form.Control
-                                as="textarea"
-                                placeholder={constants.CAPTION_PLACEHOLDER}
-                                value={values.caption}
-                                onChange={handleChange('caption')}
-                                isInvalid={Boolean(errors.caption)}
-                                autoFocus
-                                disabled={loading || !isInEditMode}
-                            />
-                            <FormControl.Feedback
-                                type="invalid"
-                                style={{ textAlign: 'center' }}>
-                                {errors.caption}
-                            </FormControl.Feedback>
-                        </Form.Group>
-                    </Form.Row>
-                </Form>
+                <form noValidate onSubmit={handleSubmit} onClick={openEditMode}>
+                    <TextField
+                        fullWidth
+                        id="caption"
+                        name="caption"
+                        type="text"
+                        multiline
+                        label={constants.CAPTION_PLACEHOLDER}
+                        value={values.caption}
+                        onChange={handleChange('caption')}
+                        error={Boolean(errors.caption)}
+                        helperText={errors.caption}
+                        disabled={loading || !isInEditMode}
+                    />
+                    {isInEditMode && (
+                        <FlexWrapper justifyContent={'flex-end'}>
+                            <IconButton type="submit" disabled={loading}>
+                                {loading ? (
+                                    <SmallLoadingSpinner />
+                                ) : (
+                                    <TickIcon />
+                                )}
+                            </IconButton>
+                            <IconButton
+                                onClick={discardEdits}
+                                disabled={loading}>
+                                <CloseIcon />
+                            </IconButton>
+                        </FlexWrapper>
+                    )}
+                </form>
             )}
         </Formik>
     );

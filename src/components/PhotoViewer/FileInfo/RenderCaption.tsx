@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { changeCaption, updateExistingFilePubMetadata } from 'utils/file';
@@ -27,9 +27,17 @@ export function RenderCaption({
     const [caption, setCaption] = useState(
         file?.pubMagicMetadata?.data.caption
     );
-    const [isInEditMode, setIsInEditMode] = useState(false);
-    const closeEditMode = () => setIsInEditMode(false);
+    const [isInEditMode, setIsInEditMode] = useState(true);
 
+    const openEditMode = () => setIsInEditMode(true);
+    const closeEditMode = () => {
+        console.log('sss');
+        setIsInEditMode(false);
+    };
+
+    useEffect(() => {
+        console.log(isInEditMode);
+    }, [isInEditMode]);
     const saveEdits = async (newCaption: string) => {
         try {
             if (file) {
@@ -57,9 +65,11 @@ export function RenderCaption({
     return (
         <Box p={1}>
             <CaptionEditForm
+                openEditMode={openEditMode}
                 isInEditMode={isInEditMode}
                 caption={caption}
                 saveEdits={saveEdits}
+                discardEdits={closeEditMode}
             />
         </Box>
     );
