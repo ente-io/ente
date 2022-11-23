@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
@@ -10,6 +11,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
@@ -108,6 +110,17 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
       } else if (widget.file.fileType == FileType.livePhoto &&
           widget.shouldShowLivePhotoOverlay) {
         contentChildren.add(const LivePhotoOverlayIcon());
+      }
+      if (widget.file.ownerID != null &&
+          widget.file.ownerID != Configuration.instance.getUserID()) {
+        contentChildren.add(
+          OwnerAvatarOverlayIcon(
+            User(
+              id: widget.file.ownerID,
+              email: 'n@ente.io',
+            ),
+          ),
+        );
       }
       content = contentChildren.length == 1
           ? contentChildren.first
