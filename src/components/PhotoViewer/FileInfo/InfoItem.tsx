@@ -4,35 +4,56 @@ import { FlexWrapper } from 'components/Container';
 import React from 'react';
 import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 
+interface Iprops {
+    icon: JSX.Element;
+    title?: string;
+    caption?: string | JSX.Element;
+    openEditor?: any;
+    loading?: boolean;
+    hideEditOption?: any;
+    customEndButton?: any;
+    children?: any;
+}
+
 export default function InfoItem({
     icon,
     title,
     caption,
     openEditor,
     loading,
-    showEditOption,
-}) {
+    hideEditOption,
+    customEndButton,
+    children,
+}: Iprops): JSX.Element {
     return (
         <FlexWrapper height={48} justifyContent="space-between">
             <FlexWrapper gap={0.5} pr={1}>
                 <IconButton
                     color="secondary"
-                    sx={{ cursor: 'default' }}
+                    sx={{ '&&': { cursor: 'default' } }}
                     disableRipple>
                     {icon}
                 </IconButton>
                 <Box>
-                    <Typography>{title}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {caption}
-                    </Typography>
+                    {children ? (
+                        children
+                    ) : (
+                        <>
+                            <Typography>{title}</Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                {caption}
+                            </Typography>
+                        </>
+                    )}
                 </Box>
             </FlexWrapper>
-            {showEditOption && (
-                <IconButton onClick={openEditor}>
-                    {loading ? <SmallLoadingSpinner /> : <Edit />}
-                </IconButton>
-            )}
+            {customEndButton
+                ? customEndButton
+                : !hideEditOption && (
+                      <IconButton onClick={openEditor} color="secondary">
+                          {!loading ? <Edit /> : <SmallLoadingSpinner />}
+                      </IconButton>
+                  )}
         </FlexWrapper>
     );
 }
