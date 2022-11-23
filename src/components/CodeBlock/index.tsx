@@ -1,7 +1,7 @@
 import { FreeFlowText } from '../Container';
 import React from 'react';
 import EnteSpinner from '../EnteSpinner';
-import { Wrapper, CodeWrapper } from './styledComponents';
+import { Wrapper, CodeWrapper, CopyButtonWrapper } from './styledComponents';
 import CopyButton from './CopyButton';
 import { BoxProps } from '@mui/material';
 
@@ -29,7 +29,9 @@ export default function CodeBlock({
                     {code}
                 </FreeFlowText>
             </CodeWrapper>
-            <CopyButton code={code} />
+            <CopyButtonWrapper>
+                <CopyButton code={code} />
+            </CopyButtonWrapper>
         </Wrapper>
     );
 }
