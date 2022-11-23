@@ -62,7 +62,7 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Crash analytics",
+            title: "Crash & error reporting",
           ),
           trailingSwitch: ToggleSwitchWidget(
             value: SuperLogging.shouldReportErrors(),
