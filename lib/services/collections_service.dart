@@ -221,6 +221,8 @@ class CollectionsService {
 
   Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
     bool includedOwnedByOthers = false,
+    // includeCollabCollections will include collections where the current user
+    // is added as a collaborator
     bool includeCollabCollections = false,
   }) async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
