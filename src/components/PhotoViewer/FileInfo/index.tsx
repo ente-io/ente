@@ -7,7 +7,6 @@ import {
     Box,
     DialogProps,
     Drawer,
-    IconButton,
     Link,
     Stack,
     styled,
@@ -17,7 +16,6 @@ import { Location, Metadata } from 'types/upload';
 import Photoswipe from 'photoswipe';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
-import CloseIcon from '@mui/icons-material/Close';
 import {
     BackupOutlined,
     FolderOutlined,
@@ -28,6 +26,7 @@ import { FlexWrapper } from 'components/Container';
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDateShort, formatTime } from 'utils/time';
 import { Badge } from 'components/Badge';
+import Titlebar from 'components/Titlebar';
 
 const FileInfoSidebar = styled((props: DialogProps) => (
     <Drawer {...props} anchor="right" />
@@ -92,14 +91,7 @@ export function FileInfo({
 
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
-            <Box>
-                <IconButton color="secondary" onClick={handleCloseInfo}>
-                    <CloseIcon />
-                </IconButton>
-                <Typography variant="h3" fontWeight={'bold'} px={2} py={0.5}>
-                    {constants.INFO}
-                </Typography>
-            </Box>
+            <Titlebar onClose={handleCloseInfo} title={constants.INFO} />
             <Stack pt={1} pb={3} spacing={'20px'}>
                 <RenderCaption
                     shouldDisableEdits={shouldDisableEdits}
