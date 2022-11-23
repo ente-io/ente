@@ -27,7 +27,7 @@ export function RenderCaption({
     const [caption, setCaption] = useState(
         file?.pubMagicMetadata?.data.caption
     );
-    const [isInEditMode, setIsInEditMode] = useState(true);
+    const [isInEditMode, setIsInEditMode] = useState(false);
 
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => {

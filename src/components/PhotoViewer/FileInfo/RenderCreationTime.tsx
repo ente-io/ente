@@ -64,7 +64,7 @@ export function RenderCreationTime({
                     caption={formatDateTime(originalCreationTime)}
                     openEditor={openEditMode}
                     loading={loading}
-                    showEditOption={!shouldDisableEdits && !isInEditMode}
+                    hideEditOption={shouldDisableEdits || isInEditMode}
                 />
                 {isInEditMode && (
                     <EnteDateTimePicker

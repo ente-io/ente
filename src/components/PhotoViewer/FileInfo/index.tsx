@@ -3,15 +3,7 @@ import constants from 'utils/strings/constants';
 import { RenderFileName } from './RenderFileName';
 // import { ExifData } from './ExifData';
 import { RenderCreationTime } from './RenderCreationTime';
-import {
-    Box,
-    DialogProps,
-    Drawer,
-    Link,
-    Stack,
-    styled,
-    Typography,
-} from '@mui/material';
+import { DialogProps, Drawer, Link, Stack, styled } from '@mui/material';
 import { Location, Metadata } from 'types/upload';
 import Photoswipe from 'photoswipe';
 import { getEXIFLocation } from 'services/upload/exifService';
@@ -22,11 +14,11 @@ import {
     LocationOnOutlined,
     TextSnippetOutlined,
 } from '@mui/icons-material';
-import { FlexWrapper } from 'components/Container';
 import CopyButton from 'components/CodeBlock/CopyButton';
-import { formatDateShort, formatTime } from 'utils/time';
+import { formatDateTime } from 'utils/time';
 import { Badge } from 'components/Badge';
 import Titlebar from 'components/Titlebar';
+import InfoItem from './InfoItem';
 
 const FileInfoSidebar = styled((props: DialogProps) => (
     <Drawer {...props} anchor="right" />
@@ -112,52 +104,46 @@ export function FileInfo({
                     scheduleUpdate={scheduleUpdate}
                 />
 
-                {/* {location && ( */}
-                <FlexWrapper sx={{ position: 'relative' }}>
-                    <LocationOnOutlined />
-                    <Box>
-                        <Box>
-                            <Typography>{constants.LOCATION}</Typography>
-                        </Box>
-                        <Link
-                            href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
-                            target="_blank"
-                            rel="noopener noreferrer">
-                            {constants.SHOW_ON_MAP}
-                        </Link>
-                    </Box>
-                    <CopyButton
-                        code={
-                            'https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}'
+                {location && (
+                    <InfoItem
+                        icon={<LocationOnOutlined />}
+                        title={constants.LOCATION}
+                        caption={
+                            <Link
+                                href={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}>
+                                {constants.SHOW_ON_MAP}
+                            </Link>
+                        }
+                        customEndButton={
+                            <CopyButton
+                                code={`https://www.openstreetmap.org/?mlat=${metadata.latitude}&mlon=${metadata.longitude}#map=15/${metadata.latitude}/${metadata.longitude}`}
+                                color="secondary"
+                                size="medium"
+                            />
                         }
                     />
-                </FlexWrapper>
-                <FlexWrapper>
-                    <TextSnippetOutlined />
-                    <Box>
-                        <Box>{constants.DETAILS}</Box>
-                        <Box>{constants.VIEW_EXIF}</Box>
-                    </Box>
-                </FlexWrapper>
+                )}
+                <InfoItem
+                    icon={<TextSnippetOutlined />}
+                    title={constants.DETAILS}
+                    caption={constants.VIEW_EXIF}
+                    hideEditOption
+                />
+                <InfoItem
+                    icon={<BackupOutlined />}
+                    title={formatDateTime(metadata.modificationTime / 1000)}
+                    caption={formatDateTime(metadata.modificationTime / 1000)}
+                    hideEditOption
+                />
 
-                <FlexWrapper>
-                    <BackupOutlined />
-                    <Box>
-                        <Box>
-                            {formatDateShort(metadata.modificationTime / 1000)}
-                        </Box>
-                        <Box>{formatTime(metadata.modificationTime)}</Box>
-                    </Box>
-                </FlexWrapper>
-
-                <FlexWrapper>
-                    <FolderOutlined />
+                <InfoItem icon={<FolderOutlined />} hideEditOption>
                     <Stack spacing={1} direction="row">
                         <Badge>abc</Badge>
                         <Badge>DEF</Badge>
                         <Badge>GHI</Badge>
                     </Stack>
-                </FlexWrapper>
+                </InfoItem>
+
                 {/* {exif && (
                     <>
                         <ExifData exif={exif} />
