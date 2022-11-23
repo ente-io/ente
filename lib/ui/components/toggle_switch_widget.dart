@@ -60,7 +60,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
               activeColor: enteColorScheme.primary400,
               inactiveTrackColor: enteColorScheme.fillMuted,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: toggleValue,
+              value: toggleValue ?? false,
               onChanged: (negationOfToggleValue) async {
                 setState(() {
                   toggleValue = negationOfToggleValue;
