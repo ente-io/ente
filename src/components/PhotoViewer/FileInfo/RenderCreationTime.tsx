@@ -7,12 +7,10 @@ import {
     updateExistingFilePubMetadata,
 } from 'utils/file';
 import { formatDateTime } from 'utils/time';
-import EditIcon from '@mui/icons-material/Edit';
-import { FlexWrapper, Value } from 'components/Container';
+import { FlexWrapper } from 'components/Container';
 import { logError } from 'utils/sentry';
-import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { IconButton } from '@mui/material';
+import InfoItem from './InfoItem';
 
 export function RenderCreationTime({
     shouldDisableEdits,
@@ -58,35 +56,25 @@ export function RenderCreationTime({
     };
 
     return (
-        <FlexWrapper>
-            <CalendarTodayIcon />
-            <Value width={!shouldDisableEdits ? !isInEditMode && '60%' : '70%'}>
-                {isInEditMode ? (
+        <>
+            <FlexWrapper>
+                <InfoItem
+                    icon={<CalendarTodayIcon />}
+                    title={formatDateTime(originalCreationTime)}
+                    caption={formatDateTime(originalCreationTime)}
+                    openEditor={openEditMode}
+                    loading={loading}
+                    showEditOption={!shouldDisableEdits && !isInEditMode}
+                />
+                {isInEditMode && (
                     <EnteDateTimePicker
                         initialValue={originalCreationTime}
                         disabled={loading}
                         onSubmit={saveEdits}
                         onClose={closeEditMode}
                     />
-                ) : (
-                    formatDateTime(originalCreationTime)
                 )}
-            </Value>
-            {!shouldDisableEdits && !isInEditMode && (
-                <Value
-                    width={'10%'}
-                    style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                    {loading ? (
-                        <IconButton>
-                            <SmallLoadingSpinner />
-                        </IconButton>
-                    ) : (
-                        <IconButton onClick={openEditMode}>
-                            <EditIcon />
-                        </IconButton>
-                    )}
-                </Value>
-            )}
-        </FlexWrapper>
+            </FlexWrapper>
+        </>
     );
 }
