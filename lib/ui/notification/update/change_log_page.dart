@@ -41,16 +41,17 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             const SizedBox(
               height: 36,
             ),
-            SafeArea(
-              child: Container(
-                alignment: Alignment.centerLeft,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: TitleBarTitleWidget(
-                    title: "What's new",
-                  ),
+            Container(
+              alignment: Alignment.centerLeft,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: TitleBarTitleWidget(
+                  title: "What's new",
                 ),
               ),
+            ),
+            const SizedBox(
+              height: 24,
             ),
             Expanded(child: _getChangeLog()),
             const DividerWidget(
@@ -184,15 +185,14 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         thumbVisibility: true,
         thickness: 2.0,
         child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(right: 16.0),
               child: ChangeLogEntryWidget(entry: items[index]),
             );
           },
-          physics: const ClampingScrollPhysics(),
           itemCount: items.length,
-          shrinkWrap: true,
         ),
       ),
     );
