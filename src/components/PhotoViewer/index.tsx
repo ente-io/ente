@@ -33,7 +33,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { ChevronLeft, ContentCopy } from '@mui/icons-material';
+import { ChevronLeft } from '@mui/icons-material';
 import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 
@@ -104,9 +104,9 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         if (!photoSwipe) return;
-        function handleCopyEvent() {
-            copyToClipboardHelper(photoSwipe.currItem as EnteFile);
-        }
+        // function handleCopyEvent() {
+        //     copyToClipboardHelper(photoSwipe.currItem as EnteFile);
+        // }
 
         function handleKeyUp(event: KeyboardEvent) {
             if (!isOpen || showInfo) {
@@ -144,11 +144,11 @@ function PhotoViewer(props: Iprops) {
         }
 
         window.addEventListener('keyup', handleKeyUp);
-        window.addEventListener('copy', handleCopyEvent);
+        // window.addEventListener('copy', handleCopyEvent);
         return () => {
             addLocalLog(() => 'Removing listener');
             window.removeEventListener('keyup', handleKeyUp);
-            window.removeEventListener('copy', handleCopyEvent);
+            // window.removeEventListener('copy', handleCopyEvent);
         };
     }, [isOpen, photoSwipe, showInfo]);
 
@@ -428,6 +428,8 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
+    //Don't use... firefox support is not available
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const copyToClipboardHelper = async (file: EnteFile) => {
         if (props.enableDownload) {
             appContext.startLoading();
@@ -496,7 +498,7 @@ function PhotoViewer(props: Iprops) {
                                     <DownloadIcon fontSize="small" />
                                 </button>
                             )}
-                            {props.enableDownload && (
+                            {/* {props.enableDownload && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={constants.COPY_OPTION}
@@ -507,7 +509,7 @@ function PhotoViewer(props: Iprops) {
                                     }>
                                     <ContentCopy fontSize="small" />
                                 </button>
-                            )}
+                            )} */}
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button

@@ -531,6 +531,7 @@ export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
     return files.filter((file) => file.isTrashed || file.ownerID === user.id);
 };
 
+// doesn't work on firefox
 export const copyFileToClipboard = async (fileUrl: string) => {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
