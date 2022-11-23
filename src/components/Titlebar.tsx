@@ -20,13 +20,11 @@ export default function Titlebar({
                     <Close />
                 </IconButton>
             </Box>
-            <Box py={0.5} px={2}>
+            <Box py={0.5} px={2} height={54}>
                 <Typography variant="h3" fontWeight={'bold'}>
                     {title}
                 </Typography>
-                <Typography variant="body2" minHeight={17}>
-                    {caption}
-                </Typography>
+                <Typography variant="body2">{caption}</Typography>
             </Box>
         </>
     );
