@@ -437,7 +437,8 @@ const englishConstants = {
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
         'This video cannot be played on your browser',
     METADATA: 'Metadata',
-    INFO: 'Info',
+    INFO: 'Info ',
+    INFO_OPTION: 'Info (I)',
     FILE_ID: 'File ID',
     FILE_NAME: 'File name',
     CAPTION: 'Description',

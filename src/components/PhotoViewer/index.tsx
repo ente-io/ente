@@ -109,19 +109,21 @@ function PhotoViewer(props: Iprops) {
         // }
 
         function handleKeyUp(event: KeyboardEvent) {
-            if (!isOpen || showInfo) {
+            if (!isOpen) {
                 return;
             }
             addLocalLog(() => 'Event: ' + event.key);
+            if (event.key === 'i' || event.key === 'I') {
+                if (!showInfo) {
+                    setShowInfo(true);
+                } else {
+                    setShowInfo(false);
+                }
+            }
+            if (showInfo) {
+                return;
+            }
             switch (event.key) {
-                case 'i':
-                case 'I':
-                    if (!showInfo) {
-                        setShowInfo(true);
-                    } else {
-                        setShowInfo(false);
-                    }
-                    break;
                 case 'Backspace':
                 case 'Delete':
                     confirmTrashFile(photoSwipe?.currItem as EnteFile);
@@ -535,7 +537,7 @@ function PhotoViewer(props: Iprops) {
                             {!props.isSharedCollection && (
                                 <button
                                     className="pswp__button pswp__button--custom"
-                                    title={constants.INFO}
+                                    title={constants.INFO_OPTION}
                                     onClick={handleOpenInfo}>
                                     <InfoIcon fontSize="small" />
                                 </button>
