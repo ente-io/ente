@@ -536,7 +536,7 @@ export const copyFileToClipboard = async (fileUrl: string) => {
     const canvasCTX = canvas.getContext('2d');
     const image = new Image();
 
-    const blobPromise = await new Promise<Blob>((resolve, reject) => {
+    const blobPromise = new Promise<Blob>((resolve, reject) => {
         let timeout: NodeJS.Timeout = null;
         try {
             image.setAttribute('src', fileUrl);
