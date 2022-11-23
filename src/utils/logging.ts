@@ -7,6 +7,8 @@ export function setupLogging(isDev?: boolean) {
     if (!isDev) {
         log.transports.console.level = false;
     }
+    log.transports.file.format =
+        '[{y}-{m}-{d}T{h}:{i}:{s}{z}] [{level}]{scope} {text}';
 }
 
 export function makeID(length: number) {

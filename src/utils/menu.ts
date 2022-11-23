@@ -203,6 +203,7 @@ export async function buildMenuBar(): Promise<Menu> {
         {
             label: 'Window',
             submenu: [
+                { role: 'close', label: 'Close' },
                 { role: 'minimize', label: 'Minimize' },
                 ...((isMac
                     ? [
@@ -211,9 +212,7 @@ export async function buildMenuBar(): Promise<Menu> {
                           { type: 'separator' },
                           { role: 'window', label: 'ente' },
                       ]
-                    : [
-                          { role: 'close', label: 'Close ente' },
-                      ]) as MenuItemConstructorOptions[]),
+                    : []) as MenuItemConstructorOptions[]),
             ],
         },
         {
