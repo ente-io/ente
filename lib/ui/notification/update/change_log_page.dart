@@ -185,6 +185,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
         thumbVisibility: true,
         thickness: 2.0,
         child: ListView.builder(
+          physics: const BouncingScrollPhysics(),
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(right: 16.0),
