@@ -8,6 +8,7 @@ import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
 import fetch from 'node-fetch';
 import { isPlatformMac } from '../utils/main';
 import { logErrorSentry } from './sentry';
+import ElectronLog from 'electron-log';
 
 const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 
@@ -83,6 +84,7 @@ export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
 }
 
 export function updateAndRestart() {
+    ElectronLog.log('user quit the app');
     setIsAppQuitting(true);
     autoUpdater.quitAndInstall();
 }

@@ -1,10 +1,12 @@
 import log from 'electron-log';
 import { LOG_FILENAME, MAX_LOG_SIZE } from '../config';
 
-export function setupLogging() {
+export function setupLogging(isDev?: boolean) {
     log.transports.file.fileName = LOG_FILENAME;
     log.transports.file.maxSize = MAX_LOG_SIZE;
-    log.transports.console.level = false;
+    if (!isDev) {
+        log.transports.console.level = false;
+    }
     log.transports.file.format =
         '[{y}-{m}-{d}T{h}:{i}:{s}{z}] [{level}]{scope} {text}';
 }
