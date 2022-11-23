@@ -436,7 +436,7 @@ const englishConstants = {
     FILE_ID: 'File ID',
     FILE_NAME: 'File name',
     CAPTION: 'Description',
-    CAPTION_PLACEHOLDER: 'Add a description... ',
+    CAPTION_PLACEHOLDER: 'Add a description',
     CREATION_TIME: 'Creation time',
     UPDATED_ON: 'Updated on',
     LOCATION: 'Location',
