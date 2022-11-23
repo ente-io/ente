@@ -8,6 +8,7 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/notification_service.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:ente_auth/services/user_remote_flag_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -60,6 +61,7 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 Future<void> _init(bool bool, {String via}) async {
   InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
+  await PreferenceService.instance.init();
   await CodeStore.instance.init();
   await Configuration.instance.init();
   await Network.instance.init();

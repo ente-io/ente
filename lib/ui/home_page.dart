@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/ente_theme_data.dart';
@@ -9,6 +10,7 @@ import 'package:ente_auth/events/codes_updated_event.dart';
 import "package:ente_auth/l10n/l10n.dart";
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
+import 'package:ente_auth/services/preference_service.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/store/code_store.dart';
 import 'package:ente_auth/ui/code_widget.dart';
@@ -121,7 +123,11 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           title: const Text('ente Authenticator'),
         ),
-        floatingActionButton: !_hasLoaded || _codes.isEmpty ? null : _getFab(),
+        floatingActionButton: !_hasLoaded ||
+                _codes.isEmpty ||
+                !PreferenceService.instance.hasShownCoachMark()
+            ? null
+            : _getFab(),
       ),
     );
   }
@@ -131,12 +137,22 @@ class _HomePageState extends State<HomePage> {
       if (_codes.isEmpty) {
         return _getEmptyState();
       } else {
-        return ListView.builder(
+        final list = ListView.builder(
           itemBuilder: ((context, index) {
             return CodeWidget(_codes[index]);
           }),
           itemCount: _codes.length,
         );
+        if (!PreferenceService.instance.hasShownCoachMark()) {
+          return Stack(
+            children: [
+              list,
+              _getCoachMarkWidget(),
+            ],
+          );
+        } else {
+          return list;
+        }
       }
     } else {
       return const EnteLoadingWidget();
@@ -219,6 +235,64 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _getCoachMarkWidget() {
+    return GestureDetector(
+      onTap: () async {
+        await PreferenceService.instance.setHasShownCoachMark(true);
+        setState(() {});
+      },
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              color: Theme.of(context).colorScheme.background.withOpacity(0.1),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.swipe_left,
+                          size: 42,
+                        ),
+                        const SizedBox(
+                          height: 24,
+                        ),
+                        Text(
+                          "Swipe left to edit or remove codes",
+                          style: Theme.of(context).textTheme.headline6,
+                        ),
+                        const SizedBox(
+                          height: 36,
+                        ),
+                        SizedBox(
+                          width: 160,
+                          child: OutlinedButton(
+                            onPressed: () async {
+                              await PreferenceService.instance
+                                  .setHasShownCoachMark(true);
+                              setState(() {});
+                            },
+                            child: const Text("OK"),
+                          ),
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
