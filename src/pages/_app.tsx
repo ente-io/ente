@@ -8,7 +8,6 @@ import 'photoswipe/dist/photoswipe.css';
 import 'styles/global.css';
 import EnteSpinner from 'components/EnteSpinner';
 import { logError } from '../utils/sentry';
-// import { Workbox } from 'workbox-window';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import HTTPService from 'services/HTTPService';
 import FlashMessageBar from 'components/FlashMessageBar';
@@ -120,34 +119,6 @@ export default function App({ Component, err }) {
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
-
-    useEffect(() => {
-        if (
-            !('serviceWorker' in navigator) ||
-            process.env.NODE_ENV !== 'production'
-        ) {
-            console.warn('Progressive Web App support is disabled');
-            return;
-        }
-        // const wb = new Workbox('sw.js', { scope: '/' });
-        // wb.register();
-
-        if ('serviceWorker' in navigator && !isElectron()) {
-            navigator.serviceWorker.onmessage = (event) => {
-                if (event.data.action === 'upload-files') {
-                    const files = event.data.files;
-                    setSharedFiles(files);
-                }
-            };
-            navigator.serviceWorker
-                .getRegistrations()
-                .then(function (registrations) {
-                    for (const registration of registrations) {
-                        registration.unregister();
-                    }
-                });
-        }
-    }, []);
 
     useEffect(() => {
         HTTPService.getInterceptors().response.use(

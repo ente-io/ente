@@ -62,7 +62,8 @@ export function getUnixTimeInMicroSeconds(dateTime: Date) {
         return null;
     }
     const unixTime = dateTime.getTime() * 1000;
-    if (unixTime <= 0) {
+    //ignoring dateTimeString = "0000:00:00 00:00:00";
+    if (unixTime === Date.UTC(0, 0, 0, 0, 0, 0, 0)) {
         return null;
     } else {
         return unixTime;
