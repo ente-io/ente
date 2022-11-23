@@ -7,7 +7,6 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import VerticallyCentered from 'components/Container';
-import { Button } from 'react-bootstrap';
 import { logError } from 'utils/sentry';
 import { recoverTwoFactor, removeTwoFactor } from 'services/userService';
 import { AppContext } from 'pages/_app';
@@ -15,6 +14,7 @@ import { PAGES } from 'constants/pages';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import LinkButton from 'components/pages/gallery/LinkButton';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -101,12 +101,12 @@ export default function Recover() {
                     buttonText={constants.RECOVER}
                 />
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
-                    <Button variant="link" onClick={showNoRecoveryKeyMessage}>
+                    <LinkButton onClick={showNoRecoveryKeyMessage}>
                         {constants.NO_RECOVERY_KEY}
-                    </Button>
-                    <Button variant="link" onClick={router.back}>
+                    </LinkButton>
+                    <LinkButton onClick={router.back}>
                         {constants.GO_BACK}
-                    </Button>
+                    </LinkButton>
                 </FormPaperFooter>
             </FormPaper>
         </VerticallyCentered>

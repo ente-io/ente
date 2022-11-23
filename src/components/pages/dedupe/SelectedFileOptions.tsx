@@ -2,9 +2,8 @@ import { FluidContainer } from 'components/Container';
 import { SelectionBar } from '../../Navbar/SelectionBar';
 import constants from 'utils/strings/constants';
 import React, { useContext } from 'react';
-import { Box, IconButton, styled } from '@mui/material';
+import { Box, IconButton, styled, Tooltip } from '@mui/material';
 import { DeduplicateContext } from 'pages/deduplicate';
-import { IconWithMessage } from 'components/IconWithMessage';
 import { AppContext } from 'pages/_app';
 import CloseIcon from '@mui/icons-material/Close';
 import BackButton from '@mui/icons-material/ArrowBackOutlined';
@@ -78,11 +77,11 @@ export default function DeduplicateOptions({
             <div>
                 <VerticalLine />
             </div>
-            <IconWithMessage message={constants.DELETE}>
+            <Tooltip title={constants.DELETE}>
                 <IconButton onClick={trashHandler}>
                     <DeleteIcon />
                 </IconButton>
-            </IconWithMessage>
+            </Tooltip>
         </SelectionBar>
     );
 }
