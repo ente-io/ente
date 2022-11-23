@@ -60,7 +60,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         title: const Text("Add people"),
       ),
       body: Container(
-        color: enteColorScheme.backgroundElevated,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
