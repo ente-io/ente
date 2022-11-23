@@ -93,7 +93,7 @@ export function FileInfo({
     return (
         <FileInfoSidebar open={showInfo} onClose={handleCloseInfo}>
             <Box>
-                <IconButton color="secondary">
+                <IconButton color="secondary" onClick={handleCloseInfo}>
                     <CloseIcon />
                 </IconButton>
                 <Typography variant="h3" fontWeight={'bold'} px={2} py={0.5}>
