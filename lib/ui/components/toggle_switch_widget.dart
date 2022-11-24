@@ -26,7 +26,7 @@ class ToggleSwitchWidget extends StatefulWidget {
 }
 
 class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
-  late bool toggleValue;
+  bool? toggleValue;
   ExecutionState executionState = ExecutionState.idle;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
 
@@ -96,7 +96,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                       });
                     }
                   } else {
-                    toggleValue = !toggleValue;
+                    toggleValue = !toggleValue!;
                     executionState = ExecutionState.idle;
                   }
                 });

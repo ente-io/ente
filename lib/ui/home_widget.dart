@@ -443,6 +443,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         ),
       ),
       backgroundColor: colorScheme.backgroundElevated,
+      enableDrag: false,
       barrierColor: backdropMutedDark,
       context: context,
       builder: (BuildContext context) {
