@@ -39,6 +39,22 @@ You can also export the codes you have added to ente, to an **unencrypted** text
 file, that adheres to the above format.
 
 
+## 📲 Download
+
+#### Android
+
+You can download the latest version from [GitHub
+releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apk).
+The downloaded APK supports auto-updates.
+
+
+#### iOS
+
+The app is not live on the AppStore yet. If you would like access, please write
+to [auth@ente.io](mailto:auth@ente.io), and we will be happy to provide access
+via TestFlight.
+
+
 ## 🔩 Architecture
 
 The architecture that powers end-to-end encrypted storage and sync of your
