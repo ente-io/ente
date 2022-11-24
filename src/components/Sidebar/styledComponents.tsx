@@ -1,11 +1,9 @@
-import { Drawer, styled } from '@mui/material';
+import { styled } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
+import { EnteDrawer } from 'components/EnteDrawer';
 
-export const DrawerSidebar = styled(Drawer)(({ theme }) => ({
+export const DrawerSidebar = styled(EnteDrawer)(({ theme }) => ({
     '& .MuiPaper-root': {
-        maxWidth: '375px',
-        width: '100%',
-        scrollbarWidth: 'thin',
         padding: theme.spacing(1.5),
     },
 }));

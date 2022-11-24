@@ -443,6 +443,7 @@ const englishConstants = {
     SHOW_ON_MAP: 'View on OpenStreetMap',
     DETAILS: 'Details',
     VIEW_EXIF: 'View all EXIF data',
+    NO_EXIF: 'No EXIF data',
     EXIF: 'Exif',
     DEVICE: 'Device',
     IMAGE_SIZE: 'Image size',

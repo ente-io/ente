@@ -1,73 +1,70 @@
-import React, { useState } from 'react';
+import React from 'react';
 import constants from 'utils/strings/constants';
 
-import { RenderInfoItem } from './RenderInfoItem';
-import { LegendContainer } from '../styledComponents/LegendContainer';
-import { Pre } from '../styledComponents/Pre';
-import {
-    Checkbox,
-    FormControlLabel,
-    FormGroup,
-    Typography,
-} from '@mui/material';
+import { Stack, styled, Typography } from '@mui/material';
+import { FileInfoSidebar } from '.';
+import Titlebar from 'components/Titlebar';
+import { Box } from '@mui/system';
+import CopyButton from 'components/CodeBlock/CopyButton';
 
-export function ExifData(props: { exif: any }) {
-    const { exif } = props;
-    const [showAll, setShowAll] = useState(false);
+const ExifItem = styled(Box)`
+    padding-left: 8px;
+    padding-right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+`;
 
-    const changeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setShowAll(e.target.checked);
+function parseExifValue(value: any) {
+    switch (typeof value) {
+        case 'string':
+        case 'number':
+            return value;
+        case 'object':
+            if (value instanceof Date) {
+                return value.toString();
+            }
+            break;
+        default:
+            return JSON.stringify(value);
+    }
+}
+export function ExifData(props: {
+    exif: any;
+    open: boolean;
+    onClose: () => void;
+    filename: string;
+    onInfoClose: () => void;
+}) {
+    const { exif, open, onClose, filename, onInfoClose } = props;
+
+    if (!exif) {
+        return <></>;
+    }
+    const handleRootClose = () => {
+        onClose();
+        onInfoClose();
     };
 
-    const renderAllValues = () => <Pre>{exif.raw}</Pre>;
-
-    const renderSelectedValues = () => (
-        <>
-            {exif?.Make &&
-                exif?.Model &&
-                RenderInfoItem(constants.DEVICE, `${exif.Make} ${exif.Model}`)}
-            {exif?.ImageWidth &&
-                exif?.ImageHeight &&
-                RenderInfoItem(
-                    constants.IMAGE_SIZE,
-                    `${exif.ImageWidth} x ${exif.ImageHeight}`
-                )}
-            {exif?.Flash && RenderInfoItem(constants.FLASH, exif.Flash)}
-            {exif?.FocalLength &&
-                RenderInfoItem(
-                    constants.FOCAL_LENGTH,
-                    exif.FocalLength.toString()
-                )}
-            {exif?.ApertureValue &&
-                RenderInfoItem(
-                    constants.APERTURE,
-                    exif.ApertureValue.toString()
-                )}
-            {exif?.ISOSpeedRatings &&
-                RenderInfoItem(constants.ISO, exif.ISOSpeedRatings.toString())}
-        </>
-    );
-
     return (
-        <>
-            <LegendContainer>
-                <Typography variant="subtitle" mb={1}>
-                    {constants.EXIF}
-                </Typography>
-                <FormGroup>
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                size="small"
-                                onChange={changeHandler}
-                                color="accent"
-                            />
-                        }
-                        label={constants.SHOW_ALL}
-                    />
-                </FormGroup>
-            </LegendContainer>
-            {showAll ? renderAllValues() : renderSelectedValues()}
-        </>
+        <FileInfoSidebar open={open} onClose={onClose}>
+            <Titlebar
+                onClose={onClose}
+                title={constants.EXIF}
+                caption={filename}
+                onRootClose={handleRootClose}
+                actionButton={<CopyButton code={exif} color={'secondary'} />}
+            />
+            <Stack py={3} px={1} spacing={2}>
+                {[...Object.entries(exif)].map(([key, value]) => (
+                    <ExifItem key={key}>
+                        <Typography variant="body2" color={'text.secondary'}>
+                            {key}
+                        </Typography>
+                        <Typography>{parseExifValue(value)}</Typography>
+                    </ExifItem>
+                ))}
+            </Stack>
+        </FileInfoSidebar>
     );
 }

@@ -26,27 +26,29 @@ export default function InfoItem({
     children,
 }: Iprops): JSX.Element {
     return (
-        <FlexWrapper height={48} justifyContent="space-between">
-            <FlexWrapper gap={0.5} pr={1}>
+        <FlexWrapper justifyContent="space-between">
+            <Box display={'flex'} alignItems="flex-start" gap={0.5} pr={1}>
                 <IconButton
                     color="secondary"
-                    sx={{ '&&': { cursor: 'default' } }}
+                    sx={{ '&&': { cursor: 'default', m: 0.5 } }}
                     disableRipple>
                     {icon}
                 </IconButton>
-                <Box>
+                <Box py={0.5}>
                     {children ? (
                         children
                     ) : (
                         <>
-                            <Typography>{title}</Typography>
+                            <Typography sx={{ wordBreak: 'break-all' }}>
+                                {title}
+                            </Typography>
                             <Typography variant="body2" color="text.secondary">
                                 {caption}
                             </Typography>
                         </>
                     )}
                 </Box>
-            </FlexWrapper>
+            </Box>
             {customEndButton
                 ? customEndButton
                 : !hideEditOption && (

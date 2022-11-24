@@ -10,7 +10,6 @@ import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
 import { downloadFile } from 'utils/file';
-import { prettyPrintExif } from 'utils/exif';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
@@ -61,6 +60,8 @@ interface Iprops {
     isTrashCollection: boolean;
     enableDownload: boolean;
     isSourceLoaded: boolean;
+    fileToCollectionsMap: Map<number, number[]>;
+    collectionNameMap: Map<number, string>;
 }
 
 function PhotoViewer(props: Iprops) {
@@ -71,7 +72,6 @@ function PhotoViewer(props: Iprops) {
     const { isOpen, items, isSourceLoaded } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [metadata, setMetaData] = useState<EnteFile['metadata']>(null);
     const [exif, setExif] = useState<any>(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions
@@ -318,8 +318,10 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async () => {
-        setExif(null);
+    const checkExifAvailable = async (force?: boolean) => {
+        if (exif || !force) {
+            return;
+        }
         await sleep(100);
         try {
             const img: HTMLImageElement = document.querySelector(
@@ -327,11 +329,11 @@ function PhotoViewer(props: Iprops) {
             );
             if (img) {
                 const exifData = await exifr.parse(img);
-                if (!exifData) {
-                    return;
+                if (exifData) {
+                    setExif(exifData);
+                } else {
+                    setExif(null);
                 }
-                exifData.raw = prettyPrintExif(exifData);
-                setExif(exifData);
             }
         } catch (e) {
             logError(e, 'exifr parsing failed');
@@ -340,10 +342,9 @@ function PhotoViewer(props: Iprops) {
 
     function updateInfo() {
         const file: EnteFile = this?.currItem;
-        if (file?.metadata) {
-            setMetaData(file.metadata);
-            setExif(null);
-            checkExifAvailable();
+        if (file) {
+            setExif(undefined);
+            checkExifAvailable(true);
         }
     }
 
@@ -493,12 +494,12 @@ function PhotoViewer(props: Iprops) {
                 shouldDisableEdits={props.isSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
-                items={items}
-                photoSwipe={photoSwipe}
-                metadata={metadata}
+                file={photoSwipe?.currItem as EnteFile}
                 exif={exif}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
+                fileToCollectionsMap={props.fileToCollectionsMap}
+                collectionNameMap={props.collectionNameMap}
             />
         </>
     );

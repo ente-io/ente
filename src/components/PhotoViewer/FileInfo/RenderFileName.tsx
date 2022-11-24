@@ -13,6 +13,7 @@ import { FILE_TYPE } from 'constants/file';
 import { PhotoOutlined, VideoFileOutlined } from '@mui/icons-material';
 import InfoItem from './InfoItem';
 import { makeHumanReadableStorage } from 'utils/billing';
+import Box from '@mui/material/Box';
 
 const getFileTitle = (filename, extension) => {
     if (extension) {
@@ -22,14 +23,14 @@ const getFileTitle = (filename, extension) => {
     }
 };
 
-const getCaption = (file: EnteFile, exif) => {
-    const cameraMP = exif?.['megaPixels'];
-    const resolution = exif?.['resolution'];
+const getCaption = (file: EnteFile, parsedExifData) => {
+    const megaPixels = parsedExifData?.['megaPixels'];
+    const resolution = parsedExifData?.['resolution'];
     const fileSize = file.info?.fileSize;
 
     const captionParts = [];
-    if (cameraMP) {
-        captionParts.push(`${cameraMP} MP`);
+    if (megaPixels) {
+        captionParts.push(megaPixels);
     }
     if (resolution) {
         captionParts.push(resolution);
@@ -37,16 +38,22 @@ const getCaption = (file: EnteFile, exif) => {
     if (fileSize) {
         captionParts.push(makeHumanReadableStorage(fileSize));
     }
-    return captionParts.join(' ');
+    return (
+        <FlexWrapper gap={1}>
+            {captionParts.map((caption) => (
+                <Box key={caption}> {caption}</Box>
+            ))}
+        </FlexWrapper>
+    );
 };
 
 export function RenderFileName({
-    exif,
+    parsedExifData,
     shouldDisableEdits,
     file,
     scheduleUpdate,
 }: {
-    exif: Record<string, any>;
+    parsedExifData: Record<string, any>;
     shouldDisableEdits: boolean;
     file: EnteFile;
     scheduleUpdate: () => void;
@@ -93,9 +100,8 @@ export function RenderFileName({
                         )
                     }
                     title={getFileTitle(filename, extension)}
-                    caption={getCaption(file, exif)}
+                    caption={getCaption(file, parsedExifData)}
                     openEditor={openEditMode}
-                    loading={false}
                     hideEditOption={shouldDisableEdits || isInEditMode}
                 />
             ) : (

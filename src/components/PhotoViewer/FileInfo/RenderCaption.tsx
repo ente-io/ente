@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { changeCaption, updateExistingFilePubMetadata } from 'utils/file';
@@ -35,9 +35,6 @@ export function RenderCaption({
         setIsInEditMode(false);
     };
 
-    useEffect(() => {
-        console.log(isInEditMode);
-    }, [isInEditMode]);
     const saveEdits = async (newCaption: string) => {
         try {
             if (file) {
