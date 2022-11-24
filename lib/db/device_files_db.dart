@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -320,6 +321,31 @@ extension DeviceFiles on FilesDB {
     final files = convertToFiles(results);
     final dedupe = deduplicateByLocalID(files);
     return FileLoadResult(dedupe, files.length == limit);
+  }
+
+  Future<BackedUpFileIDs> getBackedUpForDeviceCollection(
+    String pathID,
+    int ownerID,
+  ) async {
+    final db = await database;
+    const String rawQuery = ''' 
+    SELECT ${FilesDB.columnLocalID}, ${FilesDB.columnUploadedFileID}
+          FROM ${FilesDB.filesTable}
+          WHERE ${FilesDB.columnLocalID} IS NOT NULL AND
+          (${FilesDB.columnOwnerID} IS NULL OR ${FilesDB.columnOwnerID} = ?)
+          AND (${FilesDB.columnUploadedFileID} IS NOT NULL AND ${FilesDB.columnUploadedFileID} IS NOT -1)
+          AND 
+          ${FilesDB.columnLocalID} IN 
+          (SELECT id FROM device_files where path_id = ?)
+          ''';
+    final results = await db.rawQuery(rawQuery, [ownerID, pathID]);
+    final localIDs = <String>{};
+    final uploadedIDs = <int>{};
+    for (final result in results) {
+      localIDs.add(result[FilesDB.columnLocalID]);
+      uploadedIDs.add(result[FilesDB.columnUploadedFileID]);
+    }
+    return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
 
   Future<List<DeviceCollection>> getDeviceCollections({

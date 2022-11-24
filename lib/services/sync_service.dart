@@ -12,6 +12,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
+import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/permission_granted_event.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
@@ -206,8 +207,16 @@ class SyncService {
     );
   }
 
-  Future<BackupStatus> getBackupStatus() async {
-    final ids = await FilesDB.instance.getBackedUpIDs();
+  Future<BackupStatus> getBackupStatus({String pathID}) async {
+    BackedUpFileIDs ids;
+    if (pathID == null) {
+      ids = await FilesDB.instance.getBackedUpIDs();
+    } else {
+      ids = await FilesDB.instance.getBackedUpForDeviceCollection(
+        pathID,
+        Configuration.instance.getUserID(),
+      );
+    }
     final size = await _getFileSize(ids.uploadedIDs);
     return BackupStatus(ids.localIDs, size);
   }
