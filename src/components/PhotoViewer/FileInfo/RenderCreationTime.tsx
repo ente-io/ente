@@ -6,7 +6,7 @@ import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { formatDateTime } from 'utils/time';
+import { formatDateMedium, formatTime } from 'utils/time';
 import { FlexWrapper } from 'components/Container';
 import { logError } from 'utils/sentry';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
@@ -60,8 +60,8 @@ export function RenderCreationTime({
             <FlexWrapper>
                 <InfoItem
                     icon={<CalendarTodayIcon />}
-                    title={formatDateTime(originalCreationTime)}
-                    caption={formatDateTime(originalCreationTime)}
+                    title={formatDateMedium(originalCreationTime)}
+                    caption={formatTime(originalCreationTime)}
                     openEditor={openEditMode}
                     loading={loading}
                     hideEditOption={shouldDisableEdits || isInEditMode}

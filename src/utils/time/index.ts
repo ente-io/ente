@@ -33,11 +33,21 @@ export function formatDateShort(date: number | Date) {
     return dateTimeFormat.format(date);
 }
 
+export function formatDateMedium(date: number | Date) {
+    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+    });
+    return dateTimeFormat.format(date);
+}
+
 export function formatTime(date: number | Date) {
     const timeFormat = new Intl.DateTimeFormat('en-IN', {
         timeStyle: 'short',
     });
-    return timeFormat.format(date);
+    return timeFormat.format(date).toUpperCase();
 }
 
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
