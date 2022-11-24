@@ -10,8 +10,13 @@ import 'package:photos/utils/delete_file_util.dart';
 
 class FreeSpacePage extends StatefulWidget {
   final BackupStatus status;
+  final bool clearSpaceForFolder;
 
-  const FreeSpacePage(this.status, {Key key}) : super(key: key);
+  const FreeSpacePage(
+    this.status, {
+    Key key,
+    this.clearSpaceForFolder = false,
+  }) : super(key: key);
 
   @override
   State<FreeSpacePage> createState() => _FreeSpacePageState();
@@ -43,6 +48,12 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
   Widget _getWidget(BackupStatus status) {
     final count = status.localIDs.length;
     final formattedCount = NumberFormat().format(count);
+    final String textMessage = widget.clearSpaceForFolder
+        ? formattedCount.toString() +
+            " file${count == 1 ? "" : "s"} in this album has been backed up "
+                "safely"
+        : formattedCount.toString() +
+            " file${count == 1 ? "" : "s"} on this device have been backed up safely";
     final informationTextStyle = TextStyle(
       fontSize: 14,
       height: 1.3,
@@ -90,11 +101,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               const Padding(padding: EdgeInsets.all(10)),
               Expanded(
                 child: Text(
-                  count == 1
-                      ? formattedCount.toString() +
-                          " file on this device has been backed up safely"
-                      : formattedCount.toString() +
-                          " files on this device have been backed up safely",
+                  textMessage,
                   style: informationTextStyle,
                 ),
               ),
@@ -114,7 +121,7 @@ class _FreeSpacePageState extends State<FreeSpacePage> {
               Expanded(
                 child: Text(
                   (count == 1 ? "It" : "They") +
-                      " can be deleted from this device to free up " +
+                      " can be deleted from the device to free up " +
                       formatBytes(status.size),
                   style: informationTextStyle,
                 ),
