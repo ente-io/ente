@@ -183,10 +183,13 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       showErrorDialog(
         context,
         "✨ All clear",
-        "You've no files in this folder that can be deleted",
+        "You've no files in this album that can be deleted",
       );
     } else {
-      final bool result = await routeToPage(context, FreeSpacePage(status));
+      final bool result = await routeToPage(
+        context,
+        FreeSpacePage(status, clearSpaceForFolder: true),
+      );
       if (result == true) {
         _showSpaceFreedDialog(status);
       }
@@ -342,7 +345,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           value: 5,
           child: Row(
             children: const [
-              Icon(Icons.logout),
+              Icon(Icons.delete_sweep_outlined),
               Padding(
                 padding: EdgeInsets.all(8),
               ),
