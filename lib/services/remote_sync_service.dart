@@ -359,6 +359,9 @@ class RemoteSyncService {
     // remove all collectionIDs which are still marked for backup
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
+    if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
+      Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
+    }
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(<File>[], source: "deviceFolderSync"),
     );
