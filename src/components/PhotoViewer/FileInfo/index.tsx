@@ -99,6 +99,7 @@ export function FileInfo({
                 />
 
                 <RenderFileName
+                    exif={exif}
                     shouldDisableEdits={shouldDisableEdits}
                     file={items[photoSwipe?.getCurrentIndex()]}
                     scheduleUpdate={scheduleUpdate}

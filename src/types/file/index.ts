@@ -27,6 +27,11 @@ export interface FilePublicMagicMetadata
     data: FilePublicMagicMetadataProps;
 }
 
+export interface EnteFileInfo {
+    fileSize: number;
+    thumbSize: number;
+}
+
 export interface EnteFile {
     id: number;
     collectionID: number;
@@ -34,6 +39,7 @@ export interface EnteFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: Metadata;
+    info: EnteFileInfo;
     magicMetadata: FileMagicMetadata;
     pubMagicMetadata: FilePublicMagicMetadata;
     encryptedKey: string;

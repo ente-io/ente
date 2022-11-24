@@ -12,8 +12,9 @@ import { FileNameEditForm } from './FileNameEditForm';
 import { FILE_TYPE } from 'constants/file';
 import { PhotoOutlined, VideoFileOutlined } from '@mui/icons-material';
 import InfoItem from './InfoItem';
+import { makeHumanReadableStorage } from 'utils/billing';
 
-export const getFileTitle = (filename, extension) => {
+const getFileTitle = (filename, extension) => {
     if (extension) {
         return filename + '.' + extension;
     } else {
@@ -21,11 +22,31 @@ export const getFileTitle = (filename, extension) => {
     }
 };
 
+const getCaption = (file: EnteFile, exif) => {
+    const cameraMP = exif?.['megaPixels'];
+    const resolution = exif?.['resolution'];
+    const fileSize = file.info?.fileSize;
+
+    const captionParts = [];
+    if (cameraMP) {
+        captionParts.push(`${cameraMP} MP`);
+    }
+    if (resolution) {
+        captionParts.push(resolution);
+    }
+    if (fileSize) {
+        captionParts.push(makeHumanReadableStorage(fileSize));
+    }
+    return captionParts.join(' ');
+};
+
 export function RenderFileName({
+    exif,
     shouldDisableEdits,
     file,
     scheduleUpdate,
 }: {
+    exif: Record<string, any>;
     shouldDisableEdits: boolean;
     file: EnteFile;
     scheduleUpdate: () => void;
@@ -72,7 +93,7 @@ export function RenderFileName({
                         )
                     }
                     title={getFileTitle(filename, extension)}
-                    caption={getFileTitle(filename, extension)}
+                    caption={getCaption(file, exif)}
                     openEditor={openEditMode}
                     loading={false}
                     hideEditOption={shouldDisableEdits || isInEditMode}
