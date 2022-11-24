@@ -6,6 +6,7 @@ import { FileInfoSidebar } from '.';
 import Titlebar from 'components/Titlebar';
 import { Box } from '@mui/system';
 import CopyButton from 'components/CodeBlock/CopyButton';
+import { formatDateExif } from 'utils/time';
 
 const ExifItem = styled(Box)`
     padding-left: 8px;
@@ -20,13 +21,15 @@ function parseExifValue(value: any) {
         case 'string':
         case 'number':
             return value;
-        case 'object':
-            if (value instanceof Date) {
-                return value.toString();
-            }
-            break;
         default:
-            return JSON.stringify(value);
+            if (value instanceof Date) {
+                return formatDateExif(value);
+            }
+            try {
+                return JSON.stringify(Array.from(value));
+            } catch (e) {
+                return null;
+            }
     }
 }
 export function ExifData(props: {
@@ -56,14 +59,28 @@ export function ExifData(props: {
                 actionButton={<CopyButton code={exif} color={'secondary'} />}
             />
             <Stack py={3} px={1} spacing={2}>
-                {[...Object.entries(exif)].map(([key, value]) => (
-                    <ExifItem key={key}>
-                        <Typography variant="body2" color={'text.secondary'}>
-                            {key}
-                        </Typography>
-                        <Typography>{parseExifValue(value)}</Typography>
-                    </ExifItem>
-                ))}
+                {[...Object.entries(exif)].map(([key, value]) =>
+                    value ? (
+                        <ExifItem key={key}>
+                            <Typography
+                                variant="body2"
+                                color={'text.secondary'}>
+                                {key}
+                            </Typography>
+                            <Typography
+                                sx={{
+                                    width: '100%',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    overflow: 'hidden',
+                                }}>
+                                {parseExifValue(value)}
+                            </Typography>
+                        </ExifItem>
+                    ) : (
+                        <></>
+                    )
+                )}
             </Stack>
         </FileInfoSidebar>
     );
