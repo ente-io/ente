@@ -37,7 +37,9 @@ export default function SearchInput(props: Iprops) {
         setValue(value);
     };
 
-    useEffect(() => search(value), [value]);
+    useEffect(() => {
+        search(value), [value];
+    });
 
     const resetSearch = () => {
         if (props.isOpen) {
