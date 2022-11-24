@@ -50,7 +50,7 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   move_to_background: ^1.0.2
-  open_file: ^3.2.1
+  # open_file: ^3.2.1 Disabled to please PlayStore overlords
   otp: ^3.1.1
   package_info_plus: ^1.0.1
   password_strength: ^0.2.0
