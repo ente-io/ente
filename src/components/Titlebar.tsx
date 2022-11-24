@@ -40,14 +40,14 @@ export default function Titlebar({
                     )}
                 </Box>
             </FlexWrapper>
-            <Box py={0.5} px={2} height={54}>
+            <Box py={0.5} px={2}>
                 <Typography variant="h3" fontWeight={'bold'}>
                     {title}
                 </Typography>
                 <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ wordBreak: 'break-all' }}>
+                    sx={{ wordBreak: 'break-all', minHeight: '17px' }}>
                     {caption}
                 </Typography>
             </Box>
