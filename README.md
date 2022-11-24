@@ -41,14 +41,14 @@ file, that adheres to the above format.
 
 ## 📲 Download
 
-#### Android
+### Android
 
 You can download the latest version from [GitHub
 releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apk).
-The downloaded APK supports auto-updates.
+The downloaded APK will keep itself updated.
 
 
-#### iOS
+### iOS
 
 The app is not live on the AppStore yet. If you would like access, please write
 to [auth@ente.io](mailto:auth@ente.io), and we will be happy to provide access
