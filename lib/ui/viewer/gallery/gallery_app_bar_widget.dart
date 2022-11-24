@@ -165,7 +165,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   // the free up space page and show loading indicator while calculating
   // the space which can be claimed up. This code duplication should be removed
   // whenever we move to the new design for free up space.
-  Future<dynamic> _deleteDeviceAlbum(BuildContext context) async {
+  Future<dynamic> _deleteBackedUpFiles(BuildContext context) async {
     final dialog = createProgressDialog(context, "Calculating...");
     await dialog.show();
     BackupStatus status;
@@ -377,7 +377,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             } else if (value == 4) {
               await _leaveAlbum(context);
             } else if (value == 5) {
-              await _deleteDeviceAlbum(context);
+              await _deleteBackedUpFiles(context);
             } else {
               showToast(context, "Something went wrong");
             }
