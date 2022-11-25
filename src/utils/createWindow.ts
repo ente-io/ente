@@ -17,11 +17,12 @@ export async function createWindow(): Promise<BrowserWindow> {
         height: 600,
         width: 800,
         webPreferences: {
+            sandbox: false,
             preload: path.join(__dirname, '../preload.js'),
             contextIsolation: false,
         },
         icon: appIcon,
-        show: false, // don't show the main window on load
+        show: false, // don't show the main window on load,
     });
     mainWindow.maximize();
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
