@@ -121,9 +121,12 @@ export function FileInfo({
         const imageHeight = exif['ImageHeight'] ?? exif['ExifImageHeight'];
         if (imageWidth && imageHeight) {
             parsedExifData['resolution'] = `${imageWidth} x ${imageHeight}`;
-            parsedExifData['megaPixels'] = `${Math.round(
-                (imageWidth * imageHeight) / 1000000
-            )}MP`;
+            const megaPixels = Math.round((imageWidth * imageHeight) / 1000000);
+            if (megaPixels) {
+                parsedExifData['megaPixels'] = `${Math.round(
+                    (imageWidth * imageHeight) / 1000000
+                )}MP`;
+            }
         }
         if (exif['Make'] && exif['Model']) {
             parsedExifData[
