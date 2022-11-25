@@ -3,16 +3,19 @@ import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import { changeCaption, updateExistingFilePubMetadata } from 'utils/file';
 import { logError } from 'utils/sentry';
-import { Box } from '@mui/material';
-import { CaptionEditForm } from './CaptionEditForm';
+import { Box, IconButton, TextField } from '@mui/material';
+import { FlexWrapper } from 'components/Container';
+import { MAX_CAPTION_SIZE } from 'constants/file';
+import { Formik } from 'formik';
+import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
+import * as Yup from 'yup';
+import constants from 'utils/strings/constants';
+import Close from '@mui/icons-material/Close';
+import { Done } from '@mui/icons-material';
 
-export const getFileTitle = (filename, extension) => {
-    if (extension) {
-        return filename + '.' + extension;
-    } else {
-        return filename;
-    }
-};
+export interface formValues {
+    caption: string;
+}
 
 export function RenderCaption({
     file,
@@ -27,19 +30,13 @@ export function RenderCaption({
     const [caption, setCaption] = useState(
         file?.pubMagicMetadata?.data.caption
     );
-    const [isInEditMode, setIsInEditMode] = useState(false);
 
-    const openEditMode = () => setIsInEditMode(true);
-    const closeEditMode = () => {
-        console.log('sss');
-        setIsInEditMode(false);
-    };
+    const [loading, setLoading] = useState(false);
 
     const saveEdits = async (newCaption: string) => {
         try {
             if (file) {
                 if (caption === newCaption) {
-                    closeEditMode();
                     return;
                 }
                 setCaption(newCaption);
@@ -55,19 +52,75 @@ export function RenderCaption({
             }
         } catch (e) {
             logError(e, 'failed to update caption');
+        }
+    };
+
+    const onSubmit = async (values: formValues) => {
+        try {
+            setLoading(true);
+            await saveEdits(values.caption);
         } finally {
-            closeEditMode();
+            setLoading(false);
         }
     };
     return (
         <Box p={1}>
-            <CaptionEditForm
-                openEditMode={openEditMode}
-                isInEditMode={isInEditMode}
-                caption={caption}
-                saveEdits={saveEdits}
-                discardEdits={closeEditMode}
-            />
+            <Formik<formValues>
+                initialValues={{ caption }}
+                validationSchema={Yup.object().shape({
+                    caption: Yup.string().max(
+                        MAX_CAPTION_SIZE,
+                        constants.CAPTION_CHARACTER_LIMIT
+                    ),
+                })}
+                validateOnBlur={false}
+                onSubmit={onSubmit}>
+                {({
+                    values,
+                    errors,
+                    handleChange,
+                    handleSubmit,
+                    resetForm,
+                }) => (
+                    <form noValidate onSubmit={handleSubmit}>
+                        <TextField
+                            hiddenLabel
+                            fullWidth
+                            id="caption"
+                            name="caption"
+                            type="text"
+                            multiline
+                            placeholder={constants.CAPTION_PLACEHOLDER}
+                            value={values.caption}
+                            onChange={handleChange('caption')}
+                            error={Boolean(errors.caption)}
+                            helperText={errors.caption}
+                            disabled={loading}
+                        />
+                        {values.caption !== caption && (
+                            <FlexWrapper justifyContent={'flex-end'}>
+                                <IconButton type="submit" disabled={loading}>
+                                    {loading ? (
+                                        <SmallLoadingSpinner />
+                                    ) : (
+                                        <Done />
+                                    )}
+                                </IconButton>
+                                <IconButton
+                                    onClick={() =>
+                                        resetForm({
+                                            values: { caption: caption ?? '' },
+                                            touched: { caption: false },
+                                        })
+                                    }
+                                    disabled={loading}>
+                                    <Close />
+                                </IconButton>
+                            </FlexWrapper>
+                        )}
+                    </form>
+                )}
+            </Formik>
         </Box>
     );
 }
