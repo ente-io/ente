@@ -2,16 +2,16 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:pedantic/pedantic.dart';
 import 'package:photos/core/configuration.dart';
-import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
-import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -19,20 +19,20 @@ class PasswordReminder extends StatefulWidget {
   const PasswordReminder({Key? key}) : super(key: key);
 
   @override
-  State<PasswordReminder> createState() => _P();
+  State<PasswordReminder> createState() => _PasswordReminderState();
 }
 
-class _P extends State<PasswordReminder> {
-  final _recoveryKey = TextEditingController();
-  final Logger _logger = Logger((_P).toString());
+class _PasswordReminderState extends State<PasswordReminder> {
+  final _passwordController = TextEditingController();
+  final Logger _logger = Logger((_PasswordReminderState).toString());
   bool _password2Visible = false;
   bool _incorrectPassword = false;
 
-  void _verifyRecoveryKey() async {
+  Future<void> _verifyRecoveryKey() async {
     final dialog = createProgressDialog(context, "Verifying password...");
     await dialog.show();
     try {
-      final String inputKey = _recoveryKey.text;
+      final String inputKey = _passwordController.text;
       await Configuration.instance.verifyPassword(inputKey);
       await dialog.hide();
       UserRemoteFlagService.instance.stopPasswordReminder().ignore();
@@ -44,7 +44,17 @@ class _P extends State<PasswordReminder> {
             "\nPlease"
             " remember to keep your recovery key safely backed up.",
       );
-      Bus.instance.fire(SubscriptionPurchasedEvent());
+
+      unawaited(
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) {
+              return const HomeWidget();
+            },
+          ),
+          (route) => false,
+        ),
+      );
     } catch (e, s) {
       _logger.severe("failed to verify password", e, s);
       await dialog.hide();
@@ -172,6 +182,12 @@ class _P extends State<PasswordReminder> {
   }
 
   @override
+  void dispose() {
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final enteTheme = Theme.of(context).colorScheme.enteTheme;
     final List<Widget> actions = <Widget>[];
@@ -293,7 +309,7 @@ class _P extends State<PasswordReminder> {
                           fontSize: 14,
                           fontFeatures: [FontFeature.tabularFigures()],
                         ),
-                        controller: _recoveryKey,
+                        controller: _passwordController,
                         autofocus: false,
                         autocorrect: false,
                         obscureText: !_password2Visible,
