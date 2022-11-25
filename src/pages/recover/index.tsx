@@ -59,9 +59,15 @@ export default function Recover() {
         setFieldError
     ) => {
         try {
+            recoveryKey = recoveryKey
+                .trim()
+                .split(' ')
+                .map((part) => part.trim())
+                .filter((part) => !!part)
+                .join(' ');
             // check if user is entering mnemonic recovery key
-            if (recoveryKey.trim().indexOf(' ') > 0) {
-                if (recoveryKey.trim().split(' ').length !== 24) {
+            if (recoveryKey.indexOf(' ') > 0) {
+                if (recoveryKey.split(' ').length !== 24) {
                     throw new Error('recovery code should have 24 words');
                 }
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
