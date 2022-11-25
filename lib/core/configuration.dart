@@ -323,6 +323,32 @@ class Configuration {
     );
   }
 
+  Future<void> verifyPassword(String password) async {
+    final KeyAttributes attributes = getKeyAttributes()!;
+    _logger.info('state validation done');
+    final kek = await CryptoUtil.deriveKey(
+      utf8.encode(password) as Uint8List,
+      Sodium.base642bin(attributes.kekSalt),
+      attributes.memLimit,
+      attributes.opsLimit,
+    ).onError((e, s) {
+      _logger.severe('deriveKey failed', e, s);
+      throw KeyDerivationError();
+    });
+
+    _logger.info('user-key done');
+    try {
+      final Uint8List key = CryptoUtil.decryptSync(
+        Sodium.base642bin(attributes.encryptedKey),
+        kek,
+        Sodium.base642bin(attributes.keyDecryptionNonce),
+      );
+    } catch (e) {
+      _logger.severe('master-key failed, incorrect password?', e);
+      throw Exception("Incorrect password");
+    }
+  }
+
   Future<KeyAttributes> createNewRecoveryKey() async {
     final masterKey = getKey()!;
     final existingAttributes = getKeyAttributes();
