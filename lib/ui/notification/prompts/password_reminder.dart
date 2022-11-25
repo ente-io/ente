@@ -273,8 +273,7 @@ class _PasswordReminderState extends State<PasswordReminder> {
                         "Enter your password to ensure you remember it."
                         "\n\nThe developer account we use to publish "
                         "ente on App Store will change in the next "
-                        "version. This will cause you will get logged "
-                        "out when the next version is released. So it "
+                        "version. This will cause you to get logged out when the next version is released. So it "
                         "is good to make sure you know your password.",
                         style: enteTheme.textTheme.small
                             .copyWith(color: enteTheme.colorScheme.textMuted),
