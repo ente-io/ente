@@ -1,3 +1,5 @@
+import constants from 'utils/strings/constants';
+
 export function formatDateFull(date: number | Date) {
     const dateTimeFormat1 = new Intl.DateTimeFormat('en-US', {
         weekday: 'short',
@@ -33,6 +35,18 @@ export function formatDate(date: number | Date) {
         .join(' ');
 }
 
+export function formatDateTimeShort(date: number | Date) {
+    const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+
+    return dateTimeFormat.format(date);
+}
+
 export function formatTime(date: number | Date) {
     const timeFormat = new Intl.DateTimeFormat('en-IN', {
         timeStyle: 'short',
@@ -41,24 +55,13 @@ export function formatTime(date: number | Date) {
 }
 
 export function formatDateTimeFull(dateTime: number | Date): string {
-    return [formatDateFull(dateTime), 'at', formatTime(dateTime)].join(' ');
+    return [formatDateFull(dateTime), constants.AT, formatTime(dateTime)].join(
+        ' '
+    );
 }
 
 export function formatDateTime(dateTime: number | Date): string {
-    return [formatDate(dateTime), 'at', formatTime(dateTime)].join(' ');
-}
-
-export function formatDateTimeShort(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    });
-    const timeFormat = new Intl.DateTimeFormat('en-IN', {
-        timeStyle: 'short',
-    });
-    return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
+    return [formatDate(dateTime), constants.AT, formatTime(dateTime)].join(' ');
 }
 
 export function formatDateRelative(date: number) {

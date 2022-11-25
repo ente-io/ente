@@ -835,6 +835,9 @@ const englishConstants = {
         'A new version of ente has been released, but it cannot be automatically downloaded and installed.',
     DOWNLOAD_AND_INSTALL: 'Download and install',
     IGNORE_THIS_VERSION: 'Ignore this version',
+    TODAY: 'Today',
+    YESTERDAY: 'Yesterday',
+    AT: 'at',
 };
 
 export default englishConstants;

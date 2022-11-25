@@ -21,6 +21,7 @@ import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { SpecialPadding } from 'styles/SpecialPadding';
+import { formatDate } from 'utils/time/format';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -304,22 +305,17 @@ export function PhotoList({
                 )
             ) {
                 currentDate = item.metadata.creationTime / 1000;
-                const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                });
+
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
                     date: isSameDay(new Date(currentDate), new Date())
-                        ? 'Today'
+                        ? constants.TODAY
                         : isSameDay(
                               new Date(currentDate),
                               new Date(Date.now() - A_DAY)
                           )
-                        ? 'Yesterday'
-                        : dateTimeFormat.format(currentDate),
+                        ? constants.YESTERDAY
+                        : formatDate(currentDate),
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
