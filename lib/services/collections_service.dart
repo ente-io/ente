@@ -319,7 +319,6 @@ class CollectionsService {
       for (final user in response.data["sharees"]) {
         sharees.add(User.fromMap(user));
       }
-
       _collectionIDToCollections[collectionID] =
           _collectionIDToCollections[collectionID].copyWith(sharees: sharees);
       unawaited(_db.insert([_collectionIDToCollections[collectionID]]));

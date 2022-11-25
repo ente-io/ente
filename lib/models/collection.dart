@@ -70,6 +70,11 @@ class Collection {
     return result;
   }
 
+  void updateSharees(List<User> newSharees) {
+    sharees?.clear();
+    sharees?.addAll(newSharees);
+  }
+
   static CollectionType typeFromString(String type) {
     switch (type) {
       case "folder":

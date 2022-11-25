@@ -85,7 +85,7 @@ class CollectionSharingActions {
     try {
       final newSharees =
           await CollectionsService.instance.unshare(collection.id, user.email);
-      collection = collection.copyWith(sharees: newSharees);
+      collection.updateSharees(newSharees);
       await dialog.hide();
       showToast(context, "Stopped sharing with " + user.email + ".");
       return true;
@@ -139,7 +139,6 @@ class CollectionSharingActions {
     // getPublicKey can return null
     // ignore: unnecessary_null_comparison
     if (publicKey == null || publicKey == '') {
-      Navigator.of(context, rootNavigator: true).pop('dialog');
       final dialog = AlertDialog(
         title: const Text("Invite to ente?"),
         content: Text(
@@ -179,7 +178,7 @@ class CollectionSharingActions {
       try {
         final newSharees = await CollectionsService.instance
             .share(collection.id, email, publicKey, role);
-        collection = collection.copyWith(sharees: newSharees);
+        collection.updateSharees(newSharees);
         await dialog.hide();
         showShortToast(context, "Shared successfully!");
         return true;
