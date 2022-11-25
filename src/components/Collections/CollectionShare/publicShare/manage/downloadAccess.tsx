@@ -1,5 +1,4 @@
 import { Box, Typography } from '@mui/material';
-import { ButtonVariant } from 'components/pages/gallery/LinkButton';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
@@ -34,7 +33,7 @@ export function ManageDownloadAccess({
                         collectionID: collection.id,
                         enableDownload: false,
                     }),
-                variant: ButtonVariant.danger,
+                variant: 'danger',
             },
         });
     };

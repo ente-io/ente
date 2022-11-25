@@ -1,6 +1,6 @@
 import { ElectronFile } from 'types/upload';
 import { convertBytesToHumanReadable } from 'utils/file/size';
-import { formatDateTime } from 'utils/time';
+import { formatDateTimeShort } from 'utils/time/format';
 import { isDEVSentryENV } from 'constants/sentry';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
@@ -103,7 +103,7 @@ function getStringSize(str: string) {
 }
 
 function formatLog(log: Log) {
-    return `[${formatDateTime(log.timestamp)}] ${log.logLine}`;
+    return `[${formatDateTimeShort(log.timestamp)}] ${log.logLine}`;
 }
 
 function combineLogLines(logs: Log[]) {
