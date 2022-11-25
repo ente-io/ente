@@ -318,10 +318,7 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async (force?: boolean) => {
-        if (exif || !force) {
-            return;
-        }
+    const checkExifAvailable = async () => {
         await sleep(100);
         try {
             const img: HTMLImageElement = document.querySelector(
@@ -344,7 +341,7 @@ function PhotoViewer(props: Iprops) {
         const file: EnteFile = this?.currItem;
         if (file) {
             setExif(undefined);
-            checkExifAvailable(true);
+            checkExifAvailable();
         }
     }
 
