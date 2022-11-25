@@ -159,16 +159,6 @@ export function getSelectedFiles(
     return selectedFiles;
 }
 
-export function formatDate(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    return dateTimeFormat.format(date);
-}
-
 export function sortFiles(files: EnteFile[]) {
     // sort according to modification time first
     files = files.sort((a, b) => {
