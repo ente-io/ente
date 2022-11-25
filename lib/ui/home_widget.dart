@@ -25,6 +25,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/update_service.dart';
+import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -41,6 +42,7 @@ import 'package:photos/ui/home/landing_page_widget.dart';
 import 'package:photos/ui/home/preserve_footer_widget.dart';
 import 'package:photos/ui/home/start_backup_hook_widget.dart';
 import 'package:photos/ui/loading_photos_widget.dart';
+import 'package:photos/ui/notification/prompts/password_reminder.dart';
 import 'package:photos/ui/notification/update/change_log_page.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
@@ -317,6 +319,10 @@ class _HomeWidgetState extends State<HomeWidget> {
     }
     if (!LocalSyncService.instance.hasCompletedFirstImport()) {
       return const LoadingPhotosWidget();
+    }
+
+    if (UserRemoteFlagService.instance.showPasswordReminder()) {
+      return const PasswordReminder();
     }
     if (_sharedFiles != null && _sharedFiles.isNotEmpty) {
       ReceiveSharingIntent.reset();

@@ -39,6 +39,7 @@ class UpdateService {
   }
 
   Future<bool> resetChangeLog() {
+    _prefs.remove("userNotify.passwordReminderFlag");
     return _prefs.remove(changeLogVersionKey);
   }
 
