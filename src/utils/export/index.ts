@@ -5,9 +5,10 @@ import { CollectionIDPathMap, ExportRecord } from 'types/export';
 import { EnteFile } from 'types/file';
 
 import { Metadata } from 'types/upload';
-import { formatDate, splitFilenameAndExtension } from 'utils/file';
+import { splitFilenameAndExtension } from 'utils/file';
 import { ENTE_METADATA_FOLDER } from 'constants/export';
 import sanitize from 'sanitize-filename';
+import { formatDateTimeShort } from 'utils/time/format';
 
 export const getExportRecordFileUID = (file: EnteFile) =>
     `${file.id}_${file.collectionID}_${file.updationTime}`;
@@ -142,11 +143,11 @@ export const getGoogleLikeMetadataFile = (
             caption: captionValue,
             creationTime: {
                 timestamp: creationTime,
-                formatted: formatDate(creationTime * 1000),
+                formatted: formatDateTimeShort(creationTime * 1000),
             },
             modificationTime: {
                 timestamp: modificationTime,
-                formatted: formatDate(modificationTime * 1000),
+                formatted: formatDateTimeShort(modificationTime * 1000),
             },
             geoData: {
                 latitude: metadata.latitude,

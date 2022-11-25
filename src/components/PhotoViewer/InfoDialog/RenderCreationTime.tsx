@@ -6,7 +6,7 @@ import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { formatDateTime } from 'utils/time';
+import { formatDateTime } from 'utils/time/format';
 import EditIcon from '@mui/icons-material/Edit';
 import { Label, Row, Value } from 'components/Container';
 import { logError } from 'utils/sentry';
