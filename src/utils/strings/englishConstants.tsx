@@ -444,7 +444,7 @@ const englishConstants = {
     DETAILS: 'Details',
     VIEW_EXIF: 'View all EXIF data',
     NO_EXIF: 'No EXIF data',
-    EXIF: 'Exif',
+    EXIF: 'EXIF',
     DEVICE: 'Device',
     IMAGE_SIZE: 'Image size',
     FLASH: 'Flash',

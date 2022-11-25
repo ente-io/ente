@@ -6,7 +6,7 @@ import { FileInfoSidebar } from '.';
 import Titlebar from 'components/Titlebar';
 import { Box } from '@mui/system';
 import CopyButton from 'components/CodeBlock/CopyButton';
-import { formatDateExif } from 'utils/time';
+import { formatDateFull } from 'utils/time/format';
 
 const ExifItem = styled(Box)`
     padding-left: 8px;
@@ -23,7 +23,7 @@ function parseExifValue(value: any) {
             return value;
         default:
             if (value instanceof Date) {
-                return formatDateExif(value);
+                return formatDateFull(value);
             }
             try {
                 return JSON.stringify(Array.from(value));

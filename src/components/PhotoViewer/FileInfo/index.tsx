@@ -14,7 +14,7 @@ import {
     TextSnippetOutlined,
 } from '@mui/icons-material';
 import CopyButton from 'components/CodeBlock/CopyButton';
-import { formatDateMedium, formatTime } from 'utils/time';
+import { formatDate, formatTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
 import InfoItem from './InfoItem';
 import { FlexWrapper } from 'components/Container';
@@ -193,7 +193,8 @@ export function FileInfo({
                                 latitude: file.metadata.latitude,
                                 longitude: file.metadata.longitude,
                             })}
-                            target="_blank">
+                            target="_blank"
+                            sx={{ fontWeight: 'bold' }}>
                             {constants.SHOW_ON_MAP}
                         </Link>
                     }
@@ -221,6 +222,7 @@ export function FileInfo({
                                 sx={{
                                     textDecoration: 'none',
                                     color: 'text.secondary',
+                                    fontWeight: 'bold',
                                 }}>
                                 {constants.VIEW_EXIF}
                             </LinkButton>
@@ -232,9 +234,7 @@ export function FileInfo({
                 />
                 <InfoItem
                     icon={<BackupOutlined />}
-                    title={formatDateMedium(
-                        file.metadata.modificationTime / 1000
-                    )}
+                    title={formatDate(file.metadata.modificationTime / 1000)}
                     caption={formatTime(file.metadata.modificationTime / 1000)}
                     hideEditOption
                 />
