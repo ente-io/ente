@@ -9,12 +9,12 @@ import {
 import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
-import { downloadFile } from 'utils/file';
+import { downloadFile, copyFileToClipboard } from 'utils/file';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import { FILE_TYPE } from 'constants/file';
-import { sleep } from 'utils/common';
+import { isClipboardItemPresent, sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
@@ -32,8 +32,15 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { ChevronLeft } from '@mui/icons-material';
+import { ChevronLeft, ContentCopy } from '@mui/icons-material';
 import { styled } from '@mui/material';
+import { addLocalLog } from 'utils/logging';
+
+interface PhotoswipeFullscreenAPI {
+    enter: () => void;
+    exit: () => void;
+    isFullscreen: () => boolean;
+}
 
 const CaptionContainer = styled('div')(({ theme }) => ({
     padding: theme.spacing(2),
@@ -82,6 +89,8 @@ function PhotoViewer(props: Iprops) {
     );
     const appContext = useContext(AppContext);
 
+    const showCopyOption = useRef(isClipboardItemPresent());
+
     useEffect(() => {
         if (!pswpElement) return;
         if (isOpen) {
@@ -94,6 +103,57 @@ function PhotoViewer(props: Iprops) {
             closePhotoSwipe();
         };
     }, [isOpen]);
+
+    useEffect(() => {
+        if (!photoSwipe) return;
+        // function handleCopyEvent() {
+        //     copyToClipboardHelper(photoSwipe.currItem as EnteFile);
+        // }
+
+        function handleKeyUp(event: KeyboardEvent) {
+            if (!isOpen) {
+                return;
+            }
+            addLocalLog(() => 'Event: ' + event.key);
+            if (event.key === 'i' || event.key === 'I') {
+                if (!showInfo) {
+                    setShowInfo(true);
+                } else {
+                    setShowInfo(false);
+                }
+            }
+            if (showInfo) {
+                return;
+            }
+            switch (event.key) {
+                case 'Backspace':
+                case 'Delete':
+                    confirmTrashFile(photoSwipe?.currItem as EnteFile);
+                    break;
+                case 'd':
+                case 'D':
+                    downloadFileHelper(photoSwipe?.currItem as EnteFile);
+                    break;
+                case 'f':
+                case 'F':
+                    toggleFullscreen(photoSwipe);
+                    break;
+                case 'l':
+                case 'L':
+                    onFavClick(photoSwipe?.currItem as EnteFile);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        window.addEventListener('keyup', handleKeyUp);
+        // window.addEventListener('copy', handleCopyEvent);
+        return () => {
+            window.removeEventListener('keyup', handleKeyUp);
+            // window.removeEventListener('copy', handleCopyEvent);
+        };
+    }, [isOpen, photoSwipe, showInfo]);
 
     useEffect(() => {
         updateItems(items);
@@ -289,8 +349,12 @@ function PhotoViewer(props: Iprops) {
         needUpdate.current = true;
     };
 
-    const confirmTrashFile = (file: EnteFile) =>
+    const confirmTrashFile = (file: EnteFile) => {
+        if (props.isSharedCollection || props.isTrashCollection) {
+            return;
+        }
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
+    };
 
     const updateItems = (items = []) => {
         if (photoSwipe) {
@@ -353,15 +417,37 @@ function PhotoViewer(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        appContext.startLoading();
-        await downloadFile(
-            file,
-            publicCollectionGalleryContext.accessedThroughSharedURL,
-            publicCollectionGalleryContext.token,
-            publicCollectionGalleryContext.passwordToken
-        );
+        if (props.enableDownload) {
+            appContext.startLoading();
+            await downloadFile(
+                file,
+                publicCollectionGalleryContext.accessedThroughSharedURL,
+                publicCollectionGalleryContext.token,
+                publicCollectionGalleryContext.passwordToken
+            );
+            appContext.finishLoading();
+        }
+    };
 
-        appContext.finishLoading();
+    const copyToClipboardHelper = async (file: EnteFile) => {
+        if (props.enableDownload && showCopyOption?.current) {
+            appContext.startLoading();
+            await copyFileToClipboard(file.src);
+            appContext.finishLoading();
+        }
+    };
+
+    const toggleFullscreen = (photoSwipe) => {
+        const fullScreenApi: PhotoswipeFullscreenAPI =
+            photoSwipe?.ui?.getFullscreenAPI();
+        if (!fullScreenApi) {
+            return;
+        }
+        if (fullScreenApi.isFullscreen()) {
+            fullScreenApi.exit();
+        } else {
+            fullScreenApi.enter();
+        }
     };
     const scheduleUpdate = () => (needUpdate.current = true);
     const { id } = props;
@@ -400,11 +486,34 @@ function PhotoViewer(props: Iprops) {
                                 className="pswp__button pswp__button--close"
                                 title={constants.CLOSE}
                             />
+
+                            {props.enableDownload && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    title={constants.DOWNLOAD_OPTION}
+                                    onClick={() =>
+                                        downloadFileHelper(photoSwipe.currItem)
+                                    }>
+                                    <DownloadIcon fontSize="small" />
+                                </button>
+                            )}
+                            {props.enableDownload && showCopyOption?.current && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    title={constants.COPY_OPTION}
+                                    onClick={() =>
+                                        copyToClipboardHelper(
+                                            photoSwipe.currItem as EnteFile
+                                        )
+                                    }>
+                                    <ContentCopy fontSize="small" />
+                                </button>
+                            )}
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         className="pswp__button pswp__button--custom"
-                                        title={constants.DELETE}
+                                        title={constants.DELETE_OPTION}
                                         onClick={() => {
                                             confirmTrashFile(
                                                 photoSwipe?.currItem as EnteFile
@@ -413,32 +522,30 @@ function PhotoViewer(props: Iprops) {
                                         <DeleteIcon fontSize="small" />
                                     </button>
                                 )}
-
-                            {props.enableDownload && (
-                                <button
-                                    className="pswp__button pswp__button--custom"
-                                    title={constants.DOWNLOAD}
-                                    onClick={() =>
-                                        downloadFileHelper(photoSwipe.currItem)
-                                    }>
-                                    <DownloadIcon fontSize="small" />
-                                </button>
-                            )}
-                            <button
-                                className="pswp__button pswp__button--fs"
-                                title={constants.TOGGLE_FULLSCREEN}
-                            />
                             <button
                                 className="pswp__button pswp__button--zoom"
                                 title={constants.ZOOM_IN_OUT}
                             />
+                            <button
+                                className="pswp__button pswp__button--fs"
+                                title={constants.TOGGLE_FULLSCREEN}
+                            />
+
+                            {!props.isSharedCollection && (
+                                <button
+                                    className="pswp__button pswp__button--custom"
+                                    title={constants.INFO_OPTION}
+                                    onClick={handleOpenInfo}>
+                                    <InfoIcon fontSize="small" />
+                                </button>
+                            )}
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
                                         title={
                                             isFav
-                                                ? constants.UNFAVORITE
-                                                : constants.FAVORITE
+                                                ? constants.UNFAVORITE_OPTION
+                                                : constants.FAVORITE_OPTION
                                         }
                                         className="pswp__button pswp__button--custom"
                                         onClick={() => {
@@ -452,14 +559,6 @@ function PhotoViewer(props: Iprops) {
                                     </button>
                                 )}
 
-                            {!props.isSharedCollection && (
-                                <button
-                                    className="pswp__button pswp__button--custom"
-                                    title={constants.INFO}
-                                    onClick={handleOpenInfo}>
-                                    <InfoIcon fontSize="small" />
-                                </button>
-                            )}
                             <div className="pswp__preloader">
                                 <div className="pswp__preloader__icn">
                                     <div className="pswp__preloader__cut">
