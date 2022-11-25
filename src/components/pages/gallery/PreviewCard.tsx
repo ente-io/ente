@@ -14,7 +14,7 @@ import { DeduplicateContext } from 'pages/deduplicate';
 import { logError } from 'utils/sentry';
 import { Overlay } from 'components/Container';
 import { TRASH_SECTION } from 'constants/collection';
-import { formatDateRelative } from 'utils/time';
+import { formatDateRelative } from 'utils/time/format';
 
 interface IProps {
     file: EnteFile;
