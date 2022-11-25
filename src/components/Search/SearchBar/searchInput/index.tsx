@@ -38,8 +38,8 @@ export default function SearchInput(props: Iprops) {
     };
 
     useEffect(() => {
-        search(value), [value];
-    });
+        search(value);
+    }, [value]);
 
     const resetSearch = () => {
         if (props.isOpen) {
