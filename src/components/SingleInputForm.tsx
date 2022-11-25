@@ -6,7 +6,7 @@ import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
 import ShowHidePassword from './Form/ShowHidePassword';
 import { FlexWrapper } from './Container';
-import { Button } from '@mui/material';
+import { Button, FormHelperText } from '@mui/material';
 
 interface formValues {
     inputValue: string;
@@ -24,6 +24,7 @@ export interface SingleInputFormProps {
     secondaryButtonAction?: () => void;
     disableAutoFocus?: boolean;
     hiddenPreInput?: any;
+    caption?: any;
     hiddenPostInput?: any;
     autoComplete?: string;
 }
@@ -113,6 +114,15 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             ),
                         }}
                     />
+                    <FormHelperText
+                        sx={{
+                            position: 'relative',
+                            top: errors.inputValue ? '-22px' : '0',
+                            float: 'right',
+                            padding: '0 8px',
+                        }}>
+                        {props.caption}
+                    </FormHelperText>
                     {props.hiddenPostInput}
                     <FlexWrapper justifyContent={'flex-end'}>
                         {props.secondaryButtonAction && (
