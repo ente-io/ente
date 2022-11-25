@@ -15,7 +15,7 @@ import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import { FILE_TYPE } from 'constants/file';
-import { sleep } from 'utils/common';
+import { isClipboardItemPresent, sleep } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
@@ -33,7 +33,7 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { ChevronLeft } from '@mui/icons-material';
+import { ChevronLeft, ContentCopy } from '@mui/icons-material';
 import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
 
@@ -88,6 +88,8 @@ function PhotoViewer(props: Iprops) {
         PublicCollectionGalleryContext
     );
     const appContext = useContext(AppContext);
+
+    const showCopyOption = useRef(isClipboardItemPresent());
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -430,10 +432,8 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    //Don't use... firefox support is not available
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const copyToClipboardHelper = async (file: EnteFile) => {
-        if (props.enableDownload) {
+        if (props.enableDownload && showCopyOption?.current) {
             appContext.startLoading();
             await copyFileToClipboard(file.src);
             appContext.finishLoading();
@@ -500,7 +500,7 @@ function PhotoViewer(props: Iprops) {
                                     <DownloadIcon fontSize="small" />
                                 </button>
                             )}
-                            {/* {props.enableDownload && (
+                            {props.enableDownload && showCopyOption?.current && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={constants.COPY_OPTION}
@@ -511,7 +511,7 @@ function PhotoViewer(props: Iprops) {
                                     }>
                                     <ContentCopy fontSize="small" />
                                 </button>
-                            )} */}
+                            )}
                             {!props.isSharedCollection &&
                                 !props.isTrashCollection && (
                                     <button
