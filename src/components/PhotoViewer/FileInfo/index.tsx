@@ -249,20 +249,9 @@ export function FileInfo({
                         {fileToCollectionsMap
                             .get(file.id)
                             .map((collectionID) => (
-                                <>
-                                    <Chip key={collectionID}>
-                                        {collectionNameMap.get(collectionID)}
-                                    </Chip>
-                                    <Chip key={collectionID}>
-                                        {collectionNameMap.get(collectionID)}
-                                    </Chip>
-                                    <Chip key={collectionID}>
-                                        {collectionNameMap.get(collectionID)}
-                                    </Chip>
-                                    <Chip key={collectionID}>
-                                        {collectionNameMap.get(collectionID)}
-                                    </Chip>
-                                </>
+                                <Chip key={collectionID}>
+                                    {collectionNameMap.get(collectionID)}
+                                </Chip>
                             ))}
                     </Box>
                 </InfoItem>
