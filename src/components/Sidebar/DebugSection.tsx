@@ -6,7 +6,9 @@ import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
+import { testUpload } from 'tests/upload.test';
 import Typography from '@mui/material/Typography';
+import { isInternalUser } from 'utils/user';
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
@@ -59,6 +61,11 @@ export default function DebugSection() {
                 <Typography p={1.5} color="text.secondary" variant="caption">
                     {appVersion}
                 </Typography>
+            )}
+            {isInternalUser() && (
+                <SidebarButton onClick={testUpload}>
+                    {constants.RUN_TESTS}
+                </SidebarButton>
             )}
         </>
     );
