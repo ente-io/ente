@@ -31,6 +31,7 @@ import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useMemo } from 'react';
+import { Collection } from 'types/collection';
 
 const Container = styled('div')`
     display: block;
@@ -49,6 +50,7 @@ const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
     files: EnteFile[];
+    collections?: Collection[];
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
     archivedCollections?: Set<number>;
@@ -76,6 +78,7 @@ type SourceURL = {
 
 const PhotoFrame = ({
     files,
+    collections,
     syncWithRemote,
     favItemIds,
     archivedCollections,
@@ -183,6 +186,23 @@ const PhotoFrame = ({
                 return false;
             });
     }, [files, deletedFileIds, search, activeCollection]);
+
+    const fileToCollectionsMap = useMemo(() => {
+        const fileToCollectionsMap = new Map<number, number[]>();
+        files.forEach((file) => {
+            if (!fileToCollectionsMap.get(file.id)) {
+                fileToCollectionsMap.set(file.id, []);
+            }
+            fileToCollectionsMap.get(file.id).push(file.collectionID);
+        });
+        return fileToCollectionsMap;
+    }, [files]);
+
+    const collectionNameMap = useMemo(() => {
+        return new Map<number, string>(
+            collections.map((collection) => [collection.id, collection.name])
+        );
+    }, [collections]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -600,6 +620,8 @@ const PhotoFrame = ({
                         isTrashCollection={activeCollection === TRASH_SECTION}
                         enableDownload={enableDownload}
                         isSourceLoaded={isSourceLoaded}
+                        fileToCollectionsMap={fileToCollectionsMap}
+                        collectionNameMap={collectionNameMap}
                     />
                 </Container>
             )}

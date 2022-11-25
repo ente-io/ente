@@ -257,19 +257,16 @@ export default function Gallery() {
         setDerivativeState(user, collections, files);
     }, [collections, files]);
 
-    useEffect(
-        () => collectionSelectorAttributes && setCollectionSelectorView(true),
-        [collectionSelectorAttributes]
-    );
+    useEffect(() => {
+        collectionSelectorAttributes && setCollectionSelectorView(true);
+    }, [collectionSelectorAttributes]);
 
-    useEffect(
-        () => collectionNamerAttributes && setCollectionNamerView(true),
-        [collectionNamerAttributes]
-    );
-    useEffect(
-        () => fixCreationTimeAttributes && setFixCreationTimeView(true),
-        [fixCreationTimeAttributes]
-    );
+    useEffect(() => {
+        collectionNamerAttributes && setCollectionNamerView(true);
+    }, [collectionNamerAttributes]);
+    useEffect(() => {
+        fixCreationTimeAttributes && setFixCreationTimeView(true);
+    }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -669,6 +666,7 @@ export default function Gallery() {
                 />
                 <PhotoFrame
                     files={files}
+                    collections={collections}
                     syncWithRemote={syncWithRemote}
                     favItemIds={favItemIds}
                     archivedCollections={archivedCollections}

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
-import { Box, styled } from '@mui/material';
+import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -15,13 +15,13 @@ import {
 import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
-import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { SpecialPadding } from 'styles/SpecialPadding';
+import { formatDate } from 'utils/time/format';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
@@ -305,22 +305,17 @@ export function PhotoList({
                 )
             ) {
                 currentDate = item.metadata.creationTime / 1000;
-                const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                });
+
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
                     date: isSameDay(new Date(currentDate), new Date())
-                        ? 'Today'
+                        ? constants.TODAY
                         : isSameDay(
                               new Date(currentDate),
                               new Date(Date.now() - A_DAY)
                           )
-                        ? 'Yesterday'
-                        : dateTimeFormat.format(currentDate),
+                        ? constants.YESTERDAY
+                        : formatDate(currentDate),
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
@@ -410,15 +405,9 @@ export function PhotoList({
                 <FooterContainer span={columns}>
                     <p>
                         {constants.PRESERVED_BY}{' '}
-                        <a
-                            target="_blank"
-                            style={{
-                                color: getVariantColor(ButtonVariant.success),
-                            }}
-                            href={ENTE_WEBSITE_LINK}
-                            rel="noreferrer">
+                        <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {constants.ENTE_IO}
-                        </a>
+                        </Link>
                     </p>
                 </FooterContainer>
             ),

@@ -229,9 +229,13 @@ export default function App({ Component, err }) {
         };
     }, [redirectName]);
 
-    useEffect(() => setMessageDialogView(true), [dialogMessage]);
+    useEffect(() => {
+        setMessageDialogView(true);
+    }, [dialogMessage]);
 
-    useEffect(() => setNotificationView(true), [notificationAttributes]);
+    useEffect(() => {
+        setNotificationView(true);
+    }, [notificationAttributes]);
 
     const showNavBar = (show: boolean) => setShowNavBar(show);
     const setDisappearingFlashMessage = (flashMessages: FlashMessage) => {

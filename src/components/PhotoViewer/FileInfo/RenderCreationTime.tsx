@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
 import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
-import constants from 'utils/strings/constants';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import {
     changeFileCreationTime,
     updateExistingFilePubMetadata,
 } from 'utils/file';
-import { formatDateTime } from 'utils/time';
-import EditIcon from '@mui/icons-material/Edit';
-import { Label, Row, Value } from 'components/Container';
+import { formatDate, formatTime } from 'utils/time/format';
+import { FlexWrapper } from 'components/Container';
 import { logError } from 'utils/sentry';
-import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 import EnteDateTimePicker from 'components/EnteDateTimePicker';
-import { IconButton } from '@mui/material';
+import InfoItem from './InfoItem';
 
 export function RenderCreationTime({
     shouldDisableEdits,
@@ -59,39 +57,24 @@ export function RenderCreationTime({
 
     return (
         <>
-            <Row>
-                <Label width="30%">{constants.CREATION_TIME}</Label>
-                <Value
-                    width={
-                        !shouldDisableEdits ? !isInEditMode && '60%' : '70%'
-                    }>
-                    {isInEditMode ? (
-                        <EnteDateTimePicker
-                            initialValue={originalCreationTime}
-                            disabled={loading}
-                            onSubmit={saveEdits}
-                            onClose={closeEditMode}
-                        />
-                    ) : (
-                        formatDateTime(originalCreationTime)
-                    )}
-                </Value>
-                {!shouldDisableEdits && !isInEditMode && (
-                    <Value
-                        width={'10%'}
-                        style={{ cursor: 'pointer', marginLeft: '10px' }}>
-                        {loading ? (
-                            <IconButton>
-                                <SmallLoadingSpinner />
-                            </IconButton>
-                        ) : (
-                            <IconButton onClick={openEditMode}>
-                                <EditIcon />
-                            </IconButton>
-                        )}
-                    </Value>
+            <FlexWrapper>
+                <InfoItem
+                    icon={<CalendarTodayIcon />}
+                    title={formatDate(originalCreationTime)}
+                    caption={formatTime(originalCreationTime)}
+                    openEditor={openEditMode}
+                    loading={loading}
+                    hideEditOption={shouldDisableEdits || isInEditMode}
+                />
+                {isInEditMode && (
+                    <EnteDateTimePicker
+                        initialValue={originalCreationTime}
+                        disabled={loading}
+                        onSubmit={saveEdits}
+                        onClose={closeEditMode}
+                    />
                 )}
-            </Row>
+            </FlexWrapper>
         </>
     );
 }

@@ -4,7 +4,6 @@ import {
     MIN_EDITED_CREATION_TIME,
     MAX_EDITED_CREATION_TIME,
 } from 'constants/file';
-import { TextField } from '@mui/material';
 import {
     LocalizationProvider,
     MobileDateTimePicker,
@@ -60,14 +59,7 @@ const EnteDateTimePicker = ({
                         },
                     },
                 }}
-                renderInput={(params) => (
-                    <TextField
-                        {...params}
-                        hiddenLabel
-                        margin="none"
-                        variant="standard"
-                    />
-                )}
+                renderInput={() => <></>}
             />
         </LocalizationProvider>
     );
