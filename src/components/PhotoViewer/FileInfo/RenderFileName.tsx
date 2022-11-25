@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { updateFilePublicMagicMetadata } from 'services/fileService';
 import { EnteFile } from 'types/file';
 import {
@@ -8,12 +8,12 @@ import {
 } from 'utils/file';
 import { FlexWrapper } from 'components/Container';
 import { logError } from 'utils/sentry';
-import { FileNameEditForm } from './FileNameEditForm';
 import { FILE_TYPE } from 'constants/file';
 import { PhotoOutlined, VideoFileOutlined } from '@mui/icons-material';
 import InfoItem from './InfoItem';
 import { makeHumanReadableStorage } from 'utils/billing';
 import Box from '@mui/material/Box';
+import { FileNameEditDialog } from './FileNameEditDialog';
 
 const getFileTitle = (filename, extension) => {
     if (extension) {
@@ -58,13 +58,19 @@ export function RenderFileName({
     file: EnteFile;
     scheduleUpdate: () => void;
 }) {
-    const originalTitle = file?.metadata.title;
     const [isInEditMode, setIsInEditMode] = useState(false);
-    const [originalFileName, extension] =
-        splitFilenameAndExtension(originalTitle);
-    const [filename, setFilename] = useState(originalFileName);
     const openEditMode = () => setIsInEditMode(true);
     const closeEditMode = () => setIsInEditMode(false);
+    const [filename, setFilename] = useState<string>();
+    const [extension, setExtension] = useState<string>();
+
+    useEffect(() => {
+        const [filename, extension] = splitFilenameAndExtension(
+            file.metadata.title
+        );
+        setFilename(filename);
+        setExtension(extension);
+    }, []);
 
     const saveEdits = async (newFilename: string) => {
         try {
@@ -84,34 +90,32 @@ export function RenderFileName({
             }
         } catch (e) {
             logError(e, 'failed to update file name');
-        } finally {
-            closeEditMode();
+            throw e;
         }
     };
+
     return (
-        <FlexWrapper>
-            {!isInEditMode ? (
-                <InfoItem
-                    icon={
-                        file.metadata.fileType === FILE_TYPE.IMAGE ? (
-                            <PhotoOutlined />
-                        ) : (
-                            <VideoFileOutlined />
-                        )
-                    }
-                    title={getFileTitle(filename, extension)}
-                    caption={getCaption(file, parsedExifData)}
-                    openEditor={openEditMode}
-                    hideEditOption={shouldDisableEdits || isInEditMode}
-                />
-            ) : (
-                <FileNameEditForm
-                    extension={extension}
-                    filename={filename}
-                    saveEdits={saveEdits}
-                    discardEdits={closeEditMode}
-                />
-            )}
-        </FlexWrapper>
+        <>
+            <InfoItem
+                icon={
+                    file.metadata.fileType === FILE_TYPE.IMAGE ? (
+                        <PhotoOutlined />
+                    ) : (
+                        <VideoFileOutlined />
+                    )
+                }
+                title={getFileTitle(filename, extension)}
+                caption={getCaption(file, parsedExifData)}
+                openEditor={openEditMode}
+                hideEditOption={shouldDisableEdits || isInEditMode}
+            />
+            <FileNameEditDialog
+                isInEditMode={isInEditMode}
+                closeEditMode={closeEditMode}
+                filename={filename}
+                extension={extension}
+                saveEdits={saveEdits}
+            />
+        </>
     );
 }

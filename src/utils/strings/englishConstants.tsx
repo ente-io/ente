@@ -99,6 +99,7 @@ const englishConstants = {
     SELECT_COLLECTION: 'Select an album to upload to',
     CREATE_COLLECTION: 'New album',
     ENTER_ALBUM_NAME: 'Album name',
+    ENTER_FILE_NAME: 'File name',
     CLOSE: 'Close',
     NO: 'No',
     NOTHING_HERE: 'Nothing to see here yet 👀',
@@ -350,6 +351,7 @@ const englishConstants = {
         </>
     ),
     RENAME: 'Rename',
+    RENAME_FILE: 'Rename file',
     RENAME_COLLECTION: 'Rename album',
     DELETE_COLLECTION_TITLE: 'Delete album?',
     DELETE_COLLECTION: 'Delete album',
