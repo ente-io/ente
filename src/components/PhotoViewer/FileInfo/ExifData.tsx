@@ -56,7 +56,12 @@ export function ExifData(props: {
                 title={constants.EXIF}
                 caption={filename}
                 onRootClose={handleRootClose}
-                actionButton={<CopyButton code={exif} color={'secondary'} />}
+                actionButton={
+                    <CopyButton
+                        code={JSON.stringify(exif)}
+                        color={'secondary'}
+                    />
+                }
             />
             <Stack py={3} px={1} spacing={2}>
                 {[...Object.entries(exif)].map(([key, value]) =>
