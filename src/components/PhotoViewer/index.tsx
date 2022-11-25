@@ -150,7 +150,6 @@ function PhotoViewer(props: Iprops) {
         window.addEventListener('keyup', handleKeyUp);
         // window.addEventListener('copy', handleCopyEvent);
         return () => {
-            addLocalLog(() => 'Removing listener');
             window.removeEventListener('keyup', handleKeyUp);
             // window.removeEventListener('copy', handleCopyEvent);
         };
