@@ -35,6 +35,18 @@ export function formatDate(date: number | Date) {
         .join(' ');
 }
 
+export function formatDateTimeShort(date: number | Date) {
+    const dateTimeFormat = new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+
+    return dateTimeFormat.format(date);
+}
+
 export function formatTime(date: number | Date) {
     const timeFormat = new Intl.DateTimeFormat('en-IN', {
         timeStyle: 'short',
@@ -50,10 +62,6 @@ export function formatDateTimeFull(dateTime: number | Date): string {
 
 export function formatDateTime(dateTime: number | Date): string {
     return [formatDate(dateTime), constants.AT, formatTime(dateTime)].join(' ');
-}
-
-export function formatDateTimeShort(date: number | Date) {
-    return [formatDateFull(date), formatTime(date)].join(' ');
 }
 
 export function formatDateRelative(date: number) {
