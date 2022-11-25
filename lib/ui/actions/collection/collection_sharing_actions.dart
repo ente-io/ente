@@ -54,7 +54,7 @@ class CollectionSharingActions {
       if (e is SharingNotPermittedForFreeAccountsError) {
         _showUnSupportedAlert(context);
       } else {
-        _logger.severe("failed to share collection", e);
+        _logger.severe("Failed to update shareUrl collection", e);
         showGenericErrorDialog(context);
       }
       return false;
@@ -83,8 +83,9 @@ class CollectionSharingActions {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      await CollectionsService.instance.unshare(collection.id, user.email);
-      collection.sharees!.removeWhere((u) => u!.email == user.email);
+      final newSharees =
+          await CollectionsService.instance.unshare(collection.id, user.email);
+      collection = collection.copyWith(sharees: newSharees);
       await dialog.hide();
       showToast(context, "Stopped sharing with " + user.email + ".");
       return true;
@@ -176,9 +177,9 @@ class CollectionSharingActions {
       final dialog = createProgressDialog(context, "Sharing...");
       await dialog.show();
       try {
-        await CollectionsService.instance
+        final newSharees = await CollectionsService.instance
             .share(collection.id, email, publicKey, role);
-        collection.sharees?.add((User(email: email, role: role.toStringVal())));
+        collection = collection.copyWith(sharees: newSharees);
         await dialog.hide();
         showShortToast(context, "Shared successfully!");
         return true;

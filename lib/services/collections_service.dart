@@ -269,7 +269,7 @@ class CollectionsService {
     });
   }
 
-  Future<void> share(
+  Future<List<User>> share(
     int collectionID,
     String email,
     String publicKey,
@@ -280,7 +280,7 @@ class CollectionsService {
       Sodium.base642bin(publicKey),
     );
     try {
-      await _enteDio.post(
+      final response = await _enteDio.post(
         "/collections/share",
         data: {
           "collectionID": collectionID,
@@ -289,28 +289,42 @@ class CollectionsService {
           "role": role.toStringVal()
         },
       );
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+      _collectionIDToCollections[collectionID] =
+          _collectionIDToCollections[collectionID].copyWith(sharees: sharees);
+      unawaited(_db.insert([_collectionIDToCollections[collectionID]]));
+      RemoteSyncService.instance.sync(silently: true).ignore();
+      return sharees;
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
       rethrow;
     }
-    RemoteSyncService.instance.sync(silently: true);
   }
 
-  Future<void> unshare(int collectionID, String email) async {
+  Future<List<User>> unshare(int collectionID, String email) async {
     try {
-      await _enteDio.post(
+      final response = await _enteDio.post(
         "/collections/unshare",
         data: {
           "collectionID": collectionID,
           "email": email,
         },
       );
-      _collectionIDToCollections[collectionID]
-          .sharees
-          .removeWhere((user) => user.email == email);
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+
+      _collectionIDToCollections[collectionID] =
+          _collectionIDToCollections[collectionID].copyWith(sharees: sharees);
       unawaited(_db.insert([_collectionIDToCollections[collectionID]]));
+      RemoteSyncService.instance.sync(silently: true).ignore();
+      return sharees;
     } catch (e) {
       _logger.severe(e);
       rethrow;

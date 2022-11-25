@@ -39,21 +39,21 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     if (user.id == currentUserID) {
       return;
     }
-    final result = await routeToPage(
+    await routeToPage(
       context,
       ManageIndividualParticipant(collection: widget.collection, user: user),
     );
-    if (result != null && mounted) {
+    if (mounted) {
       setState(() => {});
     }
   }
 
   Future<void> _navigateToAddUser(bool addingViewer) async {
-    final result = await routeToPage(
+    await routeToPage(
       context,
       AddParticipantPage(widget.collection),
     );
-    if (result != null && mounted) {
+    if (mounted) {
       setState(() => {});
     }
   }
