@@ -104,8 +104,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     );
     result.matched.removeWhere(
       (element) =>
-          element.thumbnail == null ||
-          (element.collection.publicURLs?.isNotEmpty ?? false),
+          element.thumbnail == null &&
+          (element.collection.publicURLs?.isEmpty ?? false),
     );
     return result.matched + result.unmatched;
   }
