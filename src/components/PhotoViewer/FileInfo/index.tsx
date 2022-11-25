@@ -134,7 +134,9 @@ export function FileInfo({
             ] = `${exif['Make']} ${exif['Model']}`;
         }
         if (exif['ExposureTime']) {
-            parsedExifData['exposureTime'] = exif['ExposureTime'];
+            parsedExifData['exposureTime'] = `1/${
+                1 / parseFloat(exif['ExposureTime'])
+            }`;
         }
         if (exif['ISO']) {
             parsedExifData['ISO'] = `ISO${exif['ISO']}`;
