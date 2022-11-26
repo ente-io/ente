@@ -89,7 +89,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       cursorWidth: 1.5,
       maxLength: maxLength,
       minLines: 1,
-      maxLines: 6,
+      maxLines: 10,
       textCapitalization: TextCapitalization.sentences,
       keyboardType: TextInputType.text,
       onChanged: (value) {
