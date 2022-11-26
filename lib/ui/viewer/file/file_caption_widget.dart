@@ -13,7 +13,7 @@ class FileCaptionWidget extends StatefulWidget {
 }
 
 class _FileCaptionWidgetState extends State<FileCaptionWidget> {
-  int maxLength = 280;
+  static const int maxLength = 5000;
   int currentLength = 0;
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
