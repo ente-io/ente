@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class KeyboardTopButton extends StatelessWidget {
-  final Function? onDoneTap;
-  final Function? onCancelTap;
+  final VoidCallback? onDoneTap;
+  final VoidCallback? onCancelTap;
   final String doneText;
   final String cancelText;
 
@@ -36,16 +36,12 @@ class KeyboardTopButton extends StatelessWidget {
           children: [
             CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-              onPressed: () {
-                onCancelTap?.call();
-              },
+              onPressed: onCancelTap,
               child: Text(cancelText, style: enteTheme.bodyBold),
             ),
             CupertinoButton(
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-              onPressed: () {
-                onDoneTap?.call();
-              },
+              onPressed: onDoneTap,
               child: Text(doneText, style: enteTheme.bodyBold),
             ),
           ],
