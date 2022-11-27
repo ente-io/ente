@@ -114,10 +114,8 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   }
 
   void onCancelTap() {
+    _textController.text = widget.file.caption ?? '';
     _focusNode.unfocus();
-    if (widget.file.caption != null) {
-      _textController.text = widget.file.caption!;
-    }
     editedCaption = null;
   }
 
