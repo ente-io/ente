@@ -57,6 +57,11 @@ class ScannerPageState extends State<ScannerPage> {
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
+    // h4ck to remove black screen on Android scanners: https://github.com/juliuscanute/qr_code_scanner/issues/560#issuecomment-1159611301
+    if (Platform.isAndroid) {
+      controller.pauseCamera();
+      controller.resumeCamera();
+    }
     controller.scannedDataStream.listen((scanData) {
       try {
         final code = Code.fromRawData(scanData.code!);
