@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 1.0.18+18
+version: 1.0.20+20
 publish_to: none
 
 environment:
@@ -44,7 +44,6 @@ dependencies:
   fluttertoast: ^8.1.1
   google_nav_bar: ^5.0.5 #supported
   http: ^0.13.4
-  in_app_purchase: ^0.5.2
   intl: ^0.17.0
   json_annotation: ^4.5.0
   local_auth: ^1.1.5
