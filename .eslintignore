@@ -1,0 +1,3 @@
+src/worker/ffmpeg.worker.js
+src/worker/crypto.worker.js
+src/worker/convert.worker.js
