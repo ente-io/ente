@@ -64,15 +64,11 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - in_app_purchase (0.0.1):
-    - Flutter
   - local_auth (0.0.1):
     - Flutter
   - move_to_background (0.0.1):
     - Flutter
   - MTBBarcodeScanner (5.0.11)
-  - open_file (0.0.1):
-    - Flutter
   - OrderedSet (5.0.0)
   - package_info_plus (0.4.5):
     - Flutter
@@ -115,10 +111,8 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - flutter_sodium (from `.symlinks/plugins/flutter_sodium/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
-  - in_app_purchase (from `.symlinks/plugins/in_app_purchase/ios`)
   - local_auth (from `.symlinks/plugins/local_auth/ios`)
   - move_to_background (from `.symlinks/plugins/move_to_background/ios`)
-  - open_file (from `.symlinks/plugins/open_file/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
   - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
@@ -166,14 +160,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_sodium/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
-  in_app_purchase:
-    :path: ".symlinks/plugins/in_app_purchase/ios"
   local_auth:
     :path: ".symlinks/plugins/local_auth/ios"
   move_to_background:
     :path: ".symlinks/plugins/move_to_background/ios"
-  open_file:
-    :path: ".symlinks/plugins/open_file/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider_ios:
@@ -207,11 +197,9 @@ SPEC CHECKSUMS:
   flutter_sodium: c84426b4de738514b5b66cfdeb8a06634e72fe0b
   fluttertoast: 74526702fea2c060ea55dde75895b7e1bde1c86b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
   local_auth: 1740f55d7af0a2e2a8684ce225fe79d8931e808c
   move_to_background: 39a5b79b26d577b0372cbe8a8c55e7aa9fcd3a2d
   MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
-  open_file: 02eb5cb6b21264bd3a696876f5afbfb7ca4f4b7d
   OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
