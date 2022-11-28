@@ -8,7 +8,6 @@ import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/models/billing_plan.dart';
 import 'package:ente_auth/models/subscription.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 
 const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
@@ -36,33 +35,6 @@ class BillingService {
   Future<BillingPlans> _future;
 
   Future<void> init() async {
-    if (Platform.isAndroid || Platform.isIOS) {
-      InAppPurchaseConnection.enablePendingPurchases();
-      // if (Platform.isIOS && kDebugMode) {
-      //   await FlutterInappPurchase.instance.initConnection;
-      //   FlutterInappPurchase.instance.clearTransactionIOS();
-      // }
-      InAppPurchaseConnection.instance.purchaseUpdatedStream
-          .listen((purchases) {
-        if (_isOnSubscriptionPage) {
-          return;
-        }
-        for (final purchase in purchases) {
-          if (purchase.status == PurchaseStatus.purchased) {
-            verifySubscription(
-              purchase.productID,
-              purchase.verificationData.serverVerificationData,
-            ).then((response) {
-              if (response != null) {
-                InAppPurchaseConnection.instance.completePurchase(purchase);
-              }
-            });
-          } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
-            InAppPurchaseConnection.instance.completePurchase(purchase);
-          }
-        }
-      });
-    }
   }
 
   void clearCache() {

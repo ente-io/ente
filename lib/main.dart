@@ -17,7 +17,6 @@ import 'package:ente_auth/ui/tools/app_lock.dart';
 import 'package:ente_auth/ui/tools/lock_screen.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import "package:flutter/material.dart";
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -59,7 +58,6 @@ Future _runWithLogs(Function() function, {String prefix = ""}) async {
 }
 
 Future<void> _init(bool bool, {String via}) async {
-  InAppPurchaseConnection.enablePendingPurchases();
   CryptoUtil.init();
   await PreferenceService.instance.init();
   await CodeStore.instance.init();
