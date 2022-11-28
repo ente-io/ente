@@ -253,7 +253,7 @@ export function FileInfo({
                         alignItems={'flex-start'}>
                         {fileToCollectionsMap
                             .get(file.id)
-                            .map((collectionID) => (
+                            ?.map((collectionID) => (
                                 <Chip key={collectionID}>
                                     {collectionNameMap.get(collectionID)}
                                 </Chip>
