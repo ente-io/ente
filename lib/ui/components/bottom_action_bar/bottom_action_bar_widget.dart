@@ -6,12 +6,12 @@ import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 
 class BottomActionBarWidget extends StatefulWidget {
-  final Widget? textWidget;
+  final String? text;
   final List<Widget>? iconButtons;
   final Widget expandedMenu;
   const BottomActionBarWidget({
     required this.expandedMenu,
-    this.textWidget,
+    this.text,
     this.iconButtons,
     super.key,
   });
@@ -40,10 +40,10 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
               theme: getExpandableTheme(context),
               header: Padding(
                 padding: EdgeInsets.symmetric(
-                  horizontal: widget.textWidget == null ? 12 : 0,
+                  horizontal: widget.text == null ? 12 : 0,
                 ),
                 child: ActionBarWidget(
-                  textWidget: widget.textWidget,
+                  text: widget.text,
                   iconButtons: _iconButtons(),
                 ),
               ),
