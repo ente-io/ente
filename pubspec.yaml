@@ -75,6 +75,7 @@ dependencies:
   like_button: ^2.0.2
   loading_animations: ^2.1.0
   local_auth: ^1.1.5
+  local_hero: ^0.2.0
   logging: ^1.0.1
   lottie: ^1.2.2
   media_extension:

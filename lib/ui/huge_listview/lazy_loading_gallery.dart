@@ -5,8 +5,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:local_hero/local_hero.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -33,6 +33,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final String logTag;
   final Stream<int> currentIndexStream;
+  final int imagesPerRow;
 
   LazyLoadingGallery(
     this.files,
@@ -44,6 +45,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.tag,
     this.currentIndexStream, {
     this.logTag = "",
+    this.imagesPerRow,
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -251,6 +253,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _files.length > kRecycleLimit,
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
+          widget.imagesPerRow,
         ),
       );
     }
@@ -278,6 +281,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final bool shouldRecycle;
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
+  final int imagesPerRow;
 
   LazyLoadingGridView(
     this.tag,
@@ -287,7 +291,8 @@ class LazyLoadingGridView extends StatefulWidget {
     this.shouldRender,
     this.shouldRecycle,
     this.toggleSelectAllFromDay,
-    this.areAllFilesSelected, {
+    this.areAllFilesSelected,
+    this.imagesPerRow, {
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -383,10 +388,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         return _buildFile(context, widget.filesInDay[index]);
       },
       itemCount: widget.filesInDay.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: 4,
+        crossAxisCount: widget.imagesPerRow ?? 4,
       ),
       padding: const EdgeInsets.all(0),
     );
@@ -405,8 +410,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         HapticFeedback.lightImpact();
         _selectFile(file);
       },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(1),
+      child: LocalHero(
+        tag: widget.tag + file.tag,
         child: Stack(
           children: [
             Hero(
