@@ -55,14 +55,31 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
   }
 
   List<Widget> _iconButtons() {
+    final isExpanded = _expandableController.expanded;
     final iconButtons = <Widget?>[
       ...?widget.iconButtons,
-      IconButtonWidget(
-        onTap: () {
-          _expandableController.value = !_expandableController.value;
-        },
-        icon: Icons.more_horiz_outlined,
-        iconButtonType: IconButtonType.primary,
+      AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeInOutExpo,
+        child: isExpanded
+            ? IconButtonWidget(
+                key: ValueKey<bool>(isExpanded),
+                onTap: () {
+                  _expandableController.value = false;
+                  setState(() {});
+                },
+                icon: Icons.expand_more_outlined,
+                iconButtonType: IconButtonType.primary,
+              )
+            : IconButtonWidget(
+                key: ValueKey<bool>(isExpanded),
+                onTap: () {
+                  _expandableController.value = true;
+                  setState(() {});
+                },
+                icon: Icons.more_horiz_outlined,
+                iconButtonType: IconButtonType.primary,
+              ),
       ),
     ];
     iconButtons.removeWhere((element) => element == null);
