@@ -1,5 +1,6 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
@@ -25,7 +26,9 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    //todo : restric width of column
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    //todo : restrict width of column
     return Container(
       padding: const EdgeInsets.only(top: 4, bottom: 36),
       child: Column(
@@ -49,40 +52,90 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
               controller: _expandableController,
             ),
           ),
+          GestureDetector(
+            onTap: () {
+              //unselect all files here
+              //or collapse the expansion panel
+              _expandableController.value = false;
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Center(
+                child: Text(
+                  "Cancel",
+                  style: textTheme.bodyBold
+                      .copyWith(color: colorScheme.blurTextBase),
+                ),
+              ),
+            ),
+          )
         ],
       ),
     );
   }
 
   List<Widget> _iconButtons() {
-    final isExpanded = _expandableController.expanded;
     final iconButtons = <Widget?>[
       ...?widget.iconButtons,
-      AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        switchInCurve: Curves.easeInOutExpo,
-        child: isExpanded
-            ? IconButtonWidget(
-                key: ValueKey<bool>(isExpanded),
-                onTap: () {
-                  _expandableController.value = false;
-                  setState(() {});
-                },
-                icon: Icons.expand_more_outlined,
-                iconButtonType: IconButtonType.primary,
-              )
-            : IconButtonWidget(
-                key: ValueKey<bool>(isExpanded),
-                onTap: () {
-                  _expandableController.value = true;
-                  setState(() {});
-                },
-                icon: Icons.more_horiz_outlined,
-                iconButtonType: IconButtonType.primary,
-              ),
-      ),
+      ExpansionIconWidget(expandableController: _expandableController)
     ];
     iconButtons.removeWhere((element) => element == null);
     return iconButtons as List<Widget>;
+  }
+}
+
+class ExpansionIconWidget extends StatefulWidget {
+  final ExpandableController expandableController;
+  const ExpansionIconWidget({required this.expandableController, super.key});
+
+  @override
+  State<ExpansionIconWidget> createState() => _ExpansionIconWidgetState();
+}
+
+class _ExpansionIconWidgetState extends State<ExpansionIconWidget> {
+  @override
+  void initState() {
+    widget.expandableController.addListener(_expandableListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    widget.expandableController.removeListener(_expandableListener);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 200),
+      switchInCurve: Curves.easeInOutExpo,
+      child: widget.expandableController.value
+          ? IconButtonWidget(
+              key: const ValueKey<bool>(false),
+              onTap: () {
+                widget.expandableController.value = false;
+                setState(() {});
+              },
+              icon: Icons.expand_more_outlined,
+              iconButtonType: IconButtonType.primary,
+            )
+          : IconButtonWidget(
+              key: const ValueKey<bool>(true),
+              onTap: () {
+                widget.expandableController.value = true;
+                setState(() {});
+              },
+              icon: Icons.more_horiz_outlined,
+              iconButtonType: IconButtonType.primary,
+            ),
+    );
+  }
+
+  _expandableListener() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 }
