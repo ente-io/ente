@@ -13,7 +13,10 @@ class FileCaptionWidget extends StatefulWidget {
 }
 
 class _FileCaptionWidgetState extends State<FileCaptionWidget> {
-  int maxLength = 280;
+  static const int maxLength = 5000;
+  // counterThreshold represents the nun of char after which
+  // currentLength/maxLength will show up
+  static const int counterThreshold = 1000;
   int currentLength = 0;
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
@@ -60,7 +63,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       focusNode: _focusNode,
       decoration: InputDecoration(
         counterStyle: textTheme.mini.copyWith(color: colorScheme.textMuted),
-        counterText: currentLength > 99
+        counterText: currentLength >= counterThreshold
             ? currentLength.toString() + " / " + maxLength.toString()
             : "",
         contentPadding: const EdgeInsets.all(16),
@@ -89,7 +92,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
       cursorWidth: 1.5,
       maxLength: maxLength,
       minLines: 1,
-      maxLines: 6,
+      maxLines: 10,
       textCapitalization: TextCapitalization.sentences,
       keyboardType: TextInputType.text,
       onChanged: (value) {
