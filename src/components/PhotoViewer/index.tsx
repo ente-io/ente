@@ -79,7 +79,8 @@ function PhotoViewer(props: Iprops) {
     const { isOpen, items, isSourceLoaded } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [exif, setExif] = useState<any>(null);
+    const [exif, setExif] = useState<Record<string, any>>({});
+    const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions
     );
@@ -90,7 +91,7 @@ function PhotoViewer(props: Iprops) {
     const appContext = useContext(AppContext);
 
     const showCopyOption = useRef(isClipboardItemPresent());
-    const exifExtractionInProgress = useRef(false);
+    const exifExtractionInProgress = useRef<number>(null);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -232,9 +233,9 @@ function PhotoViewer(props: Iprops) {
         }
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
-    // useEffect(() => {
-    //     console.log('useEffect', exif);
-    // }, [exif]);
+    useEffect(() => {
+        exifCopy.current = exif;
+    }, [exif]);
 
     function updateFavButton(photoSwipe: Photoswipe<Photoswipe.Options>) {
         setIsFav(isInFav(photoSwipe?.currItem as EnteFile));
@@ -300,19 +301,29 @@ function PhotoViewer(props: Iprops) {
             }
         });
         photoSwipe.listen('beforeChange', () => {
-            // console.log('beforeChange', exif);
-            // if (exif?.fileID !== (photoSwipe?.currItem as EnteFile)?.id) {
-            setExif(null);
-            checkExifAvailable(photoSwipe, { force: true });
-            // }
+            const currItem = photoSwipe?.currItem as EnteFile;
+            if (
+                !currItem ||
+                !exifCopy?.current === null ||
+                exifCopy?.current?.fileID === currItem.id
+            ) {
+                return;
+            }
+            setExif(undefined);
+            checkExifAvailable(currItem.id);
             updateFavButton(photoSwipe);
         });
         photoSwipe.listen('resize', () => {
-            // console.log('resize', exif);
-            // if (exif?.fileID !== (photoSwipe?.currItem as EnteFile)?.id) {
-            // setExif(null);
-            checkExifAvailable(photoSwipe);
-            // }
+            const currItem = photoSwipe?.currItem as EnteFile;
+            if (
+                !currItem ||
+                !exifCopy?.current === null ||
+                exifCopy?.current?.fileID === currItem.id
+            ) {
+                return;
+            }
+            setExif(undefined);
+            checkExifAvailable(currItem.id);
         });
         photoSwipe.init();
         needUpdate.current = false;
@@ -397,34 +408,33 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async (
-        photoSwipe: Photoswipe<Photoswipe.Options>,
-        option?: { force?: boolean }
-    ) => {
-        if (exifExtractionInProgress?.current || (exif && !option?.force)) {
+    const checkExifAvailable = async (fileID: number) => {
+        if (exifExtractionInProgress?.current === fileID) {
             return;
         }
         try {
-            exifExtractionInProgress.current = true;
+            exifExtractionInProgress.current = fileID;
             await sleep(100);
             const img: HTMLImageElement = document.querySelector(
                 '.pswp__img:not(.pswp__img--placeholder)'
             );
             if (img) {
-                const exifData = await exifr.parse(img);
-                if (exifData) {
-                    setExif({
-                        ...exifData,
-                        fileID: (photoSwipe?.currItem as EnteFile).id,
-                    });
-                } else {
-                    setExif(null);
+                const exifData = (await exifr.parse(img)) as Record<
+                    string,
+                    any
+                >;
+                if (exifExtractionInProgress.current === fileID) {
+                    if (exifData) {
+                        setExif({ ...exifData, fileID });
+                    } else {
+                        setExif(null);
+                    }
                 }
             }
         } catch (e) {
             logError(e, 'exifr parsing failed');
         } finally {
-            exifExtractionInProgress.current = false;
+            exifExtractionInProgress.current = null;
         }
     };
 
