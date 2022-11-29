@@ -14,7 +14,7 @@ import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import { FILE_TYPE } from 'constants/file';
-import { isClipboardItemPresent, sleep } from 'utils/common';
+import { isClipboardItemPresent } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
@@ -90,7 +90,7 @@ function PhotoViewer(props: Iprops) {
     );
     const appContext = useContext(AppContext);
 
-    const exifExtractionInProgress = useRef<number>(null);
+    const exifExtractionInProgress = useRef<string>(null);
     const [shouldShowCopyOption] = useState(isClipboardItemPresent());
 
     useEffect(() => {
@@ -239,6 +239,7 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         exifCopy.current = exif;
+        console.log(exif);
     }, [exif]);
 
     function updateFavButton(file: EnteFile) {
@@ -309,12 +310,13 @@ function PhotoViewer(props: Iprops) {
             if (
                 !currItem ||
                 !exifCopy?.current === null ||
-                exifCopy?.current?.fileID === currItem.id
+                exifCopy?.current?.fileSrc === currItem.src ||
+                !currItem.isSourceLoaded
             ) {
                 return;
             }
             setExif(undefined);
-            checkExifAvailable(currItem.id);
+            checkExifAvailable(currItem);
             updateFavButton(currItem);
         });
         photoSwipe.listen('resize', () => {
@@ -322,12 +324,13 @@ function PhotoViewer(props: Iprops) {
             if (
                 !currItem ||
                 !exifCopy?.current === null ||
-                exifCopy?.current?.fileID === currItem.id
+                exifCopy?.current?.fileSrc === currItem.src ||
+                !currItem.isSourceLoaded
             ) {
                 return;
             }
             setExif(undefined);
-            checkExifAvailable(currItem.id);
+            checkExifAvailable(currItem);
         });
         photoSwipe.init();
         needUpdate.current = false;
@@ -412,33 +415,38 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async (fileID: number) => {
+    const checkExifAvailable = async (file: EnteFile) => {
         try {
-            if (exifExtractionInProgress.current === fileID) {
+            console.log('checkExifAvailable', file.src);
+            if (exifExtractionInProgress.current === file.src) {
+                console.log('already in process');
                 return;
             }
-            exifExtractionInProgress.current = fileID;
-            await sleep(100);
-            const img: HTMLImageElement = document.querySelector(
-                '.pswp__img:not(.pswp__img--placeholder)'
-            );
-            if (img) {
-                const exifData = (await exifr.parse(img)) as Record<
+            try {
+                console.log('starting processing');
+                exifExtractionInProgress.current = file.src;
+                const imageBlob = await (await fetch(file.src)).blob();
+                const exifData = (await exifr.parse(imageBlob)) as Record<
                     string,
                     any
                 >;
-                if (exifExtractionInProgress.current === fileID) {
+                console.log({ exifData });
+                console.log(exifExtractionInProgress, file.src);
+                if (exifExtractionInProgress.current === file.src) {
                     if (exifData) {
-                        setExif({ ...exifData, fileID });
+                        console.log('set extracted metadata');
+                        setExif({ ...exifData, fileSrc: file.src });
                     } else {
+                        console.log("doesn't have metadata");
                         setExif(null);
                     }
                 }
+            } finally {
+                console.log('cleared exifExtractionInProgress');
+                exifExtractionInProgress.current = null;
             }
         } catch (e) {
             logError(e, 'exifr parsing failed');
-        } finally {
-            exifExtractionInProgress.current = null;
         }
     };
 

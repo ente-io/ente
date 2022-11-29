@@ -325,7 +325,7 @@ const PhotoFrame = ({
         const updateFile = (file: EnteFile) => {
             file.w = window.innerWidth;
             file.h = window.innerHeight;
-
+            file.isSourceLoaded = true;
             if (file.metadata.fileType === FILE_TYPE.VIDEO) {
                 if (isPlayable) {
                     file.html = `
@@ -500,6 +500,7 @@ const PhotoFrame = ({
                 item.msrc = newFile.msrc;
                 item.html = newFile.html;
                 item.src = newFile.src;
+                item.isSourceLoaded = newFile.isSourceLoaded;
                 item.w = newFile.w;
                 item.h = newFile.h;
 
@@ -561,6 +562,7 @@ const PhotoFrame = ({
                 item.msrc = newFile.msrc;
                 item.html = newFile.html;
                 item.src = newFile.src;
+                item.isSourceLoaded = newFile.isSourceLoaded;
                 item.w = newFile.w;
                 item.h = newFile.h;
                 try {

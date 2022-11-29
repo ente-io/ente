@@ -54,6 +54,7 @@ export interface EnteFile {
     isDeleted: boolean;
     isTrashed?: boolean;
     deleteBy?: number;
+    isSourceLoaded?: boolean;
     dataIndex: number;
     updationTime: number;
 }
