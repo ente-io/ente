@@ -1,5 +1,6 @@
 import { TimeStampListItem } from 'components/PhotoList';
 import { REPORT_REASON } from 'constants/publicCollection';
+import { PublicURL } from 'types/collection';
 import { EnteFile } from 'types/file';
 
 export interface PublicCollectionGalleryContextType {
@@ -39,3 +40,7 @@ export interface Address {
     postalCode: string;
     phone: string;
 }
+
+export type SetPublicShareProp = React.Dispatch<
+    React.SetStateAction<PublicURL>
+>;

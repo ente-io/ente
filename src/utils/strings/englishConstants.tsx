@@ -663,6 +663,7 @@ const englishConstants = {
         'Are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'Allow downloads',
     LINK_PASSWORD_LOCK: 'Password lock',
+    ENABLE_COLLECT: 'Enable collect',
     LINK_DEVICE_LIMIT: 'Device limit',
     LINK_EXPIRY: 'Link expiry',
     LINK_EXPIRY_NEVER: 'Never',
