@@ -226,11 +226,18 @@ export function PhotoList({
         if (timeStampList.length === 1) {
             timeStampList.push(getEmptyListItem());
         }
+        timeStampList.push(getVacuumItem(timeStampList));
+        if (publicCollectionGalleryContext.photoListFooter) {
+            timeStampList.push(
+                getPhotoListFooter(
+                    publicCollectionGalleryContext.photoListFooter
+                )
+            );
+        }
         if (
             showAppDownloadBanner ||
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
-            timeStampList.push(getVacuumItem(timeStampList));
             if (publicCollectionGalleryContext.accessedThroughSharedURL) {
                 timeStampList.push(getAlbumsFooter());
             } else {
@@ -349,6 +356,17 @@ export function PhotoList({
             item: (
                 <ListItemContainer span={columns}>
                     {photoListHeader.item}
+                </ListItemContainer>
+            ),
+        };
+    };
+
+    const getPhotoListFooter = (photoListFooter) => {
+        return {
+            ...photoListFooter,
+            item: (
+                <ListItemContainer span={columns}>
+                    {photoListFooter.item}
                 </ListItemContainer>
             ),
         };

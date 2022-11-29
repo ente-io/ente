@@ -105,6 +105,8 @@ const englishConstants = {
     NO: 'No',
     NOTHING_HERE: 'Nothing to see here yet 👀',
     UPLOAD: 'Upload',
+    ADD_MORE_PHOTOS: 'Add more photos',
+    ADD_PHOTOS: 'Add photos',
     FILE_UPLOAD: 'File Upload',
     UPLOAD_STAGE_MESSAGE: {
         0: 'Preparing to upload',

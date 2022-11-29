@@ -18,12 +18,9 @@ import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
-import {
-    defaultPublicCollectionGalleryContext,
-    PublicCollectionGalleryContext,
-} from 'utils/publicCollectionGallery';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import VerticallyCentered from 'components/Container';
+import VerticallyCentered, { CenteredFlex } from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
 import CryptoWorker from 'utils/crypto';
@@ -41,6 +38,7 @@ import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import Typography from '@mui/material/Typography';
+import UploadButton from 'components/Upload/UploadButton';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -68,6 +66,9 @@ export default function PublicCollectionGallery() {
     const [isPasswordProtected, setIsPasswordProtected] =
         useState<boolean>(false);
     const [photoListHeader, setPhotoListHeader] =
+        useState<TimeStampListItem>(null);
+
+    const [photoListFooter, setPhotoListFooter] =
         useState<TimeStampListItem>(null);
 
     useEffect(() => {
@@ -144,6 +145,23 @@ export default function PublicCollectionGallery() {
                 height: 68,
             });
     }, [publicCollection, publicFiles]);
+
+    useEffect(() => {
+        publicCollection?.publicURLs?.[0]?.enableCollect &&
+            setPhotoListFooter({
+                item: (
+                    <CenteredFlex>
+                        <UploadButton
+                            openUploader={() => {}}
+                            text={constants.ADD_MORE_PHOTOS}
+                            color="accent"
+                        />
+                    </CenteredFlex>
+                ),
+                itemType: ITEM_TYPE.OTHER,
+                height: 68,
+            });
+    }, [publicCollection]);
 
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
@@ -297,14 +315,19 @@ export default function PublicCollectionGallery() {
     return (
         <PublicCollectionGalleryContext.Provider
             value={{
-                ...defaultPublicCollectionGalleryContext,
                 token: token.current,
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 openReportForm,
                 photoListHeader,
+                photoListFooter,
             }}>
-            <SharedAlbumNavbar />
+            <SharedAlbumNavbar
+                showUploadButton={
+                    publicCollection?.publicURLs?.[0]?.enableCollect
+                }
+                openUploader={() => {}}
+            />
             <PhotoFrame
                 files={publicFiles}
                 syncWithRemote={syncWithRemote}

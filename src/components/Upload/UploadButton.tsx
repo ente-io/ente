@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconButton, styled } from '@mui/material';
+import { ButtonProps, IconButton, styled } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Button } from '@mui/material';
 import constants from 'utils/strings/constants';
@@ -26,8 +26,10 @@ const Wrapper = styled('div')`
 
 interface Iprops {
     openUploader: () => void;
+    text?: string;
+    color?: ButtonProps['color'];
 }
-function UploadButton({ openUploader }: Iprops) {
+function UploadButton({ openUploader, text, color }: Iprops) {
     return (
         <Wrapper
             style={{
@@ -37,9 +39,9 @@ function UploadButton({ openUploader }: Iprops) {
                 onClick={openUploader}
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="desktop-button"
-                color="secondary"
+                color={color ?? 'secondary'}
                 startIcon={<FileUploadOutlinedIcon />}>
-                {constants.UPLOAD}
+                {text ?? constants.UPLOAD}
             </Button>
 
             <IconButton
