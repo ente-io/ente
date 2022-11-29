@@ -191,33 +191,33 @@ export function FileInfo({
                     />
                 )}
 
-                {/* {location && ( */}
-                <InfoItem
-                    icon={<LocationOnOutlined />}
-                    title={constants.LOCATION}
-                    caption={
-                        <Link
-                            href={getOpenStreetMapLink({
-                                latitude: file.metadata.latitude,
-                                longitude: file.metadata.longitude,
-                            })}
-                            target="_blank"
-                            sx={{ fontWeight: 'bold' }}>
-                            {constants.SHOW_ON_MAP}
-                        </Link>
-                    }
-                    customEndButton={
-                        <CopyButton
-                            code={getOpenStreetMapLink({
-                                latitude: file.metadata.latitude,
-                                longitude: file.metadata.longitude,
-                            })}
-                            color="secondary"
-                            size="medium"
-                        />
-                    }
-                />
-                {/* )} */}
+                {location && (
+                    <InfoItem
+                        icon={<LocationOnOutlined />}
+                        title={constants.LOCATION}
+                        caption={
+                            <Link
+                                href={getOpenStreetMapLink({
+                                    latitude: file.metadata.latitude,
+                                    longitude: file.metadata.longitude,
+                                })}
+                                target="_blank"
+                                sx={{ fontWeight: 'bold' }}>
+                                {constants.SHOW_ON_MAP}
+                            </Link>
+                        }
+                        customEndButton={
+                            <CopyButton
+                                code={getOpenStreetMapLink({
+                                    latitude: file.metadata.latitude,
+                                    longitude: file.metadata.longitude,
+                                })}
+                                color="secondary"
+                                size="medium"
+                            />
+                        }
+                    />
+                )}
                 <InfoItem
                     icon={<TextSnippetOutlined />}
                     title={constants.DETAILS}
