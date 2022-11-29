@@ -147,7 +147,7 @@ export default function PublicCollectionGallery() {
     }, [publicCollection, publicFiles]);
 
     useEffect(() => {
-        publicCollection?.publicURLs?.[0]?.enableCollect &&
+        if (publicCollection?.publicURLs?.[0]?.enableCollect) {
             setPhotoListFooter({
                 item: (
                     <CenteredFlex>
@@ -161,6 +161,9 @@ export default function PublicCollectionGallery() {
                 itemType: ITEM_TYPE.OTHER,
                 height: 68,
             });
+        } else {
+            setPhotoListFooter(null);
+        }
     }, [publicCollection]);
 
     const syncWithRemote = async () => {

@@ -255,6 +255,7 @@ export function PhotoList({
         showAppDownloadBanner,
         publicCollectionGalleryContext.accessedThroughSharedURL,
         galleryContext.photoListHeader,
+        publicCollectionGalleryContext.photoListFooter,
         publicCollectionGalleryContext.photoListHeader,
         deduplicateContext.isOnDeduplicatePage,
         deduplicateContext.fileSizeMap,
