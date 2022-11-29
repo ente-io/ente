@@ -26,6 +26,7 @@ import { styled } from '@mui/material';
 import { syncCollections } from 'services/collectionService';
 import EnteSpinner from 'components/EnteSpinner';
 import VerticallyCentered from 'components/Container';
+import { Collection } from 'types/collection';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -44,6 +45,7 @@ export default function Deduplicate() {
         setRedirectURL,
     } = useContext(AppContext);
     const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
+    const [collections, setCollection] = useState<Collection[]>([]);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
     const [collectionNameMap, setCollectionNameMap] = useState(
@@ -74,6 +76,7 @@ export default function Deduplicate() {
     const syncWithRemote = async () => {
         startLoading();
         const collections = await syncCollections();
+        setCollection(collections);
         const collectionNameMap = new Map<number, string>();
         for (const collection of collections) {
             collectionNameMap.set(collection.id, collection.name);
@@ -174,6 +177,7 @@ export default function Deduplicate() {
             )}
             <PhotoFrame
                 files={duplicateFiles}
+                collections={collections}
                 syncWithRemote={syncWithRemote}
                 setSelected={setSelected}
                 selected={selected}

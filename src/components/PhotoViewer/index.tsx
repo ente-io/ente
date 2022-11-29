@@ -14,7 +14,7 @@ import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
 import { FILE_TYPE } from 'constants/file';
-import { isClipboardItemPresent, sleep } from 'utils/common';
+import { isClipboardItemPresent } from 'utils/common';
 import { playVideo, pauseVideo } from 'utils/photoFrame';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { AppContext } from 'pages/_app';
@@ -79,7 +79,9 @@ function PhotoViewer(props: Iprops) {
     const { isOpen, items, isSourceLoaded } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [exif, setExif] = useState<any>(null);
+    const [exif, setExif] =
+        useState<{ key: string; value: Record<string, any> }>();
+    const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions
     );
@@ -89,6 +91,7 @@ function PhotoViewer(props: Iprops) {
     );
     const appContext = useContext(AppContext);
 
+    const exifExtractionInProgress = useRef<string>(null);
     const [shouldShowCopyOption] = useState(isClipboardItemPresent());
 
     useEffect(() => {
@@ -235,8 +238,13 @@ function PhotoViewer(props: Iprops) {
         }
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
-    function updateFavButton() {
-        setIsFav(isInFav(this?.currItem));
+    useEffect(() => {
+        exifCopy.current = exif;
+        console.log(exif);
+    }, [exif]);
+
+    function updateFavButton(file: EnteFile) {
+        setIsFav(isInFav(file));
     }
 
     const openPhotoSwipe = () => {
@@ -298,11 +306,31 @@ function PhotoViewer(props: Iprops) {
                 });
             }
         });
-        photoSwipe.listen('beforeChange', function () {
-            updateInfo.call(this);
-            updateFavButton.call(this);
+        photoSwipe.listen('beforeChange', () => {
+            const currItem = photoSwipe?.currItem as EnteFile;
+            if (
+                !currItem ||
+                !exifCopy?.current?.value === null ||
+                exifCopy?.current?.key === currItem.src
+            ) {
+                return;
+            }
+            setExif({ key: currItem.src, value: undefined });
+            checkExifAvailable(currItem);
+            updateFavButton(currItem);
         });
-        photoSwipe.listen('resize', checkExifAvailable);
+        photoSwipe.listen('resize', () => {
+            const currItem = photoSwipe?.currItem as EnteFile;
+            if (
+                !currItem ||
+                !exifCopy?.current?.value === null ||
+                exifCopy?.current?.key === currItem.src
+            ) {
+                return;
+            }
+            setExif({ key: currItem.src, value: undefined });
+            checkExifAvailable(currItem);
+        });
         photoSwipe.init();
         needUpdate.current = false;
         setPhotoSwipe(photoSwipe);
@@ -323,7 +351,7 @@ function PhotoViewer(props: Iprops) {
         }
         handleCloseInfo();
     };
-    const isInFav = (file) => {
+    const isInFav = (file: EnteFile) => {
         const { favItemIds } = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
@@ -331,7 +359,7 @@ function PhotoViewer(props: Iprops) {
         return false;
     };
 
-    const onFavClick = async (file) => {
+    const onFavClick = async (file: EnteFile) => {
         const { favItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
@@ -386,32 +414,45 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async () => {
-        await sleep(100);
+    const checkExifAvailable = async (file: EnteFile) => {
         try {
-            const img: HTMLImageElement = document.querySelector(
-                '.pswp__img:not(.pswp__img--placeholder)'
-            );
-            if (img) {
-                const exifData = await exifr.parse(img);
-                if (exifData) {
-                    setExif(exifData);
-                } else {
-                    setExif(null);
+            console.log('checkExifAvailable', file.src);
+            if (exifExtractionInProgress.current === file.src) {
+                console.log('already in process');
+                return;
+            }
+            try {
+                if (file.isSourceLoaded) {
+                    console.log('starting processing');
+                    exifExtractionInProgress.current = file.src;
+                    console.log(file.originalImageURL);
+                    const imageBlob = await (
+                        await fetch(file.originalImageURL)
+                    ).blob();
+                    const exifData = (await exifr.parse(imageBlob)) as Record<
+                        string,
+                        any
+                    >;
+                    console.log({ exifData });
+                    console.log(exifExtractionInProgress, file.src);
+                    if (exifExtractionInProgress.current === file.src) {
+                        if (exifData) {
+                            console.log('set extracted metadata');
+                            setExif({ key: file.src, value: exifData });
+                        } else {
+                            console.log("doesn't have metadata");
+                            setExif({ key: file.src, value: null });
+                        }
+                    }
                 }
+            } finally {
+                console.log('cleared exifExtractionInProgress');
+                exifExtractionInProgress.current = null;
             }
         } catch (e) {
             logError(e, 'exifr parsing failed');
         }
     };
-
-    function updateInfo() {
-        const file: EnteFile = this?.currItem;
-        if (file) {
-            setExif(undefined);
-            checkExifAvailable();
-        }
-    }
 
     const handleCloseInfo = () => {
         setShowInfo(false);
@@ -553,7 +594,9 @@ function PhotoViewer(props: Iprops) {
                                         }
                                         className="pswp__button pswp__button--custom"
                                         onClick={() => {
-                                            onFavClick(photoSwipe?.currItem);
+                                            onFavClick(
+                                                photoSwipe?.currItem as EnteFile
+                                            );
                                         }}>
                                         {isFav ? (
                                             <FavoriteIcon fontSize="small" />
@@ -591,11 +634,12 @@ function PhotoViewer(props: Iprops) {
                 </div>
             </div>
             <FileInfo
+                isTrashCollection={props.isTrashCollection}
                 shouldDisableEdits={props.isSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
-                exif={exif}
+                exif={exif?.value}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
