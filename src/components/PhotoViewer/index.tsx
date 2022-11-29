@@ -311,8 +311,7 @@ function PhotoViewer(props: Iprops) {
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
-                exifCopy?.current?.key === currItem.src ||
-                !currItem.isSourceLoaded
+                exifCopy?.current?.key === currItem.src
             ) {
                 return;
             }
@@ -325,8 +324,7 @@ function PhotoViewer(props: Iprops) {
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
-                exifCopy?.current?.key === currItem.src ||
-                !currItem.isSourceLoaded
+                exifCopy?.current?.key === currItem.src
             ) {
                 return;
             }
@@ -424,22 +422,24 @@ function PhotoViewer(props: Iprops) {
                 return;
             }
             try {
-                console.log('starting processing');
-                exifExtractionInProgress.current = file.src;
-                const imageBlob = await (await fetch(file.src)).blob();
-                const exifData = (await exifr.parse(imageBlob)) as Record<
-                    string,
-                    any
-                >;
-                console.log({ exifData });
-                console.log(exifExtractionInProgress, file.src);
-                if (exifExtractionInProgress.current === file.src) {
-                    if (exifData) {
-                        console.log('set extracted metadata');
-                        setExif({ key: file.src, value: exifData });
-                    } else {
-                        console.log("doesn't have metadata");
-                        setExif({ key: file.src, value: null });
+                if (file.isSourceLoaded) {
+                    console.log('starting processing');
+                    exifExtractionInProgress.current = file.src;
+                    const imageBlob = await (await fetch(file.src)).blob();
+                    const exifData = (await exifr.parse(imageBlob)) as Record<
+                        string,
+                        any
+                    >;
+                    console.log({ exifData });
+                    console.log(exifExtractionInProgress, file.src);
+                    if (exifExtractionInProgress.current === file.src) {
+                        if (exifData) {
+                            console.log('set extracted metadata');
+                            setExif({ key: file.src, value: exifData });
+                        } else {
+                            console.log("doesn't have metadata");
+                            setExif({ key: file.src, value: null });
+                        }
                     }
                 }
             } finally {
