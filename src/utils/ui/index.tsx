@@ -45,16 +45,20 @@ export const getTrashFileMessage = (deleteFileHelper): DialogBoxAttributes => ({
     close: { text: constants.CANCEL },
 });
 
-export const getUpdateReadyToInstallMessage = (): DialogBoxAttributes => ({
+export const getUpdateReadyToInstallMessage = (
+    updateInfo: AppUpdateInfo
+): DialogBoxAttributes => ({
     icon: <AutoAwesomeOutlinedIcon />,
     title: constants.UPDATE_AVAILABLE,
     content: constants.UPDATE_INSTALLABLE_MESSAGE,
     close: {
         text: constants.INSTALL_ON_NEXT_LAUNCH,
         variant: 'secondary',
+        action: () => ElectronUpdateService.updateAndRestart(),
     },
     proceed: {
-        action: () => ElectronUpdateService.updateAndRestart(),
+        action: () =>
+            ElectronUpdateService.muteUpdateNotification(updateInfo.version),
         text: constants.INSTALL_NOW,
         variant: 'accent',
     },
@@ -69,7 +73,7 @@ export const getUpdateAvailableForDownloadMessage = (
     close: {
         text: constants.IGNORE_THIS_VERSION,
         variant: 'secondary',
-        action: () => ElectronUpdateService.skipAppVersion(updateInfo.version),
+        action: () => ElectronUpdateService.skipAppUpdate(updateInfo.version),
     },
     proceed: {
         action: downloadApp,

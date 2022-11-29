@@ -21,9 +21,14 @@ class ElectronUpdateService {
         }
     }
 
-    skipAppVersion(version: string) {
-        if (this.electronAPIs?.skipAppVersion) {
-            this.electronAPIs.skipAppVersion(version);
+    skipAppUpdate(version: string) {
+        if (this.electronAPIs?.skipAppUpdate) {
+            this.electronAPIs.skipAppUpdate(version);
+        }
+    }
+    muteUpdateNotification(version: string) {
+        if (this.electronAPIs?.muteUpdateNotification) {
+            this.electronAPIs.muteUpdateNotification(version);
         }
     }
 }

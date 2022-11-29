@@ -141,7 +141,9 @@ export default function App({ Component, err }) {
         if (isElectron()) {
             const showUpdateDialog = (updateInfo: AppUpdateInfo) => {
                 if (updateInfo.autoUpdatable) {
-                    setDialogMessage(getUpdateReadyToInstallMessage());
+                    setDialogMessage(
+                        getUpdateReadyToInstallMessage(updateInfo)
+                    );
                 } else {
                     setNotificationAttributes({
                         endIcon: <ArrowForward />,
