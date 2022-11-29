@@ -409,10 +409,10 @@ function PhotoViewer(props: Iprops) {
     };
 
     const checkExifAvailable = async (fileID: number) => {
-        if (exifExtractionInProgress?.current === fileID) {
-            return;
-        }
         try {
+            if (exifExtractionInProgress.current === fileID) {
+                return;
+            }
             exifExtractionInProgress.current = fileID;
             await sleep(100);
             const img: HTMLImageElement = document.querySelector(
