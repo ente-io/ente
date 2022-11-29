@@ -44,6 +44,7 @@ interface Iprops {
     refreshPhotoswipe: () => void;
     fileToCollectionsMap: Map<number, number[]>;
     collectionNameMap: Map<number, string>;
+    isTrashCollection: boolean;
 }
 
 function BasicDeviceCamera({
@@ -77,6 +78,7 @@ export function FileInfo({
     refreshPhotoswipe,
     fileToCollectionsMap,
     collectionNameMap,
+    isTrashCollection,
 }: Iprops) {
     const [location, setLocation] = useState<Location>(null);
     const [parsedExifData, setParsedExifData] = useState<Record<string, any>>();
@@ -107,6 +109,7 @@ export function FileInfo({
 
     useEffect(() => {
         if (!exif) {
+            setParsedExifData({});
             return;
         }
         const parsedExifData = {};
@@ -188,33 +191,33 @@ export function FileInfo({
                     />
                 )}
 
-                {/* {location && ( */}
-                <InfoItem
-                    icon={<LocationOnOutlined />}
-                    title={constants.LOCATION}
-                    caption={
-                        <Link
-                            href={getOpenStreetMapLink({
-                                latitude: file.metadata.latitude,
-                                longitude: file.metadata.longitude,
-                            })}
-                            target="_blank"
-                            sx={{ fontWeight: 'bold' }}>
-                            {constants.SHOW_ON_MAP}
-                        </Link>
-                    }
-                    customEndButton={
-                        <CopyButton
-                            code={getOpenStreetMapLink({
-                                latitude: file.metadata.latitude,
-                                longitude: file.metadata.longitude,
-                            })}
-                            color="secondary"
-                            size="medium"
-                        />
-                    }
-                />
-                {/* )} */}
+                {location && (
+                    <InfoItem
+                        icon={<LocationOnOutlined />}
+                        title={constants.LOCATION}
+                        caption={
+                            <Link
+                                href={getOpenStreetMapLink({
+                                    latitude: file.metadata.latitude,
+                                    longitude: file.metadata.longitude,
+                                })}
+                                target="_blank"
+                                sx={{ fontWeight: 'bold' }}>
+                                {constants.SHOW_ON_MAP}
+                            </Link>
+                        }
+                        customEndButton={
+                            <CopyButton
+                                code={getOpenStreetMapLink({
+                                    latitude: file.metadata.latitude,
+                                    longitude: file.metadata.longitude,
+                                })}
+                                color="secondary"
+                                size="medium"
+                            />
+                        }
+                    />
+                )}
                 <InfoItem
                     icon={<TextSnippetOutlined />}
                     title={constants.DETAILS}
@@ -243,23 +246,27 @@ export function FileInfo({
                     caption={formatTime(file.metadata.modificationTime / 1000)}
                     hideEditOption
                 />
-
-                <InfoItem icon={<FolderOutlined />} hideEditOption>
-                    <Box
-                        display={'flex'}
-                        gap={1}
-                        flexWrap="wrap"
-                        justifyContent={'flex-start'}
-                        alignItems={'flex-start'}>
-                        {fileToCollectionsMap
-                            .get(file.id)
-                            ?.map((collectionID) => (
-                                <Chip key={collectionID}>
-                                    {collectionNameMap.get(collectionID)}
-                                </Chip>
-                            ))}
-                    </Box>
-                </InfoItem>
+                {!isTrashCollection && (
+                    <InfoItem icon={<FolderOutlined />} hideEditOption>
+                        <Box
+                            display={'flex'}
+                            gap={1}
+                            flexWrap="wrap"
+                            justifyContent={'flex-start'}
+                            alignItems={'flex-start'}>
+                            {fileToCollectionsMap
+                                .get(file.id)
+                                ?.filter((collectionID) =>
+                                    collectionNameMap.has(collectionID)
+                                )
+                                ?.map((collectionID) => (
+                                    <Chip key={collectionID}>
+                                        {collectionNameMap.get(collectionID)}
+                                    </Chip>
+                                ))}
+                        </Box>
+                    </InfoItem>
+                )}
             </Stack>
             <ExifData
                 exif={exif}

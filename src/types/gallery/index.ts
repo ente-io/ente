@@ -17,7 +17,7 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
 
 export type GalleryContextType = {
     thumbs: Map<number, string>;
-    files: Map<number, string>;
+    files: Map<number, { original: string; converted: string }>;
     showPlanSelectorModal: () => void;
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;

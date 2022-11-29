@@ -36,7 +36,8 @@ export async function updateCreationTimeWithExif(
                     if (file.metadata.fileType !== FILE_TYPE.IMAGE) {
                         continue;
                     }
-                    const fileURL = await downloadManager.getFile(file)[0];
+                    const fileURL = (await downloadManager.getFile(file))
+                        .original[0];
                     const fileObject = await getFileFromURL(fileURL);
                     const fileTypeInfo = await getFileType(fileObject);
                     const exifData = await getRawExif(fileObject, fileTypeInfo);
