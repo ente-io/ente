@@ -289,25 +289,18 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
             );
             return {
                 converted: [URL.createObjectURL(convertedBlob)],
-                original: [
-                    await createTypedObjectURL(fileBlob, file.metadata.title),
-                ],
+                original: [URL.createObjectURL(fileBlob)],
             };
         }
         case FILE_TYPE.LIVE_PHOTO: {
             const livePhoto = await getRenderableLivePhoto(file, fileBlob);
             return {
                 converted: livePhoto.map((asset) => URL.createObjectURL(asset)),
-                original: [
-                    await createTypedObjectURL(fileBlob, file.metadata.title),
-                ],
+                original: [URL.createObjectURL(fileBlob)],
             };
         }
         default: {
-            const previewURL = await createTypedObjectURL(
-                fileBlob,
-                file.metadata.title
-            );
+            const previewURL = URL.createObjectURL(fileBlob);
             return {
                 converted: [previewURL],
                 original: [previewURL],
