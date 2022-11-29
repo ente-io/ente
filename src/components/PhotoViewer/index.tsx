@@ -90,6 +90,7 @@ function PhotoViewer(props: Iprops) {
     const appContext = useContext(AppContext);
 
     const showCopyOption = useRef(isClipboardItemPresent());
+    const exifExtractionInProgress = useRef(false);
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -231,8 +232,12 @@ function PhotoViewer(props: Iprops) {
         }
     }, [photoSwipe?.currItem, isOpen, isSourceLoaded]);
 
-    function updateFavButton() {
-        setIsFav(isInFav(this?.currItem));
+    // useEffect(() => {
+    //     console.log('useEffect', exif);
+    // }, [exif]);
+
+    function updateFavButton(photoSwipe: Photoswipe<Photoswipe.Options>) {
+        setIsFav(isInFav(photoSwipe?.currItem as EnteFile));
     }
 
     const openPhotoSwipe = () => {
@@ -294,11 +299,21 @@ function PhotoViewer(props: Iprops) {
                 });
             }
         });
-        photoSwipe.listen('beforeChange', function () {
-            updateInfo.call(this);
-            updateFavButton.call(this);
+        photoSwipe.listen('beforeChange', () => {
+            // console.log('beforeChange', exif);
+            // if (exif?.fileID !== (photoSwipe?.currItem as EnteFile)?.id) {
+            setExif(null);
+            checkExifAvailable(photoSwipe, { force: true });
+            // }
+            updateFavButton(photoSwipe);
         });
-        photoSwipe.listen('resize', checkExifAvailable);
+        photoSwipe.listen('resize', () => {
+            // console.log('resize', exif);
+            // if (exif?.fileID !== (photoSwipe?.currItem as EnteFile)?.id) {
+            // setExif(null);
+            checkExifAvailable(photoSwipe);
+            // }
+        });
         photoSwipe.init();
         needUpdate.current = false;
         setPhotoSwipe(photoSwipe);
@@ -382,32 +397,36 @@ function PhotoViewer(props: Iprops) {
         }
     };
 
-    const checkExifAvailable = async () => {
-        await sleep(100);
+    const checkExifAvailable = async (
+        photoSwipe: Photoswipe<Photoswipe.Options>,
+        option?: { force?: boolean }
+    ) => {
+        if (exifExtractionInProgress?.current || (exif && !option?.force)) {
+            return;
+        }
         try {
+            exifExtractionInProgress.current = true;
+            await sleep(100);
             const img: HTMLImageElement = document.querySelector(
                 '.pswp__img:not(.pswp__img--placeholder)'
             );
             if (img) {
                 const exifData = await exifr.parse(img);
                 if (exifData) {
-                    setExif(exifData);
+                    setExif({
+                        ...exifData,
+                        fileID: (photoSwipe?.currItem as EnteFile).id,
+                    });
                 } else {
                     setExif(null);
                 }
             }
         } catch (e) {
             logError(e, 'exifr parsing failed');
+        } finally {
+            exifExtractionInProgress.current = false;
         }
     };
-
-    function updateInfo() {
-        const file: EnteFile = this?.currItem;
-        if (file) {
-            setExif(undefined);
-            checkExifAvailable();
-        }
-    }
 
     const handleCloseInfo = () => {
         setShowInfo(false);
