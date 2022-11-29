@@ -79,7 +79,8 @@ function PhotoViewer(props: Iprops) {
     const { isOpen, items, isSourceLoaded } = props;
     const [isFav, setIsFav] = useState(false);
     const [showInfo, setShowInfo] = useState(false);
-    const [exif, setExif] = useState<Record<string, any>>();
+    const [exif, setExif] =
+        useState<{ key: string; value: Record<string, any> }>();
     const exifCopy = useRef(null);
     const [livePhotoBtnOptions, setLivePhotoBtnOptions] = useState(
         defaultLivePhotoDefaultOptions
@@ -309,13 +310,13 @@ function PhotoViewer(props: Iprops) {
             const currItem = photoSwipe?.currItem as EnteFile;
             if (
                 !currItem ||
-                !exifCopy?.current === null ||
-                exifCopy?.current?.fileSrc === currItem.src ||
+                !exifCopy?.current?.value === null ||
+                exifCopy?.current?.key === currItem.src ||
                 !currItem.isSourceLoaded
             ) {
                 return;
             }
-            setExif(undefined);
+            setExif({ key: currItem.src, value: undefined });
             checkExifAvailable(currItem);
             updateFavButton(currItem);
         });
@@ -323,13 +324,13 @@ function PhotoViewer(props: Iprops) {
             const currItem = photoSwipe?.currItem as EnteFile;
             if (
                 !currItem ||
-                !exifCopy?.current === null ||
-                exifCopy?.current?.fileSrc === currItem.src ||
+                !exifCopy?.current?.value === null ||
+                exifCopy?.current?.key === currItem.src ||
                 !currItem.isSourceLoaded
             ) {
                 return;
             }
-            setExif(undefined);
+            setExif({ key: currItem.src, value: undefined });
             checkExifAvailable(currItem);
         });
         photoSwipe.init();
@@ -435,10 +436,10 @@ function PhotoViewer(props: Iprops) {
                 if (exifExtractionInProgress.current === file.src) {
                     if (exifData) {
                         console.log('set extracted metadata');
-                        setExif({ ...exifData, fileSrc: file.src });
+                        setExif({ key: file.src, value: exifData });
                     } else {
                         console.log("doesn't have metadata");
-                        setExif(null);
+                        setExif({ key: file.src, value: null });
                     }
                 }
             } finally {
@@ -635,7 +636,7 @@ function PhotoViewer(props: Iprops) {
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
                 file={photoSwipe?.currItem as EnteFile}
-                exif={exif}
+                exif={exif?.value}
                 scheduleUpdate={scheduleUpdate}
                 refreshPhotoswipe={refreshPhotoswipe}
                 fileToCollectionsMap={props.fileToCollectionsMap}
