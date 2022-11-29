@@ -663,7 +663,7 @@ const englishConstants = {
         'Are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'Allow downloads',
     LINK_PASSWORD_LOCK: 'Password lock',
-    ENABLE_COLLECT: 'Enable collect',
+    PUBLIC_COLLECT: 'Public collect',
     LINK_DEVICE_LIMIT: 'Device limit',
     LINK_EXPIRY: 'Link expiry',
     LINK_EXPIRY_NEVER: 'Never',
@@ -680,10 +680,10 @@ const englishConstants = {
             </p>
         </>
     ),
-    ENABLE_PUBLIC_COLLECT: 'Enable Collect',
+    ENABLE_PUBLIC_COLLECT: 'Enable public collect',
     ENABLE_PUBLIC_COLLECT_MESSAGE: () => (
         <>
-            <p>Are you sure that you want to enable the public collect? </p>{' '}
+            <p>Are you sure that you want to enable public collect? </p>{' '}
             <p>Uploaded files will be counted towards your storage</p>
         </>
     ),

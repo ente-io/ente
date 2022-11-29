@@ -47,7 +47,7 @@ export function ManagePublicCollect({
     };
     return (
         <Box>
-            <Typography mb={0.5}>{constants.ENABLE_COLLECT}</Typography>
+            <Typography mb={0.5}>{constants.PUBLIC_COLLECT}</Typography>
             <PublicShareSwitch
                 checked={publicShareProp?.enableCollect}
                 onChange={handleFileDownloadSetting}
