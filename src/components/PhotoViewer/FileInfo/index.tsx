@@ -107,6 +107,7 @@ export function FileInfo({
 
     useEffect(() => {
         if (!exif) {
+            setParsedExifData({});
             return;
         }
         const parsedExifData = {};
