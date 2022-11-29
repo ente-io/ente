@@ -118,6 +118,7 @@ const defaultGalleryContext: GalleryContextType = {
     syncWithRemote: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
+    token: null,
 };
 
 export const GalleryContext = createContext<GalleryContextType>(
@@ -126,7 +127,7 @@ export const GalleryContext = createContext<GalleryContextType>(
 
 export default function Gallery() {
     const router = useRouter();
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<User>(null);
     const [collections, setCollections] = useState<Collection[]>(null);
 
     const [files, setFiles] = useState<EnteFile[]>(null);
@@ -561,6 +562,7 @@ export default function Gallery() {
                 syncWithRemote,
                 setBlockingLoad,
                 photoListHeader: photoListHeader,
+                token: user.token,
             }}>
             <FullScreenDropZone
                 getDragAndDropRootProps={getDragAndDropRootProps}>

@@ -2,7 +2,6 @@ import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
-import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
@@ -132,7 +131,7 @@ export default async function uploader(
             encryptedFile.fileKey
         );
 
-        const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
+        const uploadedFile = await UploadService.uploadFile(uploadFile);
 
         UIService.increaseFileUploaded();
         addLogLine(`${fileNameSize} successfully uploaded`);

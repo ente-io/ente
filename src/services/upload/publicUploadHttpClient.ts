@@ -1,0 +1,116 @@
+import HTTPService from 'services/HTTPService';
+import { getEndpoint } from 'utils/common/apiUtil';
+import { logError } from 'utils/sentry';
+import { EnteFile } from 'types/file';
+import { handleUploadError } from 'utils/error';
+import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
+import { retryHTTPCall } from 'utils/upload/uploadRetrier';
+
+const ENDPOINT = getEndpoint();
+
+const MAX_URL_REQUESTS = 50;
+
+class PublicUploadHttpClient {
+    private uploadURLFetchInProgress = null;
+
+    async uploadFile(
+        uploadFile: UploadFile,
+        token: string,
+        passwordToken: string
+    ): Promise<EnteFile> {
+        try {
+            if (!token) {
+                return;
+            }
+            const response = await retryHTTPCall(
+                () =>
+                    HTTPService.post(
+                        `${ENDPOINT}/public-collection/file`,
+                        uploadFile,
+                        null,
+                        {
+                            'X-Auth-Access-Token': token,
+                            ...(passwordToken && {
+                                'X-Auth-Access-Token-JWT': passwordToken,
+                            }),
+                        }
+                    ),
+                handleUploadError
+            );
+            return response.data;
+        } catch (e) {
+            logError(e, 'upload public File Failed');
+            throw e;
+        }
+    }
+
+    async fetchUploadURLs(
+        count: number,
+        urlStore: UploadURL[],
+        token: string,
+        passwordToken: string
+    ): Promise<void> {
+        try {
+            if (!this.uploadURLFetchInProgress) {
+                try {
+                    if (!token) {
+                        return;
+                    }
+                    this.uploadURLFetchInProgress = HTTPService.get(
+                        `${ENDPOINT}/public-collection/upload-urls`,
+                        {
+                            count: Math.min(MAX_URL_REQUESTS, count * 2),
+                        },
+                        {
+                            'X-Auth-Access-Token': token,
+                            ...(passwordToken && {
+                                'X-Auth-Access-Token-JWT': passwordToken,
+                            }),
+                        }
+                    );
+                    const response = await this.uploadURLFetchInProgress;
+                    for (const url of response.data['urls']) {
+                        urlStore.push(url);
+                    }
+                } finally {
+                    this.uploadURLFetchInProgress = null;
+                }
+            }
+            return this.uploadURLFetchInProgress;
+        } catch (e) {
+            logError(e, 'fetch public upload-url failed ');
+            throw e;
+        }
+    }
+
+    async fetchMultipartUploadURLs(
+        count: number,
+        token: string,
+        passwordToken: string
+    ): Promise<MultipartUploadURLs> {
+        try {
+            if (!token) {
+                return;
+            }
+            const response = await HTTPService.get(
+                `${ENDPOINT}/public-collection/multipart-upload-urls`,
+                {
+                    count,
+                },
+                {
+                    'X-Auth-Access-Token': token,
+                    ...(passwordToken && {
+                        'X-Auth-Access-Token-JWT': passwordToken,
+                    }),
+                }
+            );
+
+            return response.data['urls'];
+        } catch (e) {
+            logError(e, 'fetch public multipart-upload-url failed');
+            throw e;
+        }
+    }
+}
+
+export default new PublicUploadHttpClient();

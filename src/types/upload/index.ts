@@ -149,3 +149,9 @@ export interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
 }
+
+export interface PublicUploadProps {
+    token: string;
+    passwordToken: string;
+    accessedThroughSharedURL: boolean;
+}

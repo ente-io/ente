@@ -419,7 +419,7 @@ export default function PublicCollectionGallery() {
                         null,
                         false
                     )}
-                    collection={publicCollection}
+                    uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
                     setFiles={setPublicFiles}

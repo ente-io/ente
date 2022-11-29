@@ -10,7 +10,6 @@ import { SetCollections, SetCollectionSelectorAttributes } from 'types/gallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
-import UploadManager from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
 import isElectron from 'is-electron';
@@ -50,6 +49,7 @@ import {
 import { getUserOwnedCollections } from 'utils/collection';
 import billingService from 'services/billingService';
 import { addLogLine } from 'utils/logging';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -73,7 +73,7 @@ interface Props {
     webFileSelectorFiles: File[];
     dragAndDropFiles: File[];
     zipUploadDisabled?: boolean;
-    collection?: Collection;
+    uploadCollection?: Collection;
 }
 
 export default function Uploader(props: Props) {
@@ -119,9 +119,12 @@ export default function Uploader(props: Props) {
     };
 
     const uploadRunning = useRef(false);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
 
     useEffect(() => {
-        UploadManager.init(
+        uploadManager.init(
             {
                 setPercentComplete,
                 setUploadCounter,
@@ -131,7 +134,17 @@ export default function Uploader(props: Props) {
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
             },
-            props.setFiles
+            props.setFiles,
+            {
+                accessedThroughSharedURL:
+                    publicCollectionGalleryContext.accessedThroughSharedURL,
+                ...(publicCollectionGalleryContext.passwordToken && {
+                    passwordToken: publicCollectionGalleryContext.passwordToken,
+                }),
+                token: publicCollectionGalleryContext.accessedThroughSharedURL
+                    ? publicCollectionGalleryContext.token
+                    : galleryContext.token,
+            }
         );
 
         if (isElectron() && ImportService.checkAllElectronAPIsExists()) {
@@ -238,7 +251,8 @@ export default function Uploader(props: Props) {
             handleCollectionCreationAndUpload(
                 importSuggestion,
                 props.isFirstUpload,
-                pickedUploadType.current
+                pickedUploadType.current,
+                publicCollectionGalleryContext.accessedThroughSharedURL
             );
             pickedUploadType.current = null;
             props.setLoading(false);
@@ -259,7 +273,7 @@ export default function Uploader(props: Props) {
     };
 
     const preCollectionCreationAction = async () => {
-        props.closeCollectionSelector();
+        props.closeCollectionSelector?.();
         props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
         setUploadStage(UPLOAD_STAGES.START);
         setUploadProgressView(true);
@@ -500,8 +514,13 @@ export default function Uploader(props: Props) {
     const handleCollectionCreationAndUpload = (
         importSuggestion: ImportSuggestion,
         isFirstUpload: boolean,
-        pickedUploadType: PICKED_UPLOAD_TYPE
+        pickedUploadType: PICKED_UPLOAD_TYPE,
+        accessedThroughSharedURL?: boolean
     ) => {
+        if (accessedThroughSharedURL) {
+            uploadFilesToExistingCollection(props.uploadCollection);
+            return;
+        }
         if (isPendingDesktopUpload.current) {
             isPendingDesktopUpload.current = false;
             if (pendingDesktopUploadCollectionName.current) {

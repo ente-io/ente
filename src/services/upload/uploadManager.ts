@@ -27,6 +27,7 @@ import {
     MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    PublicUploadProps,
 } from 'types/upload';
 import {
     UPLOAD_RESULT,
@@ -42,6 +43,10 @@ import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
+import {
+    getLocalPublicFiles,
+    getPublicCollectionUID,
+} from 'services/publicCollectionService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -58,12 +63,18 @@ class UploadManager {
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
+    private publicUploadProps: PublicUploadProps;
 
-    public async init(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
+    public async init(
+        progressUpdater: ProgressUpdater,
+        setFiles: SetFiles,
+        publicCollectProps: PublicUploadProps
+    ) {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
+        this.publicUploadProps = publicCollectProps;
     }
 
     public isUploadRunning() {
@@ -89,10 +100,18 @@ class UploadManager {
     }
 
     async updateExistingFilesAndCollections(collections: Collection[]) {
-        this.existingFiles = await getLocalFiles();
-        this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
-            this.existingFiles
-        );
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            this.existingFiles = await getLocalPublicFiles(
+                getPublicCollectionUID(this.publicUploadProps.token)
+            );
+            this.userOwnedNonTrashedExistingFiles = this.existingFiles;
+        } else {
+            this.existingFiles = await getLocalFiles();
+            this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
+                this.existingFiles
+            );
+        }
+        console.log(this.existingFiles);
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
         );
@@ -376,6 +395,7 @@ class UploadManager {
 
         UIService.reset(mediaFiles.length);
 
+        UploadService.setPublicUploadProps(this.publicUploadProps);
         await UploadService.setFileCount(mediaFiles.length);
 
         UIService.setUploadStage(UPLOAD_STAGES.UPLOADING);
