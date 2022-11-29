@@ -519,7 +519,7 @@ function PhotoViewer(props: Iprops) {
 
                             <button
                                 className="pswp__button pswp__button--close"
-                                title={constants.CLOSE}
+                                title={constants.CLOSE_OPTION}
                             />
 
                             {props.enableDownload && (
