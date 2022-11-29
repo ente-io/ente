@@ -47,57 +47,59 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     //todo : restrict width of column
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 200),
-      child: _showBottomActionBar
-          ? Container(
-              padding: const EdgeInsets.only(top: 4, bottom: 36),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ExpandableNotifier(
-                    controller: _expandableController,
-                    child: ExpandablePanel(
-                      theme: getExpandableTheme(context),
-                      header: Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: widget.text == null ? 12 : 0,
-                        ),
-                        child: ActionBarWidget(
-                          text: widget.text,
-                          iconButtons: _iconButtons(),
-                        ),
-                      ),
-                      expanded: widget.expandedMenu,
-                      collapsed: const SizedBox.shrink(),
-                      controller: _expandableController,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      //unselect all files here
-                      //or collapse the expansion panel
-                      _expandableController.value = false;
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Cancel",
-                          style: textTheme.bodyBold
-                              .copyWith(color: colorScheme.blurTextBase),
-                        ),
-                      ),
-                    ),
-                  )
-                ],
+    return Container(
+      color: Colors.white,
+      padding: EdgeInsets.only(
+        top: 4,
+        bottom: !_expandableController.expanded &&
+                ((widget.selectedFiles?.files.isNotEmpty) ?? false)
+            ? 24
+            : 36,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ExpandableNotifier(
+            controller: _expandableController,
+            child: ExpandablePanel(
+              theme: getExpandableTheme(context),
+              header: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: widget.text == null ? 12 : 0,
+                ),
+                child: ActionBarWidget(
+                  text: widget.text,
+                  iconButtons: _iconButtons(),
+                ),
               ),
-            )
-          : const SizedBox.shrink(),
+              expanded: widget.expandedMenu,
+              collapsed: const SizedBox.shrink(),
+              controller: _expandableController,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              //unselect all files here
+              //or collapse the expansion panel
+              _expandableController.value = false;
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              child: Center(
+                child: Text(
+                  "Cancel",
+                  style: textTheme.bodyBold
+                      .copyWith(color: colorScheme.blurTextBase),
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
     );
   }
 

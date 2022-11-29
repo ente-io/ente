@@ -10,19 +10,19 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
+import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
-import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
-class CollectionPage extends StatelessWidget {
+class CollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
   final String tagPrefix;
   final GalleryType appBarType;
-  final _selectedFiles = SelectedFiles();
   final bool hasVerifiedLock;
 
-  CollectionPage(
+  const CollectionPage(
     this.c, {
     this.tagPrefix = "collection",
     this.appBarType = GalleryType.ownedCollection,
@@ -31,16 +31,37 @@ class CollectionPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<CollectionPage> createState() => _CollectionPageState();
+}
+
+class _CollectionPageState extends State<CollectionPage> {
+  final _selectedFiles = SelectedFiles();
+
+  final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
+  @override
+  void initState() {
+    _selectedFiles.addListener(_selectedFilesListener);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _selectedFiles.removeListener(_selectedFilesListener);
+    super.dispose();
+  }
+
+  @override
   Widget build(Object context) {
-    if (hasVerifiedLock == false && c.collection.isHidden()) {
+    if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
       return const EmptyState();
     }
-    final initialFiles = c.thumbnail != null ? [c.thumbnail] : null;
+    final initialFiles =
+        widget.c.thumbnail != null ? [widget.c.thumbnail] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result =
             await FilesDB.instance.getFilesInCollection(
-          c.collection.id,
+          widget.c.collection.id,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -57,38 +78,72 @@ class CollectionPage extends StatelessWidget {
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == c.collection.id),
+          .where((event) => event.collectionID == widget.c.collection.id),
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: tagPrefix,
+      tagPrefix: widget.tagPrefix,
       selectedFiles: _selectedFiles,
       initialFiles: initialFiles,
-      albumName: c.collection.name,
+      albumName: widget.c.collection.name,
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          appBarType,
-          c.collection.name,
+          widget.appBarType,
+          widget.c.collection.name,
           _selectedFiles,
-          collection: c.collection,
+          collection: widget.c.collection,
         ),
       ),
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          GalleryOverlayWidget(
-            appBarType,
-            _selectedFiles,
-            collection: c.collection,
+          // GalleryOverlayWidget(
+          //   appBarType,
+          //   _selectedFiles,
+          //   collection: c.collection,
+          // ),
+          ValueListenableBuilder(
+            valueListenable: _bottomPosition,
+            builder: (context, value, child) {
+              return AnimatedPositioned(
+                curve: Curves.easeInOutExpo,
+                bottom: _bottomPosition.value,
+                right: 0,
+                left: 0,
+                duration: const Duration(milliseconds: 200),
+                child: BottomActionBarWidget(
+                  selectedFiles: _selectedFiles,
+                  showBottomActionBarByDefault: false,
+                  expandedMenu: const SizedBox(height: 150),
+                  text: "3 selected",
+                  iconButtons: const [
+                    IconButtonWidget(
+                      icon: Icons.delete_outlined,
+                      iconButtonType: IconButtonType.primary,
+                    ),
+                    IconButtonWidget(
+                      icon: Icons.ios_share_outlined,
+                      iconButtonType: IconButtonType.primary,
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ],
       ),
     );
+  }
+
+  _selectedFilesListener() {
+    _selectedFiles.files.isNotEmpty
+        ? _bottomPosition.value = 0.0
+        : _bottomPosition.value = -150.0;
   }
 }
