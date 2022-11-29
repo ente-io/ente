@@ -38,6 +38,13 @@ import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import Typography from '@mui/material/Typography';
+import Uploader from 'components/Upload/Uploader';
+import { LoadingOverlay } from 'components/LoadingOverlay';
+import FullScreenDropZone from 'components/FullScreenDropZone';
+import useFileInput from 'hooks/useFileInput';
+import { useDropzone } from 'react-dropzone';
+import UploadSelectorInputs from 'components/UploadSelectorInputs';
+import { logoutUser } from 'services/userService';
 import UploadButton from 'components/Upload/UploadButton';
 
 const Loader = () => (
@@ -70,6 +77,34 @@ export default function PublicCollectionGallery() {
 
     const [photoListFooter, setPhotoListFooter] =
         useState<TimeStampListItem>(null);
+
+    const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
+    const [blockingLoad, setBlockingLoad] = useState(false);
+    const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+
+    const {
+        getRootProps: getDragAndDropRootProps,
+        getInputProps: getDragAndDropInputProps,
+        acceptedFiles: dragAndDropFiles,
+    } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        disabled: shouldDisableDropzone,
+    });
+    const {
+        selectedFiles: webFileSelectorFiles,
+        open: openFileSelector,
+        getInputProps: getFileSelectorInputProps,
+    } = useFileInput({
+        directory: false,
+    });
+    const {
+        selectedFiles: webFolderSelectorFiles,
+        open: openFolderSelector,
+        getInputProps: getFolderSelectorInputProps,
+    } = useFileInput({
+        directory: true,
+    });
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -152,7 +187,7 @@ export default function PublicCollectionGallery() {
                 item: (
                     <CenteredFlex>
                         <UploadButton
-                            openUploader={() => {}}
+                            openUploader={openUploader}
                             text={constants.ADD_MORE_PHOTOS}
                             color="accent"
                         />
@@ -217,7 +252,7 @@ export default function PublicCollectionGallery() {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
                         ? constants.LINK_TOO_MANY_REQUESTS
-                        : constants.LINK_EXPIRED
+                        : constants.LINK_EXPIRED_MESSAGE
                 );
                 // share has been disabled
                 // local cache should be cleared
@@ -315,6 +350,23 @@ export default function PublicCollectionGallery() {
         }
     }
 
+    const openUploader = () => {
+        setUploadTypeSelectorView(true);
+    };
+
+    const showPublicLinkExpiredMessage = () =>
+        appContext.setDialogMessage({
+            title: constants.LINK_EXPIRED,
+            content: constants.LINK_EXPIRED_MESSAGE,
+
+            nonClosable: true,
+            proceed: {
+                text: constants.LOGIN,
+                action: logoutUser,
+                variant: 'accent',
+            },
+        });
+
     return (
         <PublicCollectionGalleryContext.Provider
             value={{
@@ -325,29 +377,62 @@ export default function PublicCollectionGallery() {
                 photoListHeader,
                 photoListFooter,
             }}>
-            <SharedAlbumNavbar
-                showUploadButton={
-                    publicCollection?.publicURLs?.[0]?.enableCollect
-                }
-                openUploader={() => {}}
-            />
-            <PhotoFrame
-                files={publicFiles}
-                syncWithRemote={syncWithRemote}
-                setSelected={() => null}
-                selected={{ count: 0, collectionID: null }}
-                isFirstLoad={true}
-                activeCollection={ALL_SECTION}
-                isSharedCollection
-                enableDownload={
-                    publicCollection?.publicURLs?.[0]?.enableDownload ?? true
-                }
-            />
-            <AbuseReportForm
-                show={abuseReportFormView}
-                close={closeReportForm}
-                url={url.current}
-            />
+            <FullScreenDropZone
+                getDragAndDropRootProps={getDragAndDropRootProps}>
+                <UploadSelectorInputs
+                    getDragAndDropInputProps={getDragAndDropInputProps}
+                    getFileSelectorInputProps={getFileSelectorInputProps}
+                    getFolderSelectorInputProps={getFolderSelectorInputProps}
+                />
+                <SharedAlbumNavbar
+                    showUploadButton={
+                        publicCollection?.publicURLs?.[0]?.enableCollect
+                    }
+                    openUploader={openUploader}
+                />
+                <PhotoFrame
+                    files={publicFiles}
+                    syncWithRemote={syncWithRemote}
+                    setSelected={() => null}
+                    selected={{ count: 0, collectionID: null }}
+                    isFirstLoad={true}
+                    activeCollection={ALL_SECTION}
+                    isSharedCollection
+                    enableDownload={
+                        publicCollection?.publicURLs?.[0]?.enableDownload ??
+                        true
+                    }
+                />
+                <AbuseReportForm
+                    show={abuseReportFormView}
+                    close={closeReportForm}
+                    url={url.current}
+                />
+                {blockingLoad && (
+                    <LoadingOverlay>
+                        <EnteSpinner />
+                    </LoadingOverlay>
+                )}
+                <Uploader
+                    syncWithRemote={syncWithRemote}
+                    closeUploadTypeSelector={setUploadTypeSelectorView.bind(
+                        null,
+                        false
+                    )}
+                    collection={publicCollection}
+                    setLoading={setBlockingLoad}
+                    setShouldDisableDropzone={setShouldDisableDropzone}
+                    setFiles={setPublicFiles}
+                    webFileSelectorFiles={webFileSelectorFiles}
+                    webFolderSelectorFiles={webFolderSelectorFiles}
+                    dragAndDropFiles={dragAndDropFiles}
+                    uploadTypeSelectorView={uploadTypeSelectorView}
+                    showUploadFilesDialog={openFileSelector}
+                    showUploadDirsDialog={openFolderSelector}
+                    showSessionExpiredMessage={showPublicLinkExpiredMessage}
+                    zipUploadDisabled
+                />
+            </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
     );
 }
