@@ -89,7 +89,7 @@ function PhotoViewer(props: Iprops) {
     );
     const appContext = useContext(AppContext);
 
-    const showCopyOption = useRef(isClipboardItemPresent());
+    const [shouldShowCopyOption] = useState(isClipboardItemPresent());
 
     useEffect(() => {
         if (!pswpElement) return;
@@ -106,9 +106,9 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         if (!photoSwipe) return;
-        // function handleCopyEvent() {
-        //     copyToClipboardHelper(photoSwipe.currItem as EnteFile);
-        // }
+        function handleCopyEvent() {
+            copyToClipboardHelper(photoSwipe.currItem as EnteFile);
+        }
 
         function handleKeyUp(event: KeyboardEvent) {
             if (!isOpen) {
@@ -148,10 +148,14 @@ function PhotoViewer(props: Iprops) {
         }
 
         window.addEventListener('keyup', handleKeyUp);
-        // window.addEventListener('copy', handleCopyEvent);
+        if (shouldShowCopyOption) {
+            window.addEventListener('copy', handleCopyEvent);
+        }
         return () => {
             window.removeEventListener('keyup', handleKeyUp);
-            // window.removeEventListener('copy', handleCopyEvent);
+            if (shouldShowCopyOption) {
+                window.removeEventListener('copy', handleCopyEvent);
+            }
         };
     }, [isOpen, photoSwipe, showInfo]);
 
@@ -430,7 +434,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const copyToClipboardHelper = async (file: EnteFile) => {
-        if (props.enableDownload && showCopyOption?.current) {
+        if (props.enableDownload && shouldShowCopyOption) {
             appContext.startLoading();
             await copyFileToClipboard(file.src);
             appContext.finishLoading();
@@ -497,7 +501,7 @@ function PhotoViewer(props: Iprops) {
                                     <DownloadIcon fontSize="small" />
                                 </button>
                             )}
-                            {props.enableDownload && showCopyOption?.current && (
+                            {props.enableDownload && shouldShowCopyOption && (
                                 <button
                                     className="pswp__button pswp__button--custom"
                                     title={constants.COPY_OPTION}
