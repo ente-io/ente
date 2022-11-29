@@ -9,6 +9,8 @@ import { buildContextMenu, buildMenuBar } from './menu';
 import autoLauncher from '../services/autoLauncher';
 import { getHideDockIconPreference } from '../services/userPreference';
 import { setupAutoUpdater } from '../services/appUpdater';
+import ElectronLog from 'electron-log';
+import os from 'os';
 
 export function handleUpdates(mainWindow: BrowserWindow) {
     if (!isDev) {
@@ -97,4 +99,11 @@ export async function handleDockIconHideOnAutoLaunch() {
 
 export function enableSharedArrayBufferSupport() {
     app.commandLine.appendSwitch('enable-features', 'SharedArrayBuffer');
+}
+
+export function logSystemInfo() {
+    const systemVersion = process.getSystemVersion();
+    const osName = process.platform;
+    const osRelease = os.release();
+    ElectronLog.info({ osName, osRelease, systemVersion });
 }

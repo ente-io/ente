@@ -12,6 +12,7 @@ import {
 import fetch from 'node-fetch';
 import { isPlatformMac } from '../utils/main';
 import { logErrorSentry } from './sentry';
+import ElectronLog from 'electron-log';
 
 const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 const ONE_DAY_IN_MICROSECOND = 1 * 24 * 60 * 60 * 1000;
@@ -93,6 +94,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
 }
 
 export function updateAndRestart() {
+    ElectronLog.log('user quit the app');
     setIsAppQuitting(true);
     autoUpdater.quitAndInstall();
 }

@@ -12,15 +12,13 @@ try {
   process.exit(1);
 }
 
-const VERSION = /\bv?(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)(?:-[\da-z-]+(?:\.[\da-z-]+)*)?(?:\+[\da-z-]+(?:\.[\da-z-]+)*)?\b/i;
 const SYMBOL_CACHE_FOLDER = '.electron-symbols';
-const package = require('./package.json');
 const sentryCli = new SentryCli('./sentry.properties');
 
 async function main() {
-  let version = getElectronVersion();
+  const version = getElectronVersion();
   if (!version) {
-    console.error('Cannot detect electron version, check package.json');
+    console.error('Cannot detect electron version, check that electron is installed');
     return;
   }
 
@@ -68,20 +66,11 @@ async function main() {
 }
 
 function getElectronVersion() {
-  if (!package) {
-    return false;
+  try {
+    return require('electron/package.json').version;
+  } catch (error) {
+    return undefined;
   }
-
-  let electronVersion =
-    (package.dependencies && package.dependencies.electron) ||
-    (package.devDependencies && package.devDependencies.electron);
-
-  if (!electronVersion) {
-    return false;
-  }
-
-  const matches = VERSION.exec(electronVersion);
-  return matches ? matches[0] : false;
 }
 
 async function downloadSymbols(options) {

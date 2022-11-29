@@ -12,6 +12,7 @@ import {
 import { setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
 import { isPlatformMac } from './main';
+import ElectronLog from 'electron-log';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -76,6 +77,7 @@ export function buildContextMenu(
         {
             label: 'Quit ente',
             click: function () {
+                ElectronLog.log('user quit the app');
                 setIsAppQuitting(true);
                 app.quit();
             },
@@ -201,6 +203,7 @@ export async function buildMenuBar(): Promise<Menu> {
         {
             label: 'Window',
             submenu: [
+                { role: 'close', label: 'Close' },
                 { role: 'minimize', label: 'Minimize' },
                 ...((isMac
                     ? [
@@ -209,9 +212,7 @@ export async function buildMenuBar(): Promise<Menu> {
                           { type: 'separator' },
                           { role: 'window', label: 'ente' },
                       ]
-                    : [
-                          { role: 'close', label: 'Close ente' },
-                      ]) as MenuItemConstructorOptions[]),
+                    : []) as MenuItemConstructorOptions[]),
             ],
         },
         {
