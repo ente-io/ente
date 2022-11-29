@@ -4,7 +4,11 @@ import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import semVerCmp from 'semver-compare';
 import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
-import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
+import {
+    getSkipAppVersion,
+    setMuteUpdateNotificationVersion,
+    setSkipAppVersion,
+} from './userPreference';
 import fetch from 'node-fetch';
 import { isPlatformMac } from '../utils/main';
 import { logErrorSentry } from './sentry';
@@ -97,8 +101,12 @@ export function getAppVersion() {
     return `v${app.getVersion()}`;
 }
 
-export function skipAppVersion(version: string) {
+export function skipAppUpdate(version: string) {
     setSkipAppVersion(version);
+}
+
+export function muteUpdateNotification(version: string) {
+    setMuteUpdateNotificationVersion(version);
 }
 
 async function getDesktopCutoffVersion() {

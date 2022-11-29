@@ -8,6 +8,9 @@ const userPreferencesSchema: Schema<UserPreferencesType> = {
     skipAppVersion: {
         type: 'string',
     },
+    muteUpdateNotificationVersion: {
+        type: 'string',
+    },
 };
 
 export const userPreferencesStore = new Store({
