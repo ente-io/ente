@@ -49,7 +49,7 @@ export function ManageDownloadAccess({
         <Box>
             <Typography mb={0.5}>{constants.FILE_DOWNLOAD}</Typography>
             <PublicShareSwitch
-                checked={publicShareProp?.enableDownload ?? false}
+                checked={publicShareProp?.enableDownload ?? true}
                 onChange={handleFileDownloadSetting}
             />
         </Box>
