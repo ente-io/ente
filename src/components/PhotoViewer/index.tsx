@@ -240,7 +240,6 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         exifCopy.current = exif;
-        console.log(exif);
     }, [exif]);
 
     function updateFavButton(file: EnteFile) {
@@ -416,16 +415,12 @@ function PhotoViewer(props: Iprops) {
 
     const checkExifAvailable = async (file: EnteFile) => {
         try {
-            console.log('checkExifAvailable', file.src);
             if (exifExtractionInProgress.current === file.src) {
-                console.log('already in process');
                 return;
             }
             try {
                 if (file.isSourceLoaded) {
-                    console.log('starting processing');
                     exifExtractionInProgress.current = file.src;
-                    console.log(file.originalImageURL);
                     const imageBlob = await (
                         await fetch(file.originalImageURL)
                     ).blob();
@@ -433,20 +428,15 @@ function PhotoViewer(props: Iprops) {
                         string,
                         any
                     >;
-                    console.log({ exifData });
-                    console.log(exifExtractionInProgress, file.src);
                     if (exifExtractionInProgress.current === file.src) {
                         if (exifData) {
-                            console.log('set extracted metadata');
                             setExif({ key: file.src, value: exifData });
                         } else {
-                            console.log("doesn't have metadata");
                             setExif({ key: file.src, value: null });
                         }
                     }
                 }
             } finally {
-                console.log('cleared exifExtractionInProgress');
                 exifExtractionInProgress.current = null;
             }
         } catch (e) {

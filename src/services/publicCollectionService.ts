@@ -200,7 +200,6 @@ export const syncPublicFiles = async (
             const parsedError = parseSharingErrorCodes(e);
             logError(e, 'failed to sync shared collection files');
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                console.log('invalid token or password');
                 throw e;
             }
         }
