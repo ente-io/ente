@@ -680,6 +680,13 @@ const englishConstants = {
             </p>
         </>
     ),
+    ENABLE_PUBLIC_COLLECT: 'Enable Collect',
+    ENABLE_PUBLIC_COLLECT_MESSAGE: () => (
+        <>
+            <p>Are you sure that you want to enable the public collect? </p>{' '}
+            <p>Uploaded files will be counted towards your storage</p>
+        </>
+    ),
     ABUSE_REPORT: 'Abuse report',
     ABUSE_REPORT_BUTTON_TEXT: 'Report abuse?',
     MALICIOUS_CONTENT: 'Contains malicious content',
