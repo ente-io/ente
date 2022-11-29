@@ -7,13 +7,22 @@ import { UploadTypeOption } from './option';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import { Box, Dialog, Stack, Typography } from '@mui/material';
 
+interface Iprops {
+    onHide: () => void;
+    show: boolean;
+    uploadFiles: () => void;
+    uploadFolders: () => void;
+    uploadGoogleTakeoutZips: () => void;
+    hideZipUploadOption?: boolean;
+}
 export default function UploadTypeSelector({
     onHide,
     show,
     uploadFiles,
     uploadFolders,
     uploadGoogleTakeoutZips,
-}) {
+    hideZipUploadOption,
+}: Iprops) {
     return (
         <Dialog
             open={show}
@@ -40,11 +49,13 @@ export default function UploadTypeSelector({
                         startIcon={<FolderUploadIcon />}>
                         {constants.UPLOAD_DIRS}
                     </UploadTypeOption>
-                    <UploadTypeOption
-                        onClick={uploadGoogleTakeoutZips}
-                        startIcon={<GoogleIcon />}>
-                        {constants.UPLOAD_GOOGLE_TAKEOUT}
-                    </UploadTypeOption>
+                    {!hideZipUploadOption && (
+                        <UploadTypeOption
+                            onClick={uploadGoogleTakeoutZips}
+                            startIcon={<GoogleIcon />}>
+                            {constants.UPLOAD_GOOGLE_TAKEOUT}
+                        </UploadTypeOption>
+                    )}
                 </Stack>
                 <Typography p={1.5} pt={4} color="text.secondary">
                     {constants.DRAG_AND_DROP_HINT}

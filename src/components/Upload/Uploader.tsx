@@ -55,16 +55,16 @@ const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    closeCollectionSelector: () => void;
+    closeCollectionSelector?: () => void;
     closeUploadTypeSelector: () => void;
-    setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setCollectionSelectorAttributes?: SetCollectionSelectorAttributes;
+    setCollectionNamerAttributes?: SetCollectionNamerAttributes;
     setLoading: SetLoading;
     setShouldDisableDropzone: (value: boolean) => void;
-    showCollectionSelector: () => void;
+    showCollectionSelector?: () => void;
     setFiles: SetFiles;
-    setCollections: SetCollections;
-    isFirstUpload: boolean;
+    setCollections?: SetCollections;
+    isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
     showUploadFilesDialog: () => void;
@@ -72,6 +72,8 @@ interface Props {
     webFolderSelectorFiles: File[];
     webFileSelectorFiles: File[];
     dragAndDropFiles: File[];
+    zipUploadDisabled?: boolean;
+    collection?: Collection;
 }
 
 export default function Uploader(props: Props) {
@@ -599,6 +601,7 @@ export default function Uploader(props: Props) {
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}
+                hideZipUploadOption={props.zipUploadDisabled}
             />
             <UploadProgress
                 open={uploadProgressView}
