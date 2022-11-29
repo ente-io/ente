@@ -17,7 +17,10 @@ import { CustomError } from 'utils/error';
 import QueueProcessor from './queueProcessor';
 
 class PublicCollectionDownloadManager {
-    private fileObjectURLPromise = new Map<string, Promise<string[]>>();
+    private fileObjectURLPromise = new Map<
+        string,
+        Promise<{ original: string[]; converted: string[] }>
+    >();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
 
     private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(5);
@@ -121,12 +124,11 @@ class PublicCollectionDownloadManager {
                 if (forPreview) {
                     return await getRenderableFileURL(file, fileBlob);
                 } else {
-                    return [
-                        await createTypedObjectURL(
-                            fileBlob,
-                            file.metadata.title
-                        ),
-                    ];
+                    const fileURL = await createTypedObjectURL(
+                        fileBlob,
+                        file.metadata.title
+                    );
+                    return { converted: [fileURL], original: [fileURL] };
                 }
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {

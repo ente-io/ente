@@ -425,7 +425,10 @@ function PhotoViewer(props: Iprops) {
                 if (file.isSourceLoaded) {
                     console.log('starting processing');
                     exifExtractionInProgress.current = file.src;
-                    const imageBlob = await (await fetch(file.src)).blob();
+                    console.log(file.originalImageURL);
+                    const imageBlob = await (
+                        await fetch(file.originalImageURL)
+                    ).blob();
                     const exifData = (await exifr.parse(imageBlob)) as Record<
                         string,
                         any

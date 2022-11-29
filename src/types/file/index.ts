@@ -55,6 +55,8 @@ export interface EnteFile {
     isTrashed?: boolean;
     deleteBy?: number;
     isSourceLoaded?: boolean;
+    originalVideoURL?: string;
+    originalImageURL?: string;
     dataIndex: number;
     updationTime: number;
 }
