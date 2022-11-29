@@ -237,8 +237,8 @@ function PhotoViewer(props: Iprops) {
         exifCopy.current = exif;
     }, [exif]);
 
-    function updateFavButton(photoSwipe: Photoswipe<Photoswipe.Options>) {
-        setIsFav(isInFav(photoSwipe?.currItem as EnteFile));
+    function updateFavButton(file: EnteFile) {
+        setIsFav(isInFav(file));
     }
 
     const openPhotoSwipe = () => {
@@ -311,7 +311,7 @@ function PhotoViewer(props: Iprops) {
             }
             setExif(undefined);
             checkExifAvailable(currItem.id);
-            updateFavButton(photoSwipe);
+            updateFavButton(currItem);
         });
         photoSwipe.listen('resize', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
@@ -345,7 +345,7 @@ function PhotoViewer(props: Iprops) {
         }
         handleCloseInfo();
     };
-    const isInFav = (file) => {
+    const isInFav = (file: EnteFile) => {
         const { favItemIds } = props;
         if (favItemIds && file) {
             return favItemIds.has(file.id);
@@ -353,7 +353,7 @@ function PhotoViewer(props: Iprops) {
         return false;
     };
 
-    const onFavClick = async (file) => {
+    const onFavClick = async (file: EnteFile) => {
         const { favItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
@@ -578,7 +578,9 @@ function PhotoViewer(props: Iprops) {
                                         }
                                         className="pswp__button pswp__button--custom"
                                         onClick={() => {
-                                            onFavClick(photoSwipe?.currItem);
+                                            onFavClick(
+                                                photoSwipe?.currItem as EnteFile
+                                            );
                                         }}>
                                         {isFav ? (
                                             <FavoriteIcon fontSize="small" />
