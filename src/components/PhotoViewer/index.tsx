@@ -630,6 +630,7 @@ function PhotoViewer(props: Iprops) {
                 </div>
             </div>
             <FileInfo
+                isTrashCollection={props.isTrashCollection}
                 shouldDisableEdits={props.isSharedCollection}
                 showInfo={showInfo}
                 handleCloseInfo={handleCloseInfo}
