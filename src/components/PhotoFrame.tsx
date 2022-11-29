@@ -199,9 +199,16 @@ const PhotoFrame = ({
     }, [files]);
 
     const collectionNameMap = useMemo(() => {
-        return new Map<number, string>(
-            collections.map((collection) => [collection.id, collection.name])
-        );
+        if (collections) {
+            return new Map<number, string>(
+                collections.map((collection) => [
+                    collection.id,
+                    collection.name,
+                ])
+            );
+        } else {
+            return new Map();
+        }
     }, [collections]);
 
     useEffect(() => {
