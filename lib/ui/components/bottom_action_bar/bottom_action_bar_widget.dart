@@ -15,12 +15,14 @@ class BottomActionBarWidget extends StatefulWidget {
   final Widget expandedMenu;
   final bool showBottomActionBarByDefault;
   final SelectedFiles? selectedFiles;
+  final VoidCallback? onCancel;
   const BottomActionBarWidget({
     required this.expandedMenu,
     required this.showBottomActionBarByDefault,
     this.selectedFiles,
     this.text,
     this.iconButtons,
+    this.onCancel,
     super.key,
   });
 
@@ -55,12 +57,13 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
         filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
         child: Container(
           color: colorScheme.backdropBase,
-          padding: EdgeInsets.only(
+          padding: const EdgeInsets.only(
             top: 4,
-            bottom: !_expandableController.expanded &&
-                    ((widget.selectedFiles?.files.isNotEmpty) ?? false)
-                ? 24
-                : 36,
+            // bottom: !_expandableController.expanded &&
+            //         ((widget.selectedFiles?.files.isNotEmpty) ?? false)
+            //     ? 24
+            //     : 36,
+            bottom: 24,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -87,6 +90,7 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
                 onTap: () {
                   //unselect all files here
                   //or collapse the expansion panel
+                  widget.onCancel?.call();
                   _expandableController.value = false;
                 },
                 child: Container(

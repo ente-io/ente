@@ -116,12 +116,17 @@ class _CollectionPageState extends State<CollectionPage> {
                 bottom: _bottomPosition.value,
                 right: 0,
                 left: 0,
-                duration: const Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 400),
                 child: BottomActionBarWidget(
                   selectedFiles: _selectedFiles,
                   showBottomActionBarByDefault: false,
                   expandedMenu: const SizedBox(height: 150),
                   text: "3 selected",
+                  onCancel: () {
+                    if (_selectedFiles.files.isNotEmpty) {
+                      _selectedFiles.clearAll();
+                    }
+                  },
                   iconButtons: const [
                     IconButtonWidget(
                       icon: Icons.delete_outlined,
