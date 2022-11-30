@@ -9,16 +9,14 @@ import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 
-class BottomActionBarWidget extends StatefulWidget {
+class BottomActionBarWidget extends StatelessWidget {
   final String? text;
   final List<Widget>? iconButtons;
   final Widget expandedMenu;
-  final bool showBottomActionBarByDefault;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
-  const BottomActionBarWidget({
+  BottomActionBarWidget({
     required this.expandedMenu,
-    required this.showBottomActionBarByDefault,
     this.selectedFiles,
     this.text,
     this.iconButtons,
@@ -26,27 +24,10 @@ class BottomActionBarWidget extends StatefulWidget {
     super.key,
   });
 
-  @override
-  State<BottomActionBarWidget> createState() => _BottomActionBarWidgetState();
-}
-
-class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
-  late bool _showBottomActionBar; //need to use this
   final ExpandableController _expandableController =
       ExpandableController(initialExpanded: false);
-  @override
-  void initState() {
-    _showBottomActionBar = widget.showBottomActionBarByDefault;
-    widget.selectedFiles?.addListener(_selectedFilesListener);
-    super.initState();
-  }
 
   @override
-  void dispose() {
-    widget.selectedFiles?.removeListener(_selectedFilesListener);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
@@ -74,14 +55,14 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
                   theme: getExpandableTheme(context),
                   header: Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: widget.text == null ? 12 : 0,
+                      horizontal: text == null ? 12 : 0,
                     ),
                     child: ActionBarWidget(
-                      text: widget.text,
+                      text: text,
                       iconButtons: _iconButtons(),
                     ),
                   ),
-                  expanded: widget.expandedMenu,
+                  expanded: expandedMenu,
                   collapsed: const SizedBox.shrink(),
                   controller: _expandableController,
                 ),
@@ -90,7 +71,7 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
                 onTap: () {
                   //unselect all files here
                   //or collapse the expansion panel
-                  widget.onCancel?.call();
+                  onCancel?.call();
                   _expandableController.value = false;
                 },
                 child: Container(
@@ -116,24 +97,12 @@ class _BottomActionBarWidgetState extends State<BottomActionBarWidget> {
   }
 
   List<Widget> _iconButtons() {
-    final iconButtons = <Widget?>[
-      ...?widget.iconButtons,
+    final iconButtonsWithExpansionIcon = <Widget?>[
+      ...?iconButtons,
       ExpansionIconWidget(expandableController: _expandableController)
     ];
-    iconButtons.removeWhere((element) => element == null);
-    return iconButtons as List<Widget>;
-  }
-
-  _selectedFilesListener() {
-    if (mounted) {
-      setState(() {
-        if (widget.selectedFiles!.files.isNotEmpty) {
-          _showBottomActionBar = true;
-        } else {
-          _showBottomActionBar = false;
-        }
-      });
-    }
+    iconButtonsWithExpansionIcon.removeWhere((element) => element == null);
+    return iconButtonsWithExpansionIcon as List<Widget>;
   }
 }
 

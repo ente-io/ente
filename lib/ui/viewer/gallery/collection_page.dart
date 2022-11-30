@@ -119,7 +119,6 @@ class _CollectionPageState extends State<CollectionPage> {
                 duration: const Duration(milliseconds: 400),
                 child: BottomActionBarWidget(
                   selectedFiles: _selectedFiles,
-                  showBottomActionBarByDefault: false,
                   expandedMenu: const SizedBox(height: 150),
                   text: "3 selected",
                   onCancel: () {
