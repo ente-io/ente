@@ -7,7 +7,6 @@ import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/settings/common_settings.dart';
 
 class BottomActionBarWidget extends StatelessWidget {
   final String? text;
@@ -52,7 +51,7 @@ class BottomActionBarWidget extends StatelessWidget {
               ExpandableNotifier(
                 controller: _expandableController,
                 child: ExpandablePanel(
-                  theme: getExpandableTheme(context),
+                  theme: _getExpandableTheme(),
                   header: Padding(
                     padding: EdgeInsets.symmetric(
                       horizontal: text == null ? 12 : 0,
@@ -104,6 +103,17 @@ class BottomActionBarWidget extends StatelessWidget {
     ];
     iconButtonsWithExpansionIcon.removeWhere((element) => element == null);
     return iconButtonsWithExpansionIcon as List<Widget>;
+  }
+
+  ExpandableThemeData _getExpandableTheme() {
+    return const ExpandableThemeData(
+      hasIcon: false,
+      useInkWell: false,
+      tapBodyToCollapse: false,
+      tapBodyToExpand: false,
+      tapHeaderToExpand: false,
+      animationDuration: Duration(milliseconds: 400),
+    );
   }
 }
 
