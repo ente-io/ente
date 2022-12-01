@@ -58,6 +58,7 @@ class BottomActionBarWidget extends StatelessWidget {
                       horizontal: text == null ? 12 : 0,
                     ),
                     child: ActionBarWidget(
+                      selectedFiles: selectedFiles,
                       text: text,
                       iconButtons: _iconButtons(),
                     ),

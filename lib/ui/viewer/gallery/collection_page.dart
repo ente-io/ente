@@ -120,7 +120,7 @@ class _CollectionPageState extends State<CollectionPage> {
                 child: BottomActionBarWidget(
                   selectedFiles: _selectedFiles,
                   expandedMenu: const SizedBox(height: 150),
-                  text: "3 selected",
+                  text: _selectedFiles.files.length.toString() + ' selected',
                   onCancel: () {
                     if (_selectedFiles.files.isNotEmpty) {
                       _selectedFiles.clearAll();
