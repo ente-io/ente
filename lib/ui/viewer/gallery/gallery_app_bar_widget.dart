@@ -255,7 +255,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
-        widget.type == GalleryType.ownedCollection) {
+        widget.type == GalleryType.ownedCollection &&
+        widget.collection?.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
           message: "Share",
