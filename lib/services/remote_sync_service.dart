@@ -279,10 +279,14 @@ class RemoteSyncService {
         localIDsToSync.removeAll(alreadyClaimedLocalIDs);
       }
 
-      if (localIDsToSync.isEmpty || deviceCollection.collectionID == -1) {
+      if (localIDsToSync.isEmpty) {
         continue;
       }
       await _createCollectionForDevicePath(deviceCollection);
+      if (deviceCollection.collectionID == -1) {
+        _logger.finest('DeviceCollection should not be -1 here');
+        continue;
+      }
 
       moreFilesMarkedForBackup = true;
       await _db.setCollectionIDForUnMappedLocalFiles(
@@ -355,6 +359,9 @@ class RemoteSyncService {
     // remove all collectionIDs which are still marked for backup
     oldCollectionIDsForAutoSync.removeAll(newCollectionIDsForAutoSync);
     await removeFilesQueuedForUpload(oldCollectionIDsForAutoSync.toList());
+    if (syncStatusUpdate.values.any((syncStatus) => syncStatus == false)) {
+      Configuration.instance.setSelectAllFoldersForBackup(false).ignore();
+    }
     Bus.instance.fire(
       LocalPhotosUpdatedEvent(<File>[], source: "deviceFolderSync"),
     );

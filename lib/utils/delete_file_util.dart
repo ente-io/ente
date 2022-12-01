@@ -338,7 +338,7 @@ Future<bool> deleteLocalFiles(
     final androidInfo = await DeviceInfoPlugin().androidInfo;
     if (androidInfo.version.sdkInt < android11SDKINT) {
       deletedIDs
-          .addAll(await _deleteLocalFilesInBatches(context, localAssetIDs));
+          .addAll(await deleteLocalFilesInBatches(context, localAssetIDs));
     } else {
       deletedIDs
           .addAll(await _deleteLocalFilesInOneShot(context, localAssetIDs));
@@ -384,7 +384,7 @@ Future<List<String>> _deleteLocalFilesInOneShot(
   return deletedIDs;
 }
 
-Future<List<String>> _deleteLocalFilesInBatches(
+Future<List<String>> deleteLocalFilesInBatches(
   BuildContext context,
   List<String> localIDs,
 ) async {

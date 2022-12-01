@@ -26,7 +26,7 @@ class ToggleSwitchWidget extends StatefulWidget {
 }
 
 class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
-  late bool toggleValue;
+  bool? toggleValue;
   ExecutionState executionState = ExecutionState.idle;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
 
@@ -60,7 +60,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
               activeColor: enteColorScheme.primary400,
               inactiveTrackColor: enteColorScheme.fillMuted,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              value: toggleValue,
+              value: toggleValue ?? false,
               onChanged: (negationOfToggleValue) async {
                 setState(() {
                   toggleValue = negationOfToggleValue;
@@ -96,7 +96,7 @@ class _ToggleSwitchWidgetState extends State<ToggleSwitchWidget> {
                       });
                     }
                   } else {
-                    toggleValue = !toggleValue;
+                    toggleValue = !toggleValue!;
                     executionState = ExecutionState.idle;
                   }
                 });

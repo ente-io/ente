@@ -204,6 +204,8 @@ class FadingBottomBarState extends State<FadingBottomBar> {
                           ),
                           child: Text(
                             widget.file.caption,
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 4,
                             style: getEnteTextTheme(context)
                                 .small
                                 .copyWith(color: textBaseDark),
