@@ -65,6 +65,10 @@ class LocalAuthenticationService {
   }
 
   Future<bool> _isLocalAuthSupportedOnDevice() async {
-    return await LocalAuthentication().isDeviceSupported();
+    try {
+      return await LocalAuthentication().isDeviceSupported();
+    } catch (e) {
+      return false;
+    }
   }
 }

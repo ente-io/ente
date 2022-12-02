@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'package:convert/convert.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -13,7 +14,6 @@ import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 
 class AccountSectionWidget extends StatelessWidget {
   AccountSectionWidget({Key key}) : super(key: key);
@@ -48,7 +48,7 @@ class AccountSectionWidget extends StatelessWidget {
             String recoveryKey;
             try {
               recoveryKey =
-                  Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+                  hex.encode(await Configuration.instance.getRecoveryKey());
             } catch (e) {
               showGenericErrorDialog(context);
               return;

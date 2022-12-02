@@ -1,12 +1,13 @@
 // @dart=2.9
 
+import 'dart:convert';
+
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/settings_section_title.dart';
 import 'package:ente_auth/ui/settings/settings_text_item.dart';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 
 class DebugSectionWidget extends StatelessWidget {
   const DebugSectionWidget({Key key}) : super(key: key);
@@ -48,7 +49,7 @@ class DebugSectionWidget extends StatelessWidget {
               "Key",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(Sodium.bin2base64(Configuration.instance.getKey())),
+            Text(base64Encode(Configuration.instance.getKey())),
             const Padding(padding: EdgeInsets.all(12)),
             const Text(
               "Encrypted Key",

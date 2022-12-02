@@ -11,7 +11,6 @@ import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/email_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
@@ -165,8 +164,8 @@ class DeleteAccountPage extends StatelessWidget {
         return;
       }
       final decryptChallenge = CryptoUtil.openSealSync(
-        Sodium.base642bin(response.encryptedChallenge),
-        Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
+        base64.decode(response.encryptedChallenge),
+        base64.decode(Configuration.instance.getKeyAttributes().publicKey),
         Configuration.instance.getSecretKey(),
       );
       final challengeResponseStr = utf8.decode(decryptChallenge);

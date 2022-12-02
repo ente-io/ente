@@ -11,13 +11,17 @@ class Network {
   late Dio _dio;
 
   Future<void> init() async {
-    await FkUserAgent.init();
+    String userAgent = "";
+    if (Platform.isAndroid || Platform.isIOS) {
+      await FkUserAgent.init();
+      userAgent = FkUserAgent.userAgent ?? "";
+    }
     final packageInfo = await PackageInfo.fromPlatform();
     _dio = Dio(
       BaseOptions(
         connectTimeout: kConnectTimeout,
         headers: {
-          HttpHeaders.userAgentHeader: FkUserAgent.userAgent,
+          HttpHeaders.userAgentHeader: userAgent,
           'X-Client-Version': packageInfo.version,
           'X-Client-Package': packageInfo.packageName,
         },

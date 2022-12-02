@@ -3,6 +3,7 @@ import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:convert/convert.dart';
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/errors.dart';
 import 'package:ente_auth/core/event_bus.dart';
@@ -15,7 +16,6 @@ import 'package:ente_auth/models/private_key_attributes.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -120,6 +120,7 @@ class Configuration {
   }
 
   Future<void> logout({bool autoLogout = false}) async {
+    _logger.info("Logging out");
     await _preferences.clear();
     await _secureStorage.deleteAll(iOptions: _secureStorageOptionsIOS);
     await AuthenticatorDB.instance.clearTable();
@@ -138,8 +139,9 @@ class Configuration {
     final recoveryKey = CryptoUtil.generateKey();
 
     // Encrypt master key and recovery key with each other
-    final encryptedMasterKey = CryptoUtil.encryptSync(masterKey, recoveryKey);
-    final encryptedRecoveryKey = CryptoUtil.encryptSync(recoveryKey, masterKey);
+    final encryptedMasterKey = await CryptoUtil.encrypt(masterKey, recoveryKey);
+    final encryptedRecoveryKey =
+        await CryptoUtil.encrypt(recoveryKey, masterKey);
 
     // Derive a key from the password that will be used to encrypt and
     // decrypt the master key
@@ -151,31 +153,31 @@ class Configuration {
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey, derivedKeyResult.key);
+        await CryptoUtil.encrypt(masterKey, derivedKeyResult.key);
 
     // Generate a public-private keypair and encrypt the latter
     final keyPair = await CryptoUtil.generateKeyPair();
     final encryptedSecretKeyData =
-        CryptoUtil.encryptSync(keyPair.sk, masterKey);
+        await CryptoUtil.encrypt(keyPair.secretKey.extractBytes(), masterKey);
 
     final attributes = KeyAttributes(
-      Sodium.bin2base64(kekSalt),
-      Sodium.bin2base64(encryptedKeyData.encryptedData!),
-      Sodium.bin2base64(encryptedKeyData.nonce!),
-      Sodium.bin2base64(keyPair.pk),
-      Sodium.bin2base64(encryptedSecretKeyData.encryptedData!),
-      Sodium.bin2base64(encryptedSecretKeyData.nonce!),
+      base64Encode(kekSalt),
+      base64Encode(encryptedKeyData.encryptedData!),
+      base64Encode(encryptedKeyData.nonce!),
+      base64Encode(keyPair.publicKey),
+      base64Encode(encryptedSecretKeyData.encryptedData!),
+      base64Encode(encryptedSecretKeyData.nonce!),
       derivedKeyResult.memLimit,
       derivedKeyResult.opsLimit,
-      Sodium.bin2base64(encryptedMasterKey.encryptedData!),
-      Sodium.bin2base64(encryptedMasterKey.nonce!),
-      Sodium.bin2base64(encryptedRecoveryKey.encryptedData!),
-      Sodium.bin2base64(encryptedRecoveryKey.nonce!),
+      base64Encode(encryptedMasterKey.encryptedData!),
+      base64Encode(encryptedMasterKey.nonce!),
+      base64Encode(encryptedRecoveryKey.encryptedData!),
+      base64Encode(encryptedRecoveryKey.nonce!),
     );
     final privateAttributes = PrivateKeyAttributes(
-      Sodium.bin2base64(masterKey),
-      Sodium.bin2hex(recoveryKey),
-      Sodium.bin2base64(keyPair.sk),
+      base64Encode(masterKey),
+      hex.encode(recoveryKey),
+      base64Encode(keyPair.secretKey.extractBytes()),
     );
     return KeyGenResult(attributes, privateAttributes);
   }
@@ -194,14 +196,14 @@ class Configuration {
 
     // Encrypt the key with this derived key
     final encryptedKeyData =
-        CryptoUtil.encryptSync(masterKey!, derivedKeyResult.key);
+        await CryptoUtil.encrypt(masterKey!, derivedKeyResult.key);
 
     final existingAttributes = getKeyAttributes();
 
     return existingAttributes!.copyWith(
-      kekSalt: Sodium.bin2base64(kekSalt),
-      encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
-      keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
+      kekSalt: base64Encode(kekSalt),
+      encryptedKey: base64Encode(encryptedKeyData.encryptedData!),
+      keyDecryptionNonce: base64Encode(encryptedKeyData.nonce!),
       memLimit: derivedKeyResult.memLimit,
       opsLimit: derivedKeyResult.opsLimit,
     );
@@ -220,7 +222,7 @@ class Configuration {
     _logger.info('state validation done');
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
-      Sodium.base642bin(attributes.kekSalt),
+      base64.decode(attributes.kekSalt),
       attributes.memLimit,
       attributes.opsLimit,
     ).onError((e, s) {
@@ -231,33 +233,31 @@ class Configuration {
     _logger.info('user-key done');
     Uint8List key;
     try {
-      key = CryptoUtil.decryptSync(
-        Sodium.base642bin(attributes.encryptedKey),
+      key = await CryptoUtil.decrypt(
+        base64.decode(attributes.encryptedKey),
         kek,
-        Sodium.base642bin(attributes.keyDecryptionNonce),
+        base64.decode(attributes.keyDecryptionNonce),
       );
     } catch (e) {
       _logger.severe('master-key failed, incorrect password?', e);
       throw Exception("Incorrect password");
     }
     _logger.info("master-key done");
-    await setKey(Sodium.bin2base64(key));
-    final secretKey = CryptoUtil.decryptSync(
-      Sodium.base642bin(attributes.encryptedSecretKey),
+    await setKey(base64Encode(key));
+    final secretKey = await CryptoUtil.decrypt(
+      base64.decode(attributes.encryptedSecretKey),
       key,
-      Sodium.base642bin(attributes.secretKeyDecryptionNonce),
+      base64.decode(attributes.secretKeyDecryptionNonce),
     );
     _logger.info("secret-key done");
-    await setSecretKey(Sodium.bin2base64(secretKey));
+    await setSecretKey(base64Encode(secretKey));
     final token = CryptoUtil.openSealSync(
-      Sodium.base642bin(getEncryptedToken()!),
-      Sodium.base642bin(attributes.publicKey),
+      base64.decode(getEncryptedToken()!),
+      base64.decode(attributes.publicKey),
       secretKey,
     );
     _logger.info('appToken done');
-    await setToken(
-      Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe),
-    );
+    await setToken(base64Url.encode(token));
   }
 
   Future<void> recover(String recoveryKey) async {
@@ -274,29 +274,27 @@ class Configuration {
     Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
-        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey),
-        Sodium.hex2bin(recoveryKey),
-        Sodium.base642bin(attributes.masterKeyDecryptionNonce),
+        base64.decode(attributes!.masterKeyEncryptedWithRecoveryKey),
+        Uint8List.fromList(hex.decode(recoveryKey)),
+        base64.decode(attributes.masterKeyDecryptionNonce),
       );
     } catch (e) {
       _logger.severe(e);
       rethrow;
     }
-    await setKey(Sodium.bin2base64(masterKey));
-    final secretKey = CryptoUtil.decryptSync(
-      Sodium.base642bin(attributes.encryptedSecretKey),
+    await setKey(base64Encode(masterKey));
+    final secretKey = await CryptoUtil.decrypt(
+      base64.decode(attributes.encryptedSecretKey),
       masterKey,
-      Sodium.base642bin(attributes.secretKeyDecryptionNonce),
+      base64.decode(attributes.secretKeyDecryptionNonce),
     );
-    await setSecretKey(Sodium.bin2base64(secretKey));
+    await setSecretKey(base64Encode(secretKey));
     final token = CryptoUtil.openSealSync(
-      Sodium.base642bin(getEncryptedToken()!),
-      Sodium.base642bin(attributes.publicKey),
+      base64.decode(getEncryptedToken()!),
+      base64.decode(attributes.publicKey),
       secretKey,
     );
-    await setToken(
-      Sodium.bin2base64(token, variant: Sodium.base64VariantUrlsafe),
-    );
+    await setToken(base64Url.encode(token));
   }
 
   String getHttpEndpoint() {
@@ -400,23 +398,23 @@ class Configuration {
   }
 
   Uint8List? getKey() {
-    return _key == null ? null : Sodium.base642bin(_key!);
+    return _key == null ? null : base64.decode(_key!);
   }
 
   Uint8List? getSecretKey() {
-    return _secretKey == null ? null : Sodium.base642bin(_secretKey!);
+    return _secretKey == null ? null : base64.decode(_secretKey!);
   }
 
   Uint8List? getAuthSecretKey() {
-    return _authSecretKey == null ? null : Sodium.base642bin(_authSecretKey!);
+    return _authSecretKey == null ? null : base64.decode(_authSecretKey!);
   }
 
-  Uint8List getRecoveryKey() {
+  Future<Uint8List> getRecoveryKey() async {
     final keyAttributes = getKeyAttributes()!;
-    return CryptoUtil.decryptSync(
-      Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
-      getKey(),
-      Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce),
+    return CryptoUtil.decrypt(
+      base64.decode(keyAttributes.recoveryKeyEncryptedWithMasterKey),
+      getKey()!,
+      base64.decode(keyAttributes.recoveryKeyDecryptionNonce),
     );
   }
 

@@ -3,6 +3,7 @@
 import 'dart:ui';
 
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:convert/convert.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/event_bus.dart';
@@ -16,7 +17,6 @@ import 'package:ente_auth/ui/common/gradient_button.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/navigation_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
 class VerifyRecoveryPage extends StatefulWidget {
@@ -36,7 +36,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     try {
       final String inputKey = _recoveryKey.text.trim();
       final String recoveryKey =
-          Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+          hex.encode(await Configuration.instance.getRecoveryKey());
       final String recoveryKeyWords = bip39.entropyToMnemonic(recoveryKey);
       if (inputKey == recoveryKey || inputKey == recoveryKeyWords) {
         try {
@@ -97,7 +97,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
     if (hasAuthenticated) {
       String recoveryKey;
       try {
-        recoveryKey = Sodium.bin2hex(Configuration.instance.getRecoveryKey());
+        recoveryKey = hex.encode(await Configuration.instance.getRecoveryKey());
         routeToPage(
           context,
           RecoveryKeyPage(

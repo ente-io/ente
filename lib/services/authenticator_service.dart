@@ -16,7 +16,6 @@ import 'package:ente_auth/models/authenticator/local_auth_entity.dart';
 import 'package:ente_auth/store/authenticator_db.dart';
 import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,9 +54,9 @@ class AuthenticatorService {
     for (LocalAuthEntity e in result) {
       try {
         final decryptedValue = await CryptoUtil.decryptChaCha(
-          Sodium.base642bin(e.encryptedData),
+          base64.decode(e.encryptedData),
           key,
-          Sodium.base642bin(e.header),
+          base64.decode(e.header),
         );
         final hasSynced = !(e.id == null || e.shouldSync);
         entities.add(
@@ -80,8 +79,8 @@ class AuthenticatorService {
       utf8.encode(plainText) as Uint8List,
       key,
     );
-    String encryptedData = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-    String header = Sodium.bin2base64(encryptedKeyData.header!);
+    String encryptedData = base64Encode(encryptedKeyData.encryptedData!);
+    String header = base64Encode(encryptedKeyData.header!);
     final insertedID = await _db.insert(encryptedData, header);
     if (shouldSync) {
       unawaited(sync());
@@ -99,8 +98,8 @@ class AuthenticatorService {
       utf8.encode(plainText) as Uint8List,
       key,
     );
-    String encryptedData = Sodium.bin2base64(encryptedKeyData.encryptedData!);
-    String header = Sodium.bin2base64(encryptedKeyData.header!);
+    String encryptedData = base64Encode(encryptedKeyData.encryptedData!);
+    String header = base64Encode(encryptedKeyData.header!);
     final int affectedRows =
         await _db.updateEntry(generatedID, encryptedData, header);
     assert(
@@ -207,22 +206,22 @@ class AuthenticatorService {
     }
     try {
       final AuthKey response = await _gateway.getKey();
-      final authKey = CryptoUtil.decryptSync(
-        Sodium.base642bin(response.encryptedKey),
-        _config.getKey(),
-        Sodium.base642bin(response.header),
+      final authKey = await CryptoUtil.decrypt(
+        base64.decode(response.encryptedKey),
+        _config.getKey()!,
+        base64.decode(response.header),
       );
-      await _config.setAuthSecretKey(Sodium.bin2base64(authKey));
+      await _config.setAuthSecretKey(base64Encode(authKey));
       return authKey;
     } on AuthenticatorKeyNotFound catch (e) {
       _logger.info("AuthenticatorKeyNotFound generating key ${e.stackTrace}");
       final key = CryptoUtil.generateKey();
-      final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey()!);
+      final encryptedKeyData = await CryptoUtil.encrypt(key, _config.getKey()!);
       await _gateway.createKey(
-        Sodium.bin2base64(encryptedKeyData.encryptedData!),
-        Sodium.bin2base64(encryptedKeyData.nonce!),
+        base64Encode(encryptedKeyData.encryptedData!),
+        base64Encode(encryptedKeyData.nonce!),
       );
-      await _config.setAuthSecretKey(Sodium.bin2base64(key));
+      await _config.setAuthSecretKey(base64Encode(key));
       return key;
     } catch (e, s) {
       _logger.severe("Failed to getOrCreateAuthDataKey", e, s);

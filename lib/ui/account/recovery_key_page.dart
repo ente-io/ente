@@ -208,9 +208,9 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
   }
 
   List<Widget> _saveOptions(BuildContext context, String recoveryKey) {
-    final List<Widget> childrens = [];
+    final List<Widget> children = [];
     if (!_hasTriedToSave) {
-      childrens.add(
+      children.add(
         ElevatedButton(
           style: Theme.of(context).colorScheme.optionalActionButtonStyle,
           onPressed: () async {
@@ -219,10 +219,10 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
           child: const Text('Do this later'),
         ),
       );
-      childrens.add(const SizedBox(height: 10));
+      children.add(const SizedBox(height: 10));
     }
 
-    childrens.add(
+    children.add(
       GradientButton(
         onTap: () async {
           await _shareRecoveryKey(recoveryKey);
@@ -231,8 +231,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
       ),
     );
     if (_hasTriedToSave) {
-      childrens.add(const SizedBox(height: 10));
-      childrens.add(
+      children.add(const SizedBox(height: 10));
+      children.add(
         ElevatedButton(
           child: Text(widget.doneText),
           onPressed: () async {
@@ -241,8 +241,8 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         ),
       );
     }
-    childrens.add(const SizedBox(height: 12));
-    return childrens;
+    children.add(const SizedBox(height: 12));
+    return children;
   }
 
   Future _shareRecoveryKey(String recoveryKey) async {

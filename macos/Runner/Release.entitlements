@@ -5,6 +5,11 @@
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
 	<key>com.apple.security.network.client</key>
-    <true/>
+	<true/>
+	<key>keychain-access-groups</key>
+	<array>
+		<string>$(AppIdentifierPrefix)io.ente.auth</string>
+		<string>$(AppIdentifierPrefix)io.ente.photos</string>
+	</array>
 </dict>
 </plist>

@@ -1,6 +1,9 @@
 // @dart=2.9
 
+import 'dart:convert';
+
 import 'package:bip39/bip39.dart' as bip39;
+import 'package:convert/convert.dart';
 import 'package:dio/dio.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/constants.dart';
@@ -24,7 +27,6 @@ import 'package:ente_auth/utils/crypto_util.dart';
 import 'package:ente_auth/utils/dialog_util.dart';
 import 'package:ente_auth/utils/toast_util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 
 class UserService {
@@ -630,11 +632,11 @@ class UserService {
         }
         recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
       }
-      secret = Sodium.bin2base64(
+      secret = base64Encode(
         await CryptoUtil.decrypt(
-          Sodium.base642bin(encryptedSecret),
-          Sodium.hex2bin(recoveryKey.trim()),
-          Sodium.base642bin(secretDecryptionNonce),
+          base64.decode(encryptedSecret),
+          hex.decode(recoveryKey.trim()),
+          base64.decode(secretDecryptionNonce),
         ),
       );
     } catch (e) {

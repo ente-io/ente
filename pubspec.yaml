@@ -15,6 +15,7 @@ dependencies:
   computer: ^2.0.0
   confetti: ^0.7.0
   connectivity: ^3.0.3
+  convert: ^3.1.1
   cupertino_icons: ^1.0.0
   device_info: ^2.0.2
   dio: ^4.0.6
@@ -38,7 +39,6 @@ dependencies:
   flutter_native_splash: ^2.2.13
   flutter_secure_storage: ^6.0.0
   flutter_slidable: ^2.0.0
-  flutter_sodium: ^0.2.0
   flutter_speed_dial: ^6.2.0
   flutter_windowmanager: ^0.2.0
   fluttertoast: ^8.1.1
@@ -60,10 +60,17 @@ dependencies:
   sentry_flutter: ^6.12.1
   share_plus: ^4.4.0
   shared_preferences: ^2.0.5
+  sodium: ^1.2.2
+  sodium_libs: ^1.2.3
   sqflite: ^2.1.0
   step_progress_indicator: ^1.0.2
   url_launcher: ^6.1.5
   uuid: ^3.0.4
+  window_size:
+    git:
+      url: https://github.com/google/flutter-desktop-embedding.git
+      path: plugins/window_size
+      ref: a738913c8ce2c9f47515382d40827e794a334274
 
 dev_dependencies:
   bloc_test: ^9.0.3
