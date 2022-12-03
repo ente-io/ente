@@ -6,9 +6,16 @@ import { readFile, writeFile } from 'promise-fs';
 import { generateTempFilePath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
 import { isPlatform } from '../utils/main';
-import pathToImageMagick from '../pkg/image-magick-static';
+import { isDev } from '../utils/common';
+import path from 'path';
 
 const asyncExec = util.promisify(exec);
+
+function getImageMagickStaticPath() {
+    return isDev
+        ? 'build/image-magick'
+        : path.join(process.resourcesPath, 'image-magick');
+}
 
 export async function convertHEIC(
     heicFileData: Uint8Array
@@ -54,7 +61,7 @@ async function runConvertCommand(
         );
     } else if (isPlatform('linux')) {
         await asyncExec(
-            `${pathToImageMagick} ${tempInputFilePath} -quality 100% ${tempOutputFilePath}`
+            `${getImageMagickStaticPath()} ${tempInputFilePath} -quality 100% ${tempOutputFilePath}`
         );
     } else {
         Error(`${process.platform} native heic convert not supported yet`);

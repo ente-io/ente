@@ -8,7 +8,7 @@ import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
 import fetch from 'node-fetch';
 import { logErrorSentry } from './sentry';
 import ElectronLog from 'electron-log';
-import { isPlatform } from 'utils/main';
+import { isPlatform } from '../utils/main';
 
 const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 
