@@ -5,6 +5,8 @@ import { rmSync } from 'fs';
 import { readFile, writeFile } from 'promise-fs';
 import { generateTempFilePath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
+import { isPlatform } from '../utils/main';
+import pathToImageMagick from '../pkg/image-magick-static';
 
 const asyncExec = util.promisify(exec);
 
@@ -19,9 +21,8 @@ export async function convertHEIC(
 
         await writeFile(tempInputFilePath, heicFileData);
 
-        await asyncExec(
-            `sips -s format jpeg ${tempInputFilePath} --out ${tempOutputFilePath}`
-        );
+        await runConvertCommand(tempInputFilePath, tempOutputFilePath);
+
         const convertedFileData = new Uint8Array(
             await readFile(tempOutputFilePath)
         );
@@ -40,5 +41,22 @@ export async function convertHEIC(
         } catch (e) {
             logErrorSentry(e, 'failed to remove tempOutputFile');
         }
+    }
+}
+
+async function runConvertCommand(
+    tempInputFilePath: string,
+    tempOutputFilePath: string
+) {
+    if (isPlatform('mac')) {
+        await asyncExec(
+            `sips -s format jpeg ${tempInputFilePath} --out ${tempOutputFilePath}`
+        );
+    } else if (isPlatform('linux')) {
+        await asyncExec(
+            `${pathToImageMagick} ${tempInputFilePath} -quality 100% ${tempOutputFilePath}`
+        );
+    } else {
+        Error(`${process.platform} native heic convert not supported yet`);
     }
 }
