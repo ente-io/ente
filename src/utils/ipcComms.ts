@@ -14,7 +14,7 @@ import { getSentryUserID, logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
-import { convertHEIC } from '../services/heicConvertor';
+import { convertHEIC } from '../services/heicConverter';
 import {
     getAppVersion,
     skipAppVersion,
