@@ -11,7 +11,7 @@ import {
 } from '../services/userPreference';
 import { setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
-import { isPlatformMac } from './main';
+import { isPlatform } from './main';
 import ElectronLog from 'electron-log';
 
 export function buildContextMenu(
@@ -88,7 +88,7 @@ export function buildContextMenu(
 
 export async function buildMenuBar(): Promise<Menu> {
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    const isMac = isPlatformMac();
+    const isMac = isPlatform('mac');
     let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
         {

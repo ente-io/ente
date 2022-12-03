@@ -1,8 +1,8 @@
 import { ipcRenderer } from 'electron/renderer';
-import { isPlatformMac } from '../utils/preload';
+import { isPlatform } from '../utils/preload';
 
 export async function convertHEIC(fileData: Uint8Array): Promise<Uint8Array> {
-    if (!isPlatformMac()) {
+    if (!isPlatform('mac')) {
         throw Error('native heic conversion only supported on mac');
     }
     const convertedFileData = await ipcRenderer.invoke(

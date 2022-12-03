@@ -3,7 +3,7 @@ import * as path from 'path';
 import { isDev } from './common';
 import { isAppQuitting } from '../main';
 import { PROD_HOST_URL } from '../config';
-import { isPlatformMac } from './main';
+import { isPlatform } from './main';
 import { getHideDockIconPreference } from '../services/userPreference';
 import autoLauncher from '../services/autoLauncher';
 
@@ -83,12 +83,12 @@ export async function createWindow(): Promise<BrowserWindow> {
     });
     mainWindow.on('hide', () => {
         const shouldHideDockIcon = getHideDockIconPreference();
-        if (isPlatformMac() && shouldHideDockIcon) {
+        if (isPlatform('mac') && shouldHideDockIcon) {
             app.dock.hide();
         }
     });
     mainWindow.on('show', () => {
-        if (isPlatformMac()) {
+        if (isPlatform('mac')) {
             app.dock.show();
         }
     });
