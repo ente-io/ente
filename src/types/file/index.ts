@@ -1,11 +1,20 @@
 import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import { Metadata } from 'types/upload';
 
-export interface fileAttribute {
-    encryptedData?: string;
-    objectKey?: string;
+interface FileAttributesBase {
     decryptionHeader: string;
 }
+
+interface MetadataFileAttributes extends FileAttributesBase {
+    encryptedData: string;
+    objectKey?: string;
+}
+interface S3FileAttributes extends FileAttributesBase {
+    objectKey: string;
+    encryptedData?: string;
+}
+
+export type FileAttributes = MetadataFileAttributes | S3FileAttributes;
 
 export interface FileMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
@@ -37,8 +46,8 @@ export interface EnteFile {
     id: number;
     collectionID: number;
     ownerID: number;
-    file: fileAttribute;
-    thumbnail: fileAttribute;
+    file: FileAttributes;
+    thumbnail: FileAttributes;
     metadata: Metadata;
     info: EnteFileInfo;
     magicMetadata: FileMagicMetadata;
