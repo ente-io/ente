@@ -8,6 +8,7 @@
         "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
+        "strictBindCallApply": false,
         "strictNullChecks": false,
         "strictPropertyInitialization": false,
         "noImplicitAny": false,
