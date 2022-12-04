@@ -1,18 +1,38 @@
 import isElectron from 'is-electron';
 import { ElectronAPIs } from 'types/electron';
-import { runningInBrowser } from 'utils/common';
 
 class ElectronService {
     private electronAPIs: ElectronAPIs;
-    private isBundledApp: boolean = false;
 
     constructor() {
-        this.electronAPIs = runningInBrowser() && window['ElectronAPIs'];
-        this.isBundledApp = !!this.electronAPIs?.openDiskCache;
+        this.electronAPIs = globalThis['ElectronAPIs'];
     }
 
     checkIsBundledApp() {
-        return isElectron() && this.isBundledApp;
+        return isElectron() && !!this.electronAPIs?.openDiskCache;
+    }
+
+    logToDisk(msg: string) {
+        if (this.electronAPIs?.logToDisk) {
+            this.electronAPIs.logToDisk(msg);
+        }
+    }
+
+    openLogDirectory() {
+        if (this.electronAPIs?.openLogDirectory) {
+            this.electronAPIs.openLogDirectory();
+        }
+    }
+
+    getSentryUserID() {
+        if (this.electronAPIs?.getSentryUserID) {
+            return this.electronAPIs.getSentryUserID();
+        }
+    }
+    getAppVersion() {
+        if (this.electronAPIs?.getAppVersion) {
+            return this.electronAPIs.getAppVersion();
+        }
     }
 }
 

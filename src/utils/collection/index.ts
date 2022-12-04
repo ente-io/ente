@@ -30,9 +30,11 @@ import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
+    SUB_TYPE,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { ENV_DEVELOPMENT } from 'constants/sentry';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -121,7 +123,7 @@ export function appendCollectionKeyToShareURL(
     }
     const bs58 = require('bs58');
     const sharableURL = new URL(url);
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === ENV_DEVELOPMENT) {
         sharableURL.host = getAlbumSiteHost();
         sharableURL.protocol = 'http';
     }
@@ -226,3 +228,11 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     }
     return collections.filter((collection) => collection.owner.id === user.id);
 };
+
+export const getNonHiddenCollections = (collections: Collection[]) => {
+    return collections.filter((collection) => !isCollectionHidden(collection));
+};
+
+export const isCollectionHidden = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
+    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;

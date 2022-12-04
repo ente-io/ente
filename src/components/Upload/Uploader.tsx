@@ -49,6 +49,7 @@ import {
 } from 'utils/upload';
 import { getUserOwnedCollections } from 'utils/collection';
 import billingService from 'services/billingService';
+import { addLogLine } from 'utils/logging';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -286,7 +287,7 @@ export default function Uploader(props: Props) {
     ) => {
         try {
             await preCollectionCreationAction();
-            const filesWithCollectionToUpload: FileWithCollection[] = [];
+            let filesWithCollectionToUpload: FileWithCollection[] = [];
             const collections: Collection[] = [];
             let collectionNameToFilesMap = new Map<
                 string,
@@ -320,13 +321,14 @@ export default function Uploader(props: Props) {
                         ...existingCollection,
                         ...collections,
                     ]);
-                    filesWithCollectionToUpload.push(
+                    filesWithCollectionToUpload = [
+                        ...filesWithCollectionToUpload,
                         ...files.map((file) => ({
                             localID: index++,
                             collectionID: collection.id,
                             file,
-                        }))
-                    );
+                        })),
+                    ];
                 }
             } catch (e) {
                 closeUploadProgress();
@@ -426,6 +428,7 @@ export default function Uploader(props: Props) {
 
     const retryFailed = async () => {
         try {
+            addLogLine('user retrying failed  upload');
             const filesWithCollections =
                 await uploadManager.getFailedFilesWithCollections();
             await preUploadAction();
@@ -449,31 +452,28 @@ export default function Uploader(props: Props) {
             case CustomError.SUBSCRIPTION_EXPIRED:
                 notification = {
                     variant: 'danger',
-                    message: constants.SUBSCRIPTION_EXPIRED,
-                    action: {
-                        text: constants.RENEW_NOW,
-                        callback: billingService.redirectToCustomerPortal,
-                    },
+                    subtext: constants.SUBSCRIPTION_EXPIRED,
+                    message: constants.RENEW_NOW,
+                    onClick: () => billingService.redirectToCustomerPortal(),
                 };
                 break;
             case CustomError.STORAGE_QUOTA_EXCEEDED:
                 notification = {
                     variant: 'danger',
-                    message: constants.STORAGE_QUOTA_EXCEEDED,
-                    action: {
-                        text: constants.UPGRADE_NOW,
-                        callback: galleryContext.showPlanSelectorModal,
-                    },
-                    icon: <DiscFullIcon fontSize="large" />,
+                    subtext: constants.STORAGE_QUOTA_EXCEEDED,
+                    message: constants.UPGRADE_NOW,
+                    onClick: () => galleryContext.showPlanSelectorModal(),
+                    startIcon: <DiscFullIcon />,
                 };
                 break;
             default:
                 notification = {
                     variant: 'danger',
                     message: constants.UNKNOWN_ERROR,
+                    onClick: () => null,
                 };
         }
-        galleryContext.setNotificationAttributes(notification);
+        appContext.setNotificationAttributes(notification);
     }
 
     const uploadToSingleNewCollection = (collectionName: string) => {

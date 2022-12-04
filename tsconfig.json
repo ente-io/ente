@@ -20,12 +20,6 @@
         "downlevelIteration": true,
         "incremental": true
     },
-    "include": [
-        "next-env.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "src/pages/index.tsx",
-        "configUtil.js"
-    ],
-    "exclude": ["node_modules"]
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+    "exclude": ["node_modules", "out", ".next", "thirdparty"]
 }

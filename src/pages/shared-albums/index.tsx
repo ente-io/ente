@@ -58,7 +58,7 @@ export default function PublicCollectionGallery() {
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
-    const [errorMessage, setErrorMessage] = useState<String>(null);
+    const [errorMessage, setErrorMessage] = useState<string>(null);
     const appContext = useContext(AppContext);
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -128,9 +128,8 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
-    useEffect(
-        () =>
-            publicCollection &&
+    useEffect(() => {
+        publicCollection &&
             publicFiles &&
             setPhotoListHeader({
                 item: (
@@ -143,9 +142,8 @@ export default function PublicCollectionGallery() {
                 ),
                 itemType: ITEM_TYPE.OTHER,
                 height: 68,
-            }),
-        [publicCollection, publicFiles]
-    );
+            });
+    }, [publicCollection, publicFiles]);
 
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
@@ -309,16 +307,10 @@ export default function PublicCollectionGallery() {
             <SharedAlbumNavbar />
             <PhotoFrame
                 files={publicFiles}
-                setFiles={setPublicFiles}
                 syncWithRemote={syncWithRemote}
-                favItemIds={null}
                 setSelected={() => null}
                 selected={{ count: 0, collectionID: null }}
                 isFirstLoad={true}
-                openUploader={() => null}
-                isInSearchMode={false}
-                search={{}}
-                deleted={[]}
                 activeCollection={ALL_SECTION}
                 isSharedCollection
                 enableDownload={

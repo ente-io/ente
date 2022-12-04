@@ -1,4 +1,12 @@
-export default [
+export const defaultLivePhotoDefaultOptions = {
+    click: () => {},
+    hide: () => {},
+    show: () => {},
+    loading: false,
+    visible: false,
+};
+
+export const photoSwipeV4Events = [
     'beforeChange',
     'afterChange',
     'imageLoadComplete',

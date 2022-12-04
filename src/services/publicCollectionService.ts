@@ -151,7 +151,7 @@ export const syncPublicFiles = async (
         let files: EnteFile[] = [];
         const collectionUID = getPublicCollectionUID(token);
         const localFiles = await getLocalPublicFiles(collectionUID);
-        files.push(...localFiles);
+        files = [...files, ...localFiles];
         try {
             if (!token) {
                 return files;
@@ -171,7 +171,7 @@ export const syncPublicFiles = async (
                 setPublicFiles
             );
 
-            files.push(...fetchedFiles);
+            files = [...files, ...fetchedFiles];
             const latestVersionFiles = new Map<string, EnteFile>();
             files.forEach((file) => {
                 const uid = `${file.collectionID}-${file.id}`;
@@ -200,7 +200,6 @@ export const syncPublicFiles = async (
             const parsedError = parseSharingErrorCodes(e);
             logError(e, 'failed to sync shared collection files');
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                console.log('invalid token or password');
                 throw e;
             }
         }
@@ -220,7 +219,7 @@ const getPublicFiles = async (
     setPublicFiles: (files: EnteFile[]) => void
 ): Promise<EnteFile[]> => {
     try {
-        const decryptedFiles: EnteFile[] = [];
+        let decryptedFiles: EnteFile[] = [];
         let time = sinceTime;
         let resp;
         do {
@@ -240,7 +239,8 @@ const getPublicFiles = async (
                     }),
                 }
             );
-            decryptedFiles.push(
+            decryptedFiles = [
+                ...decryptedFiles,
                 ...(await Promise.all(
                     resp.data.diff.map(async (file: EnteFile) => {
                         if (!file.isDeleted) {
@@ -248,8 +248,8 @@ const getPublicFiles = async (
                         }
                         return file;
                     }) as Promise<EnteFile>[]
-                ))
-            );
+                )),
+            ];
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;

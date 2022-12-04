@@ -21,27 +21,23 @@ import {
     FILE_TYPE,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
-import HEICConverter from 'services/heicConverter/heicConverterService';
-import ffmpegService from 'services/ffmpeg/ffmpegService';
+import heicConversionService from 'services/heicConversionService';
+import * as ffmpegService from 'services/ffmpeg/ffmpegService';
 import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
 import { makeHumanReadableStorage } from 'utils/billing';
+import { CustomError } from 'utils/error';
+
+const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
+
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
     });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(file);
-    a.download = filename;
-
-    a.style.display = 'none';
-    document.body.appendChild(a);
-
-    a.click();
-
-    a.remove();
+    const fileURL = URL.createObjectURL(file);
+    downloadUsingAnchor(fileURL, filename);
 }
 
 export async function downloadFile(
@@ -116,10 +112,6 @@ export async function downloadFile(
         tempURL = URL.createObjectURL(fileBlob);
         downloadUsingAnchor(tempURL, file.metadata.title);
     }
-
-    tempURL && URL.revokeObjectURL(tempURL);
-    tempImageURL && URL.revokeObjectURL(tempImageURL);
-    tempVideoURL && URL.revokeObjectURL(tempVideoURL);
 }
 
 function downloadUsingAnchor(link: string, name: string) {
@@ -129,6 +121,7 @@ function downloadUsingAnchor(link: string, name: string) {
     a.download = name;
     document.body.appendChild(a);
     a.click();
+    URL.revokeObjectURL(link);
     a.remove();
 }
 
@@ -168,16 +161,6 @@ export function getSelectedFiles(
         }
     }
     return selectedFiles;
-}
-
-export function formatDate(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    return dateTimeFormat.format(date);
 }
 
 export function sortFiles(files: EnteFile[]) {
@@ -304,14 +287,25 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
                 file.metadata.title,
                 fileBlob
             );
-            return [URL.createObjectURL(convertedBlob)];
+            return {
+                converted: [URL.createObjectURL(convertedBlob)],
+                original: [URL.createObjectURL(fileBlob)],
+            };
         }
         case FILE_TYPE.LIVE_PHOTO: {
             const livePhoto = await getRenderableLivePhoto(file, fileBlob);
-            return livePhoto.map((asset) => URL.createObjectURL(asset));
+            return {
+                converted: livePhoto.map((asset) => URL.createObjectURL(asset)),
+                original: [URL.createObjectURL(fileBlob)],
+            };
         }
-        default:
-            return [URL.createObjectURL(fileBlob)];
+        default: {
+            const previewURL = URL.createObjectURL(fileBlob);
+            return {
+                converted: [previewURL],
+                original: [previewURL],
+            };
+        }
     }
 }
 
@@ -330,10 +324,9 @@ async function getRenderableLivePhoto(
 
 async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
     const mp4ConvertedVideo = await ffmpegService.convertToMP4(
-        video,
-        videoNameTitle
+        new File([video], videoNameTitle)
     );
-    return new Blob([mp4ConvertedVideo]);
+    return new Blob([await mp4ConvertedVideo.arrayBuffer()]);
 }
 
 async function getRenderableImage(fileName: string, imageBlob: Blob) {
@@ -343,7 +336,10 @@ async function getRenderableImage(fileName: string, imageBlob: Blob) {
                 imageBlob.size
             )}`
         );
-        const convertedImageBlob = await HEICConverter.convert(imageBlob);
+        const convertedImageBlob = await heicConversionService.convert(
+            imageBlob
+        );
+
         addLogLine(`${fileName} successfully converted`);
         return convertedImageBlob;
     } else {
@@ -406,6 +402,19 @@ export async function changeFileCreationTime(
 export async function changeFileName(file: EnteFile, editedName: string) {
     const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
         editedName,
+    };
+
+    file.pubMagicMetadata = await updateMagicMetadataProps(
+        file.pubMagicMetadata ?? NEW_FILE_MAGIC_METADATA,
+        file.key,
+        updatedPublicMagicMetadataProps
+    );
+    return file;
+}
+
+export async function changeCaption(file: EnteFile, caption: string) {
+    const updatedPublicMagicMetadataProps: FilePublicMagicMetadataProps = {
+        caption,
     };
 
     file.pubMagicMetadata = await updateMagicMetadataProps(
@@ -521,4 +530,47 @@ export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
         throw Error('user missing');
     }
     return files.filter((file) => file.isTrashed || file.ownerID === user.id);
+};
+
+// doesn't work on firefox
+export const copyFileToClipboard = async (fileUrl: string) => {
+    const canvas = document.createElement('canvas');
+    const canvasCTX = canvas.getContext('2d');
+    const image = new Image();
+
+    const blobPromise = new Promise<Blob>((resolve, reject) => {
+        let timeout: NodeJS.Timeout = null;
+        try {
+            image.setAttribute('src', fileUrl);
+            image.onload = () => {
+                canvas.width = image.width;
+                canvas.height = image.height;
+                canvasCTX.drawImage(image, 0, 0, image.width, image.height);
+                canvas.toBlob(
+                    (blob) => {
+                        resolve(blob);
+                    },
+                    'image/png',
+                    1
+                );
+
+                clearTimeout(timeout);
+            };
+        } catch (e) {
+            void logError(e, 'failed to copy to clipboard');
+            reject(e);
+        } finally {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            WAIT_TIME_IMAGE_CONVERSION
+        );
+    });
+
+    const { ClipboardItem } = window;
+
+    await navigator.clipboard
+        .write([new ClipboardItem({ 'image/png': blobPromise })])
+        .catch((e) => logError(e, 'failed to copy to clipboard'));
 };

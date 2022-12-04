@@ -115,6 +115,14 @@ class UploadManager {
             addLogLine(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
+            uiService.setFilenames(
+                new Map<number, string>(
+                    filesWithCollectionToUploadIn.map((mediaFile) => [
+                        mediaFile.localID,
+                        UploadService.getAssetName(mediaFile),
+                    ])
+                )
+            );
             const { metadataJSONFiles, mediaFiles } =
                 segregateMetadataAndMediaFiles(filesWithCollectionToUploadIn);
             addLogLine(`has ${metadataJSONFiles.length} metadata json files`);
@@ -136,8 +144,6 @@ class UploadManager {
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
                 );
-
-                addLogLine(`clusterLivePhotoFiles called`);
 
                 // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
                 // as they will be rejected during upload and are not valid upload files which we need to clustering
@@ -163,11 +169,16 @@ class UploadManager {
                     }
                 });
 
+                addLogLine(`clusterLivePhotoFiles started`);
+
                 const analysedMediaFiles =
                     UploadService.clusterLivePhotoFiles(filesWithMetadata);
 
+                addLogLine(`clusterLivePhotoFiles ended`);
                 const allFiles = [...rejectedFiles, ...analysedMediaFiles];
-
+                addLogLine(
+                    `got live photos: ${mediaFiles.length !== allFiles.length}`
+                );
                 uiService.setFilenames(
                     new Map<number, string>(
                         allFiles.map((mediaFile) => [
@@ -180,9 +191,6 @@ class UploadManager {
                 UIService.setHasLivePhoto(
                     mediaFiles.length !== allFiles.length
                 );
-                addLogLine(
-                    `got live photos: ${mediaFiles.length !== allFiles.length}`
-                );
 
                 await this.uploadMediaFiles(allFiles);
             }
@@ -193,10 +201,6 @@ class UploadManager {
                 }
             } else {
                 logError(e, 'uploading failed with error');
-                addLogLine(
-                    `uploading failed with error -> ${e.message}
-                ${(e as Error).stack}`
-                );
                 throw e;
             }
         } finally {
@@ -257,12 +261,12 @@ class UploadManager {
                     } else {
                         // and don't break for subsequent files just log and move on
                         logError(e, 'parsing failed for a file');
+                        addLogLine(
+                            `failed to parse metadata json file ${getFileNameSize(
+                                file
+                            )} error: ${e.message}`
+                        );
                     }
-                    addLogLine(
-                        `failed to parse metadata json file ${getFileNameSize(
-                            file
-                        )} error: ${e.message}`
-                    );
                 }
             }
         } catch (e) {
@@ -278,6 +282,7 @@ class UploadManager {
             addLogLine(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
             for (const { file, localID, collectionID } of mediaFiles) {
+                UIService.setFileProgress(localID, 0);
                 if (uploadCancelService.isUploadCancelationRequested()) {
                     throw Error(CustomError.UPLOAD_CANCELLED);
                 }
@@ -306,18 +311,19 @@ class UploadManager {
                     } else {
                         // and don't break for subsequent files just log and move on
                         logError(e, 'extractFileTypeAndMetadata failed');
+                        addLogLine(
+                            `metadata extraction failed ${getFileNameSize(
+                                file
+                            )} error: ${e.message}`
+                        );
                     }
-                    addLogLine(
-                        `metadata extraction failed ${getFileNameSize(
-                            file
-                        )} error: ${e.message}`
-                    );
                 }
                 this.metadataAndFileTypeInfoMap.set(localID, {
                     fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
                     metadata: metadata && { ...metadata },
                     filePath: filePath,
                 });
+                UIService.removeFromInProgressList(localID);
                 UIService.increaseFileUploaded();
             }
         } catch (e) {
@@ -366,10 +372,10 @@ class UploadManager {
 
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
         addLogLine(`uploadMediaFiles called`);
-        this.filesToBeUploaded.push(...mediaFiles);
+        this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
 
         if (isElectron()) {
-            this.remainingFiles.push(...mediaFiles);
+            this.remainingFiles = [...this.remainingFiles, ...mediaFiles];
         }
 
         UIService.reset(mediaFiles.length);
@@ -434,7 +440,9 @@ class UploadManager {
     ) {
         try {
             let decryptedFile: EnteFile;
-            addLogLine(`uploadedFile ${JSON.stringify(uploadedFile)}`);
+            addLogLine(
+                `post upload action -> fileUploadResult: ${fileUploadResult} uploadedFile present ${!!uploadedFile}`
+            );
             this.updateElectronRemainingFiles(fileWithCollection);
             switch (fileUploadResult) {
                 case UPLOAD_RESULT.FAILED:
@@ -480,10 +488,6 @@ class UploadManager {
             return fileUploadResult;
         } catch (e) {
             logError(e, 'failed to do post file upload action');
-            addLogLine(
-                `failed to do post file upload action -> ${e.message}
-                ${(e as Error).stack}`
-            );
             return UPLOAD_RESULT.FAILED;
         }
     }
@@ -503,6 +507,7 @@ class UploadManager {
     }
 
     public cancelRunningUpload() {
+        addLogLine('user cancelled running upload');
         UIService.setUploadStage(UPLOAD_STAGES.CANCELLING);
         uploadCancelService.requestUploadCancelation();
     }

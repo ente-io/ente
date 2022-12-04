@@ -71,8 +71,8 @@ const englishConstants = {
     UNKNOWN_ERROR: 'Something went wrong, please try again',
     INVALID_CODE: 'Invalid verification code',
     EXPIRED_CODE: 'Your verification code has expired',
-    SENDING: 'sending...',
-    SENT: 'sent!',
+    SENDING: 'Sending...',
+    SENT: 'Sent!',
     PASSWORD: 'Password',
     LINK_PASSWORD: 'Enter password to unlock the album',
     ENTER_PASSPHRASE: 'Enter your password',
@@ -99,6 +99,8 @@ const englishConstants = {
     SELECT_COLLECTION: 'Select an album to upload to',
     CREATE_COLLECTION: 'New album',
     ENTER_ALBUM_NAME: 'Album name',
+    CLOSE_OPTION: 'Close (Esc)',
+    ENTER_FILE_NAME: 'File name',
     CLOSE: 'Close',
     NO: 'No',
     NOTHING_HERE: 'Nothing to see here yet 👀',
@@ -107,7 +109,8 @@ const englishConstants = {
     UPLOAD_STAGE_MESSAGE: {
         0: 'Preparing to upload',
         1: 'Reading google metadata files',
-        2: 'Reading file metadata',
+        2: (fileCounter) =>
+            `${fileCounter.finished} / ${fileCounter.total} files metadata extracted`,
         3: (fileCounter) =>
             `${fileCounter.finished} / ${fileCounter.total} files backed up`,
         4: 'Cancelling remaining uploads',
@@ -131,10 +134,12 @@ const englishConstants = {
     ALBUM_NAME: 'Album name',
     CREATE: 'Create',
     DOWNLOAD: 'Download',
-    TOGGLE_FULLSCREEN: 'Toggle fullscreen',
+    DOWNLOAD_OPTION: 'Download (D)',
+    COPY_OPTION: 'Copy as PNG (Ctrl/Cmd - C)',
+    TOGGLE_FULLSCREEN: 'Toggle fullscreen (F)',
     ZOOM_IN_OUT: 'Zoom in/out',
-    PREVIOUS: 'Previous (arrow left)',
-    NEXT: 'Next (arrow right)',
+    PREVIOUS: 'Previous (←)',
+    NEXT: 'Next (→)',
     NO_INTERNET_CONNECTION:
         'Please check your internet connection and try again',
     TITLE: 'ente.io | encrypted photo storage',
@@ -146,14 +151,18 @@ const englishConstants = {
     UPLOAD_FIRST_PHOTO: 'Preserve',
     UPLOAD_DROPZONE_MESSAGE: 'Drop to backup your files',
     WATCH_FOLDER_DROPZONE_MESSAGE: 'Drop to add watched folder',
-    CONFIRM_DELETE: 'Confirm deletion',
-    DELETE_MESSAGE: `The selected files will be permanently deleted and can't be restored `,
     TRASH_FILES_TITLE: 'Delete files?',
+    TRASH_FILE_TITLE: 'Delete file?',
     DELETE_FILES_TITLE: 'Delete immediately?',
     DELETE_FILES_MESSAGE:
         'Selected files will be permanently deleted from your ente account.',
     DELETE_FILE: 'Delete files',
     DELETE: 'Delete',
+    DELETE_OPTION: 'Delete (DEL)',
+    FAVORITE: 'Favorite',
+    FAVORITE_OPTION: 'Favorite (L)',
+    UNFAVORITE_OPTION: 'Unfavorite (L)',
+    UNFAVORITE: 'Unfavorite',
     MULTI_FOLDER_UPLOAD: 'Multiple folders detected',
     UPLOAD_STRATEGY_CHOICE: 'Would you like to upload them into',
     UPLOAD_STRATEGY_SINGLE_COLLECTION: 'A single album',
@@ -348,6 +357,7 @@ const englishConstants = {
         </>
     ),
     RENAME: 'Rename',
+    RENAME_FILE: 'Rename file',
     RENAME_COLLECTION: 'Rename album',
     DELETE_COLLECTION_TITLE: 'Delete album?',
     DELETE_COLLECTION: 'Delete album',
@@ -371,7 +381,6 @@ const englishConstants = {
             <p>All files will be queued for download sequentially</p>
         </>
     ),
-    ARCHIVED_ALBUM: 'Archived album',
     DOWNLOAD_COLLECTION_FAILED: 'Album downloading failed, please try again',
     CREATE_ALBUM_FAILED: 'Failed to create album , please try again',
 
@@ -431,14 +440,20 @@ const englishConstants = {
     VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD:
         'This video cannot be played on your browser',
     METADATA: 'Metadata',
-    INFO: 'Info',
-    FILE_ID: 'File id',
+    INFO: 'Info ',
+    INFO_OPTION: 'Info (I)',
+    FILE_ID: 'File ID',
     FILE_NAME: 'File name',
+    CAPTION: 'Description',
+    CAPTION_PLACEHOLDER: 'Add a description',
     CREATION_TIME: 'Creation time',
     UPDATED_ON: 'Updated on',
     LOCATION: 'Location',
-    SHOW_MAP: 'show on map',
-    EXIF: 'Exif',
+    SHOW_ON_MAP: 'View on OpenStreetMap',
+    DETAILS: 'Details',
+    VIEW_EXIF: 'View all EXIF data',
+    NO_EXIF: 'No EXIF data',
+    EXIF: 'EXIF',
     DEVICE: 'Device',
     IMAGE_SIZE: 'Image size',
     FLASH: 'Flash',
@@ -509,7 +524,7 @@ const englishConstants = {
     EMAIl_ALREADY_OWNED: 'Email already taken',
     EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
     UPLOAD_FAILED: 'Upload failed',
-    ETAGS_BLOCKED: (url: string) => (
+    ETAGS_BLOCKED: (link: string) => (
         <>
             <Box mb={1}>
                 We were unable to upload the following files because of your
@@ -518,13 +533,9 @@ const englishConstants = {
             <Box>
                 Please disable any addons that might be preventing ente from
                 using <code>eTags</code> to upload large files, or use our{' '}
-                <a
-                    href={url}
-                    style={{ color: '#51cd7c', textDecoration: 'underline' }}
-                    target="_blank"
-                    rel="noreferrer">
+                <Link href={link} target="_blank">
                     desktop app
-                </a>{' '}
+                </Link>{' '}
                 for a more reliable import experience.
             </Box>
         </>
@@ -543,6 +554,7 @@ const englishConstants = {
         'Skipped these as there are files with matching names in the same album',
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'Blocked uploads',
+    INPROGRESS_METADATA_EXTRACTION: 'In progress',
     INPROGRESS_UPLOADS: 'Uploads in progress',
     TOO_LARGE_UPLOADS: 'Large files',
     LARGER_THAN_AVAILABLE_STORAGE_UPLOADS: 'Insufficient storage',
@@ -553,11 +565,11 @@ const englishConstants = {
     THUMBNAIL_GENERATION_FAILED_INFO:
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
-    ARCHIVE: 'Hide',
-    ARCHIVE_SECTION_NAME: 'Hidden',
+    ARCHIVE: 'Archive',
+    ARCHIVE_SECTION_NAME: 'Archive',
     ALL_SECTION_NAME: 'All',
     MOVE_TO_COLLECTION: 'Move to album',
-    UNARCHIVE: 'Unhide',
+    UNARCHIVE: 'Unarchive',
     MOVE: 'Move',
     ADD: 'Add',
     SORT: 'Sort',
@@ -567,6 +579,8 @@ const englishConstants = {
     MOVE_TO_TRASH: 'Move to trash',
     TRASH_FILES_MESSAGE:
         'Selected files will be removed from all albums and moved to trash.',
+    TRASH_FILE_MESSAGE:
+        'The file will be removed from all albums and moved to trash.',
     DELETE_PERMANENTLY: 'Delete permanently',
     RESTORE: 'Restore',
     CONFIRM_RESTORE: 'Confirm restoration',
@@ -622,6 +636,7 @@ const englishConstants = {
         <>File time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
+    CAPTION_CHARACTER_LIMIT: '280 characters max',
 
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
@@ -692,7 +707,7 @@ const englishConstants = {
     TERM_1: 'I hereby state that I have a good faith belief that the sharing of copyrighted material at the location above is not authorized by the copyright owner, its agent, or the law (e.g., as a fair use). ',
     TERM_2: 'I hereby state that the information in this Notice is accurate and, under penalty of perjury, that I am the owner, or authorized to act on behalf of, the owner, of the copyright or of an exclusive right under the copyright that is allegedly infringed. ',
     TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
-    PRESERVED_BY: 'preserved by',
+    PRESERVED_BY: 'Preserved by',
     ENTE_IO: 'ente.io',
     LIVE: 'LIVE',
     DISABLE_PASSWORD: 'Disable password lock',
@@ -820,6 +835,19 @@ const englishConstants = {
     UPLOADED_TO_SINGLE_COLLECTION: 'Uploaded to single collection',
     UPLOADED_TO_SEPARATE_COLLECTIONS: 'Uploaded to separate collections',
     NEVERMIND: 'Nevermind',
+    UPDATE_AVAILABLE: 'Update available',
+    UPDATE_INSTALLABLE_MESSAGE:
+        'A new version of ente is ready to be installed.',
+    INSTALL_NOW: `Install now`,
+    INSTALL_ON_NEXT_LAUNCH: 'Install on next launch',
+    UPDATE_AVAILABLE_MESSAGE:
+        'A new version of ente has been released, but it cannot be automatically downloaded and installed.',
+    DOWNLOAD_AND_INSTALL: 'Download and install',
+    IGNORE_THIS_VERSION: 'Ignore this version',
+    RUN_TESTS: 'Run tests',
+    TODAY: 'Today',
+    YESTERDAY: 'Yesterday',
+    AT: 'at',
 };
 
 export default englishConstants;

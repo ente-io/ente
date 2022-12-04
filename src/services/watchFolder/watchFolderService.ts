@@ -80,8 +80,6 @@ class watchFolderService {
         try {
             let mappings = this.getWatchMappings();
 
-            addLogLine(`mappings, ${mappings.map((m) => JSON.stringify(m))}`);
-
             if (!mappings?.length) {
                 return;
             }
@@ -238,11 +236,6 @@ class watchFolderService {
 
     private async runNextEvent() {
         try {
-            addLogLine(
-                `mappings,
-            ${this.getWatchMappings().map((m) => JSON.stringify(m))}`
-            );
-
             if (
                 this.eventQueue.length === 0 ||
                 this.isEventRunning ||
@@ -252,6 +245,9 @@ class watchFolderService {
             }
 
             const event = this.clubSameCollectionEvents();
+            addLogLine(
+                `running event type:${event.type} collectionName:${event.collectionName} folderPath:${event.folderPath} , fileCount:${event.files?.length} pathsCount: ${event.paths?.length}`
+            );
             const mappings = this.getWatchMappings();
             const mapping = mappings.find(
                 (mapping) => mapping.folderPath === event.folderPath
@@ -259,15 +255,19 @@ class watchFolderService {
             if (!mapping) {
                 throw Error('no Mapping found for event');
             }
+            addLogLine(
+                `mapping for event rootFolder: ${mapping.rootFolderName} folderPath: ${mapping.folderPath} uploadStrategy: ${mapping.uploadStrategy} syncedFilesCount: ${mapping.syncedFiles.length} ignoredFilesCount ${mapping.ignoredFiles.length}`
+            );
             if (event.type === 'upload') {
                 event.files = getValidFilesToUpload(event.files, mapping);
+                addLogLine(`valid files count: ${event.files?.length}`);
                 if (event.files.length === 0) {
                     return;
                 }
             }
             this.currentEvent = event;
             this.currentlySyncedMapping = mapping;
-            addLogLine(`running event', ${JSON.stringify(event)}`);
+
             this.setIsEventRunning(true);
             if (event.type === 'upload') {
                 this.processUploadEvent();

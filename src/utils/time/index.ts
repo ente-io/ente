@@ -14,25 +14,6 @@ interface DateComponent<T = number> {
     second: T;
 }
 
-export function dateStringWithMMH(unixTimeInMicroSeconds: number): string {
-    return new Date(unixTimeInMicroSeconds / 1000).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-}
-
-export function formatDateShort(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        year: '2-digit',
-        month: 'short',
-        day: 'numeric',
-    });
-    return dateTimeFormat.format(date);
-}
-
 export function getUnixTimeInMicroSecondsWithDelta(delta: TimeDelta): number {
     let currentDate = new Date();
     if (delta?.hours) {
@@ -55,7 +36,8 @@ export function getUnixTimeInMicroSeconds(dateTime: Date) {
         return null;
     }
     const unixTime = dateTime.getTime() * 1000;
-    if (unixTime <= 0) {
+    //ignoring dateTimeString = "0000:00:00 00:00:00";
+    if (unixTime === Date.UTC(0, 0, 0, 0, 0, 0, 0)) {
         return null;
     } else {
         return unixTime;
@@ -162,40 +144,4 @@ function getDateFromComponents(dateComponent: DateComponent<string>) {
     return hasTimeValues
         ? new Date(year, month, day, hour, minute, second)
         : new Date(year, month, day);
-}
-
-export function formatDateTime(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    const timeFormat = new Intl.DateTimeFormat('en-IN', {
-        timeStyle: 'short',
-    });
-    return `${dateTimeFormat.format(date)} ${timeFormat.format(date)}`;
-}
-export function formatDateRelative(date: number) {
-    const units = {
-        year: 24 * 60 * 60 * 1000 * 365,
-        month: (24 * 60 * 60 * 1000 * 365) / 12,
-        day: 24 * 60 * 60 * 1000,
-        hour: 60 * 60 * 1000,
-        minute: 60 * 1000,
-        second: 1000,
-    };
-    const relativeDateFormat = new Intl.RelativeTimeFormat('en-IN', {
-        localeMatcher: 'best fit',
-        numeric: 'always',
-        style: 'long',
-    });
-    const elapsed = date - Date.now(); // "Math.abs" accounts for both "past" & "future" scenarios
-
-    for (const u in units)
-        if (Math.abs(elapsed) > units[u] || u === 'second')
-            return relativeDateFormat.format(
-                Math.round(elapsed / units[u]),
-                u as Intl.RelativeTimeFormatUnit
-            );
 }

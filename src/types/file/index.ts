@@ -19,11 +19,17 @@ export interface FileMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
 export interface FilePublicMagicMetadataProps {
     editedTime?: number;
     editedName?: string;
+    caption?: string;
 }
 
 export interface FilePublicMagicMetadata
     extends Omit<MagicMetadataCore, 'data'> {
     data: FilePublicMagicMetadataProps;
+}
+
+export interface EnteFileInfo {
+    fileSize: number;
+    thumbSize: number;
 }
 
 export interface EnteFile {
@@ -33,6 +39,7 @@ export interface EnteFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: Metadata;
+    info: EnteFileInfo;
     magicMetadata: FileMagicMetadata;
     pubMagicMetadata: FilePublicMagicMetadata;
     encryptedKey: string;
@@ -43,9 +50,13 @@ export interface EnteFile {
     html: string;
     w: number;
     h: number;
+    title: string;
     isDeleted: boolean;
     isTrashed?: boolean;
     deleteBy?: number;
+    isSourceLoaded?: boolean;
+    originalVideoURL?: string;
+    originalImageURL?: string;
     dataIndex: number;
     updationTime: number;
 }

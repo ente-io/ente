@@ -2,13 +2,13 @@ import { FILE_TYPE } from 'constants/file';
 import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
-import FFmpegService from 'services/ffmpeg/ffmpegService';
+import * as FFmpegService from 'services/ffmpeg/ffmpegService';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { isExactTypeHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
 import { getUint8ArrayView } from '../readerService';
-import HEICConverter from 'services/heicConverter/heicConverterService';
 import { getFileNameSize, addLogLine } from 'utils/logging';
+import HeicConversionService from 'services/heicConversionService';
 
 const MAX_THUMBNAIL_DIMENSION = 720;
 const MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF = 10;
@@ -33,9 +33,6 @@ export async function generateThumbnail(
         let canvas = document.createElement('canvas');
         let thumbnail: Uint8Array;
         try {
-            if (!(file instanceof File)) {
-                file = new File([await file.blob()], file.name);
-            }
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
                 const isHEIC = isExactTypeHEIC(fileTypeInfo.exactType);
                 canvas = await generateImageThumbnail(file, isHEIC);
@@ -47,17 +44,14 @@ export async function generateThumbnail(
                         )}`
                     );
 
-                    const thumb = await FFmpegService.generateThumbnail(file);
+                    const thumbFile =
+                        await FFmpegService.generateVideoThumbnail(file);
                     addLogLine(
                         `ffmpeg thumbnail successfully generated ${getFileNameSize(
                             file
                         )}`
                     );
-                    const dummyImageFile = new File([thumb], file.name);
-                    canvas = await generateImageThumbnail(
-                        dummyImageFile,
-                        false
-                    );
+                    canvas = await generateImageThumbnail(thumbFile, false);
                 } catch (e) {
                     addLogLine(
                         `ffmpeg thumbnail generated failed  ${getFileNameSize(
@@ -99,7 +93,10 @@ export async function generateThumbnail(
     }
 }
 
-export async function generateImageThumbnail(file: File, isHEIC: boolean) {
+export async function generateImageThumbnail(
+    file: File | ElectronFile,
+    isHEIC: boolean
+) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
@@ -108,15 +105,19 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
 
     if (isHEIC) {
         addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
-        file = new File([await HEICConverter.convert(file)], file.name);
+        const convertedBlob = await HeicConversionService.convert(
+            new Blob([await file.arrayBuffer()])
+        );
+        file = new File([convertedBlob], file.name);
         addLogLine(`${getFileNameSize(file)} successfully converted`);
     }
     let image = new Image();
-    imageURL = URL.createObjectURL(file);
-    image.setAttribute('src', imageURL);
+    imageURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
     await new Promise((resolve, reject) => {
+        image.setAttribute('src', imageURL);
         image.onload = () => {
             try {
+                URL.revokeObjectURL(imageURL);
                 const imageDimension = {
                     width: image.width,
                     height: image.height,
@@ -153,18 +154,21 @@ export async function generateImageThumbnail(file: File, isHEIC: boolean) {
     return canvas;
 }
 
-export async function generateVideoThumbnail(file: File) {
+export async function generateVideoThumbnail(file: File | ElectronFile) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
-    let videoURL = null;
     let timeout = null;
+    let videoURL = null;
 
+    let video = document.createElement('video');
+    videoURL = URL.createObjectURL(new Blob([await file.arrayBuffer()]));
     await new Promise((resolve, reject) => {
-        let video = document.createElement('video');
-        videoURL = URL.createObjectURL(file);
+        video.preload = 'metadata';
+        video.src = videoURL;
         video.addEventListener('loadeddata', function () {
             try {
+                URL.revokeObjectURL(videoURL);
                 if (!video) {
                     throw Error('video load failed');
                 }
@@ -196,8 +200,6 @@ export async function generateVideoThumbnail(file: File) {
                 reject(err);
             }
         });
-        video.preload = 'metadata';
-        video.src = videoURL;
         timeout = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             WAIT_TIME_THUMBNAIL_GENERATION

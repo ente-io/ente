@@ -21,6 +21,8 @@ function UploadProgressSubtitleText() {
         <Typography color="text.secondary">
             {uploadStage === UPLOAD_STAGES.UPLOADING
                 ? constants.UPLOAD_STAGE_MESSAGE[uploadStage](uploadCounter)
+                : uploadStage === UPLOAD_STAGES.EXTRACTING_METADATA
+                ? constants.UPLOAD_STAGE_MESSAGE[uploadStage](uploadCounter)
                 : constants.UPLOAD_STAGE_MESSAGE[uploadStage]}
         </Typography>
     );

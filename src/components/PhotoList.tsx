@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
-import { Box, styled } from '@mui/material';
+import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -15,16 +15,15 @@ import {
 import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
-import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { SpecialPadding } from 'styles/SpecialPadding';
+import { formatDate } from 'utils/time/format';
 
 const A_DAY = 24 * 60 * 60 * 1000;
-const NO_OF_PAGES = 2;
 const FOOTER_HEIGHT = 90;
 
 export enum ITEM_TYPE {
@@ -153,7 +152,11 @@ interface Props {
     width: number;
     filteredData: EnteFile[];
     showAppDownloadBanner: boolean;
-    getThumbnail: (files: EnteFile[], index: number) => JSX.Element;
+    getThumbnail: (
+        files: EnteFile[],
+        index: number,
+        isScrolling?: boolean
+    ) => JSX.Element;
     activeCollection: number;
     resetFetching: () => void;
 }
@@ -244,6 +247,10 @@ export function PhotoList({
         filteredData,
         showAppDownloadBanner,
         publicCollectionGalleryContext.accessedThroughSharedURL,
+        galleryContext.photoListHeader,
+        publicCollectionGalleryContext.photoListHeader,
+        deduplicateContext.isOnDeduplicatePage,
+        deduplicateContext.fileSizeMap,
     ]);
 
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
@@ -298,22 +305,17 @@ export function PhotoList({
                 )
             ) {
                 currentDate = item.metadata.creationTime / 1000;
-                const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                });
+
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
                     date: isSameDay(new Date(currentDate), new Date())
-                        ? 'Today'
+                        ? constants.TODAY
                         : isSameDay(
                               new Date(currentDate),
                               new Date(Date.now() - A_DAY)
                           )
-                        ? 'Yesterday'
-                        : dateTimeFormat.format(currentDate),
+                        ? constants.YESTERDAY
+                        : formatDate(currentDate),
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
@@ -403,15 +405,9 @@ export function PhotoList({
                 <FooterContainer span={columns}>
                     <p>
                         {constants.PRESERVED_BY}{' '}
-                        <a
-                            target="_blank"
-                            style={{
-                                color: getVariantColor(ButtonVariant.success),
-                            }}
-                            href={ENTE_WEBSITE_LINK}
-                            rel="noreferrer">
+                        <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {constants.ENTE_IO}
-                        </a>
+                        </Link>
                     </p>
                 </FooterContainer>
             ),
@@ -453,9 +449,10 @@ export function PhotoList({
                             date: currItem.date,
                             span: items[index + 1].items.length,
                         });
-                        newList[newIndex + 1].items = newList[
-                            newIndex + 1
-                        ].items.concat(items[index + 1].items);
+                        newList[newIndex + 1].items = [
+                            ...newList[newIndex + 1].items,
+                            ...items[index + 1].items,
+                        ];
                         index += 2;
                     } else {
                         // Adding items would exceed the number of columns.
@@ -512,10 +509,6 @@ export function PhotoList({
         }
     };
 
-    const extraRowsToRender = Math.ceil(
-        (NO_OF_PAGES * height) / IMAGE_CONTAINER_MAX_HEIGHT
-    );
-
     const generateKey = (index) => {
         switch (timeStampList[index].itemType) {
             case ITEM_TYPE.FILE:
@@ -527,7 +520,10 @@ export function PhotoList({
         }
     };
 
-    const renderListItem = (listItem: TimeStampListItem) => {
+    const renderListItem = (
+        listItem: TimeStampListItem,
+        isScrolling: boolean
+    ) => {
         switch (listItem.itemType) {
             case ITEM_TYPE.TIME:
                 return listItem.dates ? (
@@ -556,7 +552,8 @@ export function PhotoList({
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
                         filteredDataCopy,
-                        listItem.itemStartIndex + idx
+                        listItem.itemStartIndex + idx,
+                        isScrolling
                     )
                 );
                 if (listItem.groups) {
@@ -587,14 +584,15 @@ export function PhotoList({
             width={width}
             itemCount={timeStampList.length}
             itemKey={generateKey}
-            overscanCount={extraRowsToRender}>
-            {({ index, style }) => (
+            overscanCount={0}
+            useIsScrolling>
+            {({ index, style, isScrolling }) => (
                 <ListItem style={style}>
                     <ListContainer
                         columns={columns}
                         shrinkRatio={shrinkRatio}
                         groups={timeStampList[index].groups}>
-                        {renderListItem(timeStampList[index])}
+                        {renderListItem(timeStampList[index], isScrolling)}
                     </ListContainer>
                 </ListItem>
             )}

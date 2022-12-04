@@ -1,5 +1,4 @@
 import { Box, Typography } from '@mui/material';
-import { ButtonVariant } from 'components/pages/gallery/LinkButton';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
@@ -32,7 +31,7 @@ export function ManageLinkPassword({
                         collectionID: collection.id,
                         disablePassword: true,
                     }),
-                variant: ButtonVariant.danger,
+                variant: 'danger',
             },
         });
     };

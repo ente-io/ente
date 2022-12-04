@@ -11,8 +11,13 @@ export interface EncryptedMagicMetadataCore
 }
 
 export enum VISIBILITY_STATE {
-    VISIBLE,
-    ARCHIVED,
+    VISIBLE = 0,
+    ARCHIVED = 1,
+    HIDDEN = 2,
+}
+
+export enum SUB_TYPE {
+    DEFAULT_HIDDEN = 1,
 }
 
 export const NEW_FILE_MAGIC_METADATA: MagicMetadataCore = {

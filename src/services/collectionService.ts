@@ -42,6 +42,7 @@ import { EncryptionResult } from 'types/upload';
 import constants from 'utils/strings/constants';
 import { IsArchived } from 'utils/magicMetadata';
 import { User } from 'types/user';
+import { getNonHiddenCollections } from 'utils/collection';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -143,7 +144,7 @@ const getCollections = async (
 export const getLocalCollections = async (): Promise<Collection[]> => {
     const collections: Collection[] =
         (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return collections;
+    return getNonHiddenCollections(collections);
 };
 
 export const getCollectionUpdationTime = async (): Promise<number> =>
@@ -188,7 +189,7 @@ export const syncCollections = async () => {
 
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
-    return collections;
+    return getNonHiddenCollections(collections);
 };
 
 export const getCollection = async (

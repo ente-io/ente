@@ -2,7 +2,6 @@ import { CollectionSelectorAttributes } from 'components/Collections/CollectionS
 import { TimeStampListItem } from 'components/PhotoList';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { NotificationAttributes } from 'types/Notification';
 
 export type SelectedState = {
     [k: number]: boolean;
@@ -18,11 +17,10 @@ export type SetCollectionSelectorAttributes = React.Dispatch<
 
 export type GalleryContextType = {
     thumbs: Map<number, string>;
-    files: Map<number, string>;
+    files: Map<number, { original: string; converted: string }>;
     showPlanSelectorModal: () => void;
     setActiveCollection: (collection: number) => void;
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    setNotificationAttributes: (attributes: NotificationAttributes) => void;
     setBlockingLoad: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
 };

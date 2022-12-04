@@ -4,7 +4,7 @@ import Select from 'react-select';
 import { linkExpiryStyle } from 'styles/linkExpiry';
 import { shareExpiryOptions } from 'utils/collection';
 import constants from 'utils/strings/constants';
-import { dateStringWithMMH } from 'utils/time';
+import { formatDateTime } from 'utils/time/format';
 import { OptionWithDivider } from './selectComponents/OptionWithDivider';
 
 export function ManageLinkExpiry({
@@ -31,7 +31,7 @@ export function ManageLinkExpiry({
                 }}
                 placeholder={
                     publicShareProp?.validTill
-                        ? dateStringWithMMH(publicShareProp?.validTill)
+                        ? formatDateTime(publicShareProp?.validTill / 1000)
                         : 'never'
                 }
                 onChange={(e) => {

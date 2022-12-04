@@ -18,6 +18,8 @@ import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
+import { isCollectionHidden } from 'utils/collection';
+import { CustomError } from 'utils/error';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -63,13 +65,16 @@ export const syncFiles = async (
         if (!getToken()) {
             continue;
         }
+        if (isCollectionHidden(collection)) {
+            throw Error(CustomError.HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED);
+        }
         const lastSyncTime = await getCollectionLastSyncTime(collection);
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
         const fetchedFiles =
             (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
-        files.push(...fetchedFiles);
+        files = [...files, ...fetchedFiles];
         const latestVersionFiles = new Map<string, EnteFile>();
         files.forEach((file) => {
             const uid = `${file.collectionID}-${file.id}`;
@@ -105,7 +110,7 @@ export const getFiles = async (
     setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
-        const decryptedFiles: EnteFile[] = [];
+        let decryptedFiles: EnteFile[] = [];
         let time = sinceTime;
         let resp;
         do {
@@ -124,7 +129,8 @@ export const getFiles = async (
                 }
             );
 
-            decryptedFiles.push(
+            decryptedFiles = [
+                ...decryptedFiles,
                 ...(await Promise.all(
                     resp.data.diff.map(async (file: EnteFile) => {
                         if (!file.isDeleted) {
@@ -132,8 +138,8 @@ export const getFiles = async (
                         }
                         return file;
                     }) as Promise<EnteFile>[]
-                ))
-            );
+                )),
+            ];
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;

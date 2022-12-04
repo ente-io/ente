@@ -27,14 +27,14 @@ import { checkSubscriptionPurchase } from 'utils/billing';
 
 import FullScreenDropZone from 'components/FullScreenDropZone';
 import Sidebar from 'components/Sidebar';
-import { checkConnectivity, preloadImage } from 'utils/common';
+import { preloadImage } from 'utils/common';
 import {
     isFirstLogin,
     justSignedUp,
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, logoutUser } from 'services/userService';
+import { isTokenValid, logoutUser, validateKey } from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -89,18 +89,17 @@ import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
 import { GalleryContextType, SelectedState } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
-import Notification from 'components/Notification';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
 import { Search, SearchResultSummary, UpdateSearch } from 'types/search';
 import SearchResultInfo from 'components/Search/SearchResultInfo';
-import { NotificationAttributes } from 'types/Notification';
 import { ITEM_TYPE, TimeStampListItem } from 'components/PhotoList';
 import UploadInputs from 'components/UploadSelectorInputs';
 import useFileInput from 'hooks/useFileInput';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
+import { checkConnectivity } from 'utils/error/ui';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -117,7 +116,6 @@ const defaultGalleryContext: GalleryContextType = {
     showPlanSelectorModal: () => null,
     setActiveCollection: () => null,
     syncWithRemote: () => null,
-    setNotificationAttributes: () => null,
     setBlockingLoad: () => null,
     photoListHeader: null,
 };
@@ -180,7 +178,9 @@ export default function Gallery() {
         useState<SearchResultSummary>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
-    const [deleted, setDeleted] = useState<number[]>([]);
+    const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
@@ -189,13 +189,6 @@ export default function Gallery() {
     const [fixCreationTimeView, setFixCreationTimeView] = useState(false);
     const [fixCreationTimeAttributes, setFixCreationTimeAttributes] =
         useState<FixCreationTimeAttributes>(null);
-
-    const [notificationView, setNotificationView] = useState(false);
-
-    const closeNotification = () => setNotificationView(false);
-
-    const [notificationAttributes, setNotificationAttributes] =
-        useState<NotificationAttributes>(null);
 
     const [archivedCollections, setArchivedCollections] =
         useState<Set<number>>();
@@ -233,6 +226,10 @@ export default function Gallery() {
             return;
         }
         const main = async () => {
+            const valid = await validateKey();
+            if (!valid) {
+                return;
+            }
             setActiveCollection(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
             setIsFirstFetch(true);
@@ -241,10 +238,10 @@ export default function Gallery() {
             }
             setIsFirstLogin(false);
             const user = getData(LS_KEYS.USER);
-            const files = mergeMetadata(await getLocalFiles());
+            let files = mergeMetadata(await getLocalFiles());
             const collections = await getLocalCollections();
             const trash = await getLocalTrash();
-            files.push(...getTrashedFiles(trash));
+            files = [...files, ...getTrashedFiles(trash)];
             setUser(user);
             setFiles(sortFiles(files));
             setCollections(collections);
@@ -264,24 +261,16 @@ export default function Gallery() {
         setDerivativeState(user, collections, files);
     }, [collections, files]);
 
-    useEffect(
-        () => collectionSelectorAttributes && setCollectionSelectorView(true),
-        [collectionSelectorAttributes]
-    );
+    useEffect(() => {
+        collectionSelectorAttributes && setCollectionSelectorView(true);
+    }, [collectionSelectorAttributes]);
 
-    useEffect(
-        () => collectionNamerAttributes && setCollectionNamerView(true),
-        [collectionNamerAttributes]
-    );
-    useEffect(
-        () => fixCreationTimeAttributes && setFixCreationTimeView(true),
-        [fixCreationTimeAttributes]
-    );
-
-    useEffect(
-        () => notificationAttributes && setNotificationView(true),
-        [notificationAttributes]
-    );
+    useEffect(() => {
+        collectionNamerAttributes && setCollectionNamerView(true);
+    }, [collectionNamerAttributes]);
+    useEffect(() => {
+        fixCreationTimeAttributes && setFixCreationTimeView(true);
+    }, [fixCreationTimeAttributes]);
 
     useEffect(() => {
         if (typeof activeCollection === 'undefined') {
@@ -341,9 +330,9 @@ export default function Gallery() {
             !silent && startLoading();
             const collections = await syncCollections();
             setCollections(collections);
-            const files = await syncFiles(collections, setFiles);
+            let files = await syncFiles(collections, setFiles);
             const trash = await syncTrash(collections, setFiles, files);
-            files.push(...getTrashedFiles(trash));
+            files = [...files, ...getTrashedFiles(trash)];
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {
@@ -490,12 +479,12 @@ export default function Gallery() {
         startLoading();
         try {
             const selectedFiles = getSelectedFiles(selected, files);
+            setDeletedFileIds((deletedFileIds) => {
+                selectedFiles.forEach((file) => deletedFileIds.add(file.id));
+                return new Set(deletedFileIds);
+            });
             if (permanent) {
                 await deleteFromTrash(selectedFiles.map((file) => file.id));
-                setDeleted([
-                    ...deleted,
-                    ...selectedFiles.map((file) => file.id),
-                ]);
             } else {
                 await trashFiles(selectedFiles);
             }
@@ -574,7 +563,6 @@ export default function Gallery() {
                 showPlanSelectorModal,
                 setActiveCollection,
                 syncWithRemote,
-                setNotificationAttributes,
                 setBlockingLoad,
                 photoListHeader: photoListHeader,
             }}>
@@ -601,11 +589,6 @@ export default function Gallery() {
                     modalView={planModalView}
                     closeModal={() => setPlanModalView(false)}
                     setLoading={setBlockingLoad}
-                />
-                <Notification
-                    open={notificationView}
-                    onClose={closeNotification}
-                    attributes={notificationAttributes}
                 />
                 <CollectionNamer
                     show={collectionNamerView}
@@ -685,10 +668,9 @@ export default function Gallery() {
                     sidebarView={sidebarView}
                     closeSidebar={closeSidebar}
                 />
-
                 <PhotoFrame
                     files={files}
-                    setFiles={setFiles}
+                    collections={collections}
                     syncWithRemote={syncWithRemote}
                     favItemIds={favItemIds}
                     archivedCollections={archivedCollections}
@@ -698,7 +680,8 @@ export default function Gallery() {
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     search={search}
-                    deleted={deleted}
+                    deletedFileIds={deletedFileIds}
+                    setDeletedFileIds={setDeletedFileIds}
                     activeCollection={activeCollection}
                     isSharedCollection={isSharedCollection(
                         activeCollection,
