@@ -28,6 +28,7 @@ import {
     CollectionSummary,
     CollectionFilesCount,
     EncryptedCollection,
+    CollectionMagicMetadata,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -83,20 +84,22 @@ const getCollectionWithSecrets = async (
             collectionKey
         ));
 
-    if (
-        collection.magicMetadata?.data &&
-        typeof collection.magicMetadata?.data === 'string'
-    ) {
-        collection.magicMetadata.data = await worker.decryptMetadata(
-            collection.magicMetadata.data,
-            collection.magicMetadata.header,
-            collectionKey
-        );
+    let collectionMagicMetadata: CollectionMagicMetadata;
+    if (collection.magicMetadata?.data) {
+        collectionMagicMetadata = {
+            ...collection.magicMetadata,
+            data: await worker.decryptMetadata(
+                collection.magicMetadata.data,
+                collection.magicMetadata.header,
+                collectionKey
+            ),
+        };
     }
     return {
         ...collection,
         name: collectionName,
         key: collectionKey,
+        magicMetadata: collectionMagicMetadata,
     };
 };
 
