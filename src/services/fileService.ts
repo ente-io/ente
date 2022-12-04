@@ -13,7 +13,7 @@ import {
     sortFiles,
 } from 'utils/file';
 import CryptoWorker from 'utils/crypto';
-import { EnteFile, TrashRequest } from 'types/file';
+import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
@@ -132,11 +132,12 @@ export const getFiles = async (
             decryptedFiles = [
                 ...decryptedFiles,
                 ...(await Promise.all(
-                    resp.data.diff.map(async (file: EnteFile) => {
+                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
                         if (!file.isDeleted) {
-                            file = await decryptFile(file, collection.key);
+                            return await decryptFile(file, collection.key);
+                        } else {
+                            return file;
                         }
-                        return file;
                     }) as Promise<EnteFile>[]
                 )),
             ];

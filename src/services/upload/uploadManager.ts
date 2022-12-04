@@ -17,7 +17,7 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
+import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {
     ElectronFile,
     FileWithCollection,
@@ -435,7 +435,7 @@ class UploadManager {
 
     async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
-        uploadedFile: EnteFile | null,
+        uploadedFile: EncryptedEnteFile | EnteFile | null,
         fileWithCollection: FileWithCollection
     ) {
         try {
@@ -450,16 +450,16 @@ class UploadManager {
                     this.failedFiles.push(fileWithCollection);
                     break;
                 case UPLOAD_RESULT.ALREADY_UPLOADED:
-                    decryptedFile = uploadedFile;
+                    decryptedFile = uploadedFile as EnteFile;
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
-                    decryptedFile = uploadedFile;
+                    decryptedFile = uploadedFile as EnteFile;
                     fileUploadResult = UPLOAD_RESULT.UPLOADED;
                     break;
                 case UPLOAD_RESULT.UPLOADED:
                 case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
                     decryptedFile = await decryptFile(
-                        uploadedFile,
+                        uploadedFile as EncryptedEnteFile,
                         fileWithCollection.collection.key
                     );
                     break;
@@ -483,7 +483,7 @@ class UploadManager {
             await this.watchFolderCallback(
                 fileUploadResult,
                 fileWithCollection,
-                uploadedFile
+                decryptedFile
             );
             return fileUploadResult;
         } catch (e) {

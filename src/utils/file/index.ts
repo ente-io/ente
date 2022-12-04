@@ -1,8 +1,10 @@
 import { SelectedState } from 'types/gallery';
 import {
     EnteFile,
-    fileAttribute,
+    EncryptedEnteFile,
+    FileMagicMetadata,
     FileMagicMetadataProps,
+    FilePublicMagicMetadata,
     FilePublicMagicMetadataProps,
 } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
@@ -191,41 +193,59 @@ export function sortFiles(files: EnteFile[]) {
     return files;
 }
 
-export async function decryptFile(file: EnteFile, collectionKey: string) {
+export async function decryptFile(
+    file: EncryptedEnteFile,
+    collectionKey: string
+): Promise<EnteFile> {
     try {
         const worker = await new CryptoWorker();
-        file.key = await worker.decryptB64(
-            file.encryptedKey,
-            file.keyDecryptionNonce,
+        const {
+            encryptedKey,
+            keyDecryptionNonce,
+            metadata,
+            magicMetadata,
+            pubMagicMetadata,
+            ...restFileProps
+        } = file;
+        const fileKey = await worker.decryptB64(
+            encryptedKey,
+            keyDecryptionNonce,
             collectionKey
         );
-        const encryptedMetadata = file.metadata as unknown as fileAttribute;
-        file.metadata = await worker.decryptMetadata(
-            encryptedMetadata.encryptedData as string,
-            encryptedMetadata.decryptionHeader,
-            file.key
+        const fileMetadata = await worker.decryptMetadata(
+            metadata.encryptedData,
+            metadata.decryptionHeader,
+            fileKey
         );
-        if (
-            file.magicMetadata?.data &&
-            typeof file.magicMetadata.data === 'string'
-        ) {
-            file.magicMetadata.data = await worker.decryptMetadata(
-                file.magicMetadata.data,
-                file.magicMetadata.header,
-                file.key
-            );
+        let fileMagicMetadata: FileMagicMetadata;
+        let filePubMagicMetadata: FilePublicMagicMetadata;
+        if (magicMetadata?.data) {
+            fileMagicMetadata = {
+                ...file.magicMetadata,
+                data: await worker.decryptMetadata(
+                    magicMetadata.data,
+                    magicMetadata.header,
+                    fileKey
+                ),
+            };
         }
-        if (
-            file.pubMagicMetadata?.data &&
-            typeof file.pubMagicMetadata.data === 'string'
-        ) {
-            file.pubMagicMetadata.data = await worker.decryptMetadata(
-                file.pubMagicMetadata.data,
-                file.pubMagicMetadata.header,
-                file.key
-            );
+        if (pubMagicMetadata?.data) {
+            filePubMagicMetadata = {
+                ...pubMagicMetadata,
+                data: await worker.decryptMetadata(
+                    pubMagicMetadata.data,
+                    pubMagicMetadata.header,
+                    fileKey
+                ),
+            };
         }
-        return file;
+        return {
+            ...restFileProps,
+            key: fileKey,
+            metadata: fileMetadata,
+            magicMetadata: fileMagicMetadata,
+            pubMagicMetadata: filePubMagicMetadata,
+        };
     } catch (e) {
         logError(e, 'file decryption failed');
         throw e;
