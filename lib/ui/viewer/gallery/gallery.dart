@@ -211,8 +211,7 @@ class _GalleryState extends State<Gallery> {
   Widget _getListView() {
     return LocalHeroScope(
       duration: const Duration(milliseconds: 100),
-      child:
-          RawGestureDetector(
+      child: RawGestureDetector(
         gestures: {
           AllowMultipleGestureRecognizer: GestureRecognizerFactoryWithHandlers<
               AllowMultipleGestureRecognizer>(
@@ -225,21 +224,26 @@ class _GalleryState extends State<Gallery> {
               };
               instance.onEnd = (details) {
                 if (_lastScaleUpdateDetails != null) {
+                  bool shouldReload = false;
                   if (_lastScaleUpdateDetails.verticalScale > 1 &&
                       _lastScaleUpdateDetails.horizontalScale > 1) {
                     _logger.info("zoomed in");
                     if (_imagesPerRow > 2) {
+                      shouldReload = true;
                       _imagesPerRow--;
                     }
                   } else if (_lastScaleUpdateDetails.verticalScale < 1 &&
                       _lastScaleUpdateDetails.horizontalScale < 1) {
                     _logger.info("zoomed out");
                     if (_imagesPerRow < 4) {
+                      shouldReload = true;
                       _imagesPerRow++;
                     }
                   }
                   _lastScaleUpdateDetails = null;
-                  setState(() {});
+                  if (shouldReload) {
+                    setState(() {});
+                  }
                 }
               };
             },
