@@ -38,7 +38,7 @@ import {
     CollectionSummaryType,
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { EncryptionResult } from 'types/upload';
+import { MetadataEncryptionResult } from 'types/upload';
 import constants from 'utils/strings/constants';
 import { IsArchived } from 'utils/magicMetadata';
 import { User } from 'types/user';
@@ -513,7 +513,7 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
 
     const worker = await new CryptoWorker();
 
-    const { file: encryptedMagicMetadata }: EncryptionResult =
+    const { file: encryptedMagicMetadata }: MetadataEncryptionResult =
         await worker.encryptMetadata(
             collection.magicMetadata.data,
             collection.key
