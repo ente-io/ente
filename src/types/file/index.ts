@@ -1,4 +1,8 @@
-import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
+import {
+    EncryptedMagicMetadata,
+    MagicMetadataCore,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 import { DataStream, Metadata } from 'types/upload';
 
 export interface FileAttribute {
@@ -14,6 +18,54 @@ export interface B64FileAttribute {
 export interface S3FileAttribute {
     objectKey: string;
     decryptionHeader: string;
+}
+
+export interface EnteFileInfo {
+    fileSize: number;
+    thumbSize: number;
+}
+
+export interface EncryptedEnteFile {
+    id: number;
+    collectionID: number;
+    ownerID: number;
+    file: S3FileAttribute;
+    thumbnail: S3FileAttribute;
+    metadata: B64FileAttribute;
+    info: EnteFileInfo;
+    magicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    isDeleted: boolean;
+    updationTime: number;
+}
+
+export interface EnteFile
+    extends Omit<
+        EncryptedEnteFile,
+        | 'metadata'
+        | 'pubMagicMetadata'
+        | 'magicMetadata'
+        | 'encryptedKey'
+        | 'keyDecryptionNonce'
+    > {
+    metadata: Metadata;
+    magicMetadata: FileMagicMetadata;
+    pubMagicMetadata: FilePublicMagicMetadata;
+    key: string;
+    src?: string;
+    msrc?: string;
+    html?: string;
+    w?: number;
+    h?: number;
+    title?: string;
+    isTrashed?: boolean;
+    deleteBy?: number;
+    isSourceLoaded?: boolean;
+    originalVideoURL?: string;
+    originalImageURL?: string;
+    dataIndex?: number;
 }
 
 export interface FileMagicMetadataProps {
@@ -34,40 +86,6 @@ export interface FilePublicMagicMetadataProps {
 export interface FilePublicMagicMetadata
     extends Omit<MagicMetadataCore, 'data'> {
     data: FilePublicMagicMetadataProps;
-}
-
-export interface EnteFileInfo {
-    fileSize: number;
-    thumbSize: number;
-}
-
-export interface EnteFile {
-    id: number;
-    collectionID: number;
-    ownerID: number;
-    file: S3FileAttribute;
-    thumbnail: S3FileAttribute;
-    metadata: Metadata;
-    info: EnteFileInfo;
-    magicMetadata: FileMagicMetadata;
-    pubMagicMetadata: FilePublicMagicMetadata;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    key: string;
-    src: string;
-    msrc: string;
-    html: string;
-    w: number;
-    h: number;
-    title: string;
-    isDeleted: boolean;
-    isTrashed?: boolean;
-    deleteBy?: number;
-    isSourceLoaded?: boolean;
-    originalVideoURL?: string;
-    originalImageURL?: string;
-    dataIndex: number;
-    updationTime: number;
 }
 
 export interface TrashRequest {
