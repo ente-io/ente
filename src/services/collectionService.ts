@@ -463,13 +463,13 @@ const encryptWithNewCollectionKey = async (
             file.key,
             newCollection.key
         );
-        file.encryptedKey = newEncryptedKey.encryptedData;
-        file.keyDecryptionNonce = newEncryptedKey.nonce;
+        const encryptedKey = newEncryptedKey.encryptedData;
+        const keyDecryptionNonce = newEncryptedKey.nonce;
 
         fileKeysEncryptedWithNewCollection.push({
             id: file.id,
-            encryptedKey: file.encryptedKey,
-            keyDecryptionNonce: file.keyDecryptionNonce,
+            encryptedKey,
+            keyDecryptionNonce,
         });
     }
     return fileKeysEncryptedWithNewCollection;

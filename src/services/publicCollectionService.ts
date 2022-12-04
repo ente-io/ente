@@ -4,7 +4,7 @@ import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
-import { EnteFile } from 'types/file';
+import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {
     AbuseReportDetails,
     AbuseReportRequest,
@@ -242,9 +242,9 @@ const getPublicFiles = async (
             decryptedFiles = [
                 ...decryptedFiles,
                 ...(await Promise.all(
-                    resp.data.diff.map(async (file: EnteFile) => {
+                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
                         if (!file.isDeleted) {
-                            file = await decryptFile(file, collection.key);
+                            return await decryptFile(file, collection.key);
                         }
                         return file;
                     }) as Promise<EnteFile>[]

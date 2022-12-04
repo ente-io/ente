@@ -14,7 +14,7 @@ import { getCollection } from './collectionService';
 import { EnteFile } from 'types/file';
 
 import HTTPService from './HTTPService';
-import { Trash, TrashItem } from 'types/trash';
+import { EncryptedTrashItem, Trash, TrashItem } from 'types/trash';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
@@ -99,7 +99,7 @@ export const updateTrash = async (
                     'X-Auth-Token': token,
                 }
             );
-            for (const trashItem of resp.data.diff as TrashItem[]) {
+            for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
                 const collectionID = trashItem.file.collectionID;
                 let collection = collections.get(collectionID);
                 if (!collection) {
@@ -109,13 +109,14 @@ export const updateTrash = async (
                         ...collections.values(),
                     ]);
                 }
+                let decryptedFile: EnteFile;
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
-                    trashItem.file = await decryptFile(
+                    decryptedFile = await decryptFile(
                         trashItem.file,
                         collection.key
                     );
                 }
-                updatedTrash.push(trashItem);
+                updatedTrash.push({ ...trashItem, file: decryptedFile });
             }
 
             if (resp.data.diff.length) {

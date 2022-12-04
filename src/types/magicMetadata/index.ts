@@ -5,7 +5,7 @@ export interface MagicMetadataCore {
     data: Record<string, any>;
 }
 
-export interface EncryptedMagicMetadataCore
+export interface EncryptedMagicMetadata
     extends Omit<MagicMetadataCore, 'data'> {
     data: string;
 }
@@ -40,5 +40,5 @@ export interface BulkUpdateMagicMetadataRequest {
 
 export interface UpdateMagicMetadataRequest {
     id: number;
-    magicMetadata: EncryptedMagicMetadataCore;
+    magicMetadata: EncryptedMagicMetadata;
 }
