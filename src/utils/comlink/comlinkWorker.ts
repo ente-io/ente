@@ -1,4 +1,3 @@
-import { runningInBrowser } from 'utils/common';
 import { Remote, wrap } from 'comlink';
 import { addLocalLog } from 'utils/logging';
 
@@ -7,12 +6,10 @@ export class ComlinkWorker<T> {
     private worker: Worker;
     private name: string;
 
-    constructor(name: string, url: string) {
+    constructor(name: string, worker: Worker) {
         this.name = name;
-        if (!runningInBrowser()) {
-            return;
-        }
-        this.worker = new Worker(new URL(url, import.meta.url), { name: name });
+        this.worker = worker;
+
         this.worker.onerror = (errorEvent) => {
             console.error('Got error event from worker', errorEvent);
         };
