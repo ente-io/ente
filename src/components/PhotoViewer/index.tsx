@@ -293,7 +293,7 @@ function PhotoViewer(props: Iprops) {
             if (callback || event === 'destroy') {
                 photoSwipe.listen(event, function (...args) {
                     if (callback) {
-                        args.unshift(this);
+                        args.unshift(photoSwipe);
                         callback(...args);
                     }
                     if (event === 'destroy') {
