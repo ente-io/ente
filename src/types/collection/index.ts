@@ -2,6 +2,7 @@ import { User } from 'types/user';
 import { EnteFile } from 'types/file';
 import { CollectionSummaryType, CollectionType } from 'constants/collection';
 import {
+    EncryptedMagicMetadata,
     MagicMetadataCore,
     SUB_TYPE,
     VISIBILITY_STATE,
@@ -21,7 +22,7 @@ export interface EncryptedCollection {
     publicURLs?: PublicURL[];
     updationTime: number;
     isDeleted: boolean;
-    magicMetadata: CollectionMagicMetadata;
+    magicMetadata: EncryptedMagicMetadata;
 }
 
 export interface Collection
@@ -31,10 +32,12 @@ export interface Collection
         | 'keyDecryptionNonce'
         | 'encryptedName'
         | 'nameDecryptionNonce'
+        | 'magicMetadata'
     > {
     key: string;
     name: string;
     isSharedCollection?: boolean;
+    magicMetadata: CollectionMagicMetadata;
 }
 
 export interface PublicURL {
