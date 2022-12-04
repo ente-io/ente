@@ -27,6 +27,7 @@ import {
     CollectionSummaries,
     CollectionSummary,
     CollectionFilesCount,
+    EncryptedCollection,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -49,14 +50,14 @@ const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
 const getCollectionWithSecrets = async (
-    collection: Collection,
+    collection: EncryptedCollection,
     masterKey: string
-) => {
+): Promise<Collection> => {
     const worker = await new CryptoWorker();
     const userID = getData(LS_KEYS.USER).id;
-    let decryptedKey: string;
+    let collectionKey: string;
     if (collection.owner.id === userID) {
-        decryptedKey = await worker.decryptB64(
+        collectionKey = await worker.decryptB64(
             collection.encryptedKey,
             collection.keyDecryptionNonce,
             masterKey
@@ -68,18 +69,18 @@ const getCollectionWithSecrets = async (
             keyAttributes.secretKeyDecryptionNonce,
             masterKey
         );
-        decryptedKey = await worker.boxSealOpen(
+        collectionKey = await worker.boxSealOpen(
             collection.encryptedKey,
             keyAttributes.publicKey,
             secretKey
         );
     }
-    collection.name =
+    const collectionName =
         collection.name ||
         (await worker.decryptToUTF8(
             collection.encryptedName,
             collection.nameDecryptionNonce,
-            decryptedKey
+            collectionKey
         ));
 
     if (
@@ -89,12 +90,13 @@ const getCollectionWithSecrets = async (
         collection.magicMetadata.data = await worker.decryptMetadata(
             collection.magicMetadata.data,
             collection.magicMetadata.header,
-            decryptedKey
+            collectionKey
         );
     }
     return {
         ...collection,
-        key: decryptedKey,
+        name: collectionName,
+        key: collectionKey,
     };
 };
 
@@ -111,30 +113,27 @@ const getCollections = async (
             },
             { 'X-Auth-Token': token }
         );
-        const promises: Promise<Collection>[] = resp.data.collections.map(
-            async (collection: Collection) => {
-                if (collection.isDeleted) {
-                    return collection;
+        const decryptedCollections: Collection[] = await Promise.all(
+            resp.data.collections.map(
+                async (collection: EncryptedCollection) => {
+                    if (collection.isDeleted) {
+                        return null;
+                    }
+                    try {
+                        return await getCollectionWithSecrets(collection, key);
+                    } catch (e) {
+                        logError(e, `decryption failed for collection`, {
+                            collectionID: collection.id,
+                        });
+                        return null;
+                    }
                 }
-                let collectionWithSecrets = collection;
-                try {
-                    collectionWithSecrets = await getCollectionWithSecrets(
-                        collection,
-                        key
-                    );
-                } catch (e) {
-                    logError(e, `decryption failed for collection`, {
-                        collectionID: collection.id,
-                    });
-                }
-                return collectionWithSecrets;
-            }
+            )
         );
-        // only allow deleted or collection with key, filtering out collection whose decryption failed
-        const collections = (await Promise.all(promises)).filter(
-            (collection) => collection.isDeleted || collection.key
+        const nonNullCollections = decryptedCollections.filter(
+            (collection) => !!collection
         );
-        return collections;
+        return nonNullCollections;
     } catch (e) {
         logError(e, 'getCollections failed');
         throw e;
@@ -284,7 +283,7 @@ export const createCollection = async (
             await worker.encryptToB64(collectionKey, encryptionKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
             await worker.encryptUTF8(collectionName, collectionKey);
-        const newCollection: Collection = {
+        const newCollection: EncryptedCollection = {
             id: null,
             owner: null,
             encryptedKey,
@@ -298,15 +297,12 @@ export const createCollection = async (
             isDeleted: false,
             magicMetadata: null,
         };
-        let createdCollection: Collection = await postCollection(
-            newCollection,
-            token
-        );
-        createdCollection = await getCollectionWithSecrets(
+        const createdCollection = await postCollection(newCollection, token);
+        const decryptedCreatedCollection = await getCollectionWithSecrets(
             createdCollection,
             encryptionKey
         );
-        return createdCollection;
+        return decryptedCreatedCollection;
     } catch (e) {
         logError(e, 'create collection failed');
         throw e;
@@ -314,9 +310,9 @@ export const createCollection = async (
 };
 
 const postCollection = async (
-    collectionData: Collection,
+    collectionData: EncryptedCollection,
     token: string
-): Promise<Collection> => {
+): Promise<EncryptedCollection> => {
     try {
         const response = await HTTPService.post(
             `${ENDPOINT}/collections`,

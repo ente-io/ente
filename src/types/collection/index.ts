@@ -7,23 +7,34 @@ import {
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
 
-export interface Collection {
+export interface EncryptedCollection {
     id: number;
     owner: User;
-    key?: string;
     name?: string;
-    encryptedName?: string;
-    nameDecryptionNonce?: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    encryptedName: string;
+    nameDecryptionNonce: string;
     type: CollectionType;
     attributes: collectionAttributes;
     sharees: User[];
-    updationTime: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    isDeleted: boolean;
-    isSharedCollection?: boolean;
     publicURLs?: PublicURL[];
-    magicMetadata?: CollectionMagicMetadata;
+    updationTime: number;
+    isDeleted: boolean;
+    magicMetadata: CollectionMagicMetadata;
+}
+
+export interface Collection
+    extends Omit<
+        EncryptedCollection,
+        | 'encryptedKey'
+        | 'keyDecryptionNonce'
+        | 'encryptedName'
+        | 'nameDecryptionNonce'
+    > {
+    key: string;
+    name: string;
+    isSharedCollection?: boolean;
 }
 
 export interface PublicURL {
