@@ -11,7 +11,7 @@ import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
 import { EncryptionResult, UploadURL } from 'types/upload';
-import { fileAttribute } from 'types/file';
+import { S3FileAttribute } from 'types/file';
 import { USE_CF_PROXY } from 'constants/upload';
 
 const ENDPOINT = getEndpoint();
@@ -106,7 +106,7 @@ export async function uploadThumbnail(
     fileKey: string,
     updatedThumbnail: Uint8Array,
     uploadURL: UploadURL
-): Promise<fileAttribute> {
+): Promise<S3FileAttribute> {
     const { file: encryptedThumbnail }: EncryptionResult =
         await worker.encryptThumbnail(updatedThumbnail, fileKey);
     let thumbnailObjectKey: string = null;
@@ -131,7 +131,7 @@ export async function uploadThumbnail(
 
 export async function updateThumbnail(
     fileID: number,
-    newThumbnail: fileAttribute
+    newThumbnail: S3FileAttribute
 ) {
     try {
         const token = getToken();

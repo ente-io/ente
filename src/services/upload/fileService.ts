@@ -10,6 +10,7 @@ import {
     ParsedMetadataJSONMap,
     DataStream,
     ElectronFile,
+    MetadataEncryptionResult,
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -105,7 +106,7 @@ export async function encryptFile(
 
         const { file: encryptedThumbnail }: EncryptionResult =
             await worker.encryptThumbnail(file.thumbnail, fileKey);
-        const { file: encryptedMetadata }: EncryptionResult =
+        const { file: encryptedMetadata }: MetadataEncryptionResult =
             await worker.encryptMetadata(file.metadata, fileKey);
 
         const encryptedKey: B64EncryptionResult = await worker.encryptToB64(

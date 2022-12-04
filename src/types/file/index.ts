@@ -1,9 +1,18 @@
 import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
 import { DataStream, Metadata } from 'types/upload';
 
-export interface fileAttribute {
-    encryptedData?: DataStream | Uint8Array;
-    objectKey?: string;
+export interface FileAttribute {
+    encryptedData: DataStream | Uint8Array;
+    decryptionHeader: string;
+}
+
+export interface B64FileAttribute {
+    encryptedData: string;
+    decryptionHeader: string;
+}
+
+export interface S3FileAttribute {
+    objectKey: string;
     decryptionHeader: string;
 }
 
@@ -36,8 +45,8 @@ export interface EnteFile {
     id: number;
     collectionID: number;
     ownerID: number;
-    file: fileAttribute;
-    thumbnail: fileAttribute;
+    file: S3FileAttribute;
+    thumbnail: S3FileAttribute;
     metadata: Metadata;
     info: EnteFileInfo;
     magicMetadata: FileMagicMetadata;

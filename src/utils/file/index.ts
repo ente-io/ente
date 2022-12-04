@@ -1,7 +1,7 @@
 import { SelectedState } from 'types/gallery';
 import {
+    B64FileAttribute,
     EnteFile,
-    fileAttribute,
     FileMagicMetadataProps,
     FilePublicMagicMetadataProps,
 } from 'types/file';
@@ -199,7 +199,7 @@ export async function decryptFile(file: EnteFile, collectionKey: string) {
             file.keyDecryptionNonce,
             collectionKey
         );
-        const encryptedMetadata = file.metadata as unknown as fileAttribute;
+        const encryptedMetadata = file.metadata as unknown as B64FileAttribute;
         file.metadata = await worker.decryptMetadata(
             encryptedMetadata.encryptedData,
             encryptedMetadata.decryptionHeader,

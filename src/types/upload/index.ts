@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { fileAttribute } from 'types/file';
+import { B64FileAttribute, FileAttribute, S3FileAttribute } from 'types/file';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -12,7 +12,12 @@ export function isDataStream(object: any): object is DataStream {
 }
 
 export interface EncryptionResult {
-    file: fileAttribute;
+    file: FileAttribute;
+    key: string;
+}
+
+export interface MetadataEncryptionResult {
+    file: B64FileAttribute;
     key: string;
 }
 
@@ -126,12 +131,17 @@ export interface EncryptedFile {
     fileKey: B64EncryptionResult;
 }
 export interface ProcessedFile {
-    file: fileAttribute;
-    thumbnail: fileAttribute;
-    metadata: fileAttribute;
+    file: FileAttribute;
+    thumbnail: FileAttribute;
+    metadata: B64FileAttribute;
     localID: number;
 }
-export interface BackupedFile extends Omit<ProcessedFile, 'localID'> {}
+
+export interface BackupedFile {
+    file: S3FileAttribute;
+    thumbnail: S3FileAttribute;
+    metadata: B64FileAttribute;
+}
 
 export interface UploadFile extends BackupedFile {
     collectionID: number;
