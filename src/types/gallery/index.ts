@@ -10,7 +10,7 @@ export type SelectedState = {
 };
 export type SetFiles = React.Dispatch<React.SetStateAction<EnteFile[]>>;
 export type SetCollections = React.Dispatch<React.SetStateAction<Collection[]>>;
-export type SetLoading = React.Dispatch<React.SetStateAction<Boolean>>;
+export type SetLoading = React.Dispatch<React.SetStateAction<boolean>>;
 export type SetCollectionSelectorAttributes = React.Dispatch<
     React.SetStateAction<CollectionSelectorAttributes>
 >;
