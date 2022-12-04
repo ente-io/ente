@@ -7,12 +7,12 @@ export class ComlinkWorker<T> {
     private worker: Worker;
     private name: string;
 
-    constructor(name: string, url: string) {
+    constructor(name: string, url: URL) {
         this.name = name;
         if (!runningInBrowser()) {
             return;
         }
-        this.worker = new Worker(new URL(url, import.meta.url), { name: name });
+        this.worker = new Worker(url, { name: name });
         this.worker.onerror = (errorEvent) => {
             console.error('Got error event from worker', errorEvent);
         };

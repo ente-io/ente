@@ -8,7 +8,10 @@ const getDedicatedFFmpegWorker = () => {
     if (runningInBrowser()) {
         const cryptoComlinkWorker = new ComlinkWorker<
             typeof DedicatedFFmpegWorker
-        >('ente-ffmpeg-worker', 'worker/ffmpeg.worker.ts');
+        >(
+            'ente-ffmpeg-worker',
+            new URL('worker/ffmpeg.worker.ts', import.meta.url)
+        );
         return cryptoComlinkWorker;
     }
 };
@@ -19,7 +22,10 @@ export const getDedicatedCryptoWorker = () => {
     if (runningInBrowser()) {
         const cryptoComlinkWorker = new ComlinkWorker<
             typeof DedicatedCryptoWorker
-        >('ente-crypto-worker', 'worker/crypto.worker.ts');
+        >(
+            'ente-crypto-worker',
+            new URL('worker/crypto.worker.ts', import.meta.url)
+        );
         return cryptoComlinkWorker;
     }
 };
@@ -29,7 +35,10 @@ export const getDedicatedConvertWorker = () => {
     if (runningInBrowser()) {
         const cryptoComlinkWorker = new ComlinkWorker<
             typeof DedicatedConvertWorker
-        >('ente-convert-worker', 'worker/convert.worker.ts');
+        >(
+            'ente-convert-worker',
+            new URL('worker/convert.worker.ts', import.meta.url)
+        );
         return cryptoComlinkWorker;
     }
 };
