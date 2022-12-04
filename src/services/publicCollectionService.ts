@@ -1,6 +1,6 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
-import { Collection } from 'types/collection';
+import { Collection, EncryptedCollection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
@@ -322,7 +322,7 @@ export const verifyPublicCollectionPassword = async (
 };
 
 const decryptCollectionName = async (
-    collection: Collection,
+    collection: EncryptedCollection,
     collectionKey: string
 ) => {
     const worker = await new CryptoWorker();
