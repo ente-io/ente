@@ -128,14 +128,13 @@ class _CollectionPageState extends State<CollectionPage> {
                   selectedFiles: _selectedFiles,
                   expandedMenu: ExpandedMenuWidget(
                     items: [
-                      BlurMenuItemWidget(
-                        leadingIcon: Icons.add_outlined,
-                        labelText: "One",
-                        menuItemColor: colorScheme.fillFaint,
-                      ),
-                    ],
-                    groupingOrder: const [
-                      1,
+                      [
+                        BlurMenuItemWidget(
+                          leadingIcon: Icons.add_outlined,
+                          labelText: "One",
+                          menuItemColor: colorScheme.fillFaint,
+                        ),
+                      ],
                     ],
                   ),
                   text: _selectedFiles.files.length.toString() + ' selected',
