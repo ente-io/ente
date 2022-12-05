@@ -61,13 +61,23 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
                     )
                   : const SizedBox.shrink(),
               widget.labelText != null
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2),
-                      child: Text(
-                        widget.labelText!,
-                        style: getEnteTextTheme(context)
-                            .bodyBold
-                            .copyWith(color: colorScheme.blurTextBase),
+                  ? Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.labelText!,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: getEnteTextTheme(context)
+                                    .bodyBold
+                                    .copyWith(color: colorScheme.blurTextBase),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   : const SizedBox.shrink(),
