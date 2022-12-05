@@ -155,7 +155,7 @@ class _CollectionPageState extends State<CollectionPage> {
                       onTap: () => shareSelected(
                         context,
                         shareButtonKey,
-                        _selectedFiles,
+                        _selectedFiles.files,
                       ),
                     ),
                   ],

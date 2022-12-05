@@ -10,7 +10,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
-import 'package:photos/models/selected_files.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
@@ -133,11 +132,14 @@ DateTime parseDateFromFileNam1e(String fileName) {
   }
 }
 
-void shareSelected(BuildContext context, GlobalKey shareButtonKey,
-    SelectedFiles selectedFiles) {
+void shareSelected(
+  BuildContext context,
+  GlobalKey shareButtonKey,
+  Set<File> selectedFiles,
+) {
   share(
     context,
-    selectedFiles.files.toList(),
+    selectedFiles.toList(),
     shareButtonKey: shareButtonKey,
   );
 }

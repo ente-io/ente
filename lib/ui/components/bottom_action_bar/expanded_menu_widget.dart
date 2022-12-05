@@ -4,7 +4,6 @@ import 'package:photos/ui/components/divider_widget.dart';
 
 class ExpandedMenuWidget extends StatelessWidget {
   final List<List<BlurMenuItemWidget>> items;
-  // final List<int> groupingOrder;
   const ExpandedMenuWidget({
     required this.items,
     super.key,
