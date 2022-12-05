@@ -1,12 +1,15 @@
 import 'dart:ui';
 
 import 'package:expandable/expandable.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/utils/delete_file_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class BottomActionBarWidget extends StatelessWidget {
   final String? text;
@@ -59,7 +62,7 @@ class BottomActionBarWidget extends StatelessWidget {
                     child: ActionBarWidget(
                       selectedFiles: selectedFiles,
                       text: text,
-                      iconButtons: _iconButtons(),
+                      iconButtons: _iconButtons(context),
                     ),
                   ),
                   expanded: expandedMenu,
@@ -96,13 +99,122 @@ class BottomActionBarWidget extends StatelessWidget {
     );
   }
 
-  List<Widget> _iconButtons() {
+  List<Widget> _iconButtons(BuildContext context) {
     final iconButtonsWithExpansionIcon = <Widget?>[
-      ...?iconButtons,
+      IconButtonWidget(
+        icon: Icons.delete_outlined,
+        iconButtonType: IconButtonType.primary,
+        onTap: () => _showDeleteSheet(context),
+      ),
+      IconButtonWidget(
+        icon: Icons.ios_share_outlined,
+        iconButtonType: IconButtonType.primary,
+        onTap: () {},
+      ),
       ExpansionIconWidget(expandableController: _expandableController)
     ];
     iconButtonsWithExpansionIcon.removeWhere((element) => element == null);
     return iconButtonsWithExpansionIcon as List<Widget>;
+  }
+
+  void _showDeleteSheet(BuildContext context) {
+    final count = selectedFiles!.files.length;
+    bool containsUploadedFile = false, containsLocalFile = false;
+    for (final file in selectedFiles!.files) {
+      if (file.uploadedFileID != null) {
+        containsUploadedFile = true;
+      }
+      if (file.localID != null) {
+        containsLocalFile = true;
+      }
+    }
+    final actions = <Widget>[];
+    if (containsUploadedFile && containsLocalFile) {
+      actions.add(
+        CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.of(context, rootNavigator: true).pop();
+            await deleteFilesOnDeviceOnly(
+              context,
+              selectedFiles!.files.toList(),
+            );
+            _clearSelectedFiles();
+            showToast(context, "Files deleted from device");
+          },
+          child: const Text("Device"),
+        ),
+      );
+      actions.add(
+        CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.of(context, rootNavigator: true).pop();
+            await deleteFilesFromRemoteOnly(
+              context,
+              selectedFiles!.files.toList(),
+            );
+            _clearSelectedFiles();
+            showShortToast(context, "Moved to trash");
+          },
+          child: const Text("ente"),
+        ),
+      );
+      actions.add(
+        CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.of(context, rootNavigator: true).pop();
+            await deleteFilesFromEverywhere(
+              context,
+              selectedFiles!.files.toList(),
+            );
+            _clearSelectedFiles();
+          },
+          child: const Text("Everywhere"),
+        ),
+      );
+    } else {
+      actions.add(
+        CupertinoActionSheetAction(
+          isDestructiveAction: true,
+          onPressed: () async {
+            Navigator.of(context, rootNavigator: true).pop();
+            await deleteFilesFromEverywhere(
+              context,
+              selectedFiles!.files.toList(),
+            );
+            _clearSelectedFiles();
+          },
+          child: const Text("Delete"),
+        ),
+      );
+    }
+    final action = CupertinoActionSheet(
+      title: Text(
+        "Delete " +
+            count.toString() +
+            " file" +
+            (count == 1 ? "" : "s") +
+            (containsUploadedFile && containsLocalFile ? " from" : "?"),
+      ),
+      actions: actions,
+      cancelButton: CupertinoActionSheetAction(
+        child: const Text("Cancel"),
+        onPressed: () {
+          Navigator.of(context, rootNavigator: true).pop();
+        },
+      ),
+    );
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => action,
+      barrierColor: Colors.black.withOpacity(0.75),
+    );
+  }
+
+  void _clearSelectedFiles() {
+    selectedFiles!.clearAll();
   }
 
   ExpandableThemeData _getExpandableTheme() {
