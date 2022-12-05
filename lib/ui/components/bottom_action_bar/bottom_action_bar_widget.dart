@@ -38,13 +38,9 @@ class BottomActionBarWidget extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
         child: Container(
           color: colorScheme.backdropBase,
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             top: 4,
-            // bottom: !_expandableController.expanded &&
-            //         ((widget.selectedFiles?.files.isNotEmpty) ?? false)
-            //     ? 24
-            //     : 36,
-            bottom: 24,
+            bottom: (selectedFiles?.files.isNotEmpty) ?? false ? 24 : 36,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
