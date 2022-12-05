@@ -14,6 +14,7 @@ class BottomActionBarWidget extends StatelessWidget {
   final Widget expandedMenu;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
+
   BottomActionBarWidget({
     required this.expandedMenu,
     this.selectedFiles,
@@ -37,13 +38,9 @@ class BottomActionBarWidget extends StatelessWidget {
         filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
         child: Container(
           color: colorScheme.backdropBase,
-          padding: const EdgeInsets.only(
+          padding: EdgeInsets.only(
             top: 4,
-            // bottom: !_expandableController.expanded &&
-            //         ((widget.selectedFiles?.files.isNotEmpty) ?? false)
-            //     ? 24
-            //     : 36,
-            bottom: 24,
+            bottom: (selectedFiles?.files.isNotEmpty) ?? false ? 24 : 36,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -59,7 +56,7 @@ class BottomActionBarWidget extends StatelessWidget {
                     child: ActionBarWidget(
                       selectedFiles: selectedFiles,
                       text: text,
-                      iconButtons: _iconButtons(),
+                      iconButtons: _iconButtons(context),
                     ),
                   ),
                   expanded: expandedMenu,
@@ -96,7 +93,7 @@ class BottomActionBarWidget extends StatelessWidget {
     );
   }
 
-  List<Widget> _iconButtons() {
+  List<Widget> _iconButtons(BuildContext context) {
     final iconButtonsWithExpansionIcon = <Widget?>[
       ...?iconButtons,
       ExpansionIconWidget(expandableController: _expandableController)
