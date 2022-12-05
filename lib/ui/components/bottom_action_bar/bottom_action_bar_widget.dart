@@ -9,6 +9,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
+import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class BottomActionBarWidget extends StatelessWidget {
@@ -17,6 +18,8 @@ class BottomActionBarWidget extends StatelessWidget {
   final Widget expandedMenu;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
+  final GlobalKey shareButtonKey = GlobalKey();
+
   BottomActionBarWidget({
     required this.expandedMenu,
     this.selectedFiles,
@@ -109,7 +112,7 @@ class BottomActionBarWidget extends StatelessWidget {
       IconButtonWidget(
         icon: Icons.ios_share_outlined,
         iconButtonType: IconButtonType.primary,
-        onTap: () {},
+        onTap: () => _shareSelected(context),
       ),
       ExpansionIconWidget(expandableController: _expandableController)
     ];
@@ -210,6 +213,14 @@ class BottomActionBarWidget extends StatelessWidget {
       context: context,
       builder: (_) => action,
       barrierColor: Colors.black.withOpacity(0.75),
+    );
+  }
+
+  void _shareSelected(BuildContext context) {
+    share(
+      context,
+      selectedFiles!.files.toList(),
+      shareButtonKey: shareButtonKey,
     );
   }
 
