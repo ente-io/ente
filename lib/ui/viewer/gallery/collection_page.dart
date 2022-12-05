@@ -14,9 +14,12 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
+import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
+import 'package:photos/utils/delete_file_util.dart';
+import 'package:photos/utils/share_util.dart';
 
 class CollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
@@ -38,6 +41,7 @@ class CollectionPage extends StatefulWidget {
 
 class _CollectionPageState extends State<CollectionPage> {
   final _selectedFiles = SelectedFiles();
+  final GlobalKey shareButtonKey = GlobalKey();
 
   final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
   @override
@@ -140,6 +144,22 @@ class _CollectionPageState extends State<CollectionPage> {
                       _selectedFiles.clearAll();
                     }
                   },
+                  iconButtons: [
+                    IconButtonWidget(
+                      icon: Icons.delete_outlined,
+                      iconButtonType: IconButtonType.primary,
+                      onTap: () => showDeleteSheet(context, _selectedFiles),
+                    ),
+                    IconButtonWidget(
+                      icon: Icons.ios_share_outlined,
+                      iconButtonType: IconButtonType.primary,
+                      onTap: () => shareSelected(
+                        context,
+                        shareButtonKey,
+                        _selectedFiles,
+                      ),
+                    ),
+                  ],
                 ),
               );
             },
