@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -14,9 +15,11 @@ class BottomActionBarWidget extends StatelessWidget {
   final Widget expandedMenu;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
+  final bool hasSmallerBottomPadding;
 
   BottomActionBarWidget({
     required this.expandedMenu,
+    required this.hasSmallerBottomPadding,
     this.selectedFiles,
     this.text,
     this.iconButtons,
@@ -28,11 +31,13 @@ class BottomActionBarWidget extends StatelessWidget {
       ExpandableController(initialExpanded: false);
 
   @override
-  @override
   Widget build(BuildContext context) {
+    final widthOfScreen = MediaQuery.of(context).size.width;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    //todo : restrict width of column
+    final double leftRightPadding = widthOfScreen > restrictedMaxWidth
+        ? (widthOfScreen - restrictedMaxWidth) / 2
+        : 0;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
@@ -40,7 +45,9 @@ class BottomActionBarWidget extends StatelessWidget {
           color: colorScheme.backdropBase,
           padding: EdgeInsets.only(
             top: 4,
-            bottom: (selectedFiles?.files.isNotEmpty) ?? false ? 24 : 36,
+            bottom: hasSmallerBottomPadding ? 24 : 36,
+            right: leftRightPadding,
+            left: leftRightPadding,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -66,8 +73,6 @@ class BottomActionBarWidget extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  //unselect all files here
-                  //or collapse the expansion panel
                   onCancel?.call();
                   _expandableController.value = false;
                 },
@@ -110,6 +115,7 @@ class BottomActionBarWidget extends StatelessWidget {
       tapBodyToExpand: false,
       tapHeaderToExpand: false,
       animationDuration: Duration(milliseconds: 400),
+      crossFadePoint: 0.5,
     );
   }
 }

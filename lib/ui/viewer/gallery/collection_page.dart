@@ -126,6 +126,7 @@ class _CollectionPageState extends State<CollectionPage> {
                 duration: const Duration(milliseconds: 400),
                 child: BottomActionBarWidget(
                   selectedFiles: _selectedFiles,
+                  hasSmallerBottomPadding: true,
                   expandedMenu: ExpandedMenuWidget(
                     items: [
                       [
