@@ -43,6 +43,12 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   }
 
   @override
+  void dispose() {
+    _isStorageCardPressed.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final inheritedUserDetails = InheritedUserDetails.of(context);
 
