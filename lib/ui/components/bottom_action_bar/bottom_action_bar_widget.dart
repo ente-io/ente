@@ -14,9 +14,11 @@ class BottomActionBarWidget extends StatelessWidget {
   final Widget expandedMenu;
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
+  final bool hasSmallerBottomPadding;
 
   BottomActionBarWidget({
     required this.expandedMenu,
+    required this.hasSmallerBottomPadding,
     this.selectedFiles,
     this.text,
     this.iconButtons,
@@ -41,7 +43,7 @@ class BottomActionBarWidget extends StatelessWidget {
           color: colorScheme.backdropBase,
           padding: EdgeInsets.only(
             top: 4,
-            bottom: (selectedFiles?.files.isNotEmpty) ?? false ? 24 : 36,
+            bottom: hasSmallerBottomPadding ? 24 : 36,
             right: leftRightPadding,
             left: leftRightPadding,
           ),
