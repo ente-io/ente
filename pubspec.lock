@@ -700,6 +700,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.7.0"
+  keyboard_visibility:
+    dependency: "direct main"
+    description:
+      name: keyboard_visibility
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.6"
   like_button:
     dependency: "direct main"
     description:

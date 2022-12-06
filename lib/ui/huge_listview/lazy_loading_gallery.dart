@@ -162,7 +162,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     _reloadEventSubscription.cancel();
     _currentIndexSubscription.cancel();
     widget.selectedFiles.removeListener(_selectedFilesListener);
-
+    _toggleSelectAllFromDay.dispose();
+    _showSelectAllButton.dispose();
+    _areAllFromDaySelected.dispose();
     super.dispose();
   }
 
