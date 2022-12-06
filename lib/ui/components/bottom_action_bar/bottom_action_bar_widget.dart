@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -34,8 +35,9 @@ class BottomActionBarWidget extends StatelessWidget {
     final widthOfScreen = MediaQuery.of(context).size.width;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    final double leftRightPadding =
-        widthOfScreen > 430 ? (widthOfScreen - 430) / 2 : 0;
+    final double leftRightPadding = widthOfScreen > restrictedMaxWidth
+        ? (widthOfScreen - restrictedMaxWidth) / 2
+        : 0;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
