@@ -45,7 +45,7 @@ Map<int, String> _days = {
   7: "Sun",
 };
 
-final currentYear = int.parse(DateTime.now().year.toString());
+final currentYear = DateTime.now().year;
 const searchStartYear = 1970;
 
 //Jun 2022
@@ -269,7 +269,16 @@ bool isValidDate({
 
 final RegExp exp = RegExp('[\\.A-Za-z]*');
 
-DateTime? parseDateTimeFromFileNameV2(String fileName) {
+DateTime? parseDateTimeFromFileNameV2(
+  String fileName, {
+  /* to avoid parsing incorrect date time from the filename, the max and min
+    year limits the chances of parsing incorrect date times
+    */
+  int minYear = 1990,
+  int? maxYear,
+}) {
+  // add next year to avoid corner cases for 31st Dec
+  maxYear ??= currentYear + 1;
   String val = fileName.replaceAll(exp, '');
   if (val.isNotEmpty && !isNumeric(val[0])) {
     val = val.substring(1, val.length);
@@ -298,7 +307,10 @@ DateTime? parseDateTimeFromFileNameV2(String fileName) {
   if (kDebugMode && result == null) {
     debugPrint("Failed to parse $fileName dateTime from $valForParser");
   }
-  return result;
+  if (result != null && result.year >= minYear && result.year <= maxYear) {
+    return result;
+  }
+  return null;
 }
 
 bool isNumeric(String? s) {
