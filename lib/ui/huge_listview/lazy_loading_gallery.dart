@@ -405,39 +405,42 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         HapticFeedback.lightImpact();
         _selectFile(file);
       },
-      child: Stack(
-        children: [
-          Hero(
-            tag: widget.tag + file.tag,
-            child: ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(
-                  widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(1),
+        child: Stack(
+          children: [
+            Hero(
+              tag: widget.tag + file.tag,
+              child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                  Colors.black.withOpacity(
+                    widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
+                  ),
+                  BlendMode.darken,
                 ),
-                BlendMode.darken,
-              ),
-              child: ThumbnailWidget(
-                file,
-                diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                shouldShowLivePhotoOverlay: true,
-                key: Key(widget.tag + file.tag),
-              ),
-            ),
-          ),
-          Visibility(
-            visible: widget.selectedFiles.isFileSelected(file),
-            child: const Positioned(
-              right: 4,
-              top: 4,
-              child: Icon(
-                Icons.check_circle_rounded,
-                size: 20,
-                color: Colors.white, //same for both themes
+                child: ThumbnailWidget(
+                  file,
+                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                  shouldShowLivePhotoOverlay: true,
+                  key: Key(widget.tag + file.tag),
+                ),
               ),
             ),
-          )
-        ],
+            Visibility(
+              visible: widget.selectedFiles.isFileSelected(file),
+              child: const Positioned(
+                right: 4,
+                top: 4,
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  size: 20,
+                  color: Colors.white, //same for both themes
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

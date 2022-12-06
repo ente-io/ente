@@ -5,7 +5,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/models/ente_file.dart';
 
 class ThumbnailLruCache {
-  static final LRUMap<String, Uint8List?> _map = LRUMap(250);
+  static final LRUMap<String, Uint8List?> _map = LRUMap(1000);
 
   static Uint8List? get(EnteFile enteFile, [int? size]) {
     return _map.get(

@@ -179,6 +179,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           _loadNetworkImage();
         } else {
           if (await doesLocalFileExist(widget.file) == false) {
+            _logger.info("Deleting file " + widget.file.tag);
             FilesDB.instance.deleteLocalFile(widget.file);
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
@@ -196,6 +197,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         final imageProvider = Image.memory(thumbData).image;
         _cacheAndRender(imageProvider);
       }
+      ThumbnailLruCache.put(widget.file, thumbData, thumbnailSmallSize);
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _errorLoadingLocalThumbnail = true;

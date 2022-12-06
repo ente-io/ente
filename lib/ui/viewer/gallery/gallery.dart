@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -315,15 +314,4 @@ class GalleryIndexUpdatedEvent {
   final int index;
 
   GalleryIndexUpdatedEvent(this.tag, this.index);
-}
-
-// Custom Gesture Recognizer.
-// rejectGesture() is overridden. When a gesture is rejected, this is the function that is called. By default, it disposes of the
-// Recognizer and runs clean up. However we modified it so that instead the Recognizer is disposed of, it is actually manually added.
-// The result is instead you have one Recognizer winning the Arena, you have two. It is a win-win.
-class AllowMultipleGestureRecognizer extends ScaleGestureRecognizer {
-  @override
-  void rejectGesture(int pointer) {
-    acceptGesture(pointer);
-  }
 }
