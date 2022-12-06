@@ -113,6 +113,7 @@ class BottomActionBarWidget extends StatelessWidget {
       tapBodyToExpand: false,
       tapHeaderToExpand: false,
       animationDuration: Duration(milliseconds: 400),
+      crossFadePoint: 0.5,
     );
   }
 }
