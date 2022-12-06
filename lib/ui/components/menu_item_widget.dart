@@ -14,7 +14,7 @@ class MenuItemWidget extends StatefulWidget {
   /// trailing icon can be passed without size as default size set by
   /// flutter is what this component expects
   final IconData? trailingIcon;
-  final Widget? trailingSwitch;
+  final Widget? trailingWidget;
   final bool trailingIconIsMuted;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
@@ -34,7 +34,7 @@ class MenuItemWidget extends StatefulWidget {
     this.leadingIcon,
     this.leadingIconColor,
     this.trailingIcon,
-    this.trailingSwitch,
+    this.trailingWidget,
     this.trailingIconIsMuted = false,
     this.onTap,
     this.onDoubleTap,
@@ -163,7 +163,7 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                           ? enteColorScheme.strokeMuted
                           : null,
                     )
-                  : widget.trailingSwitch ?? const SizedBox.shrink(),
+                  : widget.trailingWidget ?? const SizedBox.shrink(),
         ],
       ),
     );

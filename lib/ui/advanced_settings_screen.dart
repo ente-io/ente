@@ -72,7 +72,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   title: "Album grid size",
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
-                                trailingSwitch: Row(
+                                trailingWidget: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [

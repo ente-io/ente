@@ -68,7 +68,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             captionedTextWidget: const CaptionedTextWidget(
               title: "Two-factor",
             ),
-            trailingSwitch: ToggleSwitchWidget(
+            trailingWidget: ToggleSwitchWidget(
               value: () => UserService.instance.hasEnabledTwoFactor(),
               onChanged: () async {
                 final hasAuthenticated = await LocalAuthenticationService
@@ -101,7 +101,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         captionedTextWidget: const CaptionedTextWidget(
           title: "Lockscreen",
         ),
-        trailingSwitch: ToggleSwitchWidget(
+        trailingWidget: ToggleSwitchWidget(
           value: () => _config.shouldShowLockScreen(),
           onChanged: () async {
             await LocalAuthenticationService.instance
@@ -123,7 +123,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
             captionedTextWidget: const CaptionedTextWidget(
               title: "Hide from recents",
             ),
-            trailingSwitch: ToggleSwitchWidget(
+            trailingWidget: ToggleSwitchWidget(
               value: () => _config.shouldHideFromRecents(),
               onChanged: _hideFromRecentsOnChanged,
             ),
