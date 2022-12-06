@@ -59,6 +59,8 @@ class Configuration {
   static const keyAttributesKey = "key_attributes";
   static const keyKey = "key";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
+  static const keyAlbumGridSize = "album_grid_size";
+  static const defaultAlbumGridSize = 4;
   static const keyShouldBackupVideos = "should_backup_videos";
 
   // keyShouldKeepDeviceAwake is used to determine whether the device screen
@@ -532,6 +534,18 @@ class Configuration {
     } else {
       return false;
     }
+  }
+
+  int getAlbumGridSize() {
+    if (_preferences.containsKey(keyAlbumGridSize)) {
+      return _preferences.getInt(keyAlbumGridSize)!;
+    } else {
+      return defaultAlbumGridSize;
+    }
+  }
+
+  Future<void> setAlbumGridSize(int value) async {
+    await _preferences.setInt(keyAlbumGridSize, value);
   }
 
   Future<void> setBackupOverMobileData(bool value) async {
