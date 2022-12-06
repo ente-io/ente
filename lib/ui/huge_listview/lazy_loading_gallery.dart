@@ -6,8 +6,8 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:local_hero/local_hero.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
@@ -33,7 +33,6 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final String logTag;
   final Stream<int> currentIndexStream;
-  final int imagesPerRow;
 
   LazyLoadingGallery(
     this.files,
@@ -45,7 +44,6 @@ class LazyLoadingGallery extends StatefulWidget {
     this.tag,
     this.currentIndexStream, {
     this.logTag = "",
-    this.imagesPerRow,
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -253,7 +251,6 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _files.length > kRecycleLimit,
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
-          widget.imagesPerRow,
         ),
       );
     }
@@ -281,7 +278,6 @@ class LazyLoadingGridView extends StatefulWidget {
   final bool shouldRecycle;
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
-  final int imagesPerRow;
 
   LazyLoadingGridView(
     this.tag,
@@ -291,8 +287,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.shouldRender,
     this.shouldRecycle,
     this.toggleSelectAllFromDay,
-    this.areAllFilesSelected,
-    this.imagesPerRow, {
+    this.areAllFilesSelected, {
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -391,7 +386,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: widget.imagesPerRow ?? 4,
+        crossAxisCount: Configuration.instance.getAlbumGridSize(),
       ),
       padding: const EdgeInsets.all(0),
     );
@@ -410,42 +405,39 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         HapticFeedback.lightImpact();
         _selectFile(file);
       },
-      child: LocalHero(
-        tag: widget.tag + file.tag,
-        child: Stack(
-          children: [
-            Hero(
-              tag: widget.tag + file.tag,
-              child: ColorFiltered(
-                colorFilter: ColorFilter.mode(
-                  Colors.black.withOpacity(
-                    widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
-                  ),
-                  BlendMode.darken,
+      child: Stack(
+        children: [
+          Hero(
+            tag: widget.tag + file.tag,
+            child: ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                Colors.black.withOpacity(
+                  widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
                 ),
-                child: ThumbnailWidget(
-                  file,
-                  diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
-                  serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
-                  shouldShowLivePhotoOverlay: true,
-                  key: Key(widget.tag + file.tag),
-                ),
+                BlendMode.darken,
+              ),
+              child: ThumbnailWidget(
+                file,
+                diskLoadDeferDuration: thumbnailDiskLoadDeferDuration,
+                serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
+                shouldShowLivePhotoOverlay: true,
+                key: Key(widget.tag + file.tag),
               ),
             ),
-            Visibility(
-              visible: widget.selectedFiles.isFileSelected(file),
-              child: const Positioned(
-                right: 4,
-                top: 4,
-                child: Icon(
-                  Icons.check_circle_rounded,
-                  size: 20,
-                  color: Colors.white, //same for both themes
-                ),
+          ),
+          Visibility(
+            visible: widget.selectedFiles.isFileSelected(file),
+            child: const Positioned(
+              right: 4,
+              top: 4,
+              child: Icon(
+                Icons.check_circle_rounded,
+                size: 20,
+                color: Colors.white, //same for both themes
               ),
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }
