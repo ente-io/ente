@@ -60,7 +60,6 @@ class Configuration {
   static const keyKey = "key";
   static const keyShouldBackupOverMobileData = "should_backup_over_mobile_data";
   static const keyAlbumGridSize = "album_grid_size";
-  static const defaultAlbumGridSize = 4;
   static const keyShouldBackupVideos = "should_backup_videos";
 
   // keyShouldKeepDeviceAwake is used to determine whether the device screen
