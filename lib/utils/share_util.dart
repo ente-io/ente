@@ -51,7 +51,10 @@ Future<void> share(
     );
   } catch (e, s) {
     _logger.severe(
-        "failed to fetch files for system share ${files.length}", e, s);
+      "failed to fetch files for system share ${files.length}",
+      e,
+      s,
+    );
     await dialog.hide();
     await showGenericErrorDialog(context);
   }
