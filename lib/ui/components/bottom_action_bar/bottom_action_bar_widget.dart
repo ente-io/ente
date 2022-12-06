@@ -28,11 +28,12 @@ class BottomActionBarWidget extends StatelessWidget {
       ExpandableController(initialExpanded: false);
 
   @override
-  @override
   Widget build(BuildContext context) {
+    final widthOfScreen = MediaQuery.of(context).size.width;
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
-    //todo : restrict width of column
+    final double leftRightPadding =
+        widthOfScreen > 430 ? (widthOfScreen - 430) / 2 : 0;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
@@ -41,6 +42,8 @@ class BottomActionBarWidget extends StatelessWidget {
           padding: EdgeInsets.only(
             top: 4,
             bottom: (selectedFiles?.files.isNotEmpty) ?? false ? 24 : 36,
+            right: leftRightPadding,
+            left: leftRightPadding,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -66,8 +69,6 @@ class BottomActionBarWidget extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  //unselect all files here
-                  //or collapse the expansion panel
                   onCancel?.call();
                   _expandableController.value = false;
                 },
