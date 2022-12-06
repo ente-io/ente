@@ -62,7 +62,6 @@ class _PasswordReminderState extends State<PasswordReminder> {
       if (mounted) {
         setState(() => {});
       }
-      // showShortToast(context, "Failed to verify password");
     }
   }
 
@@ -154,7 +153,6 @@ class _PasswordReminderState extends State<PasswordReminder> {
               ),
               foregroundColor: MaterialStateProperty.resolveWith<Color>(
                 (Set<MaterialState> states) {
-                  // return Colors.yellow;
                   return Theme.of(context).colorScheme.defaultTextColor;
                 },
               ),
