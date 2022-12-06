@@ -74,12 +74,23 @@ class _PasswordReminderState extends State<PasswordReminder> {
         "Please authenticate to change your password",
       );
       if (hasAuthenticated) {
+        UserRemoteFlagService.instance.stopPasswordReminder().ignore();
         await routeToPage(
           context,
           const PasswordEntryPage(
             mode: PasswordEntryMode.update,
           ),
           forceCustomPageRoute: true,
+        );
+        unawaited(
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) {
+                return const HomeWidget();
+              },
+            ),
+            (route) => false,
+          ),
         );
       }
     } catch (e) {
@@ -117,7 +128,7 @@ class _PasswordReminderState extends State<PasswordReminder> {
             ),
             onPressed: () async {
               Navigator.of(context, rootNavigator: true).pop('dialog');
-              // UserRemoteFlagService.instance.stopPasswordReminder().ignore();
+
               _onChangePasswordClick();
             },
             child: const Text(
@@ -271,14 +282,11 @@ class _PasswordReminderState extends State<PasswordReminder> {
                       const SizedBox(height: 18),
                       Text(
                         "Enter your password to ensure you remember it."
-                        "\n\nThe developer account we use to publish "
-                        "ente on App Store will change in the next "
-                        "version. This will cause you to get logged out when the next version is released. So it "
-                        "is good to make sure you know your password.",
+                        "\n\nThe developer account we use to publish ente on App Store will change in the next version, so you will need to login again when the next version is released.",
                         style: enteTheme.textTheme.small
                             .copyWith(color: enteTheme.colorScheme.textMuted),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 24),
                       TextFormField(
                         autofillHints: const [AutofillHints.password],
                         decoration: InputDecoration(
