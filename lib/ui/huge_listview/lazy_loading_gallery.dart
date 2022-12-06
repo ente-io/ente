@@ -424,6 +424,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key(widget.tag + file.tag),
+                  thumbnailSize: Configuration.instance.getAlbumGridSize() <
+                          defaultAlbumGridSize
+                      ? thumbnailLargeSize
+                      : thumbnailSmallSize,
                 ),
               ),
             ),
