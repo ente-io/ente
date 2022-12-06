@@ -73,7 +73,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
                                 trailingSwitch: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
                                       _albumGridSize.toString(),
