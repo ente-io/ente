@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:local_hero/local_hero.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
@@ -205,122 +204,76 @@ class _GalleryState extends State<Gallery> {
     return _getListView();
   }
 
-  int _imagesPerRow = 4;
-  ScaleUpdateDetails _lastScaleUpdateDetails;
-
   Widget _getListView() {
-    return LocalHeroScope(
-      duration: const Duration(milliseconds: 100),
-      child: RawGestureDetector(
-        gestures: {
-          AllowMultipleGestureRecognizer: GestureRecognizerFactoryWithHandlers<
-              AllowMultipleGestureRecognizer>(
-            () => AllowMultipleGestureRecognizer(), //constructor
-            (AllowMultipleGestureRecognizer instance) {
-              instance.onUpdate = (details) {
-                if (details.pointerCount == 2) {
-                  _lastScaleUpdateDetails = details;
-                }
-              };
-              instance.onEnd = (details) {
-                if (_lastScaleUpdateDetails != null) {
-                  bool shouldReload = false;
-                  if (_lastScaleUpdateDetails.verticalScale > 1 &&
-                      _lastScaleUpdateDetails.horizontalScale > 1) {
-                    _logger.info("zoomed in");
-                    if (_imagesPerRow > 2) {
-                      shouldReload = true;
-                      _imagesPerRow--;
-                    }
-                  } else if (_lastScaleUpdateDetails.verticalScale < 1 &&
-                      _lastScaleUpdateDetails.horizontalScale < 1) {
-                    _logger.info("zoomed out");
-                    if (_imagesPerRow < 4) {
-                      shouldReload = true;
-                      _imagesPerRow++;
-                    }
-                  }
-                  _lastScaleUpdateDetails = null;
-                  if (shouldReload) {
-                    setState(() {});
-                  }
-                }
-              };
-            },
-          )
-        },
-        child: HugeListView<List<File>>(
-          key: _hugeListViewKey,
-          controller: _itemScroller,
-          startIndex: 0,
-          totalCount: _collatedFiles.length,
-          isDraggableScrollbarEnabled: _collatedFiles.length > 10,
-          waitBuilder: (_) {
-            return const EnteLoadingWidget();
-          },
-          emptyResultBuilder: (_) {
-            final List<Widget> children = [];
-            if (widget.header != null) {
-              children.add(widget.header);
-            }
-            children.add(
-              Expanded(
-                child: widget.emptyState,
-              ),
-            );
-            if (widget.footer != null) {
-              children.add(widget.footer);
-            }
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: children,
-            );
-          },
-          itemBuilder: (context, index) {
-            Widget gallery;
-            gallery = LazyLoadingGallery(
-              _collatedFiles[index],
-              index,
-              widget.reloadEvent,
-              widget.removalEventTypes,
-              widget.asyncLoader,
-              widget.selectedFiles,
-              widget.tagPrefix,
-              Bus.instance
-                  .on<GalleryIndexUpdatedEvent>()
-                  .where((event) => event.tag == widget.tagPrefix)
-                  .map((event) => event.index),
-              logTag: _logTag,
-              imagesPerRow: _imagesPerRow,
-            );
-            if (widget.header != null && index == 0) {
-              gallery = Column(children: [widget.header, gallery]);
-            }
-            if (widget.footer != null && index == _collatedFiles.length - 1) {
-              gallery = Column(children: [gallery, widget.footer]);
-            }
-            return gallery;
-          },
-          labelTextBuilder: (int index) {
-            return getMonthAndYear(
-              DateTime.fromMicrosecondsSinceEpoch(
-                _collatedFiles[index][0].creationTime,
-              ),
-            );
-          },
-          thumbBackgroundColor:
-              Theme.of(context).colorScheme.galleryThumbBackgroundColor,
-          thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
-          thumbPadding: widget.header != null
-              ? const EdgeInsets.only(top: 60)
-              : const EdgeInsets.all(0),
-          bottomSafeArea: widget.scrollBottomSafeArea,
-          firstShown: (int firstIndex) {
-            Bus.instance
-                .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
-          },
-        ),
-      ),
+    return HugeListView<List<File>>(
+      key: _hugeListViewKey,
+      controller: _itemScroller,
+      startIndex: 0,
+      totalCount: _collatedFiles.length,
+      isDraggableScrollbarEnabled: _collatedFiles.length > 10,
+      waitBuilder: (_) {
+        return const EnteLoadingWidget();
+      },
+      emptyResultBuilder: (_) {
+        final List<Widget> children = [];
+        if (widget.header != null) {
+          children.add(widget.header);
+        }
+        children.add(
+          Expanded(
+            child: widget.emptyState,
+          ),
+        );
+        if (widget.footer != null) {
+          children.add(widget.footer);
+        }
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: children,
+        );
+      },
+      itemBuilder: (context, index) {
+        Widget gallery;
+        gallery = LazyLoadingGallery(
+          _collatedFiles[index],
+          index,
+          widget.reloadEvent,
+          widget.removalEventTypes,
+          widget.asyncLoader,
+          widget.selectedFiles,
+          widget.tagPrefix,
+          Bus.instance
+              .on<GalleryIndexUpdatedEvent>()
+              .where((event) => event.tag == widget.tagPrefix)
+              .map((event) => event.index),
+          logTag: _logTag,
+        );
+        if (widget.header != null && index == 0) {
+          gallery = Column(children: [widget.header, gallery]);
+        }
+        if (widget.footer != null && index == _collatedFiles.length - 1) {
+          gallery = Column(children: [gallery, widget.footer]);
+        }
+        return gallery;
+      },
+      labelTextBuilder: (int index) {
+        return getMonthAndYear(
+          DateTime.fromMicrosecondsSinceEpoch(
+            _collatedFiles[index][0].creationTime,
+          ),
+        );
+      },
+      thumbBackgroundColor:
+          Theme.of(context).colorScheme.galleryThumbBackgroundColor,
+      thumbDrawColor: Theme.of(context).colorScheme.galleryThumbDrawColor,
+      thumbPadding: widget.header != null
+          ? const EdgeInsets.only(top: 60)
+          : const EdgeInsets.all(0),
+      bottomSafeArea: widget.scrollBottomSafeArea,
+      firstShown: (int firstIndex) {
+        Bus.instance
+            .fire(GalleryIndexUpdatedEvent(widget.tagPrefix, firstIndex));
+      },
     );
   }
 
