@@ -13,7 +13,7 @@ import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
 import { Done } from '@mui/icons-material';
 
-export interface formValues {
+interface formValues {
     caption: string;
 }
 
