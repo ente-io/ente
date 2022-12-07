@@ -200,13 +200,17 @@ Widget getDayWidget(
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
   final textStyle = photoGridSize < 6 ? textTheme.body : textTheme.small;
-  return Container(
-    alignment: Alignment.centerLeft,
-    child: Text(
-      getDayTitle(timestamp),
-      style: (getDayTitle(timestamp) == "Today")
-          ? textStyle
-          : textStyle.copyWith(color: colorScheme.textMuted),
+  final double paddingValue = photoGridSize < 6 ? 12.0 : 8.0;
+  return Padding(
+    padding: EdgeInsets.all(paddingValue),
+    child: Container(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        getDayTitle(timestamp),
+        style: (getDayTitle(timestamp) == "Today")
+            ? textStyle
+            : textStyle.copyWith(color: colorScheme.textMuted),
+      ),
     ),
   );
 }

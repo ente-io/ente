@@ -188,13 +188,10 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: getDayWidget(
-                context,
-                _files[0].creationTime,
-                widget.photoGirdSize,
-              ),
+            getDayWidget(
+              context,
+              _files[0].creationTime,
+              widget.photoGirdSize,
             ),
             ValueListenableBuilder(
               valueListenable: _showSelectAllButton,
