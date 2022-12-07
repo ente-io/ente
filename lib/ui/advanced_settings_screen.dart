@@ -106,15 +106,16 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
   }
 
   Future<void> _showAlbumGridSizePicker() async {
+    final textTheme = getEnteTextTheme(context);
     final List<Text> options = [];
     options.add(
-      Text("2", style: Theme.of(context).textTheme.subtitle1),
+      Text("2", style: textTheme.body),
     );
     options.add(
-      Text("3", style: Theme.of(context).textTheme.subtitle1),
+      Text("3", style: textTheme.body),
     );
     options.add(
-      Text("4", style: Theme.of(context).textTheme.subtitle1),
+      Text("4", style: textTheme.body),
     );
     return showCupertinoModalPopup(
       context: context,
@@ -145,7 +146,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                     ),
                     child: Text(
                       'Cancel',
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: textTheme.body,
                     ),
                   ),
                   CupertinoButton(
@@ -165,7 +166,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                     ),
                     child: Text(
                       'Confirm',
-                      style: Theme.of(context).textTheme.subtitle1,
+                      style: textTheme.body,
                     ),
                   )
                 ],
