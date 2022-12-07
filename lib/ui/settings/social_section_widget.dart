@@ -1,7 +1,5 @@
 // @dart=2.9
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -25,15 +23,13 @@ class SocialSectionWidget extends StatelessWidget {
 
   Widget _getSectionOptions(BuildContext context) {
     final List<Widget> options = [];
+    final result = UpdateService.instance.getRateDetails();
+    final String ratePlace = result.item1;
+    final String rateUrl = result.item2;
     if (!UpdateService.instance.isIndependent()) {
       options.addAll(
         [
-          SocialsMenuItemWidget(
-            "Rate us! ✨",
-            Platform.isAndroid
-                ? "https://play.google.com/store/apps/details?id=io.ente.photos"
-                : "https://apps.apple.com/in/app/ente-photos/id1542026904",
-          ),
+          SocialsMenuItemWidget("Rate us on $ratePlace", rateUrl),
           sectionOptionSpacing,
         ],
       );
