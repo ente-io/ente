@@ -388,7 +388,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: LocalSettings.instance.getAlbumGridSize(),
+        crossAxisCount: LocalSettings.instance.getPhotoGridSize(),
       ),
       padding: const EdgeInsets.all(0),
     );
@@ -426,8 +426,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key(widget.tag + file.tag),
-                  thumbnailSize: LocalSettings.instance.getAlbumGridSize() <
-                          defaultAlbumGridSize
+                  thumbnailSize: LocalSettings.instance.getPhotoGridSize() <
+                          defaultPhotoGridSize
                       ? thumbnailLargeSize
                       : thumbnailSmallSize,
                 ),

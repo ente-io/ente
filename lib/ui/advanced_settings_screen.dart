@@ -18,12 +18,12 @@ class AdvancedSettingsScreen extends StatefulWidget {
 }
 
 class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
-  late int _albumGridSize, _chosenGridSize;
+  late int _photoGridSize, _chosenGridSize;
 
   @override
   void initState() {
-    _albumGridSize = LocalSettings.instance.getAlbumGridSize();
-    _chosenGridSize = _albumGridSize;
+    _photoGridSize = LocalSettings.instance.getPhotoGridSize();
+    _chosenGridSize = _photoGridSize;
     super.initState();
   }
 
@@ -63,11 +63,11 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                _showAlbumGridSizePicker();
+                                _showPhotoGridSizePicker();
                               },
                               child: MenuItemWidget(
                                 captionedTextWidget: const CaptionedTextWidget(
-                                  title: "Album grid size",
+                                  title: "Photo grid size",
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
                                 trailingWidget: Row(
@@ -75,7 +75,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
-                                      _albumGridSize.toString(),
+                                      _photoGridSize.toString(),
                                     ),
                                     Icon(
                                       Icons.chevron_right,
@@ -104,7 +104,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
     );
   }
 
-  Future<void> _showAlbumGridSizePicker() async {
+  Future<void> _showPhotoGridSizePicker() async {
     final textTheme = getEnteTextTheme(context);
     final List<Text> options = [];
     options.add(
@@ -151,11 +151,11 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                   CupertinoButton(
                     onPressed: () async {
                       await LocalSettings.instance
-                          .setAlbumGridSize(_chosenGridSize);
+                          .setPhotoGridSize(_chosenGridSize);
                       Bus.instance.fire(
                         ForceReloadHomeGalleryEvent("grid size changed"),
                       );
-                      _albumGridSize = _chosenGridSize;
+                      _photoGridSize = _chosenGridSize;
                       setState(() {});
                       Navigator.of(context).pop('');
                     },
@@ -177,11 +177,11 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
               child: CupertinoPicker(
                 backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 onSelectedItemChanged: (index) {
-                  _chosenGridSize = _getAlbumGridSizeFromIndex(index);
+                  _chosenGridSize = _getPhotoGridSizeFromIndex(index);
                   setState(() {});
                 },
                 scrollController: FixedExtentScrollController(
-                  initialItem: _getIndexFromAlbumGridSize(_chosenGridSize),
+                  initialItem: _getIndexFromPhotoGridSize(_chosenGridSize),
                 ),
                 magnification: 1.3,
                 useMagnifier: true,
@@ -196,11 +196,11 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
     );
   }
 
-  int _getAlbumGridSizeFromIndex(int index) {
+  int _getPhotoGridSizeFromIndex(int index) {
     return index + 2;
   }
 
-  int _getIndexFromAlbumGridSize(int gridSize) {
+  int _getIndexFromPhotoGridSize(int gridSize) {
     return gridSize - 2;
   }
 }

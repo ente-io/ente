@@ -12,7 +12,7 @@ class LocalSettings {
 
   static final LocalSettings instance = LocalSettings._privateConstructor();
   static const kCollectionSortPref = "collection_sort_pref";
-  static const keyAlbumGridSize = "album_grid_size";
+  static const kPhotoGridSize = "photo_grid_size";
 
   late SharedPreferences _prefs;
 
@@ -28,15 +28,15 @@ class LocalSettings {
     return _prefs.setInt(kCollectionSortPref, key.index);
   }
 
-  int getAlbumGridSize() {
-    if (_prefs.containsKey(keyAlbumGridSize)) {
-      return _prefs.getInt(keyAlbumGridSize)!;
+  int getPhotoGridSize() {
+    if (_prefs.containsKey(kPhotoGridSize)) {
+      return _prefs.getInt(kPhotoGridSize)!;
     } else {
-      return defaultAlbumGridSize;
+      return defaultPhotoGridSize;
     }
   }
 
-  Future<void> setAlbumGridSize(int value) async {
-    await _prefs.setInt(keyAlbumGridSize, value);
+  Future<void> setPhotoGridSize(int value) async {
+    await _prefs.setInt(kPhotoGridSize, value);
   }
 }

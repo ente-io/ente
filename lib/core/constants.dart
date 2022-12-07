@@ -15,7 +15,7 @@ const int jan011981Time = 347155200000000;
 const int galleryLoadStartTime = -8000000000000000; // Wednesday, March 6, 1748
 const int galleryLoadEndTime = 9223372036854775807; // 2^63 -1
 const int batchSize = 1000;
-const defaultAlbumGridSize = 4;
+const defaultPhotoGridSize = 4;
 
 // used to identify which ente file are available in app cache
 // todo: 6Jun22: delete old media identifier after 3 months
