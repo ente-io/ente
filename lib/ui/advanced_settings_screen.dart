@@ -66,22 +66,21 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 _showPhotoGridSizePicker();
                               },
                               child: MenuItemWidget(
-                                captionedTextWidget: const CaptionedTextWidget(
-                                  title: "Photo grid size",
+                                captionedTextWidget: Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      CaptionedTextWidget(
+                                        title: "Photo grid size",
+                                        subTitle: _photoGridSize.toString(),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
-                                trailingWidget: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      _photoGridSize.toString(),
-                                    ),
-                                    Icon(
-                                      Icons.chevron_right,
-                                      color: colorScheme.strokeMuted,
-                                    ),
-                                  ],
+                                trailingWidget: Icon(
+                                  Icons.chevron_right,
+                                  color: colorScheme.strokeMuted,
                                 ),
                                 borderRadius: 8,
                                 alignCaptionedTextToLeft: true,
