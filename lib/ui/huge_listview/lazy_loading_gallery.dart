@@ -193,6 +193,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
               child: getDayWidget(
                 context,
                 _files[0].creationTime,
+                widget.photoGirdSize,
               ),
             ),
             ValueListenableBuilder(
