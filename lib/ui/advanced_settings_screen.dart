@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
@@ -10,6 +9,7 @@ import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import 'package:photos/utils/local_settings.dart';
 
 class AdvancedSettingsScreen extends StatefulWidget {
   const AdvancedSettingsScreen({super.key});
@@ -20,11 +20,10 @@ class AdvancedSettingsScreen extends StatefulWidget {
 
 class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
   late int _albumGridSize, _chosenGridSize;
-  final _config = Configuration.instance;
 
   @override
   void initState() {
-    _albumGridSize = _config.getAlbumGridSize();
+    _albumGridSize = LocalSettings.instance.getAlbumGridSize();
     _chosenGridSize = _albumGridSize;
     super.initState();
   }
@@ -151,7 +150,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                   ),
                   CupertinoButton(
                     onPressed: () async {
-                      await _config.setAlbumGridSize(_chosenGridSize);
+                      await LocalSettings.instance
+                          .setAlbumGridSize(_chosenGridSize);
                       Bus.instance.fire(
                         ForceReloadHomeGalleryEvent("grid size changed"),
                       );

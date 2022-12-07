@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
@@ -20,6 +19,7 @@ import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -388,7 +388,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: Configuration.instance.getAlbumGridSize(),
+        crossAxisCount: LocalSettings.instance.getAlbumGridSize(),
       ),
       padding: const EdgeInsets.all(0),
     );
@@ -426,7 +426,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key(widget.tag + file.tag),
-                  thumbnailSize: Configuration.instance.getAlbumGridSize() <
+                  thumbnailSize: LocalSettings.instance.getAlbumGridSize() <
                           defaultAlbumGridSize
                       ? thumbnailLargeSize
                       : thumbnailSmallSize,
