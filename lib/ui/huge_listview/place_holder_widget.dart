@@ -1,7 +1,6 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
-import 'package:photos/utils/local_settings.dart';
 
 class PlaceHolderWidget extends StatelessWidget {
   const PlaceHolderWidget(
@@ -30,7 +29,7 @@ class PlaceHolderWidget extends StatelessWidget {
         },
         itemCount: count,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: LocalSettings.instance.getPhotoGridSize(),
+          crossAxisCount: columns,
         ),
       );
     }
