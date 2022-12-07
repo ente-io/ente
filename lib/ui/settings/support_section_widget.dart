@@ -10,6 +10,7 @@ import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -41,6 +42,11 @@ class SupportSectionWidget extends StatelessWidget {
           onTap: () async {
             await sendEmail(context, to: supportEmail);
           },
+        ),
+        sectionOptionSpacing,
+        const AboutMenuItemWidget(
+          title: "Frequently asked questions",
+          url: "https://ente.io/faq",
         ),
         sectionOptionSpacing,
         MenuItemWidget(

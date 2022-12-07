@@ -29,24 +29,9 @@ class AboutSectionWidget extends StatelessWidget {
     return Column(
       children: [
         sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "FAQ",
-          url: "https://ente.io/faq",
-        ),
-        sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "Terms",
-          url: "https://ente.io/terms",
-        ),
-        sectionOptionSpacing,
-        const AboutMenuItemWidget(
-          title: "Privacy",
-          url: "https://ente.io/privacy",
-        ),
-        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Source code",
+            title: "We are open source!",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -54,6 +39,16 @@ class AboutSectionWidget extends StatelessWidget {
           onTap: () async {
             launchUrl(Uri.parse("https://github.com/ente-io/frame"));
           },
+        ),
+        sectionOptionSpacing,
+        const AboutMenuItemWidget(
+          title: "Privacy",
+          url: "https://ente.io/privacy",
+        ),
+        sectionOptionSpacing,
+        const AboutMenuItemWidget(
+          title: "Terms",
+          url: "https://ente.io/terms",
         ),
         sectionOptionSpacing,
         UpdateService.instance.isIndependent()
