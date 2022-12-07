@@ -45,7 +45,7 @@ class SocialSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         const SocialsMenuItemWidget(
           "Matrix",
-          "https://matrix.to/#/#ente:matrix.org",
+          "http://ente.io/matrix/",
         ),
         sectionOptionSpacing,
         const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
