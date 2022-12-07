@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { default as FileUploadIcon } from '@mui/icons-material/ImageOutlined';
 import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlined';
@@ -6,6 +6,7 @@ import GoogleIcon from '@mui/icons-material/Google';
 import { UploadTypeOption } from './option';
 import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
 import { Box, Dialog, Stack, Typography } from '@mui/material';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 
 interface Iprops {
     onHide: () => void;
@@ -23,6 +24,9 @@ export default function UploadTypeSelector({
     uploadGoogleTakeoutZips,
     hideZipUploadOption,
 }: Iprops) {
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
     return (
         <Dialog
             open={show}
@@ -35,7 +39,9 @@ export default function UploadTypeSelector({
             }}
             onClose={onHide}>
             <DialogTitleWithCloseButton onClose={onHide}>
-                {constants.UPLOAD}
+                {publicCollectionGalleryContext.accessedThroughSharedURL
+                    ? constants.SELECT_PHOTOS
+                    : constants.UPLOAD}
             </DialogTitleWithCloseButton>
             <Box p={1.5} pt={0.5}>
                 <Stack spacing={0.5}>
