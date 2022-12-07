@@ -66,16 +66,9 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 _showPhotoGridSizePicker();
                               },
                               child: MenuItemWidget(
-                                captionedTextWidget: Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      CaptionedTextWidget(
-                                        title: "Photo grid size",
-                                        subTitle: _photoGridSize.toString(),
-                                      ),
-                                    ],
-                                  ),
+                                captionedTextWidget: CaptionedTextWidget(
+                                  title: "Photo grid size",
+                                  subTitle: _photoGridSize.toString(),
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
                                 trailingWidget: Icon(
