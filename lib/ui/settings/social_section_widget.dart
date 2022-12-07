@@ -24,15 +24,7 @@ class SocialSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final List<Widget> options = [
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
-      sectionOptionSpacing,
-    ];
+    final List<Widget> options = [];
     if (!UpdateService.instance.isIndependent()) {
       options.addAll(
         [
@@ -46,6 +38,27 @@ class SocialSectionWidget extends StatelessWidget {
         ],
       );
     }
+    options.addAll(
+      [
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Blog", "https://ente.io/blog"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Mastodon", "https://mstdn.social/@ente"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget(
+          "Matrix",
+          "https://matrix.to/#/#ente:matrix.org",
+        ),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
+        sectionOptionSpacing,
+      ],
+    );
+
     return Column(children: options);
   }
 }

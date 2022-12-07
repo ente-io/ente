@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
@@ -199,8 +200,9 @@ Widget getDayWidget(
 ) {
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
-  final textStyle = photoGridSize < 6 ? textTheme.body : textTheme.small;
-  final double paddingValue = photoGridSize < 6 ? 12.0 : 8.0;
+  final textStyle =
+      photoGridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
+  final double paddingValue = photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
   return Padding(
     padding: EdgeInsets.all(paddingValue),
     child: Container(
