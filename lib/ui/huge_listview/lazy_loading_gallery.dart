@@ -232,7 +232,12 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             )
           ],
         ),
-        _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
+        _shouldRender
+            ? _getGallery()
+            : PlaceHolderWidget(
+                _files.length,
+                LocalSettings.instance.getPhotoGridSize(),
+              ),
       ],
     );
   }
@@ -299,6 +304,7 @@ class LazyLoadingGridView extends StatefulWidget {
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool _shouldRender;
+  int _photoGridSize;
   StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
 
   @override
@@ -334,6 +340,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   @override
   Widget build(BuildContext context) {
+    _photoGridSize = LocalSettings.instance.getPhotoGridSize();
     if (widget.shouldRecycle) {
       return _getRecyclableView();
     } else {
@@ -354,7 +361,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       },
       child: _shouldRender
           ? _getGridView()
-          : PlaceHolderWidget(widget.filesInDay.length),
+          : PlaceHolderWidget(widget.filesInDay.length, _photoGridSize),
     );
   }
 
@@ -369,7 +376,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
             });
           }
         },
-        child: PlaceHolderWidget(widget.filesInDay.length),
+        child: PlaceHolderWidget(widget.filesInDay.length, _photoGridSize),
       );
     } else {
       return _getGridView();
@@ -388,7 +395,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: LocalSettings.instance.getPhotoGridSize(),
+        crossAxisCount: _photoGridSize,
       ),
       padding: const EdgeInsets.all(0),
     );
