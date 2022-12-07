@@ -15,8 +15,15 @@ enum ButtonType {
 }
 
 class LargeButtonWidget extends StatelessWidget {
+  final IconData icon;
+  final String labelText;
   final ButtonType buttonType;
-  const LargeButtonWidget({required this.buttonType, super.key});
+  const LargeButtonWidget({
+    required this.icon,
+    required this.labelText,
+    required this.buttonType,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +67,12 @@ class LargeButtonWidget extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(right: 16),
                       child: Text(
-                        "Button",
+                        labelText,
                         style: defaultLabelStyle,
                       ),
                     ),
                     Icon(
-                      Icons.add_outlined,
+                      icon,
                       size: 20,
                       color: defaultIconColor,
                     ),
@@ -75,7 +82,7 @@ class LargeButtonWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.add_outlined,
+                      icon,
                       size: 20,
                       color: defaultIconColor,
                     ),
@@ -83,7 +90,7 @@ class LargeButtonWidget extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Text(
-                        "Button",
+                        labelText,
                         style: defaultLabelStyle,
                       ),
                     )
