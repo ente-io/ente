@@ -8,6 +8,7 @@ import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/backup_folder_selection_page.dart';
 import 'package:photos/ui/backup_settings_screen.dart';
@@ -175,16 +176,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           ),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
-            // TODO: Replace with https://pub.dev/packages/in_app_review
-            if (Platform.isAndroid) {
-              launchUrlString(
-                "https://play.google.com/store/apps/details?id=io.ente.photos",
-              );
-            } else {
-              launchUrlString(
-                "https://apps.apple.com/in/app/ente-photos/id1542026904",
-              );
-            }
+            final url = UpdateService.instance.getRateDetails().item2;
+            launchUrlString(url);
           },
         ),
         TextButton(
@@ -238,15 +231,8 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             // TODO: Replace with https://pub.dev/packages/in_app_review
-            if (Platform.isAndroid) {
-              launchUrlString(
-                "https://play.google.com/store/apps/details?id=io.ente.photos",
-              );
-            } else {
-              launchUrlString(
-                "https://apps.apple.com/in/app/ente-photos/id1542026904",
-              );
-            }
+            final url = UpdateService.instance.getRateDetails().item2;
+            launchUrlString(url);
           },
         ),
         TextButton(
