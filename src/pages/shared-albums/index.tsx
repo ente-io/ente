@@ -106,6 +106,23 @@ export default function PublicCollectionGallery() {
         directory: true,
     });
 
+    const openUploader = () => {
+        setUploadTypeSelectorView(true);
+    };
+
+    const showPublicLinkExpiredMessage = () =>
+        appContext.setDialogMessage({
+            title: constants.LINK_EXPIRED,
+            content: constants.LINK_EXPIRED_MESSAGE,
+
+            nonClosable: true,
+            proceed: {
+                text: constants.LOGIN,
+                action: logoutUser,
+                variant: 'accent',
+            },
+        });
+
     useEffect(() => {
         const currentURL = new URL(window.location.href);
         if (currentURL.pathname !== PAGES.ROOT) {
@@ -185,7 +202,7 @@ export default function PublicCollectionGallery() {
         if (publicCollection?.publicURLs?.[0]?.enableCollect) {
             setPhotoListFooter({
                 item: (
-                    <CenteredFlex>
+                    <CenteredFlex sx={{ marginTop: '56px' }}>
                         <UploadButton
                             openUploader={openUploader}
                             text={constants.ADD_MORE_PHOTOS}
@@ -194,7 +211,7 @@ export default function PublicCollectionGallery() {
                     </CenteredFlex>
                 ),
                 itemType: ITEM_TYPE.OTHER,
-                height: 68,
+                height: 104,
             });
         } else {
             setPhotoListFooter(null);
@@ -349,23 +366,6 @@ export default function PublicCollectionGallery() {
             );
         }
     }
-
-    const openUploader = () => {
-        setUploadTypeSelectorView(true);
-    };
-
-    const showPublicLinkExpiredMessage = () =>
-        appContext.setDialogMessage({
-            title: constants.LINK_EXPIRED,
-            content: constants.LINK_EXPIRED_MESSAGE,
-
-            nonClosable: true,
-            proceed: {
-                text: constants.LOGIN,
-                action: logoutUser,
-                variant: 'accent',
-            },
-        });
 
     return (
         <PublicCollectionGalleryContext.Provider
