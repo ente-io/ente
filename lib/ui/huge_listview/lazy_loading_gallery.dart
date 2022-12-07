@@ -5,7 +5,6 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -20,6 +19,7 @@ import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -385,10 +385,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
         return _buildFile(context, widget.filesInDay[index]);
       },
       itemCount: widget.filesInDay.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: 4,
+        crossAxisCount: LocalSettings.instance.getPhotoGridSize(),
       ),
       padding: const EdgeInsets.all(0),
     );
@@ -426,6 +426,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key(widget.tag + file.tag),
+                  thumbnailSize: LocalSettings.instance.getPhotoGridSize() <
+                          defaultPhotoGridSize
+                      ? thumbnailLargeSize
+                      : thumbnailSmallSize,
                 ),
               ),
             ),

@@ -12,8 +12,8 @@ import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/account_section_widget.dart';
 import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
-import 'package:photos/ui/settings/danger_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
+import 'package:photos/ui/settings/general_section_widget.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/settings_title_bar_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
@@ -91,14 +91,10 @@ class SettingsPage extends StatelessWidget {
       sectionSpacing,
       const SocialSectionWidget(),
       sectionSpacing,
+      const GeneralSectionWidget(),
+      sectionSpacing,
       const AboutSectionWidget(),
     ]);
-    if (hasLoggedIn) {
-      contents.addAll([
-        sectionSpacing,
-        const DangerSectionWidget(),
-      ]);
-    }
 
     if (FeatureFlagService.instance.isInternalUserOrDebugBuild() &&
         hasLoggedIn) {

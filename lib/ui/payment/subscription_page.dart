@@ -16,7 +16,6 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
 import 'package:photos/ui/payment/subscription_common_widgets.dart';
@@ -286,7 +285,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
           alignment: Alignment.topCenter,
           child: GestureDetector(
             onTap: () async {
-              _launchFamilyPortal();
+              _billingService.launchFamilyPortal(context, _userDetails);
             },
             child: Container(
               padding: const EdgeInsets.fromLTRB(40, 0, 40, 80),
@@ -464,36 +463,5 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         ),
       ),
     );
-  }
-
-  // todo: refactor manage family in common widget
-  Future<void> _launchFamilyPortal() async {
-    if (_userDetails.subscription.productID == freeProductID) {
-      await showErrorDialog(
-        context,
-        "Share your storage plan with your family members!",
-        "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",
-      );
-      return;
-    }
-    await _dialog.show();
-    try {
-      final String jwtToken = await _userService.getFamiliesToken();
-      final bool familyExist = _userDetails.isPartOfFamily();
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return WebPage(
-              "Family",
-              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',
-            );
-          },
-        ),
-      );
-    } catch (e) {
-      await _dialog.hide();
-      showGenericErrorDialog(context);
-    }
-    await _dialog.hide();
   }
 }
