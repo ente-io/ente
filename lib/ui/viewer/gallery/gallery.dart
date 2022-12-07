@@ -19,6 +19,7 @@ import 'package:photos/ui/huge_listview/huge_listview.dart';
 import 'package:photos/ui/huge_listview/lazy_loading_gallery.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/date_time_util.dart';
+import 'package:photos/utils/local_settings.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 typedef GalleryLoader = Future<FileLoadResult> Function(
@@ -77,6 +78,7 @@ class _GalleryState extends State<Gallery> {
   StreamSubscription<TabDoubleTapEvent> _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
   String _logTag;
+  int _photoGridSize;
 
   @override
   void initState() {
@@ -200,6 +202,7 @@ class _GalleryState extends State<Gallery> {
     if (!_hasLoadedFiles) {
       return const EnteLoadingWidget();
     }
+    _photoGridSize = LocalSettings.instance.getPhotoGridSize();
     return _getListView();
   }
 
@@ -246,6 +249,7 @@ class _GalleryState extends State<Gallery> {
               .where((event) => event.tag == widget.tagPrefix)
               .map((event) => event.index),
           logTag: _logTag,
+          photoGirdSize: _photoGridSize,
         );
         if (widget.header != null && index == 0) {
           gallery = Column(children: [widget.header, gallery]);

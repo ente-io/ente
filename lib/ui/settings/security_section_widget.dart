@@ -135,7 +135,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
     children.addAll([
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
-          title: "Active sessions",
+          title: "View active sessions",
         ),
         pressedColor: getEnteColorScheme(context).fillFaint,
         trailingIcon: Icons.chevron_right_outlined,

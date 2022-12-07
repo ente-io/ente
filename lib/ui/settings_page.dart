@@ -77,6 +77,8 @@ class SettingsPage extends StatelessWidget {
     contents.addAll([
       const SecuritySectionWidget(),
       sectionSpacing,
+      const GeneralSectionWidget(),
+      sectionSpacing,
     ]);
 
     if (Platform.isAndroid || kDebugMode) {
@@ -90,8 +92,6 @@ class SettingsPage extends StatelessWidget {
       const SupportSectionWidget(),
       sectionSpacing,
       const SocialSectionWidget(),
-      sectionSpacing,
-      const GeneralSectionWidget(),
       sectionSpacing,
       const AboutSectionWidget(),
     ]);
