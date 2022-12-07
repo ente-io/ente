@@ -175,8 +175,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
               height: 220.0,
               color: const Color(0xfff7f7f7),
               child: CupertinoPicker(
-                backgroundColor:
-                    Theme.of(context).backgroundColor.withOpacity(0.95),
+                backgroundColor: getEnteColorScheme(context).backgroundElevated,
                 onSelectedItemChanged: (index) {
                   _chosenGridSize = _getAlbumGridSizeFromIndex(index);
                   setState(() {});
