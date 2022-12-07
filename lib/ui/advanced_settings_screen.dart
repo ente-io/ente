@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -99,15 +100,16 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
   Future<void> _showPhotoGridSizePicker() async {
     final textTheme = getEnteTextTheme(context);
     final List<Text> options = [];
-    options.add(
-      Text("2", style: textTheme.body),
-    );
-    options.add(
-      Text("3", style: textTheme.body),
-    );
-    options.add(
-      Text("4", style: textTheme.body),
-    );
+    for (int gridSize = photoGridSizeMin;
+        gridSize <= photoGridSizeMax;
+        gridSize++) {
+      options.add(
+        Text(
+          gridSize.toString(),
+          style: textTheme.body,
+        ),
+      );
+    }
     return showCupertinoModalPopup(
       context: context,
       builder: (context) {

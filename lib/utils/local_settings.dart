@@ -32,7 +32,7 @@ class LocalSettings {
     if (_prefs.containsKey(kPhotoGridSize)) {
       return _prefs.getInt(kPhotoGridSize)!;
     } else {
-      return defaultPhotoGridSize;
+      return photoGridSizeDefault;
     }
   }
 

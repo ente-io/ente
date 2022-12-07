@@ -434,7 +434,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   shouldShowLivePhotoOverlay: true,
                   key: Key(widget.tag + file.tag),
                   thumbnailSize: LocalSettings.instance.getPhotoGridSize() <
-                          defaultPhotoGridSize
+                          photoGridSizeDefault
                       ? thumbnailLargeSize
                       : thumbnailSmallSize,
                 ),
