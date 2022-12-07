@@ -33,7 +33,7 @@ class SupportSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Email",
+            title: "Contact support",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -45,7 +45,7 @@ class SupportSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Roadmap",
+            title: "Suggest features",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -59,7 +59,7 @@ class SupportSectionWidget extends StatelessWidget {
                   final url = Configuration.instance.isLoggedIn()
                       ? endpoint + "?token=" + Configuration.instance.getToken()
                       : roadmapURL;
-                  return WebPage("Roadmap", url);
+                  return WebPage("Suggest features", url);
                 },
               ),
             );

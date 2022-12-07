@@ -81,7 +81,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       [
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Free up space",
+            title: "Free up device space",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -117,7 +117,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Deduplicate files",
+            title: "Remove duplicates",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
