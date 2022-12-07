@@ -423,7 +423,7 @@ export function PhotoList({
             item: (
                 <FooterContainer span={columns}>
                     <p>
-                        {constants.PRESERVED_BY}{' '}
+                        {constants.SHARED_USING}{' '}
                         <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {constants.ENTE_IO}
                         </Link>
