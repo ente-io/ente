@@ -45,7 +45,9 @@ const englishConstants = {
     NEW_USER: 'New to ente',
     EXISTING_USER: 'Existing user',
     NAME: 'Name',
-    ENTER_NAME: 'Your name',
+    ENTER_NAME: 'Enter name',
+    PUBLIC_UPLOADER_NAME_MESSAGE:
+        'Add a name so that your friends know who to thank for these great photos!',
     EMAIL: 'Email',
     ENTER_EMAIL: 'Enter email address',
     DATA_DISCLAIMER: "We'll never share your data with anyone else.",
@@ -860,6 +862,7 @@ const englishConstants = {
     TODAY: 'Today',
     YESTERDAY: 'Yesterday',
     AT: 'at',
+    NAME_PLACEHOLDER: 'Name...',
 };
 
 export default englishConstants;
