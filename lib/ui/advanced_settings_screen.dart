@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -125,7 +124,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.cupertinoPickerTopColor,
+                color: getEnteColorScheme(context).backgroundElevated2,
                 border: const Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
