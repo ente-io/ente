@@ -216,9 +216,14 @@ Widget getDayWidget(
   final textTheme = getEnteTextTheme(context);
   final textStyle =
       photoGridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
-  final double paddingValue = photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
+  final double horizontalPadding =
+      photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
+  final double verticalPadding = photoGridSize < photoGridSizeMax ? 12.0 : 14.0;
   return Padding(
-    padding: EdgeInsets.all(paddingValue),
+    padding: EdgeInsets.symmetric(
+      horizontal: horizontalPadding,
+      vertical: verticalPadding,
+    ),
     child: Container(
       alignment: Alignment.centerLeft,
       child: Text(
