@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -177,11 +179,21 @@ class File extends EnteFile {
         duration = asset.duration;
       }
     }
+    bool hasExifTime = false;
     if (fileType == FileType.image && mediaUploadData.sourceFile != null) {
       final exifTime =
           await getCreationTimeFromEXIF(mediaUploadData.sourceFile!);
       if (exifTime != null) {
+        hasExifTime = true;
         creationTime = exifTime.microsecondsSinceEpoch;
+      }
+    }
+    // try to get the timestamp from fileName. In case of iOS, file names are
+    // generic IMG_XXXX, so only parse it on Android devices
+    if (!hasExifTime && Platform.isAndroid && title != null) {
+      final timeFromFileName = parseDateTimeFromFileNameV2(title!);
+      if (timeFromFileName != null) {
+        creationTime = timeFromFileName.microsecondsSinceEpoch;
       }
     }
     hash = mediaUploadData.hashData?.fileHash;

@@ -32,7 +32,11 @@ void main() {
   });
 
   test("test invalid datetime parsing", () {
-    final List<String> badParsing = ["Snapchat-431959199.mp4."];
+    final List<String> badParsing = [
+      "Snapchat-431959199.mp4.",
+      "Snapchat-400000000.mp4",
+      "Snapchat-900000000.mp4"
+    ];
     for (String val in badParsing) {
       final parsedValue = parseDateTimeFromFileNameV2(val);
       expect(
