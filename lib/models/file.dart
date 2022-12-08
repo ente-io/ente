@@ -202,7 +202,7 @@ class File extends EnteFile {
             daysBetween(
                   DateTime.fromMicrosecondsSinceEpoch(creationTime!),
                   timeFromFileName,
-                ).abs() <=
+                ).abs() >
                 2;
         if (useFileTimeStamp) {
           creationTime = timeFromFileName.microsecondsSinceEpoch;
