@@ -22,7 +22,8 @@ export default async function uploader(
     worker: any,
     existingFiles: EnteFile[],
     fileWithCollection: FileWithCollection,
-    uploaderName: string
+    uploaderName: string,
+    rejectVideos: boolean
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
     const fileNameSize = `${UploadService.getAssetName(
@@ -44,6 +45,10 @@ export default async function uploader(
         }
         if (!metadata) {
             throw Error(CustomError.NO_METADATA);
+        }
+
+        if (rejectVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
+            return { fileUploadResult: UPLOAD_RESULT.REJECTED };
         }
 
         const matchingExistingFiles = findMatchingExistingFiles(

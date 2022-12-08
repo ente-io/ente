@@ -434,7 +434,8 @@ class UploadManager {
                 worker,
                 this.userOwnedNonTrashedExistingFiles,
                 fileWithCollection,
-                this.uploaderName
+                this.uploaderName,
+                this.publicUploadProps.accessedThroughSharedURL
             );
 
             const finalUploadResult = await this.postUploadTask(
