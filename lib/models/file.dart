@@ -200,7 +200,9 @@ class File extends EnteFile {
         // contain the time.
         final bool useFileTimeStamp = creationTime == null ||
             !areFromSameDay(
-                creationTime!, timeFromFileName.microsecondsSinceEpoch);
+              creationTime!,
+              timeFromFileName.microsecondsSinceEpoch,
+            );
         if (useFileTimeStamp) {
           creationTime = timeFromFileName.microsecondsSinceEpoch;
         }
