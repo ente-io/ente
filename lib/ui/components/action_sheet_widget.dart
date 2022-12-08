@@ -5,30 +5,34 @@ import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/add_separators_util.dart';
 
-class DeleteItemsWidget extends StatelessWidget {
+class ActionSheetWidget extends StatelessWidget {
   final List<Widget> actionButtons;
-  const DeleteItemsWidget({required this.actionButtons, super.key});
+
+  const ActionSheetWidget({required this.actionButtons, super.key});
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
-    return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(8)),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurMuted, sigmaY: blurMuted),
-        child: Container(
-          color: colorScheme.backdropBase,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const TextContainer(),
-                const SizedBox(height: 36),
-                ActionButtons(
-                  actionButtons,
-                ),
-              ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
+      child: ClipRRect(
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: blurMuted, sigmaY: blurMuted),
+          child: Container(
+            color: colorScheme.backdropBase,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const TextContainer(),
+                  const SizedBox(height: 36),
+                  ActionButtons(
+                    actionButtons,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
