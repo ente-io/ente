@@ -18,19 +18,32 @@ class LargeButtonWidget extends StatelessWidget {
   final IconData icon;
   final String labelText;
   final ButtonType buttonType;
+  final VoidCallback onTap;
+
+  ///setting this flag to true will make the button appear like how it would
+  ///on dark theme irrespective of the app's theme.
+  final bool isInActionSheet;
   const LargeButtonWidget({
     required this.icon,
     required this.labelText,
     required this.buttonType,
+    required this.onTap,
+    this.isInActionSheet = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
-    final inverseColorScheme = getEnteColorScheme(context, inverse: true);
-    final textTheme = getEnteTextTheme(context);
-    final inverseTextTheme = getEnteTextTheme(context, inverse: true);
+    final colorScheme =
+        isInActionSheet ? darkScheme : getEnteColorScheme(context);
+    final inverseColorScheme = isInActionSheet
+        ? lightScheme
+        : getEnteColorScheme(context, inverse: true);
+    final textTheme =
+        isInActionSheet ? darkTextTheme : getEnteTextTheme(context);
+    final inverseTextTheme = isInActionSheet
+        ? lightTextTheme
+        : getEnteTextTheme(context, inverse: true);
     final defaultButtonColor = _defaultButtonColor(colorScheme);
     final pressedButtonColor = _pressedButtonColor(colorScheme);
     final disabledButtonColor = _disabledButtonColor(colorScheme);
@@ -49,7 +62,7 @@ class LargeButtonWidget extends StatelessWidget {
     final disabledLabelStyle = _disabledLabelStyle(textTheme, colorScheme);
 
     return GestureDetector(
-      onTap: () {},
+      onTap: onTap,
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
