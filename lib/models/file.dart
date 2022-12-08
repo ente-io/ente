@@ -193,17 +193,14 @@ class File extends EnteFile {
     if (!hasExifTime && Platform.isAndroid && title != null) {
       final timeFromFileName = parseDateTimeFromFileNameV2(title!);
       if (timeFromFileName != null) {
-        // only use timeFromFileName is the delta between current
-        // creationTime and timeFromFileName is larger than some threshold.
+        // only use timeFromFileName if the existing creationTime and
+        // timeFromFilename belongs to different date.
         // This is done because many times the fileTimeStamp will only give us
         // the date, not time value but the photo_manager's creation time will
         // contain the time.
         final bool useFileTimeStamp = creationTime == null ||
-            daysBetween(
-                  DateTime.fromMicrosecondsSinceEpoch(creationTime!),
-                  timeFromFileName,
-                ).abs() >
-                2;
+            !areFromSameDay(
+                creationTime!, timeFromFileName.microsecondsSinceEpoch);
         if (useFileTimeStamp) {
           creationTime = timeFromFileName.microsecondsSinceEpoch;
         }
