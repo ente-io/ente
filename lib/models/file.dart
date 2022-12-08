@@ -188,12 +188,25 @@ class File extends EnteFile {
         creationTime = exifTime.microsecondsSinceEpoch;
       }
     }
-    // try to get the timestamp from fileName. In case of iOS, file names are
+    // Try to get the timestamp from fileName. In case of iOS, file names are
     // generic IMG_XXXX, so only parse it on Android devices
     if (!hasExifTime && Platform.isAndroid && title != null) {
       final timeFromFileName = parseDateTimeFromFileNameV2(title!);
       if (timeFromFileName != null) {
-        creationTime = timeFromFileName.microsecondsSinceEpoch;
+        // only use timeFromFileName is the delta between current
+        // creationTime and timeFromFileName is larger than some threshold.
+        // This is done because many times the fileTimeStamp will only give us
+        // the date, not time value but the photo_manager's creation time will
+        // contain the time.
+        final bool useFileTimeStamp = creationTime == null ||
+            daysBetween(
+                  DateTime.fromMicrosecondsSinceEpoch(creationTime!),
+                  timeFromFileName,
+                ).abs() <=
+                2;
+        if (useFileTimeStamp) {
+          creationTime = timeFromFileName.microsecondsSinceEpoch;
+        }
       }
     }
     hash = mediaUploadData.hashData?.fileHash;

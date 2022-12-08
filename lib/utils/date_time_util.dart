@@ -54,6 +54,12 @@ String getMonthAndYear(DateTime dateTime) {
   return _months[dateTime.month]! + " " + dateTime.year.toString();
 }
 
+int daysBetween(DateTime from, DateTime to) {
+  from = DateTime(from.year, from.month, from.day);
+  to = DateTime(to.year, to.month, to.day);
+  return (to.difference(from).inHours / 24).round();
+}
+
 //Thu, 30 Jun
 String getDayAndMonth(DateTime dateTime) {
   return _days[dateTime.weekday]! +
