@@ -60,6 +60,14 @@ int daysBetween(DateTime from, DateTime to) {
   return (to.difference(from).inHours / 24).round();
 }
 
+bool areFromSameDay(int firstCreationTime, int secondCreationTime) {
+  final firstDate = DateTime.fromMicrosecondsSinceEpoch(firstCreationTime);
+  final secondDate = DateTime.fromMicrosecondsSinceEpoch(secondCreationTime);
+  return firstDate.year == secondDate.year &&
+      firstDate.month == secondDate.month &&
+      firstDate.day == secondDate.day;
+}
+
 //Thu, 30 Jun
 String getDayAndMonth(DateTime dateTime) {
   return _days[dateTime.weekday]! +
