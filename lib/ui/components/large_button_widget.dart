@@ -72,7 +72,7 @@ class LargeButtonWidget extends StatelessWidget {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-          //show loading or row depending on state of button
+          //todo: show loading or row depending on state of button
           child: _hasTrailingIcon()
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,6 +212,7 @@ class LargeButtonWidget extends StatelessWidget {
     return null;
   }
 
+  //Returning null to fallback to default color
   Color? _disabledIconColor(EnteColorScheme colorScheme) {
     if (buttonType == ButtonType.primary ||
         buttonType == ButtonType.secondary) {
@@ -254,6 +255,7 @@ class LargeButtonWidget extends StatelessWidget {
     return null;
   }
 
+  //Returning null to fallback to default color
   TextStyle? _disabledLabelStyle(
     EnteTextTheme textTheme,
     EnteColorScheme colorScheme,

@@ -99,14 +99,15 @@ class ContentContainerWidget extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
-      //set cross axis to center when icon should be shown in place of body
+      //todo: set cross axis to center when icon should be shown in place of body
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         title == null
             ? const SizedBox.shrink()
             : Text(
                 title!,
-                style: textTheme.h3Bold.copyWith(color: textBaseDark),
+                style: textTheme.h3Bold
+                    .copyWith(color: textBaseDark), //constant color
               ),
         title == null || body == null
             ? const SizedBox.shrink()
@@ -115,7 +116,8 @@ class ContentContainerWidget extends StatelessWidget {
             ? const SizedBox.shrink()
             : Text(
                 body!,
-                style: textTheme.body.copyWith(color: textMutedDark),
+                style: textTheme.body
+                    .copyWith(color: textMutedDark), //constant color
               )
       ],
     );
@@ -131,8 +133,9 @@ class ActionButtons extends StatelessWidget {
     final actionButtonsWithSeparators = actionButtons;
     return Column(
       children:
-          //Separator is 8pts in figma. -2pts here as the action buttons are 2pts
-          //extra in height in code compared to figma because of the border of buttons
+          //Separator height is 8pts in figma. -2pts here as the action
+          //buttons are 2pts extra in height in code compared to figma because
+          //of the border(1pt top + 1pt bottom) of action buttons.
           addSeparators(actionButtonsWithSeparators, const SizedBox(height: 6)),
     );
   }
