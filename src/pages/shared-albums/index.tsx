@@ -204,6 +204,7 @@ export default function PublicCollectionGallery() {
                 item: (
                     <CenteredFlex sx={{ marginTop: '56px' }}>
                         <UploadButton
+                            disableShrink
                             openUploader={openUploader}
                             text={constants.ADD_MORE_PHOTOS}
                             color="accent"
