@@ -46,6 +46,7 @@ import { useDropzone } from 'react-dropzone';
 import UploadSelectorInputs from 'components/UploadSelectorInputs';
 import { logoutUser } from 'services/userService';
 import UploadButton from 'components/Upload/UploadButton';
+import { isMobileOrTable } from 'utils/common/deviceDetection';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -107,7 +108,9 @@ export default function PublicCollectionGallery() {
     });
 
     const openUploader = () => {
-        setUploadTypeSelectorView(true);
+        isMobileOrTable()
+            ? openFileSelector()
+            : setUploadTypeSelectorView(true);
     };
 
     const showPublicLinkExpiredMessage = () =>
