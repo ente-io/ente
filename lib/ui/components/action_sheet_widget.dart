@@ -6,12 +6,16 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/add_separators_util.dart';
 
 class ActionSheetWidget extends StatelessWidget {
+  final String? title;
+  final String? body;
   final List<Widget> actionButtons;
 
-  const ActionSheetWidget({required this.actionButtons, super.key});
+  const ActionSheetWidget(
+      {required this.actionButtons, this.title, this.body, super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isTitleAndBodyNull = title == null && body == null;
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
@@ -22,12 +26,18 @@ class ActionSheetWidget extends StatelessWidget {
           child: Container(
             color: colorScheme.backdropBase,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+              padding:
+                  EdgeInsets.fromLTRB(24, 24, 24, isTitleAndBodyNull ? 24 : 28),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const TextContainer(),
-                  const SizedBox(height: 36),
+                  isTitleAndBodyNull
+                      ? const SizedBox.shrink()
+                      : Padding(
+                          padding: const EdgeInsets.only(bottom: 36),
+                          child:
+                              ContentContainerWidget(title: title, body: body),
+                        ),
                   ActionButtons(
                     actionButtons,
                   ),
@@ -41,8 +51,10 @@ class ActionSheetWidget extends StatelessWidget {
   }
 }
 
-class TextContainer extends StatelessWidget {
-  const TextContainer({super.key});
+class ContentContainerWidget extends StatelessWidget {
+  final String? title;
+  final String? body;
+  const ContentContainerWidget({this.title, this.body, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,16 +62,24 @@ class TextContainer extends StatelessWidget {
     final textTheme = getEnteTextTheme(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
+      //set cross axis to center when icon should be shown in place of body
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          "Delete items",
-          style: textTheme.h3Bold,
-        ),
-        const SizedBox(height: 19),
-        Text(
-          "Some items exists both on ente and on your device.",
-          style: textTheme.body.copyWith(color: colorScheme.textMuted),
-        )
+        title == null
+            ? const SizedBox.shrink()
+            : Text(
+                title!,
+                style: textTheme.h3Bold,
+              ),
+        title == null || body == null
+            ? const SizedBox.shrink()
+            : const SizedBox(height: 19),
+        body == null
+            ? const SizedBox.shrink()
+            : Text(
+                body!,
+                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              )
       ],
     );
   }
