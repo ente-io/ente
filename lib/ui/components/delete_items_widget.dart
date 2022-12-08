@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/utils/add_separators_util.dart';
 
 class DeleteItemsWidget extends StatelessWidget {
-  const DeleteItemsWidget({super.key});
+  final List<Widget> actionButtons;
+  const DeleteItemsWidget({required this.actionButtons, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +23,11 @@ class DeleteItemsWidget extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextContainer(),
+                const TextContainer(),
                 const SizedBox(height: 36),
-                OptionButtons(),
+                ActionButtons(
+                  actionButtons,
+                ),
               ],
             ),
           ),
@@ -57,15 +61,18 @@ class TextContainer extends StatelessWidget {
   }
 }
 
-class OptionButtons extends StatelessWidget {
-  const OptionButtons({super.key});
+class ActionButtons extends StatelessWidget {
+  final List<Widget> actionButtons;
+  const ActionButtons(this.actionButtons, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 216,
-      width: 303,
-      color: Colors.green.shade300.withOpacity(0.5),
+    final actionButtonsWithSeparators = actionButtons;
+    return Column(
+      children:
+          //Separator is 8pts in figma. -2pts here as the action buttons are 2pts
+          //extra in height in code compared to figma because of the border of buttons
+          addSeparators(actionButtonsWithSeparators, const SizedBox(height: 6)),
     );
   }
 }
