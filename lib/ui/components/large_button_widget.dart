@@ -77,11 +77,15 @@ class LargeButtonWidget extends StatelessWidget {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 16),
-                      child: Text(
-                        labelText,
-                        style: defaultLabelStyle,
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 16),
+                        child: Text(
+                          labelText,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                          style: defaultLabelStyle,
+                        ),
                       ),
                     ),
                     Icon(
@@ -100,11 +104,15 @@ class LargeButtonWidget extends StatelessWidget {
                       color: defaultIconColor,
                     ),
                     const SizedBox(width: 8),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text(
-                        labelText,
-                        style: defaultLabelStyle,
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          labelText,
+                          style: defaultLabelStyle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     )
                   ],
