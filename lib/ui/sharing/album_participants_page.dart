@@ -102,7 +102,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                               title: isOwner
                                   ? "You"
                                   : widget.collection.owner?.email ?? '',
-                              makeTextBold: true,
+                              makeTextBold: isOwner,
                             ),
                             leadingIconWidget: UserAvatarWidget(
                               owner,
@@ -135,16 +135,22 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index > 0 && index <= collaborators.length) {
                     final listIndex = index - 1;
                     final currentUser = collaborators[listIndex];
+                    final isSameAsLoggedInUser =
+                        currentUserID == currentUser.id;
                     return Column(
                       children: [
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: currentUser.email,
+                            title: isSameAsLoggedInUser
+                                ? "You"
+                                : currentUser.email,
+                            makeTextBold: isSameAsLoggedInUser,
                           ),
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
                             type: AvatarType.mini,
+                            currentUserID: currentUserID,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
                           pressedColor: getEnteColorScheme(context).fillFaint,
@@ -201,16 +207,22 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index > 0 && index <= viewers.length) {
                     final listIndex = index - 1;
                     final currentUser = viewers[listIndex];
+                    final isSameAsLoggedInUser =
+                        currentUserID == currentUser.id;
                     return Column(
                       children: [
                         MenuItemWidget(
                           captionedTextWidget: CaptionedTextWidget(
-                            title: currentUser.email,
+                            title: isSameAsLoggedInUser
+                                ? "You"
+                                : currentUser.email,
+                            makeTextBold: isSameAsLoggedInUser,
                           ),
                           leadingIconSize: 24.0,
                           leadingIconWidget: UserAvatarWidget(
                             currentUser,
                             type: AvatarType.mini,
+                            currentUserID: currentUserID,
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
                           pressedColor: getEnteColorScheme(context).fillFaint,
