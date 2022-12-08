@@ -111,7 +111,6 @@ class UploadManager {
                 this.existingFiles
             );
         }
-        console.log(this.existingFiles);
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
         );

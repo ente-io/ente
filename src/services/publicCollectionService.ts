@@ -27,7 +27,7 @@ const getPublicCollectionPasswordKey = (collectionUID: string) =>
     `public-${collectionUID}-passkey`;
 
 const getPublicCollectionUploaderNameKey = (collectionUID: string) =>
-    `public-${collectionUID}-time`;
+    `public-${collectionUID}-uploaderName`;
 
 export const getPublicCollectionUploaderName = async (collectionUID: string) =>
     await localForage.getItem<string>(
