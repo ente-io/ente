@@ -60,6 +60,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isOwner =
+        widget.collection.owner?.id == Configuration.instance.getUserID();
     final colorScheme = getEnteColorScheme(context);
     final currentUserID = Configuration.instance.getUserID()!;
     final int particpants = 1 + widget.collection.getSharees().length;
@@ -96,8 +98,10 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             iconData: Icons.admin_panel_settings_outlined,
                           ),
                           MenuItemWidget(
-                            captionedTextWidget: const CaptionedTextWidget(
-                              title: "You",
+                            captionedTextWidget: CaptionedTextWidget(
+                              title: isOwner
+                                  ? "You"
+                                  : widget.collection.owner?.email ?? '',
                               makeTextBold: true,
                             ),
                             leadingIconWidget: UserAvatarWidget(
@@ -123,7 +127,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  if (index == 0) {
+                  if (index == 0 && (isOwner || collaborators.isNotEmpty)) {
                     return const MenuSectionTitle(
                       title: "Collaborator",
                       iconData: Icons.edit_outlined,
@@ -144,10 +148,12 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
                           pressedColor: getEnteColorScheme(context).fillFaint,
-                          trailingIcon: Icons.chevron_right,
+                          trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
                           onTap: () async {
-                            await _navigateToManageUser(currentUser);
+                            if (isOwner) {
+                              await _navigateToManageUser(currentUser);
+                            }
                           },
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: true,
@@ -159,7 +165,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         ),
                       ],
                     );
-                  } else if (index == (1 + collaborators.length)) {
+                  } else if (index == (1 + collaborators.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title:
@@ -176,7 +182,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       borderRadius: 8,
                     );
                   }
-                  return const Text("-----");
+                  return const SizedBox.shrink();
                 },
                 childCount: 1 + collaborators.length + 1,
               ),
@@ -187,7 +193,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
             sliver: SliverList(
               delegate: SliverChildBuilderDelegate(
                 (context, index) {
-                  if (index == 0) {
+                  if (index == 0 && (isOwner || viewers.isNotEmpty)) {
                     return const MenuSectionTitle(
                       title: "Viewer",
                       iconData: Icons.photo_outlined,
@@ -208,10 +214,12 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                           ),
                           menuItemColor: getEnteColorScheme(context).fillFaint,
                           pressedColor: getEnteColorScheme(context).fillFaint,
-                          trailingIcon: Icons.chevron_right,
+                          trailingIcon: isOwner ? Icons.chevron_right : null,
                           trailingIconIsMuted: true,
                           onTap: () async {
-                            await _navigateToManageUser(currentUser);
+                            if (isOwner) {
+                              await _navigateToManageUser(currentUser);
+                            }
                           },
                           isTopBorderRadiusRemoved: listIndex > 0,
                           isBottomBorderRadiusRemoved: true,
@@ -223,7 +231,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         ),
                       ],
                     );
-                  } else if (index == (1 + viewers.length)) {
+                  } else if (index == (1 + viewers.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
                         title: viewers.isNotEmpty ? "Add more" : "Add Viewer",
@@ -239,7 +247,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                       borderRadius: 8,
                     );
                   }
-                  return const Text("-----");
+                  return const SizedBox.shrink();
                 },
                 childCount: 1 + viewers.length + 1,
               ),

@@ -21,6 +21,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
+import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
 import 'package:photos/utils/data_util.dart';
@@ -249,7 +250,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final List<Widget> actions = <Widget>[];
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.selectedFiles.files.isEmpty &&
-        widget.type == GalleryType.ownedCollection &&
+        (widget.type == GalleryType.ownedCollection ||
+            widget.type == GalleryType.sharedCollection) &&
         widget.collection?.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
@@ -428,21 +430,30 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   Future<void> _showShareCollectionDialog() async {
     final collection = widget.collection;
     try {
-      if (collection == null || widget.type != GalleryType.ownedCollection) {
+      if (collection == null ||
+          (widget.type != GalleryType.ownedCollection &&
+              widget.type != GalleryType.sharedCollection)) {
         throw Exception(
-          "Cannot share empty collection of type ${widget.type}",
+          "Cannot share empty collection of typex ${widget.type}",
         );
       }
-      // await dialog.hide();
-      unawaited(
-        routeToPage(
-          context,
-          ShareCollectionPage(collection),
-        ),
-      );
+      if (Configuration.instance.getUserID() == widget.collection.owner.id) {
+        unawaited(
+          routeToPage(
+            context,
+            ShareCollectionPage(collection),
+          ),
+        );
+      } else {
+        unawaited(
+          routeToPage(
+            context,
+            AlbumParticipantsPage(collection),
+          ),
+        );
+      }
     } catch (e, s) {
       _logger.severe(e, s);
-      // await dialog.hide();
       showGenericErrorDialog(context);
     }
   }
