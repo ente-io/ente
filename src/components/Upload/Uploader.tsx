@@ -51,6 +51,11 @@ import billingService from 'services/billingService';
 import { addLogLine } from 'utils/logging';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import UserNameInputDialog from 'components/UserNameInputDialog';
+import {
+    getPublicCollectionUID,
+    getPublicCollectionUploaderName,
+    savePublicCollectionUploaderName,
+} from 'services/publicCollectionService';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -528,50 +533,66 @@ export default function Uploader(props: Props) {
         });
     };
 
-    const handleCollectionCreationAndUpload = (
+    const handleCollectionCreationAndUpload = async (
         importSuggestion: ImportSuggestion,
         isFirstUpload: boolean,
         pickedUploadType: PICKED_UPLOAD_TYPE,
         accessedThroughSharedURL?: boolean
     ) => {
-        if (accessedThroughSharedURL) {
-            showUserNameInputDialog();
-            return;
-        }
-        if (isPendingDesktopUpload.current) {
-            isPendingDesktopUpload.current = false;
-            if (pendingDesktopUploadCollectionName.current) {
-                uploadToSingleNewCollection(
-                    pendingDesktopUploadCollectionName.current
+        try {
+            if (accessedThroughSharedURL) {
+                const uploaderName = await getPublicCollectionUploaderName(
+                    getPublicCollectionUID(publicCollectionGalleryContext.token)
                 );
-                pendingDesktopUploadCollectionName.current = null;
-            } else {
+                if (!uploaderName) {
+                    showUserNameInputDialog();
+                    return;
+                } else {
+                    await handlePublicUpload(uploaderName, true);
+                }
+            }
+            if (isPendingDesktopUpload.current) {
+                isPendingDesktopUpload.current = false;
+                if (pendingDesktopUploadCollectionName.current) {
+                    uploadToSingleNewCollection(
+                        pendingDesktopUploadCollectionName.current
+                    );
+                    pendingDesktopUploadCollectionName.current = null;
+                } else {
+                    uploadFilesToNewCollections(
+                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+                    );
+                }
+                return;
+            }
+            if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
                 uploadFilesToNewCollections(
                     UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
                 );
+                return;
             }
-            return;
+            if (isFirstUpload && !importSuggestion.rootFolderName) {
+                importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
+            }
+            let showNextModal = () => {};
+            if (importSuggestion.hasNestedFolders) {
+                showNextModal = () => setChoiceModalView(true);
+            } else {
+                showNextModal = () =>
+                    uploadToSingleNewCollection(
+                        importSuggestion.rootFolderName
+                    );
+            }
+            props.setCollectionSelectorAttributes({
+                callback: uploadFilesToExistingCollection,
+                showNextModal,
+                title: constants.UPLOAD_TO_COLLECTION,
+            });
+        } catch (e) {
+            logError(e, 'handleCollectionCreationAndUpload failed');
         }
-        if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
-            uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
-            return;
-        }
-        if (isFirstUpload && !importSuggestion.rootFolderName) {
-            importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
-        }
-        let showNextModal = () => {};
-        if (importSuggestion.hasNestedFolders) {
-            showNextModal = () => setChoiceModalView(true);
-        } else {
-            showNextModal = () =>
-                uploadToSingleNewCollection(importSuggestion.rootFolderName);
-        }
-        props.setCollectionSelectorAttributes({
-            callback: uploadFilesToExistingCollection,
-            showNextModal,
-            title: constants.UPLOAD_TO_COLLECTION,
-        });
     };
+
     const handleDesktopUpload = async (type: PICKED_UPLOAD_TYPE) => {
         let files: ElectronFile[];
         pickedUploadType.current = type;
@@ -617,8 +638,19 @@ export default function Uploader(props: Props) {
     const handleFolderUpload = handleUpload(PICKED_UPLOAD_TYPE.FOLDERS);
     const handleZipUpload = handleUpload(PICKED_UPLOAD_TYPE.ZIPS);
 
-    const handlePublicUpload = async (uploaderName: string) => {
+    const handlePublicUpload = async (
+        uploaderName: string,
+        skipSave?: boolean
+    ) => {
         try {
+            if (!skipSave) {
+                savePublicCollectionUploaderName(
+                    getPublicCollectionUID(
+                        publicCollectionGalleryContext.token
+                    ),
+                    uploaderName
+                );
+            }
             await uploadFilesToExistingCollection(
                 props.uploadCollection,
                 uploaderName
