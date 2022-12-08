@@ -15,19 +15,19 @@ enum ButtonType {
 }
 
 class LargeButtonWidget extends StatelessWidget {
-  final IconData icon;
-  final String labelText;
+  final IconData? icon;
+  final String? labelText;
   final ButtonType buttonType;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
   final bool isInActionSheet;
   const LargeButtonWidget({
-    required this.icon,
-    required this.labelText,
     required this.buttonType,
-    required this.onTap,
+    this.icon,
+    this.labelText,
+    this.onTap,
     this.isInActionSheet = false,
     super.key,
   });
@@ -77,44 +77,57 @@ class LargeButtonWidget extends StatelessWidget {
               ? Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 16),
-                        child: Text(
-                          labelText,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                          style: defaultLabelStyle,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      icon,
-                      size: 20,
-                      color: defaultIconColor,
-                    ),
+                    labelText == null
+                        ? const SizedBox.shrink()
+                        : Flexible(
+                            child: Padding(
+                              padding: icon == null
+                                  ? const EdgeInsets.symmetric(horizontal: 8)
+                                  : const EdgeInsets.only(right: 16),
+                              child: Text(
+                                labelText!,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
+                                style: defaultLabelStyle,
+                              ),
+                            ),
+                          ),
+                    icon == null
+                        ? const SizedBox.shrink()
+                        : Icon(
+                            icon,
+                            size: 20,
+                            color: defaultIconColor,
+                          ),
                   ],
                 )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      icon,
-                      size: 20,
-                      color: defaultIconColor,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
-                        child: Text(
-                          labelText,
-                          style: defaultLabelStyle,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                    )
+                    icon == null
+                        ? const SizedBox.shrink()
+                        : Icon(
+                            icon,
+                            size: 20,
+                            color: defaultIconColor,
+                          ),
+                    icon == null || labelText == null
+                        ? const SizedBox.shrink()
+                        : const SizedBox(width: 8),
+                    labelText == null
+                        ? const SizedBox.shrink()
+                        : Flexible(
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8),
+                              child: Text(
+                                labelText!,
+                                style: defaultLabelStyle,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          )
                   ],
                 ),
         ),
