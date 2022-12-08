@@ -545,6 +545,21 @@ const englishConstants = {
             </Box>
         </>
     ),
+    SKIPPED_VIDEOS_INFO: (link: string) => (
+        <>
+            <Box mb={1}>
+                Presently we do not support adding videos via public links.{' '}
+            </Box>
+            <Box>
+                To share videos, please
+                <Link href={link} target="_blank">
+                    signup
+                </Link>{' '}
+                for ente and share with the intended recipients using their
+                email.
+            </Box>
+        </>
+    ),
 
     LIVE_PHOTOS_DETECTED:
         'The photo and video files from your Live Photos have been merged into a single ELP file',
@@ -559,6 +574,7 @@ const englishConstants = {
         'Skipped these as there are files with matching names in the same album',
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'Blocked uploads',
+    SKIPPED_VIDEOS: 'Skipped videos',
     INPROGRESS_METADATA_EXTRACTION: 'In progress',
     INPROGRESS_UPLOADS: 'Uploads in progress',
     TOO_LARGE_UPLOADS: 'Large files',
