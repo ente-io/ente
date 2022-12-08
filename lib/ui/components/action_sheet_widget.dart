@@ -1,47 +1,85 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/add_separators_util.dart';
+
+void showActionSheet({
+  required BuildContext context,
+  required List<Widget> buttons,
+  String? title,
+  String? body,
+}) {
+  showMaterialModalBottomSheet(
+    backgroundColor: Colors.transparent,
+    barrierColor: backdropMutedDark,
+    useRootNavigator: true,
+    context: context,
+    builder: (_) {
+      return ActionSheetWidget(
+        title: title,
+        body: body,
+        actionButtons: buttons,
+      );
+    },
+  );
+}
 
 class ActionSheetWidget extends StatelessWidget {
   final String? title;
   final String? body;
   final List<Widget> actionButtons;
 
-  const ActionSheetWidget(
-      {required this.actionButtons, this.title, this.body, super.key});
+  const ActionSheetWidget({
+    required this.actionButtons,
+    this.title,
+    this.body,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isTitleAndBodyNull = title == null && body == null;
-    final colorScheme = getEnteColorScheme(context);
+    final blur = MediaQuery.of(context).platformBrightness == Brightness.light
+        ? blurMuted
+        : blurBase;
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blurMuted, sigmaY: blurMuted),
-          child: Container(
-            color: colorScheme.backdropBase,
-            child: Padding(
-              padding:
-                  EdgeInsets.fromLTRB(24, 24, 24, isTitleAndBodyNull ? 24 : 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  isTitleAndBodyNull
-                      ? const SizedBox.shrink()
-                      : Padding(
-                          padding: const EdgeInsets.only(bottom: 36),
-                          child:
-                              ContentContainerWidget(title: title, body: body),
-                        ),
-                  ActionButtons(
-                    actionButtons,
-                  ),
-                ],
+      child: Container(
+        decoration: BoxDecoration(boxShadow: shadowMenuLight),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+            child: Container(
+              color: backdropBaseDark,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  24,
+                  24,
+                  24,
+                  isTitleAndBodyNull ? 24 : 28,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    isTitleAndBodyNull
+                        ? const SizedBox.shrink()
+                        : Padding(
+                            padding: const EdgeInsets.only(bottom: 36),
+                            child: ContentContainerWidget(
+                              title: title,
+                              body: body,
+                            ),
+                          ),
+                    ActionButtons(
+                      actionButtons,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -58,7 +96,6 @@ class ContentContainerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -69,7 +106,7 @@ class ContentContainerWidget extends StatelessWidget {
             ? const SizedBox.shrink()
             : Text(
                 title!,
-                style: textTheme.h3Bold,
+                style: textTheme.h3Bold.copyWith(color: textBaseDark),
               ),
         title == null || body == null
             ? const SizedBox.shrink()
@@ -78,7 +115,7 @@ class ContentContainerWidget extends StatelessWidget {
             ? const SizedBox.shrink()
             : Text(
                 body!,
-                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+                style: textTheme.body.copyWith(color: textMutedDark),
               )
       ],
     );
