@@ -50,6 +50,7 @@ import { getUserOwnedCollections } from 'utils/collection';
 import billingService from 'services/billingService';
 import { addLogLine } from 'utils/logging';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import UserNameInputDialog from 'components/UserNameInputDialog';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
@@ -95,6 +96,8 @@ export default function Uploader(props: Props) {
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
     const [choiceModalView, setChoiceModalView] = useState(false);
+    const [userNameInputDialogView, setUserNameInputDialogView] =
+        useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
         DEFAULT_IMPORT_SUGGESTION
     );
@@ -112,6 +115,8 @@ export default function Uploader(props: Props) {
     const [webFiles, setWebFiles] = useState([]);
 
     const closeUploadProgress = () => setUploadProgressView(false);
+    const showUserNameInputDialog = () => setUserNameInputDialogView(true);
+    const closeUserNameInputDialog = () => setUserNameInputDialogView(false);
 
     const setCollectionName = (collectionName: string) => {
         isPendingDesktopUpload.current = true;
@@ -279,7 +284,10 @@ export default function Uploader(props: Props) {
         setUploadProgressView(true);
     };
 
-    const uploadFilesToExistingCollection = async (collection: Collection) => {
+    const uploadFilesToExistingCollection = async (
+        collection: Collection,
+        uploaderName?: string
+    ) => {
         try {
             await preCollectionCreationAction();
             const filesWithCollectionToUpload: FileWithCollection[] =
@@ -288,9 +296,11 @@ export default function Uploader(props: Props) {
                     localID: index,
                     collectionID: collection.id,
                 }));
-            waitInQueueAndUploadFiles(filesWithCollectionToUpload, [
-                collection,
-            ]);
+            waitInQueueAndUploadFiles(
+                filesWithCollectionToUpload,
+                [collection],
+                uploaderName
+            );
             toUploadFiles.current = null;
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
@@ -366,13 +376,18 @@ export default function Uploader(props: Props) {
 
     const waitInQueueAndUploadFiles = (
         filesWithCollectionToUploadIn: FileWithCollection[],
-        collections: Collection[]
+        collections: Collection[],
+        uploaderName?: string
     ) => {
         const currentPromise = currentUploadPromise.current;
         currentUploadPromise.current = waitAndRun(
             currentPromise,
             async () =>
-                await uploadFiles(filesWithCollectionToUploadIn, collections)
+                await uploadFiles(
+                    filesWithCollectionToUploadIn,
+                    collections,
+                    uploaderName
+                )
         );
     };
 
@@ -390,7 +405,8 @@ export default function Uploader(props: Props) {
 
     const uploadFiles = async (
         filesWithCollectionToUploadIn: FileWithCollection[],
-        collections: Collection[]
+        collections: Collection[],
+        uploaderName?: string
     ) => {
         try {
             preUploadAction();
@@ -417,7 +433,8 @@ export default function Uploader(props: Props) {
             const shouldCloseUploadProgress =
                 await uploadManager.queueFilesForUpload(
                     filesWithCollectionToUploadIn,
-                    collections
+                    collections,
+                    uploaderName
                 );
             if (shouldCloseUploadProgress) {
                 closeUploadProgress();
@@ -518,7 +535,7 @@ export default function Uploader(props: Props) {
         accessedThroughSharedURL?: boolean
     ) => {
         if (accessedThroughSharedURL) {
-            uploadFilesToExistingCollection(props.uploadCollection);
+            showUserNameInputDialog();
             return;
         }
         if (isPendingDesktopUpload.current) {
@@ -600,6 +617,17 @@ export default function Uploader(props: Props) {
     const handleFolderUpload = handleUpload(PICKED_UPLOAD_TYPE.FOLDERS);
     const handleZipUpload = handleUpload(PICKED_UPLOAD_TYPE.ZIPS);
 
+    const handlePublicUpload = async (uploaderName: string) => {
+        try {
+            await uploadFilesToExistingCollection(
+                props.uploadCollection,
+                uploaderName
+            );
+        } catch (e) {
+            logError(e, 'public upload failed ');
+        }
+    };
+
     return (
         <>
             <UploadStrategyChoiceModal
@@ -634,6 +662,11 @@ export default function Uploader(props: Props) {
                 retryFailed={retryFailed}
                 finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
+            />
+            <UserNameInputDialog
+                open={userNameInputDialogView}
+                onClose={closeUserNameInputDialog}
+                onNameSubmit={handlePublicUpload}
             />
         </>
     );

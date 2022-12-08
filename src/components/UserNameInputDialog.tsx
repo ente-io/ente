@@ -6,6 +6,10 @@ import { Typography } from '@mui/material';
 import SingleInputForm from './SingleInputForm';
 
 export default function UserNameInputDialog({ open, onClose, onNameSubmit }) {
+    const handleSubmit = async (inputValue: string) => {
+        onClose();
+        await onNameSubmit(inputValue);
+    };
     return (
         <DialogBox
             sx={{ zIndex: 1600 }}
@@ -20,7 +24,7 @@ export default function UserNameInputDialog({ open, onClose, onNameSubmit }) {
                 {constants.PUBLIC_UPLOADER_NAME_MESSAGE}
             </Typography>
             <SingleInputForm
-                callback={onNameSubmit}
+                callback={handleSubmit}
                 placeholder={constants.ENTER_FILE_NAME}
                 buttonText={constants.CONTINUE}
                 fieldType="text"

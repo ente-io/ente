@@ -21,7 +21,8 @@ interface UploadResponse {
 export default async function uploader(
     worker: any,
     existingFiles: EnteFile[],
-    fileWithCollection: FileWithCollection
+    fileWithCollection: FileWithCollection,
+    uploaderName: string
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
     const fileNameSize = `${UploadService.getAssetName(
@@ -98,6 +99,9 @@ export default async function uploader(
 
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
+        }
+        if (uploaderName) {
+            metadata.uploaderName = uploaderName;
         }
         const fileWithMetadata = {
             localID,

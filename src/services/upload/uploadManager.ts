@@ -64,14 +64,13 @@ class UploadManager {
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
     private publicUploadProps: PublicUploadProps;
+    private uploaderName: string;
 
     public async init(
         progressUpdater: ProgressUpdater,
         setFiles: SetFiles,
         publicCollectProps: PublicUploadProps
     ) {
-        UIService.init(progressUpdater);
-        this.setFiles = setFiles;
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
         this.publicUploadProps = publicCollectProps;
@@ -90,6 +89,7 @@ class UploadManager {
             number,
             MetadataAndFileTypeInfo
         >();
+        this.uploaderName = null;
     }
 
     prepareForNewUpload() {
@@ -119,7 +119,8 @@ class UploadManager {
 
     public async queueFilesForUpload(
         filesWithCollectionToUploadIn: FileWithCollection[],
-        collections: Collection[]
+        collections: Collection[],
+        uploaderName?: string
     ) {
         try {
             if (this.uploadInProgress) {
@@ -127,6 +128,7 @@ class UploadManager {
             }
             this.uploadInProgress = true;
             await this.updateExistingFilesAndCollections(collections);
+            this.uploaderName = uploaderName;
             addLogLine(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
@@ -432,7 +434,8 @@ class UploadManager {
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
                 this.userOwnedNonTrashedExistingFiles,
-                fileWithCollection
+                fileWithCollection,
+                this.uploaderName
             );
 
             const finalUploadResult = await this.postUploadTask(

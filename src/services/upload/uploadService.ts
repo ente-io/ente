@@ -47,6 +47,8 @@ class UploadService {
         MetadataAndFileTypeInfo
     >();
 
+    private uploaderName: string;
+
     private pendingUploadCount: number = 0;
 
     private publicUploadProps: PublicUploadProps = undefined;
@@ -62,6 +64,14 @@ class UploadService {
 
     setParsedMetadataJSONMap(parsedMetadataJSONMap: ParsedMetadataJSONMap) {
         this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+    }
+
+    setUploaderName(uploaderName: string) {
+        this.uploaderName = uploaderName;
+    }
+
+    getUploaderName() {
+        return this.uploaderName;
     }
 
     setMetadataAndFileTypeInfoMap(
