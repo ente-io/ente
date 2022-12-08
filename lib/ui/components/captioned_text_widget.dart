@@ -23,35 +23,42 @@ class CaptionedTextWidget extends StatelessWidget {
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final enteTextTheme = Theme.of(context).colorScheme.enteTheme.textTheme;
 
+    final List<Widget> children = [
+      Flexible(
+        child: Text(
+          title,
+          style: textStyle ??
+              (makeTextBold
+                  ? enteTextTheme.bodyBold.copyWith(color: textColor)
+                  : enteTextTheme.body.copyWith(color: textColor)),
+        ),
+      ),
+    ];
+    if (subTitle != null) {
+      children.add(const SizedBox(width: 4));
+      children.add(
+        Text(
+          '\u2022',
+          style: enteTextTheme.small.copyWith(
+            color: enteColorScheme.textMuted,
+          ),
+        ),
+      );
+      children.add(const SizedBox(width: 4));
+      children.add(
+        Text(
+          subTitle!,
+          style: enteTextTheme.small.copyWith(
+            color: enteColorScheme.textMuted,
+          ),
+        ),
+      );
+    }
     return Flexible(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 2),
         child: Row(
-          children: [
-            Flexible(
-              child: RichText(
-                text: TextSpan(
-                  style: textStyle ??
-                      (makeTextBold
-                          ? enteTextTheme.bodyBold.copyWith(color: textColor)
-                          : enteTextTheme.body.copyWith(color: textColor)),
-                  children: [
-                    TextSpan(
-                      text: title,
-                    ),
-                    subTitle != null
-                        ? TextSpan(
-                            text: ' \u2022 $subTitle',
-                            style: enteTextTheme.small.copyWith(
-                              color: subTitleColor ?? enteColorScheme.textMuted,
-                            ),
-                          )
-                        : const TextSpan(text: ''),
-                  ],
-                ),
-              ),
-            )
-          ],
+          children: children,
         ),
       ),
     );

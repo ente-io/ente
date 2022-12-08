@@ -20,7 +20,7 @@ class CollectionPage extends StatelessWidget {
   final String tagPrefix;
   final GalleryType appBarType;
   final _selectedFiles = SelectedFiles();
-  bool hasVerifiedLock;
+  final bool hasVerifiedLock;
 
   CollectionPage(
     this.c, {

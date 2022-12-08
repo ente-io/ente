@@ -1,7 +1,5 @@
 // @dart=2.9
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -24,28 +22,39 @@ class SocialSectionWidget extends StatelessWidget {
   }
 
   Widget _getSectionOptions(BuildContext context) {
-    final List<Widget> options = [
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
-      sectionOptionSpacing,
-      const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
-      sectionOptionSpacing,
-    ];
+    final List<Widget> options = [];
+    final result = UpdateService.instance.getRateDetails();
+    final String ratePlace = result.item1;
+    final String rateUrl = result.item2;
     if (!UpdateService.instance.isIndependent()) {
       options.addAll(
         [
-          SocialsMenuItemWidget(
-            "Rate us! ✨",
-            Platform.isAndroid
-                ? "https://play.google.com/store/apps/details?id=io.ente.photos"
-                : "https://apps.apple.com/in/app/ente-photos/id1542026904",
-          ),
+          SocialsMenuItemWidget("Rate us on $ratePlace", rateUrl),
           sectionOptionSpacing,
         ],
       );
     }
+    options.addAll(
+      [
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Blog", "https://ente.io/blog"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Mastodon", "https://mstdn.social/@ente"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget(
+          "Matrix",
+          "https://ente.io/matrix/",
+        ),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Discord", "https://ente.io/discord"),
+        sectionOptionSpacing,
+        const SocialsMenuItemWidget("Reddit", "https://reddit.com/r/enteio"),
+        sectionOptionSpacing,
+      ],
+    );
+
     return Column(children: options);
   }
 }

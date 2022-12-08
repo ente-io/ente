@@ -29,6 +29,7 @@ class ThumbnailWidget extends StatefulWidget {
   final bool shouldShowLivePhotoOverlay;
   final Duration diskLoadDeferDuration;
   final Duration serverLoadDeferDuration;
+  final int thumbnailSize;
 
   ThumbnailWidget(
     this.file, {
@@ -40,6 +41,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.showFavForAlbumOnly = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
+    this.thumbnailSize = thumbnailSmallSize,
   }) : super(key: key ?? Key(file.tag));
 
   @override
@@ -179,7 +181,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
   }
 
   Future _getThumbnailFromDisk() async {
-    getThumbnailFromLocal(widget.file).then((thumbData) async {
+    getThumbnailFromLocal(
+      widget.file,
+      size: widget.thumbnailSize,
+    ).then((thumbData) async {
       if (thumbData == null) {
         if (widget.file.uploadedFileID != null) {
           _logger.fine("Removing localID reference for " + widget.file.tag);

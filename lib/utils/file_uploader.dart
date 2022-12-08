@@ -153,7 +153,7 @@ class FileUploader {
       }
       return CollectionsService.instance
           .addToCollection(collectionID, [uploadedFile]).then((aVoid) {
-        return uploadedFile;
+        return uploadedFile as File;
       });
     });
   }

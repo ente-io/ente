@@ -128,7 +128,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
-                    trailingSwitch: Switch.adaptive(
+                    trailingWidget: Switch.adaptive(
                       value: widget.collection.publicURLs?.firstOrNull
                               ?.enableDownload ??
                           true,
@@ -177,7 +177,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
-                    trailingSwitch: Switch.adaptive(
+                    trailingWidget: Switch.adaptive(
                       value: widget.collection.publicURLs?.firstOrNull
                               ?.passwordEnabled ??
                           false,

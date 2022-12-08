@@ -3,15 +3,19 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 // import 'package:flutter/foundation.dart';
 // import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/models/billing_plan.dart';
 import 'package:photos/models/subscription.dart';
+import 'package:photos/models/user_details.dart';
+import 'package:photos/services/user_service.dart';
+import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/utils/dialog_util.dart';
 
 const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";
 const kWebPaymentBaseEndpoint = String.fromEnvironment(
@@ -30,9 +34,7 @@ class BillingService {
   static final BillingService instance = BillingService._privateConstructor();
 
   final _logger = Logger("BillingService");
-  final _dio = Network.instance.getDio();
   final _enteDio = Network.instance.enteDio;
-  final _config = Configuration.instance;
 
   bool _isOnSubscriptionPage = false;
 
@@ -69,21 +71,14 @@ class BillingService {
   }
 
   Future<BillingPlans> getBillingPlans() {
-    _future ??= (_config.isLoggedIn()
-            ? _fetchPublicBillingPlans()
-            : _fetchPrivateBillingPlans())
-        .then((response) {
+    _future ??= _fetchBillingPlans().then((response) {
       return BillingPlans.fromMap(response.data);
     });
     return _future;
   }
 
-  Future<Response<dynamic>> _fetchPrivateBillingPlans() {
+  Future<Response<dynamic>> _fetchBillingPlans() {
     return _enteDio.get("/billing/user-plans/");
-  }
-
-  Future<Response<dynamic>> _fetchPublicBillingPlans() {
-    return _dio.get(_config.getHttpEndpoint() + "/billing/plans/v2");
   }
 
   Future<Subscription> verifySubscription(
@@ -168,5 +163,39 @@ class BillingService {
 
   void setIsOnSubscriptionPage(bool isOnSubscriptionPage) {
     _isOnSubscriptionPage = isOnSubscriptionPage;
+  }
+
+  Future<void> launchFamilyPortal(
+    BuildContext context,
+    UserDetails userDetails,
+  ) async {
+    if (userDetails.subscription.productID == freeProductID) {
+      await showErrorDialog(
+        context,
+        "Share your storage plan with your family members!",
+        "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",
+      );
+      return;
+    }
+    final dialog = createProgressDialog(context, "Please wait...");
+    await dialog.show();
+    try {
+      final String jwtToken = await UserService.instance.getFamiliesToken();
+      final bool familyExist = userDetails.isPartOfFamily();
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (BuildContext context) {
+            return WebPage(
+              "Family",
+              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',
+            );
+          },
+        ),
+      );
+    } catch (e) {
+      await dialog.hide();
+      showGenericErrorDialog(context);
+    }
+    await dialog.hide();
   }
 }

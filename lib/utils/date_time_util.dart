@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 const Set<int> monthWith31Days = {1, 3, 5, 7, 8, 10, 12};
@@ -45,7 +46,7 @@ Map<int, String> _days = {
   7: "Sun",
 };
 
-final currentYear = int.parse(DateTime.now().year.toString());
+final currentYear = DateTime.now().year;
 const searchStartYear = 1970;
 
 //Jun 2022
@@ -195,16 +196,23 @@ bool isLeapYear(DateTime dateTime) {
 Widget getDayWidget(
   BuildContext context,
   int timestamp,
+  int photoGridSize,
 ) {
   final colorScheme = getEnteColorScheme(context);
   final textTheme = getEnteTextTheme(context);
-  return Container(
-    alignment: Alignment.centerLeft,
-    child: Text(
-      getDayTitle(timestamp),
-      style: (getDayTitle(timestamp) == "Today")
-          ? textTheme.body
-          : textTheme.body.copyWith(color: colorScheme.textMuted),
+  final textStyle =
+      photoGridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
+  final double paddingValue = photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
+  return Padding(
+    padding: EdgeInsets.all(paddingValue),
+    child: Container(
+      alignment: Alignment.centerLeft,
+      child: Text(
+        getDayTitle(timestamp),
+        style: (getDayTitle(timestamp) == "Today")
+            ? textStyle
+            : textStyle.copyWith(color: colorScheme.textMuted),
+      ),
     ),
   );
 }
@@ -267,30 +275,18 @@ bool isValidDate({
   return true;
 }
 
-@Deprecated("Use parseDateTimeV2 ")
-DateTime? parseDateFromFileName(String fileName) {
-  if (fileName.startsWith('IMG-') || fileName.startsWith('VID-')) {
-// Whatsapp media files
-    return DateTime.tryParse(fileName.split('-')[1]);
-  } else if (fileName.startsWith("Screenshot_")) {
-// Screenshots on droid
-    return DateTime.tryParse(
-      (fileName).replaceAll('Screenshot_', '').replaceAll('-', 'T'),
-    );
-  } else {
-    return DateTime.tryParse(
-      (fileName)
-          .replaceAll("IMG_", "")
-          .replaceAll("VID_", "")
-          .replaceAll("DCIM_", "")
-          .replaceAll("_", " "),
-    );
-  }
-}
-
 final RegExp exp = RegExp('[\\.A-Za-z]*');
 
-DateTime? parseDateTimeFromFileNameV2(String fileName) {
+DateTime? parseDateTimeFromFileNameV2(
+  String fileName, {
+  /* to avoid parsing incorrect date time from the filename, the max and min
+    year limits the chances of parsing incorrect date times
+    */
+  int minYear = 1990,
+  int? maxYear,
+}) {
+  // add next year to avoid corner cases for 31st Dec
+  maxYear ??= currentYear + 1;
   String val = fileName.replaceAll(exp, '');
   if (val.isNotEmpty && !isNumeric(val[0])) {
     val = val.substring(1, val.length);
@@ -319,7 +315,10 @@ DateTime? parseDateTimeFromFileNameV2(String fileName) {
   if (kDebugMode && result == null) {
     debugPrint("Failed to parse $fileName dateTime from $valForParser");
   }
-  return result;
+  if (result != null && result.year >= minYear && result.year <= maxYear) {
+    return result;
+  }
+  return null;
 }
 
 bool isNumeric(String? s) {
