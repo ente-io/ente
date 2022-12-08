@@ -285,7 +285,7 @@ class _GalleryState extends State<Gallery> {
     final List<List<File>> collatedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
-          !_areFromSameDay(
+          !areFromSameDay(
             files[index - 1].creationTime,
             files[index].creationTime,
           )) {
@@ -302,14 +302,6 @@ class _GalleryState extends State<Gallery> {
     collatedFiles
         .sort((a, b) => b[0].creationTime.compareTo(a[0].creationTime));
     return collatedFiles;
-  }
-
-  bool _areFromSameDay(int firstCreationTime, int secondCreationTime) {
-    final firstDate = DateTime.fromMicrosecondsSinceEpoch(firstCreationTime);
-    final secondDate = DateTime.fromMicrosecondsSinceEpoch(secondCreationTime);
-    return firstDate.year == secondDate.year &&
-        firstDate.month == secondDate.month &&
-        firstDate.day == secondDate.day;
   }
 }
 
