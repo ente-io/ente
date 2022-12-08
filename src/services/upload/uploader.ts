@@ -43,12 +43,11 @@ export default async function uploader(
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
-        if (!metadata) {
-            throw Error(CustomError.NO_METADATA);
-        }
-
         if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
             return { fileUploadResult: UPLOAD_RESULT.SKIPPED_VIDEOS };
+        }
+        if (!metadata) {
+            throw Error(CustomError.NO_METADATA);
         }
 
         const matchingExistingFiles = findMatchingExistingFiles(

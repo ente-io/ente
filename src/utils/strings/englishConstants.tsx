@@ -551,7 +551,7 @@ const englishConstants = {
                 Presently we do not support adding videos via public links.{' '}
             </Box>
             <Box>
-                To share videos, please
+                To share videos, please{' '}
                 <Link href={link} target="_blank">
                     signup
                 </Link>{' '}

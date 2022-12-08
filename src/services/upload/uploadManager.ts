@@ -311,7 +311,8 @@ class UploadManager {
                     );
                     const result = await this.extractFileTypeAndMetadata(
                         file,
-                        collectionID
+                        collectionID,
+                        this.publicUploadProps?.accessedThroughSharedURL
                     );
                     fileTypeInfo = result.fileTypeInfo;
                     metadata = result.metadata;
@@ -352,7 +353,8 @@ class UploadManager {
 
     private async extractFileTypeAndMetadata(
         file: File | ElectronFile,
-        collectionID: number
+        collectionID: number,
+        skipVideos: boolean
     ) {
         if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
             addLogLine(
@@ -368,6 +370,9 @@ class UploadManager {
                     file
                 )} rejected  because of unknown file format`
             );
+            return { fileTypeInfo, metadata: null };
+        }
+        if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
             return { fileTypeInfo, metadata: null };
         }
         addLogLine(` extracting ${getFileNameSize(file)} metadata`);
@@ -435,7 +440,7 @@ class UploadManager {
                 this.userOwnedNonTrashedExistingFiles,
                 fileWithCollection,
                 this.uploaderName,
-                this.publicUploadProps.accessedThroughSharedURL
+                this.publicUploadProps?.accessedThroughSharedURL
             );
 
             const finalUploadResult = await this.postUploadTask(
