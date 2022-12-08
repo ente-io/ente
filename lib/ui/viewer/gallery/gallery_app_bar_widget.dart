@@ -426,20 +426,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<void> _showShareCollectionDialog() async {
-    var collection = widget.collection;
-    final dialog = createProgressDialog(context, "Please wait...");
-    await dialog.show();
+    final collection = widget.collection;
     try {
       if (collection == null || widget.type != GalleryType.ownedCollection) {
         throw Exception(
           "Cannot share empty collection of type ${widget.type}",
         );
-      } else {
-        final sharees =
-            await CollectionsService.instance.getSharees(collection.id);
-        collection = collection.copyWith(sharees: sharees);
       }
-      await dialog.hide();
+      // await dialog.hide();
       unawaited(
         routeToPage(
           context,
@@ -448,7 +442,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       );
     } catch (e, s) {
       _logger.severe(e, s);
-      await dialog.hide();
+      // await dialog.hide();
       showGenericErrorDialog(context);
     }
   }
