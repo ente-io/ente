@@ -59,6 +59,12 @@ You can alternatively install the build from PlayStore.
   <img width="197" alt="Download on AppStore" src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
 </a>
 
+### Desktop
+
+Support for desktop platforms (Linux, Mac and Windows) is a [work in progress](https://github.com/ente-io/auth/tree/desktop).
+
+Please ⭐ this repo to be notified of updates.
+
 
 ## 🔩 Architecture
 
