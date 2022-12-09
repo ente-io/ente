@@ -95,16 +95,33 @@ class LargeButtonChildWidget extends StatefulWidget {
 }
 
 class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
+  late Color buttonColor;
+  late Color borderColor;
+  late Color iconColor;
+  late TextStyle labelStyle;
+  @override
+  void initState() {
+    buttonColor = widget.buttonStyle.defaultButtonColor;
+    borderColor = widget.buttonStyle.defaultBorderColor;
+    iconColor = widget.buttonStyle.defaultIconColor;
+    labelStyle = widget.buttonStyle.defaultLabelStyle;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: widget.onTap,
-      child: Container(
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 16),
         width: double.infinity,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          color: widget.buttonStyle.defaultButtonColor,
-          border: Border.all(color: widget.buttonStyle.defaultBorderColor),
+          color: buttonColor,
+          border: Border.all(color: borderColor),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
@@ -169,5 +186,40 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
         ),
       ),
     );
+  }
+
+  void _onTapDown(details) {
+    setState(() {
+      buttonColor = widget.buttonStyle.pressedButtonColor ??
+          widget.buttonStyle.defaultButtonColor;
+      borderColor = widget.buttonStyle.pressedBorderColor ??
+          widget.buttonStyle.defaultBorderColor;
+      iconColor = widget.buttonStyle.pressedIconColor ??
+          widget.buttonStyle.defaultIconColor;
+      labelStyle = widget.buttonStyle.pressedLabelStyle ??
+          widget.buttonStyle.defaultLabelStyle;
+    });
+  }
+
+  void _onTapUp(details) {
+    Future.delayed(
+      const Duration(milliseconds: 84),
+      () => setState(() {
+        setAllStylesToDefault();
+      }),
+    );
+  }
+
+  void _onTapCancel() {
+    setState(() {
+      setAllStylesToDefault();
+    });
+  }
+
+  void setAllStylesToDefault() {
+    buttonColor = widget.buttonStyle.defaultButtonColor;
+    borderColor = widget.buttonStyle.defaultBorderColor;
+    iconColor = widget.buttonStyle.defaultIconColor;
+    labelStyle = widget.buttonStyle.defaultLabelStyle;
   }
 }
