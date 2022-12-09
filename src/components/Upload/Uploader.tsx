@@ -546,10 +546,10 @@ export default function Uploader(props: Props) {
                 );
                 if (!uploaderName) {
                     showUserNameInputDialog();
-                    return;
                 } else {
                     await handlePublicUpload(uploaderName, true);
                 }
+                return;
             }
             if (isPendingDesktopUpload.current) {
                 isPendingDesktopUpload.current = false;
@@ -676,7 +676,7 @@ export default function Uploader(props: Props) {
             />
             <UploadTypeSelector
                 show={props.uploadTypeSelectorView}
-                onHide={props.closeUploadTypeSelector}
+                onClose={props.closeUploadTypeSelector}
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}

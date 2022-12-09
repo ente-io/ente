@@ -46,7 +46,6 @@ import { useDropzone } from 'react-dropzone';
 import UploadSelectorInputs from 'components/UploadSelectorInputs';
 import { logoutUser } from 'services/userService';
 import UploadButton from 'components/Upload/UploadButton';
-import { isMobileOrTable } from 'utils/common/deviceDetection';
 import bs58 from 'bs58';
 
 const Loader = () => (
@@ -108,9 +107,11 @@ export default function PublicCollectionGallery() {
     });
 
     const openUploader = () => {
-        isMobileOrTable()
-            ? openFileSelector()
-            : setUploadTypeSelectorView(true);
+        setUploadTypeSelectorView(true);
+    };
+
+    const closeUploadTypeSelectorView = () => {
+        setUploadTypeSelectorView(false);
     };
 
     const showPublicLinkExpiredMessage = () =>
@@ -419,10 +420,6 @@ export default function PublicCollectionGallery() {
                 )}
                 <Uploader
                     syncWithRemote={syncWithRemote}
-                    closeUploadTypeSelector={setUploadTypeSelectorView.bind(
-                        null,
-                        false
-                    )}
                     uploadCollection={publicCollection}
                     setLoading={setBlockingLoad}
                     setShouldDisableDropzone={setShouldDisableDropzone}
@@ -431,6 +428,7 @@ export default function PublicCollectionGallery() {
                     webFolderSelectorFiles={webFolderSelectorFiles}
                     dragAndDropFiles={dragAndDropFiles}
                     uploadTypeSelectorView={uploadTypeSelectorView}
+                    closeUploadTypeSelector={closeUploadTypeSelectorView}
                     showUploadFilesDialog={openFileSelector}
                     showUploadDirsDialog={openFolderSelector}
                     showSessionExpiredMessage={showPublicLinkExpiredMessage}

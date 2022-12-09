@@ -1,15 +1,18 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import constants from 'utils/strings/constants';
 import { default as FileUploadIcon } from '@mui/icons-material/ImageOutlined';
 import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlined';
 import GoogleIcon from '@mui/icons-material/Google';
 import { UploadTypeOption } from './option';
-import DialogTitleWithCloseButton from 'components/DialogBox/TitleWithCloseButton';
+import DialogTitleWithCloseButton, {
+    dialogCloseHandler,
+} from 'components/DialogBox/TitleWithCloseButton';
 import { Box, Dialog, Stack, Typography } from '@mui/material';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import { isMobileOrTable } from 'utils/common/deviceDetection';
 
 interface Iprops {
-    onHide: () => void;
+    onClose: () => void;
     show: boolean;
     uploadFiles: () => void;
     uploadFolders: () => void;
@@ -17,7 +20,7 @@ interface Iprops {
     hideZipUploadOption?: boolean;
 }
 export default function UploadTypeSelector({
-    onHide,
+    onClose,
     show,
     uploadFiles,
     uploadFolders,
@@ -27,9 +30,25 @@ export default function UploadTypeSelector({
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
+
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (
+            show &&
+            isMobileOrTable() &&
+            publicCollectionGalleryContext.accessedThroughSharedURL
+        ) {
+            uploadFiles();
+            onClose();
+        } else {
+            setLoading(false);
+        }
+    }, [show]);
+
     return (
         <Dialog
-            open={show}
+            open={show && !loading}
             PaperProps={{
                 sx: (theme) => ({
                     maxWidth: '375px',
@@ -37,8 +56,8 @@ export default function UploadTypeSelector({
                     [theme.breakpoints.down(360)]: { p: 0 },
                 }),
             }}
-            onClose={onHide}>
-            <DialogTitleWithCloseButton onClose={onHide}>
+            onClose={dialogCloseHandler({ onClose })}>
+            <DialogTitleWithCloseButton onClose={onClose}>
                 {publicCollectionGalleryContext.accessedThroughSharedURL
                     ? constants.SELECT_PHOTOS
                     : constants.UPLOAD}
