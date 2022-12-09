@@ -68,4 +68,4 @@ export const getUploadEndpoint = () => {
 };
 
 export const isDevDeployment = () =>
-    process.env.NEXT_PUBLIC_ENTE_DEV_APP_URL === window.location.origin;
+    process.env.NEXT_PUBLIC_ENTE_DEV_APP_ENDPOINT === window.location.origin;
