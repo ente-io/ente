@@ -5,7 +5,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/utils/add_separators_util.dart';
+import 'package:photos/utils/separators_util.dart';
 
 void showActionSheet({
   required BuildContext context,
