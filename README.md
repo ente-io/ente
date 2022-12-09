@@ -1,3 +1,16 @@
+# 🔥 Warning 🔥
+
+This branch contains untested code that can potentially corrupt your data.
+
+**You should not run this against your main acccount.**
+
+If you are interested in the official release of our desktop app, please star this repo.
+
+---
+
+<br/>
+<br/>
+
 # ente Authenticator
 
 ente's Authenticator app helps you generate and store 2 step verification (2FA)
@@ -71,8 +84,31 @@ tokens has been documented [here](architecture/index.md).
 1. [Install Flutter](https://flutter.dev/docs/get-started/install)
 2. Clone this repository with `git clone git@github.com:ente-io/auth.git` 
 3. Pull in all submodules with `git submodule update --init --recursive`
-4. For Android, run `flutter build apk --release --flavor independent`
-5. For iOS, run `flutter build ios` 
+
+### Android 
+```
+flutter build apk --release --flavor independent
+```
+
+### iOS
+```
+flutter build ios
+```
+
+### Linux
+```
+flutter build linux
+```
+
+### MacOS
+```
+fluter build macos
+```
+
+### Windows
+```
+flutter build windows
+```
 
 
 ## 🙋‍♂️ Support
