@@ -396,7 +396,7 @@ export function PhotoList({
         const footerHeight =
             publicCollectionGalleryContext.accessedThroughSharedURL
                 ? ALBUM_FOOTER_HEIGHT +
-                  publicCollectionGalleryContext.photoListFooter.height
+                  (publicCollectionGalleryContext.photoListFooter?.height ?? 0)
                 : FOOTER_HEIGHT;
         const photoFrameHeight = (() => {
             let sum = 0;
