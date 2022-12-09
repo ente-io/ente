@@ -47,6 +47,7 @@ import UploadSelectorInputs from 'components/UploadSelectorInputs';
 import { logoutUser } from 'services/userService';
 import UploadButton from 'components/Upload/UploadButton';
 import bs58 from 'bs58';
+import { AddPhotoAlternateOutlined } from '@mui/icons-material';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -212,6 +213,7 @@ export default function PublicCollectionGallery() {
                             openUploader={openUploader}
                             text={constants.ADD_MORE_PHOTOS}
                             color="accent"
+                            icon={<AddPhotoAlternateOutlined />}
                         />
                     </CenteredFlex>
                 ),

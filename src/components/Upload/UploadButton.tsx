@@ -31,8 +31,15 @@ interface Iprops {
     text?: string;
     color?: ButtonProps['color'];
     disableShrink?: boolean;
+    icon?: JSX.Element;
 }
-function UploadButton({ openUploader, text, color, disableShrink }: Iprops) {
+function UploadButton({
+    openUploader,
+    text,
+    color,
+    disableShrink,
+    icon,
+}: Iprops) {
     return (
         <Wrapper
             disableShrink={disableShrink}
@@ -44,7 +51,7 @@ function UploadButton({ openUploader, text, color, disableShrink }: Iprops) {
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="desktop-button"
                 color={color ?? 'secondary'}
-                startIcon={<FileUploadOutlinedIcon />}>
+                startIcon={icon ?? <FileUploadOutlinedIcon />}>
                 {text ?? constants.UPLOAD}
             </Button>
 
