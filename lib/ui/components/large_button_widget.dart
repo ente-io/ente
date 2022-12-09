@@ -2,17 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
-
-enum ButtonType {
-  primary,
-  secondary,
-  neutral,
-  trailingIcon,
-  critical,
-  tertiaryCritical,
-  trailingIconPrimary,
-  trailingIconSecondary,
-}
+import 'package:photos/ui/components/models/button_type.dart';
 
 class LargeButtonWidget extends StatelessWidget {
   final IconData? icon;
