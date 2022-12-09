@@ -47,6 +47,7 @@ import UploadSelectorInputs from 'components/UploadSelectorInputs';
 import { logoutUser } from 'services/userService';
 import UploadButton from 'components/Upload/UploadButton';
 import { isMobileOrTable } from 'utils/common/deviceDetection';
+import bs58 from 'bs58';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -55,7 +56,6 @@ const Loader = () => (
         </EnteSpinner>
     </VerticallyCentered>
 );
-const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
