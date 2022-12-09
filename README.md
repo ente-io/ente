@@ -2,13 +2,12 @@
 
 This branch contains untested code that can potentially corrupt your data.
 
-**You should not run this against your main acccount.**
+**You <u>should not</u> run this against your main acccount.**
 
 If you are interested in the official release of our desktop app, please star this repo.
 
 ---
 
-<br/>
 <br/>
 
 # ente Authenticator
