@@ -54,7 +54,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                 title: "Backup over mobile data",
                               ),
                               menuItemColor: colorScheme.fillFaint,
-                              trailingSwitch: ToggleSwitchWidget(
+                              trailingWidget: ToggleSwitchWidget(
                                 value: () => Configuration.instance
                                     .shouldBackupOverMobileData(),
                                 onChanged: () async {
@@ -79,7 +79,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                 title: "Backup videos",
                               ),
                               menuItemColor: colorScheme.fillFaint,
-                              trailingSwitch: ToggleSwitchWidget(
+                              trailingWidget: ToggleSwitchWidget(
                                 value: () =>
                                     Configuration.instance.shouldBackupVideos(),
                                 onChanged: () => Configuration.instance
@@ -104,7 +104,7 @@ class BackupSettingsScreen extends StatelessWidget {
                                       title: "Disable auto lock",
                                     ),
                                     menuItemColor: colorScheme.fillFaint,
-                                    trailingSwitch: ToggleSwitchWidget(
+                                    trailingWidget: ToggleSwitchWidget(
                                       value: () => Configuration.instance
                                           .shouldKeepDeviceAwake(),
                                       onChanged: () {

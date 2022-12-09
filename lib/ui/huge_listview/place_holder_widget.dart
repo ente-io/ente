@@ -4,18 +4,20 @@ import 'package:flutter/material.dart';
 
 class PlaceHolderWidget extends StatelessWidget {
   const PlaceHolderWidget(
-    this.count, {
+    this.count,
+    this.columns, {
     Key key,
   }) : super(key: key);
 
-  final int count;
+  final int count, columns;
 
-  static final _gridViewCache = <int, GridView>{};
+  static final _gridViewCache = <String, GridView>{};
 
   @override
   Widget build(BuildContext context) {
-    if (!_gridViewCache.containsKey(count)) {
-      _gridViewCache[count] = GridView.builder(
+    final key = _getCacheKey(count, columns);
+    if (!_gridViewCache.containsKey(key)) {
+      _gridViewCache[key] = GridView.builder(
         padding: const EdgeInsets.all(0),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -26,11 +28,15 @@ class PlaceHolderWidget extends StatelessWidget {
           );
         },
         itemCount: count,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
         ),
       );
     }
-    return _gridViewCache[count];
+    return _gridViewCache[key];
+  }
+
+  String _getCacheKey(int totalCount, int columns) {
+    return totalCount.toString() + ":" + columns.toString();
   }
 }

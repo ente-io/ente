@@ -10,6 +10,7 @@ import 'package:photos/ui/common/web_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/settings/about_section_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -33,7 +34,7 @@ class SupportSectionWidget extends StatelessWidget {
         sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Email",
+            title: "Contact support",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -43,9 +44,14 @@ class SupportSectionWidget extends StatelessWidget {
           },
         ),
         sectionOptionSpacing,
+        const AboutMenuItemWidget(
+          title: "Frequently asked questions",
+          url: "https://ente.io/faq",
+        ),
+        sectionOptionSpacing,
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
-            title: "Roadmap",
+            title: "Suggest features",
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -59,7 +65,7 @@ class SupportSectionWidget extends StatelessWidget {
                   final url = Configuration.instance.isLoggedIn()
                       ? endpoint + "?token=" + Configuration.instance.getToken()
                       : roadmapURL;
-                  return WebPage("Roadmap", url);
+                  return WebPage("Suggest features", url);
                 },
               ),
             );

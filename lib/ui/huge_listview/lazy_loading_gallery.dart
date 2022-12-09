@@ -5,7 +5,6 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -33,6 +32,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final String logTag;
   final Stream<int> currentIndexStream;
+  final int photoGirdSize;
 
   LazyLoadingGallery(
     this.files,
@@ -44,6 +44,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.tag,
     this.currentIndexStream, {
     this.logTag = "",
+    this.photoGirdSize = photoGridSizeDefault,
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -162,7 +163,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     _reloadEventSubscription.cancel();
     _currentIndexSubscription.cancel();
     widget.selectedFiles.removeListener(_selectedFilesListener);
-
+    _toggleSelectAllFromDay.dispose();
+    _showSelectAllButton.dispose();
+    _areAllFromDaySelected.dispose();
     super.dispose();
   }
 
@@ -185,12 +188,10 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: getDayWidget(
-                context,
-                _files[0].creationTime,
-              ),
+            getDayWidget(
+              context,
+              _files[0].creationTime,
+              widget.photoGirdSize,
             ),
             ValueListenableBuilder(
               valueListenable: _showSelectAllButton,
@@ -230,7 +231,12 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             )
           ],
         ),
-        _shouldRender ? _getGallery() : PlaceHolderWidget(_files.length),
+        _shouldRender
+            ? _getGallery()
+            : PlaceHolderWidget(
+                _files.length,
+                widget.photoGirdSize,
+              ),
       ],
     );
   }
@@ -251,6 +257,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           _files.length > kRecycleLimit,
           _toggleSelectAllFromDay,
           _areAllFromDaySelected,
+          widget.photoGirdSize,
         ),
       );
     }
@@ -278,6 +285,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final bool shouldRecycle;
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
+  final int photoGridSize;
 
   LazyLoadingGridView(
     this.tag,
@@ -287,7 +295,8 @@ class LazyLoadingGridView extends StatefulWidget {
     this.shouldRender,
     this.shouldRecycle,
     this.toggleSelectAllFromDay,
-    this.areAllFilesSelected, {
+    this.areAllFilesSelected,
+    this.photoGridSize, {
     Key key,
   }) : super(key: key ?? UniqueKey());
 
@@ -352,7 +361,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       },
       child: _shouldRender
           ? _getGridView()
-          : PlaceHolderWidget(widget.filesInDay.length),
+          : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
     );
   }
 
@@ -367,7 +376,8 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
             });
           }
         },
-        child: PlaceHolderWidget(widget.filesInDay.length),
+        child:
+            PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
       );
     } else {
       return _getGridView();
@@ -377,16 +387,16 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   Widget _getGridView() {
     return GridView.builder(
       shrinkWrap: true,
-      physics:
-          const NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+      physics: const NeverScrollableScrollPhysics(),
+      // to disable GridView's scrolling
       itemBuilder: (context, index) {
         return _buildFile(context, widget.filesInDay[index]);
       },
       itemCount: widget.filesInDay.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: 4,
+        crossAxisCount: widget.photoGridSize,
       ),
       padding: const EdgeInsets.all(0),
     );
@@ -424,6 +434,9 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key(widget.tag + file.tag),
+                  thumbnailSize: widget.photoGridSize < photoGridSizeDefault
+                      ? thumbnailLargeSize
+                      : thumbnailSmallSize,
                 ),
               ),
             ),
