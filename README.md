@@ -4,7 +4,7 @@ This branch contains untested code that can potentially corrupt your data.
 
 **You <u>should not</u> run this against your main acccount.**
 
-If you are interested in the official release of our desktop app, please star this repo.
+If you are interested in the official release of our desktop app, please ⭐ this repo.
 
 ---
 
