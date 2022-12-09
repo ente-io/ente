@@ -45,10 +45,7 @@ export const getPaymentsURL = () => {
 
 export const getAlbumsURL = () => {
     const albumsURL = process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
-    if (
-        process.env.NEXT_PUBLIC_ENTE_DEV_APP_URL === window.location.origin &&
-        albumsURL
-    ) {
+    if (isDevDeployment() && albumsURL) {
         return albumsURL;
     }
     return `https://albums.ente.io`;
@@ -69,3 +66,6 @@ export const getUploadEndpoint = () => {
     }
     return `https://uploader.ente.io`;
 };
+
+export const isDevDeployment = () =>
+    process.env.NEXT_PUBLIC_ENTE_DEV_APP_URL === window.location.origin;

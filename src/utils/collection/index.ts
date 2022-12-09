@@ -126,7 +126,7 @@ export function appendCollectionKeyToShareURL(
     const albumsURL = new URL(getAlbumsURL());
 
     sharableURL.protocol = albumsURL.protocol;
-    sharableURL.hostname = albumsURL.hostname;
+    sharableURL.host = albumsURL.host;
     sharableURL.pathname = albumsURL.pathname;
 
     const bytes = Buffer.from(collectionKey, 'base64');
