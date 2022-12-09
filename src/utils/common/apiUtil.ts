@@ -68,4 +68,5 @@ export const getSentryTunnelURL = () => {
 };
 
 const isDevDeployment = () =>
-    process.env.NEXT_PUBLIC_ENTE_DEV_APP_ENDPOINT === window.location.origin;
+    process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT === window.location.origin ||
+    process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT === window.location.origin;
