@@ -75,7 +75,7 @@ Please ⭐ this repo to be notified of updates.
 ## 🔩 Architecture
 
 The architecture that powers end-to-end encrypted storage and sync of your
-tokens has been documented [here](architecture/index.md).
+tokens has been documented [here](architecture/README.md).
 
 
 ## 🧑‍💻 Building from source
