@@ -278,7 +278,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           alignment: Alignment.topCenter,
           child: GestureDetector(
             onTap: () async {
-              await _launchFamilyPortal();
+              _billingService.launchFamilyPortal(context, _userDetails);
             },
             child: Container(
               padding: const EdgeInsets.fromLTRB(40, 0, 40, 80),
@@ -317,36 +317,6 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
         MaterialPageRoute(
           builder: (BuildContext context) {
             return WebPage("Payment details", url);
-          },
-        ),
-      ).then((value) => onWebPaymentGoBack);
-    } catch (e) {
-      await _dialog.hide();
-      showGenericErrorDialog(context);
-    }
-    await _dialog.hide();
-  }
-
-  Future<void> _launchFamilyPortal() async {
-    if (_userDetails.subscription.productID == freeProductID) {
-      await showErrorDialog(
-        context,
-        "Now you can share your storage plan with your family members!",
-        "Customers on paid plans can add up to 5 family members without paying extra. Each member gets their own private space.",
-      );
-      return;
-    }
-    await _dialog.show();
-    try {
-      final String jwtToken = await _userService.getFamiliesToken();
-      final bool familyExist = _userDetails.isPartOfFamily();
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (BuildContext context) {
-            return WebPage(
-              "Family",
-              '$kFamilyPlanManagementUrl?token=$jwtToken&isFamilyCreated=$familyExist',
-            );
           },
         ),
       ).then((value) => onWebPaymentGoBack);

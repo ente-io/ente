@@ -26,23 +26,38 @@ Future<void> share(
 }) async {
   final dialog = createProgressDialog(context, "Preparing...");
   await dialog.show();
-  final List<Future<String>> pathFutures = [];
-  for (File file in files) {
-    // Note: We are requesting the origin file for performance reasons on iOS.
-    // This will eat up storage, which will be reset only when the app restarts.
-    // We could have cleared the cache had there been a callback to the share API.
-    pathFutures.add(getFile(file, isOrigin: true).then((file) => file.path));
-    if (file.fileType == FileType.livePhoto) {
-      pathFutures.add(getFile(file, liveVideo: true).then((file) => file.path));
+  try {
+    final List<Future<String>> pathFutures = [];
+    for (File file in files) {
+      // Note: We are requesting the origin file for performance reasons on iOS.
+      // This will eat up storage, which will be reset only when the app restarts.
+      // We could have cleared the cache had there been a callback to the share API.
+      pathFutures.add(
+        getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile.path),
+      );
+      if (file.fileType == FileType.livePhoto) {
+        pathFutures.add(
+          getFile(file, liveVideo: true)
+              .then((fetchedFile) => fetchedFile.path),
+        );
+      }
     }
+    final paths = await Future.wait(pathFutures);
+    await dialog.hide();
+    return Share.shareFiles(
+      paths,
+      // required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
+      sharePositionOrigin: shareButtonRect(context, shareButtonKey),
+    );
+  } catch (e, s) {
+    _logger.severe(
+      "failed to fetch files for system share ${files.length}",
+      e,
+      s,
+    );
+    await dialog.hide();
+    await showGenericErrorDialog(context);
   }
-  final paths = await Future.wait(pathFutures);
-  await dialog.hide();
-  return Share.shareFiles(
-    paths,
-    // required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
-    sharePositionOrigin: shareButtonRect(context, shareButtonKey),
-  );
 }
 
 Rect shareButtonRect(BuildContext context, GlobalKey shareButtonKey) {

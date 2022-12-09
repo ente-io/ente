@@ -18,6 +18,7 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
+import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/sharing/share_collection_widget.dart';
@@ -213,15 +214,8 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
             // TODO: Replace with https://pub.dev/packages/in_app_review
-            if (Platform.isAndroid) {
-              launchUrlString(
-                "https://play.google.com/store/apps/details?id=io.ente.photos",
-              );
-            } else {
-              launchUrlString(
-                "https://apps.apple.com/in/app/ente-photos/id1542026904",
-              );
-            }
+            final url = UpdateService.instance.getRateDetails().item2;
+            launchUrlString(url);
           },
         ),
         TextButton(

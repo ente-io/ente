@@ -9,6 +9,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/services/notification_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tuple/tuple.dart';
 
 class UpdateService {
   UpdateService._privateConstructor();
@@ -120,6 +121,32 @@ class UpdateService {
       return false;
     }
     return _packageInfo.packageName.startsWith("io.ente.photos.independent");
+  }
+
+  bool isFdroidFlavor() {
+    if (Platform.isIOS) {
+      return false;
+    }
+    return _packageInfo.packageName.startsWith("io.ente.photos.fdroid");
+  }
+
+  // getRateDetails returns details about the place
+  Tuple2<String, String> getRateDetails() {
+    if (isFdroidFlavor() || isIndependentFlavor()) {
+      return const Tuple2(
+        "AlternativeTo",
+        "https://alternativeto.net/software/ente/about/",
+      );
+    }
+    return Platform.isAndroid
+        ? const Tuple2(
+            "play store",
+            "https://play.google.com/store/apps/details?id=io.ente.photos",
+          )
+        : const Tuple2(
+            "app store",
+            "https://apps.apple.com/in/app/ente-photos/id1542026904",
+          );
   }
 }
 
