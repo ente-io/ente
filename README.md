@@ -45,23 +45,29 @@ file, that adheres to the above format.
 
 ### Android
 
-This repository's [GitHub releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apks) contains APKs, built straight from source. These builds keep themselves updated, without relying on third party stores.
+This repository's [GitHub
+releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apks)
+contains APKs, built straight from source. These builds keep themselves updated,
+without relying on third party stores.
 
 You can alternatively install the build from PlayStore.
 
-<a href="https://play.google.com/store/apps/details?id=io.ente.auth">
-  <img width="197" alt="Get it on Google Play" src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-badge.webp">
+<a href="https://play.google.com/store/apps/details?id=io.ente.auth"> <img
+  width="197" alt="Get it on Google Play"
+src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-badge.webp">
 </a>
 
 ### iOS
 
-<a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398">
-  <img width="197" alt="Download on AppStore" src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
+<a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398"> <img
+  width="197" alt="Download on AppStore"
+src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
 </a>
 
 ### Desktop
 
-Support for desktop platforms (Linux, Mac and Windows) is a [work in progress](https://github.com/ente-io/auth/tree/desktop).
+Support for desktop platforms (Linux, Mac and Windows) is a [work in
+progress](https://github.com/ente-io/auth/tree/desktop).
 
 Please ⭐ this repo to be notified of updates.
 
@@ -86,7 +92,9 @@ tokens has been documented [here](architecture/index.md).
 If you need help, please reach out to support@ente.io, and a human will get in
 touch with you.
 
-On the other hand, if you wish to support us, please
+If you have feature requests, please create a [GitHub issue](./issues).
+
+If you wish to support us, please ⭐
 [star](https://github.com/ente-io/auth/stargazers) this project.
 
 
