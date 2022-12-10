@@ -243,16 +243,22 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
         .call()
         .onError((error, stackTrace) => _debouncer.cancelDebounce());
     _debouncer.cancelDebounce();
-    setState(() {
-      if (executionState == ExecutionState.inProgress) {
+    // when the time taken by widget.onTap is approx. equal to the debounce
+    // time, the callback is getting executed when/after the if condition
+    // below is executing/executed which result in execution state stuck at
+    // idle state. This Future is for delaying the execution of the if
+    // condition so that the calback in the debouncer finishes execution before.
+    await Future.delayed(const Duration(milliseconds: 5));
+    if (executionState == ExecutionState.inProgress) {
+      setState(() {
         executionState = ExecutionState.successful;
         Future.delayed(const Duration(seconds: 2), () {
           setState(() {
             executionState = ExecutionState.idle;
           });
         });
-      }
-    });
+      });
+    }
   }
 
   void _onTapDown(details) {
