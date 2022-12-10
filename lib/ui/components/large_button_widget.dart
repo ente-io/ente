@@ -10,6 +10,7 @@ class LargeButtonWidget extends StatelessWidget {
   final String? labelText;
   final ButtonType buttonType;
   final VoidCallback? onTap;
+  final bool isDisabled;
 
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
@@ -20,6 +21,7 @@ class LargeButtonWidget extends StatelessWidget {
     this.labelText,
     this.onTap,
     this.isInActionSheet = false,
+    this.isDisabled = false,
     super.key,
   });
 
@@ -68,6 +70,7 @@ class LargeButtonWidget extends StatelessWidget {
     return LargeButtonChildWidget(
       buttonStyle: buttonStyle,
       buttonType: buttonType,
+      isDisabled: isDisabled,
       onTap: onTap,
       labelText: labelText,
       icon: icon,
@@ -81,9 +84,11 @@ class LargeButtonChildWidget extends StatefulWidget {
   final ButtonType buttonType;
   final String? labelText;
   final IconData? icon;
+  final bool isDisabled;
   const LargeButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
+    required this.isDisabled,
     this.onTap,
     this.labelText,
     this.icon,
@@ -101,20 +106,31 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
   late TextStyle labelStyle;
   @override
   void initState() {
-    buttonColor = widget.buttonStyle.defaultButtonColor;
-    borderColor = widget.buttonStyle.defaultBorderColor;
-    iconColor = widget.buttonStyle.defaultIconColor;
-    labelStyle = widget.buttonStyle.defaultLabelStyle;
+    if (widget.isDisabled) {
+      buttonColor = widget.buttonStyle.disabledButtonColor ??
+          widget.buttonStyle.defaultButtonColor;
+      borderColor = widget.buttonStyle.disabledBorderColor ??
+          widget.buttonStyle.defaultBorderColor;
+      iconColor = widget.buttonStyle.disabledIconColor ??
+          widget.buttonStyle.defaultIconColor;
+      labelStyle = widget.buttonStyle.disabledLabelStyle ??
+          widget.buttonStyle.defaultLabelStyle;
+    } else {
+      buttonColor = widget.buttonStyle.defaultButtonColor;
+      borderColor = widget.buttonStyle.defaultBorderColor;
+      iconColor = widget.buttonStyle.defaultIconColor;
+      labelStyle = widget.buttonStyle.defaultLabelStyle;
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onTap,
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
+      onTap: widget.isDisabled ? null : widget.onTap,
+      onTapDown: widget.isDisabled ? null : _onTapDown,
+      onTapUp: widget.isDisabled ? null : _onTapUp,
+      onTapCancel: widget.isDisabled ? null : _onTapCancel,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 16),
         width: double.infinity,
@@ -141,7 +157,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                                 widget.labelText!,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 2,
-                                style: widget.buttonStyle.defaultLabelStyle,
+                                style: labelStyle,
                               ),
                             ),
                           ),
@@ -150,7 +166,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                         : Icon(
                             widget.icon,
                             size: 20,
-                            color: widget.buttonStyle.defaultIconColor,
+                            color: iconColor,
                           ),
                   ],
                 )
@@ -162,7 +178,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                         : Icon(
                             widget.icon,
                             size: 20,
-                            color: widget.buttonStyle.defaultIconColor,
+                            color: iconColor,
                           ),
                     widget.icon == null || widget.labelText == null
                         ? const SizedBox.shrink()
@@ -175,7 +191,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                                   const EdgeInsets.symmetric(horizontal: 8),
                               child: Text(
                                 widget.labelText!,
-                                style: widget.buttonStyle.defaultLabelStyle,
+                                style: labelStyle,
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
