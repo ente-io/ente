@@ -1,0 +1,24 @@
+{
+  "@@locale": "it",
+  "counterAppBarTitle": "Contatore",
+  "@counterAppBarTitle": {
+    "description": "Testo mostrato nell'AppBar della Pagina Contatore"
+  },
+  "onBoardingBody": "Proteggi i tuoi codici 2FA",
+  "onBoardingGetStarted": "Iniziamo",
+
+  "setupFirstAccount": "Crea il tuo primo account",
+  "importScanQrCode": "Scansiona un codice QR",
+  "importEnterSetupKey": "Inserisci una chiave di configurazione",
+  "importAccountPageTitle": "Inserisci i dettagli dell'account",
+  "codeIssuerHint": "Emittente",
+  "codeSecretKeyHint" : "Chiave segreta",
+  "codeAccountHint": "Account (tu@dominio.com)",
+  "accountKeyType": "Tipo di chiave",
+  "timeBasedKeyType": "Basato sul tempo (TOTP)",
+  "counterBasedKeyType": "Basato sul contatore (HOTP)",
+  "saveAction": "Salva",
+
+  "existingUser": "Utente esistente",
+  "newUser" : "Nuovo da inserire"
+}
