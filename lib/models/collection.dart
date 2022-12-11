@@ -288,6 +288,7 @@ class PublicURL {
   int deviceLimit;
   int validTill;
   bool enableDownload;
+  bool enableCollect;
   bool passwordEnabled;
 
   PublicURL({
@@ -296,6 +297,7 @@ class PublicURL {
     required this.validTill,
     this.enableDownload = true,
     this.passwordEnabled = false,
+    this.enableCollect = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -305,6 +307,7 @@ class PublicURL {
       'validTill': validTill,
       'enableDownload': enableDownload,
       'passwordEnabled': passwordEnabled,
+      'enableCollect': enableCollect,
     };
   }
 
@@ -323,6 +326,7 @@ class PublicURL {
       validTill: map['validTill'] ?? 0,
       enableDownload: map['enableDownload'] ?? true,
       passwordEnabled: map['passwordEnabled'] ?? false,
+      enableCollect: map['enableCollect'] ?? false,
     );
   }
 }

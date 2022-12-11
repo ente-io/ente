@@ -49,7 +49,7 @@ class CaptionedTextWidget extends StatelessWidget {
         Text(
           subTitle!,
           style: enteTextTheme.small.copyWith(
-            color: enteColorScheme.textMuted,
+            color: subTitleColor ?? enteColorScheme.textMuted,
           ),
         ),
       );

@@ -10,6 +10,7 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
@@ -61,6 +62,42 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
     final PublicURL url = widget.collection?.publicURLs?.firstOrNull;
+
+    final enableCollectFeature = FeatureFlagService.instance.enableCollect();
+    final Widget collect = enableCollectFeature
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              MenuItemWidget(
+                captionedTextWidget: const CaptionedTextWidget(
+                  title: "Allow adding photos",
+                ),
+                alignCaptionedTextToLeft: true,
+                menuItemColor: getEnteColorScheme(context).fillFaint,
+                pressedColor: getEnteColorScheme(context).fillFaint,
+                trailingWidget: Switch.adaptive(
+                  value: widget
+                          .collection.publicURLs?.firstOrNull?.enableCollect ??
+                      false,
+                  onChanged: (value) async {
+                    await _updateUrlSettings(
+                      context,
+                      {'enableCollect': value},
+                    );
+
+                    setState(() {});
+                  },
+                ),
+              ),
+              const MenuSectionDescriptionWidget(
+                content:
+                    "Allow people with the link to also add photos to the shared "
+                    "album.",
+              ),
+              const SizedBox(height: 24)
+            ],
+          )
+        : const SizedBox.shrink();
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -77,6 +114,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  collect,
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(

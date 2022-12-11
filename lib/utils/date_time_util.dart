@@ -54,6 +54,20 @@ String getMonthAndYear(DateTime dateTime) {
   return _months[dateTime.month]! + " " + dateTime.year.toString();
 }
 
+int daysBetween(DateTime from, DateTime to) {
+  from = DateTime(from.year, from.month, from.day);
+  to = DateTime(to.year, to.month, to.day);
+  return (to.difference(from).inHours / 24).round();
+}
+
+bool areFromSameDay(int firstCreationTime, int secondCreationTime) {
+  final firstDate = DateTime.fromMicrosecondsSinceEpoch(firstCreationTime);
+  final secondDate = DateTime.fromMicrosecondsSinceEpoch(secondCreationTime);
+  return firstDate.year == secondDate.year &&
+      firstDate.month == secondDate.month &&
+      firstDate.day == secondDate.day;
+}
+
 //Thu, 30 Jun
 String getDayAndMonth(DateTime dateTime) {
   return _days[dateTime.weekday]! +
@@ -202,9 +216,14 @@ Widget getDayWidget(
   final textTheme = getEnteTextTheme(context);
   final textStyle =
       photoGridSize < photoGridSizeMax ? textTheme.body : textTheme.small;
-  final double paddingValue = photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
+  final double horizontalPadding =
+      photoGridSize < photoGridSizeMax ? 12.0 : 8.0;
+  final double verticalPadding = photoGridSize < photoGridSizeMax ? 12.0 : 14.0;
   return Padding(
-    padding: EdgeInsets.all(paddingValue),
+    padding: EdgeInsets.symmetric(
+      horizontal: horizontalPadding,
+      vertical: verticalPadding,
+    ),
     child: Container(
       alignment: Alignment.centerLeft,
       child: Text(
