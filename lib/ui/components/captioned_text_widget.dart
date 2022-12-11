@@ -7,12 +7,14 @@ class CaptionedTextWidget extends StatelessWidget {
   final TextStyle? textStyle;
   final bool makeTextBold;
   final Color? textColor;
+  final Color? subTitleColor;
   const CaptionedTextWidget({
     required this.title,
     this.subTitle,
     this.textStyle,
     this.makeTextBold = false,
     this.textColor,
+    this.subTitleColor,
     Key? key,
   }) : super(key: key);
 
@@ -47,7 +49,7 @@ class CaptionedTextWidget extends StatelessWidget {
         Text(
           subTitle!,
           style: enteTextTheme.small.copyWith(
-            color: enteColorScheme.textMuted,
+            color: subTitleColor ?? enteColorScheme.textMuted,
           ),
         ),
       );
