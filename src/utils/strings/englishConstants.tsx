@@ -527,7 +527,7 @@ const englishConstants = {
     RETRY: 'Retry',
     SEND_OTT: 'Send OTP',
     EMAIl_ALREADY_OWNED: 'Email already taken',
-    EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
+    EMAIL_UDPATE_SUCCESSFUL: 'Your email has been updated successfully',
     UPLOAD_FAILED: 'Upload failed',
     ETAGS_BLOCKED: (link: string) => (
         <>
