@@ -76,6 +76,7 @@ class LargeButtonWidget extends StatelessWidget {
         buttonType.pressedLabelStyle(textTheme, colorScheme);
     buttonStyle.disabledLabelStyle =
         buttonType.disabledLabelStyle(textTheme, colorScheme);
+    buttonStyle.checkColor = buttonType.checkColor(colorScheme);
 
     return LargeButtonChildWidget(
       buttonStyle: buttonStyle,
@@ -114,10 +115,15 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
   late Color borderColor;
   late Color iconColor;
   late TextStyle labelStyle;
+  late Color checkColor;
+  late Color loadingIconColor;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
   @override
   void initState() {
+    checkColor =
+        widget.buttonStyle.checkColor ?? widget.buttonStyle.defaultIconColor;
+    loadingIconColor = widget.buttonStyle.defaultIconColor;
     if (widget.isDisabled) {
       buttonColor = widget.buttonStyle.disabledButtonColor ??
           widget.buttonStyle.defaultButtonColor;
@@ -214,11 +220,15 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                       ],
                     )
               : executionState == ExecutionState.inProgress
-                  ? const EnteLoadingWidget(is20pts: true)
+                  ? EnteLoadingWidget(
+                      is20pts: true,
+                      color: loadingIconColor,
+                    )
                   : executionState == ExecutionState.successful
-                      ? const Icon(
+                      ? Icon(
                           Icons.check_outlined,
                           size: 20,
+                          color: checkColor,
                         )
                       : const SizedBox.shrink(), //fallback
         ),

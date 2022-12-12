@@ -155,7 +155,9 @@ enum ButtonType {
 
   //Returning null to fallback to default color
   TextStyle? pressedLabelStyle(
-      EnteTextTheme textTheme, EnteColorScheme colorScheme) {
+    EnteTextTheme textTheme,
+    EnteColorScheme colorScheme,
+  ) {
     if (this == ButtonType.tertiaryCritical) {
       return textTheme.bodyBold.copyWith(color: colorScheme.strokeBase);
     }
@@ -172,6 +174,13 @@ enum ButtonType {
         this == ButtonType.critical ||
         this == ButtonType.tertiaryCritical) {
       return textTheme.bodyBold.copyWith(color: colorScheme.textFaint);
+    }
+    return null;
+  }
+
+  Color? checkColor(EnteColorScheme colorScheme) {
+    if (this == ButtonType.secondary) {
+      return colorScheme.primary500;
     }
     return null;
   }
