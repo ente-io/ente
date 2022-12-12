@@ -184,4 +184,14 @@ enum ButtonType {
     }
     return null;
   }
+
+  bool get hasExecutionStates {
+    if (this == ButtonType.primary ||
+        this == ButtonType.secondary ||
+        this == ButtonType.neutral) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }
