@@ -7,15 +7,12 @@ import { CustomError, handleUploadError } from 'utils/error';
 import {
     B64EncryptionResult,
     BackupedFile,
-    ElectronFile,
     EncryptedFile,
     FileTypeInfo,
     FileWithCollection,
     FileWithMetadata,
     isDataStream,
     Metadata,
-    MetadataAndFileTypeInfo,
-    MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     ProcessedFile,
@@ -26,6 +23,8 @@ import {
 } from 'types/upload';
 import {
     clusterLivePhotoFiles,
+    extractLivePhotoMetadata,
+    getLivePhotoFileType,
     getLivePhotoName,
     getLivePhotoSize,
     readLivePhoto,
@@ -41,10 +40,6 @@ class UploadService {
     private parsedMetadataJSONMap: ParsedMetadataJSONMap = new Map<
         string,
         ParsedMetadataJSON
-    >();
-    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap = new Map<
-        number,
-        MetadataAndFileTypeInfo
     >();
 
     private uploaderName: string;
@@ -74,12 +69,6 @@ class UploadService {
         return this.uploaderName;
     }
 
-    setMetadataAndFileTypeInfoMap(
-        metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap
-    ) {
-        this.metadataAndFileTypeInfoMap = metadataAndFileTypeInfoMap;
-    }
-
     reducePendingUploadCount() {
         this.pendingUploadCount--;
     }
@@ -90,14 +79,16 @@ class UploadService {
             : getFileSize(file);
     }
 
-    getAssetName({ isLivePhoto, file, livePhotoAssets }: FileWithCollection) {
+    getAssetName({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
         return isLivePhoto
-            ? getLivePhotoName(livePhotoAssets.image.name)
+            ? getLivePhotoName(livePhotoAssets)
             : getFilename(file);
     }
 
-    async getFileType(file: File | ElectronFile) {
-        return getFileType(file);
+    getAssetFileType({ isLivePhoto, file, livePhotoAssets }: UploadAsset) {
+        return isLivePhoto
+            ? getLivePhotoFileType(livePhotoAssets)
+            : getFileType(file);
     }
 
     async readAsset(
@@ -109,31 +100,24 @@ class UploadService {
             : await readFile(fileTypeInfo, file);
     }
 
-    async extractFileMetadata(
-        file: File | ElectronFile,
+    async extractAssetMetadata(
+        { isLivePhoto, file, livePhotoAssets }: UploadAsset,
         collectionID: number,
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
-        return extractFileMetadata(
-            this.parsedMetadataJSONMap,
-            file,
-            collectionID,
-            fileTypeInfo
-        );
-    }
-
-    getFileMetadataAndFileTypeInfo(localID: number) {
-        return this.metadataAndFileTypeInfoMap.get(localID);
-    }
-
-    setFileMetadataAndFileTypeInfo(
-        localID: number,
-        metadataAndFileTypeInfo: MetadataAndFileTypeInfo
-    ) {
-        return this.metadataAndFileTypeInfoMap.set(
-            localID,
-            metadataAndFileTypeInfo
-        );
+        return isLivePhoto
+            ? await extractFileMetadata(
+                  this.parsedMetadataJSONMap,
+                  collectionID,
+                  fileTypeInfo,
+                  file
+              )
+            : extractLivePhotoMetadata(
+                  this.parsedMetadataJSONMap,
+                  collectionID,
+                  fileTypeInfo,
+                  livePhotoAssets
+              );
     }
 
     clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {

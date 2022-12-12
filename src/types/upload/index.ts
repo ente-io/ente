@@ -90,13 +90,7 @@ export interface FileWithCollection extends UploadAsset {
     collection?: Collection;
     collectionID?: number;
 }
-export interface MetadataAndFileTypeInfo {
-    metadata: Metadata;
-    fileTypeInfo: FileTypeInfo;
-    filePath: string;
-}
 
-export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;
 export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
