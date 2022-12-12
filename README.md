@@ -3,7 +3,7 @@
 ente's Authenticator app helps you generate and store 2 step verification (2FA)
 tokens on your mobile devices.
 
-[Download now](#📲-download)
+[Download now](#-download)
 
 ![App Screenshots](./screenshots/screenshots.png)
 
