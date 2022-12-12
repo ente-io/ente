@@ -47,7 +47,7 @@ enum ButtonType {
 
   //Returning null to fallback to default color
   Color? pressedButtonColor(EnteColorScheme colorScheme) {
-    if (isPrimary) {
+    if (this == ButtonType.primary) {
       return colorScheme.primary700;
     }
     return null;
