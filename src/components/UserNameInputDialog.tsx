@@ -12,7 +12,6 @@ export default function UserNameInputDialog({ open, onClose, onNameSubmit }) {
     };
     return (
         <DialogBox
-            sx={{ zIndex: 1600 }}
             size="xs"
             open={open}
             onClose={onClose}
