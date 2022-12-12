@@ -138,8 +138,6 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     if (hasFocus) {
       KeyboardOverlay.showOverlay(context, keyboardTopButtoms!);
     } else {
-      debugPrint("Removing listener");
-
       KeyboardOverlay.removeOverlay();
     }
   }
