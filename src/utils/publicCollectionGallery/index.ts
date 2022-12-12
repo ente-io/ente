@@ -1,7 +1,7 @@
 import { createContext } from 'react';
 import { PublicCollectionGalleryContextType } from 'types/publicCollection';
 
-export const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
+const defaultPublicCollectionGalleryContext: PublicCollectionGalleryContextType =
     {
         token: null,
         passwordToken: null,
