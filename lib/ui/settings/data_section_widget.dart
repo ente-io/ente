@@ -6,6 +6,7 @@ import 'dart:ui';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/services/authenticator_service.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
@@ -215,11 +216,12 @@ class DataSectionWidget extends StatelessWidget {
   }
 
   Future<void> _pickImportFile(BuildContext context) async {
+    final l10n = context.l10n;
     FilePickerResult result = await FilePicker.platform.pickFiles();
     if (result == null) {
       return;
     }
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       File file = File(result.files.single.path);
@@ -257,7 +259,7 @@ class DataSectionWidget extends StatelessWidget {
             actions: [
               TextButton(
                 child: Text(
-                  "Okay",
+                  l10n.ok,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurface,
                   ),

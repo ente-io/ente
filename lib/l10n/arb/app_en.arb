@@ -6,7 +6,6 @@
   },
   "onBoardingBody": "Secure your 2FA codes",
   "onBoardingGetStarted": "Get Started",
-
   "setupFirstAccount": "Setup your first account",
   "importScanQrCode": "Scan a QR Code",
   "importEnterSetupKey": "Enter a setup key",
@@ -18,7 +17,100 @@
   "timeBasedKeyType": "Time based (TOTP)",
   "counterBasedKeyType": "Counter based (HOTP)",
   "saveAction": "Save",
-
+  "nextTotpTitle": "next",
+  "deleteCodeTitle": "Delete code?",
+  "deleteCodeMessage": "Are you sure you want to delete this code? This action is irreversible.",
+  "viewLogsAction": "View logs",
+  "sendLogsDescription": "This will send across logs to help us debug your issue. While we take precautions to ensure that sensitive information is not logged, we encourage you to view these logs before sharing them.",
+  "preparingLogsTitle": "Preparing logs...",
+  "emailLogsTitle": "Email logs",
+  "emailLogsMessage": "Please send the logs to {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "Copy email",
+  "exportLogsAction": "Export logs",
+  "reportABug": "Report a bug",
+  "crashAndErrorReporting": "Crash & error reporting",
+  "reportBug": "Report bug",
+  "emailUsMessage": "Please email us at {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Contact support",
+  "verifyPassword": "Verify password",
+  "pleaseWaitTitle": "Please wait...",
+  "generatingEncryptionKeysTitle": "Generating encryption keys...",
+  "recreatePassword": "Recreate password",
+  "recreatePasswordMessage": "The current device is not powerful enough to verify your password, so we need to regenerate it once in a way that works with all devices. \n\nPlease login using your recovery key and regenerate your password (you can use the same one again if you wish).",
+  "useRecoveryKeyAction": "Use recovery key",
+  "incorrectPassword": "Incorrect password",
+  "welcomeBackTitle": "Welcome back!",
+  "madeWithLoveAtPrefix": "made with ❤️ at ",
+  "changeEmail": "change email",
+  "ok": "OK",
+  "cancel": "Cancel",
+  "yes": "Yes",
+  "no": "No",
+  "email": "Email",
+  "support": "Support",
+  "settings": "Settings",
+  "copied": "Copied",
+  "tryAgainMessage": "Please try again",
   "existingUser": "Existing User",
-  "newUser" : "New to ente"
+  "newUser" : "New to ente",
+  "delete": "Delete",
+  "enterYourPasswordHint": "Enter your password",
+  "forgotPassword": "Forgot password",
+  "oops": "Oops",
+  "somethingWentWrongMessage": "Something went wrong, please try again",
+  "leaveFamily": "Leave family",
+  "leaveFamilyMessage": "Are you sure that you want to leave the family plan?",
+  "inFamilyPlanMessage": "You are on a family plan!",
+  "swipeHint": "Swipe left to edit or remove codes",
+  "scan": "Scan",
+  "scanACode": "Scan a code",
+  "verify": "Verify",
+  "enterCodeHint": "Enter the 6-digit code from\nyour authenticator app",
+  "lostDeviceTitle": "Lost device?",
+  "twoFactorAuthTitle": "Two-factor authentication",
+  "recoverAccount": "Recover account",
+  "enterRecoveryKeyHint": "Enter your recovery key",
+  "recover": "Recover",
+  "contactSupportViaEmailMessage":"Please drop an email to {email} from your registered email address",
+  "@contactSupportViaEmailMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noRecoveryKeyTitle": "No recovery key?",
+  "enterEmailHint": "Enter your email address",
+  "invalidEmailTitle": "Invalid email address",
+  "invalidEmailMessage": "Please enter a valid email address.",
+  "deleteAccount": "Delete account",
+  "deleteAccountQuery": "We'll be sorry to see you go. Are you facing some issue?",
+  "yesSendFeedbackAction": "Yes, send feedback",
+  "noDeleteAccountAction": "No, delete account",
+  "initiateAccountDeleteTitle": "Please authenticate to initiate account deletion",
+  "confirmAccountDeleteTitle": "Are you sure you want to delete your ente account?",
+  "confirmAccountDeleteMessage": "Your uploaded data, across all apps (Photos and Authenticator both), will be scheduled for deletion, and your account will be permanently deleted.",
+  "sendEmail": "Send email",
+  "createNewAccount": "Create new account",
+  "passwordStrengthWeak": "Weak",
+  "passwordStrengthStrong": "Strong",
+  "passwordStrengthModerate": "Moderate",
+  "confirmPassword": "Confirm password",
+  "close": "Close",
+  "oopsSomethingWentWrong": "Oops, Something went wrong."
+
 }

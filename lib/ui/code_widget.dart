@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:clipboard/clipboard.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:ente_auth/onboarding/view/setup_enter_secret_key_page.dart';
 import 'package:ente_auth/store/code_store.dart';
@@ -49,6 +50,7 @@ class _CodeWidgetState extends State<CodeWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 8),
       child: Slidable(
@@ -174,7 +176,7 @@ class _CodeWidgetState extends State<CodeWidget> {
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Text(
-                                    "next",
+                                    l10n.nextTotpTitle,
                                     style: Theme.of(context).textTheme.caption,
                                   ),
                                   Text(
@@ -224,20 +226,21 @@ class _CodeWidgetState extends State<CodeWidget> {
   }
 
   void _onDeletePressed(_) {
+    final l10n = context.l10n;
     final AlertDialog alert = AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       title: Text(
-        "Delete code?",
+        l10n.deleteCodeTitle,
         style: Theme.of(context).textTheme.headline6,
       ),
-      content: const Text(
-        "Are you sure you want to delete this code? This action is irreversible.",
+      content: Text(
+        l10n.deleteCodeMessage,
       ),
       actions: [
         TextButton(
-          child: const Text(
-            "Delete",
-            style: TextStyle(
+          child: Text(
+            l10n.delete,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),
