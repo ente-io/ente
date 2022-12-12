@@ -34,7 +34,7 @@ import {
     setIsFirstLogin,
     setJustSignedUp,
 } from 'utils/storage';
-import { isTokenValid, logoutUser } from 'services/userService';
+import { isTokenValid, logoutUser, validateKey } from 'services/userService';
 import { useDropzone } from 'react-dropzone';
 import EnteSpinner from 'components/EnteSpinner';
 import { LoadingOverlay } from 'components/LoadingOverlay';
@@ -226,6 +226,10 @@ export default function Gallery() {
             return;
         }
         const main = async () => {
+            const valid = await validateKey();
+            if (!valid) {
+                return;
+            }
             setActiveCollection(ALL_SECTION);
             setIsFirstLoad(isFirstLogin());
             setIsFirstFetch(true);
