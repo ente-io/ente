@@ -23,5 +23,4 @@ export type GalleryContextType = {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
     setBlockingLoad: (value: boolean) => void;
     photoListHeader: TimeStampListItem;
-    token: string;
 };
