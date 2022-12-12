@@ -663,6 +663,7 @@ const englishConstants = {
         'Are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'Allow downloads',
     LINK_PASSWORD_LOCK: 'Password lock',
+    PUBLIC_COLLECT: 'Public collect',
     LINK_DEVICE_LIMIT: 'Device limit',
     LINK_EXPIRY: 'Link expiry',
     LINK_EXPIRY_NEVER: 'Never',
@@ -677,6 +678,13 @@ const englishConstants = {
                 Viewers can still take screenshots or save a copy of your photos
                 using external tools'{' '}
             </p>
+        </>
+    ),
+    ENABLE_PUBLIC_COLLECT: 'Enable public collect',
+    ENABLE_PUBLIC_COLLECT_MESSAGE: () => (
+        <>
+            <p>Are you sure that you want to enable public collect? </p>{' '}
+            <p>Uploaded files will be counted towards your storage</p>
         </>
     ),
     ABUSE_REPORT: 'Abuse report',

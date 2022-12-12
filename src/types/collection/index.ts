@@ -31,6 +31,7 @@ export interface PublicURL {
     deviceLimit: number;
     validTill: number;
     enableDownload: boolean;
+    enableCollect: boolean;
     passwordEnabled: boolean;
     nonce?: string;
     opsLimit?: number;
@@ -41,6 +42,7 @@ export interface UpdatePublicURL {
     collectionID: number;
     disablePassword?: boolean;
     enableDownload?: boolean;
+    enableCollect?: boolean;
     validTill?: number;
     deviceLimit?: number;
     passHash?: string;

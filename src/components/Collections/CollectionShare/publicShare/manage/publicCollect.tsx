@@ -11,7 +11,7 @@ interface Iprops {
     updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
 }
 
-export function ManageDownloadAccess({
+export function ManagePublicCollect({
     publicShareProp,
     updatePublicShareURLHelper,
     collection,
@@ -19,37 +19,37 @@ export function ManageDownloadAccess({
     const appContext = useContext(AppContext);
 
     const handleFileDownloadSetting = () => {
-        if (publicShareProp.enableDownload) {
-            disableFileDownload();
+        if (!publicShareProp.enableCollect) {
+            enablePublicCollect();
         } else {
             updatePublicShareURLHelper({
                 collectionID: collection.id,
-                enableDownload: true,
+                enableCollect: false,
             });
         }
     };
 
-    const disableFileDownload = () => {
+    const enablePublicCollect = () => {
         appContext.setDialogMessage({
-            title: constants.DISABLE_FILE_DOWNLOAD,
-            content: constants.DISABLE_FILE_DOWNLOAD_MESSAGE(),
+            title: constants.ENABLE_PUBLIC_COLLECT,
+            content: constants.ENABLE_PUBLIC_COLLECT_MESSAGE(),
             close: { text: constants.CANCEL },
             proceed: {
-                text: constants.DISABLE,
+                text: constants.ENABLE,
                 action: () =>
                     updatePublicShareURLHelper({
                         collectionID: collection.id,
-                        enableDownload: false,
+                        enableCollect: true,
                     }),
-                variant: 'danger',
+                variant: 'accent',
             },
         });
     };
     return (
         <Box>
-            <Typography mb={0.5}>{constants.FILE_DOWNLOAD}</Typography>
+            <Typography mb={0.5}>{constants.PUBLIC_COLLECT}</Typography>
             <PublicShareSwitch
-                checked={publicShareProp?.enableDownload ?? true}
+                checked={publicShareProp?.enableCollect}
                 onChange={handleFileDownloadSetting}
             />
         </Box>
