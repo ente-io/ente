@@ -99,8 +99,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     "Allow people with the link to also add photos to the shared "
                         "album.",
                   ),
-                  const SizedBox(height: 24)
-                ],
+                  const SizedBox(height: 24),
                   MenuItemWidget(
                     alignCaptionedTextToLeft: true,
                     captionedTextWidget: CaptionedTextWidget(
