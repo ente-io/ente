@@ -178,7 +178,7 @@ enum ButtonType {
     return null;
   }
 
-  Color? checkColor(EnteColorScheme colorScheme) {
+  Color? checkIconColor(EnteColorScheme colorScheme) {
     if (this == ButtonType.secondary) {
       return colorScheme.primary500;
     }

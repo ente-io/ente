@@ -76,7 +76,7 @@ class LargeButtonWidget extends StatelessWidget {
         buttonType.pressedLabelStyle(textTheme, colorScheme);
     buttonStyle.disabledLabelStyle =
         buttonType.disabledLabelStyle(textTheme, colorScheme);
-    buttonStyle.checkColor = buttonType.checkColor(colorScheme);
+    buttonStyle.checkIconColor = buttonType.checkIconColor(colorScheme);
 
     return LargeButtonChildWidget(
       buttonStyle: buttonStyle,
@@ -115,15 +115,15 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
   late Color borderColor;
   late Color iconColor;
   late TextStyle labelStyle;
-  late Color checkColor;
+  late Color checkIconColor;
   late Color loadingIconColor;
   late bool hasExecutionStates;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
   @override
   void initState() {
-    checkColor =
-        widget.buttonStyle.checkColor ?? widget.buttonStyle.defaultIconColor;
+    checkIconColor = widget.buttonStyle.checkIconColor ??
+        widget.buttonStyle.defaultIconColor;
     loadingIconColor = widget.buttonStyle.defaultIconColor;
     hasExecutionStates = widget.buttonType.hasExecutionStates;
     if (widget.isDisabled) {
@@ -235,7 +235,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                         ? Icon(
                             Icons.check_outlined,
                             size: 20,
-                            color: checkColor,
+                            color: checkIconColor,
                           )
                         : const SizedBox.shrink(), //fallback
           ),
@@ -262,9 +262,9 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
           .call()
           .onError((error, stackTrace) => _debouncer.cancelDebounce());
       _debouncer.cancelDebounce();
-      // when the time taken by widget.onTap is approx. equal to the debounce
+      // when the time taken by widget.onTap is approximately equal to the debounce
       // time, the callback is getting executed when/after the if condition
-      // below is executing/executed which result in execution state stuck at
+      // below is executing/executed which results in execution state stuck at
       // idle state. This Future is for delaying the execution of the if
       // condition so that the calback in the debouncer finishes execution before.
       await Future.delayed(const Duration(milliseconds: 5));

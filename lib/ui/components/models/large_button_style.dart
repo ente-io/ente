@@ -13,7 +13,7 @@ class LargeButtonStyle {
   TextStyle defaultLabelStyle;
   TextStyle? pressedLabelStyle;
   TextStyle? disabledLabelStyle;
-  Color? checkColor;
+  Color? checkIconColor;
 
   LargeButtonStyle({
     required this.defaultButtonColor,
@@ -28,6 +28,6 @@ class LargeButtonStyle {
     required this.defaultLabelStyle,
     this.pressedLabelStyle,
     this.disabledLabelStyle,
-    this.checkColor,
+    this.checkIconColor,
   });
 }
