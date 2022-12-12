@@ -24,6 +24,9 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
+import 'package:photos/ui/components/large_button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -562,25 +565,130 @@ void showDeleteSheet(BuildContext context, SelectedFiles selectedFiles) {
       ),
     );
   }
-  final action = CupertinoActionSheet(
-    title: Text(
-      "Delete " +
-          count.toString() +
-          " file" +
-          (count == 1 ? "" : "s") +
-          (containsUploadedFile && containsLocalFile ? " from" : "?"),
-    ),
-    actions: actions,
-    cancelButton: CupertinoActionSheetAction(
-      child: const Text("Cancel"),
-      onPressed: () {
-        Navigator.of(context, rootNavigator: true).pop();
-      },
-    ),
-  );
-  showCupertinoModalPopup(
+  // final action = CupertinoActionSheet(
+  //   title: Text(
+  //     "Delete " +
+  //         count.toString() +
+  //         " file" +
+  //         (count == 1 ? "" : "s") +
+  //         (containsUploadedFile && containsLocalFile ? " from" : "?"),
+  //   ),
+  //   actions: actions,
+  //   cancelButton: CupertinoActionSheetAction(
+  //     child: const Text("Cancel"),
+  //     onPressed: () {
+  //       Navigator.of(context, rootNavigator: true).pop();
+  //     },
+  //   ),
+  // );
+  // showCupertinoModalPopup(
+  //   context: context,
+  //   builder: (_) => action,
+  //   barrierColor: Colors.black.withOpacity(0.75),
+  // );
+  showActionSheet(
     context: context,
-    builder: (_) => action,
-    barrierColor: Colors.black.withOpacity(0.75),
+    buttons: buttons,
+    title: "Title",
+    body: "Body",
   );
 }
+
+final buttons = [
+  LargeButtonWidget(
+    buttonType: ButtonType.primary,
+    labelText: "Primary",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Primary");
+      });
+    },
+    // isDisabled: true,
+  ),
+  LargeButtonWidget(
+    buttonType: ButtonType.secondary,
+    labelText: "Secondary",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Secondary");
+      });
+    },
+    // isDisabled: true,
+  ),
+  LargeButtonWidget(
+    buttonType: ButtonType.neutral,
+    labelText: "Neutral",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Neutral");
+      });
+    },
+    // isDisabled: true,
+  ),
+  LargeButtonWidget(
+    buttonType: ButtonType.trailingIcon,
+    labelText: "Trailing Icon",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Neutral");
+      });
+    },
+    // isDisabled: true,
+  ),
+  LargeButtonWidget(
+    buttonType: ButtonType.critical,
+    labelText: "Critical",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Critical");
+      });
+    },
+    // isDisabled: true,
+  ),
+  LargeButtonWidget(
+    buttonType: ButtonType.tertiaryCritical,
+    labelText: "Tertiary Critical",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Tertiary Critical");
+      });
+    },
+    // isDisabled: true,
+  ),
+  LargeButtonWidget(
+    buttonType: ButtonType.trailingIconPrimary,
+    labelText: "Trailing Icon Primary",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Trailing Icon Primary");
+      });
+    },
+    // isDisabled: true,
+  ),
+  LargeButtonWidget(
+    buttonType: ButtonType.trailingIconSecondary,
+    labelText: "Trailing Icon Secondary",
+    icon: Icons.add_outlined,
+    isInActionSheet: true,
+    onTap: () {
+      return Future.delayed(const Duration(milliseconds: 1000), () {
+        // print("Trailing Icon Secondary");
+      });
+    },
+    // isDisabled: true,
+  ),
+];
