@@ -2,6 +2,7 @@
 
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -9,7 +10,13 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/divider_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -49,6 +56,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final enteColorScheme = getEnteColorScheme(context);
+    final PublicURL url = widget.collection?.publicURLs?.firstOrNull;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -63,145 +72,162 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(padding: EdgeInsets.all(4)),
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: "Allow adding photos",
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    trailingWidget: Switch.adaptive(
+                      value: widget.collection.publicURLs?.firstOrNull?.enableCollect ??
+                          false,
+                      onChanged: (value) async {
+                        await _updateUrlSettings(
+                          context,
+                          {'enableCollect': value},
+                        );
+
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                  const MenuSectionDescriptionWidget(
+                    content:
+                    "Allow people with the link to also add photos to the shared "
+                        "album.",
+                  ),
+                  const SizedBox(height: 24),
+                  MenuItemWidget(
+                    alignCaptionedTextToLeft: true,
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: "Link expiry",
+                      subTitle: (url.hasExpiry
+                          ? (url.isExpired ? "Expired" : "Enabled")
+                          : "Never"),
+                      subTitleColor: url.isExpired ? warning500 : null,
+                    ),
+                    trailingIcon: Icons.chevron_right,
+                    menuItemColor: enteColorScheme.fillFaint,
                     onTap: () async {
                       await showPicker();
                     },
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Link expiry"),
-                            const Padding(padding: EdgeInsets.all(4)),
-                            _getLinkExpiryTimeWidget(),
-                          ],
-                        ),
-                        const Icon(Icons.navigate_next),
-                      ],
-                    ),
                   ),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  const Divider(height: 4),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  GestureDetector(
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () {
-                      _showDeviceLimitPicker();
+                  url.hasExpiry
+                      ? MenuSectionDescriptionWidget(
+                          content: url.isExpired
+                              ? "This link has expired. Please select a new expiry time or disable link expiry."
+                              : 'Link will expire on '
+                                  '${getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(url.validTill))}',
+                        )
+                      : const SizedBox.shrink(),
+                  const Padding(padding: EdgeInsets.only(top: 24)),
+                  MenuItemWidget(
+                    captionedTextWidget: CaptionedTextWidget(
+                      title: "Device limit",
+                      subTitle: widget.collection.publicURLs.first.deviceLimit
+                          .toString(),
+                    ),
+                    trailingIcon: Icons.chevron_right,
+                    menuItemColor: enteColorScheme.fillFaint,
+                    alignCaptionedTextToLeft: true,
+                    isBottomBorderRadiusRemoved: true,
+                    onTap: () async {
+                      await _showDeviceLimitPicker();
                     },
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Device limit"),
-                            const Padding(padding: EdgeInsets.all(4)),
-                            Text(
-                              widget.collection.publicURLs.first.deviceLimit
-                                  .toString(),
-                              style: const TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Icon(Icons.navigate_next),
-                      ],
+                  ),
+                  DividerWidget(
+                    dividerType: DividerType.menu,
+                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: "Allow downloads",
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    isBottomBorderRadiusRemoved: true,
+                    isTopBorderRadiusRemoved: true,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    trailingWidget: Switch.adaptive(
+                      value: widget.collection.publicURLs?.firstOrNull
+                              ?.enableDownload ??
+                          true,
+                      onChanged: (value) async {
+                        if (!value) {
+                          final choice = await showChoiceDialog(
+                            context,
+                            'Disable downloads',
+                            'Are you sure that you want to disable the download button for files?',
+                            firstAction: 'No',
+                            secondAction: 'Yes',
+                            firstActionColor:
+                                Theme.of(context).colorScheme.greenText,
+                            secondActionColor: Theme.of(context)
+                                .colorScheme
+                                .inverseBackgroundColor,
+                          );
+                          if (choice != DialogUserChoice.secondChoice) {
+                            return;
+                          }
+                        }
+                        await _updateUrlSettings(
+                          context,
+                          {'enableDownload': value},
+                        );
+                        if (!value) {
+                          showErrorDialog(
+                            context,
+                            "Please note",
+                            "Viewers can still take screenshots or save a copy of your photos using external tools",
+                          );
+                        }
+                        setState(() {});
+                      },
                     ),
                   ),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  const Divider(height: 4),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  SizedBox(
-                    height: 36,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("Password lock"),
-                        Switch.adaptive(
-                          value: widget.collection.publicURLs?.first
-                                  ?.passwordEnabled ??
-                              false,
-                          onChanged: (enablePassword) async {
-                            if (enablePassword) {
-                              final inputResult =
-                                  await _displayLinkPasswordInput(context);
-                              if (inputResult != null &&
-                                  inputResult == 'ok' &&
-                                  _textFieldController.text.trim().isNotEmpty) {
-                                final propToUpdate = await _getEncryptedPassword(
-                                  _textFieldController.text,
-                                );
-                                await _updateUrlSettings(context, propToUpdate);
-                              }
-                            } else {
-                              await _updateUrlSettings(
-                                context,
-                                {'disablePassword': true},
-                              );
-                            }
-                            setState(() {});
-                          },
-                        ),
-                      ],
-                    ),
+                  DividerWidget(
+                    dividerType: DividerType.menu,
+                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
                   ),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  const Divider(height: 4),
-                  const Padding(padding: EdgeInsets.all(4)),
-                  SizedBox(
-                    height: 36,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text("File download"),
-                        Switch.adaptive(
-                          value: widget.collection.publicURLs?.first
-                                  ?.enableDownload ??
-                              true,
-                          onChanged: (value) async {
-                            if (!value) {
-                              final choice = await showChoiceDialog(
-                                context,
-                                'Disable downloads',
-                                'Are you sure that you want to disable the download button for files?',
-                                firstAction: 'No',
-                                secondAction: 'Yes',
-                                firstActionColor:
-                                    Theme.of(context).colorScheme.greenText,
-                                secondActionColor: Theme.of(context)
-                                    .colorScheme
-                                    .inverseBackgroundColor,
-                              );
-                              if (choice != DialogUserChoice.secondChoice) {
-                                return;
-                              }
-                            }
-                            await _updateUrlSettings(
-                              context,
-                              {'enableDownload': value},
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: "Password lock",
+                    ),
+                    alignCaptionedTextToLeft: true,
+                    isTopBorderRadiusRemoved: true,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    trailingWidget: Switch.adaptive(
+                      value: widget.collection.publicURLs?.firstOrNull
+                              ?.passwordEnabled ??
+                          false,
+                      onChanged: (enablePassword) async {
+                        if (enablePassword) {
+                          final inputResult =
+                              await _displayLinkPasswordInput(context);
+                          if (inputResult != null &&
+                              inputResult == 'ok' &&
+                              _textFieldController.text.trim().isNotEmpty) {
+                            final propToUpdate = await _getEncryptedPassword(
+                              _textFieldController.text,
                             );
-                            if (!value) {
-                              showErrorDialog(
-                                context,
-                                "Please note",
-                                "Viewers can still take screenshots or save a copy of your photos using external tools",
-                              );
-                            }
-                            setState(() {});
-                          },
-                        ),
-                      ],
+                            await _updateUrlSettings(context, propToUpdate);
+                          }
+                        } else {
+                          await _updateUrlSettings(
+                            context,
+                            {'disablePassword': true},
+                          );
+                        }
+                        setState(() {});
+                      },
                     ),
+                  ),
+                  const SizedBox(
+                    height: 24,
                   ),
                 ],
               ),
@@ -252,7 +278,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   CupertinoButton(
                     onPressed: () async {
                       int newValidTill = -1;
-                      final int expireAfterInMicroseconds = _selectedExpiry.item3;
+                      final int expireAfterInMicroseconds =
+                          _selectedExpiry.item3;
                       // need to manually select time
                       if (expireAfterInMicroseconds < 0) {
                         final timeInMicrosecondsFromEpoch =
@@ -446,7 +473,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Text _getLinkExpiryTimeWidget() {
-    final int validTill = widget.collection.publicURLs?.first?.validTill ?? 0;
+    final int validTill =
+        widget.collection.publicURLs?.firstOrNull?.validTill ?? 0;
     if (validTill == 0) {
       return const Text(
         'Never',
