@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import constants from 'utils/strings/constants';
 import { default as FileUploadIcon } from '@mui/icons-material/ImageOutlined';
 import { default as FolderUploadIcon } from '@mui/icons-material/PermMediaOutlined';
@@ -30,25 +30,22 @@ export default function UploadTypeSelector({
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
-
-    const [loading, setLoading] = useState(true);
+    const directlyShowUploadFiles = useRef(isMobileOrTable());
 
     useEffect(() => {
         if (
             show &&
-            isMobileOrTable() &&
+            directlyShowUploadFiles.current &&
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
             uploadFiles();
             onClose();
-        } else {
-            setLoading(false);
         }
     }, [show]);
 
     return (
         <Dialog
-            open={show && !loading}
+            open={show}
             PaperProps={{
                 sx: (theme) => ({
                     maxWidth: '375px',
