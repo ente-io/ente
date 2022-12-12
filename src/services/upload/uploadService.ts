@@ -256,17 +256,17 @@ class UploadService {
     }
 
     private async fetchUploadURLs() {
-        if (!this.publicUploadProps.accessedThroughSharedURL) {
-            await UploadHttpClient.fetchUploadURLs(
-                this.pendingUploadCount,
-                this.uploadURLs
-            );
-        } else {
+        if (this.publicUploadProps.accessedThroughSharedURL) {
             await publicUploadHttpClient.fetchUploadURLs(
                 this.pendingUploadCount,
                 this.uploadURLs,
                 this.publicUploadProps.token,
                 this.publicUploadProps.passwordToken
+            );
+        } else {
+            await UploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+                this.uploadURLs
             );
         }
     }
