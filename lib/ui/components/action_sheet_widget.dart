@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -59,8 +60,15 @@ class ActionSheetWidget extends StatelessWidget {
     final blur = MediaQuery.of(context).platformBrightness == Brightness.light
         ? blurMuted
         : blurBase;
+    final extraWidth = MediaQuery.of(context).size.width - restrictedMaxWidth;
+    final double? horizontalPadding = extraWidth > 0 ? extraWidth / 2 : null;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
+      padding: EdgeInsets.fromLTRB(
+        horizontalPadding ?? 12,
+        12,
+        horizontalPadding ?? 12,
+        32,
+      ),
       child: Container(
         decoration: BoxDecoration(boxShadow: shadowMenuLight),
         child: ClipRRect(
