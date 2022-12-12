@@ -19,10 +19,10 @@ jobs:
                   PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
               with:
                   path-to-signatures: "signatures/version1/cla.json"
-                  path-to-document: "https://github.com/ente-io/cla/blob/main/TESTCLA.md" # e.g. a CLA or a DCO document
+                  path-to-document: "https://github.com/ente-io/cla/blob/main/CLA.md" # e.g. a CLA or a DCO document
                   # branch should not be protected
                   branch: "main"
-                  # allowlist: user1,bot*
+                  allowlist: enteio
 
                   # the followings are the optional inputs - If the optional inputs are not given, then default values will be taken
                   #remote-organization-name: enter the remote organization name where the signatures should be stored (Default is storing the signatures in the same repository)
