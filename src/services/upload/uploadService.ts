@@ -226,16 +226,11 @@ class UploadService {
         return uploadFile;
     }
 
-    async uploadFile(uploadFile: UploadFile) {
-        if (this.publicUploadProps.accessedThroughSharedURL) {
-            return publicUploadHttpClient.uploadFile(
-                uploadFile,
-                this.publicUploadProps.token,
-                this.publicUploadProps.passwordToken
-            );
-        } else {
-            return UploadHttpClient.uploadFile(uploadFile);
+    private async getUploadURL() {
+        if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
+            await this.fetchUploadURLs();
         }
+        return this.uploadURLs.pop();
     }
 
     public async preFetchUploadURLs() {
@@ -248,11 +243,16 @@ class UploadService {
         }
     }
 
-    private async getUploadURL() {
-        if (this.uploadURLs.length === 0 && this.pendingUploadCount) {
-            await this.fetchUploadURLs();
+    async uploadFile(uploadFile: UploadFile) {
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            return publicUploadHttpClient.uploadFile(
+                uploadFile,
+                this.publicUploadProps.token,
+                this.publicUploadProps.passwordToken
+            );
+        } else {
+            return UploadHttpClient.uploadFile(uploadFile);
         }
-        return this.uploadURLs.pop();
     }
 
     private async fetchUploadURLs() {
