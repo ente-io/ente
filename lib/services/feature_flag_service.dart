@@ -62,18 +62,6 @@ class FeatureFlagService {
     }
   }
 
-  bool enableCollect() {
-    if (isInternalUserOrDebugBuild()) {
-      return true;
-    }
-    try {
-      return _getFeatureFlags().enableCollect;
-    } catch (e) {
-      _logger.severe(e);
-      return FFDefault.enableCollect;
-    }
-  }
-
   bool isInternalUserOrDebugBuild() {
     final String? email = Configuration.instance.getEmail();
     return (email != null && email.endsWith("@ente.io")) || kDebugMode;
@@ -97,24 +85,20 @@ class FeatureFlags {
   static FeatureFlags defaultFlags = FeatureFlags(
     disableCFWorker: FFDefault.disableCFWorker,
     enableStripe: FFDefault.enableStripe,
-    enableCollect: FFDefault.enableCollect,
   );
 
   final bool disableCFWorker;
   final bool enableStripe;
-  final bool enableCollect;
 
   FeatureFlags({
     required this.disableCFWorker,
     required this.enableStripe,
-    required this.enableCollect,
   });
 
   Map<String, dynamic> toMap() {
     return {
       "disableCFWorker": disableCFWorker,
       "enableStripe": enableStripe,
-      "enableCollect": enableCollect,
     };
   }
 
@@ -127,7 +111,6 @@ class FeatureFlags {
     return FeatureFlags(
       disableCFWorker: json["disableCFWorker"] ?? FFDefault.disableCFWorker,
       enableStripe: json["enableStripe"] ?? FFDefault.enableStripe,
-      enableCollect: json["enableCollect"] ?? FFDefault.enableCollect,
     );
   }
 }
