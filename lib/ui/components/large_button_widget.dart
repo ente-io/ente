@@ -161,78 +161,84 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-          child: executionState == ExecutionState.idle
-              ? widget.buttonType.hasTrailingIcon
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        widget.labelText == null
-                            ? const SizedBox.shrink()
-                            : Flexible(
-                                child: Padding(
-                                  padding: widget.icon == null
-                                      ? const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                        )
-                                      : const EdgeInsets.only(right: 16),
-                                  child: Text(
-                                    widget.labelText!,
-                                    overflow: TextOverflow.ellipsis,
-                                    maxLines: 2,
-                                    style: labelStyle,
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 175),
+            switchInCurve: Curves.easeInOutExpo,
+            switchOutCurve: Curves.easeInOutExpo,
+            child: executionState == ExecutionState.idle
+                ? widget.buttonType.hasTrailingIcon
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          widget.labelText == null
+                              ? const SizedBox.shrink()
+                              : Flexible(
+                                  child: Padding(
+                                    padding: widget.icon == null
+                                        ? const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                          )
+                                        : const EdgeInsets.only(right: 16),
+                                    child: Text(
+                                      widget.labelText!,
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      style: labelStyle,
+                                    ),
                                   ),
                                 ),
-                              ),
-                        widget.icon == null
-                            ? const SizedBox.shrink()
-                            : Icon(
-                                widget.icon,
-                                size: 20,
-                                color: iconColor,
-                              ),
-                      ],
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        widget.icon == null
-                            ? const SizedBox.shrink()
-                            : Icon(
-                                widget.icon,
-                                size: 20,
-                                color: iconColor,
-                              ),
-                        widget.icon == null || widget.labelText == null
-                            ? const SizedBox.shrink()
-                            : const SizedBox(width: 8),
-                        widget.labelText == null
-                            ? const SizedBox.shrink()
-                            : Flexible(
-                                child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(horizontal: 8),
-                                  child: Text(
-                                    widget.labelText!,
-                                    style: labelStyle,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                          widget.icon == null
+                              ? const SizedBox.shrink()
+                              : Icon(
+                                  widget.icon,
+                                  size: 20,
+                                  color: iconColor,
                                 ),
-                              )
-                      ],
-                    )
-              : executionState == ExecutionState.inProgress
-                  ? EnteLoadingWidget(
-                      is20pts: true,
-                      color: loadingIconColor,
-                    )
-                  : executionState == ExecutionState.successful
-                      ? Icon(
-                          Icons.check_outlined,
-                          size: 20,
-                          color: checkColor,
-                        )
-                      : const SizedBox.shrink(), //fallback
+                        ],
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          widget.icon == null
+                              ? const SizedBox.shrink()
+                              : Icon(
+                                  widget.icon,
+                                  size: 20,
+                                  color: iconColor,
+                                ),
+                          widget.icon == null || widget.labelText == null
+                              ? const SizedBox.shrink()
+                              : const SizedBox(width: 8),
+                          widget.labelText == null
+                              ? const SizedBox.shrink()
+                              : Flexible(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    child: Text(
+                                      widget.labelText!,
+                                      style: labelStyle,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                )
+                        ],
+                      )
+                : executionState == ExecutionState.inProgress
+                    ? EnteLoadingWidget(
+                        is20pts: true,
+                        color: loadingIconColor,
+                      )
+                    : executionState == ExecutionState.successful
+                        ? Icon(
+                            Icons.check_outlined,
+                            size: 20,
+                            color: checkColor,
+                          )
+                        : const SizedBox.shrink(), //fallback
+          ),
         ),
       ),
     );
