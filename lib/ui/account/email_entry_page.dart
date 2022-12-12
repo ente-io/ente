@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/billing_plan.dart';
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -122,13 +123,14 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   }
 
   Widget _getBody() {
-    var passwordStrengthText = 'Weak';
+    final l10n = context.l10n;
+    var passwordStrengthText = l10n.passwordStrengthWeak;
     var passwordStrengthColor = Colors.redAccent;
     if (_passwordStrength > kStrongPasswordStrengthThreshold) {
-      passwordStrengthText = 'Strong';
+      passwordStrengthText = l10n.passwordStrengthStrong;
       passwordStrengthColor = Colors.greenAccent;
     } else if (_passwordStrength > kMildPasswordStrengthThreshold) {
-      passwordStrengthText = 'Moderate';
+      passwordStrengthText = l10n.passwordStrengthModerate;
       passwordStrengthColor = Colors.orangeAccent;
     }
     return Column(
@@ -141,7 +143,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Create new account',
+                    l10n.createNewAccount,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -153,7 +155,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _emailIsValid ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: 'Email',
+                      hintText: l10n.email,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -268,7 +270,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     decoration: InputDecoration(
                       fillColor: _passwordsMatch ? _validFieldValueColor : null,
                       filled: true,
-                      hintText: "Confirm password",
+                      hintText: l10n.confirmPassword,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -510,13 +512,14 @@ class PricingWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return FutureBuilder<BillingPlans>(
       future: BillingService.instance.getBillingPlans(),
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           return _buildPlans(context, snapshot.data);
         } else if (snapshot.hasError) {
-          return const Text("Oops, Something went wrong.");
+          return Text(l10n.oopsSomethingWentWrong);
         }
         return const EnteLoadingWidget();
       },
@@ -524,6 +527,7 @@ class PricingWidget extends StatelessWidget {
   }
 
   Container _buildPlans(BuildContext context, BillingPlans plans) {
+    final l10n = context.l10n;
     final planWidgets = <BillingPlanWidget>[];
     for (final plan in plans.plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
@@ -564,16 +568,16 @@ class PricingWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
-              children: const [
-                Icon(
+              children: [
+                const Icon(
                   Icons.close,
                   size: 12,
                   color: Colors.white38,
                 ),
-                Padding(padding: EdgeInsets.all(1)),
+                const Padding(padding: EdgeInsets.all(1)),
                 Text(
-                  "Close",
-                  style: TextStyle(
+                  l10n.close,
+                  style: const TextStyle(
                     color: Colors.white38,
                   ),
                 ),

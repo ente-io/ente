@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/account/recovery_key_page.dart';
 import 'package:ente_auth/ui/common/dynamic_fab.dart';
@@ -400,15 +401,16 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   }
 
   Future<void> _showRecoveryCodeDialog(String password) async {
+    final l10n = context.l10n;
     final dialog =
-        createProgressDialog(context, "Generating encryption keys...");
+        createProgressDialog(context, l10n.generatingEncryptionKeysTitle);
     await dialog.show();
     try {
       final result = await Configuration.instance.generateKey(password);
       Configuration.instance.setVolatilePassword(null);
       await dialog.hide();
       onDone() async {
-        final dialog = createProgressDialog(context, "Please wait...");
+        final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
         await dialog.show();
         try {
           await UserService.instance.setAttributes(result);

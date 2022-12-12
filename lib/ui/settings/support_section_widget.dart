@@ -2,6 +2,7 @@
 
 import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/components/captioned_text_widget.dart';
 import 'package:ente_auth/ui/components/expandable_menu_item_widget.dart';
@@ -21,20 +22,22 @@ class SupportSectionWidget extends StatefulWidget {
 class _SupportSectionWidgetState extends State<SupportSectionWidget> {
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return ExpandableMenuItemWidget(
-      title: "Support",
+      title: l10n.support,
       selectionOptionsWidget: _getSectionOptions(context),
       leadingIcon: Icons.help_outline_outlined,
     );
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final l10n = context.l10n;
     return Column(
       children: [
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Email",
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.email,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
@@ -45,14 +48,14 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Report a bug",
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.reportABug,
           ),
           pressedColor: getEnteColorScheme(context).fillFaint,
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            await sendLogs(context, "Report bug", "auth@ente.io");
+            await sendLogs(context, l10n.reportBug, "auth@ente.io");
           },
           onDoubleTap: () async {
             final zipFilePath = await getZippedLogsFile(context);
@@ -61,8 +64,8 @@ class _SupportSectionWidgetState extends State<SupportSectionWidget> {
         ),
         sectionOptionSpacing,
         MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Crash & error reporting",
+          captionedTextWidget: CaptionedTextWidget(
+            title: l10n.crashAndErrorReporting,
           ),
           trailingSwitch: ToggleSwitchWidget(
             value: SuperLogging.shouldReportErrors(),

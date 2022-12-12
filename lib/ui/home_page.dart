@@ -240,6 +240,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _getCoachMarkWidget() {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () async {
         await PreferenceService.instance.setHasShownCoachMark(true);
@@ -268,7 +269,7 @@ class _HomePageState extends State<HomePage> {
                           height: 24,
                         ),
                         Text(
-                          "Swipe left to edit or remove codes",
+                          l10n.swipeHint,
                           style: Theme.of(context).textTheme.headline6,
                         ),
                         const SizedBox(
@@ -282,7 +283,7 @@ class _HomePageState extends State<HomePage> {
                                   .setHasShownCoachMark(true);
                               setState(() {});
                             },
-                            child: const Text("OK"),
+                            child: Text(l10n.ok),
                           ),
                         )
                       ],
