@@ -2,7 +2,7 @@ import HTTPService from 'services/HTTPService';
 import { getEndpoint } from 'utils/common/apiUtil';
 import { logError } from 'utils/sentry';
 import { EnteFile } from 'types/file';
-import { handleUploadError } from 'utils/error';
+import { CustomError, handleUploadError } from 'utils/error';
 import { UploadFile, UploadURL, MultipartUploadURLs } from 'types/upload';
 import { retryHTTPCall } from 'utils/upload/uploadRetrier';
 
@@ -20,7 +20,7 @@ class PublicUploadHttpClient {
     ): Promise<EnteFile> {
         try {
             if (!token) {
-                return;
+                throw Error(CustomError.TOKEN_MISSING);
             }
             const response = await retryHTTPCall(
                 () =>
@@ -54,7 +54,7 @@ class PublicUploadHttpClient {
             if (!this.uploadURLFetchInProgress) {
                 try {
                     if (!token) {
-                        return;
+                        throw Error(CustomError.TOKEN_MISSING);
                     }
                     this.uploadURLFetchInProgress = HTTPService.get(
                         `${ENDPOINT}/public-collection/upload-urls`,
@@ -90,7 +90,7 @@ class PublicUploadHttpClient {
     ): Promise<MultipartUploadURLs> {
         try {
             if (!token) {
-                return;
+                throw Error(CustomError.TOKEN_MISSING);
             }
             const response = await HTTPService.get(
                 `${ENDPOINT}/public-collection/multipart-upload-urls`,
