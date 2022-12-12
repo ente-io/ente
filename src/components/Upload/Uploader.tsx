@@ -145,16 +145,7 @@ export default function Uploader(props: Props) {
                 setHasLivePhotos,
             },
             props.setFiles,
-            {
-                accessedThroughSharedURL:
-                    publicCollectionGalleryContext.accessedThroughSharedURL,
-                ...(publicCollectionGalleryContext.passwordToken && {
-                    passwordToken: publicCollectionGalleryContext.passwordToken,
-                }),
-                token: publicCollectionGalleryContext.accessedThroughSharedURL
-                    ? publicCollectionGalleryContext.token
-                    : galleryContext.token,
-            }
+            publicCollectionGalleryContext
         );
 
         if (isElectron() && ImportService.checkAllElectronAPIsExists()) {
