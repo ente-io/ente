@@ -214,7 +214,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                       ],
                     )
               : executionState == ExecutionState.inProgress
-                  ? const EnteLoadingWidget()
+                  ? const EnteLoadingWidget(is20pts: true)
                   : executionState == ExecutionState.successful
                       ? const Icon(
                           Icons.check_outlined,
