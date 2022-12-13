@@ -106,17 +106,17 @@ class UploadService {
         fileTypeInfo: FileTypeInfo
     ): Promise<Metadata> {
         return isLivePhoto
-            ? await extractFileMetadata(
-                  this.parsedMetadataJSONMap,
-                  collectionID,
-                  fileTypeInfo,
-                  file
-              )
-            : extractLivePhotoMetadata(
+            ? extractLivePhotoMetadata(
                   this.parsedMetadataJSONMap,
                   collectionID,
                   fileTypeInfo,
                   livePhotoAssets
+              )
+            : await extractFileMetadata(
+                  this.parsedMetadataJSONMap,
+                  collectionID,
+                  fileTypeInfo,
+                  file
               );
     }
 

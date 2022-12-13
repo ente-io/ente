@@ -44,13 +44,19 @@ export default async function uploader(
         if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
+        addLogLine(`getting filetype ${fileNameSize}`);
         fileTypeInfo = await UploadService.getAssetFileType(uploadAsset);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
+            addLogLine(
+                `skipped  video upload for public upload ${fileNameSize}`
+            );
             return { fileUploadResult: UPLOAD_RESULT.SKIPPED_VIDEOS };
         }
+
+        addLogLine(`extracting  metadata ${fileNameSize}`);
         const metadata = await UploadService.extractAssetMetadata(
             uploadAsset,
             collection.id,
