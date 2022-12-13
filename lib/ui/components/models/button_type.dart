@@ -47,7 +47,7 @@ enum ButtonType {
 
   //Returning null to fallback to default color
   Color? pressedButtonColor(EnteColorScheme colorScheme) {
-    if (isPrimary) {
+    if (this == ButtonType.primary) {
       return colorScheme.primary700;
     }
     return null;
@@ -155,7 +155,9 @@ enum ButtonType {
 
   //Returning null to fallback to default color
   TextStyle? pressedLabelStyle(
-      EnteTextTheme textTheme, EnteColorScheme colorScheme) {
+    EnteTextTheme textTheme,
+    EnteColorScheme colorScheme,
+  ) {
     if (this == ButtonType.tertiaryCritical) {
       return textTheme.bodyBold.copyWith(color: colorScheme.strokeBase);
     }
@@ -174,5 +176,22 @@ enum ButtonType {
       return textTheme.bodyBold.copyWith(color: colorScheme.textFaint);
     }
     return null;
+  }
+
+  Color? checkIconColor(EnteColorScheme colorScheme) {
+    if (this == ButtonType.secondary) {
+      return colorScheme.primary500;
+    }
+    return null;
+  }
+
+  bool get hasExecutionStates {
+    if (this == ButtonType.primary ||
+        this == ButtonType.secondary ||
+        this == ButtonType.neutral) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
