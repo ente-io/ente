@@ -19,6 +19,7 @@ import {
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     ProcessedFile,
+    PublicUploadProps,
     UploadAsset,
     UploadFile,
     UploadURL,
@@ -33,6 +34,7 @@ import { encryptFile, getFileSize, readFile } from './fileService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { USE_CF_PROXY } from 'constants/upload';
+import publicUploadHttpClient from './publicUploadHttpClient';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -45,15 +47,31 @@ class UploadService {
         MetadataAndFileTypeInfo
     >();
 
+    private uploaderName: string;
+
     private pendingUploadCount: number = 0;
+
+    private publicUploadProps: PublicUploadProps = undefined;
+
+    setPublicUploadProps(publicUploadProps: PublicUploadProps) {
+        this.publicUploadProps = publicUploadProps;
+    }
 
     async setFileCount(fileCount: number) {
         this.pendingUploadCount = fileCount;
-        await this.preFetchUploadURLs();
+        this.preFetchUploadURLs();
     }
 
     setParsedMetadataJSONMap(parsedMetadataJSONMap: ParsedMetadataJSONMap) {
         this.parsedMetadataJSONMap = parsedMetadataJSONMap;
+    }
+
+    setUploaderName(uploaderName: string) {
+        this.uploaderName = uploaderName;
+    }
+
+    getUploaderName() {
+        return this.uploaderName;
     }
 
     setMetadataAndFileTypeInfoMap(
@@ -227,11 +245,32 @@ class UploadService {
         }
     }
 
+    async uploadFile(uploadFile: UploadFile) {
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            return publicUploadHttpClient.uploadFile(
+                uploadFile,
+                this.publicUploadProps.token,
+                this.publicUploadProps.passwordToken
+            );
+        } else {
+            return UploadHttpClient.uploadFile(uploadFile);
+        }
+    }
+
     private async fetchUploadURLs() {
-        await UploadHttpClient.fetchUploadURLs(
-            this.pendingUploadCount,
-            this.uploadURLs
-        );
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            await publicUploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+                this.uploadURLs,
+                this.publicUploadProps.token,
+                this.publicUploadProps.passwordToken
+            );
+        } else {
+            await UploadHttpClient.fetchUploadURLs(
+                this.pendingUploadCount,
+                this.uploadURLs
+            );
+        }
     }
 }
 

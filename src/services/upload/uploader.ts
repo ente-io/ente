@@ -2,7 +2,6 @@ import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
-import UploadHttpClient from './uploadHttpClient';
 import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
@@ -22,7 +21,9 @@ interface UploadResponse {
 export default async function uploader(
     worker: any,
     existingFiles: EnteFile[],
-    fileWithCollection: FileWithCollection
+    fileWithCollection: FileWithCollection,
+    uploaderName: string,
+    skipVideos: boolean
 ): Promise<UploadResponse> {
     const { collection, localID, ...uploadAsset } = fileWithCollection;
     const fileNameSize = `${UploadService.getAssetName(
@@ -41,6 +42,9 @@ export default async function uploader(
         }
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
+        }
+        if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
+            return { fileUploadResult: UPLOAD_RESULT.SKIPPED_VIDEOS };
         }
         if (!metadata) {
             throw Error(CustomError.NO_METADATA);
@@ -100,6 +104,9 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
+        if (uploaderName) {
+            metadata.uploaderName = uploaderName;
+        }
         const fileWithMetadata = {
             localID,
             filedata: file.filedata,
@@ -132,7 +139,7 @@ export default async function uploader(
             encryptedFile.fileKey
         );
 
-        const uploadedFile = await UploadHttpClient.uploadFile(uploadFile);
+        const uploadedFile = await UploadService.uploadFile(uploadFile);
 
         UIService.increaseFileUploaded();
         addLogLine(`${fileNameSize} successfully uploaded`);

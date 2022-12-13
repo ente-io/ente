@@ -9,6 +9,7 @@ export interface PublicCollectionGalleryContextType {
     accessedThroughSharedURL: boolean;
     openReportForm: () => void;
     photoListHeader: TimeStampListItem;
+    photoListFooter: TimeStampListItem;
 }
 
 export interface LocalSavedPublicCollectionFiles {

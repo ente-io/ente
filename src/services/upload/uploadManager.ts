@@ -27,6 +27,7 @@ import {
     MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    PublicUploadProps,
 } from 'types/upload';
 import {
     UPLOAD_RESULT,
@@ -42,6 +43,10 @@ import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
+import {
+    getLocalPublicFiles,
+    getPublicCollectionUID,
+} from 'services/publicCollectionService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -58,12 +63,17 @@ class UploadManager {
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
+    private publicUploadProps: PublicUploadProps;
+    private uploaderName: string;
 
-    public async init(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
+    public async init(
+        progressUpdater: ProgressUpdater,
+        setFiles: SetFiles,
+        publicCollectProps: PublicUploadProps
+    ) {
         UIService.init(progressUpdater);
         this.setFiles = setFiles;
-        UIService.init(progressUpdater);
-        this.setFiles = setFiles;
+        this.publicUploadProps = publicCollectProps;
     }
 
     public isUploadRunning() {
@@ -79,6 +89,7 @@ class UploadManager {
             number,
             MetadataAndFileTypeInfo
         >();
+        this.uploaderName = null;
     }
 
     prepareForNewUpload() {
@@ -89,10 +100,17 @@ class UploadManager {
     }
 
     async updateExistingFilesAndCollections(collections: Collection[]) {
-        this.existingFiles = await getLocalFiles();
-        this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
-            this.existingFiles
-        );
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            this.existingFiles = await getLocalPublicFiles(
+                getPublicCollectionUID(this.publicUploadProps.token)
+            );
+            this.userOwnedNonTrashedExistingFiles = this.existingFiles;
+        } else {
+            this.existingFiles = await getLocalFiles();
+            this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
+                this.existingFiles
+            );
+        }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
         );
@@ -100,7 +118,8 @@ class UploadManager {
 
     public async queueFilesForUpload(
         filesWithCollectionToUploadIn: FileWithCollection[],
-        collections: Collection[]
+        collections: Collection[],
+        uploaderName?: string
     ) {
         try {
             if (this.uploadInProgress) {
@@ -111,6 +130,7 @@ class UploadManager {
                 this.cryptoWorkers[i] = getDedicatedCryptoWorker();
             }
             await this.updateExistingFilesAndCollections(collections);
+            this.uploaderName = uploaderName;
             addLogLine(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
@@ -299,7 +319,8 @@ class UploadManager {
                     const result = await this.extractFileTypeAndMetadata(
                         worker,
                         file,
-                        collectionID
+                        collectionID,
+                        this.publicUploadProps?.accessedThroughSharedURL
                     );
                     fileTypeInfo = result.fileTypeInfo;
                     metadata = result.metadata;
@@ -341,7 +362,8 @@ class UploadManager {
     private async extractFileTypeAndMetadata(
         worker,
         file: File | ElectronFile,
-        collectionID: number
+        collectionID: number,
+        skipVideos: boolean
     ) {
         if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
             addLogLine(
@@ -357,6 +379,9 @@ class UploadManager {
                     file
                 )} rejected  because of unknown file format`
             );
+            return { fileTypeInfo, metadata: null };
+        }
+        if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
             return { fileTypeInfo, metadata: null };
         }
         addLogLine(` extracting ${getFileNameSize(file)} metadata`);
@@ -386,6 +411,7 @@ class UploadManager {
 
         UIService.reset(mediaFiles.length);
 
+        UploadService.setPublicUploadProps(this.publicUploadProps);
         await UploadService.setFileCount(mediaFiles.length);
 
         UIService.setUploadStage(UPLOAD_STAGES.UPLOADING);
@@ -414,7 +440,9 @@ class UploadManager {
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
                 this.userOwnedNonTrashedExistingFiles,
-                fileWithCollection
+                fileWithCollection,
+                this.uploaderName,
+                this.publicUploadProps?.accessedThroughSharedURL
             );
 
             const finalUploadResult = await this.postUploadTask(
@@ -464,6 +492,7 @@ class UploadManager {
                 case UPLOAD_RESULT.UNSUPPORTED:
                 case UPLOAD_RESULT.TOO_LARGE:
                 case UPLOAD_RESULT.CANCELLED:
+                case UPLOAD_RESULT.SKIPPED_VIDEOS:
                     // no-op
                     break;
                 default:

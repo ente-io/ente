@@ -32,6 +32,7 @@ export enum CustomError {
     REQUEST_CANCELLED = 'request canceled',
     REQUEST_FAILED = 'request failed',
     TOKEN_EXPIRED = 'token expired',
+    TOKEN_MISSING = 'token missing',
     TOO_MANY_REQUESTS = 'too many requests',
     BAD_REQUEST = 'bad request',
     SUBSCRIPTION_NEEDED = 'subscription not present',

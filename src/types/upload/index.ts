@@ -27,6 +27,7 @@ export interface Metadata {
     hash?: string;
     imageHash?: string;
     videoHash?: string;
+    uploaderName?: string;
 }
 
 export interface Location {
@@ -148,4 +149,10 @@ export interface ParsedExtractedMetadata {
 export interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
+}
+
+export interface PublicUploadProps {
+    token: string;
+    passwordToken: string;
+    accessedThroughSharedURL: boolean;
 }

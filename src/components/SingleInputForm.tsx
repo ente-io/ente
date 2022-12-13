@@ -27,6 +27,7 @@ export interface SingleInputFormProps {
     caption?: any;
     hiddenPostInput?: any;
     autoComplete?: string;
+    blockButton?: boolean;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -124,21 +125,35 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                         {props.caption}
                     </FormHelperText>
                     {props.hiddenPostInput}
-                    <FlexWrapper justifyContent={'flex-end'}>
+                    <FlexWrapper
+                        justifyContent={'flex-end'}
+                        flexWrap={
+                            props.blockButton ? 'wrap-reverse' : 'nowrap'
+                        }>
                         {props.secondaryButtonAction && (
                             <Button
                                 onClick={props.secondaryButtonAction}
                                 size="large"
                                 color="secondary"
                                 sx={{
-                                    '&&&': { mt: 2, mb: 4, mr: 1, ...buttonSx },
+                                    '&&&': {
+                                        mt: !props.blockButton ? 2 : 0.5,
+                                        mb: !props.blockButton ? 4 : 0,
+                                        mr: !props.blockButton ? 1 : 0,
+                                        ...buttonSx,
+                                    },
                                 }}
                                 {...restSubmitButtonProps}>
                                 {constants.CANCEL}
                             </Button>
                         )}
                         <SubmitButton
-                            sx={{ '&&&': { mt: 2, ...buttonSx } }}
+                            sx={{
+                                '&&&': {
+                                    mt: 2,
+                                    ...buttonSx,
+                                },
+                            }}
                             buttonText={props.buttonText}
                             loading={loading}
                             {...restSubmitButtonProps}

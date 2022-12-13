@@ -45,7 +45,9 @@ const englishConstants = {
     NEW_USER: 'New to ente',
     EXISTING_USER: 'Existing user',
     NAME: 'Name',
-    ENTER_NAME: 'Your name',
+    ENTER_NAME: 'Enter name',
+    PUBLIC_UPLOADER_NAME_MESSAGE:
+        'Add a name so that your friends know who to thank for these great photos!',
     EMAIL: 'Email',
     ENTER_EMAIL: 'Enter email address',
     DATA_DISCLAIMER: "We'll never share your data with anyone else.",
@@ -105,6 +107,9 @@ const englishConstants = {
     NO: 'No',
     NOTHING_HERE: 'Nothing to see here yet 👀',
     UPLOAD: 'Upload',
+    ADD_MORE_PHOTOS: 'Add more photos',
+    ADD_PHOTOS: 'Add photos',
+    SELECT_PHOTOS: 'Select photos',
     FILE_UPLOAD: 'File Upload',
     UPLOAD_STAGE_MESSAGE: {
         0: 'Preparing to upload',
@@ -540,6 +545,21 @@ const englishConstants = {
             </Box>
         </>
     ),
+    SKIPPED_VIDEOS_INFO: (link: string) => (
+        <>
+            <Box mb={1}>
+                Presently we do not support adding videos via public links.{' '}
+            </Box>
+            <Box>
+                To share videos, please{' '}
+                <Link href={link} target="_blank">
+                    signup
+                </Link>{' '}
+                for ente and share with the intended recipients using their
+                email.
+            </Box>
+        </>
+    ),
 
     LIVE_PHOTOS_DETECTED:
         'The photo and video files from your Live Photos have been merged into a single ELP file',
@@ -554,6 +574,7 @@ const englishConstants = {
         'Skipped these as there are files with matching names in the same album',
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'Blocked uploads',
+    SKIPPED_VIDEOS: 'Skipped videos',
     INPROGRESS_METADATA_EXTRACTION: 'In progress',
     INPROGRESS_UPLOADS: 'Uploads in progress',
     TOO_LARGE_UPLOADS: 'Large files',
@@ -655,7 +676,8 @@ const englishConstants = {
     ALBUM_URL: 'Album url',
     PUBLIC_SHARING: 'Public link',
     NOT_FOUND: '404 - not found',
-    LINK_EXPIRED: 'This link has either expired or been disabled!',
+    LINK_EXPIRED: 'Link expired',
+    LINK_EXPIRED_MESSAGE: 'This link has either expired or been disabled!',
     MANAGE_LINK: 'Manage link',
     LINK_TOO_MANY_REQUESTS: 'This album is too popular for us to handle!',
     DISABLE_PUBLIC_SHARING: "'Disable public sharing",
@@ -715,7 +737,7 @@ const englishConstants = {
     TERM_1: 'I hereby state that I have a good faith belief that the sharing of copyrighted material at the location above is not authorized by the copyright owner, its agent, or the law (e.g., as a fair use). ',
     TERM_2: 'I hereby state that the information in this Notice is accurate and, under penalty of perjury, that I am the owner, or authorized to act on behalf of, the owner, of the copyright or of an exclusive right under the copyright that is allegedly infringed. ',
     TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
-    PRESERVED_BY: 'Preserved by',
+    SHARED_USING: 'Shared using ',
     ENTE_IO: 'ente.io',
     LIVE: 'LIVE',
     DISABLE_PASSWORD: 'Disable password lock',
@@ -856,6 +878,7 @@ const englishConstants = {
     TODAY: 'Today',
     YESTERDAY: 'Yesterday',
     AT: 'at',
+    NAME_PLACEHOLDER: 'Name...',
 };
 
 export default englishConstants;
