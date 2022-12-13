@@ -43,6 +43,5 @@ export async function getFileHash(file: File | ElectronFile) {
         addLogLine(
             `file hashing failed ${getFileNameSize(file)} ,${e.message} `
         );
-        throw e;
     }
 }
