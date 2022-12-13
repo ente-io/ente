@@ -2,14 +2,22 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/utils/separators_util.dart';
 
+enum ActionSheetType {
+  defaultActionSheet,
+  iconOnly,
+}
+
 void showActionSheet({
   required BuildContext context,
   required List<Widget> buttons,
+  required ActionSheetType actionSheetType,
+  bool isCheckIconGreen = false,
   String? title,
   String? body,
 }) {
@@ -23,6 +31,8 @@ void showActionSheet({
         title: title,
         body: body,
         actionButtons: buttons,
+        actionSheetType: actionSheetType,
+        isCheckIconGreen: isCheckIconGreen,
       );
     },
   );
@@ -32,9 +42,13 @@ class ActionSheetWidget extends StatelessWidget {
   final String? title;
   final String? body;
   final List<Widget> actionButtons;
+  final ActionSheetType actionSheetType;
+  final bool isCheckIconGreen;
 
   const ActionSheetWidget({
     required this.actionButtons,
+    required this.actionSheetType,
+    required this.isCheckIconGreen,
     this.title,
     this.body,
     super.key,
@@ -46,8 +60,15 @@ class ActionSheetWidget extends StatelessWidget {
     final blur = MediaQuery.of(context).platformBrightness == Brightness.light
         ? blurMuted
         : blurBase;
+    final extraWidth = MediaQuery.of(context).size.width - restrictedMaxWidth;
+    final double? horizontalPadding = extraWidth > 0 ? extraWidth / 2 : null;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 12, 32),
+      padding: EdgeInsets.fromLTRB(
+        horizontalPadding ?? 12,
+        12,
+        horizontalPadding ?? 12,
+        32,
+      ),
       child: Container(
         decoration: BoxDecoration(boxShadow: shadowMenuLight),
         child: ClipRRect(
@@ -73,6 +94,8 @@ class ActionSheetWidget extends StatelessWidget {
                             child: ContentContainerWidget(
                               title: title,
                               body: body,
+                              actionSheetType: actionSheetType,
+                              isCheckIconGreen: isCheckIconGreen,
                             ),
                           ),
                     ActionButtons(
@@ -92,7 +115,15 @@ class ActionSheetWidget extends StatelessWidget {
 class ContentContainerWidget extends StatelessWidget {
   final String? title;
   final String? body;
-  const ContentContainerWidget({this.title, this.body, super.key});
+  final ActionSheetType actionSheetType;
+  final bool isCheckIconGreen;
+  const ContentContainerWidget({
+    required this.actionSheetType,
+    required this.isCheckIconGreen,
+    this.title,
+    this.body,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -100,7 +131,9 @@ class ContentContainerWidget extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       //todo: set cross axis to center when icon should be shown in place of body
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: actionSheetType == ActionSheetType.defaultActionSheet
+          ? CrossAxisAlignment.stretch
+          : CrossAxisAlignment.center,
       children: [
         title == null
             ? const SizedBox.shrink()
@@ -112,13 +145,19 @@ class ContentContainerWidget extends StatelessWidget {
         title == null || body == null
             ? const SizedBox.shrink()
             : const SizedBox(height: 19),
-        body == null
-            ? const SizedBox.shrink()
-            : Text(
-                body!,
-                style: textTheme.body
-                    .copyWith(color: textMutedDark), //constant color
-              )
+        actionSheetType == ActionSheetType.defaultActionSheet
+            ? body == null
+                ? const SizedBox.shrink()
+                : Text(
+                    body!,
+                    style: textTheme.body
+                        .copyWith(color: textMutedDark), //constant color
+                  )
+            : Icon(Icons.check_outlined,
+                size: 48,
+                color: isCheckIconGreen
+                    ? getEnteColorScheme(context).primary700
+                    : strokeBaseDark)
       ],
     );
   }
