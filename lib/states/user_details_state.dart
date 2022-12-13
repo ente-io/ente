@@ -19,12 +19,12 @@ class UserDetailsStateWidget extends StatefulWidget {
 }
 
 class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
-  late Future<UserDetails?> userDetails;
+  late UserDetails? userDetails;
   late StreamSubscription<OpenedSettingsEvent> _openedSettingsEventSubscription;
 
   @override
   void initState() {
-    userDetails = Future.value(null);
+    userDetails = null;
     _openedSettingsEventSubscription =
         Bus.instance.on<OpenedSettingsEvent>().listen((event) {
       Future.delayed(
@@ -50,8 +50,9 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
         child: widget.child,
       );
 
-  void _fetchUserDetails() {
-    userDetails = UserService.instance.getUserDetailsV2(memoryCount: true);
+  void _fetchUserDetails() async {
+    userDetails =
+        await UserService.instance.getUserDetailsV2(memoryCount: true);
     if (mounted) {
       setState(() {});
     }
@@ -60,7 +61,7 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
 
 class InheritedUserDetails extends InheritedWidget {
   final UserDetailsStateWidgetState userDetailsState;
-  final Future<UserDetails?> userDetails;
+  final UserDetails? userDetails;
 
   const InheritedUserDetails({
     Key? key,
@@ -73,6 +74,8 @@ class InheritedUserDetails extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<InheritedUserDetails>();
 
   @override
-  bool updateShouldNotify(covariant InheritedUserDetails oldWidget) =>
-      userDetails != oldWidget.userDetails;
+  bool updateShouldNotify(covariant InheritedUserDetails oldWidget) {
+    return (userDetails?.usage != oldWidget.userDetails?.usage) ||
+        (userDetails?.fileCount != oldWidget.userDetails?.fileCount);
+  }
 }
