@@ -88,19 +88,23 @@ export function setupNextElectronServe() {
     });
 }
 
-export function isPlatformMac() {
-    return process.platform === 'darwin';
-}
-
-export function isPlatformWindows() {
-    return process.platform === 'win32';
+export function isPlatform(platform: 'mac' | 'windows' | 'linux') {
+    if (process.platform === 'darwin') {
+        return platform === 'mac';
+    } else if (process.platform === 'win32') {
+        return platform === 'windows';
+    } else if (process.platform === 'linux') {
+        return platform === 'linux';
+    } else {
+        return false;
+    }
 }
 
 export async function handleDockIconHideOnAutoLaunch() {
     const shouldHideDockIcon = getHideDockIconPreference();
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
 
-    if (isPlatformMac() && shouldHideDockIcon && wasAutoLaunched) {
+    if (isPlatform('mac') && shouldHideDockIcon && wasAutoLaunched) {
         app.dock.hide();
     }
 }

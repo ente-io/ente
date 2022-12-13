@@ -14,11 +14,3 @@ export const fixHotReloadNext12 = () => {
     })
   });`);
 };
-
-export function isPlatformMac() {
-    return process.platform === 'darwin';
-}
-
-export function isPlatformWindows() {
-    return process.platform === 'win32';
-}
