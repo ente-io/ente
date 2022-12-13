@@ -18,6 +18,7 @@ import {
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from '../readerService';
 import { extractFileMetadata } from './fileService';
+import { getFileHash } from './hashService';
 import { generateThumbnail } from './thumbnailService';
 import uploadCancelService from './uploadCancelService';
 
@@ -57,28 +58,19 @@ export async function extractLivePhotoMetadata(
         fileType: FILE_TYPE.IMAGE,
         exactType: fileTypeInfo.imageType,
     };
-    const videoFileTypeInfo: FileTypeInfo = {
-        fileType: FILE_TYPE.VIDEO,
-        exactType: fileTypeInfo.videoType,
-    };
     const imageMetadata = await extractFileMetadata(
         parsedMetadataJSONMap,
         collectionID,
         imageFileTypeInfo,
         livePhotoAssets.image
     );
-    const videoMetadata = await extractFileMetadata(
-        parsedMetadataJSONMap,
-        collectionID,
-        videoFileTypeInfo,
-        livePhotoAssets.video
-    );
+    const videoHash = await getFileHash(livePhotoAssets.video);
     return {
         ...imageMetadata,
         title: getLivePhotoName(livePhotoAssets),
         fileType: FILE_TYPE.LIVE_PHOTO,
         imageHash: imageMetadata.hash,
-        videoHash: videoMetadata.hash,
+        videoHash: videoHash,
         hash: undefined,
     };
 }
