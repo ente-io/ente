@@ -19,6 +19,7 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
+    TYPE_MOV,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
@@ -512,8 +513,8 @@ export async function needsConversionForPreview(
 export const isLivePhoto = (file: EnteFile) =>
     file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
 
-export const isImageOrVideo = (fileType: FILE_TYPE) =>
-    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
+export const isHeicOrMov = (fileType: string) =>
+    [TYPE_HEIC, TYPE_MOV].includes(fileType);
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(IsArchived).map((file) => file.id);

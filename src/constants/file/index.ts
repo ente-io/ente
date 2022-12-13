@@ -6,6 +6,7 @@ export const MAX_CAPTION_SIZE = 280;
 export const MAX_TRASH_BATCH_SIZE = 1000;
 
 export const TYPE_HEIC = 'heic';
+export const TYPE_MOV = 'mov';
 export const TYPE_HEIF = 'heif';
 export const TYPE_JPEG = 'jpeg';
 export const TYPE_JPG = 'jpg';

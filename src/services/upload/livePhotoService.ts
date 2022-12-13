@@ -1,4 +1,4 @@
-import { FILE_TYPE } from 'constants/file';
+import { FILE_TYPE, TYPE_HEIC, TYPE_MOV } from 'constants/file';
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
 import { getFileType } from 'services/typeDetectionService';
@@ -10,15 +10,20 @@ import {
     ParsedMetadataJSONMap,
 } from 'types/upload';
 import { CustomError } from 'utils/error';
-import { isImageOrVideo, splitFilenameAndExtension } from 'utils/file';
+import {
+    getFileExtension,
+    isHeicOrMov,
+    splitFilenameAndExtension,
+} from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from '../readerService';
 import { extractFileMetadata } from './fileService';
 import { generateThumbnail } from './thumbnailService';
+import uploadCancelService from './uploadCancelService';
 
 interface LivePhotoIdentifier {
     collectionID: number;
-    fileType: FILE_TYPE;
+    fileType: string;
     name: string;
     size: number;
 }
@@ -133,19 +138,22 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             );
         let index = 0;
         while (index < mediaFiles.length - 1) {
+            if (uploadCancelService.isUploadCancelationRequested()) {
+                throw Error(CustomError.UPLOAD_CANCELLED);
+            }
             const firstMediaFile = mediaFiles[index];
             const secondMediaFile = mediaFiles[index + 1];
-            const firstFileTypeInfo = await getFileType(firstMediaFile.file);
-            const secondFileFileInfo = await getFileType(secondMediaFile.file);
+            const firstFileType = getFileExtension(firstMediaFile.file.name);
+            const secondFileType = getFileExtension(secondMediaFile.file.name);
             const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
-                fileType: firstFileTypeInfo.fileType,
+                fileType: firstFileType,
                 name: firstMediaFile.file.name,
                 size: firstMediaFile.file.size,
             };
             const secondFileIdentifier: LivePhotoIdentifier = {
                 collectionID: secondMediaFile.collectionID,
-                fileType: secondFileFileInfo.fileType,
+                fileType: secondFileType,
                 name: secondMediaFile.file.name,
                 size: secondMediaFile.file.size,
             };
@@ -158,8 +166,8 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 let imageFile: File | ElectronFile;
                 let videoFile: File | ElectronFile;
                 if (
-                    firstFileTypeInfo.fileType === FILE_TYPE.IMAGE &&
-                    secondFileFileInfo.fileType === FILE_TYPE.VIDEO
+                    firstFileType === TYPE_HEIC &&
+                    secondFileType === TYPE_MOV
                 ) {
                     imageFile = firstMediaFile.file;
                     videoFile = secondMediaFile.file;
@@ -194,8 +202,12 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         }
         return analysedMediaFiles;
     } catch (e) {
-        logError(e, 'failed to cluster live photo');
-        throw e;
+        if (e.message === CustomError.UPLOAD_CANCELLED) {
+            throw e;
+        } else {
+            logError(e, 'failed to cluster live photo');
+            throw e;
+        }
     }
 }
 
@@ -207,8 +219,8 @@ function areFilesLivePhotoAssets(
         firstFileIdentifier.collectionID ===
             secondFileIdentifier.collectionID &&
         firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
-        isImageOrVideo(firstFileIdentifier.fileType) &&
-        isImageOrVideo(secondFileIdentifier.fileType) &&
+        isHeicOrMov(firstFileIdentifier.fileType) &&
+        isHeicOrMov(secondFileIdentifier.fileType) &&
         removeUnderscoreThreeSuffix(
             splitFilenameAndExtension(firstFileIdentifier.name)[0]
         ) ===
