@@ -58,6 +58,7 @@ export default async function uploader(
 
         addLogLine(`extracting  metadata ${fileNameSize}`);
         const metadata = await UploadService.extractAssetMetadata(
+            worker,
             uploadAsset,
             collection.id,
             fileTypeInfo

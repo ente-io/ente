@@ -49,6 +49,7 @@ export async function getLivePhotoFileType(
 }
 
 export async function extractLivePhotoMetadata(
+    worker,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
@@ -59,12 +60,13 @@ export async function extractLivePhotoMetadata(
         exactType: fileTypeInfo.imageType,
     };
     const imageMetadata = await extractFileMetadata(
+        worker,
         parsedMetadataJSONMap,
         collectionID,
         imageFileTypeInfo,
         livePhotoAssets.image
     );
-    const videoHash = await getFileHash(livePhotoAssets.video);
+    const videoHash = await getFileHash(worker, livePhotoAssets.video);
     return {
         ...imageMetadata,
         title: getLivePhotoName(livePhotoAssets),

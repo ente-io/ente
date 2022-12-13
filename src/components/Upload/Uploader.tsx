@@ -133,6 +133,14 @@ export default function Uploader(props: Props) {
         PublicCollectionGalleryContext
     );
 
+    const handleChoiceModalClose = () => {
+        setChoiceModalView(false);
+        uploadRunning.current = false;
+    };
+    const handleCollectionSelectorCancel = () => {
+        uploadRunning.current = false;
+    };
+
     useEffect(() => {
         uploadManager.init(
             {
@@ -576,6 +584,7 @@ export default function Uploader(props: Props) {
             }
             props.setCollectionSelectorAttributes({
                 callback: uploadFilesToExistingCollection,
+                onCancel: handleCollectionSelectorCancel,
                 showNextModal,
                 title: constants.UPLOAD_TO_COLLECTION,
             });
@@ -655,7 +664,7 @@ export default function Uploader(props: Props) {
         <>
             <UploadStrategyChoiceModal
                 open={choiceModalView}
-                onClose={() => setChoiceModalView(false)}
+                onClose={handleChoiceModalClose}
                 uploadToSingleCollection={() =>
                     uploadToSingleNewCollection(importSuggestion.rootFolderName)
                 }

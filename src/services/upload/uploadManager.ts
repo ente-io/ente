@@ -113,6 +113,9 @@ class UploadManager {
                 throw Error("can't run multiple uploads at once");
             }
             this.uploadInProgress = true;
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers[i] = getDedicatedCryptoWorker();
+            }
             await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
             addLogLine(
@@ -269,16 +272,8 @@ class UploadManager {
             i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
             i++
         ) {
-            const cryptoWorker = getDedicatedCryptoWorker();
-            if (!cryptoWorker) {
-                throw Error(CustomError.FAILED_TO_LOAD_WEB_WORKER);
-            }
-            this.cryptoWorkers[i] = cryptoWorker;
-            uploadProcesses.push(
-                this.uploadNextFileInQueue(
-                    await new this.cryptoWorkers[i].comlink()
-                )
-            );
+            const worker = await new this.cryptoWorkers[i].comlink();
+            uploadProcesses.push(this.uploadNextFileInQueue(worker));
         }
         await Promise.all(uploadProcesses);
     }

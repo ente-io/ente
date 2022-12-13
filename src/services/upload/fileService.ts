@@ -68,6 +68,7 @@ export async function readFile(
 }
 
 export async function extractFileMetadata(
+    worker,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
     collectionID: number,
     fileTypeInfo: FileTypeInfo,
@@ -79,6 +80,7 @@ export async function extractFileMetadata(
             getMetadataJSONMapKey(collectionID, originalName)
         ) ?? {};
     const extractedMetadata: Metadata = await extractMetadata(
+        worker,
         rawFile,
         fileTypeInfo
     );

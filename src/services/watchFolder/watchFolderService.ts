@@ -298,7 +298,7 @@ class watchFolderService {
         file: EnteFile
     ) {
         addLocalLog(() => `onFileUpload called`);
-        if (!this.isUploadRunning) {
+        if (!this.isUploadRunning()) {
             return;
         }
         if (
