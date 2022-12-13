@@ -12,6 +12,8 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import 'package:photos/ui/tools/debug/cache_size_view.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatelessWidget {
@@ -53,6 +55,18 @@ class DebugSectionWidget extends StatelessWidget {
           onTap: () async {
             await LocalSyncService.instance.resetLocalSync();
             showToast(context, "Done");
+          },
+        ),
+        sectionOptionSpacing,
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "View Cache Detail",
+          ),
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          trailingIcon: Icons.chevron_right_outlined,
+          trailingIconIsMuted: true,
+          onTap: () async {
+            routeToPage(context, const CacheSizeViewer());
           },
         ),
         sectionOptionSpacing,
