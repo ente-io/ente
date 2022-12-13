@@ -126,6 +126,9 @@ class UploadManager {
                 throw Error("can't run multiple uploads at once");
             }
             this.uploadInProgress = true;
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers[i] = getDedicatedCryptoWorker();
+            }
             await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
             addLogLine(
@@ -155,7 +158,8 @@ class UploadManager {
             }
             if (mediaFiles.length) {
                 UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
-                await this.extractMetadataFromFiles(mediaFiles);
+                const worker = await new this.cryptoWorkers[0].comlink();
+                await this.extractMetadataFromFiles(worker, mediaFiles);
 
                 UploadService.setMetadataAndFileTypeInfoMap(
                     this.metadataAndFileTypeInfoMap
@@ -293,7 +297,10 @@ class UploadManager {
         }
     }
 
-    private async extractMetadataFromFiles(mediaFiles: FileWithCollection[]) {
+    private async extractMetadataFromFiles(
+        worker,
+        mediaFiles: FileWithCollection[]
+    ) {
         try {
             addLogLine(`extractMetadataFromFiles executed`);
             UIService.reset(mediaFiles.length);
@@ -310,6 +317,7 @@ class UploadManager {
                         `metadata extraction started ${getFileNameSize(file)} `
                     );
                     const result = await this.extractFileTypeAndMetadata(
+                        worker,
                         file,
                         collectionID,
                         this.publicUploadProps?.accessedThroughSharedURL
@@ -352,6 +360,7 @@ class UploadManager {
     }
 
     private async extractFileTypeAndMetadata(
+        worker,
         file: File | ElectronFile,
         collectionID: number,
         skipVideos: boolean
@@ -379,6 +388,7 @@ class UploadManager {
         let metadata: Metadata;
         try {
             metadata = await UploadService.extractFileMetadata(
+                worker,
                 file,
                 collectionID,
                 fileTypeInfo
@@ -412,16 +422,8 @@ class UploadManager {
             i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
             i++
         ) {
-            const cryptoWorker = getDedicatedCryptoWorker();
-            if (!cryptoWorker) {
-                throw Error(CustomError.FAILED_TO_LOAD_WEB_WORKER);
-            }
-            this.cryptoWorkers[i] = cryptoWorker;
-            uploadProcesses.push(
-                this.uploadNextFileInQueue(
-                    await new this.cryptoWorkers[i].comlink()
-                )
-            );
+            const worker = await new this.cryptoWorkers[i].comlink();
+            uploadProcesses.push(this.uploadNextFileInQueue(worker));
         }
         await Promise.all(uploadProcesses);
     }
