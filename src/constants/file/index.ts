@@ -6,7 +6,6 @@ export const MAX_CAPTION_SIZE = 280;
 export const MAX_TRASH_BATCH_SIZE = 1000;
 
 export const TYPE_HEIC = 'heic';
-export const TYPE_MOV = 'mov';
 export const TYPE_HEIF = 'heif';
 export const TYPE_JPEG = 'jpeg';
 export const TYPE_JPG = 'jpg';
@@ -17,3 +16,31 @@ export enum FILE_TYPE {
     LIVE_PHOTO,
     OTHERS,
 }
+
+export const IMAGE_EXTENSIONS = [
+    'heic',
+    'heif',
+    'jpeg',
+    'jpg',
+    'png',
+    'gif',
+    'bmp',
+    'tiff',
+    'webp',
+];
+
+export const VIDEO_EXTENSIONS = [
+    'mov',
+    'mp4',
+    'm4v',
+    'avi',
+    'wmv',
+    'flv',
+    'mkv',
+    'webm',
+    '3gp',
+    '3g2',
+    'avi',
+    'ogv',
+    'mpg',
+];

@@ -1,4 +1,4 @@
-import { FILE_TYPE, TYPE_HEIC, TYPE_MOV } from 'constants/file';
+import { FILE_TYPE } from 'constants/file';
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
 import { getFileType } from 'services/typeDetectionService';
@@ -11,8 +11,8 @@ import {
 } from 'types/upload';
 import { CustomError } from 'utils/error';
 import {
-    getFileExtension,
-    isHeicOrMov,
+    getFileTypeFromExtension,
+    isImageOrVideo,
     splitFilenameAndExtension,
 } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -24,7 +24,7 @@ import uploadCancelService from './uploadCancelService';
 
 interface LivePhotoIdentifier {
     collectionID: number;
-    fileType: string;
+    fileType: FILE_TYPE;
     name: string;
     size: number;
 }
@@ -137,8 +137,12 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             }
             const firstMediaFile = mediaFiles[index];
             const secondMediaFile = mediaFiles[index + 1];
-            const firstFileType = getFileExtension(firstMediaFile.file.name);
-            const secondFileType = getFileExtension(secondMediaFile.file.name);
+            const firstFileType = getFileTypeFromExtension(
+                firstMediaFile.file.name
+            );
+            const secondFileType = getFileTypeFromExtension(
+                secondMediaFile.file.name
+            );
             const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
                 fileType: firstFileType,
@@ -160,8 +164,8 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                 let imageFile: File | ElectronFile;
                 let videoFile: File | ElectronFile;
                 if (
-                    firstFileType === TYPE_HEIC &&
-                    secondFileType === TYPE_MOV
+                    firstFileType === FILE_TYPE.IMAGE &&
+                    secondFileType === FILE_TYPE.VIDEO
                 ) {
                     imageFile = firstMediaFile.file;
                     videoFile = secondMediaFile.file;
@@ -213,8 +217,8 @@ function areFilesLivePhotoAssets(
         firstFileIdentifier.collectionID ===
             secondFileIdentifier.collectionID &&
         firstFileIdentifier.fileType !== secondFileIdentifier.fileType &&
-        isHeicOrMov(firstFileIdentifier.fileType) &&
-        isHeicOrMov(secondFileIdentifier.fileType) &&
+        isImageOrVideo(firstFileIdentifier.fileType) &&
+        isImageOrVideo(secondFileIdentifier.fileType) &&
         removeUnderscoreThreeSuffix(
             splitFilenameAndExtension(firstFileIdentifier.name)[0]
         ) ===

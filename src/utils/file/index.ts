@@ -19,7 +19,8 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
-    TYPE_MOV,
+    IMAGE_EXTENSIONS,
+    VIDEO_EXTENSIONS,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
@@ -272,6 +273,15 @@ export function getFileExtension(filename: string) {
     return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
 }
 
+export function getFileTypeFromExtension(filename: string) {
+    const extension = getFileExtension(filename);
+    if (IMAGE_EXTENSIONS.includes(extension)) {
+        return FILE_TYPE.IMAGE;
+    } else if (VIDEO_EXTENSIONS.includes(extension)) {
+        return FILE_TYPE.VIDEO;
+    }
+}
+
 export function generateStreamFromArrayBuffer(data: Uint8Array) {
     return new ReadableStream({
         async start(controller: ReadableStreamDefaultController) {
@@ -513,8 +523,8 @@ export async function needsConversionForPreview(
 export const isLivePhoto = (file: EnteFile) =>
     file.metadata.fileType === FILE_TYPE.LIVE_PHOTO;
 
-export const isHeicOrMov = (fileType: string) =>
-    [TYPE_HEIC, TYPE_MOV].includes(fileType);
+export const isImageOrVideo = (fileType: FILE_TYPE) =>
+    [FILE_TYPE.IMAGE, FILE_TYPE.VIDEO].includes(fileType);
 
 export const getArchivedFiles = (files: EnteFile[]) => {
     return files.filter(IsArchived).map((file) => file.id);
