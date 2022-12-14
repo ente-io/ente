@@ -134,7 +134,6 @@ class UserService {
   }
 
   Future<UserDetails> getUserDetailsV2({bool memoryCount = true}) async {
-    await Future.delayed(const Duration(seconds: 3));
     try {
       final response = await _enteDio.get(
         "/users/details/v2",
