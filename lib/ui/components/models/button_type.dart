@@ -73,10 +73,11 @@ enum ButtonType {
     if (this == ButtonType.primary) {
       return colorScheme.strokeMuted;
     }
-    if (this == ButtonType.secondary ||
-        this == ButtonType.critical ||
-        this == ButtonType.tertiaryCritical) {
+    if (this == ButtonType.secondary || this == ButtonType.tertiaryCritical) {
       return colorScheme.strokeBase;
+    }
+    if (this == ButtonType.critical) {
+      return strokeBaseLight;
     }
     return null;
   }
