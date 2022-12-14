@@ -13,6 +13,11 @@ enum ExecutionState {
   successful,
 }
 
+enum ButtonSize {
+  small,
+  large;
+}
+
 typedef FutureVoidCallback = Future<void> Function();
 
 class ButtonWidget extends StatelessWidget {
@@ -21,12 +26,14 @@ class ButtonWidget extends StatelessWidget {
   final ButtonType buttonType;
   final FutureVoidCallback? onTap;
   final bool isDisabled;
+  final ButtonSize buttonSize;
 
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
   final bool isInActionSheet;
   const ButtonWidget({
     required this.buttonType,
+    required this.buttonSize,
     this.icon,
     this.labelText,
     this.onTap,
@@ -82,6 +89,7 @@ class ButtonWidget extends StatelessWidget {
       buttonStyle: buttonStyle,
       buttonType: buttonType,
       isDisabled: isDisabled,
+      buttonSize: buttonSize,
       onTap: onTap,
       labelText: labelText,
       icon: icon,
@@ -96,10 +104,12 @@ class LargeButtonChildWidget extends StatefulWidget {
   final String? labelText;
   final IconData? icon;
   final bool isDisabled;
+  final ButtonSize buttonSize;
   const LargeButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
+    required this.buttonSize,
     this.onTap,
     this.labelText,
     this.icon,
@@ -153,7 +163,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
       onTapCancel: _shouldRegisterGestures ? _onTapCancel : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 16),
-        width: double.infinity,
+        width: widget.buttonSize == ButtonSize.large ? double.infinity : null,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
           color: buttonColor,
@@ -197,6 +207,9 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                         ],
                       )
                     : Row(
+                        mainAxisSize: widget.buttonSize == ButtonSize.large
+                            ? MainAxisSize.max
+                            : MainAxisSize.min,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           widget.icon == null
@@ -227,9 +240,14 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                         ],
                       )
                 : executionState == ExecutionState.inProgress
-                    ? EnteLoadingWidget(
-                        is20pts: true,
-                        color: loadingIconColor,
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          EnteLoadingWidget(
+                            is20pts: true,
+                            color: loadingIconColor,
+                          ),
+                        ],
                       )
                     : executionState == ExecutionState.successful
                         ? Icon(
