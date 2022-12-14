@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:photos/core/event_bus.dart';
-import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/viewer/search/search_widget.dart';
 
@@ -24,7 +22,6 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
           icon: Icons.menu_outlined,
           onTap: () {
             Scaffold.of(context).openDrawer();
-            Bus.instance.fire(OpenedSettingsEvent());
           },
         ),
         AnimatedSwitcher(
