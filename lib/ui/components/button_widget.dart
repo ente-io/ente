@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
@@ -128,6 +129,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
   late Color checkIconColor;
   late Color loadingIconColor;
   late bool hasExecutionStates;
+  double? widthOfButton;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
   @override
@@ -206,54 +208,72 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                                 ),
                         ],
                       )
-                    : Row(
-                        mainAxisSize: widget.buttonSize == ButtonSize.large
-                            ? MainAxisSize.max
-                            : MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          widget.icon == null
-                              ? const SizedBox.shrink()
-                              : Icon(
-                                  widget.icon,
-                                  size: 20,
-                                  color: iconColor,
-                                ),
-                          widget.icon == null || widget.labelText == null
-                              ? const SizedBox.shrink()
-                              : const SizedBox(width: 8),
-                          widget.labelText == null
-                              ? const SizedBox.shrink()
-                              : Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
+                    : Builder(
+                        builder: (context) {
+                          SchedulerBinding.instance.addPostFrameCallback(
+                            (timeStamp) {
+                              final box =
+                                  context.findRenderObject() as RenderBox;
+                              widthOfButton = box.size.width;
+                            },
+                          );
+                          return Row(
+                            mainAxisSize: widget.buttonSize == ButtonSize.large
+                                ? MainAxisSize.max
+                                : MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              widget.icon == null
+                                  ? const SizedBox.shrink()
+                                  : Icon(
+                                      widget.icon,
+                                      size: 20,
+                                      color: iconColor,
                                     ),
-                                    child: Text(
-                                      widget.labelText!,
-                                      style: labelStyle,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                )
-                        ],
+                              widget.icon == null || widget.labelText == null
+                                  ? const SizedBox.shrink()
+                                  : const SizedBox(width: 8),
+                              widget.labelText == null
+                                  ? const SizedBox.shrink()
+                                  : Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
+                                        child: Text(
+                                          widget.labelText!,
+                                          style: labelStyle,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    )
+                            ],
+                          );
+                        },
                       )
                 : executionState == ExecutionState.inProgress
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          EnteLoadingWidget(
-                            is20pts: true,
-                            color: loadingIconColor,
-                          ),
-                        ],
+                    ? SizedBox(
+                        width: widthOfButton,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            EnteLoadingWidget(
+                              is20pts: true,
+                              color: loadingIconColor,
+                            ),
+                          ],
+                        ),
                       )
                     : executionState == ExecutionState.successful
-                        ? Icon(
-                            Icons.check_outlined,
-                            size: 20,
-                            color: checkIconColor,
+                        ? SizedBox(
+                            width: widthOfButton,
+                            child: Icon(
+                              Icons.check_outlined,
+                              size: 20,
+                              color: checkIconColor,
+                            ),
                           )
                         : const SizedBox.shrink(), //fallback
           ),
