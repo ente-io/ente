@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -16,10 +17,12 @@ class BottomActionBarWidget extends StatelessWidget {
   final SelectedFiles? selectedFiles;
   final VoidCallback? onCancel;
   final bool hasSmallerBottomPadding;
+  final GalleryType type;
 
   BottomActionBarWidget({
     required this.expandedMenu,
     required this.hasSmallerBottomPadding,
+    required this.type,
     this.selectedFiles,
     this.text,
     this.iconButtons,
@@ -62,6 +65,7 @@ class BottomActionBarWidget extends StatelessWidget {
                     ),
                     child: ActionBarWidget(
                       selectedFiles: selectedFiles,
+                      galleryType: type,
                       text: text,
                       iconButtons: _iconButtons(context),
                     ),

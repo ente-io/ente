@@ -12,10 +12,9 @@ import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
-import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -126,16 +125,9 @@ class _CollectionPageState extends State<CollectionPage> {
                   selectedFiles: _selectedFiles,
                   hasSmallerBottomPadding: true,
                   type: widget.appBarType,
-                  expandedMenu: ExpandedMenuWidget(
-                    items: [
-                      [
-                        BlurMenuItemWidget(
-                          leadingIcon: Icons.add_outlined,
-                          labelText: "One",
-                          menuItemColor: colorScheme.fillFaint,
-                        ),
-                      ],
-                    ],
+                  expandedMenu: FileSelectionActionWidget(
+                    widget.appBarType,
+                    collection: widget.c.collection,
                   ),
                   text: _selectedFiles.files.length.toString() + ' selected',
                   onCancel: () {
