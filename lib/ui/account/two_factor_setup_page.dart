@@ -68,7 +68,7 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(_lifecycleEventHandler);
-    widget.completer.complete();
+    widget.completer.isCompleted ? null : widget.completer.complete();
     super.dispose();
   }
 
