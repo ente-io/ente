@@ -125,6 +125,7 @@ class _CollectionPageState extends State<CollectionPage> {
                 child: BottomActionBarWidget(
                   selectedFiles: _selectedFiles,
                   hasSmallerBottomPadding: true,
+                  type: widget.appBarType,
                   expandedMenu: ExpandedMenuWidget(
                     items: [
                       [

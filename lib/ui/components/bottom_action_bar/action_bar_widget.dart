@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
 
@@ -6,8 +8,10 @@ class ActionBarWidget extends StatefulWidget {
   final String? text;
   final List<Widget> iconButtons;
   final SelectedFiles? selectedFiles;
+  final GalleryType galleryType;
   const ActionBarWidget({
     required this.iconButtons,
+    required this.galleryType,
     this.text,
     this.selectedFiles,
     super.key,
@@ -19,6 +23,8 @@ class ActionBarWidget extends StatefulWidget {
 
 class _ActionBarWidgetState extends State<ActionBarWidget> {
   final ValueNotifier<int> _selectedFilesNotifier = ValueNotifier(0);
+  final ValueNotifier<int> _selectedOwnedFilesNotifier = ValueNotifier(0);
+  final int currentUserID = Configuration.instance.getUserID()!;
 
   @override
   void initState() {
@@ -69,8 +75,13 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
                       valueListenable: _selectedFilesNotifier,
                       builder: (context, value, child) {
                         return Text(
-                          "${_selectedFilesNotifier.value} selectedsss",
-                          style: textTheme.small.copyWith(
+                          "${_selectedFilesNotifier.value} selected" +
+                              (_selectedOwnedFilesNotifier.value !=
+                                      _selectedFilesNotifier.value
+                                  ? " (${_selectedOwnedFilesNotifier.value} "
+                                      "yours) "
+                                  : ""),
+                          style: textTheme.body.copyWith(
                             color: colorScheme.blurTextBase,
                           ),
                         );
@@ -78,8 +89,8 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
                     )
                   : Text(
                       widget.text!,
-                      style: textTheme.small
-                          .copyWith(color: colorScheme.textMuted),
+                      style:
+                          textTheme.body.copyWith(color: colorScheme.textMuted),
                     ),
             ],
           ),
@@ -102,6 +113,9 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
   void _selectedFilesListener() {
     if (widget.selectedFiles!.files.isNotEmpty) {
       _selectedFilesNotifier.value = widget.selectedFiles!.files.length;
+      _selectedOwnedFilesNotifier.value = widget.selectedFiles!.files
+          .where((f) => f.ownerID == null || f.ownerID! == currentUserID)
+          .length;
     }
   }
 }
