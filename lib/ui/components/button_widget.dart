@@ -4,7 +4,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/components/models/large_button_style.dart';
+import 'package:photos/ui/components/models/custom_button_style.dart';
 import 'package:photos/utils/debouncer.dart';
 
 enum ExecutionState {
@@ -15,7 +15,7 @@ enum ExecutionState {
 
 typedef FutureVoidCallback = Future<void> Function();
 
-class LargeButtonWidget extends StatelessWidget {
+class ButtonWidget extends StatelessWidget {
   final IconData? icon;
   final String? labelText;
   final ButtonType buttonType;
@@ -25,7 +25,7 @@ class LargeButtonWidget extends StatelessWidget {
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
   final bool isInActionSheet;
-  const LargeButtonWidget({
+  const ButtonWidget({
     required this.buttonType,
     this.icon,
     this.labelText,
@@ -47,7 +47,7 @@ class LargeButtonWidget extends StatelessWidget {
     final inverseTextTheme = isInActionSheet
         ? lightTextTheme
         : getEnteTextTheme(context, inverse: true);
-    final buttonStyle = LargeButtonStyle(
+    final buttonStyle = CustomButtonStyle(
       //Dummy default values since we need to keep these properties non-nullable
       defaultButtonColor: Colors.transparent,
       defaultBorderColor: Colors.transparent,
@@ -90,7 +90,7 @@ class LargeButtonWidget extends StatelessWidget {
 }
 
 class LargeButtonChildWidget extends StatefulWidget {
-  final LargeButtonStyle buttonStyle;
+  final CustomButtonStyle buttonStyle;
   final FutureVoidCallback? onTap;
   final ButtonType buttonType;
   final String? labelText;

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class LargeButtonStyle {
+class CustomButtonStyle {
   Color defaultButtonColor;
   Color? pressedButtonColor;
   Color? disabledButtonColor;
@@ -15,7 +15,7 @@ class LargeButtonStyle {
   TextStyle? disabledLabelStyle;
   Color? checkIconColor;
 
-  LargeButtonStyle({
+  CustomButtonStyle({
     required this.defaultButtonColor,
     this.pressedButtonColor,
     this.disabledButtonColor,
