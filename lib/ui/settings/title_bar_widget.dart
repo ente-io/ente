@@ -1,3 +1,4 @@
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 
 class SettingsTitleBarWidget extends StatelessWidget {
@@ -5,6 +6,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
@@ -19,7 +21,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
               },
               icon: const Icon(Icons.keyboard_double_arrow_left_outlined),
             ),
-            const Text("Settings"),
+            Text(l10n.settings),
           ],
         ),
       ),

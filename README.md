@@ -3,6 +3,10 @@
 ente's Authenticator app helps you generate and store 2 step verification (2FA)
 tokens on your mobile devices.
 
+[Download now](#-download)
+
+![App Screenshots](./screenshots/screenshots.png)
+
 ## ✨ Features
 
 ### Secure Backups
@@ -43,22 +47,37 @@ file, that adheres to the above format.
 
 ### Android
 
-You can download the latest version from [GitHub
-releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apk).
-The downloaded APK will keep itself updated.
+This repository's [GitHub
+releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apks)
+contains APKs, built straight from source. These builds keep themselves updated,
+without relying on third party stores.
 
+You can alternatively install the build from PlayStore.
+
+<a href="https://play.google.com/store/apps/details?id=io.ente.auth"> <img
+  width="197" alt="Get it on Google Play"
+src="https://ente.io/static/ed265c3abdcd3efa5e29f64b927bcb44/e230a/play-store-badge.webp">
+</a>
 
 ### iOS
 
-The app is not live on the AppStore yet. If you would like access, please write
-to [auth@ente.io](mailto:auth@ente.io), and we will be happy to provide access
-via TestFlight.
+<a href="https://apps.apple.com/us/app/ente-authenticator/id6444121398"> <img
+  width="197" alt="Download on AppStore"
+src="https://user-images.githubusercontent.com/1161789/154795157-c4468ff9-97fd-46f3-87fe-dca789d8733a.png">
+</a>
+
+### Desktop
+
+Support for desktop platforms (Linux, Mac and Windows) is a [work in
+progress](https://github.com/ente-io/auth/tree/desktop).
+
+Please ⭐ this repo to be notified of updates.
 
 
 ## 🔩 Architecture
 
 The architecture that powers end-to-end encrypted storage and sync of your
-tokens has been documented [here](architecture/index.md).
+tokens has been documented [here](architecture/README.md).
 
 
 ## 🧑‍💻 Building from source
@@ -75,10 +94,13 @@ tokens has been documented [here](architecture/index.md).
 If you need help, please reach out to support@ente.io, and a human will get in
 touch with you.
 
-On the other hand, if you wish to support us, please
+If you have feature requests, please create a [GitHub issue](./issues).
+
+If you wish to support us, please ⭐
 [star](https://github.com/ente-io/auth/stargazers) this project.
 
 
 ## 💜 Community
-- Follow us on [Twitter](https://twitter.com/enteio)
-- Join us on [Discord](https://ente.io/discord)
+
+- Follow us on [Twitter](https://twitter.com/enteio) / [Mastodon](https://mstdn.social/@ente)
+- Join us on [Discord](https://ente.io/discord) / [Matrix](https://ente.io/matrix)

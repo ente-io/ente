@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/subscription.dart';
 import 'package:ente_auth/services/billing_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -49,7 +50,8 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
 
   @override
   Widget build(BuildContext context) {
-    _dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    _dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     if (initPaymentUrl == null) {
       return const EnteLoadingWidget();
     }

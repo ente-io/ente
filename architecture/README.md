@@ -8,7 +8,7 @@ specifications of the underlying cryptography.
 Your data is end-to-end encrypted with **ente**. Meaning, they are encrypted
 with your `keys` before they leave your device.
 
-<img src="e2ee.svg" class="architecture-svg" style="max-width: 600px"
+<img src="assets/e2ee.svg" class="architecture-svg" style="max-width: 600px"
 title="End-to-end encryption in ente" />
 
 <br/>
@@ -39,7 +39,7 @@ leaves your device.
 During registration, your `masterKey` is encrypted with your`keyEncryptionKey`,
 and the resultant `encryptedMasterKey` is then sent to our servers for storage.
 
-<img src="key-derivation.svg" class="architecture-svg" title="Key derivation" />
+<img src="assets/key-derivation.svg" class="architecture-svg" title="Key derivation" />
 
 #### <a id="key-encryption-flows-secondary-device"></a> Secondary Device
 
@@ -92,7 +92,7 @@ leave your device unencrypted.
 - All of the above mentioned encrypted data is then pushed to the server for
   storage.
   
-<img src="token-encryption.svg" class="architecture-svg" title="Token
+<img src="assets/token-encryption.svg" class="architecture-svg" title="Token
 encryption" />
 
 #### Download
@@ -149,7 +149,7 @@ the server (as discussed in [Key Encryption](#key-encryption), and decrypts it
 with the entered `recoveryKey`. If the decryption succeeds, the client will know
 that you have entered the correct `recoveryKey`.
 
-<img src="recovery.svg" class="architecture-svg" title="Recovery" />
+<img src="assets/recovery.svg" class="architecture-svg" title="Recovery" />
 
 Now that you have your `masterKey`, the client will prompt you to set a new
 password, using which it will derive a new `keyEncryptionKey`. This is then used
@@ -204,12 +204,12 @@ your `publicKey`. This `encryptedAuthToken` can only be decrypted with your
 - This decrypted `authToken` can then from there on be used to authenticate all
   API calls against our servers.
 
-<img src="authentication.svg" class="architecture-svg" title="Authentication" />
+<img src="assets/authentication.svg" class="architecture-svg" title="Authentication" />
 
 ### Security
 
 Only by verifying access to your email and knowing your password can you obtain
-an`authToken` that can be used to authenticate yourself against our servers.
+an `authToken` that can be used to authenticate yourself against our servers.
 
 ---
 

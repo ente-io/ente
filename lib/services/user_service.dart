@@ -7,6 +7,7 @@ import 'package:ente_auth/core/constants.dart';
 import 'package:ente_auth/core/event_bus.dart';
 import 'package:ente_auth/core/network.dart';
 import 'package:ente_auth/events/user_details_changed_event.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/delete_account.dart';
 import 'package:ente_auth/models/key_attributes.dart';
 import 'package:ente_auth/models/key_gen_result.dart';
@@ -47,7 +48,8 @@ class UserService {
     bool isChangeEmail = false,
     bool isCreateAccountScreen = false,
   }) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -191,7 +193,8 @@ class UserService {
   Future<DeleteChallengeResponse> getDeleteChallenge(
     BuildContext context,
   ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       final response = await _dio.get(
@@ -259,7 +262,8 @@ class UserService {
   }
 
   Future<void> verifyEmail(BuildContext context, String ott) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -329,7 +333,8 @@ class UserService {
     String email,
     String ott,
   ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       final response = await _dio.post(
@@ -498,7 +503,8 @@ class UserService {
   }
 
   Future<void> recoverTwoFactor(BuildContext context, String sessionID) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       final response = await _dio.get(
@@ -618,7 +624,8 @@ class UserService {
     String encryptedSecret,
     String secretDecryptionNonce,
   ) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     String secret;
     try {

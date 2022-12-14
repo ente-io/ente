@@ -266,7 +266,7 @@ packages:
       name: dbus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.4"
+    version: "0.7.8"
   device_info:
     dependency: "direct main"
     description:
@@ -343,7 +343,7 @@ packages:
       name: ffi
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.1"
+    version: "2.0.1"
   file:
     dependency: transitive
     description:
@@ -357,7 +357,7 @@ packages:
       name: file_picker
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.6.1"
+    version: "5.2.4"
   fixnum:
     dependency: transitive
     description:
@@ -504,9 +504,11 @@ packages:
   flutter_sodium:
     dependency: "direct main"
     description:
-      name: flutter_sodium
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: HEAD
+      resolved-ref: "267435eaf07af60b94406adf14bedf21e08a6b4f"
+      url: "https://github.com/ente-io/flutter_sodium.git"
+    source: git
     version: "0.2.0"
   flutter_speed_dial:
     dependency: "direct main"
@@ -748,7 +750,7 @@ packages:
       name: package_info_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.2"
+    version: "1.4.3+1"
   package_info_plus_linux:
     dependency: transitive
     description:
@@ -783,7 +785,7 @@ packages:
       name: package_info_plus_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.5"
+    version: "2.1.0"
   password_strength:
     dependency: "direct main"
     description:
@@ -860,7 +862,7 @@ packages:
       name: path_provider_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.7"
+    version: "2.1.3"
   petitparser:
     dependency: transitive
     description:
@@ -1334,7 +1336,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.6.1"
+    version: "3.1.2"
   xdg_directories:
     dependency: transitive
     description:

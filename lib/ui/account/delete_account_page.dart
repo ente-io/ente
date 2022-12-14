@@ -3,6 +3,7 @@
 import 'dart:convert';
 
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/delete_account.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/services/user_service.dart';
@@ -20,10 +21,11 @@ class DeleteAccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text("Delete account"),
+        title: Text(l10n.deleteAccount),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           color: Theme.of(context).iconTheme.color,
@@ -47,7 +49,7 @@ class DeleteAccountPage extends StatelessWidget {
               ),
               Center(
                 child: Text(
-                  "We'll be sorry to see you go. Are you facing some issue?",
+                  l10n.deleteAccountQuery,
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
@@ -74,7 +76,7 @@ class DeleteAccountPage extends StatelessWidget {
                 height: 24,
               ),
               GradientButton(
-                text: "Yes, send feedback",
+                text: l10n.yesSendFeedbackAction,
                 iconData: Icons.check,
                 onTap: () async {
                   await sendEmail(
@@ -104,9 +106,9 @@ class DeleteAccountPage extends StatelessWidget {
                       ),
                       backgroundColor: Colors.white,
                     ),
-                    label: const Text(
-                      "No, delete account",
-                      style: TextStyle(
+                    label: Text(
+                      l10n.noDeleteAccountAction,
+                      style: const TextStyle(
                         color: Colors.redAccent, // same for both themes
                       ),
                       textAlign: TextAlign.center,
@@ -143,21 +145,20 @@ class DeleteAccountPage extends StatelessWidget {
     BuildContext context,
     DeleteChallengeResponse response,
   ) async {
+    final l10n = context.l10n;
     final hasAuthenticated =
         await LocalAuthenticationService.instance.requestLocalAuthentication(
       context,
-      "Please authenticate to initiate account deletion",
+      l10n.initiateAccountDeleteTitle,
     );
 
     if (hasAuthenticated) {
       final choice = await showChoiceDialog(
         context,
-        'Are you sure you want to delete your ente account?',
-        'Your uploaded data, across all apps '
-            '(Photos and Authenticator both), will be scheduled for deletion,'
-            'and your account will be permanently deleted.',
-        firstAction: 'Cancel',
-        secondAction: 'Delete',
+        l10n.confirmAccountDeleteTitle,
+        l10n.confirmAccountDeleteMessage,
+        firstAction: l10n.cancel,
+        secondAction: l10n.delete,
         firstActionColor: Theme.of(context).colorScheme.onSurface,
         secondActionColor: Colors.red,
       );
@@ -175,10 +176,11 @@ class DeleteAccountPage extends StatelessWidget {
   }
 
   Future<void> _requestEmailForDeletion(BuildContext context) async {
+    final l10n = context.l10n;
     final AlertDialog alert = AlertDialog(
-      title: const Text(
-        "Delete account",
-        style: TextStyle(
+      title: Text(
+        l10n.deleteAccount,
+        style: const TextStyle(
           color: Colors.red,
         ),
       ),
@@ -208,9 +210,9 @@ class DeleteAccountPage extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          child: const Text(
-            "Send email",
-            style: TextStyle(
+          child: Text(
+            l10n.sendEmail,
+            style: const TextStyle(
               color: Colors.red,
             ),
           ),
@@ -225,7 +227,7 @@ class DeleteAccountPage extends StatelessWidget {
         ),
         TextButton(
           child: Text(
-            "Ok",
+            l10n.ok,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
             ),

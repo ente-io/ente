@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:ente_auth/core/configuration.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:ente_auth/ui/settings/settings_section_title.dart';
 import 'package:ente_auth/ui/settings/settings_text_item.dart';
@@ -12,6 +13,8 @@ class DebugSectionWidget extends StatelessWidget {
   const DebugSectionWidget({Key key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    // This is a debug only section not shown to end users, so these strings are
+    // not translated.
     return ExpandablePanel(
       header: const SettingsSectionTitle("Debug"),
       collapsed: Container(),
@@ -38,6 +41,7 @@ class DebugSectionWidget extends StatelessWidget {
   }
 
   void _showKeyAttributesDialog(BuildContext context) {
+    final l10n = context.l10n;
     final keyAttributes = Configuration.instance.getKeyAttributes();
     final AlertDialog alert = AlertDialog(
       title: const Text("key attributes"),
@@ -73,7 +77,7 @@ class DebugSectionWidget extends StatelessWidget {
       ),
       actions: [
         TextButton(
-          child: const Text("OK"),
+          child: Text(l10n.ok),
           onPressed: () {
             Navigator.of(context, rootNavigator: true).pop('dialog');
           },

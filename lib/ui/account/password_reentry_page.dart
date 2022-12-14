@@ -2,6 +2,7 @@
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/errors.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/key_attributes.dart';
 import 'package:ente_auth/ui/account/recovery_page.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
@@ -40,6 +41,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
     FloatingActionButtonLocation fabLocation() {
@@ -66,10 +68,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
         isFormValid: _passwordController.text.isNotEmpty,
-        buttonText: 'Verify password',
+        buttonText: l10n.verifyPassword,
         onPressedFunction: () async {
           FocusScope.of(context).unfocus();
-          final dialog = createProgressDialog(context, "Please wait...");
+          final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
           await dialog.show();
           try {
             await Configuration.instance.decryptAndSaveSecrets(
@@ -81,14 +83,11 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             await dialog.hide();
             final dialogUserChoice = await showChoiceDialog(
               context,
-              "Recreate password",
-              "The current device is not powerful enough to verify your "
-                  "password, so we need to regenerate it once in a way that "
-                  "works with all devices. \n\nPlease login using your "
-                  "recovery key and regenerate your password (you can use the same one again if you wish).",
-              firstAction: "Cancel",
+              l10n.recreatePassword,
+              l10n.recreatePasswordMessage,
+              firstAction: l10n.cancel,
               firstActionColor: Theme.of(context).colorScheme.primary,
-              secondAction: "Use recovery key",
+              secondAction: l10n.useRecoveryKeyAction,
               secondActionColor: Theme.of(context).colorScheme.primary,
             );
             if (dialogUserChoice == DialogUserChoice.secondChoice) {
@@ -107,17 +106,17 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
 
             final dialogUserChoice = await showChoiceDialog(
               context,
-              "Incorrect password",
-              "Please try again",
-              firstAction: "Contact Support",
+              l10n.incorrectPassword,
+              l10n.tryAgainMessage,
+              firstAction: l10n.contactSupport,
               firstActionColor: Theme.of(context).colorScheme.primary,
-              secondAction: "Ok",
+              secondAction: l10n.ok,
               secondActionColor: Theme.of(context).colorScheme.primary,
             );
             if (dialogUserChoice == DialogUserChoice.firstChoice) {
               await sendLogs(
                 context,
-                "Contact support",
+                l10n.contactSupport,
                 "support@ente.io",
                 postShare: () {},
               );
@@ -141,6 +140,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     return Column(
       children: [
         Expanded(
@@ -151,7 +151,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   padding:
                       const EdgeInsets.symmetric(vertical: 30, horizontal: 20),
                   child: Text(
-                    'Welcome back!',
+                    l10n.welcomeBackTitle,
                     style: Theme.of(context).textTheme.headline4,
                   ),
                 ),
@@ -174,7 +174,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                   child: TextFormField(
                     autofillHints: const [AutofillHints.password],
                     decoration: InputDecoration(
-                      hintText: "Enter your password",
+                      hintText: l10n.enterYourPasswordHint,
                       filled: true,
                       contentPadding: const EdgeInsets.all(20),
                       border: UnderlineInputBorder(
@@ -236,7 +236,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Center(
                           child: Text(
-                            "Forgot password",
+                            l10n.forgotPassword,
                             style:
                                 Theme.of(context).textTheme.subtitle1.copyWith(
                                       fontSize: 14,
@@ -248,8 +248,10 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                       GestureDetector(
                         behavior: HitTestBehavior.opaque,
                         onTap: () async {
-                          final dialog =
-                              createProgressDialog(context, "Please wait...");
+                          final dialog = createProgressDialog(
+                            context,
+                            l10n.pleaseWaitTitle,
+                          );
                           await dialog.show();
                           await Configuration.instance.logout();
                           await dialog.hide();
@@ -258,7 +260,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                         },
                         child: Center(
                           child: Text(
-                            "Change email",
+                            l10n.changeEmail,
                             style:
                                 Theme.of(context).textTheme.subtitle1.copyWith(
                                       fontSize: 14,
