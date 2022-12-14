@@ -10,11 +10,8 @@ import {
     ParsedMetadataJSONMap,
 } from 'types/upload';
 import { CustomError } from 'utils/error';
-import {
-    getFileTypeFromExtension,
-    isImageOrVideo,
-    splitFilenameAndExtension,
-} from 'utils/file';
+import { getFileTypeFromExtensionForLivePhotoClustering } from 'utils/file/livePhoto';
+import { splitFilenameAndExtension, isImageOrVideo } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from '../readerService';
 import { extractFileMetadata } from './fileService';
@@ -137,12 +134,14 @@ export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             }
             const firstMediaFile = mediaFiles[index];
             const secondMediaFile = mediaFiles[index + 1];
-            const firstFileType = getFileTypeFromExtension(
-                firstMediaFile.file.name
-            );
-            const secondFileType = getFileTypeFromExtension(
-                secondMediaFile.file.name
-            );
+            const firstFileType =
+                getFileTypeFromExtensionForLivePhotoClustering(
+                    firstMediaFile.file.name
+                );
+            const secondFileType =
+                getFileTypeFromExtensionForLivePhotoClustering(
+                    secondMediaFile.file.name
+                );
             const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
                 fileType: firstFileType,

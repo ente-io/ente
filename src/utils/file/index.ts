@@ -19,8 +19,6 @@ import {
     TYPE_HEIC,
     TYPE_HEIF,
     FILE_TYPE,
-    IMAGE_EXTENSIONS,
-    VIDEO_EXTENSIONS,
 } from 'constants/file';
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
@@ -271,15 +269,6 @@ export function splitFilenameAndExtension(filename: string): [string, string] {
 
 export function getFileExtension(filename: string) {
     return splitFilenameAndExtension(filename)[1]?.toLocaleLowerCase();
-}
-
-export function getFileTypeFromExtension(filename: string) {
-    const extension = getFileExtension(filename);
-    if (IMAGE_EXTENSIONS.includes(extension)) {
-        return FILE_TYPE.IMAGE;
-    } else if (VIDEO_EXTENSIONS.includes(extension)) {
-        return FILE_TYPE.VIDEO;
-    }
 }
 
 export function generateStreamFromArrayBuffer(data: Uint8Array) {

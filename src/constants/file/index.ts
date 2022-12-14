@@ -16,31 +16,3 @@ export enum FILE_TYPE {
     LIVE_PHOTO,
     OTHERS,
 }
-
-export const IMAGE_EXTENSIONS = [
-    'heic',
-    'heif',
-    'jpeg',
-    'jpg',
-    'png',
-    'gif',
-    'bmp',
-    'tiff',
-    'webp',
-];
-
-export const VIDEO_EXTENSIONS = [
-    'mov',
-    'mp4',
-    'm4v',
-    'avi',
-    'wmv',
-    'flv',
-    'mkv',
-    'webm',
-    '3gp',
-    '3g2',
-    'avi',
-    'ogv',
-    'mpg',
-];
