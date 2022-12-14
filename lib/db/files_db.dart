@@ -817,18 +817,6 @@ class FilesDB {
     );
   }
 
-  Future<int> getNumberOfUploadedFiles() async {
-    final db = await instance.database;
-    final rows = await db.query(
-      filesTable,
-      columns: [columnUploadedFileID],
-      where:
-          '($columnLocalID IS NOT NULL AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1) AND $columnUpdationTime IS NOT NULL)',
-      distinct: true,
-    );
-    return rows.length;
-  }
-
   Future<int> updateUploadedFile(
     String localID,
     String title,

@@ -9,7 +9,6 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/ui/payment/subscription.dart';
-import 'package:photos/ui/settings/storage_error_widget.dart';
 import 'package:photos/ui/settings/storage_progress_widget.dart';
 import 'package:photos/utils/data_util.dart';
 
@@ -51,6 +50,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
   @override
   Widget build(BuildContext context) {
     final inheritedUserDetails = InheritedUserDetails.of(context);
+    final userDetails = inheritedUserDetails?.userDetails;
 
     if (inheritedUserDetails == null) {
       _logger.severe(
@@ -72,13 +72,13 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
         onTapDown: (details) => _isStorageCardPressed.value = true,
         onTapCancel: () => _isStorageCardPressed.value = false,
         onTapUp: (details) => _isStorageCardPressed.value = false,
-        child: containerForUserDetails(inheritedUserDetails),
+        child: containerForUserDetails(userDetails),
       );
     }
   }
 
   Widget containerForUserDetails(
-    InheritedUserDetails inheritedUserDetails,
+    UserDetails? userDetails,
   ) {
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 350),
@@ -87,22 +87,11 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
         child: Stack(
           children: [
             _background,
-            FutureBuilder(
-              future: inheritedUserDetails.userDetails,
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return userDetails(snapshot.data as UserDetails);
-                }
-                if (snapshot.hasError) {
-                  _logger.severe(
-                    'failed to load user details',
-                    snapshot.error,
-                  );
-                  return const StorageErrorWidget();
-                }
-                return const EnteLoadingWidget(color: strokeBaseDark);
-              },
-            ),
+            userDetails is UserDetails
+                ? _userDetails(userDetails)
+                : const EnteLoadingWidget(
+                    color: strokeBaseDark,
+                  ),
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -124,7 +113,7 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     );
   }
 
-  Widget userDetails(UserDetails userDetails) {
+  Widget _userDetails(UserDetails userDetails) {
     const hundredMBinBytes = 107374182;
     const oneTBinBytes = 1073741824000;
 
