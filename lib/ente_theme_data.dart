@@ -343,6 +343,9 @@ extension CustomColorScheme on ColorScheme {
 
   EnteTheme get enteTheme =>
       brightness == Brightness.light ? lightTheme : darkTheme;
+
+  EnteTheme get inverseEnteTheme =>
+      brightness == Brightness.light ? darkTheme : lightTheme;
 }
 
 OutlinedButtonThemeData buildOutlinedButtonThemeData({

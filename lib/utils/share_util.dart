@@ -146,3 +146,15 @@ DateTime parseDateFromFileNam1e(String fileName) {
     );
   }
 }
+
+void shareSelected(
+  BuildContext context,
+  GlobalKey shareButtonKey,
+  Set<File> selectedFiles,
+) {
+  share(
+    context,
+    selectedFiles.toList(),
+    shareButtonKey: shareButtonKey,
+  );
+}

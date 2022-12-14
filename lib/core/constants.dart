@@ -44,9 +44,11 @@ const supportEmail = 'support@ente.io';
 class FFDefault {
   static const bool enableStripe = true;
   static const bool disableCFWorker = false;
-  static const bool enableCollect = false;
 }
 
 const kDefaultProductionEndpoint = 'https://api.ente.io';
 
 const int intMaxValue = 9223372036854775807;
+
+//Screen width of iPhone 14 pro max in points is taken as maximum
+const double restrictedMaxWidth = 430;

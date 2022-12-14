@@ -23,7 +23,7 @@ class UserAvatarWidget extends StatelessWidget {
     final enteTextTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     final displayChar = (user.name == null || user.name!.isEmpty)
-        ? ((user.email.isEmpty ?? true) ? " " : user.email.substring(0, 1))
+        ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))
         : user.name!.substring(0, 1);
     final randomColor = colorScheme.avatarColors[
         (user.id ?? 0).remainder(colorScheme.avatarColors.length)];
