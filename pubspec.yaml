@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 1.0.22+22
+version: 1.0.23+23
 publish_to: none
 
 environment:
@@ -51,7 +51,7 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   move_to_background: ^1.0.2
-  # open_file: ^3.2.1 Disabled to please PlayStore overlords
+  open_filex: ^4.3.2
   otp: ^3.1.1
   package_info_plus: ^1.0.1
   password_strength: ^0.2.0

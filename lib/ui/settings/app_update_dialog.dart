@@ -6,7 +6,7 @@ import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/services/update_service.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-// import 'package:open_file/open_file.dart';
+import 'package:open_filex/open_filex.dart';
 
 class AppUpdateDialog extends StatefulWidget {
   final LatestVersionInfo latestVersionInfo;
@@ -157,7 +157,7 @@ class _ApkDownloaderDialogState extends State<ApkDownloaderDialog> {
         },
       );
       Navigator.of(context, rootNavigator: true).pop('dialog');
-      // OpenFile.open(_saveUrl);
+      OpenFilex.open(_saveUrl);
     } catch (e) {
       Logger("ApkDownloader").severe(e);
       final AlertDialog alert = AlertDialog(
