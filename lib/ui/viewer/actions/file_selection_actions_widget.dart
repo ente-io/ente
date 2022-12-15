@@ -5,15 +5,19 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_file_breakup.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
 import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/utils/delete_file_util.dart';
+import 'package:photos/utils/magic_util.dart';
 
 class FileSelectionActionWidget extends StatefulWidget {
   final GalleryType type;
@@ -111,6 +115,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.delete_outline,
           labelText: "Delete$suffix",
           menuItemColor: colorScheme.fillFaint,
+          onTap: _onDeleteClick,
         ),
       );
     }
@@ -121,6 +126,16 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.visibility_off_outlined,
           labelText: "Hide$suffix",
           menuItemColor: colorScheme.fillFaint,
+          onTap: _onHideClick,
+        ),
+      );
+    } else if (widget.type.showUnHideOption()) {
+      firstList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.visibility_off_outlined,
+          labelText: "Unhide$suffix",
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _onUnhideClick,
         ),
       );
     }
@@ -130,6 +145,16 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.archive_outlined,
           labelText: "Archive$suffix",
           menuItemColor: colorScheme.fillFaint,
+          onTap: _onArchiveClick,
+        ),
+      );
+    } else if (widget.type.showUnArchiveOption()) {
+      firstList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.unarchive_outlined,
+          labelText: "Unarchive$suffix",
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _onUnArchiveClick,
         ),
       );
     }
@@ -141,6 +166,15 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           labelText: "Favorite$suffix",
           menuItemColor: colorScheme.fillFaint,
           onTap: _onFavoriteClick,
+        ),
+      );
+    } else if (widget.type.showUnFavoriteOption()) {
+      firstList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.favorite,
+          labelText: "Remove from favorite$suffix",
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _onUnFavoriteClick,
         ),
       );
     }
@@ -171,6 +205,10 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     await _selectionCollectionForAction(CollectionActionType.addFiles);
   }
 
+  Future<void> _onDeleteClick() async {
+    showDeleteSheet(context, widget.selectedFiles);
+  }
+
   Future<void> _removeFilesFromAlbum() async {
     await collectionActions.showRemoveFromCollectionSheet(
       context,
@@ -188,6 +226,54 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     if (result) {
       widget.selectedFiles.clearAll();
     }
+  }
+
+  Future<void> _onUnFavoriteClick() async {
+    final result = await collectionActions.updateFavorites(
+      context,
+      split.ownedByCurrentUser,
+      false,
+    );
+    if (result) {
+      widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<void> _onArchiveClick() async {
+    await changeVisibility(
+      context,
+      split.ownedByCurrentUser,
+      visibilityArchive,
+    );
+    widget.selectedFiles.clearAll();
+  }
+
+  Future<void> _onUnArchiveClick() async {
+    await changeVisibility(
+      context,
+      split.ownedByCurrentUser,
+      visibilityVisible,
+    );
+    widget.selectedFiles.clearAll();
+  }
+
+  Future<void> _onHideClick() async {
+    await CollectionsService.instance.hideFiles(
+      context,
+      split.ownedByCurrentUser,
+    );
+
+    widget.selectedFiles.clearAll();
+  }
+
+  Future<void> _onUnhideClick() async {
+    if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
+      widget.selectedFiles
+          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
+      widget.selectedFiles
+          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+    }
+    await _selectionCollectionForAction(CollectionActionType.unHide);
   }
 
   Future<Object?> _selectionCollectionForAction(

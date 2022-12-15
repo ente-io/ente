@@ -19,10 +19,10 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.localFolder:
       case GalleryType.ownedCollection:
       case GalleryType.searchResults:
+      case GalleryType.favorite:
         return true;
 
       case GalleryType.hidden:
-      case GalleryType.favorite:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
         return false;
@@ -95,6 +95,10 @@ extension GalleyTypeExtension on GalleryType {
     }
   }
 
+  bool showUnArchiveOption() {
+    return this == GalleryType.archive;
+  }
+
   bool showHideOption() {
     switch (this) {
       case GalleryType.ownedCollection:
@@ -110,6 +114,10 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
         return false;
     }
+  }
+
+  bool showUnHideOption() {
+    return this == GalleryType.hidden;
   }
 
   bool showFavoriteOption() {

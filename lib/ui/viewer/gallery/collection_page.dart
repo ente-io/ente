@@ -1,7 +1,6 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -60,8 +59,6 @@ class _CollectionPageState extends State<CollectionPage> {
     if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
       return const EmptyState();
     }
-    final int ownerID = Configuration.instance.getUserID();
-    final int collectionOwner = widget.c.collection.owner.id;
     final initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail] : null;
     final gallery = Gallery(
