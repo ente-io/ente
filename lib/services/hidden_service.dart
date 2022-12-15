@@ -86,6 +86,7 @@ extension HiddenService on CollectionsService {
     } on AssertionError catch (e) {
       await dialog.hide();
       showErrorDialog(context, "Oops", e.message as String);
+      return false;
     } catch (e, s) {
       _logger.severe("Could not hide", e, s);
       await dialog.hide();
