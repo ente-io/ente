@@ -22,9 +22,12 @@ class BlurMenuItemWidget extends StatefulWidget {
 
 class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
   Color? menuItemColor;
+  late bool isDisabled;
+
   @override
   void initState() {
     menuItemColor = widget.menuItemColor;
+    isDisabled = widget.onTap == null;
     super.initState();
   }
 
@@ -44,7 +47,7 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
       onTapCancel: _onCancel,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 20),
-        color: menuItemColor,
+        color: isDisabled ? colorScheme.fillFaint : menuItemColor,
         padding: const EdgeInsets.only(left: 16, right: 12),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -56,7 +59,9 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
                       child: Icon(
                         widget.leadingIcon,
                         size: 20,
-                        color: colorScheme.blurStrokeBase,
+                        color: isDisabled
+                            ? colorScheme.strokeMuted
+                            : colorScheme.blurStrokeBase,
                       ),
                     )
                   : const SizedBox.shrink(),
@@ -71,9 +76,12 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
                                 widget.labelText!,
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
-                                style: getEnteTextTheme(context)
-                                    .bodyBold
-                                    .copyWith(color: colorScheme.blurTextBase),
+                                style:
+                                    getEnteTextTheme(context).bodyBold.copyWith(
+                                          color: isDisabled
+                                              ? colorScheme.textFaint
+                                              : colorScheme.blurTextBase,
+                                        ),
                               ),
                             ),
                           ],
