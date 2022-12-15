@@ -20,22 +20,13 @@ import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
 import { EnteFile } from 'types/file';
 import {
-    ElectronFile,
     FileWithCollection,
-    Metadata,
-    MetadataAndFileTypeInfo,
-    MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
     PublicUploadProps,
 } from 'types/upload';
-import {
-    UPLOAD_RESULT,
-    MAX_FILE_SIZE_SUPPORTED,
-    UPLOAD_STAGES,
-} from 'constants/upload';
+import { UPLOAD_RESULT, UPLOAD_STAGES } from 'constants/upload';
 import { ComlinkWorker } from 'utils/comlink';
-import { FILE_TYPE } from 'constants/file';
 import uiService from './uiService';
 import { addLogLine, getFileNameSize } from 'utils/logging';
 import isElectron from 'is-electron';
@@ -54,7 +45,6 @@ const FILE_UPLOAD_COMPLETED = 100;
 class UploadManager {
     private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
     private parsedMetadataJSONMap: ParsedMetadataJSONMap;
-    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap;
     private filesToBeUploaded: FileWithCollection[];
     private remainingFiles: FileWithCollection[] = [];
     private failedFiles: FileWithCollection[];
@@ -85,10 +75,7 @@ class UploadManager {
         this.remainingFiles = [];
         this.failedFiles = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
-        this.metadataAndFileTypeInfoMap = new Map<
-            number,
-            MetadataAndFileTypeInfo
-        >();
+
         this.uploaderName = null;
     }
 
@@ -157,51 +144,18 @@ class UploadManager {
                 );
             }
             if (mediaFiles.length) {
-                UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
-                const worker = await new this.cryptoWorkers[0].comlink();
-                await this.extractMetadataFromFiles(worker, mediaFiles);
-
-                UploadService.setMetadataAndFileTypeInfoMap(
-                    this.metadataAndFileTypeInfoMap
-                );
-
-                // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
-                // as they will be rejected during upload and are not valid upload files which we need to clustering
-                const rejectedFileLocalIDs = new Set(
-                    [...this.metadataAndFileTypeInfoMap.entries()].map(
-                        ([localID, metadataAndFileTypeInfo]) => {
-                            if (
-                                !metadataAndFileTypeInfo.metadata ||
-                                !metadataAndFileTypeInfo.fileTypeInfo
-                            ) {
-                                return localID;
-                            }
-                        }
-                    )
-                );
-                const rejectedFiles = [];
-                const filesWithMetadata = [];
-                mediaFiles.forEach((m) => {
-                    if (rejectedFileLocalIDs.has(m.localID)) {
-                        rejectedFiles.push(m);
-                    } else {
-                        filesWithMetadata.push(m);
-                    }
-                });
-
                 addLogLine(`clusterLivePhotoFiles started`);
-
                 const analysedMediaFiles =
-                    UploadService.clusterLivePhotoFiles(filesWithMetadata);
-
+                    await UploadService.clusterLivePhotoFiles(mediaFiles);
                 addLogLine(`clusterLivePhotoFiles ended`);
-                const allFiles = [...rejectedFiles, ...analysedMediaFiles];
                 addLogLine(
-                    `got live photos: ${mediaFiles.length !== allFiles.length}`
+                    `got live photos: ${
+                        mediaFiles.length !== analysedMediaFiles.length
+                    }`
                 );
                 uiService.setFilenames(
                     new Map<number, string>(
-                        allFiles.map((mediaFile) => [
+                        analysedMediaFiles.map((mediaFile) => [
                             mediaFile.localID,
                             UploadService.getAssetName(mediaFile),
                         ])
@@ -209,10 +163,10 @@ class UploadManager {
                 );
 
                 UIService.setHasLivePhoto(
-                    mediaFiles.length !== allFiles.length
+                    mediaFiles.length !== analysedMediaFiles.length
                 );
 
-                await this.uploadMediaFiles(allFiles);
+                await this.uploadMediaFiles(analysedMediaFiles);
             }
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
@@ -294,110 +248,6 @@ class UploadManager {
                 logError(e, 'error seeding MetadataMap');
             }
             throw e;
-        }
-    }
-
-    private async extractMetadataFromFiles(
-        worker,
-        mediaFiles: FileWithCollection[]
-    ) {
-        try {
-            addLogLine(`extractMetadataFromFiles executed`);
-            UIService.reset(mediaFiles.length);
-            for (const { file, localID, collectionID } of mediaFiles) {
-                UIService.setFileProgress(localID, 0);
-                if (uploadCancelService.isUploadCancelationRequested()) {
-                    throw Error(CustomError.UPLOAD_CANCELLED);
-                }
-                let fileTypeInfo = null;
-                let metadata = null;
-                let filePath = null;
-                try {
-                    addLogLine(
-                        `metadata extraction started ${getFileNameSize(file)} `
-                    );
-                    const result = await this.extractFileTypeAndMetadata(
-                        worker,
-                        file,
-                        collectionID,
-                        this.publicUploadProps?.accessedThroughSharedURL
-                    );
-                    fileTypeInfo = result.fileTypeInfo;
-                    metadata = result.metadata;
-                    filePath = result.filePath;
-                    addLogLine(
-                        `metadata extraction successful${getFileNameSize(
-                            file
-                        )} `
-                    );
-                } catch (e) {
-                    if (e.message === CustomError.UPLOAD_CANCELLED) {
-                        throw e;
-                    } else {
-                        // and don't break for subsequent files just log and move on
-                        logError(e, 'extractFileTypeAndMetadata failed');
-                        addLogLine(
-                            `metadata extraction failed ${getFileNameSize(
-                                file
-                            )} error: ${e.message}`
-                        );
-                    }
-                }
-                this.metadataAndFileTypeInfoMap.set(localID, {
-                    fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
-                    metadata: metadata && { ...metadata },
-                    filePath: filePath,
-                });
-                UIService.removeFromInProgressList(localID);
-                UIService.increaseFileUploaded();
-            }
-        } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, 'error extracting metadata');
-            }
-            throw e;
-        }
-    }
-
-    private async extractFileTypeAndMetadata(
-        worker,
-        file: File | ElectronFile,
-        collectionID: number,
-        skipVideos: boolean
-    ) {
-        if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
-            addLogLine(
-                `${getFileNameSize(file)} rejected  because of large size`
-            );
-
-            return { fileTypeInfo: null, metadata: null };
-        }
-        const fileTypeInfo = await UploadService.getFileType(file);
-        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-            addLogLine(
-                `${getFileNameSize(
-                    file
-                )} rejected  because of unknown file format`
-            );
-            return { fileTypeInfo, metadata: null };
-        }
-        if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
-            return { fileTypeInfo, metadata: null };
-        }
-        addLogLine(` extracting ${getFileNameSize(file)} metadata`);
-        let metadata: Metadata;
-        try {
-            metadata = await UploadService.extractFileMetadata(
-                worker,
-                file,
-                collectionID,
-                fileTypeInfo
-            );
-            const filePath = (file as any).path as string;
-            return { fileTypeInfo, metadata, filePath };
-        } catch (e) {
-            logError(e, 'failed to extract file metadata');
-            return { fileTypeInfo, metadata: null, filePath: null };
         }
     }
 

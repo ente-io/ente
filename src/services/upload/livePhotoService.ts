@@ -1,20 +1,23 @@
 import { FILE_TYPE } from 'constants/file';
 import { LIVE_PHOTO_ASSET_SIZE_LIMIT } from 'constants/upload';
 import { encodeMotionPhoto } from 'services/motionPhotoService';
+import { getFileType } from 'services/typeDetectionService';
 import {
     ElectronFile,
     FileTypeInfo,
     FileWithCollection,
     LivePhotoAssets,
-    Metadata,
+    ParsedMetadataJSONMap,
 } from 'types/upload';
 import { CustomError } from 'utils/error';
-import { isImageOrVideo, splitFilenameAndExtension } from 'utils/file';
+import { getFileTypeFromExtensionForLivePhotoClustering } from 'utils/file/livePhoto';
+import { splitFilenameAndExtension, isImageOrVideo } from 'utils/file';
 import { logError } from 'utils/sentry';
 import { getUint8ArrayView } from '../readerService';
+import { extractFileMetadata } from './fileService';
+import { getFileHash } from './hashService';
 import { generateThumbnail } from './thumbnailService';
-import uploadService from './uploadService';
-import UploadService from './uploadService';
+import uploadCancelService from './uploadCancelService';
 
 interface LivePhotoIdentifier {
     collectionID: number;
@@ -23,55 +26,61 @@ interface LivePhotoIdentifier {
     size: number;
 }
 
-interface Asset {
-    file: File | ElectronFile;
-    metadata: Metadata;
-    fileTypeInfo: FileTypeInfo;
-}
-
 const ENTE_LIVE_PHOTO_FORMAT = 'elp';
 
 const UNDERSCORE_THREE = '_3';
 
 const UNDERSCORE = '_';
 
-export function getLivePhotoFileType(
-    imageFileTypeInfo: FileTypeInfo,
-    videoTypeInfo: FileTypeInfo
-): FileTypeInfo {
+export async function getLivePhotoFileType(
+    livePhotoAssets: LivePhotoAssets
+): Promise<FileTypeInfo> {
+    const imageFileTypeInfo = await getFileType(livePhotoAssets.image);
+    const videoFileTypeInfo = await getFileType(livePhotoAssets.video);
     return {
         fileType: FILE_TYPE.LIVE_PHOTO,
-        exactType: `${imageFileTypeInfo.exactType}+${videoTypeInfo.exactType}`,
+        exactType: `${imageFileTypeInfo.exactType}+${videoFileTypeInfo.exactType}`,
         imageType: imageFileTypeInfo.exactType,
-        videoType: videoTypeInfo.exactType,
+        videoType: videoFileTypeInfo.exactType,
     };
 }
 
-export function getLivePhotoMetadata(
-    imageMetadata: Metadata,
-    videoMetadata: Metadata
+export async function extractLivePhotoMetadata(
+    worker,
+    parsedMetadataJSONMap: ParsedMetadataJSONMap,
+    collectionID: number,
+    fileTypeInfo: FileTypeInfo,
+    livePhotoAssets: LivePhotoAssets
 ) {
+    const imageFileTypeInfo: FileTypeInfo = {
+        fileType: FILE_TYPE.IMAGE,
+        exactType: fileTypeInfo.imageType,
+    };
+    const imageMetadata = await extractFileMetadata(
+        worker,
+        parsedMetadataJSONMap,
+        collectionID,
+        imageFileTypeInfo,
+        livePhotoAssets.image
+    );
+    const videoHash = await getFileHash(worker, livePhotoAssets.video);
     return {
         ...imageMetadata,
-        title: getLivePhotoName(imageMetadata.title),
+        title: getLivePhotoName(livePhotoAssets),
         fileType: FILE_TYPE.LIVE_PHOTO,
         imageHash: imageMetadata.hash,
-        videoHash: videoMetadata.hash,
+        videoHash: videoHash,
         hash: undefined,
     };
-}
-
-export function getLivePhotoFilePath(imageAsset: Asset): string {
-    return getLivePhotoName((imageAsset.file as any).path);
 }
 
 export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
     return livePhotoAssets.image.size + livePhotoAssets.video.size;
 }
 
-export function getLivePhotoName(imageTitle: string) {
+export function getLivePhotoName(livePhotoAssets: LivePhotoAssets) {
     return `${
-        splitFilenameAndExtension(imageTitle)[0]
+        splitFilenameAndExtension(livePhotoAssets.image.name)[0]
     }.${ENTE_LIVE_PHOTO_FORMAT}`;
 }
 
@@ -103,7 +112,7 @@ export async function readLivePhoto(
     };
 }
 
-export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
+export async function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
     try {
         const analysedMediaFiles: FileWithCollection[] = [];
         mediaFiles
@@ -120,41 +129,30 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
             );
         let index = 0;
         while (index < mediaFiles.length - 1) {
+            if (uploadCancelService.isUploadCancelationRequested()) {
+                throw Error(CustomError.UPLOAD_CANCELLED);
+            }
             const firstMediaFile = mediaFiles[index];
             const secondMediaFile = mediaFiles[index + 1];
-            const {
-                fileTypeInfo: firstFileTypeInfo,
-                metadata: firstFileMetadata,
-            } = UploadService.getFileMetadataAndFileTypeInfo(
-                firstMediaFile.localID
-            );
-            const {
-                fileTypeInfo: secondFileFileInfo,
-                metadata: secondFileMetadata,
-            } = UploadService.getFileMetadataAndFileTypeInfo(
-                secondMediaFile.localID
-            );
+            const firstFileType =
+                getFileTypeFromExtensionForLivePhotoClustering(
+                    firstMediaFile.file.name
+                );
+            const secondFileType =
+                getFileTypeFromExtensionForLivePhotoClustering(
+                    secondMediaFile.file.name
+                );
             const firstFileIdentifier: LivePhotoIdentifier = {
                 collectionID: firstMediaFile.collectionID,
-                fileType: firstFileTypeInfo.fileType,
+                fileType: firstFileType,
                 name: firstMediaFile.file.name,
                 size: firstMediaFile.file.size,
             };
             const secondFileIdentifier: LivePhotoIdentifier = {
                 collectionID: secondMediaFile.collectionID,
-                fileType: secondFileFileInfo.fileType,
+                fileType: secondFileType,
                 name: secondMediaFile.file.name,
                 size: secondMediaFile.file.size,
-            };
-            const firstAsset = {
-                file: firstMediaFile.file,
-                metadata: firstFileMetadata,
-                fileTypeInfo: firstFileTypeInfo,
-            };
-            const secondAsset = {
-                file: secondMediaFile.file,
-                metadata: secondFileMetadata,
-                fileTypeInfo: secondFileFileInfo,
             };
             if (
                 areFilesLivePhotoAssets(
@@ -162,17 +160,17 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                     secondFileIdentifier
                 )
             ) {
-                let imageAsset: Asset;
-                let videoAsset: Asset;
+                let imageFile: File | ElectronFile;
+                let videoFile: File | ElectronFile;
                 if (
-                    firstFileTypeInfo.fileType === FILE_TYPE.IMAGE &&
-                    secondFileFileInfo.fileType === FILE_TYPE.VIDEO
+                    firstFileType === FILE_TYPE.IMAGE &&
+                    secondFileType === FILE_TYPE.VIDEO
                 ) {
-                    imageAsset = firstAsset;
-                    videoAsset = secondAsset;
+                    imageFile = firstMediaFile.file;
+                    videoFile = secondMediaFile.file;
                 } else {
-                    videoAsset = firstAsset;
-                    imageAsset = secondAsset;
+                    videoFile = firstMediaFile.file;
+                    imageFile = secondMediaFile.file;
                 }
                 const livePhotoLocalID = firstMediaFile.localID;
                 analysedMediaFiles.push({
@@ -180,24 +178,9 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
                     collectionID: firstMediaFile.collectionID,
                     isLivePhoto: true,
                     livePhotoAssets: {
-                        image: imageAsset.file,
-                        video: videoAsset.file,
+                        image: imageFile,
+                        video: videoFile,
                     },
-                });
-                const livePhotoFileTypeInfo: FileTypeInfo =
-                    getLivePhotoFileType(
-                        imageAsset.fileTypeInfo,
-                        videoAsset.fileTypeInfo
-                    );
-                const livePhotoMetadata: Metadata = getLivePhotoMetadata(
-                    imageAsset.metadata,
-                    videoAsset.metadata
-                );
-                const livePhotoPath = getLivePhotoFilePath(imageAsset);
-                uploadService.setFileMetadataAndFileTypeInfo(livePhotoLocalID, {
-                    fileTypeInfo: { ...livePhotoFileTypeInfo },
-                    metadata: { ...livePhotoMetadata },
-                    filePath: livePhotoPath,
                 });
                 index += 2;
             } else {
@@ -216,8 +199,12 @@ export function clusterLivePhotoFiles(mediaFiles: FileWithCollection[]) {
         }
         return analysedMediaFiles;
     } catch (e) {
-        logError(e, 'failed to cluster live photo');
-        throw e;
+        if (e.message === CustomError.UPLOAD_CANCELLED) {
+            throw e;
+        } else {
+            logError(e, 'failed to cluster live photo');
+            throw e;
+        }
     }
 }
 

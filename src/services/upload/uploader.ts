@@ -6,7 +6,12 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
 import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
-import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
+import {
+    FileWithCollection,
+    BackupedFile,
+    UploadFile,
+    FileTypeInfo,
+} from 'types/upload';
 import { addLocalLog, addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
@@ -33,22 +38,31 @@ export default async function uploader(
     addLogLine(`uploader called for  ${fileNameSize}`);
     UIService.setFileProgress(localID, 0);
     await sleep(0);
-    const { fileTypeInfo, metadata } =
-        UploadService.getFileMetadataAndFileTypeInfo(localID);
+    let fileTypeInfo: FileTypeInfo;
     try {
         const fileSize = UploadService.getAssetSize(uploadAsset);
         if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
+        addLogLine(`getting filetype ${fileNameSize}`);
+        fileTypeInfo = await UploadService.getAssetFileType(uploadAsset);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         if (skipVideos && fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
+            addLogLine(
+                `skipped  video upload for public upload ${fileNameSize}`
+            );
             return { fileUploadResult: UPLOAD_RESULT.SKIPPED_VIDEOS };
         }
-        if (!metadata) {
-            throw Error(CustomError.NO_METADATA);
-        }
+
+        addLogLine(`extracting  metadata ${fileNameSize}`);
+        const metadata = await UploadService.extractAssetMetadata(
+            worker,
+            uploadAsset,
+            collection.id,
+            fileTypeInfo
+        );
 
         const matchingExistingFiles = findMatchingExistingFiles(
             existingFiles,
