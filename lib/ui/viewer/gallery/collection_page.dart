@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -10,14 +11,10 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
-import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
-import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
+import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
-import 'package:photos/utils/delete_file_util.dart';
-import 'package:photos/utils/share_util.dart';
 
 class CollectionPage extends StatefulWidget {
   final CollectionWithThumbnail c;
@@ -39,12 +36,16 @@ class CollectionPage extends StatefulWidget {
 
 class _CollectionPageState extends State<CollectionPage> {
   final _selectedFiles = SelectedFiles();
-  final GlobalKey shareButtonKey = GlobalKey();
 
+  bool _isCollectionOwner = false;
+  final GlobalKey shareButtonKey = GlobalKey();
   final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
+
   @override
   void initState() {
     _selectedFiles.addListener(_selectedFilesListener);
+    _isCollectionOwner =
+        Configuration.instance.getUserID() == widget.c.collection.owner.id;
     super.initState();
   }
 
@@ -107,50 +108,11 @@ class _CollectionPageState extends State<CollectionPage> {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          ValueListenableBuilder(
-            valueListenable: _bottomPosition,
-            builder: (context, value, child) {
-              return AnimatedPositioned(
-                curve: Curves.easeInOutExpo,
-                bottom: _bottomPosition.value,
-                right: 0,
-                left: 0,
-                duration: const Duration(milliseconds: 400),
-                child: BottomActionBarWidget(
-                  selectedFiles: _selectedFiles,
-                  hasSmallerBottomPadding: true,
-                  type: widget.appBarType,
-                  expandedMenu: FileSelectionActionWidget(
-                    widget.appBarType,
-                    _selectedFiles,
-                    collection: widget.c.collection,
-                  ),
-                  text: _selectedFiles.files.length.toString() + ' selected',
-                  onCancel: () {
-                    if (_selectedFiles.files.isNotEmpty) {
-                      _selectedFiles.clearAll();
-                    }
-                  },
-                  iconButtons: [
-                    IconButtonWidget(
-                      icon: Icons.delete_outlined,
-                      iconButtonType: IconButtonType.primary,
-                      onTap: () => showDeleteSheet(context, _selectedFiles),
-                    ),
-                    IconButtonWidget(
-                      icon: Icons.ios_share_outlined,
-                      iconButtonType: IconButtonType.primary,
-                      onTap: () => shareSelected(
-                        context,
-                        shareButtonKey,
-                        _selectedFiles.files,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+          FileSelectionOverlayBar(
+            widget.appBarType,
+            _selectedFiles,
+            collection: widget.c.collection,
+          )
         ],
       ),
     );
