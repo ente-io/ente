@@ -67,7 +67,8 @@ class ButtonWidget extends StatelessWidget {
     buttonStyle.disabledButtonColor =
         buttonType.disabledButtonColor(colorScheme);
     buttonStyle.defaultBorderColor = buttonType.defaultBorderColor(colorScheme);
-    buttonStyle.pressedBorderColor = buttonType.pressedBorderColor(colorScheme);
+    buttonStyle.pressedBorderColor = buttonType.pressedBorderColor(
+        colorScheme: colorScheme, inverseColorScheme: inverseColorScheme);
     buttonStyle.disabledBorderColor =
         buttonType.disabledBorderColor(colorScheme);
     buttonStyle.defaultIconColor = buttonType.defaultIconColor(
