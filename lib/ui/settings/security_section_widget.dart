@@ -90,7 +90,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            "Hiding from the task switcher will prevent you from taking screenshots in this app.",
+                            "Hiding from the task switcher may prevent you from taking screenshots in this app.",
                             style: TextStyle(
                               height: 1.5,
                             ),
