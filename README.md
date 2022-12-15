@@ -4,7 +4,7 @@
 
 We have open-source apps across Android, iOS, web and desktop that automatically backup your photos and videos.
 
-This repository contains the code for our mobile apps, built with a lot of ❤️, and a little bit of [Flutter.](https://flutter.dev)
+This repository contains the code for our mobile apps, built with a lot of ❤️, and a little bit of [Flutter](https://flutter.dev).
 
 ![App Screenshots](https://user-images.githubusercontent.com/24503581/175218240-fe5a0703-82c1-4750-bfea-abfd9f409a97.png)
 
@@ -35,7 +35,11 @@ This repository contains the code for our mobile apps, built with a lot of ❤�
 
 ### Android
 
-This [repository's GitHub releases](https://github.com/ente-io/frame/releases) contains APKs, built straight from source. The latest build is available @ [ente.io/apk](https://ente.io/apk). These builds keep themselves updated, without relying on third party stores.
+This [repository's GitHub
+releases](https://github.com/ente-io/photos-app/releases) contains APKs, built
+straight from source. The latest build is available @
+[ente.io/apk](https://ente.io/apk). These builds keep themselves updated,
+without relying on third party stores.
 
 You can alternatively install the build from PlayStore or F-Droid.
 
@@ -58,10 +62,10 @@ You can alternatively install the build from PlayStore or F-Droid.
 ## 🧑‍💻 Building from source
 
 1. [Install Flutter](https://flutter.dev/docs/get-started/install)
-2. Clone this repository with `git clone git@github.com:ente-io/frame.git` 
+2. Clone this repository with `git clone git@github.com:ente-io/photos-app.git`
 3. Pull in all submodules with `git submodule update --init --recursive`
 4. For Android, run `flutter build apk --release --flavor independent`
-5. For iOS, run `flutter build ios` 
+5. For iOS, run `flutter build ios`
 
 <br/>
 
@@ -81,7 +85,8 @@ We maintain a public roadmap, that's driven by our community @ [roadmap.ente.io]
 
 If you like this project, please consider upgrading to a paid subscription.
 
-If you would like to motivate us to keep building, you can do so by [starring](https://github.com/ente-io/frame/stargazers) this project.
+If you would like to motivate us to keep building, you can do so by
+[starring](https://github.com/ente-io/photos-app/stargazers) this project.
 
 <br/>
 
