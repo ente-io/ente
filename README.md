@@ -94,7 +94,7 @@ tokens has been documented [here](architecture/README.md).
 If you need help, please reach out to support@ente.io, and a human will get in
 touch with you.
 
-If you have feature requests, please create a [GitHub issue](./issues).
+If you have feature requests, please create a [GitHub issue](https://github.com/ente-io/auth/issues/).
 
 If you wish to support us, please ⭐
 [star](https://github.com/ente-io/auth/stargazers) this project.
