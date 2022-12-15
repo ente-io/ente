@@ -39,7 +39,10 @@ import {
     PICKED_UPLOAD_TYPE,
 } from 'constants/upload';
 import importService from 'services/importService';
-import { getDownloadAppMessage } from 'utils/ui';
+import {
+    getDownloadAppMessage,
+    getRootLevelFileWithFolderNotAllowMessage,
+} from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
 import {
     filterOutSystemFiles,
@@ -660,19 +663,28 @@ export default function Uploader(props: Props) {
         }
     };
 
+    const handleUploadToSingleCollection = () => {
+        uploadToSingleNewCollection(importSuggestion.rootFolderName);
+    };
+
+    const handleUploadToMultipleCollections = () => {
+        if (importSuggestion.hasRootLevelFileWithFolder) {
+            appContext.setDialogMessage(
+                getRootLevelFileWithFolderNotAllowMessage()
+            );
+            props.setLoading(false);
+            return;
+        }
+        uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+    };
+
     return (
         <>
             <UploadStrategyChoiceModal
                 open={choiceModalView}
                 onClose={handleChoiceModalClose}
-                uploadToSingleCollection={() =>
-                    uploadToSingleNewCollection(importSuggestion.rootFolderName)
-                }
-                uploadToMultipleCollection={() =>
-                    uploadFilesToNewCollections(
-                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
-                    )
-                }
+                uploadToSingleCollection={handleUploadToSingleCollection}
+                uploadToMultipleCollection={handleUploadToMultipleCollections}
             />
             <UploadTypeSelector
                 show={props.uploadTypeSelectorView}

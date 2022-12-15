@@ -229,7 +229,7 @@ const englishConstants = {
     LOGOUT_MESSAGE: 'Are you sure you want to logout?',
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
-    OK: 'Ok',
+    OK: 'OK',
     SUCCESS: 'Success',
     ERROR: 'Error',
     MESSAGE: 'Message',
@@ -879,6 +879,10 @@ const englishConstants = {
     YESTERDAY: 'Yesterday',
     AT: 'at',
     NAME_PLACEHOLDER: 'Name...',
+    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED:
+        'Cannot simultaneously upload a mix of files and folders',
+    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE:
+        'You have dragged and dropped a mixture of files and folders. Please provide either only files, or only folders.',
 };
 
 export default englishConstants;

@@ -143,6 +143,7 @@ export interface ParsedExtractedMetadata {
 export interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
+    hasRootLevelFileWithFolder: boolean;
 }
 
 export interface PublicUploadProps {
