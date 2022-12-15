@@ -22,12 +22,12 @@ class BlurMenuItemWidget extends StatefulWidget {
 
 class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
   Color? menuItemColor;
-  late bool isDisabled;
+  bool isDisabled = false;
 
   @override
   void initState() {
     menuItemColor = widget.menuItemColor;
-    isDisabled = widget.onTap == null;
+    isDisabled = (widget.onTap == null);
     super.initState();
   }
 
@@ -39,6 +39,7 @@ class _BlurMenuItemWidgetState extends State<BlurMenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    isDisabled = (widget.onTap == null);
     final colorScheme = getEnteColorScheme(context);
     return GestureDetector(
       onTap: widget.onTap,

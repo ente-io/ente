@@ -43,6 +43,7 @@ class CollectionItem extends StatelessWidget {
                             c.thumbnail,
                             shouldShowArchiveStatus: c.collection.isArchived(),
                             showFavForAlbumOnly: true,
+                            shownAsAlbumCover: true,
                             key: Key(heroTag),
                           )
                         : const NoThumbnailWidget(),

@@ -296,6 +296,7 @@ class OutgoingCollectionItem extends StatelessWidget {
                   tag: "outgoing_collection" + c.thumbnail.tag,
                   child: ThumbnailWidget(
                     c.thumbnail,
+                    shownAsAlbumCover: true,
                     key: Key("outgoing_collection" + c.thumbnail.tag),
                   ),
                 ),
@@ -388,6 +389,7 @@ class IncomingCollectionItem extends StatelessWidget {
                     child: ThumbnailWidget(
                       c.thumbnail,
                       key: Key("shared_collection" + c.thumbnail.tag),
+                      shownAsAlbumCover: true,
                     ),
                   ),
                   Align(

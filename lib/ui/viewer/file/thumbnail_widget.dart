@@ -30,6 +30,7 @@ class ThumbnailWidget extends StatefulWidget {
   final Duration diskLoadDeferDuration;
   final Duration serverLoadDeferDuration;
   final int thumbnailSize;
+  final bool shownAsAlbumCover;
 
   ThumbnailWidget(
     this.file, {
@@ -39,6 +40,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowLivePhotoOverlay = false,
     this.shouldShowArchiveStatus = false,
     this.showFavForAlbumOnly = false,
+    this.shownAsAlbumCover = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
@@ -114,7 +116,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
       if (widget.file.ownerID != null &&
-          widget.file.ownerID != Configuration.instance.getUserID()) {
+          widget.file.ownerID != Configuration.instance.getUserID() &&
+          widget.shownAsAlbumCover == false) {
+        // hide this icon if the current thumbnail is being showed as album
+        // cover
         contentChildren.add(
           OwnerAvatarOverlayIcon(
             User(

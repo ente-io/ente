@@ -270,7 +270,6 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       context,
       split.ownedByCurrentUser,
     );
-
     widget.selectedFiles.clearAll();
   }
 
