@@ -20,7 +20,6 @@ import 'package:photos/events/sync_status_update_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/trigger_logout_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
-import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/local_sync_service.dart';
@@ -47,7 +46,6 @@ import 'package:photos/ui/notification/update/change_log_page.dart';
 import 'package:photos/ui/settings/app_update_dialog.dart';
 import 'package:photos/ui/settings_page.dart';
 import 'package:photos/ui/shared_collections_gallery.dart';
-import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
@@ -69,6 +67,7 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   final _logger = Logger("HomeWidgetState");
   final _selectedFiles = SelectedFiles();
+  final GlobalKey shareButtonKey = GlobalKey();
 
   final PageController _pageController = PageController();
   int _selectedTabIndex = 0;
@@ -377,10 +376,6 @@ class _HomeWidgetState extends State<HomeWidget> {
               selectedTabIndex: _selectedTabIndex,
             ),
           ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: GalleryOverlayWidget(GalleryType.homepage, _selectedFiles),
         ),
       ],
     );

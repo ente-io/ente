@@ -50,6 +50,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(
+        '$runtimeType building with ${widget.selectedFiles.files.length}');
     return ValueListenableBuilder(
       valueListenable: _bottomPosition,
       builder: (context, value, child) {
