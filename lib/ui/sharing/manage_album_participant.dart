@@ -27,8 +27,8 @@ class ManageIndividualParticipant extends StatefulWidget {
 
 class _ManageIndividualParticipantState
     extends State<ManageIndividualParticipant> {
-  final CollectionSharingActions sharingActions =
-      CollectionSharingActions(CollectionsService.instance);
+  final CollectionActions collectionActions =
+      CollectionActions(CollectionsService.instance);
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,8 @@ class _ManageIndividualParticipantState
               onTap: widget.user.isCollaborator
                   ? null
                   : () async {
-                      final result = await sharingActions.addEmailToCollection(
+                      final result =
+                          await collectionActions.addEmailToCollection(
                         context,
                         widget.collection,
                         widget.user.email,
@@ -105,7 +106,8 @@ class _ManageIndividualParticipantState
               onTap: widget.user.isViewer
                   ? null
                   : () async {
-                      final result = await sharingActions.addEmailToCollection(
+                      final result =
+                          await collectionActions.addEmailToCollection(
                         context,
                         widget.collection,
                         widget.user.email,
@@ -136,7 +138,7 @@ class _ManageIndividualParticipantState
               menuItemColor: getEnteColorScheme(context).fillFaint,
               pressedColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
-                final result = await sharingActions.removeParticipant(
+                final result = await collectionActions.removeParticipant(
                   context,
                   widget.collection,
                   widget.user,

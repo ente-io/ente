@@ -13,11 +13,11 @@ import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
-class CollectionSharingActions {
-  final Logger _logger = Logger((CollectionSharingActions).toString());
+class CollectionActions {
+  final Logger logger = Logger((CollectionActions).toString());
   final CollectionsService collectionsService;
 
-  CollectionSharingActions(this.collectionsService);
+  CollectionActions(this.collectionsService);
 
   Future<bool> publicLinkToggle(
     BuildContext context,
@@ -54,7 +54,7 @@ class CollectionSharingActions {
       if (e is SharingNotPermittedForFreeAccountsError) {
         _showUnSupportedAlert(context);
       } else {
-        _logger.severe("Failed to update shareUrl collection", e);
+        logger.severe("Failed to update shareUrl collection", e);
         showGenericErrorDialog(context);
       }
       return false;
@@ -131,7 +131,7 @@ class CollectionSharingActions {
         publicKey = await UserService.instance.getPublicKey(email);
         await dialog.hide();
       } catch (e) {
-        _logger.severe("Failed to get public key", e);
+        logger.severe("Failed to get public key", e);
         showGenericErrorDialog(context);
         await dialog.hide();
       }
@@ -187,7 +187,7 @@ class CollectionSharingActions {
         if (e is SharingNotPermittedForFreeAccountsError) {
           _showUnSupportedAlert(context);
         } else {
-          _logger.severe("failed to share collection", e);
+          logger.severe("failed to share collection", e);
           showGenericErrorDialog(context);
         }
         return false;

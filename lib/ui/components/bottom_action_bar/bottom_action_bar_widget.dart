@@ -126,6 +126,7 @@ class BottomActionBarWidget extends StatelessWidget {
 
 class ExpansionIconWidget extends StatefulWidget {
   final ExpandableController expandableController;
+
   const ExpansionIconWidget({required this.expandableController, super.key});
 
   @override

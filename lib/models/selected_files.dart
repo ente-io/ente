@@ -33,10 +33,12 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
-  void unSelectAll(Set<File> selectedFiles) {
+  void unSelectAll(Set<File> selectedFiles, {bool skipNotify = false}) {
     files.removeAll(selectedFiles);
     lastSelections.clear();
-    notifyListeners();
+    if (!skipNotify) {
+      notifyListeners();
+    }
   }
 
   bool isFileSelected(File file) {

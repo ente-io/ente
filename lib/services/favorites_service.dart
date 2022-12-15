@@ -72,7 +72,7 @@ class FavoritesService {
         file.collectionID == _cachedFavoritesCollectionID) {
       return true;
     }
-    if(checkOnlyAlbum) {
+    if (checkOnlyAlbum) {
       return false;
     }
     if (file.uploadedFileID != null) {
@@ -127,6 +127,23 @@ class FavoritesService {
     }
     _updateFavoriteFilesCache(files, favFlag: true);
     RemoteSyncService.instance.sync(silently: true);
+  }
+
+  Future<void> updateFavorites(List<File> files, bool favFlag) async {
+    final int currentUserID = Configuration.instance.getUserID();
+    if (files.any((f) => f.uploadedFileID == null)) {
+      throw AssertionError("Can only favorite uploaded items");
+    }
+    if (files.any((f) => f.ownerID != currentUserID)) {
+      throw AssertionError("Can not favortie files owned by others");
+    }
+    final collectionID = await _getOrCreateFavoriteCollectionID();
+    if (favFlag) {
+      await _collectionsService.addToCollection(collectionID, files);
+    } else {
+      await _collectionsService.removeFromCollection(collectionID, files);
+    }
+    _updateFavoriteFilesCache(files, favFlag: false);
   }
 
   Future<void> removeFromFavorites(File file) async {

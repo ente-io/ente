@@ -29,7 +29,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   bool hideListOfEmails = false;
   bool _emailIsValid = false;
   bool isKeypadOpen = false;
-  late CollectionSharingActions sharingActions;
+  late CollectionActions collectionActions;
 
   // Focus nodes are necessary
   final textFieldFocusNode = FocusNode();
@@ -38,7 +38,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   @override
   void initState() {
     selectAsViewer = true;
-    sharingActions = CollectionSharingActions(CollectionsService.instance);
+    collectionActions = CollectionActions(CollectionsService.instance);
     super.initState();
   }
 
@@ -204,8 +204,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 final emailToAdd = selectedEmail == ''
                                     ? _email
                                     : selectedEmail;
-                                final result =
-                                    await sharingActions.addEmailToCollection(
+                                final result = await collectionActions
+                                    .addEmailToCollection(
                                   context,
                                   widget.collection,
                                   emailToAdd,

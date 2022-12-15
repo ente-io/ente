@@ -1,14 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_file_breakup.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/actions/collection/collection_file_actions.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
+import 'package:photos/ui/create_collection_page.dart';
 
 class FileSelectionActionWidget extends StatefulWidget {
   final GalleryType type;
@@ -32,12 +37,14 @@ class FileSelectionActionWidget extends StatefulWidget {
 class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   late int currentUserID;
   late SelectedFileSplit split;
+  late CollectionActions collectionActions;
 
   @override
   void initState() {
     currentUserID = Configuration.instance.getUserID()!;
     split = widget.selectedFiles.split(currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
+    collectionActions = CollectionActions(CollectionsService.instance);
     super.initState();
   }
 
@@ -72,6 +79,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.add_outlined,
           labelText: "Add to album$suffix",
           menuItemColor: colorScheme.fillFaint,
+          onTap: _addToAlbum,
         ),
       );
     }
@@ -81,6 +89,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.arrow_forward_outlined,
           labelText: "Move to album$suffix",
           menuItemColor: colorScheme.fillFaint,
+          onTap: _moveFiles,
         ),
       );
     }
@@ -91,6 +100,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.remove_outlined,
           labelText: "Remove from album$suffix",
           menuItemColor: colorScheme.fillFaint,
+          onTap: _removeFilesFromAlbum,
         ),
       );
     }
@@ -130,6 +140,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.favorite_border_rounded,
           labelText: "Favorite$suffix",
           menuItemColor: colorScheme.fillFaint,
+          onTap: _onFavoriteClick,
         ),
       );
     }
@@ -139,6 +150,59 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     }
     return ExpandedMenuWidget(
       items: items,
+    );
+  }
+
+  Future<void> _moveFiles() async {
+    if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
+      widget.selectedFiles
+          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
+      widget.selectedFiles
+          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+    }
+    await _selectionCollectionForAction(CollectionActionType.moveFiles);
+  }
+
+  Future<void> _addToAlbum() async {
+    if (split.ownedByOtherUsers.isNotEmpty) {
+      widget.selectedFiles
+          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+    }
+    await _selectionCollectionForAction(CollectionActionType.addFiles);
+  }
+
+  Future<void> _removeFilesFromAlbum() async {
+    await collectionActions.showRemoveFromCollectionSheet(
+      context,
+      widget.collection!,
+      widget.selectedFiles,
+    );
+  }
+
+  Future<void> _onFavoriteClick() async {
+    final result = await collectionActions.updateFavorites(
+      context,
+      split.ownedByCurrentUser,
+      true,
+    );
+    if (result) {
+      widget.selectedFiles.clearAll();
+    }
+  }
+
+  Future<Object?> _selectionCollectionForAction(
+    CollectionActionType type,
+  ) async {
+    return Navigator.push(
+      context,
+      PageTransition(
+        type: PageTransitionType.bottomToTop,
+        child: CreateCollectionPage(
+          widget.selectedFiles,
+          null,
+          actionType: type,
+        ),
+      ),
     );
   }
 }

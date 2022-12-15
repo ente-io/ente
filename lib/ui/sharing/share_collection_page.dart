@@ -33,8 +33,8 @@ class ShareCollectionPage extends StatefulWidget {
 class _ShareCollectionPageState extends State<ShareCollectionPage> {
   List<User> _sharees;
   final Logger _logger = Logger("SharingDialogState");
-  final CollectionSharingActions sharingActions =
-      CollectionSharingActions(CollectionsService.instance);
+  final CollectionActions collectionActions =
+      CollectionActions(CollectionsService.instance);
 
   Future<void> _navigateToManageUser() async {
     final result = await routeToPage(
@@ -197,7 +197,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           menuItemColor: getEnteColorScheme(context).fillFaint,
           pressedColor: getEnteColorScheme(context).fillFaint,
           onTap: () async {
-            final bool result = await sharingActions.publicLinkToggle(
+            final bool result = await collectionActions.publicLinkToggle(
               context,
               widget.collection,
               true,

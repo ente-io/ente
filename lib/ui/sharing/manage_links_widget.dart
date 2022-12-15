@@ -48,8 +48,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   Tuple3<int, String, int> _selectedExpiry;
   int _selectedDeviceLimitIndex = 0;
-  final CollectionSharingActions sharingActions =
-      CollectionSharingActions(CollectionsService.instance);
+  final CollectionActions sharingActions =
+      CollectionActions(CollectionsService.instance);
 
   @override
   void initState() {
