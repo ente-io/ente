@@ -104,7 +104,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.remove_outlined,
           labelText: "Remove from album$suffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: _removeFilesFromAlbum,
+          onTap: split.ownedByCurrentUser.isNotEmpty
+              ? _removeFilesFromAlbum
+              : null,
         ),
       );
     }
@@ -210,6 +212,12 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   }
 
   Future<void> _removeFilesFromAlbum() async {
+    if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
+      widget.selectedFiles
+          .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
+      widget.selectedFiles
+          .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
+    }
     await collectionActions.showRemoveFromCollectionSheet(
       context,
       widget.collection!,
