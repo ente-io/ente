@@ -127,6 +127,7 @@ class _CollectionPageState extends State<CollectionPage> {
                   type: widget.appBarType,
                   expandedMenu: FileSelectionActionWidget(
                     widget.appBarType,
+                    _selectedFiles,
                     collection: widget.c.collection,
                   ),
                   text: _selectedFiles.files.length.toString() + ' selected',
