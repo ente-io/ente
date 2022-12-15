@@ -2,6 +2,7 @@ enum GalleryType {
   homepage,
   archive,
   hidden,
+  favorite,
   trash,
   localFolder,
   // indicator for gallery view of collections shared with the user
@@ -21,6 +22,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.favorite:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
         return false;
@@ -33,6 +35,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.archive:
       case GalleryType.localFolder:
@@ -48,6 +51,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.ownedCollection:
       case GalleryType.searchResults:
       case GalleryType.homepage:
+      case GalleryType.favorite:
         return true;
       case GalleryType.hidden:
       case GalleryType.archive:
@@ -64,6 +68,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
         return true;
       case GalleryType.hidden:
+      case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.homepage:
       case GalleryType.archive:
@@ -80,6 +85,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.archive:
       case GalleryType.localFolder:
@@ -100,6 +106,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.archive:
       case GalleryType.localFolder:
       case GalleryType.trash:
+      case GalleryType.favorite:
       case GalleryType.sharedCollection:
         return false;
     }
@@ -113,11 +120,16 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.favorite:
       case GalleryType.archive:
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
         return false;
     }
+  }
+
+  bool showUnFavoriteOption() {
+    return this == GalleryType.favorite;
   }
 }
