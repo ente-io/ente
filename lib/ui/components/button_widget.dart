@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/components/models/large_button_style.dart';
+import 'package:photos/ui/components/models/custom_button_style.dart';
 import 'package:photos/utils/debouncer.dart';
 
 enum ExecutionState {
@@ -13,20 +14,27 @@ enum ExecutionState {
   successful,
 }
 
+enum ButtonSize {
+  small,
+  large;
+}
+
 typedef FutureVoidCallback = Future<void> Function();
 
-class LargeButtonWidget extends StatelessWidget {
+class ButtonWidget extends StatelessWidget {
   final IconData? icon;
   final String? labelText;
   final ButtonType buttonType;
   final FutureVoidCallback? onTap;
   final bool isDisabled;
+  final ButtonSize buttonSize;
 
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
   final bool isInActionSheet;
-  const LargeButtonWidget({
+  const ButtonWidget({
     required this.buttonType,
+    required this.buttonSize,
     this.icon,
     this.labelText,
     this.onTap,
@@ -47,7 +55,7 @@ class LargeButtonWidget extends StatelessWidget {
     final inverseTextTheme = isInActionSheet
         ? lightTextTheme
         : getEnteTextTheme(context, inverse: true);
-    final buttonStyle = LargeButtonStyle(
+    final buttonStyle = CustomButtonStyle(
       //Dummy default values since we need to keep these properties non-nullable
       defaultButtonColor: Colors.transparent,
       defaultBorderColor: Colors.transparent,
@@ -57,23 +65,30 @@ class LargeButtonWidget extends StatelessWidget {
     buttonStyle.defaultButtonColor = buttonType.defaultButtonColor(colorScheme);
     buttonStyle.pressedButtonColor = buttonType.pressedButtonColor(colorScheme);
     buttonStyle.disabledButtonColor =
-        buttonType.disabledButtonColor(colorScheme);
-    buttonStyle.defaultBorderColor = buttonType.defaultBorderColor(colorScheme);
-    buttonStyle.pressedBorderColor = buttonType.pressedBorderColor(colorScheme);
+        buttonType.disabledButtonColor(colorScheme, buttonSize);
+    buttonStyle.defaultBorderColor =
+        buttonType.defaultBorderColor(colorScheme, buttonSize);
+    buttonStyle.pressedBorderColor = buttonType.pressedBorderColor(
+      colorScheme: colorScheme,
+      inverseColorScheme: inverseColorScheme,
+      buttonSize: buttonSize,
+    );
     buttonStyle.disabledBorderColor =
-        buttonType.disabledBorderColor(colorScheme);
+        buttonType.disabledBorderColor(colorScheme, buttonSize);
     buttonStyle.defaultIconColor = buttonType.defaultIconColor(
       colorScheme: colorScheme,
       inverseColorScheme: inverseColorScheme,
     );
-    buttonStyle.pressedIconColor = buttonType.pressedIconColor(colorScheme);
-    buttonStyle.disabledIconColor = buttonType.disabledIconColor(colorScheme);
+    buttonStyle.pressedIconColor =
+        buttonType.pressedIconColor(colorScheme, buttonSize);
+    buttonStyle.disabledIconColor =
+        buttonType.disabledIconColor(colorScheme, buttonSize);
     buttonStyle.defaultLabelStyle = buttonType.defaultLabelStyle(
       textTheme: textTheme,
       inverseTextTheme: inverseTextTheme,
     );
     buttonStyle.pressedLabelStyle =
-        buttonType.pressedLabelStyle(textTheme, colorScheme);
+        buttonType.pressedLabelStyle(textTheme, colorScheme, buttonSize);
     buttonStyle.disabledLabelStyle =
         buttonType.disabledLabelStyle(textTheme, colorScheme);
     buttonStyle.checkIconColor = buttonType.checkIconColor(colorScheme);
@@ -82,6 +97,7 @@ class LargeButtonWidget extends StatelessWidget {
       buttonStyle: buttonStyle,
       buttonType: buttonType,
       isDisabled: isDisabled,
+      buttonSize: buttonSize,
       onTap: onTap,
       labelText: labelText,
       icon: icon,
@@ -90,16 +106,18 @@ class LargeButtonWidget extends StatelessWidget {
 }
 
 class LargeButtonChildWidget extends StatefulWidget {
-  final LargeButtonStyle buttonStyle;
+  final CustomButtonStyle buttonStyle;
   final FutureVoidCallback? onTap;
   final ButtonType buttonType;
   final String? labelText;
   final IconData? icon;
   final bool isDisabled;
+  final ButtonSize buttonSize;
   const LargeButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
+    required this.buttonSize,
     this.onTap,
     this.labelText,
     this.icon,
@@ -117,7 +135,10 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
   late TextStyle labelStyle;
   late Color checkIconColor;
   late Color loadingIconColor;
-  late bool hasExecutionStates;
+
+  ///This is used to store the width of the button in idle state (small button)
+  ///to be used as width for the button when the loading/succes states comes.
+  double? widthOfButton;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
   @override
@@ -125,7 +146,6 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
     checkIconColor = widget.buttonStyle.checkIconColor ??
         widget.buttonStyle.defaultIconColor;
     loadingIconColor = widget.buttonStyle.defaultIconColor;
-    hasExecutionStates = widget.buttonType.hasExecutionStates;
     if (widget.isDisabled) {
       buttonColor = widget.buttonStyle.disabledButtonColor ??
           widget.buttonStyle.defaultButtonColor;
@@ -153,7 +173,7 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
       onTapCancel: _shouldRegisterGestures ? _onTapCancel : null,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 16),
-        width: double.infinity,
+        width: widget.buttonSize == ButtonSize.large ? double.infinity : null,
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
           color: buttonColor,
@@ -196,46 +216,72 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
                                 ),
                         ],
                       )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          widget.icon == null
-                              ? const SizedBox.shrink()
-                              : Icon(
-                                  widget.icon,
-                                  size: 20,
-                                  color: iconColor,
-                                ),
-                          widget.icon == null || widget.labelText == null
-                              ? const SizedBox.shrink()
-                              : const SizedBox(width: 8),
-                          widget.labelText == null
-                              ? const SizedBox.shrink()
-                              : Flexible(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
+                    : Builder(
+                        builder: (context) {
+                          SchedulerBinding.instance.addPostFrameCallback(
+                            (timeStamp) {
+                              final box =
+                                  context.findRenderObject() as RenderBox;
+                              widthOfButton = box.size.width;
+                            },
+                          );
+                          return Row(
+                            mainAxisSize: widget.buttonSize == ButtonSize.large
+                                ? MainAxisSize.max
+                                : MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              widget.icon == null
+                                  ? const SizedBox.shrink()
+                                  : Icon(
+                                      widget.icon,
+                                      size: 20,
+                                      color: iconColor,
                                     ),
-                                    child: Text(
-                                      widget.labelText!,
-                                      style: labelStyle,
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                )
-                        ],
+                              widget.icon == null || widget.labelText == null
+                                  ? const SizedBox.shrink()
+                                  : const SizedBox(width: 8),
+                              widget.labelText == null
+                                  ? const SizedBox.shrink()
+                                  : Flexible(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                        ),
+                                        child: Text(
+                                          widget.labelText!,
+                                          style: labelStyle,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    )
+                            ],
+                          );
+                        },
                       )
                 : executionState == ExecutionState.inProgress
-                    ? EnteLoadingWidget(
-                        is20pts: true,
-                        color: loadingIconColor,
+                    ? SizedBox(
+                        width: widthOfButton,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            EnteLoadingWidget(
+                              is20pts: true,
+                              color: loadingIconColor,
+                            ),
+                          ],
+                        ),
                       )
                     : executionState == ExecutionState.successful
-                        ? Icon(
-                            Icons.check_outlined,
-                            size: 20,
-                            color: checkIconColor,
+                        ? SizedBox(
+                            width: widthOfButton,
+                            child: Icon(
+                              Icons.check_outlined,
+                              size: 20,
+                              color: checkIconColor,
+                            ),
                           )
                         : const SizedBox.shrink(), //fallback
           ),
@@ -250,36 +296,32 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
       executionState == ExecutionState.idle;
 
   void _onTap() async {
-    if (hasExecutionStates) {
-      _debouncer.run(
-        () => Future(() {
-          setState(() {
-            executionState = ExecutionState.inProgress;
-          });
-        }),
-      );
-      await widget.onTap!
-          .call()
-          .onError((error, stackTrace) => _debouncer.cancelDebounce());
-      _debouncer.cancelDebounce();
-      // when the time taken by widget.onTap is approximately equal to the debounce
-      // time, the callback is getting executed when/after the if condition
-      // below is executing/executed which results in execution state stuck at
-      // idle state. This Future is for delaying the execution of the if
-      // condition so that the calback in the debouncer finishes execution before.
-      await Future.delayed(const Duration(milliseconds: 5));
-      if (executionState == ExecutionState.inProgress) {
+    _debouncer.run(
+      () => Future(() {
         setState(() {
-          executionState = ExecutionState.successful;
-          Future.delayed(const Duration(seconds: 2), () {
-            setState(() {
-              executionState = ExecutionState.idle;
-            });
+          executionState = ExecutionState.inProgress;
+        });
+      }),
+    );
+    await widget.onTap!
+        .call()
+        .onError((error, stackTrace) => _debouncer.cancelDebounce());
+    _debouncer.cancelDebounce();
+    // when the time taken by widget.onTap is approximately equal to the debounce
+    // time, the callback is getting executed when/after the if condition
+    // below is executing/executed which results in execution state stuck at
+    // idle state. This Future is for delaying the execution of the if
+    // condition so that the calback in the debouncer finishes execution before.
+    await Future.delayed(const Duration(milliseconds: 5));
+    if (executionState == ExecutionState.inProgress) {
+      setState(() {
+        executionState = ExecutionState.successful;
+        Future.delayed(const Duration(seconds: 2), () {
+          setState(() {
+            executionState = ExecutionState.idle;
           });
         });
-      }
-    } else {
-      widget.onTap!.call();
+      });
     }
   }
 
