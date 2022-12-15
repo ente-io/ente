@@ -135,6 +135,9 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
   late TextStyle labelStyle;
   late Color checkIconColor;
   late Color loadingIconColor;
+
+  ///This is used to store the width of the button in idle state (small button)
+  ///to be used as width for the button when the loading/succes states comes.
   double? widthOfButton;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
