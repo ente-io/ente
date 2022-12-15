@@ -539,11 +539,15 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    async getFailedFilesWithCollections() {
+    getFailedFilesWithCollections() {
         return {
             files: this.failedFiles,
             collections: [...this.collections.values()],
         };
+    }
+
+    getUploaderName() {
+        return this.uploaderName;
     }
 
     private updateExistingFiles(decryptedFile: EnteFile) {
