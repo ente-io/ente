@@ -37,7 +37,7 @@ class AboutSectionWidget extends StatelessWidget {
           trailingIcon: Icons.chevron_right_outlined,
           trailingIconIsMuted: true,
           onTap: () async {
-            launchUrl(Uri.parse("https://github.com/ente-io/frame"));
+            launchUrl(Uri.parse("https://github.com/ente-io/photos-app"));
           },
         ),
         sectionOptionSpacing,
