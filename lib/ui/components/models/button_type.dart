@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/text_style.dart';
+import 'package:photos/ui/components/button_widget.dart';
 
 enum ButtonType {
   primary,
@@ -10,7 +11,8 @@ enum ButtonType {
   critical,
   tertiaryCritical,
   trailingIconPrimary,
-  trailingIconSecondary;
+  trailingIconSecondary,
+  tertiary;
 
   bool get isPrimary =>
       this == ButtonType.primary || this == ButtonType.trailingIconPrimary;
@@ -57,31 +59,42 @@ enum ButtonType {
   }
 
   //Returning null to fallback to default color
-  Color? disabledButtonColor(EnteColorScheme colorScheme) {
+  Color? disabledButtonColor(
+    EnteColorScheme colorScheme,
+    ButtonSize buttonSize,
+  ) {
+    if (buttonSize == ButtonSize.small &&
+        (this == ButtonType.primary ||
+            this == ButtonType.neutral ||
+            this == ButtonType.critical)) {
+      return colorScheme.fillMuted;
+    }
     if (isPrimary || this == ButtonType.critical || isNeutral) {
       return colorScheme.fillFaint;
     }
     return null;
   }
 
-  Color defaultBorderColor(EnteColorScheme colorScheme) {
-    if (this == ButtonType.tertiaryCritical) {
+  Color defaultBorderColor(EnteColorScheme colorScheme, ButtonSize buttonSize) {
+    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
       return colorScheme.warning700;
     }
     return Colors.transparent;
   }
 
   //Returning null to fallback to default color
-  Color? pressedBorderColor(
-      {required EnteColorScheme colorScheme,
-      required EnteColorScheme inverseColorScheme}) {
+  Color? pressedBorderColor({
+    required EnteColorScheme colorScheme,
+    required EnteColorScheme inverseColorScheme,
+    required ButtonSize buttonSize,
+  }) {
     if (isPrimary) {
       return colorScheme.strokeMuted;
     }
-    if (isSecondary || this == ButtonType.tertiaryCritical) {
-      return colorScheme.strokeBase;
+    if (buttonSize == ButtonSize.small && this == ButtonType.tertiaryCritical) {
+      return null;
     }
-    if (isCritical) {
+    if (isSecondary || isCritical) {
       return colorScheme.strokeBase;
     }
     if (isNeutral) {
@@ -91,8 +104,11 @@ enum ButtonType {
   }
 
   //Returning null to fallback to default color
-  Color? disabledBorderColor(EnteColorScheme colorScheme) {
-    if (this == ButtonType.tertiaryCritical) {
+  Color? disabledBorderColor(
+    EnteColorScheme colorScheme,
+    ButtonSize buttonSize,
+  ) {
+    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
       return colorScheme.strokeMuted;
     }
     return null;
@@ -105,9 +121,6 @@ enum ButtonType {
     if (isPrimary || this == ButtonType.critical) {
       return strokeBaseDark;
     }
-    if (isSecondary) {
-      return colorScheme.strokeBase;
-    }
     if (this == ButtonType.neutral || this == ButtonType.trailingIcon) {
       return inverseColorScheme.strokeBase;
     }
@@ -119,16 +132,19 @@ enum ButtonType {
   }
 
   //Returning null to fallback to default color
-  Color? pressedIconColor(EnteColorScheme colorScheme) {
-    if (this == ButtonType.tertiaryCritical) {
+  Color? pressedIconColor(EnteColorScheme colorScheme, ButtonSize buttonSize) {
+    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
       return colorScheme.strokeBase;
     }
     return null;
   }
 
   //Returning null to fallback to default color
-  Color? disabledIconColor(EnteColorScheme colorScheme) {
-    if (isPrimary || isSecondary || isNeutral) {
+  Color? disabledIconColor(EnteColorScheme colorScheme, ButtonSize buttonSize) {
+    if (isPrimary ||
+        isSecondary ||
+        isNeutral ||
+        buttonSize == ButtonSize.small) {
       return colorScheme.strokeMuted;
     }
     if (isCritical) {
@@ -144,9 +160,6 @@ enum ButtonType {
     if (isPrimary || this == ButtonType.critical) {
       return textTheme.bodyBold.copyWith(color: textBaseDark);
     }
-    if (isSecondary) {
-      return textTheme.bodyBold;
-    }
     if (this == ButtonType.neutral || this == ButtonType.trailingIcon) {
       return inverseTextTheme.bodyBold;
     }
@@ -161,8 +174,9 @@ enum ButtonType {
   TextStyle? pressedLabelStyle(
     EnteTextTheme textTheme,
     EnteColorScheme colorScheme,
+    ButtonSize buttonSize,
   ) {
-    if (this == ButtonType.tertiaryCritical) {
+    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
       return textTheme.bodyBold.copyWith(color: colorScheme.strokeBase);
     }
     return null;
@@ -173,10 +187,7 @@ enum ButtonType {
     EnteTextTheme textTheme,
     EnteColorScheme colorScheme,
   ) {
-    if (isPrimary || isSecondary || isCritical || isNeutral) {
-      return textTheme.bodyBold.copyWith(color: colorScheme.textFaint);
-    }
-    return null;
+    return textTheme.bodyBold.copyWith(color: colorScheme.textFaint);
   }
 
   //Returning null to fallback to default color

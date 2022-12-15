@@ -65,26 +65,30 @@ class ButtonWidget extends StatelessWidget {
     buttonStyle.defaultButtonColor = buttonType.defaultButtonColor(colorScheme);
     buttonStyle.pressedButtonColor = buttonType.pressedButtonColor(colorScheme);
     buttonStyle.disabledButtonColor =
-        buttonType.disabledButtonColor(colorScheme);
-    buttonStyle.defaultBorderColor = buttonType.defaultBorderColor(colorScheme);
+        buttonType.disabledButtonColor(colorScheme, buttonSize);
+    buttonStyle.defaultBorderColor =
+        buttonType.defaultBorderColor(colorScheme, buttonSize);
     buttonStyle.pressedBorderColor = buttonType.pressedBorderColor(
       colorScheme: colorScheme,
       inverseColorScheme: inverseColorScheme,
+      buttonSize: buttonSize,
     );
     buttonStyle.disabledBorderColor =
-        buttonType.disabledBorderColor(colorScheme);
+        buttonType.disabledBorderColor(colorScheme, buttonSize);
     buttonStyle.defaultIconColor = buttonType.defaultIconColor(
       colorScheme: colorScheme,
       inverseColorScheme: inverseColorScheme,
     );
-    buttonStyle.pressedIconColor = buttonType.pressedIconColor(colorScheme);
-    buttonStyle.disabledIconColor = buttonType.disabledIconColor(colorScheme);
+    buttonStyle.pressedIconColor =
+        buttonType.pressedIconColor(colorScheme, buttonSize);
+    buttonStyle.disabledIconColor =
+        buttonType.disabledIconColor(colorScheme, buttonSize);
     buttonStyle.defaultLabelStyle = buttonType.defaultLabelStyle(
       textTheme: textTheme,
       inverseTextTheme: inverseTextTheme,
     );
     buttonStyle.pressedLabelStyle =
-        buttonType.pressedLabelStyle(textTheme, colorScheme);
+        buttonType.pressedLabelStyle(textTheme, colorScheme, buttonSize);
     buttonStyle.disabledLabelStyle =
         buttonType.disabledLabelStyle(textTheme, colorScheme);
     buttonStyle.checkIconColor = buttonType.checkIconColor(colorScheme);
