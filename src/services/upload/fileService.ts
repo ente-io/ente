@@ -22,6 +22,7 @@ import {
     getUint8ArrayView,
 } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
+import { EncryptedMagicMetadataCore } from 'types/magicMetadata';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
@@ -110,6 +111,16 @@ export async function encryptFile(
         const { file: encryptedMetadata }: EncryptionResult =
             await worker.encryptMetadata(file.metadata, fileKey);
 
+        const { file: encryptedPubMagicMetadataData }: EncryptionResult =
+            await worker.encryptMetadata(file.pubMagicMetadata.data, fileKey);
+
+        const encryptedPubMagicMetadata: EncryptedMagicMetadataCore = {
+            version: file.pubMagicMetadata.version,
+            count: file.pubMagicMetadata.count,
+            data: encryptedPubMagicMetadataData.encryptedData as unknown as string,
+            header: encryptedPubMagicMetadataData.decryptionHeader,
+        };
+
         const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
             fileKey,
             encryptionKey
@@ -120,6 +131,7 @@ export async function encryptFile(
                 file: encryptedFiledata,
                 thumbnail: encryptedThumbnail,
                 metadata: encryptedMetadata,
+                pubMagicMetadata: encryptedPubMagicMetadata,
                 localID: file.localID,
             },
             fileKey: encryptedKey,

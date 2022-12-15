@@ -1,4 +1,4 @@
-import { EnteFile } from 'types/file';
+import { EnteFile, FilePublicMagicMetadata } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
@@ -6,12 +6,18 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { FILE_TYPE } from 'constants/file';
 import { UPLOAD_RESULT, MAX_FILE_SIZE_SUPPORTED } from 'constants/upload';
-import { FileWithCollection, BackupedFile, UploadFile } from 'types/upload';
+import {
+    FileWithCollection,
+    BackupedFile,
+    UploadFile,
+    FileWithMetadata,
+} from 'types/upload';
 import { addLocalLog, addLogLine } from 'utils/logging';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
 import uploadCancelService from './uploadCancelService';
+import uploadService from './uploadService';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;
@@ -104,14 +110,18 @@ export default async function uploader(
         if (file.hasStaticThumbnail) {
             metadata.hasStaticThumbnail = true;
         }
+        let pubMagicMetadata: FilePublicMagicMetadata;
         if (uploaderName) {
-            metadata.uploaderName = uploaderName;
+            pubMagicMetadata = await uploadService.constructPublicMagicMetadata(
+                { uploaderName }
+            );
         }
-        const fileWithMetadata = {
+        const fileWithMetadata: FileWithMetadata = {
             localID,
             filedata: file.filedata,
             thumbnail: file.thumbnail,
             metadata,
+            pubMagicMetadata,
         };
 
         if (uploadCancelService.isUploadCancelationRequested()) {

@@ -35,6 +35,8 @@ import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { USE_CF_PROXY } from 'constants/upload';
 import publicUploadHttpClient from './publicUploadHttpClient';
+import { constructPublicMagicMetadata } from './magicMetadataService';
+import { FilePublicMagicMetadataProps } from 'types/file';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -142,6 +144,12 @@ class UploadService {
         return clusterLivePhotoFiles(mediaFiles);
     }
 
+    constructPublicMagicMetadata(
+        publicMagicMetadataProps: FilePublicMagicMetadataProps
+    ) {
+        return constructPublicMagicMetadata(publicMagicMetadataProps);
+    }
+
     async encryptAsset(
         worker: any,
         file: FileWithMetadata,
@@ -203,6 +211,7 @@ class UploadService {
                     objectKey: thumbnailObjectKey,
                 },
                 metadata: file.metadata,
+                pubMagicMetadata: file.pubMagicMetadata,
             };
             return backupedFile;
         } catch (e) {
