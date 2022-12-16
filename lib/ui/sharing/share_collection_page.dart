@@ -153,6 +153,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
                 shareText(url);
               },
               isTopBorderRadiusRemoved: true,
+              isBottomBorderRadiusRemoved: true,
             ),
           ],
         );
@@ -266,7 +267,7 @@ class EmailItemWidget extends StatelessWidget {
             isBottomBorderRadiusRemoved: true,
           ),
           DividerWidget(
-            dividerType: DividerType.menu,
+            dividerType: DividerType.solid,
             bgColor: getEnteColorScheme(context).blurStrokeFaint,
           ),
         ],
