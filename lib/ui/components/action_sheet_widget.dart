@@ -6,6 +6,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/utils/separators_util.dart';
 
 enum ActionSheetType {
@@ -13,15 +14,15 @@ enum ActionSheetType {
   iconOnly,
 }
 
-void showActionSheet({
+Future<dynamic> showActionSheet({
   required BuildContext context,
-  required List<Widget> buttons,
+  required List<ButtonWidget> buttons,
   required ActionSheetType actionSheetType,
   bool isCheckIconGreen = false,
   String? title,
   String? body,
 }) {
-  showMaterialModalBottomSheet(
+  return showMaterialModalBottomSheet(
     backgroundColor: Colors.transparent,
     barrierColor: backdropMutedDark,
     useRootNavigator: true,
@@ -35,13 +36,15 @@ void showActionSheet({
         isCheckIconGreen: isCheckIconGreen,
       );
     },
+    isDismissible: false,
+    enableDrag: false,
   );
 }
 
 class ActionSheetWidget extends StatelessWidget {
   final String? title;
   final String? body;
-  final List<Widget> actionButtons;
+  final List<ButtonWidget> actionButtons;
   final ActionSheetType actionSheetType;
   final bool isCheckIconGreen;
 
@@ -153,11 +156,13 @@ class ContentContainerWidget extends StatelessWidget {
                     style: textTheme.body
                         .copyWith(color: textMutedDark), //constant color
                   )
-            : Icon(Icons.check_outlined,
+            : Icon(
+                Icons.check_outlined,
                 size: 48,
                 color: isCheckIconGreen
                     ? getEnteColorScheme(context).primary700
-                    : strokeBaseDark)
+                    : strokeBaseDark,
+              )
       ],
     );
   }
