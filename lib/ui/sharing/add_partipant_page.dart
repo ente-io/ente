@@ -61,183 +61,178 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       appBar: AppBar(
         title: const Text("Add people"),
       ),
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Text(
-                "Add a new email",
-                style: enteTextTheme.body,
-              ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              "Add a new email",
+              style: enteTextTheme.body,
             ),
-            const SizedBox(height: 4),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: _getEmailField(),
-            ),
-            (hideListOfEmails || isKeypadOpen)
-                ? const Expanded(child: SizedBox())
-                : Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 24),
-                          const MenuSectionTitle(
-                            title: "or pick an existing one",
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemBuilder: (context, index) {
-                                final currentUser = suggestedUsers[index];
-                                return Column(
-                                  children: [
-                                    MenuItemWidget(
-                                      captionedTextWidget: CaptionedTextWidget(
-                                        title: currentUser.email,
-                                      ),
-                                      leadingIconSize: 24.0,
-                                      leadingIconWidget: UserAvatarWidget(
-                                        currentUser,
-                                        type: AvatarType.mini,
-                                      ),
-                                      menuItemColor:
-                                          getEnteColorScheme(context).fillFaint,
-                                      pressedColor:
-                                          getEnteColorScheme(context).fillFaint,
-                                      trailingIcon:
-                                          (selectedEmail == currentUser.email)
-                                              ? Icons.check
-                                              : null,
-                                      onTap: () async {
-                                        textFieldFocusNode.unfocus();
-                                        if (selectedEmail ==
-                                            currentUser.email) {
-                                          selectedEmail = '';
-                                        } else {
-                                          selectedEmail = currentUser.email;
-                                        }
-
-                                        setState(() => {});
-                                        // showShortToast(context, "yet to implement");
-                                      },
-                                      isTopBorderRadiusRemoved: index > 0,
-                                      isBottomBorderRadiusRemoved:
-                                          index < (suggestedUsers.length - 1),
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: _getEmailField(),
+          ),
+          (hideListOfEmails || isKeypadOpen)
+              ? const Expanded(child: SizedBox())
+              : Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 24),
+                        const MenuSectionTitle(
+                          title: "or pick an existing one",
+                        ),
+                        Expanded(
+                          child: ListView.builder(
+                            itemBuilder: (context, index) {
+                              final currentUser = suggestedUsers[index];
+                              return Column(
+                                children: [
+                                  MenuItemWidget(
+                                    captionedTextWidget: CaptionedTextWidget(
+                                      title: currentUser.email,
                                     ),
-                                    (index == (suggestedUsers.length - 1))
-                                        ? const SizedBox.shrink()
-                                        : DividerWidget(
-                                            dividerType: DividerType.menu,
-                                            bgColor: getEnteColorScheme(context)
-                                                .blurStrokeFaint,
-                                          ),
-                                  ],
-                                );
-                              },
-                              itemCount: suggestedUsers.length,
+                                    leadingIconSize: 24.0,
+                                    leadingIconWidget: UserAvatarWidget(
+                                      currentUser,
+                                      type: AvatarType.mini,
+                                    ),
+                                    menuItemColor:
+                                        getEnteColorScheme(context).fillFaint,
+                                    pressedColor:
+                                        getEnteColorScheme(context).fillFaint,
+                                    trailingIcon:
+                                        (selectedEmail == currentUser.email)
+                                            ? Icons.check
+                                            : null,
+                                    onTap: () async {
+                                      textFieldFocusNode.unfocus();
+                                      if (selectedEmail == currentUser.email) {
+                                        selectedEmail = '';
+                                      } else {
+                                        selectedEmail = currentUser.email;
+                                      }
 
-                              // physics: const ClampingScrollPhysics(),
-                            ),
+                                      setState(() => {});
+                                      // showShortToast(context, "yet to implement");
+                                    },
+                                    isTopBorderRadiusRemoved: index > 0,
+                                    isBottomBorderRadiusRemoved:
+                                        index < (suggestedUsers.length - 1),
+                                  ),
+                                  (index == (suggestedUsers.length - 1))
+                                      ? const SizedBox.shrink()
+                                      : DividerWidget(
+                                          dividerType: DividerType.menu,
+                                          bgColor: getEnteColorScheme(context)
+                                              .blurStrokeFaint,
+                                        ),
+                                ],
+                              );
+                            },
+                            itemCount: suggestedUsers.length,
+
+                            // physics: const ClampingScrollPhysics(),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
-            const DividerWidget(
-              dividerType: DividerType.solid,
-            ),
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  bottom: 8,
-                  left: 16,
-                  right: 16,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const MenuSectionTitle(title: "Add as"),
-                    MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Collaborator",
-                      ),
-                      leadingIcon: Icons.edit_outlined,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
-                      pressedColor: getEnteColorScheme(context).fillFaint,
-                      trailingIcon: !selectAsViewer ? Icons.check : null,
-                      onTap: () async {
-                        if (kDebugMode) {
-                          setState(() => {selectAsViewer = false});
-                        } else {
-                          showShortToast(context, "Coming soon...");
-                        }
-                      },
-                      isBottomBorderRadiusRemoved: true,
+          const DividerWidget(
+            dividerType: DividerType.solid,
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 8,
+                bottom: 8,
+                left: 16,
+                right: 16,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const MenuSectionTitle(title: "Add as"),
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: "Collaborator",
                     ),
-                    DividerWidget(
-                      dividerType: DividerType.menu,
-                      bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                    leadingIcon: Icons.edit_outlined,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    trailingIcon: !selectAsViewer ? Icons.check : null,
+                    onTap: () async {
+                      if (kDebugMode) {
+                        setState(() => {selectAsViewer = false});
+                      } else {
+                        showShortToast(context, "Coming soon...");
+                      }
+                    },
+                    isBottomBorderRadiusRemoved: true,
+                  ),
+                  DividerWidget(
+                    dividerType: DividerType.menu,
+                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: "Viewer",
                     ),
-                    MenuItemWidget(
-                      captionedTextWidget: const CaptionedTextWidget(
-                        title: "Viewer",
-                      ),
-                      leadingIcon: Icons.photo_outlined,
-                      menuItemColor: getEnteColorScheme(context).fillFaint,
-                      pressedColor: getEnteColorScheme(context).fillFaint,
-                      trailingIcon: selectAsViewer ? Icons.check : null,
-                      onTap: () async {
-                        setState(() => {selectAsViewer = true});
-                        // showShortToast(context, "yet to implement");
-                      },
-                      isTopBorderRadiusRemoved: true,
+                    leadingIcon: Icons.photo_outlined,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    trailingIcon: selectAsViewer ? Icons.check : null,
+                    onTap: () async {
+                      setState(() => {selectAsViewer = true});
+                      // showShortToast(context, "yet to implement");
+                    },
+                    isTopBorderRadiusRemoved: true,
+                  ),
+                  !isKeypadOpen
+                      ? const MenuSectionDescriptionWidget(
+                          content:
+                              "Collaborators can add photos and videos to the shared album.",
+                        )
+                      : const SizedBox.shrink(),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: GradientButton(
+                      onTap: (selectedEmail == '' && !_emailIsValid)
+                          ? null
+                          : () async {
+                              final emailToAdd =
+                                  selectedEmail == '' ? _email : selectedEmail;
+                              final result =
+                                  await collectionActions.addEmailToCollection(
+                                context,
+                                widget.collection,
+                                emailToAdd,
+                                role: selectAsViewer
+                                    ? CollectionParticipantRole.viewer
+                                    : CollectionParticipantRole.collaborator,
+                              );
+                              if (result != null && result && mounted) {
+                                Navigator.of(context).pop(true);
+                              }
+                            },
+                      text: selectAsViewer ? "Add viewer" : "Add collaborator",
                     ),
-                    !isKeypadOpen
-                        ? const MenuSectionDescriptionWidget(
-                            content:
-                                "Collaborators can add photos and videos to the shared album.",
-                          )
-                        : const SizedBox.shrink(),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: GradientButton(
-                        onTap: (selectedEmail == '' && !_emailIsValid)
-                            ? null
-                            : () async {
-                                final emailToAdd = selectedEmail == ''
-                                    ? _email
-                                    : selectedEmail;
-                                final result = await collectionActions
-                                    .addEmailToCollection(
-                                  context,
-                                  widget.collection,
-                                  emailToAdd,
-                                  role: selectAsViewer
-                                      ? CollectionParticipantRole.viewer
-                                      : CollectionParticipantRole.collaborator,
-                                );
-                                if (result != null && result && mounted) {
-                                  Navigator.of(context).pop(true);
-                                }
-                              },
-                        text:
-                            selectAsViewer ? "Add viewer" : "Add collaborator",
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 8),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
