@@ -88,6 +88,9 @@ export function FileInfo({
     const closeExif = () => setShowExif(false);
 
     useEffect(() => {
+        console.log('file.metadata', file?.metadata);
+        console.log('location', location);
+
         if (!location && file && file.metadata) {
             if (file.metadata.longitude || file.metadata.longitude === 0) {
                 setLocation({
@@ -99,6 +102,8 @@ export function FileInfo({
     }, [file]);
 
     useEffect(() => {
+        console.log('exif', exif);
+        console.log('location', location);
         if (!location && exif) {
             const exifLocation = getEXIFLocation(exif);
             if (exifLocation.latitude || exifLocation.latitude === 0) {

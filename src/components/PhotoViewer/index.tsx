@@ -307,6 +307,11 @@ function PhotoViewer(props: Iprops) {
         });
         photoSwipe.listen('beforeChange', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            updateFavButton(currItem);
+            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
+                setExif({ key: currItem.src, value: null });
+                return;
+            }
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
@@ -316,10 +321,13 @@ function PhotoViewer(props: Iprops) {
             }
             setExif({ key: currItem.src, value: undefined });
             checkExifAvailable(currItem);
-            updateFavButton(currItem);
         });
         photoSwipe.listen('resize', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
+                setExif({ key: currItem.src, value: null });
+                return;
+            }
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
