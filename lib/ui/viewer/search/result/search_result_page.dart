@@ -9,6 +9,7 @@ import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/search/search_result.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
@@ -66,7 +67,7 @@ class SearchResultPage extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         children: [
           gallery,
-          GalleryOverlayWidget(
+          FileSelectionOverlayBar(
             overlayType,
             _selectedFiles,
           )
