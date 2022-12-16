@@ -50,9 +50,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-    final enteColorScheme = getEnteColorScheme(context);
     final enteTextTheme = getEnteTextTheme(context);
     final List<User> suggestedUsers = _getSuggestedUser();
     hideListOfEmails = suggestedUsers.isEmpty;
@@ -154,7 +154,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.only(
-                    top: 8, bottom: 8, left: 16, right: 16),
+                  top: 8,
+                  bottom: 8,
+                  left: 16,
+                  right: 16,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -171,7 +175,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                         if (kDebugMode) {
                           setState(() => {selectAsViewer = false});
                         } else {
-                          showShortToast(context, "Support coming soon");
+                          showShortToast(context, "Coming soon...");
                         }
                       },
                       isBottomBorderRadiusRemoved: true,
@@ -182,7 +186,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     ),
                     MenuItemWidget(
                       captionedTextWidget: const CaptionedTextWidget(
-                        title: " Viewer",
+                        title: "Viewer",
                       ),
                       leadingIcon: Icons.photo_outlined,
                       menuItemColor: getEnteColorScheme(context).fillFaint,
