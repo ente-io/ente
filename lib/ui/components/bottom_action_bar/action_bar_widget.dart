@@ -9,11 +9,14 @@ class ActionBarWidget extends StatefulWidget {
   final List<Widget> iconButtons;
   final SelectedFiles? selectedFiles;
   final GalleryType galleryType;
+  final bool isCollaborator;
+
   const ActionBarWidget({
     required this.iconButtons,
     required this.galleryType,
     this.text,
     this.selectedFiles,
+    this.isCollaborator = false,
     super.key,
   });
 
@@ -74,13 +77,21 @@ class _ActionBarWidgetState extends State<ActionBarWidget> {
                   ? ValueListenableBuilder(
                       valueListenable: _selectedFilesNotifier,
                       builder: (context, value, child) {
+                        if (widget.isCollaborator) {
+                          return Text(
+                            "${_selectedFilesNotifier.value} selected" +
+                                (_selectedOwnedFilesNotifier.value !=
+                                        _selectedFilesNotifier.value
+                                    ? " (${_selectedOwnedFilesNotifier.value} "
+                                        "yours) "
+                                    : ""),
+                            style: textTheme.body.copyWith(
+                              color: colorScheme.blurTextBase,
+                            ),
+                          );
+                        }
                         return Text(
-                          "${_selectedFilesNotifier.value} selected" +
-                              (_selectedOwnedFilesNotifier.value !=
-                                      _selectedFilesNotifier.value
-                                  ? " (${_selectedOwnedFilesNotifier.value} "
-                                      "yours) "
-                                  : ""),
+                          "${_selectedFilesNotifier.value} selected",
                           style: textTheme.body.copyWith(
                             color: colorScheme.blurTextBase,
                           ),
