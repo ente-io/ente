@@ -102,7 +102,7 @@ class _ManageIndividualParticipantState
             ),
             MenuItemWidget(
               captionedTextWidget: const CaptionedTextWidget(
-                title: " Viewer",
+                title: "Viewer",
               ),
               leadingIcon: Icons.photo_outlined,
               leadingIconColor: getEnteColorScheme(context).strokeBase,
