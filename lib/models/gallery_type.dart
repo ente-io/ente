@@ -53,8 +53,8 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.favorite:
       case GalleryType.archive:
-        return true;
       case GalleryType.hidden:
+        return true;
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
