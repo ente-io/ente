@@ -657,7 +657,7 @@ const englishConstants = {
         <>File time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
-    CAPTION_CHARACTER_LIMIT: '280 characters max',
+    CAPTION_CHARACTER_LIMIT: '5000 characters max',
 
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
