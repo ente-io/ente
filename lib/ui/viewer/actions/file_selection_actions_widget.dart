@@ -153,7 +153,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     } else if (widget.type.showUnArchiveOption()) {
       firstList.add(
         BlurMenuItemWidget(
-          leadingIcon: Icons.unarchive_outlined,
+          leadingIcon: Icons.unarchive,
           labelText: "Unarchive$suffix",
           menuItemColor: colorScheme.fillFaint,
           onTap: _onUnArchiveClick,
