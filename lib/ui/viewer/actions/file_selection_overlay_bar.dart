@@ -40,9 +40,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   @override
   void initState() {
-    showDeleteOption = (widget.galleryType == GalleryType.homepage ||
-        widget.galleryType == GalleryType.ownedCollection ||
-        widget.galleryType == GalleryType.favorite);
+    showDeleteOption = widget.galleryType.showDeleteIconOption();
     widget.selectedFiles.addListener(_selectedFilesListener);
     super.initState();
   }
