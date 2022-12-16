@@ -241,9 +241,8 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                         isLastItem
                             ? const SizedBox.shrink()
                             : DividerWidget(
-                                dividerType: DividerType.solid,
-                                bgColor:
-                                    getEnteColorScheme(context).blurStrokeFaint,
+                                dividerType: DividerType.menu,
+                                bgColor: getEnteColorScheme(context).fillFaint,
                               ),
                       ],
                     );
