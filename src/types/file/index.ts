@@ -20,6 +20,7 @@ export interface FilePublicMagicMetadataProps {
     editedTime?: number;
     editedName?: string;
     caption?: string;
+    uploaderName?: string;
 }
 
 export interface FilePublicMagicMetadata

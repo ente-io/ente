@@ -467,11 +467,13 @@ export default function Uploader(props: Props) {
         try {
             addLogLine('user retrying failed  upload');
             const filesWithCollections =
-                await uploadManager.getFailedFilesWithCollections();
+                uploadManager.getFailedFilesWithCollections();
+            const uploaderName = uploadManager.getUploaderName();
             await preUploadAction();
             await uploadManager.queueFilesForUpload(
                 filesWithCollections.files,
-                filesWithCollections.collections
+                filesWithCollections.collections,
+                uploaderName
             );
         } catch (err) {
             showUserFacingError(err.message);

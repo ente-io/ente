@@ -21,7 +21,7 @@ export enum SUB_TYPE {
 }
 
 export const NEW_FILE_MAGIC_METADATA: MagicMetadataCore = {
-    version: 0,
+    version: 1,
     data: {},
     header: null,
     count: 0,
