@@ -6,6 +6,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/utils/separators_util.dart';
 
 enum ActionSheetType {
@@ -15,7 +16,7 @@ enum ActionSheetType {
 
 Future<dynamic> showActionSheet({
   required BuildContext context,
-  required List<Widget> buttons,
+  required List<ButtonWidget> buttons,
   required ActionSheetType actionSheetType,
   bool isCheckIconGreen = false,
   String? title,
@@ -43,7 +44,7 @@ Future<dynamic> showActionSheet({
 class ActionSheetWidget extends StatelessWidget {
   final String? title;
   final String? body;
-  final List<Widget> actionButtons;
+  final List<ButtonWidget> actionButtons;
   final ActionSheetType actionSheetType;
   final bool isCheckIconGreen;
 
