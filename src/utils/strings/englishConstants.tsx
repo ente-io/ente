@@ -880,9 +880,16 @@ const englishConstants = {
     AT: 'at',
     NAME_PLACEHOLDER: 'Name...',
     ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED:
-        'Cannot simultaneously upload a mix of files and folders',
-    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE:
-        'You have dragged and dropped a mixture of files and folders. Please provide either only files, or only folders.',
+        'Cannot create albums from file/folder mix',
+    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE: () => (
+        <>
+            <p>You have dragged and dropped a mixture of files and folders.</p>
+            <p>
+                Please provide either only files, or only folders when selecting
+                option to create separate albums
+            </p>
+        </>
+    ),
 };
 
 export default englishConstants;
