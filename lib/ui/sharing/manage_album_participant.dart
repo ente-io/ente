@@ -77,7 +77,7 @@ class _ManageIndividualParticipantState
                   ? null
                   : () async {
                       if (!kDebugMode) {
-                        showShortToast(context, "Support coming soon");
+                        showShortToast(context, "Coming soon...");
                         return;
                       }
                       final result =
