@@ -73,7 +73,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
         ? " (${split.ownedByCurrentUser.length})"
             ""
         : "";
-    final String suffixInPending = showPrefix
+    final String suffixInPending = split.ownedByOtherUsers.isNotEmpty
         ? " (${split.ownedByCurrentUser.length + split.pendingUploads.length})"
             ""
         : "";
@@ -88,11 +88,15 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     final colorScheme = getEnteColorScheme(context);
     final List<List<BlurMenuItemWidget>> items = [];
     final List<BlurMenuItemWidget> firstList = [];
+    final showUploadIcon = widget.type == GalleryType.localFolder &&
+        split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
       firstList.add(
         BlurMenuItemWidget(
-          leadingIcon: Icons.add_outlined,
-          labelText: "Add to album$suffixInPending",
+          leadingIcon:
+              showUploadIcon ? Icons.cloud_upload_outlined : Icons.add_outlined,
+          labelText:
+              "Add to ${showUploadIcon ? 'ente' : 'album'}$suffixInPending",
           menuItemColor: colorScheme.fillFaint,
           onTap: anyOwnedFiles ? _addToAlbum : null,
         ),
