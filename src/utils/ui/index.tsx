@@ -5,6 +5,7 @@ import { downloadApp } from 'utils/common';
 import constants from 'utils/strings/constants';
 import ElectronUpdateService from 'services/electron/update';
 import { AppUpdateInfo } from 'types/electron';
+import { InfoOutlined } from '@mui/icons-material';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: constants.DOWNLOAD_APP,
@@ -77,3 +78,11 @@ export const getUpdateAvailableForDownloadMessage = (
         variant: 'accent',
     },
 });
+
+export const getRootLevelFileWithFolderNotAllowMessage =
+    (): DialogBoxAttributes => ({
+        icon: <InfoOutlined />,
+        title: constants.ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED,
+        content: constants.ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE(),
+        close: {},
+    });

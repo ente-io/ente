@@ -229,7 +229,7 @@ const englishConstants = {
     LOGOUT_MESSAGE: 'Are you sure you want to logout?',
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
-    OK: 'Ok',
+    OK: 'OK',
     SUCCESS: 'Success',
     ERROR: 'Error',
     MESSAGE: 'Message',
@@ -872,6 +872,17 @@ const englishConstants = {
     YESTERDAY: 'Yesterday',
     AT: 'at',
     NAME_PLACEHOLDER: 'Name...',
+    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED:
+        'Cannot create albums from file/folder mix',
+    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE: () => (
+        <>
+            <p>You have dragged and dropped a mixture of files and folders.</p>
+            <p>
+                Please provide either only files, or only folders when selecting
+                option to create separate albums
+            </p>
+        </>
+    ),
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
 };
 

@@ -78,6 +78,7 @@ export const USE_CF_PROXY = false;
 export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
     rootFolderName: '',
     hasNestedFolders: false,
+    hasRootLevelFileWithFolder: false,
 };
 
 export const BLACK_THUMBNAIL_BASE64 =
