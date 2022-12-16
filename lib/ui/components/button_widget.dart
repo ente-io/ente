@@ -38,9 +38,7 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
-  ///Passing a non null value to this will pop the Navigator stack and return
-  ///buttonIndex along with it when pressed. Button action will only work if
-  ///isInAlert is true
+  ///Button action will only work if isInAlert is true
   final ButtonAction? buttonAction;
 
   ///setting this flag to true will make the button appear like how it would
@@ -347,7 +345,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         setState(() {
           executionState = ExecutionState.successful;
           Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
-            widget.buttonAction != null && widget.isInAlert
+            widget.isInAlert
                 ? Navigator.of(context, rootNavigator: true)
                     .pop(widget.buttonAction)
                 : null;
@@ -362,7 +360,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (executionState == ExecutionState.error) {
         setState(() {
           executionState = ExecutionState.idle;
-          widget.buttonAction != null && widget.isInAlert
+          widget.isInAlert
               ? Future.delayed(
                   const Duration(seconds: 0),
                   () => Navigator.of(context, rootNavigator: true).pop(
