@@ -9,7 +9,7 @@ import {
 import { FlexWrapper } from 'components/Container';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
-import { PhotoOutlined, VideoFileOutlined } from '@mui/icons-material';
+import { PhotoOutlined, VideocamOutlined } from '@mui/icons-material';
 import InfoItem from './InfoItem';
 import { makeHumanReadableStorage } from 'utils/billing';
 import Box from '@mui/material/Box';
@@ -101,7 +101,7 @@ export function RenderFileName({
                     file.metadata.fileType === FILE_TYPE.IMAGE ? (
                         <PhotoOutlined />
                     ) : (
-                        <VideoFileOutlined />
+                        <VideocamOutlined />
                     )
                 }
                 title={getFileTitle(filename, extension)}
