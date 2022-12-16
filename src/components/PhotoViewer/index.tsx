@@ -9,7 +9,11 @@ import {
 import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
-import { downloadFile, copyFileToClipboard } from 'utils/file';
+import {
+    downloadFile,
+    copyFileToClipboard,
+    getFileExtension,
+} from 'utils/file';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
@@ -449,7 +453,8 @@ function PhotoViewer(props: Iprops) {
             }
         } catch (e) {
             setExif({ key: file.src, value: null });
-            logError(e, 'exifr parsing failed');
+            const fileExtension = getFileExtension(file.metadata.title);
+            logError(e, 'exifr parsing failed', { extension: fileExtension });
         }
     };
 
