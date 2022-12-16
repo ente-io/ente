@@ -83,6 +83,6 @@ export const getRootLevelFileWithFolderNotAllowMessage =
     (): DialogBoxAttributes => ({
         icon: <InfoOutlined />,
         title: constants.ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED,
-        content: constants.ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE,
+        content: constants.ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE(),
         close: {},
     });
