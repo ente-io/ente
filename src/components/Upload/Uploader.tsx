@@ -83,6 +83,12 @@ interface Props {
 }
 
 export default function Uploader(props: Props) {
+    const appContext = useContext(AppContext);
+    const galleryContext = useContext(GalleryContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START
@@ -106,8 +112,8 @@ export default function Uploader(props: Props) {
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
         DEFAULT_IMPORT_SUGGESTION
     );
-    const appContext = useContext(AppContext);
-    const galleryContext = useContext(GalleryContext);
+    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
+    const [webFiles, setWebFiles] = useState([]);
 
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
     const isPendingDesktopUpload = useRef(false);
@@ -116,28 +122,27 @@ export default function Uploader(props: Props) {
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
     const currentUploadPromise = useRef<Promise<void>>(null);
-    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [webFiles, setWebFiles] = useState([]);
+    const uploadRunning = useRef(false);
+    const uploaderNameRef = useRef<string>(null);
 
     const closeUploadProgress = () => setUploadProgressView(false);
     const showUserNameInputDialog = () => setUserNameInputDialogView(true);
-    const closeUserNameInputDialog = () => setUserNameInputDialogView(false);
 
     const setCollectionName = (collectionName: string) => {
         isPendingDesktopUpload.current = true;
         pendingDesktopUploadCollectionName.current = collectionName;
     };
 
-    const uploadRunning = useRef(false);
-    const publicCollectionGalleryContext = useContext(
-        PublicCollectionGalleryContext
-    );
-
     const handleChoiceModalClose = () => {
         setChoiceModalView(false);
         uploadRunning.current = false;
     };
     const handleCollectionSelectorCancel = () => {
+        uploadRunning.current = false;
+    };
+
+    const handleUserNameInputDialogClose = () => {
+        setUserNameInputDialogView(false);
         uploadRunning.current = false;
     };
 
@@ -305,7 +310,6 @@ export default function Uploader(props: Props) {
                 [collection],
                 uploaderName
             );
-            toUploadFiles.current = null;
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
         }
@@ -545,11 +549,8 @@ export default function Uploader(props: Props) {
                 const uploaderName = await getPublicCollectionUploaderName(
                     getPublicCollectionUID(publicCollectionGalleryContext.token)
                 );
-                if (!uploaderName) {
-                    showUserNameInputDialog();
-                } else {
-                    await handlePublicUpload(uploaderName, true);
-                }
+                uploaderNameRef.current = uploaderName;
+                showUserNameInputDialog();
                 return;
             }
             if (isPendingDesktopUpload.current) {
@@ -699,8 +700,10 @@ export default function Uploader(props: Props) {
             />
             <UserNameInputDialog
                 open={userNameInputDialogView}
-                onClose={closeUserNameInputDialog}
+                onClose={handleUserNameInputDialogClose}
                 onNameSubmit={handlePublicUpload}
+                toUploadFilesCount={toUploadFiles.current?.length}
+                uploaderName={uploaderNameRef.current}
             />
         </>
     );
