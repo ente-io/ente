@@ -98,10 +98,10 @@ export function RenderFileName({
         <>
             <InfoItem
                 icon={
-                    file.metadata.fileType === FILE_TYPE.IMAGE ? (
-                        <PhotoOutlined />
-                    ) : (
+                    file.metadata.fileType === FILE_TYPE.VIDEO ? (
                         <VideocamOutlined />
+                    ) : (
+                        <PhotoOutlined />
                     )
                 }
                 title={getFileTitle(filename, extension)}
