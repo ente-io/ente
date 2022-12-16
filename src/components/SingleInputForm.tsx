@@ -28,6 +28,7 @@ export interface SingleInputFormProps {
     hiddenPostInput?: any;
     autoComplete?: string;
     blockButton?: boolean;
+    hiddenLabel?: boolean;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -88,12 +89,15 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                 <form noValidate onSubmit={handleSubmit}>
                     {props.hiddenPreInput}
                     <TextField
+                        hiddenLabel={props.hiddenLabel}
                         variant="filled"
                         fullWidth
                         type={showPassword ? 'text' : props.fieldType}
                         id={props.fieldType}
                         name={props.fieldType}
-                        label={props.placeholder}
+                        {...(props.hiddenLabel
+                            ? { placeholder: props.placeholder }
+                            : { label: props.placeholder })}
                         value={values.inputValue}
                         onChange={handleChange('inputValue')}
                         error={Boolean(errors.inputValue)}

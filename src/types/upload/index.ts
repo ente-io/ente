@@ -1,6 +1,7 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { fileAttribute } from 'types/file';
+import { fileAttribute, FilePublicMagicMetadata } from 'types/file';
+import { EncryptedMagicMetadataCore } from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -27,7 +28,6 @@ export interface Metadata {
     hash?: string;
     imageHash?: string;
     videoHash?: string;
-    uploaderName?: string;
 }
 
 export interface Location {
@@ -114,6 +114,7 @@ export interface FileWithMetadata
     extends Omit<FileInMemory, 'hasStaticThumbnail'> {
     metadata: Metadata;
     localID: number;
+    pubMagicMetadata: FilePublicMagicMetadata;
 }
 
 export interface EncryptedFile {
@@ -124,6 +125,7 @@ export interface ProcessedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
+    pubMagicMetadata: EncryptedMagicMetadataCore;
     localID: number;
 }
 export interface BackupedFile extends Omit<ProcessedFile, 'localID'> {}

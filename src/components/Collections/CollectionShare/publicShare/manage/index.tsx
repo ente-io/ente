@@ -15,7 +15,7 @@ import {
 import { ManageDownloadAccess } from './downloadAccess';
 import { handleSharingErrors } from 'utils/error/ui';
 import { SetPublicShareProp } from 'types/publicCollection';
-// import { ManagePublicCollect } from './publicCollect';
+import { ManagePublicCollect } from './publicCollect';
 
 interface Iprops {
     publicShareProp: PublicURL;
@@ -77,6 +77,13 @@ export default function PublicShareManage({
                                 updatePublicShareURLHelper
                             }
                         />
+                        <ManagePublicCollect
+                            collection={collection}
+                            publicShareProp={publicShareProp}
+                            updatePublicShareURLHelper={
+                                updatePublicShareURLHelper
+                            }
+                        />
                         <ManageDownloadAccess
                             collection={collection}
                             publicShareProp={publicShareProp}
@@ -91,13 +98,6 @@ export default function PublicShareManage({
                                 updatePublicShareURLHelper
                             }
                         />
-                        {/* <ManagePublicCollect
-                            collection={collection}
-                            publicShareProp={publicShareProp}
-                            updatePublicShareURLHelper={
-                                updatePublicShareURLHelper
-                            }
-                        /> */}
                     </Stack>
                     {sharableLinkError && (
                         <Typography

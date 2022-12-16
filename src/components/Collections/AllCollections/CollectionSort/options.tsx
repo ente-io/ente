@@ -12,9 +12,6 @@ export default function CollectionSortOptions(props: CollectionSortProps) {
             <SortByOption sortBy={COLLECTION_SORT_BY.NAME}>
                 {constants.SORT_BY_NAME}
             </SortByOption>
-            <SortByOption sortBy={COLLECTION_SORT_BY.CREATION_TIME_DESCENDING}>
-                {constants.SORT_BY_CREATION_TIME_DESCENDING}
-            </SortByOption>
             <SortByOption sortBy={COLLECTION_SORT_BY.CREATION_TIME_ASCENDING}>
                 {constants.SORT_BY_CREATION_TIME_ASCENDING}
             </SortByOption>

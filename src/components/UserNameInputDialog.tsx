@@ -5,7 +5,13 @@ import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined';
 import { Typography } from '@mui/material';
 import SingleInputForm from './SingleInputForm';
 
-export default function UserNameInputDialog({ open, onClose, onNameSubmit }) {
+export default function UserNameInputDialog({
+    open,
+    onClose,
+    onNameSubmit,
+    toUploadFilesCount,
+    uploaderName,
+}) {
     const handleSubmit = async (inputValue: string) => {
         onClose();
         await onNameSubmit(inputValue);
@@ -23,12 +29,14 @@ export default function UserNameInputDialog({ open, onClose, onNameSubmit }) {
                 {constants.PUBLIC_UPLOADER_NAME_MESSAGE}
             </Typography>
             <SingleInputForm
+                hiddenLabel
+                initialValue={uploaderName}
                 callback={handleSubmit}
-                placeholder={constants.ENTER_FILE_NAME}
-                buttonText={constants.CONTINUE}
+                placeholder={constants.NAME_PLACEHOLDER}
+                buttonText={constants.ADD_X_PHOTOS(toUploadFilesCount)}
                 fieldType="text"
                 blockButton
-                secondaryButtonAction={() => {}}
+                secondaryButtonAction={onClose}
             />
         </DialogBox>
     );
