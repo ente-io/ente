@@ -26,8 +26,6 @@ interface LivePhotoIdentifier {
     size: number;
 }
 
-const ENTE_LIVE_PHOTO_FORMAT = 'elp';
-
 const UNDERSCORE_THREE = '_3';
 
 const UNDERSCORE = '_';
@@ -79,9 +77,7 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
 }
 
 export function getLivePhotoName(livePhotoAssets: LivePhotoAssets) {
-    return `${
-        splitFilenameAndExtension(livePhotoAssets.image.name)[0]
-    }.${ENTE_LIVE_PHOTO_FORMAT}`;
+    return splitFilenameAndExtension(livePhotoAssets.image.name)[0];
 }
 
 export async function readLivePhoto(

@@ -562,7 +562,7 @@ const englishConstants = {
     ),
 
     LIVE_PHOTOS_DETECTED:
-        'The photo and video files from your Live Photos have been merged into a single ELP file',
+        'The photo and video files from your Live Photos have been merged into a single file',
 
     RETRY_FAILED: 'Retry failed uploads',
     FAILED_UPLOADS: 'Failed uploads ',
