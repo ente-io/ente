@@ -56,6 +56,48 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Widget build(BuildContext context) {
     debugPrint(
         '$runtimeType building with ${widget.selectedFiles.files.length}');
+    final List<IconButtonWidget> iconsButton = [];
+    if (showDeleteOption) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.delete_outlined,
+          iconButtonType: IconButtonType.primary,
+          onTap: () => showDeleteSheet(context, widget.selectedFiles),
+        ),
+      );
+    }
+
+    if (widget.galleryType.showUnArchiveOption()) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.unarchive,
+          iconButtonType: IconButtonType.primary,
+          onTap: () => _onUnArchiveClick(),
+        ),
+      );
+    }
+    if (widget.galleryType.showUnHideOption()) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.visibility_off_outlined,
+          iconButtonType: IconButtonType.primary,
+          onTap: () => _selectionCollectionForAction(
+            CollectionActionType.unHide,
+          ),
+        ),
+      );
+    }
+    iconsButton.add(
+      IconButtonWidget(
+        icon: Icons.ios_share_outlined,
+        iconButtonType: IconButtonType.primary,
+        onTap: () => shareSelected(
+          context,
+          shareButtonKey,
+          widget.selectedFiles.files,
+        ),
+      ),
+    );
     return ValueListenableBuilder(
       valueListenable: _bottomPosition,
       builder: (context, value, child) {
@@ -80,41 +122,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                 widget.selectedFiles.clearAll();
               }
             },
-            iconButtons: [
-              showDeleteOption
-                  ? IconButtonWidget(
-                      icon: Icons.delete_outlined,
-                      iconButtonType: IconButtonType.primary,
-                      onTap: () =>
-                          showDeleteSheet(context, widget.selectedFiles),
-                    )
-                  : const SizedBox.shrink(),
-              widget.galleryType.showUnArchiveOption()
-                  ? IconButtonWidget(
-                      icon: Icons.unarchive,
-                      iconButtonType: IconButtonType.primary,
-                      onTap: () => _onUnArchiveClick(),
-                    )
-                  : const SizedBox.shrink(),
-              widget.galleryType.showUnHideOption()
-                  ? IconButtonWidget(
-                      icon: Icons.visibility_off_outlined,
-                      iconButtonType: IconButtonType.primary,
-                      onTap: () => _selectionCollectionForAction(
-                        CollectionActionType.unHide,
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-              IconButtonWidget(
-                icon: Icons.ios_share_outlined,
-                iconButtonType: IconButtonType.primary,
-                onTap: () => shareSelected(
-                  context,
-                  shareButtonKey,
-                  widget.selectedFiles.files,
-                ),
-              ),
-            ],
+            iconButtons: iconsButton,
           ),
         );
       },
