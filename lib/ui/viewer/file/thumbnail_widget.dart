@@ -128,9 +128,11 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           );
         } else if (widget.file.pubMagicMetadata.uploaderName != null) {
           contentChildren.add(
+            // Use uploadName hashCode as userID so that different uploader
+            // get avatar color
             OwnerAvatarOverlayIcon(
               User(
-                id: widget.file.ownerID,
+                id: widget.file.pubMagicMetadata.uploaderName.hashCode,
                 email: owner.email,
                 name: widget.file.pubMagicMetadata.uploaderName,
               ),
