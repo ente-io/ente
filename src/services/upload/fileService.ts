@@ -111,15 +111,20 @@ export async function encryptFile(
         const { file: encryptedMetadata }: EncryptionResult =
             await worker.encryptMetadata(file.metadata, fileKey);
 
-        const { file: encryptedPubMagicMetadataData }: EncryptionResult =
-            await worker.encryptMetadata(file.pubMagicMetadata.data, fileKey);
-
-        const encryptedPubMagicMetadata: EncryptedMagicMetadataCore = {
-            version: file.pubMagicMetadata.version,
-            count: file.pubMagicMetadata.count,
-            data: encryptedPubMagicMetadataData.encryptedData as unknown as string,
-            header: encryptedPubMagicMetadataData.decryptionHeader,
-        };
+        let encryptedPubMagicMetadata: EncryptedMagicMetadataCore;
+        if (file.pubMagicMetadata) {
+            const { file: encryptedPubMagicMetadataData }: EncryptionResult =
+                await worker.encryptMetadata(
+                    file.pubMagicMetadata.data,
+                    fileKey
+                );
+            encryptedPubMagicMetadata = {
+                version: file.pubMagicMetadata.version,
+                count: file.pubMagicMetadata.count,
+                data: encryptedPubMagicMetadataData.encryptedData as unknown as string,
+                header: encryptedPubMagicMetadataData.decryptionHeader,
+            };
+        }
 
         const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
             fileKey,
