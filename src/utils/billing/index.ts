@@ -41,7 +41,7 @@ export function makeHumanReadableStorage(
     bytes: number,
     round: 'round-up' | 'round-down' = 'round-down'
 ): string {
-    if (bytes === 0) {
+    if (bytes <= 0) {
         return '0 MB';
     }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
