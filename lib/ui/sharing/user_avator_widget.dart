@@ -10,12 +10,14 @@ class UserAvatarWidget extends StatelessWidget {
   final User user;
   final AvatarType type;
   final int currentUserID;
+  final bool thumbnailView;
 
   const UserAvatarWidget(
     this.user, {
     super.key,
     this.currentUserID = -1,
     this.type = AvatarType.mini,
+    this.thumbnailView = false,
   });
 
   @override
@@ -36,15 +38,19 @@ class UserAvatarWidget extends StatelessWidget {
     return Container(
       height: size,
       width: size,
-      padding: const EdgeInsets.all(2),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: decorationColor,
-        border: Border.all(
-          color: strokeBaseDark,
-          width: 1.0,
-        ),
-      ),
+      padding: thumbnailView
+          ? const EdgeInsets.only(bottom: 1)
+          : const EdgeInsets.all(2),
+      decoration: thumbnailView
+          ? null
+          : BoxDecoration(
+              shape: BoxShape.circle,
+              color: decorationColor,
+              border: Border.all(
+                color: strokeBaseDark,
+                width: 1.0,
+              ),
+            ),
       child: CircleAvatar(
         backgroundColor: decorationColor,
         child: Text(

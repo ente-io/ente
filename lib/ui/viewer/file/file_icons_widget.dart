@@ -100,6 +100,7 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
         child: UserAvatarWidget(
           user,
           type: AvatarType.tiny,
+          thumbnailView: true,
         ),
       ),
     );

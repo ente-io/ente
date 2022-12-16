@@ -253,7 +253,10 @@ class EmailItemWidget extends StatelessWidget {
             captionedTextWidget: CaptionedTextWidget(
               title: collection.getSharees().firstOrNull?.email ?? '',
             ),
-            leadingIconWidget: UserAvatarWidget(collection.getSharees().first),
+            leadingIconWidget: UserAvatarWidget(
+              collection.getSharees().first,
+              thumbnailView: true,
+            ),
             leadingIconSize: 24,
             menuItemColor: getEnteColorScheme(context).fillFaint,
             pressedColor: getEnteColorScheme(context).fillFaint,

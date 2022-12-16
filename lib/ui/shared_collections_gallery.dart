@@ -396,6 +396,7 @@ class IncomingCollectionItem extends StatelessWidget {
                       padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
                       child: UserAvatarWidget(
                         c.collection.owner,
+                        thumbnailView: true,
                       ),
                     ),
                   ),
