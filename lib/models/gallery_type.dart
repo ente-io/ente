@@ -52,9 +52,9 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.searchResults:
       case GalleryType.homepage:
       case GalleryType.favorite:
-        return true;
-      case GalleryType.hidden:
       case GalleryType.archive:
+      case GalleryType.hidden:
+        return true;
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
@@ -104,10 +104,10 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.ownedCollection:
       case GalleryType.homepage:
       case GalleryType.searchResults:
+      case GalleryType.archive:
         return true;
 
       case GalleryType.hidden:
-      case GalleryType.archive:
       case GalleryType.localFolder:
       case GalleryType.trash:
       case GalleryType.favorite:
