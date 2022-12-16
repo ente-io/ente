@@ -45,6 +45,10 @@ class ButtonWidget extends StatelessWidget {
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
   final bool isInActionSheet;
+
+  ///isInAlert is to dismiss the alert if the action on the button is completed
+  ///This flag is true by default if isInAcitonSheet is true
+  final bool isInAlert;
   const ButtonWidget({
     required this.buttonType,
     required this.buttonSize,
@@ -54,6 +58,7 @@ class ButtonWidget extends StatelessWidget {
     this.isInActionSheet = false,
     this.isDisabled = false,
     this.buttonAction,
+    this.isInAlert = false,
     super.key,
   });
 
@@ -112,6 +117,7 @@ class ButtonWidget extends StatelessWidget {
       buttonType: buttonType,
       isDisabled: isDisabled,
       buttonSize: buttonSize,
+      isInAlert: isInActionSheet ? isInActionSheet : isInAlert,
       onTap: onTap,
       labelText: labelText,
       icon: icon,
@@ -129,11 +135,13 @@ class ButtonChildWidget extends StatefulWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
   final ButtonAction? buttonAction;
+  final bool isInAlert;
   const ButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
     required this.buttonSize,
+    required this.isInAlert,
     this.onTap,
     this.labelText,
     this.icon,
@@ -334,8 +342,8 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     if (executionState == ExecutionState.inProgress) {
       setState(() {
         executionState = ExecutionState.successful;
-        Future.delayed(const Duration(seconds: 2), () {
-          widget.buttonAction != null
+        Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
+          widget.buttonAction != null && widget.isInAlert
               ? Navigator.of(context, rootNavigator: true)
                   .pop(ButtonAction.error)
               : null;
@@ -349,10 +357,15 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     }
     if (executionState == ExecutionState.error) {
       setState(() {
-        widget.buttonAction != null
-            ? Navigator.of(context, rootNavigator: true).pop(ButtonAction.error)
-            : null;
         executionState = ExecutionState.idle;
+        widget.buttonAction != null && widget.isInAlert
+            ? Future.delayed(
+                const Duration(seconds: 1),
+                () => Navigator.of(context, rootNavigator: true).pop(
+                  ButtonAction.error,
+                ),
+              )
+            : null;
       });
     }
   }
