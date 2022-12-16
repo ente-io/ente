@@ -13,7 +13,7 @@ enum ActionSheetType {
   iconOnly,
 }
 
-void showActionSheet({
+Future<dynamic> showActionSheet({
   required BuildContext context,
   required List<Widget> buttons,
   required ActionSheetType actionSheetType,
@@ -21,7 +21,7 @@ void showActionSheet({
   String? title,
   String? body,
 }) {
-  showMaterialModalBottomSheet(
+  return showMaterialModalBottomSheet(
     backgroundColor: Colors.transparent,
     barrierColor: backdropMutedDark,
     useRootNavigator: true,
@@ -153,11 +153,13 @@ class ContentContainerWidget extends StatelessWidget {
                     style: textTheme.body
                         .copyWith(color: textMutedDark), //constant color
                   )
-            : Icon(Icons.check_outlined,
+            : Icon(
+                Icons.check_outlined,
                 size: 48,
                 color: isCheckIconGreen
                     ? getEnteColorScheme(context).primary700
-                    : strokeBaseDark)
+                    : strokeBaseDark,
+              )
       ],
     );
   }

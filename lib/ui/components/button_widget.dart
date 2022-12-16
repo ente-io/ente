@@ -19,6 +19,12 @@ enum ButtonSize {
   large;
 }
 
+enum ButtonIndex {
+  first,
+  second,
+  third;
+}
+
 typedef FutureVoidCallback = Future<void> Function();
 
 class ButtonWidget extends StatelessWidget {
@@ -28,6 +34,10 @@ class ButtonWidget extends StatelessWidget {
   final FutureVoidCallback? onTap;
   final bool isDisabled;
   final ButtonSize buttonSize;
+
+  ///Passing a non null value to this will pop the Navigator stack and return
+  ///buttonIndex along with it when pressed
+  final ButtonIndex? buttonIndex;
 
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
@@ -40,6 +50,7 @@ class ButtonWidget extends StatelessWidget {
     this.onTap,
     this.isInActionSheet = false,
     this.isDisabled = false,
+    this.buttonIndex,
     super.key,
   });
 
@@ -93,7 +104,7 @@ class ButtonWidget extends StatelessWidget {
         buttonType.disabledLabelStyle(textTheme, colorScheme);
     buttonStyle.checkIconColor = buttonType.checkIconColor(colorScheme);
 
-    return LargeButtonChildWidget(
+    return ButtonChildWidget(
       buttonStyle: buttonStyle,
       buttonType: buttonType,
       isDisabled: isDisabled,
@@ -101,11 +112,12 @@ class ButtonWidget extends StatelessWidget {
       onTap: onTap,
       labelText: labelText,
       icon: icon,
+      buttonIndex: buttonIndex,
     );
   }
 }
 
-class LargeButtonChildWidget extends StatefulWidget {
+class ButtonChildWidget extends StatefulWidget {
   final CustomButtonStyle buttonStyle;
   final FutureVoidCallback? onTap;
   final ButtonType buttonType;
@@ -113,7 +125,8 @@ class LargeButtonChildWidget extends StatefulWidget {
   final IconData? icon;
   final bool isDisabled;
   final ButtonSize buttonSize;
-  const LargeButtonChildWidget({
+  final ButtonIndex? buttonIndex;
+  const ButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
@@ -121,14 +134,15 @@ class LargeButtonChildWidget extends StatefulWidget {
     this.onTap,
     this.labelText,
     this.icon,
+    this.buttonIndex,
     super.key,
   });
 
   @override
-  State<LargeButtonChildWidget> createState() => _LargeButtonChildWidgetState();
+  State<ButtonChildWidget> createState() => _ButtonChildWidgetState();
 }
 
-class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
+class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   late Color buttonColor;
   late Color borderColor;
   late Color iconColor;
@@ -313,6 +327,9 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
     // idle state. This Future is for delaying the execution of the if
     // condition so that the calback in the debouncer finishes execution before.
     await Future.delayed(const Duration(milliseconds: 5));
+    if (widget.buttonIndex != null) {
+      Navigator.of(context, rootNavigator: true).pop(widget.buttonIndex);
+    }
     if (executionState == ExecutionState.inProgress) {
       setState(() {
         executionState = ExecutionState.successful;
