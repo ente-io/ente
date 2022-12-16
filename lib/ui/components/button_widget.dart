@@ -19,10 +19,11 @@ enum ButtonSize {
   large;
 }
 
-enum ButtonIndex {
+enum ButtonAction {
   first,
   second,
-  third;
+  third,
+  cancelled;
 }
 
 typedef FutureVoidCallback = Future<void> Function();
@@ -37,7 +38,7 @@ class ButtonWidget extends StatelessWidget {
 
   ///Passing a non null value to this will pop the Navigator stack and return
   ///buttonIndex along with it when pressed
-  final ButtonIndex? buttonIndex;
+  final ButtonAction? buttonAction;
 
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
@@ -50,7 +51,7 @@ class ButtonWidget extends StatelessWidget {
     this.onTap,
     this.isInActionSheet = false,
     this.isDisabled = false,
-    this.buttonIndex,
+    this.buttonAction,
     super.key,
   });
 
@@ -112,7 +113,7 @@ class ButtonWidget extends StatelessWidget {
       onTap: onTap,
       labelText: labelText,
       icon: icon,
-      buttonIndex: buttonIndex,
+      buttonAction: buttonAction,
     );
   }
 }
@@ -125,7 +126,7 @@ class ButtonChildWidget extends StatefulWidget {
   final IconData? icon;
   final bool isDisabled;
   final ButtonSize buttonSize;
-  final ButtonIndex? buttonIndex;
+  final ButtonAction? buttonAction;
   const ButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
@@ -134,7 +135,7 @@ class ButtonChildWidget extends StatefulWidget {
     this.onTap,
     this.labelText,
     this.icon,
-    this.buttonIndex,
+    this.buttonAction,
     super.key,
   });
 
@@ -327,8 +328,8 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     // idle state. This Future is for delaying the execution of the if
     // condition so that the calback in the debouncer finishes execution before.
     await Future.delayed(const Duration(milliseconds: 5));
-    if (widget.buttonIndex != null) {
-      Navigator.of(context, rootNavigator: true).pop(widget.buttonIndex);
+    if (widget.buttonAction != null) {
+      Navigator.of(context, rootNavigator: true).pop(widget.buttonAction);
     }
     if (executionState == ExecutionState.inProgress) {
       setState(() {

@@ -35,6 +35,7 @@ Future<dynamic> showActionSheet({
         isCheckIconGreen: isCheckIconGreen,
       );
     },
+    isDismissible: false,
   );
 }
 
