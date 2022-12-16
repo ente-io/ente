@@ -21,7 +21,6 @@ export enum CollectionSummaryType {
 export enum COLLECTION_SORT_BY {
     NAME,
     CREATION_TIME_ASCENDING,
-    CREATION_TIME_DESCENDING,
     UPDATION_TIME_DESCENDING,
 }
 

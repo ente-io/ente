@@ -576,7 +576,8 @@ const PhotoFrame = ({
                 let convertedVideoURL;
 
                 if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                    [originalImageURL, originalVideoURL] = urls.converted;
+                    [originalImageURL, originalVideoURL] = urls.original;
+                    [convertedImageURL, convertedVideoURL] = urls.converted;
                 } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                     [originalVideoURL] = urls.original;
                     [convertedVideoURL] = urls.converted;

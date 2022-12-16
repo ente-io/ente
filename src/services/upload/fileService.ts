@@ -71,9 +71,9 @@ export async function readFile(
 export async function extractFileMetadata(
     worker,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
-    rawFile: File | ElectronFile,
     collectionID: number,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
+    rawFile: File | ElectronFile
 ) {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
