@@ -702,9 +702,6 @@ const englishConstants = {
             </p>
         </>
     ),
-    ENABLE_PUBLIC_COLLECT: 'Allow adding photos',
-    ENABLE_PUBLIC_COLLECT_MESSAGE:
-        'Allow people with the link to also add photos to the shared album',
     ABUSE_REPORT: 'Abuse report',
     ABUSE_REPORT_BUTTON_TEXT: 'Report abuse?',
     MALICIOUS_CONTENT: 'Contains malicious content',
@@ -876,7 +873,6 @@ const englishConstants = {
     AT: 'at',
     NAME_PLACEHOLDER: 'Name...',
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
-    ALLOW: 'Allow',
 };
 
 export default englishConstants;
