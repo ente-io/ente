@@ -98,7 +98,7 @@ class _ManageIndividualParticipantState
             ),
             DividerWidget(
               dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).blurStrokeFaint,
+              bgColor: getEnteColorScheme(context).fillFaint,
             ),
             MenuItemWidget(
               captionedTextWidget: const CaptionedTextWidget(
