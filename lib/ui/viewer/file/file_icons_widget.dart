@@ -89,7 +89,7 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 
 class OwnerAvatarOverlayIcon extends StatelessWidget {
   final User user;
-  OwnerAvatarOverlayIcon(this.user, {Key? key}) : super(key: key);
+  const OwnerAvatarOverlayIcon(this.user, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
