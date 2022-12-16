@@ -11,7 +11,8 @@ import 'package:photos/utils/debouncer.dart';
 enum ExecutionState {
   idle,
   inProgress,
-  successful,
+  error,
+  successful;
 }
 
 enum ButtonSize {
@@ -23,7 +24,8 @@ enum ButtonAction {
   first,
   second,
   third,
-  cancelled;
+  cancelled,
+  error;
 }
 
 typedef FutureVoidCallback = Future<void> Function();
@@ -318,9 +320,10 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         });
       }),
     );
-    await widget.onTap!
-        .call()
-        .onError((error, stackTrace) => _debouncer.cancelDebounce());
+    await widget.onTap!.call().onError((error, stackTrace) {
+      executionState = ExecutionState.error;
+      _debouncer.cancelDebounce();
+    });
     _debouncer.cancelDebounce();
     // when the time taken by widget.onTap is approximately equal to the debounce
     // time, the callback is getting executed when/after the if condition
@@ -328,19 +331,28 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     // idle state. This Future is for delaying the execution of the if
     // condition so that the calback in the debouncer finishes execution before.
     await Future.delayed(const Duration(milliseconds: 5));
-    if (widget.buttonAction != null) {
-      Navigator.of(context, rootNavigator: true).pop(widget.buttonAction);
-    }
     if (executionState == ExecutionState.inProgress) {
       setState(() {
         executionState = ExecutionState.successful;
         Future.delayed(const Duration(seconds: 2), () {
+          widget.buttonAction != null
+              ? Navigator.of(context, rootNavigator: true)
+                  .pop(ButtonAction.error)
+              : null;
           if (mounted) {
             setState(() {
               executionState = ExecutionState.idle;
             });
           }
         });
+      });
+    }
+    if (executionState == ExecutionState.error) {
+      setState(() {
+        widget.buttonAction != null
+            ? Navigator.of(context, rootNavigator: true).pop(ButtonAction.error)
+            : null;
+        executionState = ExecutionState.idle;
       });
     }
   }
