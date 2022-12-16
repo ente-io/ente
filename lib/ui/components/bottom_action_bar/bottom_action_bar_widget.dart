@@ -45,7 +45,7 @@ class BottomActionBarWidget extends StatelessWidget {
         : 0;
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
+        filter: ImageFilter.blur(sigmaX: blurFaint, sigmaY: blurFaint),
         child: Container(
           color: colorScheme.backdropBase,
           padding: EdgeInsets.only(
