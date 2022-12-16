@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
+import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class FileSelectionOverlayBar extends StatefulWidget {
@@ -85,6 +87,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                           showDeleteSheet(context, widget.selectedFiles),
                     )
                   : const SizedBox.shrink(),
+              widget.galleryType.showUnArchiveOption()
+                  ? IconButtonWidget(
+                      icon: Icons.unarchive,
+                      iconButtonType: IconButtonType.primary,
+                      onTap: () => _onUnArchiveClick(),
+                    )
+                  : const SizedBox.shrink(),
               IconButtonWidget(
                 icon: Icons.ios_share_outlined,
                 iconButtonType: IconButtonType.primary,
@@ -99,6 +108,15 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         );
       },
     );
+  }
+
+  Future<void> _onUnArchiveClick() async {
+    await changeVisibility(
+      context,
+      widget.selectedFiles.files.toList(),
+      visibilityVisible,
+    );
+    widget.selectedFiles.clearAll();
   }
 
   _selectedFilesListener() {
