@@ -879,6 +879,7 @@ const englishConstants = {
     YESTERDAY: 'Yesterday',
     AT: 'at',
     NAME_PLACEHOLDER: 'Name...',
+    ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
 };
 
 export default englishConstants;
