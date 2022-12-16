@@ -151,6 +151,7 @@ class _ExpansionIconWidgetState extends State<ExpansionIconWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final iconColor = getEnteColorScheme(context).blurStrokeBase;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       switchInCurve: Curves.easeInOutExpo,
@@ -163,6 +164,7 @@ class _ExpansionIconWidgetState extends State<ExpansionIconWidget> {
               },
               icon: Icons.expand_more_outlined,
               iconButtonType: IconButtonType.primary,
+              iconColor: iconColor,
             )
           : IconButtonWidget(
               key: const ValueKey<bool>(true),
@@ -172,6 +174,7 @@ class _ExpansionIconWidgetState extends State<ExpansionIconWidget> {
               },
               icon: Icons.more_horiz_outlined,
               iconButtonType: IconButtonType.primary,
+              iconColor: iconColor,
             ),
     );
   }

@@ -7,6 +7,7 @@ import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/create_collection_page.dart';
@@ -59,11 +60,13 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     debugPrint(
         '$runtimeType building with ${widget.selectedFiles.files.length}');
     final List<IconButtonWidget> iconsButton = [];
+    final iconColor = getEnteColorScheme(context).blurStrokeBase;
     if (showDeleteOption) {
       iconsButton.add(
         IconButtonWidget(
           icon: Icons.delete_outlined,
           iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
           onTap: () => showDeleteSheet(context, widget.selectedFiles),
         ),
       );
@@ -74,6 +77,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         IconButtonWidget(
           icon: Icons.unarchive,
           iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
           onTap: () => _onUnArchiveClick(),
         ),
       );
@@ -83,6 +87,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         IconButtonWidget(
           icon: Icons.visibility_off_outlined,
           iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
           onTap: () => _selectionCollectionForAction(
             CollectionActionType.unHide,
           ),
@@ -93,6 +98,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       IconButtonWidget(
         icon: Icons.ios_share_outlined,
         iconButtonType: IconButtonType.primary,
+        iconColor: getEnteColorScheme(context).blurStrokeBase,
         onTap: () => shareSelected(
           context,
           shareButtonKey,
