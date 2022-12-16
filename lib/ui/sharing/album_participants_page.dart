@@ -64,7 +64,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
         widget.collection.owner?.id == Configuration.instance.getUserID();
     final colorScheme = getEnteColorScheme(context);
     final currentUserID = Configuration.instance.getUserID()!;
-    final int particpants = 1 + widget.collection.getSharees().length;
+    final int participants = 1 + widget.collection.getSharees().length;
     final User owner = widget.collection.owner!;
     if (owner.id == currentUserID && owner.email == "") {
       owner.email = Configuration.instance.getEmail()!;
@@ -82,7 +82,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
             flexibleSpaceTitle: TitleBarTitleWidget(
               title: "${widget.collection.name}",
             ),
-            flexibleSpaceCaption: "$particpants Participants",
+            flexibleSpaceCaption: "$participants Participants",
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
