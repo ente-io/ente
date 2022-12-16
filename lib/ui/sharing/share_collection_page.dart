@@ -153,6 +153,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
                 shareText(url);
               },
               isTopBorderRadiusRemoved: true,
+              isBottomBorderRadiusRemoved: true,
             ),
           ],
         );
