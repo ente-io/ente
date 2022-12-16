@@ -36,6 +36,7 @@ Future<dynamic> showActionSheet({
       );
     },
     isDismissible: false,
+    enableDrag: false,
   );
 }
 

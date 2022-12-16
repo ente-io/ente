@@ -24,7 +24,7 @@ enum ButtonAction {
   first,
   second,
   third,
-  cancelled,
+  cancel,
   error;
 }
 
@@ -39,15 +39,17 @@ class ButtonWidget extends StatelessWidget {
   final ButtonSize buttonSize;
 
   ///Passing a non null value to this will pop the Navigator stack and return
-  ///buttonIndex along with it when pressed
+  ///buttonIndex along with it when pressed. Button action will only work if
+  ///isInAlert is true
   final ButtonAction? buttonAction;
 
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
-  final bool isInActionSheet;
+  final bool shouldStickToDarkTheme;
 
-  ///isInAlert is to dismiss the alert if the action on the button is completed
-  ///This flag is true by default if isInAcitonSheet is true
+  ///isInAlert is to dismiss the alert if the action on the button is completed.
+  ///This should be set to true if the alert which uses this button needs to
+  ///return the Button's action.
   final bool isInAlert;
   const ButtonWidget({
     required this.buttonType,
@@ -55,7 +57,7 @@ class ButtonWidget extends StatelessWidget {
     this.icon,
     this.labelText,
     this.onTap,
-    this.isInActionSheet = false,
+    this.shouldStickToDarkTheme = false,
     this.isDisabled = false,
     this.buttonAction,
     this.isInAlert = false,
@@ -65,13 +67,13 @@ class ButtonWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme =
-        isInActionSheet ? darkScheme : getEnteColorScheme(context);
-    final inverseColorScheme = isInActionSheet
+        shouldStickToDarkTheme ? darkScheme : getEnteColorScheme(context);
+    final inverseColorScheme = shouldStickToDarkTheme
         ? lightScheme
         : getEnteColorScheme(context, inverse: true);
     final textTheme =
-        isInActionSheet ? darkTextTheme : getEnteTextTheme(context);
-    final inverseTextTheme = isInActionSheet
+        shouldStickToDarkTheme ? darkTextTheme : getEnteTextTheme(context);
+    final inverseTextTheme = shouldStickToDarkTheme
         ? lightTextTheme
         : getEnteTextTheme(context, inverse: true);
     final buttonStyle = CustomButtonStyle(
@@ -117,7 +119,7 @@ class ButtonWidget extends StatelessWidget {
       buttonType: buttonType,
       isDisabled: isDisabled,
       buttonSize: buttonSize,
-      isInAlert: isInActionSheet ? isInActionSheet : isInAlert,
+      isInAlert: isInAlert,
       onTap: onTap,
       labelText: labelText,
       icon: icon,
@@ -339,34 +341,41 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     // idle state. This Future is for delaying the execution of the if
     // condition so that the calback in the debouncer finishes execution before.
     await Future.delayed(const Duration(milliseconds: 5));
-    if (executionState == ExecutionState.inProgress) {
-      setState(() {
-        executionState = ExecutionState.successful;
-        Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
-          widget.buttonAction != null && widget.isInAlert
-              ? Navigator.of(context, rootNavigator: true)
-                  .pop(ButtonAction.error)
-              : null;
-          if (mounted) {
-            setState(() {
-              executionState = ExecutionState.idle;
-            });
-          }
+    if (executionState == ExecutionState.inProgress ||
+        executionState == ExecutionState.error) {
+      if (executionState == ExecutionState.inProgress) {
+        setState(() {
+          executionState = ExecutionState.successful;
+          Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
+            widget.buttonAction != null && widget.isInAlert
+                ? Navigator.of(context, rootNavigator: true)
+                    .pop(widget.buttonAction)
+                : null;
+            if (mounted) {
+              setState(() {
+                executionState = ExecutionState.idle;
+              });
+            }
+          });
         });
-      });
-    }
-    if (executionState == ExecutionState.error) {
-      setState(() {
-        executionState = ExecutionState.idle;
-        widget.buttonAction != null && widget.isInAlert
-            ? Future.delayed(
-                const Duration(seconds: 1),
-                () => Navigator.of(context, rootNavigator: true).pop(
-                  ButtonAction.error,
-                ),
-              )
-            : null;
-      });
+      }
+      if (executionState == ExecutionState.error) {
+        setState(() {
+          executionState = ExecutionState.idle;
+          widget.buttonAction != null && widget.isInAlert
+              ? Future.delayed(
+                  const Duration(seconds: 0),
+                  () => Navigator.of(context, rootNavigator: true).pop(
+                    ButtonAction.error,
+                  ),
+                )
+              : null;
+        });
+      }
+    } else {
+      if (widget.isInAlert) {
+        Navigator.of(context).pop(widget.buttonAction);
+      }
     }
   }
 
