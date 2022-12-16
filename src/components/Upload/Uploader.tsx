@@ -675,7 +675,6 @@ export default function Uploader(props: Props) {
             appContext.setDialogMessage(
                 getRootLevelFileWithFolderNotAllowMessage()
             );
-            props.setLoading(false);
             return;
         }
         uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
