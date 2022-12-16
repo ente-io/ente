@@ -76,6 +76,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         menuItemColor: getEnteColorScheme(context).fillFaint,
         pressedColor: getEnteColorScheme(context).fillFaint,
         borderRadius: 4.0,
+        isTopBorderRadiusRemoved: _sharees.isNotEmpty,
         onTap: () async {
           routeToPage(context, AddParticipantPage(widget.collection)).then(
             (value) => {
