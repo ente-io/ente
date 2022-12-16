@@ -43,7 +43,7 @@ class BottomActionBarWidget extends StatelessWidget {
         : 0;
     return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blurBase, sigmaY: blurBase),
+        filter: ImageFilter.blur(sigmaX: blurFaint, sigmaY: blurFaint),
         child: Container(
           color: colorScheme.backdropBase,
           padding: EdgeInsets.only(
@@ -148,6 +148,7 @@ class _ExpansionIconWidgetState extends State<ExpansionIconWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final iconColor = getEnteColorScheme(context).blurStrokeBase;
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
       switchInCurve: Curves.easeInOutExpo,
@@ -160,6 +161,7 @@ class _ExpansionIconWidgetState extends State<ExpansionIconWidget> {
               },
               icon: Icons.expand_more_outlined,
               iconButtonType: IconButtonType.primary,
+              iconColor: iconColor,
             )
           : IconButtonWidget(
               key: const ValueKey<bool>(true),
@@ -169,6 +171,7 @@ class _ExpansionIconWidgetState extends State<ExpansionIconWidget> {
               },
               icon: Icons.more_horiz_outlined,
               iconButtonType: IconButtonType.primary,
+              iconColor: iconColor,
             ),
     );
   }
