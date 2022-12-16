@@ -179,7 +179,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: Text(
                             widget.subText ??
-                                "We don’t store this key, please save this in a safe place.",
+                                "We don't store this key, please save this 24 word key in a safe place.",
                             style: Theme.of(context).textTheme.bodyText1,
                           ),
                         ),
