@@ -11,10 +11,10 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
-import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/utils/file_util.dart';
@@ -122,10 +122,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         // cover
         contentChildren.add(
           OwnerAvatarOverlayIcon(
-            User(
-              id: widget.file.ownerID,
-              email: 'n@ente.io',
-            ),
+            CollectionsService.instance
+                .getFileOwner(widget.file.ownerID, widget.file.collectionID),
           ),
         );
       }

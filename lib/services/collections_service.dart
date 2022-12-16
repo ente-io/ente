@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -55,6 +56,7 @@ class CollectionsService {
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
+  final _cachedUserIdToUser = <int, User>{};
   Collection cachedDefaultHiddenCollection;
 
   CollectionsService._privateConstructor() {
@@ -217,6 +219,32 @@ class CollectionsService {
         .toList()
         .where((element) => !element.isDeleted)
         .toList();
+  }
+
+  User getFileOwner(int userID, int collectionID) {
+    if (_cachedUserIdToUser.containsKey(userID)) {
+      return _cachedUserIdToUser[userID];
+    }
+    if (collectionID != null) {
+      final Collection collection = getCollectionByID(collectionID);
+      if (collection != null) {
+        if (collection.owner.id == userID) {
+          _cachedUserIdToUser[userID] = collection.owner;
+        } else {
+          final matchingUser = collection.getSharees().firstWhereOrNull(
+                (u) => u.id == userID,
+              );
+          if (matchingUser != null) {
+            _cachedUserIdToUser[userID] = collection.owner;
+          }
+        }
+      }
+    }
+    return _cachedUserIdToUser[userID] ??
+        User(
+          id: userID,
+          email: "unknown@unknown.com",
+        );
   }
 
   Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
