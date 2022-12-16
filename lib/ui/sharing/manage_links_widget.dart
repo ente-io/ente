@@ -143,8 +143,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     },
                   ),
                   DividerWidget(
-                    dividerType: DividerType.menu,
-                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
                     captionedTextWidget: const CaptionedTextWidget(
@@ -193,8 +193,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   DividerWidget(
-                    dividerType: DividerType.menu,
-                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
                     captionedTextWidget: const CaptionedTextWidget(
