@@ -448,6 +448,7 @@ function PhotoViewer(props: Iprops) {
                 exifExtractionInProgress.current = null;
             }
         } catch (e) {
+            setExif({ key: file.src, value: null });
             logError(e, 'exifr parsing failed');
         }
     };
