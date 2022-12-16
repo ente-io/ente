@@ -9,7 +9,11 @@ import {
 import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
-import { downloadFile, copyFileToClipboard } from 'utils/file';
+import {
+    downloadFile,
+    copyFileToClipboard,
+    getFileExtension,
+} from 'utils/file';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
@@ -307,6 +311,11 @@ function PhotoViewer(props: Iprops) {
         });
         photoSwipe.listen('beforeChange', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            updateFavButton(currItem);
+            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
+                setExif({ key: currItem.src, value: null });
+                return;
+            }
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
@@ -316,10 +325,13 @@ function PhotoViewer(props: Iprops) {
             }
             setExif({ key: currItem.src, value: undefined });
             checkExifAvailable(currItem);
-            updateFavButton(currItem);
         });
         photoSwipe.listen('resize', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
+                setExif({ key: currItem.src, value: null });
+                return;
+            }
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
@@ -440,7 +452,9 @@ function PhotoViewer(props: Iprops) {
                 exifExtractionInProgress.current = null;
             }
         } catch (e) {
-            logError(e, 'exifr parsing failed');
+            setExif({ key: file.src, value: null });
+            const fileExtension = getFileExtension(file.metadata.title);
+            logError(e, 'exifr parsing failed', { extension: fileExtension });
         }
     };
 

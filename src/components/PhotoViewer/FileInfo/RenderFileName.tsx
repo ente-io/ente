@@ -9,7 +9,7 @@ import {
 import { FlexWrapper } from 'components/Container';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
-import { PhotoOutlined, VideoFileOutlined } from '@mui/icons-material';
+import { PhotoOutlined, VideocamOutlined } from '@mui/icons-material';
 import InfoItem from './InfoItem';
 import { makeHumanReadableStorage } from 'utils/billing';
 import Box from '@mui/material/Box';
@@ -98,10 +98,10 @@ export function RenderFileName({
         <>
             <InfoItem
                 icon={
-                    file.metadata.fileType === FILE_TYPE.IMAGE ? (
-                        <PhotoOutlined />
+                    file.metadata.fileType === FILE_TYPE.VIDEO ? (
+                        <VideocamOutlined />
                     ) : (
-                        <VideoFileOutlined />
+                        <PhotoOutlined />
                     )
                 }
                 title={getFileTitle(filename, extension)}
