@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
@@ -43,7 +42,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   @override
   void initState() {
     showDeleteOption = (widget.galleryType == GalleryType.homepage ||
-        widget.galleryType == GalleryType.ownedCollection);
+        widget.galleryType == GalleryType.ownedCollection ||
+        widget.galleryType == GalleryType.favorite);
     widget.selectedFiles.addListener(_selectedFilesListener);
     super.initState();
   }
