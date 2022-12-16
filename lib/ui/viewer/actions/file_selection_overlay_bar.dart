@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+
+import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -111,6 +113,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
             selectedFiles: widget.selectedFiles,
             hasSmallerBottomPadding: true,
             type: widget.galleryType,
+            isCollaborator: _isCollaborator(),
             expandedMenu: FileSelectionActionWidget(
               widget.galleryType,
               widget.selectedFiles,
@@ -158,5 +161,21 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     widget.selectedFiles.files.isNotEmpty
         ? _bottomPosition.value = 0.0
         : _bottomPosition.value = -150.0;
+  }
+
+  bool _isCollaborator() {
+    if (widget.collection == null) {
+      return false;
+    }
+    if (widget.galleryType == GalleryType.ownedCollection) {
+      return false;
+    }
+    final userID = Configuration.instance.getUserID();
+    for (final user in widget.collection!.getSharees()) {
+      if (user.id == userID) {
+        return user.isCollaborator;
+      }
+    }
+    return false;
   }
 }

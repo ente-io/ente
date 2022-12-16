@@ -18,6 +18,7 @@ class BottomActionBarWidget extends StatelessWidget {
   final VoidCallback? onCancel;
   final bool hasSmallerBottomPadding;
   final GalleryType type;
+  final bool isCollaborator;
 
   BottomActionBarWidget({
     required this.expandedMenu,
@@ -27,6 +28,7 @@ class BottomActionBarWidget extends StatelessWidget {
     this.text,
     this.iconButtons,
     this.onCancel,
+    this.isCollaborator = false,
     super.key,
   });
 
@@ -68,6 +70,7 @@ class BottomActionBarWidget extends StatelessWidget {
                       galleryType: type,
                       text: text,
                       iconButtons: _iconButtons(context),
+                      isCollaborator: isCollaborator,
                     ),
                   ),
                   expanded: expandedMenu,

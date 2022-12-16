@@ -24,6 +24,7 @@ class FileSelectionActionWidget extends StatefulWidget {
   final Collection? collection;
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
+  final bool isCollaborator;
 
   const FileSelectionActionWidget(
     this.type,
@@ -31,6 +32,7 @@ class FileSelectionActionWidget extends StatefulWidget {
     Key? key,
     this.collection,
     this.deviceCollection,
+    this.isCollaborator = false,
   }) : super(key: key);
 
   @override
@@ -105,7 +107,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       );
     }
 
-    if (widget.type.showRemoveFromAlbum()) {
+    if (widget.isCollaborator && widget.type.showRemoveFromAlbum()) {
       firstList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.remove_outlined,
@@ -188,10 +190,13 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
 
     if (firstList.isNotEmpty) {
       items.add(firstList);
+      return ExpandedMenuWidget(
+        items: items,
+      );
+    } else {
+      // TODO: Return "Select All" here
+      return const SizedBox.shrink();
     }
-    return ExpandedMenuWidget(
-      items: items,
-    );
   }
 
   Future<void> _moveFiles() async {
