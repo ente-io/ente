@@ -234,13 +234,17 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             }
                           },
                           isTopBorderRadiusRemoved: listIndex > 0,
-                          isBottomBorderRadiusRemoved: true,
+                          isBottomBorderRadiusRemoved:
+                              listIndex == viewers.length,
                           borderRadius: 8,
                         ),
-                        DividerWidget(
-                          dividerType: DividerType.menu,
-                          bgColor: getEnteColorScheme(context).blurStrokeFaint,
-                        ),
+                        listIndex == viewers.length
+                            ? DividerWidget(
+                                dividerType: DividerType.menu,
+                                bgColor:
+                                    getEnteColorScheme(context).blurStrokeFaint,
+                              )
+                            : const SizedBox.shrink(),
                       ],
                     );
                   } else if (index == (1 + viewers.length) && isOwner) {
