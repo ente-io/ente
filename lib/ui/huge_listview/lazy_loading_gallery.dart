@@ -403,6 +403,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   Widget _buildFile(BuildContext context, File file) {
+    final isFileSelected = widget.selectedFiles.isFileSelected(file);
     return GestureDetector(
       onTap: () {
         if (widget.selectedFiles.files.isNotEmpty) {
@@ -424,7 +425,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
               child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(
-                    widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
+                    isFileSelected ? 0.4 : 0,
                   ),
                   BlendMode.darken,
                 ),
@@ -437,11 +438,12 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   thumbnailSize: widget.photoGridSize < photoGridSizeDefault
                       ? thumbnailLargeSize
                       : thumbnailSmallSize,
+                  shouldShowOwnerAvatar: !isFileSelected,
                 ),
               ),
             ),
             Visibility(
-              visible: widget.selectedFiles.isFileSelected(file),
+              visible: isFileSelected,
               child: const Positioned(
                 right: 4,
                 top: 4,

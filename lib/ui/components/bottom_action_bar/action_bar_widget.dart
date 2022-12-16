@@ -9,11 +9,14 @@ class ActionBarWidget extends StatefulWidget {
   final List<Widget> iconButtons;
   final SelectedFiles? selectedFiles;
   final GalleryType galleryType;
+  final bool isCollaborator;
+
   const ActionBarWidget({
     required this.iconButtons,
     required this.galleryType,
     this.text,
     this.selectedFiles,
+    this.isCollaborator = false,
     super.key,
   });
 

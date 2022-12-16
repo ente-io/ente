@@ -209,6 +209,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                     final currentUser = viewers[listIndex];
                     final isSameAsLoggedInUser =
                         currentUserID == currentUser.id;
+                    final isLastItem = !isOwner && index == viewers.length;
                     return Column(
                       children: [
                         MenuItemWidget(
@@ -234,17 +235,15 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             }
                           },
                           isTopBorderRadiusRemoved: listIndex > 0,
-                          isBottomBorderRadiusRemoved:
-                              listIndex == viewers.length,
+                          isBottomBorderRadiusRemoved: !isLastItem,
                           borderRadius: 8,
                         ),
-                        listIndex == viewers.length
-                            ? DividerWidget(
+                        isLastItem
+                            ? const SizedBox.shrink()
+                            : DividerWidget(
                                 dividerType: DividerType.menu,
-                                bgColor:
-                                    getEnteColorScheme(context).blurStrokeFaint,
-                              )
-                            : const SizedBox.shrink(),
+                                bgColor: getEnteColorScheme(context).fillFaint,
+                              ),
                       ],
                     );
                   } else if (index == (1 + viewers.length) && isOwner) {

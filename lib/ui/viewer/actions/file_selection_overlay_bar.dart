@@ -1,13 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
+import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
+import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/share_util.dart';
 
 class FileSelectionOverlayBar extends StatefulWidget {
@@ -36,8 +41,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
 
   @override
   void initState() {
-    showDeleteOption = (widget.galleryType == GalleryType.homepage ||
-        widget.galleryType == GalleryType.ownedCollection);
+    showDeleteOption = widget.galleryType.showDeleteIconOption();
     widget.selectedFiles.addListener(_selectedFilesListener);
     super.initState();
   }
@@ -52,6 +56,53 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   Widget build(BuildContext context) {
     debugPrint(
         '$runtimeType building with ${widget.selectedFiles.files.length}');
+    final List<IconButtonWidget> iconsButton = [];
+    final iconColor = getEnteColorScheme(context).blurStrokeBase;
+    if (showDeleteOption) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.delete_outlined,
+          iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
+          onTap: () => showDeleteSheet(context, widget.selectedFiles),
+        ),
+      );
+    }
+
+    if (widget.galleryType.showUnArchiveOption()) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.unarchive,
+          iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
+          onTap: () => _onUnArchiveClick(),
+        ),
+      );
+    }
+    if (widget.galleryType.showUnHideOption()) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.visibility_off_outlined,
+          iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
+          onTap: () => _selectionCollectionForAction(
+            CollectionActionType.unHide,
+          ),
+        ),
+      );
+    }
+    iconsButton.add(
+      IconButtonWidget(
+        icon: Icons.ios_share_outlined,
+        iconButtonType: IconButtonType.primary,
+        iconColor: getEnteColorScheme(context).blurStrokeBase,
+        onTap: () => shareSelected(
+          context,
+          shareButtonKey,
+          widget.selectedFiles.files,
+        ),
+      ),
+    );
     return ValueListenableBuilder(
       valueListenable: _bottomPosition,
       builder: (context, value, child) {
@@ -76,28 +127,35 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
                 widget.selectedFiles.clearAll();
               }
             },
-            iconButtons: [
-              showDeleteOption
-                  ? IconButtonWidget(
-                      icon: Icons.delete_outlined,
-                      iconButtonType: IconButtonType.primary,
-                      onTap: () =>
-                          showDeleteSheet(context, widget.selectedFiles),
-                    )
-                  : const SizedBox.shrink(),
-              IconButtonWidget(
-                icon: Icons.ios_share_outlined,
-                iconButtonType: IconButtonType.primary,
-                onTap: () => shareSelected(
-                  context,
-                  shareButtonKey,
-                  widget.selectedFiles.files,
-                ),
-              ),
-            ],
+            iconButtons: iconsButton,
           ),
         );
       },
+    );
+  }
+
+  Future<void> _onUnArchiveClick() async {
+    await changeVisibility(
+      context,
+      widget.selectedFiles.files.toList(),
+      visibilityVisible,
+    );
+    widget.selectedFiles.clearAll();
+  }
+
+  Future<Object?> _selectionCollectionForAction(
+    CollectionActionType type,
+  ) async {
+    return Navigator.push(
+      context,
+      PageTransition(
+        type: PageTransitionType.bottomToTop,
+        child: CreateCollectionPage(
+          widget.selectedFiles,
+          null,
+          actionType: type,
+        ),
+      ),
     );
   }
 

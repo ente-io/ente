@@ -73,17 +73,32 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
         ? " (${split.ownedByCurrentUser.length})"
             ""
         : "";
+    final String suffixInPending = split.ownedByOtherUsers.isNotEmpty
+        ? " (${split.ownedByCurrentUser.length + split.pendingUploads.length})"
+            ""
+        : "";
+    final bool anyOwnedFiles =
+        split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
+    final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
+    bool showRemoveOption = widget.type.showRemoveFromAlbum();
+    if (showRemoveOption && widget.type == GalleryType.sharedCollection) {
+      showRemoveOption = split.ownedByCurrentUser.isNotEmpty;
+    }
     debugPrint('$runtimeType building  $mounted');
     final colorScheme = getEnteColorScheme(context);
     final List<List<BlurMenuItemWidget>> items = [];
     final List<BlurMenuItemWidget> firstList = [];
+    final showUploadIcon = widget.type == GalleryType.localFolder &&
+        split.ownedByCurrentUser.isEmpty;
     if (widget.type.showAddToAlbum()) {
       firstList.add(
         BlurMenuItemWidget(
-          leadingIcon: Icons.add_outlined,
-          labelText: "Add to album$suffix",
+          leadingIcon:
+              showUploadIcon ? Icons.cloud_upload_outlined : Icons.add_outlined,
+          labelText:
+              "Add to ${showUploadIcon ? 'ente' : 'album'}$suffixInPending",
           menuItemColor: colorScheme.fillFaint,
-          onTap: _addToAlbum,
+          onTap: anyOwnedFiles ? _addToAlbum : null,
         ),
       );
     }
@@ -93,20 +108,18 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.arrow_forward_outlined,
           labelText: "Move to album$suffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: _moveFiles,
+          onTap: anyUploadedFiles ? _moveFiles : null,
         ),
       );
     }
 
-    if (widget.type.showRemoveFromAlbum()) {
+    if (showRemoveOption) {
       firstList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.remove_outlined,
           labelText: "Remove from album$suffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: split.ownedByCurrentUser.isNotEmpty
-              ? _removeFilesFromAlbum
-              : null,
+          onTap: anyUploadedFiles ? _removeFilesFromAlbum : null,
         ),
       );
     }
@@ -115,9 +128,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       firstList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.delete_outline,
-          labelText: "Delete$suffix",
+          labelText: "Delete$suffixInPending",
           menuItemColor: colorScheme.fillFaint,
-          onTap: _onDeleteClick,
+          onTap: anyOwnedFiles ? _onDeleteClick : null,
         ),
       );
     }
@@ -128,7 +141,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.visibility_off_outlined,
           labelText: "Hide$suffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: _onHideClick,
+          onTap: anyUploadedFiles ? _onHideClick : null,
         ),
       );
     } else if (widget.type.showUnHideOption()) {
@@ -147,13 +160,13 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.archive_outlined,
           labelText: "Archive$suffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: _onArchiveClick,
+          onTap: anyUploadedFiles ? _onArchiveClick : null,
         ),
       );
     } else if (widget.type.showUnArchiveOption()) {
       firstList.add(
         BlurMenuItemWidget(
-          leadingIcon: Icons.unarchive_outlined,
+          leadingIcon: Icons.unarchive,
           labelText: "Unarchive$suffix",
           menuItemColor: colorScheme.fillFaint,
           onTap: _onUnArchiveClick,
@@ -167,7 +180,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.favorite_border_rounded,
           labelText: "Favorite$suffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: _onFavoriteClick,
+          onTap: anyUploadedFiles ? _onFavoriteClick : null,
         ),
       );
     } else if (widget.type.showUnFavoriteOption()) {
@@ -183,10 +196,13 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
 
     if (firstList.isNotEmpty) {
       items.add(firstList);
+      return ExpandedMenuWidget(
+        items: items,
+      );
+    } else {
+      // TODO: Return "Select All" here
+      return const SizedBox.shrink();
     }
-    return ExpandedMenuWidget(
-      items: items,
-    );
   }
 
   Future<void> _moveFiles() async {

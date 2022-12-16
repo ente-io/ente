@@ -139,7 +139,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             ),
             DividerWidget(
               dividerType: DividerType.menu,
-              bgColor: getEnteColorScheme(context).blurStrokeFaint,
+              bgColor: getEnteColorScheme(context).fillFaint,
             ),
             MenuItemWidget(
               captionedTextWidget: const CaptionedTextWidget(
@@ -163,7 +163,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         [
           DividerWidget(
             dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).blurStrokeFaint,
+            bgColor: getEnteColorScheme(context).fillFaint,
           ),
           MenuItemWidget(
             captionedTextWidget: const CaptionedTextWidget(
@@ -268,7 +268,7 @@ class EmailItemWidget extends StatelessWidget {
           ),
           DividerWidget(
             dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).blurStrokeFaint,
+            bgColor: getEnteColorScheme(context).fillFaint,
           ),
         ],
       );
@@ -294,7 +294,7 @@ class EmailItemWidget extends StatelessWidget {
           ),
           DividerWidget(
             dividerType: DividerType.menu,
-            bgColor: getEnteColorScheme(context).blurStrokeFaint,
+            bgColor: getEnteColorScheme(context).fillFaint,
           ),
         ],
       );

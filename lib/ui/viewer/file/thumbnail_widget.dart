@@ -11,6 +11,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/trash_file.dart';
@@ -30,7 +31,7 @@ class ThumbnailWidget extends StatefulWidget {
   final Duration diskLoadDeferDuration;
   final Duration serverLoadDeferDuration;
   final int thumbnailSize;
-  final bool shownAsAlbumCover;
+  final bool shouldShowOwnerAvatar;
 
   ThumbnailWidget(
     this.file, {
@@ -40,7 +41,7 @@ class ThumbnailWidget extends StatefulWidget {
     this.shouldShowLivePhotoOverlay = false,
     this.shouldShowArchiveStatus = false,
     this.showFavForAlbumOnly = false,
-    this.shownAsAlbumCover = false,
+    this.shouldShowOwnerAvatar = false,
     this.diskLoadDeferDuration,
     this.serverLoadDeferDuration,
     this.thumbnailSize = thumbnailSmallSize,
@@ -115,17 +116,29 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
           widget.shouldShowLivePhotoOverlay) {
         contentChildren.add(const LivePhotoOverlayIcon());
       }
-      if (widget.file.ownerID != null &&
-          widget.file.ownerID != Configuration.instance.getUserID() &&
-          widget.shownAsAlbumCover == false) {
-        // hide this icon if the current thumbnail is being showed as album
-        // cover
-        contentChildren.add(
-          OwnerAvatarOverlayIcon(
-            CollectionsService.instance
-                .getFileOwner(widget.file.ownerID, widget.file.collectionID),
-          ),
-        );
+      if (widget.shouldShowOwnerAvatar) {
+        final owner = CollectionsService.instance
+            .getFileOwner(widget.file.ownerID, widget.file.collectionID);
+        if (widget.file.ownerID != null &&
+            widget.file.ownerID != Configuration.instance.getUserID()) {
+          // hide this icon if the current thumbnail is being showed as album
+          // cover
+          contentChildren.add(
+            OwnerAvatarOverlayIcon(owner),
+          );
+        } else if (widget.file.pubMagicMetadata.uploaderName != null) {
+          contentChildren.add(
+            // Use uploadName hashCode as userID so that different uploader
+            // get avatar color
+            OwnerAvatarOverlayIcon(
+              User(
+                id: widget.file.pubMagicMetadata.uploaderName.hashCode,
+                email: owner.email,
+                name: widget.file.pubMagicMetadata.uploaderName,
+              ),
+            ),
+          );
+        }
       }
       content = contentChildren.length == 1
           ? contentChildren.first
