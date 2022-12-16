@@ -77,7 +77,7 @@ export function getLivePhotoSize(livePhotoAssets: LivePhotoAssets) {
 }
 
 export function getLivePhotoName(livePhotoAssets: LivePhotoAssets) {
-    return splitFilenameAndExtension(livePhotoAssets.image.name)[0];
+    return livePhotoAssets.image.name;
 }
 
 export async function readLivePhoto(
