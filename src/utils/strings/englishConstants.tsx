@@ -685,7 +685,7 @@ const englishConstants = {
         'Are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'Allow downloads',
     LINK_PASSWORD_LOCK: 'Password lock',
-    PUBLIC_COLLECT: 'Public collect',
+    PUBLIC_COLLECT: 'Allow adding photos',
     LINK_DEVICE_LIMIT: 'Device limit',
     LINK_EXPIRY: 'Link expiry',
     LINK_EXPIRY_NEVER: 'Never',
@@ -698,17 +698,13 @@ const englishConstants = {
             </p>{' '}
             <p>
                 Viewers can still take screenshots or save a copy of your photos
-                using external tools'{' '}
+                using external tools{' '}
             </p>
         </>
     ),
-    ENABLE_PUBLIC_COLLECT: 'Enable public collect',
-    ENABLE_PUBLIC_COLLECT_MESSAGE: () => (
-        <>
-            <p>Are you sure that you want to enable public collect? </p>{' '}
-            <p>Uploaded files will be counted towards your storage</p>
-        </>
-    ),
+    ENABLE_PUBLIC_COLLECT: 'Allow adding photos',
+    ENABLE_PUBLIC_COLLECT_MESSAGE:
+        'Allow people with the link to also add photos to the shared album',
     ABUSE_REPORT: 'Abuse report',
     ABUSE_REPORT_BUTTON_TEXT: 'Report abuse?',
     MALICIOUS_CONTENT: 'Contains malicious content',
@@ -880,6 +876,7 @@ const englishConstants = {
     AT: 'at',
     NAME_PLACEHOLDER: 'Name...',
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
+    ALLOW: 'Allow',
 };
 
 export default englishConstants;
