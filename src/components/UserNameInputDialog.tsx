@@ -29,9 +29,10 @@ export default function UserNameInputDialog({
                 {constants.PUBLIC_UPLOADER_NAME_MESSAGE}
             </Typography>
             <SingleInputForm
+                hiddenLabel
                 initialValue={uploaderName}
                 callback={handleSubmit}
-                placeholder={constants.ENTER_FILE_NAME}
+                placeholder={constants.NAME_PLACEHOLDER}
                 buttonText={constants.ADD_X_PHOTOS(toUploadFilesCount)}
                 fieldType="text"
                 blockButton
