@@ -11,12 +11,21 @@ import 'package:photos/utils/debouncer.dart';
 enum ExecutionState {
   idle,
   inProgress,
-  successful,
+  error,
+  successful;
 }
 
 enum ButtonSize {
   small,
   large;
+}
+
+enum ButtonAction {
+  first,
+  second,
+  third,
+  cancel,
+  error;
 }
 
 typedef FutureVoidCallback = Future<void> Function();
@@ -29,30 +38,40 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
+  ///Button action will only work if isInAlert is true
+  final ButtonAction? buttonAction;
+
   ///setting this flag to true will make the button appear like how it would
   ///on dark theme irrespective of the app's theme.
-  final bool isInActionSheet;
+  final bool shouldStickToDarkTheme;
+
+  ///isInAlert is to dismiss the alert if the action on the button is completed.
+  ///This should be set to true if the alert which uses this button needs to
+  ///return the Button's action.
+  final bool isInAlert;
   const ButtonWidget({
     required this.buttonType,
     required this.buttonSize,
     this.icon,
     this.labelText,
     this.onTap,
-    this.isInActionSheet = false,
+    this.shouldStickToDarkTheme = false,
     this.isDisabled = false,
+    this.buttonAction,
+    this.isInAlert = false,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     final colorScheme =
-        isInActionSheet ? darkScheme : getEnteColorScheme(context);
-    final inverseColorScheme = isInActionSheet
+        shouldStickToDarkTheme ? darkScheme : getEnteColorScheme(context);
+    final inverseColorScheme = shouldStickToDarkTheme
         ? lightScheme
         : getEnteColorScheme(context, inverse: true);
     final textTheme =
-        isInActionSheet ? darkTextTheme : getEnteTextTheme(context);
-    final inverseTextTheme = isInActionSheet
+        shouldStickToDarkTheme ? darkTextTheme : getEnteTextTheme(context);
+    final inverseTextTheme = shouldStickToDarkTheme
         ? lightTextTheme
         : getEnteTextTheme(context, inverse: true);
     final buttonStyle = CustomButtonStyle(
@@ -93,19 +112,21 @@ class ButtonWidget extends StatelessWidget {
         buttonType.disabledLabelStyle(textTheme, colorScheme);
     buttonStyle.checkIconColor = buttonType.checkIconColor(colorScheme);
 
-    return LargeButtonChildWidget(
+    return ButtonChildWidget(
       buttonStyle: buttonStyle,
       buttonType: buttonType,
       isDisabled: isDisabled,
       buttonSize: buttonSize,
+      isInAlert: isInAlert,
       onTap: onTap,
       labelText: labelText,
       icon: icon,
+      buttonAction: buttonAction,
     );
   }
 }
 
-class LargeButtonChildWidget extends StatefulWidget {
+class ButtonChildWidget extends StatefulWidget {
   final CustomButtonStyle buttonStyle;
   final FutureVoidCallback? onTap;
   final ButtonType buttonType;
@@ -113,22 +134,26 @@ class LargeButtonChildWidget extends StatefulWidget {
   final IconData? icon;
   final bool isDisabled;
   final ButtonSize buttonSize;
-  const LargeButtonChildWidget({
+  final ButtonAction? buttonAction;
+  final bool isInAlert;
+  const ButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
     required this.buttonSize,
+    required this.isInAlert,
     this.onTap,
     this.labelText,
     this.icon,
+    this.buttonAction,
     super.key,
   });
 
   @override
-  State<LargeButtonChildWidget> createState() => _LargeButtonChildWidgetState();
+  State<ButtonChildWidget> createState() => _ButtonChildWidgetState();
 }
 
-class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
+class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   late Color buttonColor;
   late Color borderColor;
   late Color iconColor;
@@ -303,9 +328,10 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
         });
       }),
     );
-    await widget.onTap!
-        .call()
-        .onError((error, stackTrace) => _debouncer.cancelDebounce());
+    await widget.onTap!.call().onError((error, stackTrace) {
+      executionState = ExecutionState.error;
+      _debouncer.cancelDebounce();
+    });
     _debouncer.cancelDebounce();
     // when the time taken by widget.onTap is approximately equal to the debounce
     // time, the callback is getting executed when/after the if condition
@@ -313,15 +339,41 @@ class _LargeButtonChildWidgetState extends State<LargeButtonChildWidget> {
     // idle state. This Future is for delaying the execution of the if
     // condition so that the calback in the debouncer finishes execution before.
     await Future.delayed(const Duration(milliseconds: 5));
-    if (executionState == ExecutionState.inProgress) {
-      setState(() {
-        executionState = ExecutionState.successful;
-        Future.delayed(const Duration(seconds: 2), () {
-          setState(() {
-            executionState = ExecutionState.idle;
+    if (executionState == ExecutionState.inProgress ||
+        executionState == ExecutionState.error) {
+      if (executionState == ExecutionState.inProgress) {
+        setState(() {
+          executionState = ExecutionState.successful;
+          Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
+            widget.isInAlert
+                ? Navigator.of(context, rootNavigator: true)
+                    .pop(widget.buttonAction)
+                : null;
+            if (mounted) {
+              setState(() {
+                executionState = ExecutionState.idle;
+              });
+            }
           });
         });
-      });
+      }
+      if (executionState == ExecutionState.error) {
+        setState(() {
+          executionState = ExecutionState.idle;
+          widget.isInAlert
+              ? Future.delayed(
+                  const Duration(seconds: 0),
+                  () => Navigator.of(context, rootNavigator: true).pop(
+                    ButtonAction.error,
+                  ),
+                )
+              : null;
+        });
+      }
+    } else {
+      if (widget.isInAlert) {
+        Navigator.of(context).pop(widget.buttonAction);
+      }
     }
   }
 
