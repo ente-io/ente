@@ -437,6 +437,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   thumbnailSize: widget.photoGridSize < photoGridSizeDefault
                       ? thumbnailLargeSize
                       : thumbnailSmallSize,
+                  shouldShowOwnerAvatar: true,
                 ),
               ),
             ),
