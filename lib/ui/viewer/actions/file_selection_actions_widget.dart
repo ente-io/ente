@@ -24,7 +24,6 @@ class FileSelectionActionWidget extends StatefulWidget {
   final Collection? collection;
   final DeviceCollection? deviceCollection;
   final SelectedFiles selectedFiles;
-  final bool isCollaborator;
 
   const FileSelectionActionWidget(
     this.type,
@@ -32,7 +31,6 @@ class FileSelectionActionWidget extends StatefulWidget {
     Key? key,
     this.collection,
     this.deviceCollection,
-    this.isCollaborator = false,
   }) : super(key: key);
 
   @override
@@ -82,6 +80,10 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     final bool anyOwnedFiles =
         split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
+    bool showRemoveOption = widget.type.showRemoveFromAlbum();
+    if (showRemoveOption && widget.type == GalleryType.sharedCollection) {
+      showRemoveOption = split.ownedByCurrentUser.isNotEmpty;
+    }
     debugPrint('$runtimeType building  $mounted');
     final colorScheme = getEnteColorScheme(context);
     final List<List<BlurMenuItemWidget>> items = [];
@@ -107,7 +109,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       );
     }
 
-    if (widget.isCollaborator && widget.type.showRemoveFromAlbum()) {
+    if (showRemoveOption) {
       firstList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.remove_outlined,
