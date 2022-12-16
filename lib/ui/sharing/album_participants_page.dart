@@ -234,13 +234,12 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                             }
                           },
                           isTopBorderRadiusRemoved: listIndex > 0,
-                          isBottomBorderRadiusRemoved:
-                              listIndex == viewers.length,
+                          isBottomBorderRadiusRemoved: isOwner,
                           borderRadius: 8,
                         ),
-                        listIndex == viewers.length
+                        isOwner
                             ? DividerWidget(
-                                dividerType: DividerType.menu,
+                                dividerType: DividerType.solid,
                                 bgColor:
                                     getEnteColorScheme(context).blurStrokeFaint,
                               )
