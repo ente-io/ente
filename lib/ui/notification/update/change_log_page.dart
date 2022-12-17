@@ -1,15 +1,13 @@
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -29,7 +27,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final enteTextTheme = getEnteTextTheme(context);
     return Scaffold(
       appBar: null,
       body: Container(
@@ -67,57 +64,31 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: GradientButton(
-                        onTap: () async {
-                          await UpdateService.instance.hideChangeLog();
-                          if (mounted && Navigator.of(context).canPop()) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        text: "Let's go",
-                      ),
+                    ButtonWidget(
+                      buttonType: ButtonType.trailingIconPrimary,
+                      buttonSize: ButtonSize.large,
+                      labelText: "Continue",
+                      icon: Icons.arrow_forward_outlined,
+                      onTap: () async {
+                        await UpdateService.instance.hideChangeLog();
+                        if (mounted && Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 12,
-                        top: 12,
-                        right: 12,
-                        bottom: 6,
-                      ),
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: "If you like ente, ",
-                            ),
-                            TextSpan(
-                              text: "let others know",
-                              style: enteTextTheme.small.copyWith(
-                                color: enteColorScheme.primary700,
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  // Single tapped.
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                        return const WebPage(
-                                          "Spread the word",
-                                          "https://ente.io/share/",
-                                        );
-                                      },
-                                    ),
-                                  );
-                                },
-                            ),
-                          ],
-                          style: enteTextTheme.small,
-                        ),
-                      ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    ButtonWidget(
+                      buttonType: ButtonType.trailingIconSecondary,
+                      buttonSize: ButtonSize.large,
+                      labelText: "Rate the app",
+                      icon: Icons.favorite_rounded,
+                      iconColor: enteColorScheme.primary500,
+                      onTap: () async {
+                        launchUrlString(
+                            UpdateService.instance.getRateDetails().item2);
+                      },
                     ),
                     const SizedBox(height: 8),
                   ],
