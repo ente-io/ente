@@ -132,7 +132,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                       : DividerWidget(
                                           dividerType: DividerType.menu,
                                           bgColor: getEnteColorScheme(context)
-                                              .blurStrokeFaint,
+                                              .fillFaint,
                                         ),
                                 ],
                               );
@@ -180,7 +180,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                   ),
                   DividerWidget(
                     dividerType: DividerType.menu,
-                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                    bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
                     captionedTextWidget: const CaptionedTextWidget(
