@@ -70,6 +70,10 @@ class Collection {
     return result;
   }
 
+  bool isOwner(int userID) {
+    return (owner?.id ?? 0) == userID;
+  }
+
   void updateSharees(List<User> newSharees) {
     sharees?.clear();
     sharees?.addAll(newSharees);
