@@ -12,6 +12,7 @@ import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/sharing/add_partipant_page.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
@@ -49,6 +50,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   @override
   Widget build(BuildContext context) {
     _sharees = widget.collection.sharees ?? [];
+    final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
@@ -86,8 +88,16 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         },
       ),
     );
+    if (_sharees.isEmpty && !hasUrl) {
+      children.add(
+        const MenuSectionDescriptionWidget(
+          content:
+              "Create shared and collaborative albums with other ente users, "
+              "including users on free plans.",
+        ),
+      );
+    }
 
-    final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
     final bool hasExpired =
         widget.collection?.publicURLs?.firstOrNull?.isExpired ?? false;
     children.addAll([
@@ -212,10 +222,25 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           },
         ),
       );
+      if (_sharees.isEmpty && !hasUrl) {
+        children.add(
+          const MenuSectionDescriptionWidget(
+            content:
+                "Links allow people without an ente account to view and add photos to your shared albums.",
+          ),
+        );
+      }
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Sharing")),
+      appBar: AppBar(
+        title: Text(
+          widget.collection.name,
+          style: Theme.of(context).textTheme.headline5.copyWith(fontSize: 16),
+        ),
+        elevation: 0,
+        centerTitle: false,
+      ),
       body: SingleChildScrollView(
         child: ListBody(
           children: <Widget>[
