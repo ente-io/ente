@@ -74,6 +74,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   Widget build(BuildContext context) {
     final file = widget.file;
     final fileIsBackedup = file.uploadedFileID == null ? false : true;
+    final bool isFileOwner =
+        file.ownerID == null || file.ownerID == _currentUserID;
     Future<Set<int>> allCollectionIDsOfFile;
     Future<Set<String>>
         allDeviceFoldersOfFile; //Typing this as Future<Set<T>> as it would be easier to implement showing multiple device folders for a file in the future
@@ -99,11 +101,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     final listTiles = <Widget>[
-      widget.file.uploadedFileID == null || _currentUserID != file.ownerID
+      !widget.file.isUploaded ||
+              (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
           ? const SizedBox.shrink()
           : Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 4),
-              child: FileCaptionWidget(file: widget.file),
+              child: isFileOwner
+                  ? FileCaptionWidget(file: widget.file)
+                  : FileCaptionReadyOnly(caption: widget.file.caption),
             ),
       ListTile(
         horizontalTitleGap: 2,
