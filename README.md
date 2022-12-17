@@ -1,4 +1,4 @@
-# bhari-frame (heavy-frame)
+# ente Photos - Desktop
 
 Desktop app for [ente.io](https://ente.io) build with [electron](https://electronjs.org) and loads of ❤️.
 
@@ -10,7 +10,7 @@ The goal of this app was to
 1. provide a stable environment for customers to back up large amounts of data reliably
 2. export uploaded data from our servers to their local hard drives.
 
-Electron was the best way to reuse our battle tested code from [bada-frame](https://github.com/ente-io/bada-frame) that powers [web.ente.io](https://web.ente.io).
+Electron was the best way to reuse our battle tested code from [photos-web](https://github.com/ente-io/photos-web) that powers [web.ente.io](https://web.ente.io).
 
 As an archival solution built by a small team, we are hopeful that this project will help us keep our stack lean, while ensuring a painfree life for our customers.
 
@@ -18,7 +18,7 @@ If you are running into issues with this app, please drop a mail to [support@ent
 
 ## Download
 
-- [Latest Release](https://github.com/ente-io/bhari-frame/releases/latest)
+- [Latest Release](https://github.com/ente-io/photos-desktop/releases/latest)
 
 
 ## Building from source
@@ -29,10 +29,10 @@ fetch and build from source.
 
 ```bash
 # Clone this repository
-git clone https://github.com/ente-io/bhari-frame
+git clone https://github.com/ente-io/photos-desktop
 
 # Go into the repository
-cd bhari-frame
+cd photos-desktop
 
 # Clone submodules (recursively)
 git submodule update --init --recursive

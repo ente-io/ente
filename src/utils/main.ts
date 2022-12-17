@@ -22,9 +22,13 @@ export function handleUpdates(mainWindow: BrowserWindow) {
     }
 }
 export function setupTrayItem(mainWindow: BrowserWindow) {
-    const trayImgPath = isDev
-        ? 'build/taskbar-icon.png'
-        : path.join(process.resourcesPath, 'taskbar-icon.png');
+    const iconName = isPlatformMac
+        ? 'taskbar-icon-Template.png'
+        : 'taskbar-icon.png';
+    const trayImgPath = path.join(
+        isDev ? 'build' : process.resourcesPath,
+        iconName
+    );
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
     tray.setToolTip('ente');
