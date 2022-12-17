@@ -50,10 +50,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   };
 
   bool _isImage = false;
+  int _currentUserID;
 
   @override
   void initState() {
     debugPrint('file_info_dialog initState');
+    _currentUserID = Configuration.instance.getUserID();
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
@@ -97,8 +99,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     final listTiles = <Widget>[
-      widget.file.uploadedFileID == null ||
-              Configuration.instance.getUserID() != file.ownerID
+      widget.file.uploadedFileID == null || _currentUserID != file.ownerID
           ? const SizedBox.shrink()
           : Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 4),
@@ -125,8 +126,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
         ),
         trailing: (widget.file.ownerID == null ||
-                    widget.file.ownerID ==
-                        Configuration.instance.getUserID()) &&
+                    widget.file.ownerID == _currentUserID) &&
                 widget.file.uploadedFileID != null
             ? IconButton(
                 onPressed: () {
@@ -173,8 +173,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 : const SizedBox.shrink(),
           ],
         ),
-        trailing: file.uploadedFileID == null ||
-                file.ownerID != Configuration.instance.getUserID()
+        trailing: file.uploadedFileID == null || file.ownerID != _currentUserID
             ? const SizedBox.shrink()
             : IconButton(
                 onPressed: () async {
@@ -314,7 +313,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
       return const SizedBox.shrink();
     }
     String addedBy;
-    if (file.ownerID == Configuration.instance.getUserID()) {
+    if (file.ownerID == _currentUserID) {
       if (file.pubMagicMetadata.uploaderName != null) {
         addedBy = file.pubMagicMetadata.uploaderName;
       }
