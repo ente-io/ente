@@ -24,7 +24,7 @@ Future<dynamic> showActionSheet({
 }) {
   return showMaterialModalBottomSheet(
     backgroundColor: Colors.transparent,
-    barrierColor: backdropMutedDark,
+    barrierColor: backdropFaintDark,
     useRootNavigator: true,
     context: context,
     builder: (_) {
@@ -79,7 +79,7 @@ class ActionSheetWidget extends StatelessWidget {
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
             child: Container(
-              color: backdropBaseDark,
+              color: backdropMutedDark,
               child: Padding(
                 padding: EdgeInsets.fromLTRB(
                   24,

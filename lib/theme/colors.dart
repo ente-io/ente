@@ -10,7 +10,7 @@ class EnteColorScheme {
 
   // Backdrop Colors
   final Color backdropBase;
-  final Color backdropBaseMute;
+  final Color backdropMuted;
   final Color backdropFaint;
 
   // Text Colors
@@ -55,7 +55,7 @@ class EnteColorScheme {
     this.backgroundElevated,
     this.backgroundElevated2,
     this.backdropBase,
-    this.backdropBaseMute,
+    this.backdropMuted,
     this.backdropFaint,
     this.textBase,
     this.textMuted,
@@ -147,13 +147,13 @@ const Color backgroundElevatedDark = Color.fromRGBO(27, 27, 27, 1);
 const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
 
 // Backdrop Colors
-const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.75);
-const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.30);
-const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.15);
+const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.92);
+const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.75);
+const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.30);
 
-const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.65);
-const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.20);
-const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.08);
+const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.90);
+const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.65);
+const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.20);
 
 // Text Colors
 const Color textBaseLight = Color.fromRGBO(0, 0, 0, 1);

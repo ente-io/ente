@@ -186,7 +186,7 @@ class _PasswordReminderState extends State<PasswordReminder> {
           content: content,
         );
       },
-      barrierColor: enteColor.backdropBaseMute,
+      barrierColor: enteColor.backdropFaint,
     );
   }
 

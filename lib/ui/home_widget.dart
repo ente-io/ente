@@ -445,7 +445,7 @@ class _HomeWidgetState extends State<HomeWidget> {
       ),
       backgroundColor: colorScheme.backgroundElevated,
       enableDrag: false,
-      barrierColor: backdropMutedDark,
+      barrierColor: backdropFaintDark,
       context: context,
       builder: (BuildContext context) {
         return Padding(
