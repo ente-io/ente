@@ -37,6 +37,10 @@ class ButtonWidget extends StatelessWidget {
   final FutureVoidCallback? onTap;
   final bool isDisabled;
   final ButtonSize buttonSize;
+  // iconColor should only be specified when we do not want to honor the default
+  // iconColor based on buttonType. Most of the items, default iconColor is what
+  // we need unless we want to pop out the icon in a non-primary button type
+  final Color? iconColor;
 
   ///Button action will only work if isInAlert is true
   final ButtonAction? buttonAction;
@@ -59,6 +63,7 @@ class ButtonWidget extends StatelessWidget {
     this.isDisabled = false,
     this.buttonAction,
     this.isInAlert = false,
+    this.iconColor,
     super.key,
   });
 
@@ -94,10 +99,11 @@ class ButtonWidget extends StatelessWidget {
     );
     buttonStyle.disabledBorderColor =
         buttonType.disabledBorderColor(colorScheme, buttonSize);
-    buttonStyle.defaultIconColor = buttonType.defaultIconColor(
-      colorScheme: colorScheme,
-      inverseColorScheme: inverseColorScheme,
-    );
+    buttonStyle.defaultIconColor = iconColor ??
+        buttonType.defaultIconColor(
+          colorScheme: colorScheme,
+          inverseColorScheme: inverseColorScheme,
+        );
     buttonStyle.pressedIconColor =
         buttonType.pressedIconColor(colorScheme, buttonSize);
     buttonStyle.disabledIconColor =
