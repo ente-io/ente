@@ -35,7 +35,10 @@ class FavoritesService {
           _cachedFavoritesCollectionID != null &&
           _cachedFavoritesCollectionID == event.collectionID) {
         if (event.type == EventType.addedOrUpdated) {
-          _updateFavoriteFilesCache(event.updatedFiles, favFlag: true);
+          // Note: This source check is a ugly hack because currently we
+          // don't have any event type related to remove from collection
+          final bool isAdded = !event.source.contains("remove");
+          _updateFavoriteFilesCache(event.updatedFiles, favFlag: isAdded);
         } else if (event.type == EventType.deletedFromEverywhere ||
             event.type == EventType.deletedFromRemote) {
           _updateFavoriteFilesCache(event.updatedFiles, favFlag: false);
@@ -70,6 +73,7 @@ class FavoritesService {
     if (file.collectionID != null &&
         _cachedFavoritesCollectionID != null &&
         file.collectionID == _cachedFavoritesCollectionID) {
+      debugPrint("File ${file.uploadedFileID} is part of favorite collection");
       return true;
     }
     if (checkOnlyAlbum) {
@@ -143,7 +147,7 @@ class FavoritesService {
     } else {
       await _collectionsService.removeFromCollection(collectionID, files);
     }
-    _updateFavoriteFilesCache(files, favFlag: false);
+    _updateFavoriteFilesCache(files, favFlag: favFlag);
   }
 
   Future<void> removeFromFavorites(File file) async {
