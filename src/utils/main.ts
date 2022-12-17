@@ -22,7 +22,7 @@ export function handleUpdates(mainWindow: BrowserWindow) {
     }
 }
 export function setupTrayItem(mainWindow: BrowserWindow) {
-    const iconName = isPlatformMac
+    const iconName = isPlatform('mac')
         ? 'taskbar-icon-Template.png'
         : 'taskbar-icon.png';
     const trayImgPath = path.join(
