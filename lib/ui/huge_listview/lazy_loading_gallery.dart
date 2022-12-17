@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
@@ -306,11 +307,13 @@ class LazyLoadingGridView extends StatefulWidget {
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool _shouldRender;
+  int _currentUserID;
   StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
 
   @override
   void initState() {
     _shouldRender = widget.shouldRender;
+    _currentUserID = Configuration.instance.getUserID();
     widget.selectedFiles.addListener(_selectedFilesListener);
     _clearSelectionsEvent =
         Bus.instance.on<ClearSelectionsEvent>().listen((event) {
@@ -404,6 +407,17 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   Widget _buildFile(BuildContext context, File file) {
     final isFileSelected = widget.selectedFiles.isFileSelected(file);
+    Color selectionColor = Colors.white;
+    if (isFileSelected &&
+        file.isUploaded &&
+        (file.ownerID != _currentUserID ||
+            file.pubMagicMetadata.uploaderName != null)) {
+      final avatarColors = getEnteColorScheme(context).avatarColors;
+      final int randomID = file.ownerID != _currentUserID
+          ? file.ownerID
+          : file.pubMagicMetadata.uploaderName.hashCode;
+      selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
+    }
     return GestureDetector(
       onTap: () {
         if (widget.selectedFiles.files.isNotEmpty) {
@@ -444,13 +458,13 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
             ),
             Visibility(
               visible: isFileSelected,
-              child: const Positioned(
+              child: Positioned(
                 right: 4,
                 top: 4,
                 child: Icon(
                   Icons.check_circle_rounded,
                   size: 20,
-                  color: Colors.white, //same for both themes
+                  color: selectionColor, //same for both themes
                 ),
               ),
             )
