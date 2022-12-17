@@ -118,21 +118,17 @@ function PhotoViewer(props: Iprops) {
         }
 
         function handleKeyUp(event: KeyboardEvent) {
-            if (!isOpen) {
+            if (!isOpen || showInfo) {
                 return;
             }
+
             addLocalLog(() => 'Event: ' + event.key);
-            if (event.key === 'i' || event.key === 'I') {
-                if (!showInfo) {
-                    setShowInfo(true);
-                } else {
-                    setShowInfo(false);
-                }
-            }
-            if (showInfo) {
-                return;
-            }
+
             switch (event.key) {
+                case 'i':
+                case 'I':
+                    setShowInfo(true);
+                    break;
                 case 'Backspace':
                 case 'Delete':
                     confirmTrashFile(photoSwipe?.currItem as EnteFile);
