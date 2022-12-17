@@ -95,7 +95,9 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         height: 24,
       ),
       MenuSectionTitle(
-        title: hasUrl ? "Public link enabled" : "Share a public link",
+        title: hasUrl
+            ? "Public link enabled"
+            : (_sharees.isEmpty ? "Or share a link" : "Share a link"),
         iconData: Icons.public,
       ),
     ]);
