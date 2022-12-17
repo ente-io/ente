@@ -14,7 +14,7 @@ class SelectedFiles extends ChangeNotifier {
     // or any other update, using file.generatedID to track if this file was already
     // selected or not
     final File? alreadySelected = files.firstWhereOrNull(
-      (element) => element.generatedID == file.generatedID,
+      (element) => _isMatch(file, element),
     );
     if (alreadySelected != null) {
       files.remove(alreadySelected);
@@ -43,16 +43,27 @@ class SelectedFiles extends ChangeNotifier {
 
   bool isFileSelected(File file) {
     final File? alreadySelected = files.firstWhereOrNull(
-      (element) => element.generatedID == file.generatedID,
+      (element) => _isMatch(file, element),
     );
     return alreadySelected != null;
   }
 
   bool isPartOfLastSelected(File file) {
     final File? matchedFile = lastSelections.firstWhereOrNull(
-      (element) => element.generatedID == file.generatedID,
+      (element) => _isMatch(file, element),
     );
     return matchedFile != null;
+  }
+
+  bool _isMatch(File first, File second) {
+    if (first.generatedID != null && second.generatedID != null) {
+      if (first.generatedID == second.generatedID) {
+        return true;
+      }
+    } else if (first.uploadedFileID != null && second.uploadedFileID != null) {
+      return first.uploadedFileID == second.uploadedFileID;
+    }
+    return false;
   }
 
   SelectedFileSplit split(int currentUseID) {
