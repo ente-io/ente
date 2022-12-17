@@ -1,5 +1,7 @@
 // @dart=2.9
 
+import 'dart:ui';
+
 import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
@@ -9,6 +11,7 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
@@ -282,6 +285,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   onTap: () => Navigator.pop(context),
                 ),
               ),
+              SliverToBoxAdapter(child: addedBy(widget.file)),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -301,6 +305,36 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget addedBy(File file) {
+    if (file.uploadedFileID == null) {
+      return const SizedBox.shrink();
+    }
+    String addedBy;
+    if (file.ownerID == Configuration.instance.getUserID()) {
+      if (file.pubMagicMetadata.uploaderName != null) {
+        addedBy = file.pubMagicMetadata.uploaderName;
+      }
+    } else {
+      final fileOwner = CollectionsService.instance
+          .getFileOwner(file.ownerID, file.collectionID);
+      if (fileOwner != null) {
+        addedBy = fileOwner.email;
+      }
+    }
+    if (addedBy == null || addedBy.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final enteTheme = Theme.of(context).colorScheme.enteTheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 16),
+      child: Text(
+        "Added by $addedBy",
+        style: enteTheme.textTheme.mini
+            .copyWith(color: enteTheme.colorScheme.textMuted),
       ),
     );
   }
