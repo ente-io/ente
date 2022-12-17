@@ -16,6 +16,7 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/theme/colors.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -317,7 +318,12 @@ class OutgoingCollectionItem extends StatelessWidget {
                       const Padding(padding: EdgeInsets.all(2)),
                       c.collection.publicURLs.isEmpty
                           ? Container()
-                          : const Icon(Icons.link),
+                          : (c.collection.publicURLs.first.isExpired
+                              ? const Icon(
+                                  Icons.link,
+                                  color: warning500,
+                                )
+                              : const Icon(Icons.link)),
                     ],
                   ),
                   sharees.isEmpty
