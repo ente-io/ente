@@ -1,0 +1,35 @@
+ente authenticator provides end-to-end encrypted cloud backups so that you don't have to worry about losing your tokens. We use the same protocols [ente
+Photos](https://ente.io) uses to encrypt and preserve your data.
+
+
+Multi Device Synchronization
+
+ente will automatically sync the 2FA tokens you add to your account, across all
+your devices. Every new device you sign into will have access to these tokens.
+
+
+ Mode
+
+ente generates 2FA tokens offline, so your network connectivity will not get in
+the way of your workflow.
+
+Import and Export Tokens
+
+You can add tokens to ente by one of the following methods:
+1. Scanning a QR code
+2. Manually entering (copy-pasting) a 2FA secret
+3. Bulk importing from a file that contains a list of codes in the following
+   format:
+
+```
+otpauth://totp/ACCOUNT?secret=SUPERSECRET&issuer=SERVICE
+
+```
+The codes maybe separated by new lines or commas.
+
+You can also export the codes you have added to ente, to an **unencrypted** text
+file, that adheres to the above format.
+
+
+SUPPORT
+We take pride in offering human support. If you are our paid customer, you can reach out to team@ente.io and expect a response from our team within 24 hours.
