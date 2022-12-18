@@ -72,6 +72,9 @@ android {
         playstore {
             dimension "default"
         }
+        fdroid {
+            dimension "default"
+        }
     }
 
     buildTypes {
