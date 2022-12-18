@@ -2,6 +2,7 @@
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/sessions.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
@@ -111,7 +112,8 @@ class _SessionsPageState extends State<SessionsPage> {
   }
 
   Future<void> _terminateSession(Session session) async {
-    final dialog = createProgressDialog(context, "Please wait...");
+    final l10n = context.l10n;
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       await UserService.instance.terminateSession(session.token);
@@ -122,8 +124,8 @@ class _SessionsPageState extends State<SessionsPage> {
       _logger.severe('failed to terminate', e, s);
       showErrorDialog(
         context,
-        'Oops',
-        "Something went wrong, please try again",
+        l10n.oops,
+        l10n.somethingWentWrongMessage,
       );
     }
   }

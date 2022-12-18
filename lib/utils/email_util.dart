@@ -7,6 +7,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/core/logging/super_logging.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
 import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
 // import 'package:ente_auth/ui/tools/debug/log_file_viewer.dart';
@@ -37,6 +38,7 @@ Future<void> sendLogs(
   String subject,
   String body,
 }) async {
+  final l10n = context.l10n;
   final List<Widget> actions = [
     TextButton(
       child: Row(
@@ -48,7 +50,7 @@ Future<void> sendLogs(
           ),
           const Padding(padding: EdgeInsets.all(4)),
           Text(
-            "View logs",
+            l10n.viewLogsAction,
             style: TextStyle(
               color: Theme.of(context)
                   .colorScheme
@@ -88,11 +90,9 @@ Future<void> sendLogs(
   final List<Widget> content = [];
   content.addAll(
     [
-      const Text(
-        "This will send across logs to help us debug your issue. "
-        "While we take precautions to ensure that sensitive information is not "
-        "logged, we encourage you to view these logs before sharing them.",
-        style: TextStyle(
+      Text(
+        l10n.sendLogsDescription,
+        style: const TextStyle(
           height: 1.5,
           fontSize: 16,
         ),
@@ -148,7 +148,8 @@ Future<void> _sendLogs(
 }
 
 Future<String> getZippedLogsFile(BuildContext context) async {
-  final dialog = createProgressDialog(context, "Preparing logs...");
+  final l10n = context.l10n;
+  final dialog = createProgressDialog(context, l10n.preparingLogsTitle);
   await dialog.show();
   final logsPath = (await getApplicationSupportDirectory()).path;
   final logsDirectory = Directory(logsPath + "/logs");
@@ -168,12 +169,13 @@ Future<void> shareLogs(
   String toEmail,
   String zipFilePath,
 ) async {
+  final l10n = context.l10n;
   final result = await showChoiceDialog(
     context,
-    "Email logs",
-    "Please send the logs to $toEmail",
-    firstAction: "Copy email",
-    secondAction: "Export logs",
+    l10n.emailLogsTitle,
+    l10n.emailLogsMessage(toEmail),
+    firstAction: l10n.copyEmailAction,
+    secondAction: l10n.exportLogsAction,
   );
   if (result != null && result == DialogUserChoice.firstChoice) {
     await Clipboard.setData(ClipboardData(text: toEmail));
@@ -237,21 +239,22 @@ Future<String> _clientInfo() async {
 }
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
+  final l10n = context.l10n;
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text('Please email us at $toEmail'),
+        title: Text(l10n.emailUsMessage(toEmail)),
         actions: <Widget>[
           TextButton(
-            child: const Text("Copy email"),
+            child: Text(l10n.copyEmailAction),
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: toEmail));
-              showShortToast(context, 'Copied');
+              showShortToast(context, l10n.copied);
             },
           ),
           TextButton(
-            child: const Text("OK"),
+            child: Text(l10n.ok),
             onPressed: () {
               Navigator.pop(context);
             },

@@ -1,5 +1,6 @@
 // @dart=2.9
 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/lifecycle_event_handler.dart';
 import 'package:flutter/material.dart';
@@ -47,10 +48,11 @@ class _TwoFactorAuthenticationPageState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Two-factor authentication",
+        title: Text(
+          l10n.twoFactorAuthTitle,
         ),
       ),
       body: _getBody(),
@@ -58,6 +60,7 @@ class _TwoFactorAuthenticationPageState
   }
 
   Widget _getBody() {
+    final l10n = context.l10n;
     final pinPutDecoration = BoxDecoration(
       border: Border.all(
         color: Theme.of(context)
@@ -73,9 +76,9 @@ class _TwoFactorAuthenticationPageState
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.max,
       children: [
-        const Text(
-          "Enter the 6-digit code from\nyour authenticator app",
-          style: TextStyle(
+        Text(
+          l10n.enterCodeHint,
+          style: const TextStyle(
             height: 1.4,
             fontSize: 16,
           ),
@@ -121,7 +124,7 @@ class _TwoFactorAuthenticationPageState
                     _verifyTwoFactorCode(_code);
                   }
                 : null,
-            child: const Text("Verify"),
+            child: Text(l10n.verify),
           ),
         ),
         const Padding(padding: EdgeInsets.all(30)),
@@ -132,10 +135,10 @@ class _TwoFactorAuthenticationPageState
           },
           child: Container(
             padding: const EdgeInsets.all(10),
-            child: const Center(
+            child: Center(
               child: Text(
-                "Lost device?",
-                style: TextStyle(
+                l10n.lostDeviceTitle,
+                style: const TextStyle(
                   decoration: TextDecoration.underline,
                   fontSize: 12,
                 ),

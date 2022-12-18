@@ -1,6 +1,6 @@
 name: ente_auth
 description: ente two-factor authenticator
-version: 1.0.21+21
+version: 1.0.23+23
 publish_to: none
 
 environment:
@@ -23,7 +23,7 @@ dependencies:
   event_bus: ^2.0.0
   expandable: ^5.0.1
   expansion_tile_card: ^2.0.0
-  file_picker: ^4.6.1
+  file_picker: ^5.2.4
   fk_user_agent: ^2.1.0
   flutter:
     sdk: flutter
@@ -38,7 +38,9 @@ dependencies:
   flutter_native_splash: ^2.2.13
   flutter_secure_storage: ^6.0.0
   flutter_slidable: ^2.0.0
-  flutter_sodium: ^0.2.0
+  flutter_sodium:
+    git:
+      url: https://github.com/ente-io/flutter_sodium.git
   flutter_speed_dial: ^6.2.0
   flutter_windowmanager: ^0.2.0
   fluttertoast: ^8.1.1
@@ -49,7 +51,7 @@ dependencies:
   local_auth: ^1.1.5
   logging: ^1.0.1
   move_to_background: ^1.0.2
-  # open_file: ^3.2.1 Disabled to please PlayStore overlords
+  open_filex: ^4.3.2
   otp: ^3.1.1
   package_info_plus: ^1.0.1
   password_strength: ^0.2.0

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/code.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -30,9 +31,10 @@ class ScannerPageState extends State<ScannerPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Scan"),
+        title: Text(l10n.scan),
       ),
       body: Column(
         children: <Widget>[
@@ -47,7 +49,7 @@ class ScannerPageState extends State<ScannerPage> {
           Expanded(
             flex: 1,
             child: Center(
-              child: (totp != null) ? Text(totp!) : const Text('Scan a code'),
+              child: (totp != null) ? Text(totp!) : Text(l10n.scanACode),
             ),
           )
         ],

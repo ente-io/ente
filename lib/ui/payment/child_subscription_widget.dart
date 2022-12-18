@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/models/user_details.dart';
 import 'package:ente_auth/services/user_service.dart';
 import 'package:ente_auth/ui/common/dialogs.dart';
@@ -17,6 +18,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final String familyAdmin = userDetails.familyData.members
         .firstWhere((element) => element.isAdmin)
         .email;
@@ -27,7 +29,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
         children: [
           Center(
             child: Text(
-              "You are on a family plan!",
+              l10n.inFamilyPlanMessage,
               style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
@@ -76,9 +78,9 @@ class ChildSubscriptionWidget extends StatelessWidget {
                     const EdgeInsets.symmetric(vertical: 18, horizontal: 100),
                 backgroundColor: Colors.red[500],
               ),
-              child: const Text(
-                "Leave Family",
-                style: TextStyle(
+              child: Text(
+                l10n.leaveFamily,
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                   color: Colors.white, // same for both themes
@@ -120,19 +122,20 @@ class ChildSubscriptionWidget extends StatelessWidget {
   }
 
   Future<void> _leaveFamilyPlan(BuildContext context) async {
+    final l10n = context.l10n;
     final choice = await showChoiceDialog(
       context,
-      'Leave family',
-      'Are you sure that you want to leave the family plan?',
-      firstAction: 'No',
-      secondAction: 'Yes',
+      l10n.leaveFamily,
+      l10n.leaveFamilyMessage,
+      firstAction: l10n.no,
+      secondAction: l10n.yes,
       firstActionColor: Theme.of(context).colorScheme.alternativeColor,
       secondActionColor: Theme.of(context).colorScheme.onSurface,
     );
     if (choice != DialogUserChoice.secondChoice) {
       return;
     }
-    final dialog = createProgressDialog(context, "Please wait...");
+    final dialog = createProgressDialog(context, l10n.pleaseWaitTitle);
     await dialog.show();
     try {
       await UserService.instance.leaveFamilyPlan();

@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:ente_auth/core/configuration.dart';
 import 'package:ente_auth/ente_theme_data.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
 import 'package:ente_auth/ui/account/sessions_page.dart';
@@ -45,6 +46,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   }
 
   Widget _getSectionOptions(BuildContext context) {
+    final l10n = context.l10n;
     final List<Widget> children = [];
     children.addAll([
       MenuItemWidget(
@@ -88,7 +90,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
-                            "Hiding from the task switcher will prevent you from taking screenshots in this app.",
+                            "Hiding from the task switcher may prevent you from taking screenshots in this app.",
                             style: TextStyle(
                               height: 1.5,
                             ),
@@ -106,7 +108,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                     actions: [
                       TextButton(
                         child: Text(
-                          "No",
+                          l10n.no,
                           style: TextStyle(
                             color:
                                 Theme.of(context).colorScheme.defaultTextColor,
@@ -119,7 +121,7 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
                       ),
                       TextButton(
                         child: Text(
-                          "Yes",
+                          l10n.yes,
                           style: TextStyle(
                             color:
                                 Theme.of(context).colorScheme.defaultTextColor,

@@ -3,6 +3,7 @@
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
+import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/ui/common/loading_widget.dart';
 import 'package:ente_auth/ui/common/progress_dialog.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ Future<dynamic> showErrorDialog(
   String title,
   String content,
 ) {
+  final l10n = context.l10n;
   final AlertDialog alert = AlertDialog(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     title: title.isEmpty
@@ -44,7 +46,7 @@ Future<dynamic> showErrorDialog(
     actions: [
       TextButton(
         child: Text(
-          "Ok",
+          l10n.ok,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
           ),

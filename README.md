@@ -3,6 +3,8 @@
 ente's Authenticator app helps you generate and store 2 step verification (2FA)
 tokens on your mobile devices.
 
+[Download now](#-download)
+
 ![App Screenshots](./screenshots/screenshots.png)
 
 ## ✨ Features
@@ -92,12 +94,13 @@ tokens has been documented [here](architecture/README.md).
 If you need help, please reach out to support@ente.io, and a human will get in
 touch with you.
 
-If you have feature requests, please create a [GitHub issue](./issues).
+If you have feature requests, please create a [GitHub issue](https://github.com/ente-io/auth/issues/).
 
 If you wish to support us, please ⭐
 [star](https://github.com/ente-io/auth/stargazers) this project.
 
 
 ## 💜 Community
-- Follow us on [Twitter](https://twitter.com/enteio)
-- Join us on [Discord](https://ente.io/discord)
+
+- Follow us on [Twitter](https://twitter.com/enteio) / [Mastodon](https://mstdn.social/@ente)
+- Join us on [Discord](https://ente.io/discord) / [Matrix](https://ente.io/matrix)
