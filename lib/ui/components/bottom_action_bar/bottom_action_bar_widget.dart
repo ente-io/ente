@@ -75,17 +75,17 @@ class BottomActionBarWidget extends StatelessWidget {
                   controller: _expandableController,
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  onCancel?.call();
-                  _expandableController.value = false;
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () {
+                    onCancel?.call();
+                    _expandableController.value = false;
+                  },
                   child: Center(
                     child: Text(
                       "Cancel",
