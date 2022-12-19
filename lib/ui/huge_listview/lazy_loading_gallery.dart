@@ -12,6 +12,7 @@ import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/extensions/string_ext.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -415,7 +416,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       final avatarColors = getEnteColorScheme(context).avatarColors;
       final int randomID = file.ownerID != _currentUserID
           ? file.ownerID
-          : file.pubMagicMetadata.uploaderName.hashCode;
+          : file.pubMagicMetadata.uploaderName.sumAsciiValues;
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(

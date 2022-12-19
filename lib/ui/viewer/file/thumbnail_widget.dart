@@ -11,6 +11,7 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/extensions/string_ext.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -132,7 +133,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
             // get avatar color
             OwnerAvatarOverlayIcon(
               User(
-                id: widget.file.pubMagicMetadata.uploaderName.hashCode,
+                id: widget.file.pubMagicMetadata.uploaderName.sumAsciiValues,
                 email: owner.email,
                 name: widget.file.pubMagicMetadata.uploaderName,
               ),
