@@ -10,7 +10,7 @@ class EnteColorScheme {
 
   // Backdrop Colors
   final Color backdropBase;
-  final Color backdropBaseMute;
+  final Color backdropMuted;
   final Color backdropFaint;
 
   // Text Colors
@@ -23,6 +23,7 @@ class EnteColorScheme {
   final Color fillBase;
   final Color fillMuted;
   final Color fillFaint;
+  final Color fillFaintPressed;
 
   // Stroke Colors
   final Color strokeBase;
@@ -47,13 +48,14 @@ class EnteColorScheme {
 
   //other colors
   final Color tabIcon;
+  final List<Color> avatarColors;
 
   const EnteColorScheme(
     this.backgroundBase,
     this.backgroundElevated,
     this.backgroundElevated2,
     this.backdropBase,
-    this.backdropBaseMute,
+    this.backdropMuted,
     this.backdropFaint,
     this.textBase,
     this.textMuted,
@@ -62,6 +64,7 @@ class EnteColorScheme {
     this.fillBase,
     this.fillMuted,
     this.fillFaint,
+    this.fillFaintPressed,
     this.strokeBase,
     this.strokeMuted,
     this.strokeFaint,
@@ -69,7 +72,8 @@ class EnteColorScheme {
     this.blurStrokeBase,
     this.blurStrokeFaint,
     this.blurStrokePressed,
-    this.tabIcon, {
+    this.tabIcon,
+    this.avatarColors, {
     this.primary700 = _primary700,
     this.primary500 = _primary500,
     this.primary400 = _primary400,
@@ -95,6 +99,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   fillBaseLight,
   fillMutedLight,
   fillFaintLight,
+  fillFaintPressedLight,
   strokeBaseLight,
   strokeMutedLight,
   strokeFaintLight,
@@ -103,6 +108,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   blurStrokeFaintLight,
   blurStrokePressedLight,
   tabIconLight,
+  avatarLight,
 );
 
 const EnteColorScheme darkScheme = EnteColorScheme(
@@ -119,6 +125,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   fillBaseDark,
   fillMutedDark,
   fillFaintDark,
+  fillFaintPressedDark,
   strokeBaseDark,
   strokeMutedDark,
   strokeFaintDark,
@@ -127,6 +134,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   blurStrokeFaintDark,
   blurStrokePressedDark,
   tabIconDark,
+  avatarDark,
 );
 
 // Background Colors
@@ -139,13 +147,13 @@ const Color backgroundElevatedDark = Color.fromRGBO(27, 27, 27, 1);
 const Color backgroundElevated2Dark = Color.fromRGBO(37, 37, 37, 1);
 
 // Backdrop Colors
-const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.75);
-const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.30);
-const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.15);
+const Color backdropBaseLight = Color.fromRGBO(255, 255, 255, 0.92);
+const Color backdropMutedLight = Color.fromRGBO(255, 255, 255, 0.75);
+const Color backdropFaintLight = Color.fromRGBO(255, 255, 255, 0.30);
 
-const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.65);
-const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.20);
-const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.08);
+const Color backdropBaseDark = Color.fromRGBO(0, 0, 0, 0.90);
+const Color backdropMutedDark = Color.fromRGBO(0, 0, 0, 0.65);
+const Color backdropFaintDark = Color.fromRGBO(0, 0, 0, 0.20);
 
 // Text Colors
 const Color textBaseLight = Color.fromRGBO(0, 0, 0, 1);
@@ -162,10 +170,12 @@ const Color blurTextBaseDark = Color.fromRGBO(255, 255, 255, 0.95);
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
+const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
+const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
 
 // Stroke Colors
 const Color strokeBaseLight = Color.fromRGBO(0, 0, 0, 1);
@@ -181,7 +191,7 @@ const Color strokeMutedDark = Color.fromRGBO(255, 255, 255, 0.24);
 const Color strokeFaintDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color strokeFainterDark = Color.fromRGBO(255, 255, 255, 0.08);
 const Color blurStrokeBaseDark = Color.fromRGBO(255, 255, 255, 0.90);
-const Color blurStrokeFaintDark = Color.fromRGBO(255, 255, 255, 0.08);
+const Color blurStrokeFaintDark = Color.fromRGBO(255, 255, 255, 0.06);
 const Color blurStrokePressedDark = Color.fromRGBO(255, 255, 255, 0.50);
 
 // Other colors
@@ -204,3 +214,55 @@ const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning400 = Color.fromRGBO(255, 111, 111, 1);
 
 const Color _caution500 = Color.fromRGBO(255, 194, 71, 1);
+
+const List<Color> avatarLight = [
+  Color.fromRGBO(118, 84, 154, 1),
+  Color.fromRGBO(223, 120, 97, 1),
+  Color.fromRGBO(148, 180, 159, 1),
+  Color.fromRGBO(135, 162, 251, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(50, 82, 136, 1),
+  Color.fromRGBO(133, 180, 224, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(221, 157, 226, 1),
+  Color.fromRGBO(130, 171, 139, 1),
+  Color.fromRGBO(155, 187, 232, 1),
+  Color.fromRGBO(143, 190, 190, 1),
+  Color.fromRGBO(138, 195, 161, 1),
+  Color.fromRGBO(168, 176, 242, 1),
+  Color.fromRGBO(176, 198, 149, 1),
+  Color.fromRGBO(233, 154, 173, 1),
+  Color.fromRGBO(209, 132, 132, 1),
+  Color.fromRGBO(120, 181, 167, 1)
+];
+
+const List<Color> avatarDark = [
+  Color.fromRGBO(118, 84, 154, 1),
+  Color.fromRGBO(223, 120, 97, 1),
+  Color.fromRGBO(148, 180, 159, 1),
+  Color.fromRGBO(135, 162, 251, 1),
+  Color.fromRGBO(198, 137, 198, 1),
+  Color.fromRGBO(147, 125, 194, 1),
+  Color.fromRGBO(50, 82, 136, 1),
+  Color.fromRGBO(133, 180, 224, 1),
+  Color.fromRGBO(193, 163, 163, 1),
+  Color.fromRGBO(225, 160, 89, 1),
+  Color.fromRGBO(66, 97, 101, 1),
+  Color.fromRGBO(107, 119, 178, 1),
+  Color.fromRGBO(149, 127, 239, 1),
+  Color.fromRGBO(221, 157, 226, 1),
+  Color.fromRGBO(130, 171, 139, 1),
+  Color.fromRGBO(155, 187, 232, 1),
+  Color.fromRGBO(143, 190, 190, 1),
+  Color.fromRGBO(138, 195, 161, 1),
+  Color.fromRGBO(168, 176, 242, 1),
+  Color.fromRGBO(176, 198, 149, 1),
+  Color.fromRGBO(233, 154, 173, 1),
+  Color.fromRGBO(209, 132, 132, 1),
+  Color.fromRGBO(120, 181, 167, 1)
+];

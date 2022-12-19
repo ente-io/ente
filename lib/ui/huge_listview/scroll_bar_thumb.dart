@@ -31,21 +31,23 @@ class ScrollBarThumb extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        FadeTransition(
-          opacity: labelAnimation,
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: backgroundColor,
-            ),
-            child: Text(
-              title,
-              style: TextStyle(
-                color: drawColor,
-                fontWeight: FontWeight.bold,
-                backgroundColor: Colors.transparent,
-                fontSize: 14,
+        IgnorePointer(
+          child: FadeTransition(
+            opacity: labelAnimation,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: backgroundColor,
+              ),
+              child: Text(
+                title,
+                style: TextStyle(
+                  color: drawColor,
+                  fontWeight: FontWeight.bold,
+                  backgroundColor: Colors.transparent,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),

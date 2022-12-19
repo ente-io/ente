@@ -1,16 +1,13 @@
-import 'dart:io';
-import 'dart:ui';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/gradient_button.dart';
-import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -30,7 +27,6 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final enteTextTheme = getEnteTextTheme(context);
     return Scaffold(
       appBar: null,
       body: Container(
@@ -68,57 +64,31 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: GradientButton(
-                        onTap: () async {
-                          await UpdateService.instance.hideChangeLog();
-                          if (mounted && Navigator.of(context).canPop()) {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        text: "Let's go",
-                      ),
+                    ButtonWidget(
+                      buttonType: ButtonType.trailingIconPrimary,
+                      buttonSize: ButtonSize.large,
+                      labelText: "Continue",
+                      icon: Icons.arrow_forward_outlined,
+                      onTap: () async {
+                        await UpdateService.instance.hideChangeLog();
+                        if (mounted && Navigator.of(context).canPop()) {
+                          Navigator.of(context).pop();
+                        }
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(
-                        left: 12,
-                        top: 12,
-                        right: 12,
-                        bottom: 6,
-                      ),
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: "If you like ente, ",
-                            ),
-                            TextSpan(
-                              text: "let others know",
-                              style: enteTextTheme.small.copyWith(
-                                color: enteColorScheme.primary700,
-                                decoration: TextDecoration.underline,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () {
-                                  // Single tapped.
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (BuildContext context) {
-                                        return const WebPage(
-                                          "Spread the word",
-                                          "https://ente.io/share/",
-                                        );
-                                      },
-                                    ),
-                                  );
-                                },
-                            ),
-                          ],
-                          style: enteTextTheme.small,
-                        ),
-                      ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    ButtonWidget(
+                      buttonType: ButtonType.trailingIconSecondary,
+                      buttonSize: ButtonSize.large,
+                      labelText: "Rate the app",
+                      icon: Icons.favorite_rounded,
+                      iconColor: enteColorScheme.primary500,
+                      onTap: () async {
+                        launchUrlString(
+                            UpdateService.instance.getRateDetails().item2);
+                      },
                     ),
                     const SizedBox(height: 8),
                   ],
@@ -136,47 +106,45 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
     final List<ChangeLogEntry> items = [];
     items.add(
       ChangeLogEntry(
-        "Select all photos in a day",
-        "After you select a photo, you'll now see an option next to the date to select all photos from that day.",
+        "Collect photos from anyone!",
+        "You can now enable \"Allow adding photos\" under shared link "
+            "settings to allow anyone with access to the link to also add "
+            "photos to that shared album.\n\nThis is the perfect fit for "
+            "occasions where you want to ask all your friends and relatives who attended the event to add the photos they took to an album. You can then prune them there; plus everyone can view them in a single place.",
       ),
     );
     items.add(
       ChangeLogEntry(
-        '''Easier access to favorites''',
-        "Your favorites now have a special heart icon, and will appear first in the list of albums. Archived albums also get a new indicator.",
+        '''Customize photo grid size''',
+        "You can now change the number of photos that are shown in a row."
+            "\n\nSince this was a much requested feature we've released it as "
+            "an option in Settings > General > Advanced; later we'll also try a gesture for easier access.",
       ),
     );
 
     items.add(
       ChangeLogEntry(
-        '''Export photo descriptions''',
-        "When you export data out of ente using the desktop app, any photo captions and descriptions that you added will also be exported.",
+        '''Better multi-select, and hide''',
+        "The item selector gets a new, expanded look with clearly marked "
+            "actions. We'll use this revamped space to show even more actions"
+            " you can take on selected photos.\n\nAnd we've already added new "
+            "actions! You can now select multiple items and hide all of them in one go.",
       ),
     );
     items.add(
       ChangeLogEntry(
-        '''Initial support for empty albums''',
-        "Any empty albums that you already have will now show up in ente. You can choose to delete them, or add more photos to them. In the future we'll support more workflows with empty albums.",
+        '''Per album free up space''',
+        "There is now an option to free up space within each on device album. This provides both a more granular, and faster, way to save storage your phone.",
+      ),
+    );
+
+    items.add(
+      ChangeLogEntry(
+        '''Longer photo descriptions''',
+        "The previous 280 character limit on photo captions and descriptions has been increased to 5000.",
         isFeature: false,
       ),
     );
-    if (Platform.isIOS) {
-      items.add(
-        ChangeLogEntry(
-          '''Tweak video uploads''',
-          "ente will now keep videos temporarily cached until they get successfully uploaded. This will make video uploads work better as long as the app is not force killed.",
-          isFeature: false,
-        ),
-      );
-    } else {
-      items.add(
-        ChangeLogEntry(
-          '''Better timestamps for screenshots''',
-          "Added more cases when deducing photo dates from their file names. ente will also automatically apply these rules to fix photos that have already been imported without a valid date.",
-          isFeature: false,
-        ),
-      );
-    }
 
     return Container(
       padding: const EdgeInsets.only(left: 16),

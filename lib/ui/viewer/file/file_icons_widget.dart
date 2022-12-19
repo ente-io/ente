@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/trash_file.dart';
 import 'package:photos/theme/colors.dart';
+import 'package:photos/ui/sharing/user_avator_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 
 class ThumbnailPlaceHolder extends StatelessWidget {
@@ -79,6 +81,26 @@ class LivePhotoOverlayIcon extends StatelessWidget {
           Icons.album_outlined,
           size: 14,
           color: Colors.white, // fixed
+        ),
+      ),
+    );
+  }
+}
+
+class OwnerAvatarOverlayIcon extends StatelessWidget {
+  final User user;
+  const OwnerAvatarOverlayIcon(this.user, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 4, top: 4),
+        child: UserAvatarWidget(
+          user,
+          type: AvatarType.tiny,
+          thumbnailView: true,
         ),
       ),
     );

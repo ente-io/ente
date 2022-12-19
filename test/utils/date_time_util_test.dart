@@ -17,6 +17,7 @@ void main() {
       "IMG_20210921_144423_783",
       "Screenshot_2022-06-21-16-51-29-164_newFormat.heic",
       "Screenshot 20221106 211633.com.google.android.apps.nbu.paisa.user.jpg",
+      "signal-2022-12-17-15-16-04-718.jpg"
     ];
     for (String val in validParsing) {
       final parsedValue = parseDateTimeFromFileNameV2(val);

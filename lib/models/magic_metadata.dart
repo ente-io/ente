@@ -15,6 +15,7 @@ const subTypeKey = 'subType';
 const pubMagicKeyEditedTime = 'editedTime';
 const pubMagicKeyEditedName = 'editedName';
 const pubMagicKeyCaption = "caption";
+const pubMagicKeyUploaderName = "uploaderName";
 
 class MagicMetadata {
   // 0 -> visible
@@ -41,8 +42,14 @@ class PubMagicMetadata {
   int? editedTime;
   String? editedName;
   String? caption;
+  String? uploaderName;
 
-  PubMagicMetadata({this.editedTime, this.editedName, this.caption});
+  PubMagicMetadata({
+    this.editedTime,
+    this.editedName,
+    this.caption,
+    this.uploaderName,
+  });
 
   factory PubMagicMetadata.fromEncodedJson(String encodedJson) =>
       PubMagicMetadata.fromJson(jsonDecode(encodedJson));
@@ -56,6 +63,7 @@ class PubMagicMetadata {
       editedTime: map[pubMagicKeyEditedTime],
       editedName: map[pubMagicKeyEditedName],
       caption: map[pubMagicKeyCaption],
+      uploaderName: map[pubMagicKeyUploaderName],
     );
   }
 }

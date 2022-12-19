@@ -57,6 +57,28 @@ class Collection {
     return (magicMetadata.subType ?? 0) == subTypeDefaultHidden;
   }
 
+  List<User> getSharees() {
+    final List<User> result = [];
+    if (sharees == null) {
+      return result;
+    }
+    for (final User? u in sharees!) {
+      if (u != null) {
+        result.add(u);
+      }
+    }
+    return result;
+  }
+
+  bool isOwner(int userID) {
+    return (owner?.id ?? 0) == userID;
+  }
+
+  void updateSharees(List<User> newSharees) {
+    sharees?.clear();
+    sharees?.addAll(newSharees);
+  }
+
   static CollectionType typeFromString(String type) {
     switch (type) {
       case "folder":
@@ -168,6 +190,31 @@ enum CollectionType {
   album,
 }
 
+enum CollectionParticipantRole {
+  unknown,
+  viewer,
+  collaborator,
+  owner,
+}
+
+extension CollectionParticipantRoleExtn on CollectionParticipantRole {
+  static CollectionParticipantRole fromString(String? val) {
+    if ((val ?? '') == '') {
+      return CollectionParticipantRole.viewer;
+    }
+    for (var x in CollectionParticipantRole.values) {
+      if (x.name.toUpperCase() == val!.toUpperCase()) {
+        return x;
+      }
+    }
+    return CollectionParticipantRole.unknown;
+  }
+
+  String toStringVal() {
+    return name.toUpperCase();
+  }
+}
+
 class CollectionAttributes {
   final String? encryptedPath;
   final String? pathDecryptionNonce;
@@ -206,19 +253,22 @@ class User {
   int? id;
   String email;
   String? name;
+  String? role;
 
   User({
     this.id,
     required this.email,
     this.name,
+    this.role,
   });
 
+  bool get isViewer => role == null || role?.toUpperCase() == 'VIEWER';
+
+  bool get isCollaborator =>
+      role != null && role?.toUpperCase() == 'COLLABORATOR';
+
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'email': email,
-      'name': name,
-    };
+    return {'id': id, 'email': email, 'name': name, 'role': role};
   }
 
   static fromMap(Map<String, dynamic>? map) {
@@ -228,6 +278,7 @@ class User {
       id: map['id'],
       email: map['email'],
       name: map['name'],
+      role: map['role'] ?? 'VIEWER',
     );
   }
 

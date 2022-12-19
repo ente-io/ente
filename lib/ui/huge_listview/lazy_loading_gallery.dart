@@ -7,10 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/extensions/string_ext.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -53,7 +55,6 @@ class LazyLoadingGallery extends StatefulWidget {
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
-  static const kSubGalleryItemLimit = 80;
   static const kRecycleLimit = 400;
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
@@ -243,13 +244,16 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   Widget _getGallery() {
     final List<Widget> childGalleries = [];
-    for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
+    final subGalleryItemLimit = widget.photoGirdSize < photoGridSizeDefault
+        ? subGalleryLimitMin
+        : subGalleryLimitDefault;
+    for (int index = 0; index < _files.length; index += subGalleryItemLimit) {
       childGalleries.add(
         LazyLoadingGridView(
           widget.tag,
           _files.sublist(
             index,
-            min(index + kSubGalleryItemLimit, _files.length),
+            min(index + subGalleryItemLimit, _files.length),
           ),
           widget.asyncLoader,
           widget.selectedFiles,
@@ -306,11 +310,13 @@ class LazyLoadingGridView extends StatefulWidget {
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   bool _shouldRender;
+  int _currentUserID;
   StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
 
   @override
   void initState() {
     _shouldRender = widget.shouldRender;
+    _currentUserID = Configuration.instance.getUserID();
     widget.selectedFiles.addListener(_selectedFilesListener);
     _clearSelectionsEvent =
         Bus.instance.on<ClearSelectionsEvent>().listen((event) {
@@ -403,6 +409,18 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   }
 
   Widget _buildFile(BuildContext context, File file) {
+    final isFileSelected = widget.selectedFiles.isFileSelected(file);
+    Color selectionColor = Colors.white;
+    if (isFileSelected &&
+        file.isUploaded &&
+        (file.ownerID != _currentUserID ||
+            file.pubMagicMetadata.uploaderName != null)) {
+      final avatarColors = getEnteColorScheme(context).avatarColors;
+      final int randomID = file.ownerID != _currentUserID
+          ? file.ownerID
+          : file.pubMagicMetadata.uploaderName.sumAsciiValues;
+      selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
+    }
     return GestureDetector(
       onTap: () {
         if (widget.selectedFiles.files.isNotEmpty) {
@@ -424,7 +442,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
               child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
                   Colors.black.withOpacity(
-                    widget.selectedFiles.isFileSelected(file) ? 0.4 : 0,
+                    isFileSelected ? 0.4 : 0,
                   ),
                   BlendMode.darken,
                 ),
@@ -437,18 +455,19 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   thumbnailSize: widget.photoGridSize < photoGridSizeDefault
                       ? thumbnailLargeSize
                       : thumbnailSmallSize,
+                  shouldShowOwnerAvatar: !isFileSelected,
                 ),
               ),
             ),
             Visibility(
-              visible: widget.selectedFiles.isFileSelected(file),
-              child: const Positioned(
+              visible: isFileSelected,
+              child: Positioned(
                 right: 4,
                 top: 4,
                 child: Icon(
                   Icons.check_circle_rounded,
                   size: 20,
-                  color: Colors.white, //same for both themes
+                  color: selectionColor, //same for both themes
                 ),
               ),
             )

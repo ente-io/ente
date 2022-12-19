@@ -26,14 +26,12 @@ class SocialSectionWidget extends StatelessWidget {
     final result = UpdateService.instance.getRateDetails();
     final String ratePlace = result.item1;
     final String rateUrl = result.item2;
-    if (!UpdateService.instance.isIndependent()) {
-      options.addAll(
-        [
-          SocialsMenuItemWidget("Rate us on $ratePlace", rateUrl),
-          sectionOptionSpacing,
-        ],
-      );
-    }
+    options.addAll(
+      [
+        SocialsMenuItemWidget("Rate us on $ratePlace", rateUrl),
+        sectionOptionSpacing,
+      ],
+    );
     options.addAll(
       [
         sectionOptionSpacing,

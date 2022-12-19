@@ -196,7 +196,12 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
 
   Future<List<CollectionWithThumbnail>> _getCollectionsWithThumbnail() async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail =
-        await CollectionsService.instance.getCollectionsWithThumbnails();
+        await CollectionsService.instance.getCollectionsWithThumbnails(
+      // in collections where user is a collaborator, only addTo and remove
+      // action can to be performed
+      includeCollabCollections:
+          widget.actionType == CollectionActionType.addFiles,
+    );
     collectionsWithThumbnail.sort((first, second) {
       return compareAsciiLowerCaseNatural(
         first.collection.name ?? "",

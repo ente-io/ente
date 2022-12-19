@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/selected_file_breakup.dart';
 
 class SelectedFiles extends ChangeNotifier {
   final files = <File>{};
@@ -13,7 +14,7 @@ class SelectedFiles extends ChangeNotifier {
     // or any other update, using file.generatedID to track if this file was already
     // selected or not
     final File? alreadySelected = files.firstWhereOrNull(
-      (element) => element.generatedID == file.generatedID,
+      (element) => _isMatch(file, element),
     );
     if (alreadySelected != null) {
       files.remove(alreadySelected);
@@ -32,24 +33,57 @@ class SelectedFiles extends ChangeNotifier {
     notifyListeners();
   }
 
-  void unSelectAll(Set<File> selectedFiles) {
+  void unSelectAll(Set<File> selectedFiles, {bool skipNotify = false}) {
     files.removeAll(selectedFiles);
     lastSelections.clear();
-    notifyListeners();
+    if (!skipNotify) {
+      notifyListeners();
+    }
   }
 
   bool isFileSelected(File file) {
     final File? alreadySelected = files.firstWhereOrNull(
-      (element) => element.generatedID == file.generatedID,
+      (element) => _isMatch(file, element),
     );
     return alreadySelected != null;
   }
 
   bool isPartOfLastSelected(File file) {
     final File? matchedFile = lastSelections.firstWhereOrNull(
-      (element) => element.generatedID == file.generatedID,
+      (element) => _isMatch(file, element),
     );
     return matchedFile != null;
+  }
+
+  bool _isMatch(File first, File second) {
+    if (first.generatedID != null && second.generatedID != null) {
+      if (first.generatedID == second.generatedID) {
+        return true;
+      }
+    } else if (first.uploadedFileID != null && second.uploadedFileID != null) {
+      return first.uploadedFileID == second.uploadedFileID;
+    }
+    return false;
+  }
+
+  SelectedFileSplit split(int currentUseID) {
+    final List<File> ownedByCurrentUser = [],
+        ownedByOtherUsers = [],
+        pendingUploads = [];
+    for (var f in files) {
+      if (f.ownerID == null || f.uploadedFileID == null) {
+        pendingUploads.add(f);
+      } else if (f.ownerID == currentUseID) {
+        ownedByCurrentUser.add(f);
+      } else {
+        ownedByOtherUsers.add(f);
+      }
+    }
+    return SelectedFileSplit(
+      pendingUploads: pendingUploads,
+      ownedByCurrentUser: ownedByCurrentUser,
+      ownedByOtherUsers: ownedByOtherUsers,
+    );
   }
 
   void clearAll() {

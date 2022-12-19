@@ -6,8 +6,48 @@ import 'package:photos/ui/components/keyboard/keybiard_oveylay.dart';
 import 'package:photos/ui/components/keyboard/keyboard_top_button.dart';
 import 'package:photos/utils/magic_util.dart';
 
+class FileCaptionReadyOnly extends StatelessWidget {
+  final String caption;
+
+  const FileCaptionReadyOnly({super.key, required this.caption});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
+    final textTheme = getEnteTextTheme(context);
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: 32.0,
+          minWidth: double.infinity,
+          maxHeight: 200.0,
+          maxWidth: double.infinity,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colorScheme.fillFaint,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text(
+                caption,
+                style: textTheme.small,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class FileCaptionWidget extends StatefulWidget {
   final File file;
+
   const FileCaptionWidget({required this.file, super.key});
 
   @override
@@ -16,6 +56,7 @@ class FileCaptionWidget extends StatefulWidget {
 
 class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   static const int maxLength = 5000;
+
   // counterThreshold represents the nun of char after which
   // currentLength/maxLength will show up
   static const int counterThreshold = 1000;
@@ -138,8 +179,6 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
     if (hasFocus) {
       KeyboardOverlay.showOverlay(context, keyboardTopButtoms!);
     } else {
-      debugPrint("Removing listener");
-
       KeyboardOverlay.removeOverlay();
     }
   }

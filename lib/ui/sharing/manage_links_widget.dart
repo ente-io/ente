@@ -12,6 +12,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
@@ -47,6 +48,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   Tuple3<int, String, int> _selectedExpiry;
   int _selectedDeviceLimitIndex = 0;
+  final CollectionActions sharingActions =
+      CollectionActions(CollectionsService.instance);
 
   @override
   void initState() {
@@ -82,7 +85,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection.publicURLs?.firstOrNull?.enableCollect ??
+                      value: widget.collection.publicURLs?.firstOrNull
+                              ?.enableCollect ??
                           false,
                       onChanged: (value) async {
                         await _updateUrlSettings(
@@ -96,7 +100,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   const MenuSectionDescriptionWidget(
                     content:
-                    "Allow people with the link to also add photos to the shared "
+                        "Allow people with the link to also add photos to the shared "
                         "album.",
                   ),
                   const SizedBox(height: 24),
@@ -139,8 +143,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     },
                   ),
                   DividerWidget(
-                    dividerType: DividerType.menu,
-                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
                     captionedTextWidget: const CaptionedTextWidget(
@@ -189,8 +193,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                   ),
                   DividerWidget(
-                    dividerType: DividerType.menu,
-                    bgColor: getEnteColorScheme(context).blurStrokeFaint,
+                    dividerType: DividerType.menuNoIcon,
+                    bgColor: getEnteColorScheme(context).fillFaint,
                   ),
                   MenuItemWidget(
                     captionedTextWidget: const CaptionedTextWidget(
@@ -228,6 +232,28 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   ),
                   const SizedBox(
                     height: 24,
+                  ),
+                  MenuItemWidget(
+                    captionedTextWidget: const CaptionedTextWidget(
+                      title: "Remove link",
+                      textColor: warning500,
+                      makeTextBold: true,
+                    ),
+                    leadingIcon: Icons.remove_circle_outline,
+                    leadingIconColor: warning500,
+                    menuItemColor: getEnteColorScheme(context).fillFaint,
+                    pressedColor: getEnteColorScheme(context).fillFaint,
+                    onTap: () async {
+                      final bool result = await sharingActions.publicLinkToggle(
+                        context,
+                        widget.collection,
+                        false,
+                      );
+                      if (result && mounted) {
+                        Navigator.of(context).pop();
+                        // setState(() => {});
+                      }
+                    },
                   ),
                 ],
               ),
