@@ -3,6 +3,7 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -59,6 +60,32 @@ class CollectionActions {
       }
       return false;
     }
+  }
+
+  Future<Collection?> createSharedCollectionLink(
+    BuildContext context,
+    List<File> files,
+  ) async {
+    final dialog =
+        createProgressDialog(context, "Creating link...", isDismissible: true);
+    dialog.show();
+    try {
+      // create album with emptyName, use collectionCreationTime on UI to
+      // show name
+      logger.finest("creating album for sharing files");
+      final collection = await collectionsService.createAlbum("");
+      logger.finest("adding files to share to new album");
+      await collectionsService.addToCollection(collection.id, files);
+      logger.finest("creating public link for the newly created album");
+      await CollectionsService.instance.createShareUrl(collection);
+      dialog.hide();
+      return collection;
+    } catch (e, s) {
+      dialog.hide();
+      showGenericErrorDialog(context);
+      logger.severe("Failing to create link for selected files", e, s);
+    }
+    return null;
   }
 
   // removeParticipant remove the user from a share album
