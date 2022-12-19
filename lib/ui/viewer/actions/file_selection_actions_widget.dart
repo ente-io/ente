@@ -102,14 +102,25 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     final List<BlurMenuItemWidget> secondList = [];
 
     if (widget.type.showCreateLink()) {
-      firstList.add(
-        BlurMenuItemWidget(
-          leadingIcon: Icons.link_outlined,
-          labelText: "Create link$suffix",
-          menuItemColor: colorScheme.fillFaint,
-          onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
-        ),
-      );
+      if (_cachedCollectionForSharedLink != null && anyUploadedFiles) {
+        firstList.add(
+          BlurMenuItemWidget(
+            leadingIcon: Icons.copy_outlined,
+            labelText: "Copy link",
+            menuItemColor: colorScheme.fillFaint,
+            onTap: anyUploadedFiles ? _copyLink : null,
+          ),
+        );
+      } else {
+        firstList.add(
+          BlurMenuItemWidget(
+            leadingIcon: Icons.link_outlined,
+            labelText: "Create link$suffix",
+            menuItemColor: colorScheme.fillFaint,
+            onTap: anyUploadedFiles ? _onCreatedSharedLinkClicked : null,
+          ),
+        );
+      }
     }
 
     final showUploadIcon = widget.type == GalleryType.localFolder &&
@@ -333,6 +344,13 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     }
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
+    await _copyLink();
+    if (mounted) {
+      setState(() => {});
+    }
+  }
+
+  Future<void> _copyLink() async {
     if (_cachedCollectionForSharedLink != null) {
       final String collectionKey = Base58Encode(
         CollectionsService.instance
