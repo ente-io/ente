@@ -7,11 +7,15 @@ import 'package:flutter/material.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 
-ProgressDialog createProgressDialog(BuildContext context, String message) {
+ProgressDialog createProgressDialog(
+  BuildContext context,
+  String message, {
+  isDismissible = false,
+}) {
   final dialog = ProgressDialog(
     context,
     type: ProgressDialogType.normal,
-    isDismissible: false,
+    isDismissible: isDismissible,
     barrierColor: Colors.black12,
   );
   dialog.style(
