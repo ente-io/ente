@@ -28,7 +28,7 @@ Future<void> share(
   final dialog = createProgressDialog(
     context,
     "Preparing...",
-    isDismissible: remoteFileCount > 1,
+    isDismissible: remoteFileCount > 2,
   );
   await dialog.show();
   try {
