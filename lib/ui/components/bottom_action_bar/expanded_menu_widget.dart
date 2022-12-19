@@ -11,11 +11,14 @@ class ExpandedMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const double itemHeight = 48;
-    const double whiteSpaceBetweenSections = 16;
-    const double dividerHeightBetweenItems = 1;
-    int numberOfDividers = 0;
-    double combinedHeightOfItems = 0;
+    double textScaleFactor = MediaQuery.of(context).textScaleFactor;
+    textScaleFactor < 1.0 ? textScaleFactor = 1.0 : null;
+    //20 is height of font and 28 is total whitespace (top+bottom)
+    final double itemHeight = (20.0 * textScaleFactor) + 28.0;
+    const double whiteSpaceBetweenSections = 16.0;
+    const double dividerHeightBetweenItems = 1.0;
+    double numberOfDividers = 0.0;
+    double combinedHeightOfItems = 0.0;
 
     for (List<BlurMenuItemWidget> group in items) {
       //no divider if there is only one item in the section/group
@@ -30,7 +33,7 @@ class ExpandedMenuWidget extends StatelessWidget {
       child: SizedBox(
         height: combinedHeightOfItems +
             (dividerHeightBetweenItems * numberOfDividers) +
-            (whiteSpaceBetweenSections * (items.length - 1)),
+            (whiteSpaceBetweenSections * (items.length - 1.0)),
         child: ListView.separated(
           padding: const EdgeInsets.all(0),
           physics: const NeverScrollableScrollPhysics(),
