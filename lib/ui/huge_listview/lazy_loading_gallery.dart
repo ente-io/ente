@@ -55,7 +55,6 @@ class LazyLoadingGallery extends StatefulWidget {
 }
 
 class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
-  static const kSubGalleryItemLimit = 80;
   static const kRecycleLimit = 400;
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
@@ -245,13 +244,16 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   Widget _getGallery() {
     final List<Widget> childGalleries = [];
-    for (int index = 0; index < _files.length; index += kSubGalleryItemLimit) {
+    final subGalleryItemLimit = widget.photoGirdSize < photoGridSizeDefault
+        ? subGalleryLimitMin
+        : subGalleryLimitDefault;
+    for (int index = 0; index < _files.length; index += subGalleryItemLimit) {
       childGalleries.add(
         LazyLoadingGridView(
           widget.tag,
           _files.sublist(
             index,
-            min(index + kSubGalleryItemLimit, _files.length),
+            min(index + subGalleryItemLimit, _files.length),
           ),
           widget.asyncLoader,
           widget.selectedFiles,
