@@ -93,7 +93,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
     }
     iconsButton.add(
       IconButtonWidget(
-        icon: Icons.ios_share_outlined,
+        icon: Icons.adaptive.share_outlined,
         iconButtonType: IconButtonType.primary,
         iconColor: getEnteColorScheme(context).blurStrokeBase,
         onTap: () => shareSelected(
