@@ -9,6 +9,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/payment/subscription.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -73,7 +74,8 @@ class CollectionActions {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
       logger.finest("creating album for sharing files");
-      final collection = await collectionsService.createAlbum("");
+      final String dummyName = " ${getDateAndMonthAndYear(DateTime.now())} ";
+      final collection = await collectionsService.createAlbum(dummyName);
       logger.finest("adding files to share to new album");
       await collectionsService.addToCollection(collection.id, files);
       logger.finest("creating public link for the newly created album");
