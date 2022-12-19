@@ -12,7 +12,6 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
-import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 
 class SearchResultPage extends StatelessWidget {
   final SearchResult searchResult;
