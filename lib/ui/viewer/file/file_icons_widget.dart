@@ -118,12 +118,11 @@ class FavoriteOverlayIcon extends StatelessWidget {
           begin: Alignment.bottomLeft,
           end: Alignment.center,
           colors: [
-            Color.fromRGBO(0, 0, 0, 0.2),
-            Color.fromRGBO(0, 0, 0, 0.07),
+            Color.fromRGBO(0, 0, 0, 0.14),
+            Color.fromRGBO(0, 0, 0, 0.05),
             Color.fromRGBO(0, 0, 0, 0.0),
-            // Color.fromRGBO(0, 0, 0, 0.3),
           ],
-          stops: [0, 0.5, 1],
+          stops: [0, 0.6, 1],
         ),
       ),
       child: const Align(
