@@ -6,9 +6,10 @@ import { addLogLine, getDebugLogs } from 'utils/logging';
 import SidebarButton from './Button';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
-import { testUpload } from 'tests/upload.test';
 import Typography from '@mui/material/Typography';
 import { isInternalUser } from 'utils/user';
+import { testUpload } from '../../../tests/upload.test';
+import { testZipFileReading } from '../../../tests/zip-file-reading.test';
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
@@ -63,9 +64,14 @@ export default function DebugSection() {
                 </Typography>
             )}
             {isInternalUser() && (
-                <SidebarButton onClick={testUpload}>
-                    {constants.RUN_TESTS}
-                </SidebarButton>
+                <>
+                    <SidebarButton onClick={testUpload}>
+                        Test Upload
+                    </SidebarButton>
+                    <SidebarButton onClick={testZipFileReading}>
+                        Test Zip file reading
+                    </SidebarButton>
+                </>
             )}
         </>
     );
