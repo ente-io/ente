@@ -4,7 +4,7 @@ import * as fs from 'promise-fs';
 import { ElectronFile } from '../types';
 import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
-import { logErrorSentry } from './sentry';
+import { logError } from './logging';
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -165,7 +165,7 @@ export const getZipFileStream = async (
                     controller.close();
                 }
             } catch (e) {
-                logErrorSentry(e, 'readableStream pull failed');
+                logError(e, 'readableStream pull failed');
                 controller.close();
             }
         },
