@@ -4,6 +4,7 @@ import * as fs from 'promise-fs';
 import { ElectronFile } from '../types';
 import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
+import { logErrorSentry } from './sentry';
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -103,32 +104,44 @@ export const getZipFileStream = async (
     let resolveObj: (value?: any) => void = null;
     let rejectObj: (reason?: any) => void = null;
     stream.on('readable', () => {
-        if (resolveObj) {
-            inProgress.current = true;
-            const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
-            if (chunk) {
-                resolveObj(new Uint8Array(chunk));
-                resolveObj = null;
+        try {
+            if (resolveObj) {
+                inProgress.current = true;
+                const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
+                if (chunk) {
+                    resolveObj(new Uint8Array(chunk));
+                    resolveObj = null;
+                }
+                inProgress.current = false;
             }
-            inProgress.current = false;
+        } catch (e) {
+            rejectObj(e);
         }
     });
     stream.on('end', () => {
-        done.current = true;
-        if (resolveObj && !inProgress.current) {
-            resolveObj(null);
-            resolveObj = null;
+        try {
+            done.current = true;
+            if (resolveObj && !inProgress.current) {
+                resolveObj(null);
+                resolveObj = null;
+            }
+        } catch (e) {
+            rejectObj(e);
         }
     });
     stream.on('error', (e) => {
-        done.current = true;
-        if (rejectObj) {
+        try {
+            done.current = true;
+            if (rejectObj) {
+                rejectObj(e);
+                rejectObj = null;
+            }
+        } catch (e) {
             rejectObj(e);
-            rejectObj = null;
         }
     });
 
-    const readStreamData = () => {
+    const readStreamData = async () => {
         return new Promise<Uint8Array>((resolve, reject) => {
             const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
 
@@ -152,6 +165,7 @@ export const getZipFileStream = async (
                     controller.close();
                 }
             } catch (e) {
+                logErrorSentry(e, 'readableStream pull failed');
                 controller.close();
             }
         },
