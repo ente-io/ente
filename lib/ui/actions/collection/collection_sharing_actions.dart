@@ -210,6 +210,7 @@ class CollectionActions {
             ),
           ),
           onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (BuildContext context) {
