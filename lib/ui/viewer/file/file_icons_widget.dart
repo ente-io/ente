@@ -32,7 +32,10 @@ class FavoriteOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const BottomLeftOverlayIcon(Icons.favorite_rounded);
+    return const BottomLeftOverlayIcon(
+      Icons.favorite_rounded,
+      baseSize: 22,
+    );
   }
 }
 
@@ -143,9 +146,15 @@ class BottomLeftOverlayIcon extends StatelessWidget {
   /// Overriddable color. Default is a fixed white.
   final Color color;
 
+  /// Overriddable default size. This is just the initial hint, the actual size
+  /// is dynamic based on the widget's width (so that we show smaller icons in
+  /// smaller thumbnails).
+  final double baseSize;
+
   const BottomLeftOverlayIcon(
     this.icon, {
     Key? key,
+    this.baseSize = 24,
     this.color = Colors.white, // fixed
   }) : super(key: key);
 
@@ -154,14 +163,13 @@ class BottomLeftOverlayIcon extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         double inset = 4;
-        double size = 22;
+        double size = baseSize;
 
         if (constraints.hasBoundedWidth) {
-          print(constraints);
           final w = constraints.maxWidth;
-          if (w > 100) {
+          if (w > 120) {
             size = 24;
-          } else if (w < 64) {
+          } else if (w < 75) {
             inset = 3;
             size = 16;
           }
