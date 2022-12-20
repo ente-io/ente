@@ -23,7 +23,7 @@ export async function getFileHash(worker, file: File | ElectronFile) {
         for (let i = 0; i < filedata.chunkCount; i++) {
             const { done, value: chunk } = await streamReader.read();
             if (done) {
-                break;
+                throw Error(CustomError.CHUNK_LESS_THAN_EXPECTED);
             }
             await worker.hashFileChunk(hashState, Uint8Array.from(chunk));
         }
