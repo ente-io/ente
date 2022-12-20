@@ -199,7 +199,8 @@ class CollectionActions {
     final AlertDialog alert = AlertDialog(
       title: const Text("Sorry"),
       content: const Text(
-        "Sharing is not permitted for free accounts, please subscribe",
+        "Looks like your subscription has expired. Please subscribe to enable"
+        " sharing.",
       ),
       actions: [
         TextButton(
