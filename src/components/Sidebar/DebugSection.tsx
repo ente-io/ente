@@ -9,7 +9,10 @@ import ElectronService from 'services/electron/common';
 import Typography from '@mui/material/Typography';
 import { isInternalUser } from 'utils/user';
 import { testUpload } from '../../../tests/upload.test';
-import { testZipFileReading } from '../../../tests/zip-file-reading.test';
+import {
+    testZipFileReading,
+    testZipWithRootFileReadingTest,
+} from '../../../tests/zip-file-reading.test';
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
@@ -70,6 +73,9 @@ export default function DebugSection() {
                     </SidebarButton>
                     <SidebarButton onClick={testZipFileReading}>
                         Test Zip file reading
+                    </SidebarButton>
+                    <SidebarButton onClick={testZipWithRootFileReadingTest}>
+                        Zip with Root file Test
                     </SidebarButton>
                 </>
             )}

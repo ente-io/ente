@@ -1,17 +1,25 @@
 import { DataStream } from 'types/upload';
 import ImportService from 'services/importService';
-import { FILE_READER_CHUNK_SIZE } from 'constants/upload';
+import { FILE_READER_CHUNK_SIZE, PICKED_UPLOAD_TYPE } from 'constants/upload';
 import { getFileStream, getElectronFileStream } from 'services/readerService';
 import { getFileNameSize } from 'utils/logging';
-
-const openZipUploadFilePicker = async () => {
-    const response = await ImportService.showUploadZipDialog();
-    return response.files;
-};
+import isElectron from 'is-electron';
+import { getImportSuggestion } from 'utils/upload';
 
 export const testZipFileReading = async () => {
     try {
-        const files = await openZipUploadFilePicker();
+        if (!isElectron()) {
+            console.log('testZipFileReading Check is for desktop only');
+            return;
+        }
+        if (!process.env.NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH) {
+            throw Error(
+                'upload test failed NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH missing'
+            );
+        }
+        const files = await ImportService.getElectronFilesFromGoogleZip(
+            process.env.NEXT_PUBLIC_FILE_READING_TEST_ZIP_PATH
+        );
         if (!files?.length) {
             throw Error(
                 `testZipFileReading Check failed ❌ 
@@ -60,6 +68,37 @@ export const testZipFileReading = async () => {
             console.log(`${i}/${files.length} passed ✅`);
         }
         console.log('test zip file reading check passed ✅');
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+export const testZipWithRootFileReadingTest = async () => {
+    try {
+        if (!isElectron()) {
+            console.log('testZipFileReading Check is for desktop only');
+            return;
+        }
+        if (!process.env.NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH) {
+            throw Error(
+                'upload test failed NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH missing'
+            );
+        }
+        const files = await ImportService.getElectronFilesFromGoogleZip(
+            process.env.NEXT_PUBLIC_ZIP_WITH_ROOT_FILE_PATH
+        );
+
+        const importSuggestion = getImportSuggestion(
+            PICKED_UPLOAD_TYPE.ZIPS,
+            files
+        );
+        if (!importSuggestion.rootFolderName) {
+            throw Error(
+                `testZipWithRootFileReadingTest Check failed ❌
+            rootFolderName is missing`
+            );
+        }
+        console.log('testZipWithRootFileReadingTest passed ✅');
     } catch (e) {
         console.log(e);
     }
