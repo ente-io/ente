@@ -6,7 +6,7 @@ class CreateRequest {
   String keyDecryptionNonce;
   String encryptedName;
   String nameDecryptionNonce;
-  String type;
+  CollectionType type;
   CollectionAttributes? attributes;
   MetadataRequest? magicMetadata;
 
@@ -25,7 +25,7 @@ class CreateRequest {
     String? keyDecryptionNonce,
     String? encryptedName,
     String? nameDecryptionNonce,
-    String? type,
+    CollectionType? type,
     CollectionAttributes? attributes,
     MetadataRequest? magicMetadata,
   }) =>
@@ -45,7 +45,7 @@ class CreateRequest {
     map['keyDecryptionNonce'] = keyDecryptionNonce;
     map['encryptedName'] = encryptedName;
     map['nameDecryptionNonce'] = nameDecryptionNonce;
-    map['type'] = type.toString();
+    map['type'] = Collection.typeToString(type);
     if (attributes != null) {
       map['attributes'] = attributes!.toMap();
     }
