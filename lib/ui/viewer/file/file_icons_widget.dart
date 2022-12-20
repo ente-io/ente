@@ -151,30 +151,48 @@ class BottomLeftOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomLeft,
-          end: Alignment.center,
-          colors: [
-            Color.fromRGBO(0, 0, 0, 0.14),
-            Color.fromRGBO(0, 0, 0, 0.05),
-            Color.fromRGBO(0, 0, 0, 0.0),
-          ],
-          stops: [0, 0.6, 1],
-        ),
-      ),
-      child: Align(
-        alignment: Alignment.bottomLeft,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 4),
-          child: Icon(
-            icon,
-            size: 22,
-            color: color,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double inset = 4;
+        double size = 22;
+
+        if (constraints.hasBoundedWidth) {
+          print(constraints);
+          final w = constraints.maxWidth;
+          if (w > 100) {
+            size = 24;
+          } else if (w < 64) {
+            inset = 3;
+            size = 16;
+          }
+        }
+
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomLeft,
+              end: Alignment.center,
+              colors: [
+                Color.fromRGBO(0, 0, 0, 0.14),
+                Color.fromRGBO(0, 0, 0, 0.05),
+                Color.fromRGBO(0, 0, 0, 0.0),
+              ],
+              stops: [0, 0.6, 1],
+            ),
           ),
-        ),
-      ),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Padding(
+              padding: EdgeInsets.only(left: inset, bottom: inset),
+              child: Icon(
+                icon,
+                size: size,
+                color: color,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
