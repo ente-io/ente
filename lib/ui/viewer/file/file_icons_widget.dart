@@ -23,31 +23,27 @@ class UnSyncedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          // background: linear-gradient(73.58deg, rgba(0, 0, 0, 0.3) -6.66%, rgba(255, 255, 255, 0) 44.44%);
-          colors: [
-            Color.fromRGBO(255, 255, 255, 0),
-            Colors.transparent,
-            // Color.fromRGBO(0, 0, 0, 0.3),
-          ],
-          stops: [-0.067, 0.445],
-        ),
-      ),
-      child: const Align(
-        alignment: Alignment.bottomLeft,
-        child: Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 4),
-          child: Icon(
-            Icons.cloud_off_outlined,
-            size: 18,
-            color: fixedStrokeMutedWhite,
-          ),
-        ),
-      ),
+    return const BottomLeftOverlayIcon(Icons.cloud_off_outlined);
+  }
+}
+
+class FavoriteOverlayIcon extends StatelessWidget {
+  const FavoriteOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const BottomLeftOverlayIcon(Icons.favorite_rounded);
+  }
+}
+
+class ArchiveOverlayIcon extends StatelessWidget {
+  const ArchiveOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const BottomLeftOverlayIcon(
+      Icons.archive_outlined,
+      color: fixedStrokeMutedWhite,
     );
   }
 }
@@ -103,27 +99,6 @@ class OwnerAvatarOverlayIcon extends StatelessWidget {
           thumbnailView: true,
         ),
       ),
-    );
-  }
-}
-
-class FavoriteOverlayIcon extends StatelessWidget {
-  const FavoriteOverlayIcon({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const BottomLeftOverlayIcon(Icons.favorite_rounded);
-  }
-}
-
-class ArchiveOverlayIcon extends StatelessWidget {
-  const ArchiveOverlayIcon({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const BottomLeftOverlayIcon(
-      Icons.archive_outlined,
-      color: fixedStrokeMutedWhite,
     );
   }
 }
