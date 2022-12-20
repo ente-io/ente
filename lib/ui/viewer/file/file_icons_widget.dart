@@ -117,10 +117,9 @@ class FavoriteOverlayIcon extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.bottomLeft,
           end: Alignment.center,
-          // background: linear-gradient(73.58deg, rgba(0, 0, 0, 0.3) -6.66%, rgba(255, 255, 255, 0) 44.44%);
           colors: [
             Color.fromRGBO(0, 0, 0, 0.2),
-            Color.fromRGBO(0, 0, 0, 0.1),
+            Color.fromRGBO(0, 0, 0, 0.07),
             Color.fromRGBO(0, 0, 0, 0.0),
             // Color.fromRGBO(0, 0, 0, 0.3),
           ],
