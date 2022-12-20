@@ -51,6 +51,18 @@ class ArchiveOverlayIcon extends StatelessWidget {
   }
 }
 
+class LivePhotoOverlayIcon extends StatelessWidget {
+  const LivePhotoOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const BottomRightOverlayIcon(
+      Icons.album_outlined,
+      baseSize: 18,
+    );
+  }
+}
+
 class VideoOverlayIcon extends StatelessWidget {
   const VideoOverlayIcon({Key? key}) : super(key: key);
 
@@ -62,25 +74,6 @@ class VideoOverlayIcon extends StatelessWidget {
         Icons.play_circle_outline,
         size: 40,
         color: Colors.white70,
-      ),
-    );
-  }
-}
-
-class LivePhotoOverlayIcon extends StatelessWidget {
-  const LivePhotoOverlayIcon({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Align(
-      alignment: Alignment.bottomRight,
-      child: Padding(
-        padding: EdgeInsets.only(right: 4, bottom: 4),
-        child: Icon(
-          Icons.album_outlined,
-          size: 14,
-          color: Colors.white, // fixed
-        ),
       ),
     );
   }
@@ -192,6 +185,75 @@ class BottomLeftOverlayIcon extends StatelessWidget {
             alignment: Alignment.bottomLeft,
             child: Padding(
               padding: EdgeInsets.only(left: inset, bottom: inset),
+              child: Icon(
+                icon,
+                size: size,
+                color: color,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Icon overlay in the bottom right.
+///
+/// This usually indicates information about the file itself, e.g. whether it is
+/// a live photo, or the duration of the video.
+class BottomRightOverlayIcon extends StatelessWidget {
+  final IconData icon;
+
+  /// Overriddable color. Default is a fixed white.
+  final Color color;
+
+  /// Overriddable default size. This is just the initial hint, the actual size
+  /// is dynamic based on the widget's width (so that we show smaller icons in
+  /// smaller thumbnails).
+  final double baseSize;
+
+  const BottomRightOverlayIcon(
+    this.icon, {
+    Key? key,
+    this.baseSize = 24,
+    this.color = Colors.white, // fixed
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double inset = 4;
+        double size = baseSize;
+
+        if (constraints.hasBoundedWidth) {
+          final w = constraints.maxWidth;
+          if (w > 120) {
+            size = 24;
+          } else if (w < 75) {
+            inset = 3;
+            size = 16;
+          }
+        }
+
+        return Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.bottomRight,
+              end: Alignment.center,
+              colors: [
+                Color.fromRGBO(0, 0, 0, 0.14),
+                Color.fromRGBO(0, 0, 0, 0.05),
+                Color.fromRGBO(0, 0, 0, 0.0),
+              ],
+              stops: [0, 0.6, 1],
+            ),
+          ),
+          child: Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: EdgeInsets.only(bottom: inset, right: inset),
               child: Icon(
                 icon,
                 size: size,
