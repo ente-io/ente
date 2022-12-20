@@ -15,11 +15,12 @@ export const getSavedFilePaths = (type: FILE_PATH_TYPE) => {
 };
 
 export async function getZipEntryAsElectronFile(
+    zipName: string,
     zip: StreamZip.StreamZipAsync,
     entry: StreamZip.ZipEntry
 ): Promise<ElectronFile> {
     return {
-        path: entry.name,
+        path: path.join(zipName, entry.name),
         name: path.basename(entry.name),
         size: entry.size,
         lastModified: entry.time,
@@ -58,6 +59,7 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     const zip = new StreamZip.async({
         file: filePath,
     });
+    const zipName = path.basename(filePath, '.zip');
 
     const entries = await zip.entries();
     const files: ElectronFile[] = [];
@@ -65,7 +67,7 @@ export const getElectronFilesFromGoogleZip = async (filePath: string) => {
     for (const entry of Object.values(entries)) {
         const basename = path.basename(entry.name);
         if (entry.isFile && basename.length > 0 && basename[0] !== '.') {
-            files.push(await getZipEntryAsElectronFile(zip, entry));
+            files.push(await getZipEntryAsElectronFile(zipName, zip, entry));
         }
     }
 
