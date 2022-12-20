@@ -112,14 +112,30 @@ class FavoriteOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Align(
-      alignment: Alignment.bottomLeft,
-      child: Padding(
-        padding: EdgeInsets.only(left: 4, bottom: 4),
-        child: Icon(
-          Icons.favorite_rounded,
-          size: 20,
-          color: Colors.white, // fixed
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomLeft,
+          end: Alignment.center,
+          // background: linear-gradient(73.58deg, rgba(0, 0, 0, 0.3) -6.66%, rgba(255, 255, 255, 0) 44.44%);
+          colors: [
+            Color.fromRGBO(0, 0, 0, 0.2),
+            Color.fromRGBO(0, 0, 0, 0.1),
+            Color.fromRGBO(0, 0, 0, 0.0),
+            // Color.fromRGBO(0, 0, 0, 0.3),
+          ],
+          stops: [0, 0.5, 1],
+        ),
+      ),
+      child: const Align(
+        alignment: Alignment.bottomLeft,
+        child: Padding(
+          padding: EdgeInsets.only(left: 4, bottom: 4),
+          child: Icon(
+            Icons.favorite_rounded,
+            size: 22,
+            color: Colors.white, // fixed
+          ),
         ),
       ),
     );
