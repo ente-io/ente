@@ -112,31 +112,7 @@ class FavoriteOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.bottomLeft,
-          end: Alignment.center,
-          colors: [
-            Color.fromRGBO(0, 0, 0, 0.14),
-            Color.fromRGBO(0, 0, 0, 0.05),
-            Color.fromRGBO(0, 0, 0, 0.0),
-          ],
-          stops: [0, 0.6, 1],
-        ),
-      ),
-      child: const Align(
-        alignment: Alignment.bottomLeft,
-        child: Padding(
-          padding: EdgeInsets.only(left: 4, bottom: 4),
-          child: Icon(
-            Icons.favorite_rounded,
-            size: 22,
-            color: Colors.white, // fixed
-          ),
-        ),
-      ),
-    );
+    return const BottomLeftOverlayIcon(Icons.favorite_rounded);
   }
 }
 
@@ -181,6 +157,54 @@ class ArchiveOverlayIcon extends StatelessWidget {
           Icons.archive_outlined,
           size: 20,
           color: fixedStrokeMutedWhite,
+        ),
+      ),
+    );
+  }
+}
+
+// Base variations
+
+/// Icon overlay in the bottom left.
+///
+/// This usually indicates ente specific state of a file, e.g. if it is
+/// favorited/archived.
+class BottomLeftOverlayIcon extends StatelessWidget {
+  final IconData icon;
+
+  /// Overriddable color. Default is a fixed white.
+  final Color color;
+
+  const BottomLeftOverlayIcon(
+    this.icon, {
+    Key? key,
+    this.color = Colors.white, // fixed
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomLeft,
+          end: Alignment.center,
+          colors: [
+            Color.fromRGBO(0, 0, 0, 0.14),
+            Color.fromRGBO(0, 0, 0, 0.05),
+            Color.fromRGBO(0, 0, 0, 0.0),
+          ],
+          stops: [0, 0.6, 1],
+        ),
+      ),
+      child: Align(
+        alignment: Alignment.bottomLeft,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
+          child: Icon(
+            icon,
+            size: 22,
+            color: color,
+          ),
         ),
       ),
     );
