@@ -97,24 +97,31 @@ export const getZipFileStream = async (
     const done = {
         current: false,
     };
+    const inProgress = {
+        current: false,
+    };
     let resolveObj: (value?: any) => void = null;
     let rejectObj: (reason?: any) => void = null;
     stream.on('readable', () => {
         if (resolveObj) {
+            inProgress.current = true;
             const chunk = stream.read(FILE_STREAM_CHUNK_SIZE) as Buffer;
-
             if (chunk) {
                 resolveObj(new Uint8Array(chunk));
                 resolveObj = null;
             }
+            inProgress.current = false;
         }
     });
     stream.on('end', () => {
         done.current = true;
+        if (resolveObj && !inProgress.current) {
+            resolveObj(null);
+            resolveObj = null;
+        }
     });
     stream.on('error', (e) => {
         done.current = true;
-
         if (rejectObj) {
             rejectObj(e);
             rejectObj = null;
