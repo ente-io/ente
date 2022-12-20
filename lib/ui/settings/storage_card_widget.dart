@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/states/user_details_state.dart';
 import 'package:photos/theme/colors.dart';
@@ -121,7 +122,8 @@ class _StorageCardWidgetState extends State<StorageCardWidget> {
     final totalStorageInBytes = userDetails.getTotalStorage();
     final freeStorageInBytes = totalStorageInBytes - usedStorageInBytes;
 
-    final isMobileScreenSmall = MediaQuery.of(context).size.width <= 336;
+    final isMobileScreenSmall =
+        MediaQuery.of(context).size.width <= mobileSmallThreshold;
     final shouldShowFreeSpaceInMBs = freeStorageInBytes < hundredMBinBytes;
     final shouldShowFreeSpaceInTBs = freeStorageInBytes >= oneTBinBytes;
     final shouldShowUsedStorageInTBs = usedStorageInBytes >= oneTBinBytes;
