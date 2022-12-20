@@ -23,7 +23,7 @@ class UnSyncedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const BottomLeftOverlayIcon(Icons.cloud_off_outlined);
+    return const _BottomLeftOverlayIcon(Icons.cloud_off_outlined);
   }
 }
 
@@ -32,7 +32,7 @@ class FavoriteOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const BottomLeftOverlayIcon(
+    return const _BottomLeftOverlayIcon(
       Icons.favorite_rounded,
       baseSize: 22,
     );
@@ -44,7 +44,7 @@ class ArchiveOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const BottomLeftOverlayIcon(
+    return const _BottomLeftOverlayIcon(
       Icons.archive_outlined,
       color: fixedStrokeMutedWhite,
     );
@@ -56,7 +56,7 @@ class LivePhotoOverlayIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const BottomRightOverlayIcon(
+    return const _BottomRightOverlayIcon(
       Icons.album_outlined,
       baseSize: 18,
     );
@@ -133,7 +133,7 @@ class TrashedFileOverlayText extends StatelessWidget {
 ///
 /// This usually indicates ente specific state of a file, e.g. if it is
 /// favorited/archived.
-class BottomLeftOverlayIcon extends StatelessWidget {
+class _BottomLeftOverlayIcon extends StatelessWidget {
   final IconData icon;
 
   /// Overriddable color. Default is a fixed white.
@@ -144,7 +144,7 @@ class BottomLeftOverlayIcon extends StatelessWidget {
   /// smaller thumbnails).
   final double baseSize;
 
-  const BottomLeftOverlayIcon(
+  const _BottomLeftOverlayIcon(
     this.icon, {
     Key? key,
     this.baseSize = 24,
@@ -202,7 +202,7 @@ class BottomLeftOverlayIcon extends StatelessWidget {
 ///
 /// This usually indicates information about the file itself, e.g. whether it is
 /// a live photo, or the duration of the video.
-class BottomRightOverlayIcon extends StatelessWidget {
+class _BottomRightOverlayIcon extends StatelessWidget {
   final IconData icon;
 
   /// Overriddable color. Default is a fixed white.
@@ -213,7 +213,7 @@ class BottomRightOverlayIcon extends StatelessWidget {
   /// smaller thumbnails).
   final double baseSize;
 
-  const BottomRightOverlayIcon(
+  const _BottomRightOverlayIcon(
     this.icon, {
     Key? key,
     this.baseSize = 24,
