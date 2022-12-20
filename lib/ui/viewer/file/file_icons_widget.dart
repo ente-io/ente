@@ -116,6 +116,18 @@ class FavoriteOverlayIcon extends StatelessWidget {
   }
 }
 
+class ArchiveOverlayIcon extends StatelessWidget {
+  const ArchiveOverlayIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const BottomLeftOverlayIcon(
+      Icons.archive_outlined,
+      color: fixedStrokeMutedWhite,
+    );
+  }
+}
+
 class TrashedFileOverlayText extends StatelessWidget {
   final TrashFile file;
 
@@ -139,25 +151,6 @@ class TrashedFileOverlayText extends StatelessWidget {
             .textTheme
             .subtitle2!
             .copyWith(color: Colors.white), //same for both themes
-      ),
-    );
-  }
-}
-
-class ArchiveOverlayIcon extends StatelessWidget {
-  const ArchiveOverlayIcon({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Align(
-      alignment: Alignment.bottomLeft,
-      child: Padding(
-        padding: EdgeInsets.only(left: 4, bottom: 4),
-        child: Icon(
-          Icons.archive_outlined,
-          size: 20,
-          color: fixedStrokeMutedWhite,
-        ),
       ),
     );
   }
