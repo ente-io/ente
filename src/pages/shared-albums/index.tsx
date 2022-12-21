@@ -169,6 +169,9 @@ export default function PublicCollectionGallery() {
                 );
                 if (localCollection) {
                     setPublicCollection(localCollection);
+                    const isPasswordProtected =
+                        localCollection?.publicURLs?.[0]?.passwordEnabled;
+                    setIsPasswordProtected(isPasswordProtected);
                     const collectionUID = getPublicCollectionUID(token.current);
                     const localFiles = await getLocalPublicFiles(collectionUID);
                     const localPublicFiles = sortFiles(
@@ -229,6 +232,7 @@ export default function PublicCollectionGallery() {
         const collectionUID = getPublicCollectionUID(token.current);
         try {
             appContext.startLoading();
+            setLoading(true);
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -291,6 +295,7 @@ export default function PublicCollectionGallery() {
             }
         } finally {
             appContext.finishLoading();
+            setLoading(false);
         }
     };
 
