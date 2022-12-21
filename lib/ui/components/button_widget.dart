@@ -37,9 +37,10 @@ class ButtonWidget extends StatelessWidget {
   final FutureVoidCallback? onTap;
   final bool isDisabled;
   final ButtonSize buttonSize;
-  // iconColor should only be specified when we do not want to honor the default
-  // iconColor based on buttonType. Most of the items, default iconColor is what
-  // we need unless we want to pop out the icon in a non-primary button type
+
+  /// iconColor should only be specified when we do not want to honor the default
+  /// iconColor based on buttonType. Most of the items, default iconColor is what
+  /// we need unless we want to pop out the icon in a non-primary button type
   final Color? iconColor;
 
   ///Button action will only work if isInAlert is true
@@ -322,29 +323,29 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }
 
   bool get _shouldRegisterGestures =>
-      !widget.isDisabled &&
-      (widget.onTap != null) &&
-      executionState == ExecutionState.idle;
+      !widget.isDisabled && executionState == ExecutionState.idle;
 
   void _onTap() async {
-    _debouncer.run(
-      () => Future(() {
-        setState(() {
-          executionState = ExecutionState.inProgress;
-        });
-      }),
-    );
-    await widget.onTap!.call().onError((error, stackTrace) {
-      executionState = ExecutionState.error;
+    if (widget.onTap != null) {
+      _debouncer.run(
+        () => Future(() {
+          setState(() {
+            executionState = ExecutionState.inProgress;
+          });
+        }),
+      );
+      await widget.onTap!.call().onError((error, stackTrace) {
+        executionState = ExecutionState.error;
+        _debouncer.cancelDebounce();
+      });
       _debouncer.cancelDebounce();
-    });
-    _debouncer.cancelDebounce();
-    // when the time taken by widget.onTap is approximately equal to the debounce
-    // time, the callback is getting executed when/after the if condition
-    // below is executing/executed which results in execution state stuck at
-    // idle state. This Future is for delaying the execution of the if
-    // condition so that the calback in the debouncer finishes execution before.
-    await Future.delayed(const Duration(milliseconds: 5));
+      // when the time taken by widget.onTap is approximately equal to the debounce
+      // time, the callback is getting executed when/after the if condition
+      // below is executing/executed which results in execution state stuck at
+      // idle state. This Future is for delaying the execution of the if
+      // condition so that the calback in the debouncer finishes execution before.
+      await Future.delayed(const Duration(milliseconds: 5));
+    }
     if (executionState == ExecutionState.inProgress ||
         executionState == ExecutionState.error) {
       if (executionState == ExecutionState.inProgress) {
