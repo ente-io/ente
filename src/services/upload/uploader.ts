@@ -46,8 +46,9 @@ export default async function uploader(
         if (fileSize >= MAX_FILE_SIZE_SUPPORTED) {
             return { fileUploadResult: UPLOAD_RESULT.TOO_LARGE };
         }
-        addLogLine(`getting filetype ${fileNameSize}`);
+        addLogLine(`getting filetype for ${fileNameSize}`);
         fileTypeInfo = await UploadService.getAssetFileType(uploadAsset);
+        addLogLine(`got filetype for ${fileNameSize}`);
         if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
             throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
