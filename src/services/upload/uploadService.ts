@@ -50,7 +50,7 @@ class UploadService {
 
     private publicUploadProps: PublicUploadProps = undefined;
 
-    setPublicUploadProps(publicUploadProps: PublicUploadProps) {
+    init(publicUploadProps: PublicUploadProps) {
         this.publicUploadProps = publicUploadProps;
     }
 

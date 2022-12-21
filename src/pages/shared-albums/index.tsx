@@ -169,6 +169,9 @@ export default function PublicCollectionGallery() {
                 );
                 if (localCollection) {
                     setPublicCollection(localCollection);
+                    const isPasswordProtected =
+                        localCollection?.publicURLs?.[0]?.passwordEnabled;
+                    setIsPasswordProtected(isPasswordProtected);
                     const collectionUID = getPublicCollectionUID(token.current);
                     const localFiles = await getLocalPublicFiles(collectionUID);
                     const localPublicFiles = sortFiles(

@@ -177,7 +177,11 @@ export default function Uploader(props: Props) {
                 appContext.setIsFolderSyncRunning
             );
         }
-    }, []);
+    }, [
+        publicCollectionGalleryContext.accessedThroughSharedURL,
+        publicCollectionGalleryContext.token,
+        publicCollectionGalleryContext.passwordToken,
+    ]);
 
     // this handles the change of selectorFiles changes on web when user selects
     // files for upload through the opened file/folder selector or dragAndDrop them

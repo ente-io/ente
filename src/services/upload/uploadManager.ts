@@ -62,6 +62,7 @@ class UploadManager {
         publicCollectProps: PublicUploadProps
     ) {
         UIService.init(progressUpdater);
+        UploadService.init(publicCollectProps);
         this.setFiles = setFiles;
         this.publicUploadProps = publicCollectProps;
     }
@@ -261,7 +262,6 @@ class UploadManager {
 
         UIService.reset(mediaFiles.length);
 
-        UploadService.setPublicUploadProps(this.publicUploadProps);
         await UploadService.setFileCount(mediaFiles.length);
 
         UIService.setUploadStage(UPLOAD_STAGES.UPLOADING);
