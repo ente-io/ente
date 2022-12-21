@@ -187,7 +187,13 @@ const PhotoFrame = ({
                 }
                 return false;
             });
-    }, [files, deletedFileIds, search, activeCollection]);
+    }, [
+        files,
+        deletedFileIds,
+        search?.date,
+        search?.location,
+        activeCollection,
+    ]);
 
     const fileToCollectionsMap = useMemo(() => {
         const fileToCollectionsMap = new Map<number, number[]>();
