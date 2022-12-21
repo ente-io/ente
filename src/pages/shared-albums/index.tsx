@@ -232,6 +232,7 @@ export default function PublicCollectionGallery() {
         const collectionUID = getPublicCollectionUID(token.current);
         try {
             appContext.startLoading();
+            setLoading(true);
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -294,6 +295,7 @@ export default function PublicCollectionGallery() {
             }
         } finally {
             appContext.finishLoading();
+            setLoading(false);
         }
     };
 
