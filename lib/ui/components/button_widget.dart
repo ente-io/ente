@@ -83,7 +83,6 @@ class ButtonWidget extends StatelessWidget {
     final buttonStyle = CustomButtonStyle(
       //Dummy default values since we need to keep these properties non-nullable
       defaultButtonColor: Colors.transparent,
-      defaultBorderColor: Colors.transparent,
       defaultIconColor: Colors.transparent,
       defaultLabelStyle: textTheme.body,
     );
@@ -162,7 +161,7 @@ class ButtonChildWidget extends StatefulWidget {
 
 class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   late Color buttonColor;
-  late Color borderColor;
+  late Color? borderColor;
   late Color iconColor;
   late TextStyle labelStyle;
   late Color checkIconColor;
@@ -209,7 +208,12 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
           color: buttonColor,
-          border: Border.all(color: borderColor),
+          border: borderColor != null
+              ? Border.all(
+                  color: borderColor!,
+                  strokeAlign: StrokeAlign.outside,
+                )
+              : null,
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
