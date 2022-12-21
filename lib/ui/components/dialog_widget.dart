@@ -20,13 +20,19 @@ Future<dynamic> showDialogWidget({
     barrierColor: backdropFaintDark,
     context: context,
     builder: (context) {
-      return Dialog(
-        insetPadding: EdgeInsets.zero,
-        child: DialogWidget(
-          title: title,
-          body: body,
-          buttons: buttons,
-          icon: icon,
+      final widthOfScreen = MediaQuery.of(context).size.width;
+      final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: isMobileSmall ? 8 : 0),
+        child: Dialog(
+          insetPadding: EdgeInsets.zero,
+          child: DialogWidget(
+            title: title,
+            body: body,
+            buttons: buttons,
+            isMobileSmall: isMobileSmall,
+            icon: icon,
+          ),
         ),
       );
     },
@@ -38,10 +44,12 @@ class DialogWidget extends StatelessWidget {
   final String body;
   final List<ButtonWidget> buttons;
   final IconData? icon;
+  final bool isMobileSmall;
   const DialogWidget({
     required this.title,
     required this.body,
     required this.buttons,
+    required this.isMobileSmall,
     this.icon,
     super.key,
   });
@@ -49,7 +57,6 @@ class DialogWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.of(context).size.width;
-    final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
     final colorScheme = getEnteColorScheme(context);
     return Container(
       width: min(widthOfScreen, 320),
