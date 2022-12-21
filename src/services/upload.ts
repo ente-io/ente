@@ -20,7 +20,10 @@ export async function getZipEntryAsElectronFile(
     entry: StreamZip.ZipEntry
 ): Promise<ElectronFile> {
     return {
-        path: path.join(zipName, entry.name),
+        path: path
+            .join(zipName, entry.name)
+            .split(path.sep)
+            .join(path.posix.sep),
         name: path.basename(entry.name),
         size: entry.size,
         lastModified: entry.time,
