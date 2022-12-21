@@ -47,8 +47,12 @@ export default function SignUp(props: SignUpProps) {
         { email, passphrase, confirm }: FormValues,
         { setFieldError }: FormikHelpers<FormValues>
     ) => {
-        setLoading(true);
         try {
+            if (passphrase !== confirm) {
+                setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
+                return;
+            }
+            setLoading(true);
             try {
                 setData(LS_KEYS.USER, { email });
                 await sendOtt(email);
@@ -60,30 +64,23 @@ export default function SignUp(props: SignUpProps) {
                 throw e;
             }
             try {
-                if (passphrase === confirm) {
-                    const { keyAttributes, masterKey } =
-                        await generateKeyAttributes(passphrase);
-                    setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
-                    await generateAndSaveIntermediateKeyAttributes(
-                        passphrase,
-                        keyAttributes,
-                        masterKey
-                    );
-
-                    await saveKeyInSessionStore(
-                        SESSION_KEYS.ENCRYPTION_KEY,
-                        masterKey
-                    );
-                    setJustSignedUp(true);
-                    router.push(PAGES.VERIFY);
-                } else {
-                    setFieldError('confirm', constants.PASSPHRASE_MATCH_ERROR);
-                }
-            } catch (e) {
-                setFieldError(
-                    'passphrase',
-                    constants.PASSWORD_GENERATION_FAILED
+                const { keyAttributes, masterKey } =
+                    await generateKeyAttributes(passphrase);
+                setData(LS_KEYS.ORIGINAL_KEY_ATTRIBUTES, keyAttributes);
+                await generateAndSaveIntermediateKeyAttributes(
+                    passphrase,
+                    keyAttributes,
+                    masterKey
                 );
+
+                await saveKeyInSessionStore(
+                    SESSION_KEYS.ENCRYPTION_KEY,
+                    masterKey
+                );
+                setJustSignedUp(true);
+                router.push(PAGES.VERIFY);
+            } catch (e) {
+                setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
                 throw e;
             }
         } catch (err) {
