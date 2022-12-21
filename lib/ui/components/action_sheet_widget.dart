@@ -177,10 +177,7 @@ class ActionButtons extends StatelessWidget {
     final actionButtonsWithSeparators = actionButtons;
     return Column(
       children:
-          //Separator height is 8pts in figma. -2pts here as the action
-          //buttons are 2pts extra in height in code compared to figma because
-          //of the border(1pt top + 1pt bottom) of action buttons.
-          addSeparators(actionButtonsWithSeparators, const SizedBox(height: 6)),
+          addSeparators(actionButtonsWithSeparators, const SizedBox(height: 8)),
     );
   }
 }
