@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,8 +5,8 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
-import 'package:photos/utils/app_size.dart';
 import 'package:photos/utils/data_util.dart';
+import 'package:photos/utils/directory_content.dart';
 
 class PathStorageItem {
   final String path;
@@ -23,11 +21,17 @@ class PathStorageItem {
 }
 
 class PathStorageViewer extends StatefulWidget {
-  final PathStorageItem path;
+  final PathStorageItem item;
+  final bool removeTopRadius;
+  final bool removeBottomRadius;
+  final bool enableDoubleTapClear;
 
   const PathStorageViewer(
-    this.path, {
-    Key key,
+    this.item, {
+    this.removeTopRadius = false,
+    this.removeBottomRadius = false,
+    this.enableDoubleTapClear = false,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -35,16 +39,21 @@ class PathStorageViewer extends StatefulWidget {
 }
 
 class _PathStorageViewerState extends State<PathStorageViewer> {
-  Map<String, int> _logs;
+  Map<String, int>? _logs;
 
   @override
   void initState() {
-    directoryStat(widget.path.path).then((logs) {
+    _initLogs();
+    super.initState();
+  }
+
+  void _initLogs() {
+    debugPrint("Calculate for path ${widget.item.title}");
+    directoryStat(widget.item.path).then((logs) {
       setState(() {
         _logs = logs;
       });
     });
-    super.initState();
   }
 
   @override
@@ -56,13 +65,13 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
     if (_logs == null) {
       return const EnteLoadingWidget();
     }
-    final int fileCount = _logs["fileCount"] ?? -1;
-    final int size = _logs['size'];
+    final int fileCount = _logs!["fileCount"] ?? -1;
+    final int size = _logs!['size'] ?? 0;
 
     return MenuItemWidget(
       alignCaptionedTextToLeft: true,
       captionedTextWidget: CaptionedTextWidget(
-        title: widget.path.title,
+        title: widget.item.title,
         subTitle: '$fileCount',
         subTitleColor: getEnteColorScheme(context).textFaint,
       ),
@@ -72,12 +81,20 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
             .small
             .copyWith(color: getEnteColorScheme(context).textFaint),
       ),
-      trailingIcon: widget.path.allowCacheClear ? Icons.chevron_right : null,
+      borderRadius: 8,
       menuItemColor: getEnteColorScheme(context).fillFaint,
+      isBottomBorderRadiusRemoved: widget.removeBottomRadius,
+      isTopBorderRadiusRemoved: widget.removeTopRadius,
       onTap: () async {
         if (kDebugMode) {
-          await Clipboard.setData(ClipboardData(text: widget.path.path));
-          debugPrint(widget.path.path);
+          await Clipboard.setData(ClipboardData(text: widget.item.path));
+          debugPrint(widget.item.path);
+        }
+      },
+      onDoubleTap: () async {
+        if (widget.item.allowCacheClear && widget.enableDoubleTapClear) {
+          await deleteDirectoryContents(widget.item.path);
+          _initLogs();
         }
       },
     );

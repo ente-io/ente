@@ -9,7 +9,7 @@ import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
-import 'package:photos/ui/tools/debug/cache_size_view.dart';
+import 'package:photos/ui/tools/debug/app_storage_viewer.dart';
 import 'package:photos/utils/local_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -99,7 +99,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
                               onTap: () {
-                                routeToPage(context, const CacheSizeViewer());
+                                routeToPage(context, const AppStorageViewer());
                               },
                             ),
                           ],
