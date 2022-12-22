@@ -21,8 +21,10 @@ import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
+import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class FileSelectionActionWidget extends StatefulWidget {
@@ -359,10 +361,18 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           isInAlert: true,
         ),
         const ButtonWidget(
-          labelText: "Done",
+          labelText: "Manage link",
           buttonType: ButtonType.secondary,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+        const ButtonWidget(
+          labelText: "Done",
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.third,
           shouldStickToDarkTheme: true,
           isInAlert: true,
         )
@@ -373,6 +383,12 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     );
     if (actionResult != null && actionResult == ButtonAction.first) {
       await _copyLink();
+    }
+    if (actionResult != null && actionResult == ButtonAction.second) {
+      routeToPage(
+        context,
+        ManageSharedLinkWidget(collection: _cachedCollectionForSharedLink),
+      );
     }
     if (mounted) {
       setState(() => {});
