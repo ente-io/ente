@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -38,6 +40,10 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
     final appSupportDirectory = (await getApplicationSupportDirectory());
     final appTemporaryDirectory = (await getTemporaryDirectory());
     final iOSOnlyTempDirectory = "${appDocumentsDirectory.parent.path}/tmp/";
+    final iOSPhotoManagerInAppCacheDirectory =
+        iOSOnlyTempDirectory + "flutter-images";
+    final androidGlideCacheDirectory =
+        "${appTemporaryDirectory.path}/image_manager_disk_cache/";
 
     final String tempDownload = Configuration.instance.getTempDirectory();
     final String cacheDirectory =
@@ -64,16 +70,18 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
       ),
       PathStorageItem.name(tempDownload, "Pending sync"),
       PathStorageItem.name(
-        iOSOnlyTempDirectory + "flutter-images",
+        Platform.isAndroid
+            ? androidGlideCacheDirectory
+            : iOSPhotoManagerInAppCacheDirectory,
         "Local gallery",
         allowCacheClear: true,
       ),
     ]);
     if (internalUser) {
       paths.addAll([
-        PathStorageItem.name(appDocumentsDirectory.path, "App Documents"),
-        PathStorageItem.name(appSupportDirectory.path, "App Support"),
-        PathStorageItem.name(appTemporaryDirectory.path, "App Temporary"),
+        PathStorageItem.name(appDocumentsDirectory.path, "App Documents Dir"),
+        PathStorageItem.name(appSupportDirectory.path, "App Support Dir"),
+        PathStorageItem.name(appTemporaryDirectory.path, "App Temp Dir"),
       ]);
     }
     if (mounted) {
