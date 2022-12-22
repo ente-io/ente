@@ -74,7 +74,16 @@ class CollectionActions {
       // create album with emptyName, use collectionCreationTime on UI to
       // show name
       logger.finest("creating album for sharing files");
-      final String dummyName = " ${getDateAndMonthAndYear(DateTime.now())} ";
+      final File fileWithMinCreationTime = files.reduce(
+        (a, b) => (a.creationTime ?? 0) < (b.creationTime ?? 0) ? a : b,
+      );
+      final File fileWithMaxCreationTime = files.reduce(
+        (a, b) => (a.creationTime ?? 0) > (b.creationTime ?? 0) ? a : b,
+      );
+      final String dummyName = getNameForDateRange(
+        fileWithMinCreationTime.creationTime!,
+        fileWithMaxCreationTime.creationTime!,
+      );
       final collection = await collectionsService.createAlbum(dummyName);
       logger.finest("adding files to share to new album");
       await collectionsService.addToCollection(collection.id, files);

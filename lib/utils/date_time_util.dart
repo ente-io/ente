@@ -86,6 +86,32 @@ String getDateAndMonthAndYear(DateTime dateTime) {
       dateTime.year.toString();
 }
 
+// Create link default names:
+// Same day: "Dec 19, 2022"
+// Same month: "Dec 19 - 22, 2022"
+// Base case: "Dec 19, 2022 - Jan 7, 2023"
+String getNameForDateRange(int firstCreationTime, int secondCreationTime) {
+  final startTime = DateTime.fromMicrosecondsSinceEpoch(firstCreationTime);
+  final endTime = DateTime.fromMicrosecondsSinceEpoch(secondCreationTime);
+  // different year
+  if (startTime.year != endTime.year) {
+    return "${_months[startTime.month]!} ${startTime.day}, ${startTime.year} - "
+        "${_months[endTime.month]!} ${endTime.day}, ${endTime.year}";
+  }
+  // same year, diff month
+  if (startTime.month != endTime.month) {
+    return "${_months[startTime.month]!} ${startTime.day} - "
+        "${_months[endTime.month]!} ${endTime.day}, ${endTime.year}";
+  }
+  // same month and year, diff day
+  if (startTime.day != endTime.day) {
+    return "${_months[startTime.month]!} ${startTime.day} - "
+        "${_months[endTime.month]!} ${endTime.day}, ${endTime.year}";
+  }
+  // same day
+  return "${_months[endTime.month]!} ${endTime.day}, ${endTime.year}";
+}
+
 String getDay(DateTime dateTime) {
   return _days[dateTime.weekday]!;
 }
