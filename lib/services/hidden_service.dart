@@ -99,15 +99,35 @@ extension HiddenService on CollectionsService {
   }
 
   Future<Collection> _createDefaultHiddenAlbum() async {
+    final CreateRequest createRequest = await buildCollectionCreateRequest(
+      ".Hidden",
+      visibility: visibilityHidden,
+      subType: subTypeDefaultHidden,
+    );
+    _logger.info("Creating Hidden Collection");
+    final collection =
+        await createAndCacheCollection(null, createRequest: createRequest);
+    _logger.info("Creating Hidden Collection Created Successfully");
+    final Collection collectionFromServer =
+        await fetchCollectionByID(collection.id);
+    _logger.info("Fetched Created Hidden Collection Successfully");
+    return collectionFromServer;
+  }
+
+  Future<CreateRequest> buildCollectionCreateRequest(
+    String name, {
+    required int visibility,
+    required int subType,
+  }) async {
     final key = CryptoUtil.generateKey();
     final encryptedKeyData = CryptoUtil.encryptSync(key, config.getKey()!);
     final encryptedName = CryptoUtil.encryptSync(
-      utf8.encode(".Hidden") as Uint8List,
+      utf8.encode(name) as Uint8List,
       key,
     );
     final jsonToUpdate = CollectionMagicMetadata(
-      visibility: visibilityHidden,
-      subType: subTypeDefaultHidden,
+      visibility: visibility,
+      subType: subType,
     ).toJson();
     assert(jsonToUpdate.length == 2, "metadata should have two keys");
     final encryptedMMd = await CryptoUtil.encryptChaCha(
@@ -129,14 +149,6 @@ extension HiddenService on CollectionsService {
       attributes: CollectionAttributes(),
       magicMetadata: metadataRequest,
     );
-
-    _logger.info("Creating Hidden Collection");
-    final collection =
-        await createAndCacheCollection(null, createRequest: createRequest);
-    _logger.info("Creating Hidden Collection Created Successfully");
-    final Collection collectionFromServer =
-        await fetchCollectionByID(collection.id);
-    _logger.info("Fetched Created Hidden Collection Successfully");
-    return collectionFromServer;
+    return createRequest;
   }
 }
