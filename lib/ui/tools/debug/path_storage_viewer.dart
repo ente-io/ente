@@ -39,7 +39,7 @@ class PathStorageViewer extends StatefulWidget {
 }
 
 class _PathStorageViewerState extends State<PathStorageViewer> {
-  Map<String, int>? _logs;
+  Map<String, int>? _sizeAndFileCountInfo;
 
   @override
   void initState() {
@@ -48,10 +48,9 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
   }
 
   void _initLogs() {
-    debugPrint("Calculate for path ${widget.item.title}");
     directoryStat(widget.item.path).then((logs) {
       setState(() {
-        _logs = logs;
+        _sizeAndFileCountInfo = logs;
       });
     });
   }
@@ -62,11 +61,11 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
   }
 
   Widget _getBody() {
-    if (_logs == null) {
+    if (_sizeAndFileCountInfo == null) {
       return const EnteLoadingWidget();
     }
-    final int fileCount = _logs!["fileCount"] ?? -1;
-    final int size = _logs!['size'] ?? 0;
+    final int fileCount = _sizeAndFileCountInfo!["fileCount"] ?? -1;
+    final int size = _sizeAndFileCountInfo!['size'] ?? 0;
 
     return MenuItemWidget(
       alignCaptionedTextToLeft: true,
