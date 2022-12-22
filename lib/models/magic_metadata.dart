@@ -90,10 +90,6 @@ class CollectionMagicMetadata {
     return result;
   }
 
-  bool isSharedLinkCollection() {
-    return subType != null && subType == subTypeSharedFilesCollection;
-  }
-
   factory CollectionMagicMetadata.fromEncodedJson(String encodedJson) =>
       CollectionMagicMetadata.fromJson(jsonDecode(encodedJson));
 

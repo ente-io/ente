@@ -114,14 +114,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     // during create link flow for selected files
     final ListMatch<CollectionWithThumbnail> potentialSharedLinkCollection =
         favMathResult.unmatched.splitMatch(
-      (e) => (e.collection.name != null &&
-          (e.collection.name.startsWith(" ") &&
-              e.collection.name.endsWith(" "))),
+      (e) => (e.collection.isSharedFilesCollection() &&
+          (e.collection.publicURLs?.isNotEmpty ?? false)),
     );
 
     return favMathResult.matched +
-        potentialSharedLinkCollection.unmatched +
-        potentialSharedLinkCollection.matched;
+        potentialSharedLinkCollection.unmatched;
   }
 
   Widget _getCollectionsGalleryWidget(
