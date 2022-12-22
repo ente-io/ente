@@ -141,7 +141,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
             "everywhere",
             Platform.isAndroid
                 ? "Android, iOS, Web, Desktop"
-                : "iOS, Android, Web, Desktop",
+                : "Mobile, Web, Desktop",
           ),
         ],
         onPageChanged: (index) {

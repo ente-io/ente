@@ -199,7 +199,7 @@ Future<void> sendEmail(
     );
     if (Platform.isAndroid) {
       // Special handling due to issue in proton mail android client
-      // https://github.com/ente-io/frame/pull/253
+      // https://github.com/ente-io/photos-app/pull/253
       final Uri params = Uri(
         scheme: 'mailto',
         path: to,
@@ -212,7 +212,8 @@ Future<void> sendEmail(
         throw Exception('Could not launch ${params.toString()}');
       }
     } else {
-      final OpenMailAppResult result = await OpenMailApp.composeNewEmailInMailApp(
+      final OpenMailAppResult result =
+          await OpenMailApp.composeNewEmailInMailApp(
         nativePickerTitle: 'Select email app',
         emailContent: email,
       );

@@ -502,7 +502,7 @@ class RemoteSyncService {
         break;
       }
       // prefer existing collection ID for manually uploaded files.
-      // See https://github.com/ente-io/frame/pull/187
+      // See https://github.com/ente-io/photos-app/pull/187
       final collectionID = file.collectionID ??
           (await _collectionsService.getOrCreateForPath(file.deviceFolder)).id;
       _uploadFile(file, collectionID, futures);

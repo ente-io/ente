@@ -125,7 +125,7 @@ extension HiddenService on CollectionsService {
       keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
       encryptedName: Sodium.bin2base64(encryptedName.encryptedData!),
       nameDecryptionNonce: Sodium.bin2base64(encryptedName.nonce!),
-      type: CollectionType.album.toString(),
+      type: CollectionType.album,
       attributes: CollectionAttributes(),
       magicMetadata: metadataRequest,
     );

@@ -1,11 +1,10 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:equatable/equatable.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/subscription.dart';
 
-class UserDetails extends Equatable {
+class UserDetails {
   final String email;
   final int usage;
   final int fileCount;
@@ -21,16 +20,6 @@ class UserDetails extends Equatable {
     this.subscription,
     this.familyData,
   );
-
-  @override
-  List<Object?> get props => [
-        email,
-        usage,
-        fileCount,
-        sharedCollectionsCount,
-        subscription,
-        familyData
-      ];
 
   bool isPartOfFamily() {
     return familyData?.members?.isNotEmpty ?? false;

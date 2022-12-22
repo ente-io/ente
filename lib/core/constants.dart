@@ -54,3 +54,5 @@ const int intMaxValue = 9223372036854775807;
 
 //Screen width of iPhone 14 pro max in points is taken as maximum
 const double restrictedMaxWidth = 430;
+
+const double mobileSmallThreshold = 336;

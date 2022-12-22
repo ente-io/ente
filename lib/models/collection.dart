@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:photos/models/magic_metadata.dart';
 
 class Collection {
@@ -85,8 +86,15 @@ class Collection {
         return CollectionType.folder;
       case "favorites":
         return CollectionType.favorites;
+      case "uncategorized":
+        return CollectionType.uncategorized;
+      case "album":
+        return CollectionType.album;
+      case "unknown":
+        return CollectionType.unknown;
     }
-    return CollectionType.album;
+    debugPrint("unexpected collection type $type");
+    return CollectionType.unknown;
   }
 
   static String typeToString(CollectionType type) {
@@ -95,8 +103,12 @@ class Collection {
         return "folder";
       case CollectionType.favorites:
         return "favorites";
-      default:
+      case CollectionType.album:
         return "album";
+      case CollectionType.uncategorized:
+        return "uncategorized";
+      case CollectionType.unknown:
+        return "unknown";
     }
   }
 
@@ -187,7 +199,9 @@ class Collection {
 enum CollectionType {
   folder,
   favorites,
+  uncategorized,
   album,
+  unknown,
 }
 
 enum CollectionParticipantRole {

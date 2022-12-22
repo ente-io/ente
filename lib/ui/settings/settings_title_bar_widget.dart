@@ -12,6 +12,7 @@ class SettingsTitleBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final logger = Logger((SettingsTitleBarWidget).toString());
+    final userDetails = InheritedUserDetails.of(context)?.userDetails;
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Padding(
@@ -26,31 +27,12 @@ class SettingsTitleBarWidget extends StatelessWidget {
               },
               icon: const Icon(Icons.keyboard_double_arrow_left_outlined),
             ),
-            FutureBuilder(
-              future: InheritedUserDetails.of(context)?.userDetails,
-              builder: (context, snapshot) {
-                if (InheritedUserDetails.of(context) == null) {
-                  logger.severe(
-                    (InheritedUserDetails).toString() +
-                        ' not found before ' +
-                        (SettingsTitleBarWidget).toString() +
-                        ' on tree',
-                  );
-                  throw Error();
-                } else if (snapshot.hasData) {
-                  final userDetails = snapshot.data as UserDetails;
-                  return Text(
+            userDetails is UserDetails
+                ? Text(
                     "${NumberFormat().format(userDetails.fileCount)} memories",
                     style: getEnteTextTheme(context).largeBold,
-                  );
-                } else if (snapshot.hasError) {
-                  logger.severe('failed to load user details');
-                  return const EnteLoadingWidget();
-                } else {
-                  return const EnteLoadingWidget();
-                }
-              },
-            )
+                  )
+                : const EnteLoadingWidget(),
           ],
         ),
       ),
