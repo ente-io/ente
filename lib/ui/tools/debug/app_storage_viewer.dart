@@ -11,6 +11,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
 import 'package:photos/ui/tools/debug/path_storage_viewer.dart';
@@ -122,63 +123,62 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
               (context, index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 1),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Column(
-                          children: [
-                            ListView.builder(
-                              shrinkWrap: true,
-                              // padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
-                              physics: const ScrollPhysics(),
-                              // to disable GridView's scrolling
-                              itemBuilder: (context, index) {
-                                final path = paths[index];
-                                debugPrint("Showing for path ${path.title}");
-                                return PathStorageViewer(
-                                  path,
-                                  removeTopRadius: index > 0,
-                                  removeBottomRadius: index < paths.length - 1,
-                                  enableDoubleTapClear: internalUser,
-                                  key: ValueKey("$index-$_refreshCounterKey"),
-                                );
-                              },
-                              itemCount: paths.length,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        children: [
+                          const MenuSectionTitle(
+                            title: 'Cached data',
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.all(0),
+                            physics: const ScrollPhysics(),
+                            // to disable GridView's scrolling
+                            itemBuilder: (context, index) {
+                              final path = paths[index];
+                              return PathStorageViewer(
+                                path,
+                                removeTopRadius: index > 0,
+                                removeBottomRadius: index < paths.length - 1,
+                                enableDoubleTapClear: internalUser,
+                                key: ValueKey("$index-$_refreshCounterKey"),
+                              );
+                            },
+                            itemCount: paths.length,
+                          ),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                          MenuItemWidget(
+                            leadingIcon: Icons.delete_sweep_outlined,
+                            captionedTextWidget: const CaptionedTextWidget(
+                              title: "Clear caches",
                             ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            MenuItemWidget(
-                              leadingIcon: Icons.delete_sweep_outlined,
-                              captionedTextWidget: const CaptionedTextWidget(
-                                title: "Clear caches",
-                              ),
-                              menuItemColor:
-                                  getEnteColorScheme(context).fillFaint,
-                              borderRadius: 8,
-                              onTap: () async {
-                                for (var pathItem in paths) {
-                                  if (pathItem.allowCacheClear) {
-                                    await deleteDirectoryContents(
-                                      pathItem.path,
-                                    );
-                                  }
+                            menuItemColor:
+                                getEnteColorScheme(context).fillFaint,
+                            borderRadius: 8,
+                            onTap: () async {
+                              for (var pathItem in paths) {
+                                if (pathItem.allowCacheClear) {
+                                  await deleteDirectoryContents(
+                                    pathItem.path,
+                                  );
                                 }
-                                _refreshCounterKey++;
-                                if (mounted) {
-                                  setState(() => {});
-                                }
-                              },
-                            ),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                              }
+                              _refreshCounterKey++;
+                              if (mounted) {
+                                setState(() => {});
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 );
               },
