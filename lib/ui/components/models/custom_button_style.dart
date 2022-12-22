@@ -4,7 +4,7 @@ class CustomButtonStyle {
   Color defaultButtonColor;
   Color? pressedButtonColor;
   Color? disabledButtonColor;
-  Color? defaultBorderColor;
+  Color defaultBorderColor;
   Color? pressedBorderColor;
   Color? disabledBorderColor;
   Color defaultIconColor;
@@ -19,7 +19,7 @@ class CustomButtonStyle {
     required this.defaultButtonColor,
     this.pressedButtonColor,
     this.disabledButtonColor,
-    this.defaultBorderColor,
+    required this.defaultBorderColor,
     this.pressedBorderColor,
     this.disabledBorderColor,
     required this.defaultIconColor,
