@@ -75,8 +75,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 ),
                                 menuItemColor: colorScheme.fillFaint,
                                 trailingWidget: Icon(
-                                  Icons.chevron_right,
-                                  color: colorScheme.strokeMuted,
+                                  Icons.chevron_right_outlined,
+                                  color: colorScheme.strokeBase,
                                 ),
                                 borderRadius: 8,
                                 alignCaptionedTextToLeft: true,
@@ -93,8 +93,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                               ),
                               menuItemColor: colorScheme.fillFaint,
                               trailingWidget: Icon(
-                                Icons.chevron_right,
-                                color: colorScheme.strokeMuted,
+                                Icons.chevron_right_outlined,
+                                color: colorScheme.strokeBase,
                               ),
                               borderRadius: 8,
                               alignCaptionedTextToLeft: true,
