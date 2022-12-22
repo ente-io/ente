@@ -244,7 +244,7 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
-      showGenericErrorDialog(context);
+      rethrow;
     }
   }
 
