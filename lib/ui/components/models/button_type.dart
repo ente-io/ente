@@ -75,14 +75,11 @@ enum ButtonType {
     return null;
   }
 
-  Color? defaultBorderColor(
-    EnteColorScheme colorScheme,
-    ButtonSize buttonSize,
-  ) {
+  Color defaultBorderColor(EnteColorScheme colorScheme, ButtonSize buttonSize) {
     if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
       return colorScheme.warning700;
     }
-    return null;
+    return Colors.transparent;
   }
 
   //Returning null to fallback to default color
