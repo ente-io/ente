@@ -9,7 +9,9 @@ import 'package:photos/ui/components/icon_button_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/components/title_bar_widget.dart';
+import 'package:photos/ui/tools/debug/cache_size_view.dart';
 import 'package:photos/utils/local_settings.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class AdvancedSettingsScreen extends StatefulWidget {
   const AdvancedSettingsScreen({super.key});
@@ -81,6 +83,24 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                                 // isBottomBorderRadiusRemoved: true,
                                 isGestureDetectorDisabled: true,
                               ),
+                            ),
+                            const SizedBox(
+                              height: 24,
+                            ),
+                            MenuItemWidget(
+                              captionedTextWidget: const CaptionedTextWidget(
+                                title: "Manage device storage",
+                              ),
+                              menuItemColor: colorScheme.fillFaint,
+                              trailingWidget: Icon(
+                                Icons.chevron_right,
+                                color: colorScheme.strokeMuted,
+                              ),
+                              borderRadius: 8,
+                              alignCaptionedTextToLeft: true,
+                              onTap: () {
+                                routeToPage(context, const CacheSizeViewer());
+                              },
                             ),
                           ],
                         ),
