@@ -8,9 +8,11 @@ import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/force_reload_home_gallery_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file_load_result.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
+import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 
 class HomeGalleryWidget extends StatelessWidget {
@@ -83,6 +85,12 @@ class HomeGalleryWidget extends StatelessWidget {
       // scrollSafe area -> SafeArea + Preserver more + Nav Bar buttons
       scrollBottomSafeArea: bottomSafeArea + 180,
     );
-    return gallery;
+    return Stack(
+      children: [
+        gallery,
+        FileSelectionOverlayBar(GalleryType.homepage, selectedFiles)
+      ],
+    );
+    // return gallery;
   }
 }

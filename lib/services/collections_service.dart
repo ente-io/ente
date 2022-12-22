@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -55,6 +56,7 @@ class CollectionsService {
   final _localPathToCollectionID = <String, int>{};
   final _collectionIDToCollections = <int, Collection>{};
   final _cachedKeys = <int, Uint8List>{};
+  final _cachedUserIdToUser = <int, User>{};
   Collection cachedDefaultHiddenCollection;
 
   CollectionsService._privateConstructor() {
@@ -219,8 +221,37 @@ class CollectionsService {
         .toList();
   }
 
+  User getFileOwner(int userID, int collectionID) {
+    if (_cachedUserIdToUser.containsKey(userID)) {
+      return _cachedUserIdToUser[userID];
+    }
+    if (collectionID != null) {
+      final Collection collection = getCollectionByID(collectionID);
+      if (collection != null) {
+        if (collection.owner.id == userID) {
+          _cachedUserIdToUser[userID] = collection.owner;
+        } else {
+          final matchingUser = collection.getSharees().firstWhereOrNull(
+                (u) => u.id == userID,
+              );
+          if (matchingUser != null) {
+            _cachedUserIdToUser[userID] = collection.owner;
+          }
+        }
+      }
+    }
+    return _cachedUserIdToUser[userID] ??
+        User(
+          id: userID,
+          email: "unknown@unknown.com",
+        );
+  }
+
   Future<List<CollectionWithThumbnail>> getCollectionsWithThumbnails({
     bool includedOwnedByOthers = false,
+    // includeCollabCollections will include collections where the current user
+    // is added as a collaborator
+    bool includeCollabCollections = false,
   }) async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail = [];
     final usersCollection = getActiveCollections();
@@ -228,7 +259,15 @@ class CollectionsService {
     usersCollection.removeWhere((element) => element.isHidden());
     if (!includedOwnedByOthers) {
       final userID = Configuration.instance.getUserID();
-      usersCollection.removeWhere((c) => c.owner.id != userID);
+      if (includeCollabCollections) {
+        usersCollection.removeWhere(
+          (c) =>
+              (c.owner.id != userID) &&
+              (c.getSharees().any((u) => (u.id ?? -1) == userID && u.isViewer)),
+        );
+      } else {
+        usersCollection.removeWhere((c) => c.owner.id != userID);
+      }
     }
     final latestCollectionFiles = await getLatestCollectionFiles();
     final Map<int, File> collectionToThumbnailMap = Map.fromEntries(
@@ -258,42 +297,61 @@ class CollectionsService {
     });
   }
 
-  Future<void> share(int collectionID, String email, String publicKey) async {
+  Future<List<User>> share(
+    int collectionID,
+    String email,
+    String publicKey,
+    CollectionParticipantRole role,
+  ) async {
     final encryptedKey = CryptoUtil.sealSync(
       getCollectionKey(collectionID),
       Sodium.base642bin(publicKey),
     );
     try {
-      await _enteDio.post(
+      final response = await _enteDio.post(
         "/collections/share",
         data: {
           "collectionID": collectionID,
           "email": email,
           "encryptedKey": Sodium.bin2base64(encryptedKey),
+          "role": role.toStringVal()
         },
       );
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+      _collectionIDToCollections[collectionID] =
+          _collectionIDToCollections[collectionID].copyWith(sharees: sharees);
+      unawaited(_db.insert([_collectionIDToCollections[collectionID]]));
+      RemoteSyncService.instance.sync(silently: true).ignore();
+      return sharees;
     } on DioError catch (e) {
       if (e.response.statusCode == 402) {
         throw SharingNotPermittedForFreeAccountsError();
       }
       rethrow;
     }
-    RemoteSyncService.instance.sync(silently: true);
   }
 
-  Future<void> unshare(int collectionID, String email) async {
+  Future<List<User>> unshare(int collectionID, String email) async {
     try {
-      await _enteDio.post(
+      final response = await _enteDio.post(
         "/collections/unshare",
         data: {
           "collectionID": collectionID,
           "email": email,
         },
       );
-      _collectionIDToCollections[collectionID]
-          .sharees
-          .removeWhere((user) => user.email == email);
+      final sharees = <User>[];
+      for (final user in response.data["sharees"]) {
+        sharees.add(User.fromMap(user));
+      }
+      _collectionIDToCollections[collectionID] =
+          _collectionIDToCollections[collectionID].copyWith(sharees: sharees);
       unawaited(_db.insert([_collectionIDToCollections[collectionID]]));
+      RemoteSyncService.instance.sync(silently: true).ignore();
+      return sharees;
     } catch (e) {
       _logger.severe(e);
       rethrow;

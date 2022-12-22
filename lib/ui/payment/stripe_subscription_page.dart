@@ -9,6 +9,7 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -499,6 +500,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
             value: _showYearlyPlan,
             activeColor: Colors.white,
             inactiveThumbColor: Colors.white,
+            activeTrackColor: getEnteColorScheme(context).strokeMuted,
             onChanged: (value) async {
               _showYearlyPlan = value;
               await _filterStripeForUI();

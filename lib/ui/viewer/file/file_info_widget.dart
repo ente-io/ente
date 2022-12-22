@@ -1,5 +1,7 @@
 // @dart=2.9
 
+import 'dart:ui';
+
 import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
@@ -9,6 +11,7 @@ import 'package:photos/db/files_db.dart';
 import "package:photos/ente_theme_data.dart";
 import "package:photos/models/file.dart";
 import "package:photos/models/file_type.dart";
+import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
@@ -47,10 +50,12 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   };
 
   bool _isImage = false;
+  int _currentUserID;
 
   @override
   void initState() {
     debugPrint('file_info_dialog initState');
+    _currentUserID = Configuration.instance.getUserID();
     _isImage = widget.file.fileType == FileType.image ||
         widget.file.fileType == FileType.livePhoto;
     if (_isImage) {
@@ -69,6 +74,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
   Widget build(BuildContext context) {
     final file = widget.file;
     final fileIsBackedup = file.uploadedFileID == null ? false : true;
+    final bool isFileOwner =
+        file.ownerID == null || file.ownerID == _currentUserID;
     Future<Set<int>> allCollectionIDsOfFile;
     Future<Set<String>>
         allDeviceFoldersOfFile; //Typing this as Future<Set<T>> as it would be easier to implement showing multiple device folders for a file in the future
@@ -94,12 +101,14 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final bool showDimension =
         _exifData["resolution"] != null && _exifData["megaPixels"] != null;
     final listTiles = <Widget>[
-      widget.file.uploadedFileID == null ||
-              Configuration.instance.getUserID() != file.ownerID
+      !widget.file.isUploaded ||
+              (!isFileOwner && (widget.file.caption?.isEmpty ?? true))
           ? const SizedBox.shrink()
           : Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 4),
-              child: FileCaptionWidget(file: widget.file),
+              child: isFileOwner
+                  ? FileCaptionWidget(file: widget.file)
+                  : FileCaptionReadyOnly(caption: widget.file.caption),
             ),
       ListTile(
         horizontalTitleGap: 2,
@@ -122,8 +131,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
               ),
         ),
         trailing: (widget.file.ownerID == null ||
-                    widget.file.ownerID ==
-                        Configuration.instance.getUserID()) &&
+                    widget.file.ownerID == _currentUserID) &&
                 widget.file.uploadedFileID != null
             ? IconButton(
                 onPressed: () {
@@ -170,8 +178,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                 : const SizedBox.shrink(),
           ],
         ),
-        trailing: file.uploadedFileID == null ||
-                file.ownerID != Configuration.instance.getUserID()
+        trailing: file.uploadedFileID == null || file.ownerID != _currentUserID
             ? const SizedBox.shrink()
             : IconButton(
                 onPressed: () async {
@@ -223,7 +230,10 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
           horizontalTitleGap: 0,
           leading: const Icon(Icons.folder_outlined),
           title: fileIsBackedup
-              ? CollectionsListOfFileWidget(allCollectionIDsOfFile)
+              ? CollectionsListOfFileWidget(
+                  allCollectionIDsOfFile,
+                  _currentUserID,
+                )
               : DeviceFoldersListOfFileWidget(allDeviceFoldersOfFile),
         ),
       ),
@@ -282,6 +292,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
                   onTap: () => Navigator.pop(context),
                 ),
               ),
+              SliverToBoxAdapter(child: addedBy(widget.file)),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
@@ -301,6 +312,36 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget addedBy(File file) {
+    if (file.uploadedFileID == null) {
+      return const SizedBox.shrink();
+    }
+    String addedBy;
+    if (file.ownerID == _currentUserID) {
+      if (file.pubMagicMetadata.uploaderName != null) {
+        addedBy = file.pubMagicMetadata.uploaderName;
+      }
+    } else {
+      final fileOwner = CollectionsService.instance
+          .getFileOwner(file.ownerID, file.collectionID);
+      if (fileOwner != null) {
+        addedBy = fileOwner.email;
+      }
+    }
+    if (addedBy == null || addedBy.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    final enteTheme = Theme.of(context).colorScheme.enteTheme;
+    return Padding(
+      padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 16),
+      child: Text(
+        "Added by $addedBy",
+        style: enteTheme.textTheme.mini
+            .copyWith(color: enteTheme.colorScheme.textMuted),
       ),
     );
   }

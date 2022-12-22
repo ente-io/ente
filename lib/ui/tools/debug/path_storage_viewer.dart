@@ -1,22 +1,33 @@
 // @dart=2.9
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
-import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/utils/app_size.dart';
 import 'package:photos/utils/data_util.dart';
 
-class PathStorageViewer extends StatefulWidget {
+class PathStorageItem {
   final String path;
-  final bool allowClear;
+  final String title;
+  final bool allowCacheClear;
+
+  PathStorageItem.name(
+    this.path,
+    this.title, {
+    this.allowCacheClear = false,
+  });
+}
+
+class PathStorageViewer extends StatefulWidget {
+  final PathStorageItem path;
 
   const PathStorageViewer(
     this.path, {
     Key key,
-    this.allowClear = false,
   }) : super(key: key);
 
   @override
@@ -28,7 +39,7 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
 
   @override
   void initState() {
-    directoryStat(widget.path).then((logs) {
+    directoryStat(widget.path.path).then((logs) {
       setState(() {
         _logs = logs;
       });
@@ -47,33 +58,28 @@ class _PathStorageViewerState extends State<PathStorageViewer> {
     }
     final int fileCount = _logs["fileCount"] ?? -1;
     final int size = _logs['size'];
-    var pathVale = widget.path;
-    if (pathVale.endsWith("/")) {
-      pathVale = pathVale.substring(0, pathVale.length - 1);
-    }
-    int pathEle = pathVale.split("/").length;
-    final title =
-        pathVale.split("/")[pathEle - 2] + "/" + pathVale.split("/").last;
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          MenuItemWidget(
-            alignCaptionedTextToLeft: true,
-            captionedTextWidget: CaptionedTextWidget(
-              title: title,
-              subTitle: '$fileCount - ${formatBytes(size)}',
-            ),
-            trailingIcon: widget.allowClear ? Icons.chevron_right : null,
-            menuItemColor: getEnteColorScheme(context).fillFaint,
-            onTap: () async {
-              // await showPicker();
-            },
-          ),
-          MenuSectionDescriptionWidget(content: widget.path)
-        ],
+    return MenuItemWidget(
+      alignCaptionedTextToLeft: true,
+      captionedTextWidget: CaptionedTextWidget(
+        title: widget.path.title,
+        subTitle: '$fileCount',
+        subTitleColor: getEnteColorScheme(context).textFaint,
       ),
+      trailingWidget: Text(
+        formatBytes(size),
+        style: getEnteTextTheme(context)
+            .small
+            .copyWith(color: getEnteColorScheme(context).textFaint),
+      ),
+      trailingIcon: widget.path.allowCacheClear ? Icons.chevron_right : null,
+      menuItemColor: getEnteColorScheme(context).fillFaint,
+      onTap: () async {
+        if (kDebugMode) {
+          await Clipboard.setData(ClipboardData(text: widget.path.path));
+          debugPrint(widget.path.path);
+        }
+      },
     );
   }
 }

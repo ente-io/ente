@@ -1,6 +1,7 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 class GradientButton extends StatelessWidget {
   final List<Color> linearGradientColors;
@@ -71,7 +72,12 @@ class GradientButton extends StatelessWidget {
           gradient: LinearGradient(
             begin: const Alignment(0.1, -0.9),
             end: const Alignment(-0.6, 0.9),
-            colors: linearGradientColors,
+            colors: onTap != null
+                ? linearGradientColors
+                : [
+                    getEnteColorScheme(context).fillMuted,
+                    getEnteColorScheme(context).fillMuted
+                  ],
           ),
           borderRadius: BorderRadius.circular(8),
         ),

@@ -15,7 +15,7 @@ class CacheSizeViewer extends StatefulWidget {
 }
 
 class _CacheSizeViewerState extends State<CacheSizeViewer> {
-  final List<String> paths = [];
+  final List<PathStorageItem> paths = [];
 
   @override
   void initState() {
@@ -37,18 +37,24 @@ class _CacheSizeViewerState extends State<CacheSizeViewer> {
     final videoCachePath =
         appTemporaryDirectory.path + "/" + VideoCacheManager.key;
     paths.addAll([
-      tempDownload,
-      cacheDirectory,
-      logsDirectory,
-      imageCachePath,
-      videoCachePath,
-      iOSOnlyTempDirectory + "flutter-images",
-      appDocumentsDirectory.path,
-      appSupportDirectory.path,
-      appTemporaryDirectory.path,
+      PathStorageItem.name(imageCachePath, "Remote images"),
+      PathStorageItem.name(videoCachePath, "Remote videos"),
+      PathStorageItem.name(cacheDirectory, "Remote thumbnails"),
+      PathStorageItem.name(tempDownload, "Pending sync"),
+      PathStorageItem.name(logsDirectory, "Application logs"),
+      PathStorageItem.name(
+          iOSOnlyTempDirectory + "flutter-images", "Local Gallery"),
+      PathStorageItem.name(appDocumentsDirectory.path, "App Documents"),
+      PathStorageItem.name(appSupportDirectory.path, "App Support"),
+      PathStorageItem.name(appTemporaryDirectory.path, "App Temporary"),
     ]);
     appTemporaryDirectory.list().forEach((element) {
-      paths.add(element.path);
+      paths.add(
+        PathStorageItem.name(
+          element.path,
+          "App Temp " + element.path.substring(element.path.length - 10),
+        ),
+      );
     });
     if (mounted) {
       setState(() => {});
@@ -72,13 +78,11 @@ class _CacheSizeViewerState extends State<CacheSizeViewer> {
       child: SingleChildScrollView(
         child: ListView.builder(
           shrinkWrap: true,
-
           padding: const EdgeInsets.fromLTRB(6, 0, 6, 0),
           physics: const ScrollPhysics(),
           // to disable GridView's scrolling
           itemBuilder: (context, index) {
             final path = paths[index];
-            // return Text(path);
             return PathStorageViewer(path);
           },
           itemCount: paths.length,

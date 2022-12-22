@@ -172,16 +172,12 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                        height: 80,
-                        width: double.infinity,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 20),
-                          child: Text(
-                            widget.subText ??
-                                "We don’t store this key, please save this in a safe place.",
-                            style: Theme.of(context).textTheme.bodyText1,
-                          ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        child: Text(
+                          widget.subText ??
+                              "We don't store this key, please save this 24 word key in a safe place.",
+                          style: Theme.of(context).textTheme.bodyText1,
                         ),
                       ),
                       Expanded(

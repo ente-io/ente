@@ -35,7 +35,10 @@ class FavoritesService {
           _cachedFavoritesCollectionID != null &&
           _cachedFavoritesCollectionID == event.collectionID) {
         if (event.type == EventType.addedOrUpdated) {
-          _updateFavoriteFilesCache(event.updatedFiles, favFlag: true);
+          // Note: This source check is a ugly hack because currently we
+          // don't have any event type related to remove from collection
+          final bool isAdded = !event.source.contains("remove");
+          _updateFavoriteFilesCache(event.updatedFiles, favFlag: isAdded);
         } else if (event.type == EventType.deletedFromEverywhere ||
             event.type == EventType.deletedFromRemote) {
           _updateFavoriteFilesCache(event.updatedFiles, favFlag: false);
@@ -70,9 +73,10 @@ class FavoritesService {
     if (file.collectionID != null &&
         _cachedFavoritesCollectionID != null &&
         file.collectionID == _cachedFavoritesCollectionID) {
+      debugPrint("File ${file.uploadedFileID} is part of favorite collection");
       return true;
     }
-    if(checkOnlyAlbum) {
+    if (checkOnlyAlbum) {
       return false;
     }
     if (file.uploadedFileID != null) {
@@ -127,6 +131,23 @@ class FavoritesService {
     }
     _updateFavoriteFilesCache(files, favFlag: true);
     RemoteSyncService.instance.sync(silently: true);
+  }
+
+  Future<void> updateFavorites(List<File> files, bool favFlag) async {
+    final int currentUserID = Configuration.instance.getUserID();
+    if (files.any((f) => f.uploadedFileID == null)) {
+      throw AssertionError("Can only favorite uploaded items");
+    }
+    if (files.any((f) => f.ownerID != currentUserID)) {
+      throw AssertionError("Can not favortie files owned by others");
+    }
+    final collectionID = await _getOrCreateFavoriteCollectionID();
+    if (favFlag) {
+      await _collectionsService.addToCollection(collectionID, files);
+    } else {
+      await _collectionsService.removeFromCollection(collectionID, files);
+    }
+    _updateFavoriteFilesCache(files, favFlag: favFlag);
   }
 
   Future<void> removeFromFavorites(File file) async {

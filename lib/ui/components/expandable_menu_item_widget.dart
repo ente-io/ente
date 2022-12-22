@@ -71,7 +71,7 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: widget.selectionOptionsWidget,
               ),
-              theme: getExpandableTheme(context),
+              theme: getExpandableTheme(),
               controller: expandableController,
             ),
           ),

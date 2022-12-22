@@ -11,6 +11,7 @@ class MenuSectionDescriptionWidget extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
       child: Text(
         content,
+        textAlign: TextAlign.left,
         style: getEnteTextTheme(context)
             .mini
             .copyWith(color: getEnteColorScheme(context).textMuted),

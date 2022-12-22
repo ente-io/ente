@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/event_bus.dart';
+import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
@@ -26,10 +28,11 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Bus.instance.fire(OpenedSettingsEvent());
     final enteColorScheme = getEnteColorScheme(context);
     return Scaffold(
       body: Container(
-        color: enteColorScheme.backdropBase,
+        color: enteColorScheme.backdropMuted,
         child: _getBody(context, enteColorScheme),
       ),
     );

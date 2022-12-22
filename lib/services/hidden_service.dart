@@ -86,6 +86,7 @@ extension HiddenService on CollectionsService {
     } on AssertionError catch (e) {
       await dialog.hide();
       showErrorDialog(context, "Oops", e.message as String);
+      return false;
     } catch (e, s) {
       _logger.severe("Could not hide", e, s);
       await dialog.hide();
@@ -124,7 +125,7 @@ extension HiddenService on CollectionsService {
       keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
       encryptedName: Sodium.bin2base64(encryptedName.encryptedData!),
       nameDecryptionNonce: Sodium.bin2base64(encryptedName.nonce!),
-      type: CollectionType.album.toString(),
+      type: CollectionType.album,
       attributes: CollectionAttributes(),
       magicMetadata: metadataRequest,
     );

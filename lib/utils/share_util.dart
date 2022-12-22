@@ -24,7 +24,12 @@ Future<void> share(
   List<File> files, {
   GlobalKey shareButtonKey,
 }) async {
-  final dialog = createProgressDialog(context, "Preparing...");
+  final remoteFileCount = files.where((element) => element.isRemoteFile).length;
+  final dialog = createProgressDialog(
+    context,
+    "Preparing...",
+    isDismissible: remoteFileCount > 2,
+  );
   await dialog.show();
   try {
     final List<Future<String>> pathFutures = [];
@@ -145,4 +150,16 @@ DateTime parseDateFromFileNam1e(String fileName) {
           .replaceAll("_", " "),
     );
   }
+}
+
+void shareSelected(
+  BuildContext context,
+  GlobalKey shareButtonKey,
+  Set<File> selectedFiles,
+) {
+  share(
+    context,
+    selectedFiles.toList(),
+    shareButtonKey: shareButtonKey,
+  );
 }

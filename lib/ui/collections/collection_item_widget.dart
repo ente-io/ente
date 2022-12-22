@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/gallery_type.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -83,7 +85,15 @@ class CollectionItem extends StatelessWidget {
         ],
       ),
       onTap: () {
-        routeToPage(context, CollectionPage(c));
+        routeToPage(
+          context,
+          CollectionPage(
+            c,
+            appBarType: (c.collection.type == CollectionType.favorites
+                ? GalleryType.favorite
+                : GalleryType.ownedCollection),
+          ),
+        );
       },
     );
   }

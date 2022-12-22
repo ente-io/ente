@@ -136,7 +136,7 @@ class UserService {
   Future<UserDetails> getUserDetailsV2({bool memoryCount = true}) async {
     try {
       final response = await _enteDio.get(
-        "/users/details/v2?memoryCount=$memoryCount",
+        "/users/details/v2",
         queryParameters: {
           "memoryCount": memoryCount,
         },

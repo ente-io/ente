@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:device_info/device_info.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -16,6 +17,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/selected_files.dart';
 import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -484,4 +486,101 @@ Future<bool> shouldProceedWithDeletion(BuildContext context) async {
     secondActionColor: Colors.red,
   );
   return choice == DialogUserChoice.secondChoice;
+}
+
+void showDeleteSheet(BuildContext context, SelectedFiles selectedFiles) {
+  final count = selectedFiles.files.length;
+  bool containsUploadedFile = false, containsLocalFile = false;
+  for (final file in selectedFiles.files) {
+    if (file.uploadedFileID != null) {
+      containsUploadedFile = true;
+    }
+    if (file.localID != null) {
+      containsLocalFile = true;
+    }
+  }
+  final actions = <Widget>[];
+  if (containsUploadedFile && containsLocalFile) {
+    actions.add(
+      CupertinoActionSheetAction(
+        isDestructiveAction: true,
+        onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
+          await deleteFilesOnDeviceOnly(
+            context,
+            selectedFiles.files.toList(),
+          );
+          selectedFiles.clearAll();
+          showToast(context, "Files deleted from device");
+        },
+        child: const Text("Device"),
+      ),
+    );
+    actions.add(
+      CupertinoActionSheetAction(
+        isDestructiveAction: true,
+        onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
+          await deleteFilesFromRemoteOnly(
+            context,
+            selectedFiles.files.toList(),
+          );
+          selectedFiles.clearAll();
+
+          showShortToast(context, "Moved to trash");
+        },
+        child: const Text("ente"),
+      ),
+    );
+    actions.add(
+      CupertinoActionSheetAction(
+        isDestructiveAction: true,
+        onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
+          await deleteFilesFromEverywhere(
+            context,
+            selectedFiles.files.toList(),
+          );
+          selectedFiles.clearAll();
+        },
+        child: const Text("Everywhere"),
+      ),
+    );
+  } else {
+    actions.add(
+      CupertinoActionSheetAction(
+        isDestructiveAction: true,
+        onPressed: () async {
+          Navigator.of(context, rootNavigator: true).pop();
+          await deleteFilesFromEverywhere(
+            context,
+            selectedFiles.files.toList(),
+          );
+          selectedFiles.clearAll();
+        },
+        child: const Text("Delete"),
+      ),
+    );
+  }
+  final action = CupertinoActionSheet(
+    title: Text(
+      "Delete " +
+          count.toString() +
+          " file" +
+          (count == 1 ? "" : "s") +
+          (containsUploadedFile && containsLocalFile ? " from" : "?"),
+    ),
+    actions: actions,
+    cancelButton: CupertinoActionSheetAction(
+      child: const Text("Cancel"),
+      onPressed: () {
+        Navigator.of(context, rootNavigator: true).pop();
+      },
+    ),
+  );
+  showCupertinoModalPopup(
+    context: context,
+    builder: (_) => action,
+    barrierColor: Colors.black.withOpacity(0.75),
+  );
 }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:photos/models/magic_metadata.dart';
 
 class Collection {
@@ -57,14 +58,43 @@ class Collection {
     return (magicMetadata.subType ?? 0) == subTypeDefaultHidden;
   }
 
+  List<User> getSharees() {
+    final List<User> result = [];
+    if (sharees == null) {
+      return result;
+    }
+    for (final User? u in sharees!) {
+      if (u != null) {
+        result.add(u);
+      }
+    }
+    return result;
+  }
+
+  bool isOwner(int userID) {
+    return (owner?.id ?? 0) == userID;
+  }
+
+  void updateSharees(List<User> newSharees) {
+    sharees?.clear();
+    sharees?.addAll(newSharees);
+  }
+
   static CollectionType typeFromString(String type) {
     switch (type) {
       case "folder":
         return CollectionType.folder;
       case "favorites":
         return CollectionType.favorites;
+      case "uncategorized":
+        return CollectionType.uncategorized;
+      case "album":
+        return CollectionType.album;
+      case "unknown":
+        return CollectionType.unknown;
     }
-    return CollectionType.album;
+    debugPrint("unexpected collection type $type");
+    return CollectionType.unknown;
   }
 
   static String typeToString(CollectionType type) {
@@ -73,8 +103,12 @@ class Collection {
         return "folder";
       case CollectionType.favorites:
         return "favorites";
-      default:
+      case CollectionType.album:
         return "album";
+      case CollectionType.uncategorized:
+        return "uncategorized";
+      case CollectionType.unknown:
+        return "unknown";
     }
   }
 
@@ -165,7 +199,34 @@ class Collection {
 enum CollectionType {
   folder,
   favorites,
+  uncategorized,
   album,
+  unknown,
+}
+
+enum CollectionParticipantRole {
+  unknown,
+  viewer,
+  collaborator,
+  owner,
+}
+
+extension CollectionParticipantRoleExtn on CollectionParticipantRole {
+  static CollectionParticipantRole fromString(String? val) {
+    if ((val ?? '') == '') {
+      return CollectionParticipantRole.viewer;
+    }
+    for (var x in CollectionParticipantRole.values) {
+      if (x.name.toUpperCase() == val!.toUpperCase()) {
+        return x;
+      }
+    }
+    return CollectionParticipantRole.unknown;
+  }
+
+  String toStringVal() {
+    return name.toUpperCase();
+  }
 }
 
 class CollectionAttributes {
@@ -206,19 +267,22 @@ class User {
   int? id;
   String email;
   String? name;
+  String? role;
 
   User({
     this.id,
     required this.email,
     this.name,
+    this.role,
   });
 
+  bool get isViewer => role == null || role?.toUpperCase() == 'VIEWER';
+
+  bool get isCollaborator =>
+      role != null && role?.toUpperCase() == 'COLLABORATOR';
+
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'email': email,
-      'name': name,
-    };
+    return {'id': id, 'email': email, 'name': name, 'role': role};
   }
 
   static fromMap(Map<String, dynamic>? map) {
@@ -228,6 +292,7 @@ class User {
       id: map['id'],
       email: map['email'],
       name: map['name'],
+      role: map['role'] ?? 'VIEWER',
     );
   }
 
