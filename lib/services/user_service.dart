@@ -229,8 +229,6 @@ class UserService {
     BuildContext context,
     String challengeResponse,
   ) async {
-    final dialog = createProgressDialog(context, "Deleting account...");
-    await dialog.show();
     try {
       final response = await _enteDio.delete(
         "/users/delete",
@@ -241,19 +239,11 @@ class UserService {
       if (response != null && response.statusCode == 200) {
         // clear data
         await Configuration.instance.logout();
-        await dialog.hide();
-        showToast(
-          context,
-          "We have deleted your account and scheduled your uploaded data "
-          "for deletion.",
-        );
-        Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         throw Exception("delete action failed");
       }
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
       showGenericErrorDialog(context);
     }
   }

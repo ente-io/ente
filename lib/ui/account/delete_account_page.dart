@@ -8,10 +8,13 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/email_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
@@ -150,26 +153,49 @@ class DeleteAccountPage extends StatelessWidget {
     );
 
     if (hasAuthenticated) {
-      final choice = await showChoiceDialog(
-        context,
-        'Are you sure you want to delete your account?',
-        'Your uploaded data will be scheduled for deletion, and your account '
+      final choice = await showDialogWidget(
+        context: context,
+        title: 'Are you sure you want to delete your account?',
+        body:
+            'Your uploaded data will be scheduled for deletion, and your account'
             'will be permanently deleted. \n\nThis action is not reversible.',
-        firstAction: 'Cancel',
-        secondAction: 'Delete',
-        firstActionColor: Theme.of(context).colorScheme.onSurface,
-        secondActionColor: Colors.red,
+        buttons: [
+          ButtonWidget(
+            labelText: "Delete",
+            isInAlert: true,
+            buttonType: ButtonType.neutral,
+            buttonSize: ButtonSize.large,
+            buttonAction: ButtonAction.first,
+            onTap: () async {
+              final decryptChallenge = CryptoUtil.openSealSync(
+                Sodium.base642bin(response.encryptedChallenge),
+                Sodium.base642bin(
+                    Configuration.instance.getKeyAttributes().publicKey),
+                Configuration.instance.getSecretKey(),
+              );
+              final challengeResponseStr = utf8.decode(decryptChallenge);
+              await UserService.instance
+                  .deleteAccount(context, challengeResponseStr);
+            },
+          ),
+          const ButtonWidget(
+            labelText: "Cancel",
+            isInAlert: true,
+            buttonType: ButtonType.secondary,
+            buttonSize: ButtonSize.large,
+            buttonAction: ButtonAction.cancel,
+          ),
+        ],
       );
-      if (choice != DialogUserChoice.secondChoice) {
+      if (choice != ButtonAction.first) {
         return;
       }
-      final decryptChallenge = CryptoUtil.openSealSync(
-        Sodium.base642bin(response.encryptedChallenge),
-        Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
-        Configuration.instance.getSecretKey(),
+      showToast(
+        context,
+        "We have deleted your account and scheduled your uploaded data "
+        "for deletion.",
       );
-      final challengeResponseStr = utf8.decode(decryptChallenge);
-      await UserService.instance.deleteAccount(context, challengeResponseStr);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
