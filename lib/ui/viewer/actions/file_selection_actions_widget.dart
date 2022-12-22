@@ -15,8 +15,11 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_file_actions.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -344,7 +347,33 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     }
     _cachedCollectionForSharedLink ??= await collectionActions
         .createSharedCollectionLink(context, split.ownedByCurrentUser);
-    await _copyLink();
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        const ButtonWidget(
+          labelText: "Copy link",
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          isInAlert: true,
+        ),
+        const ButtonWidget(
+          labelText: "Done",
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        )
+      ],
+      title: "Public link created",
+      body: "You can manage your links in the share tab.",
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    if (actionResult != null && actionResult == ButtonAction.first) {
+      await _copyLink();
+    }
     if (mounted) {
       setState(() => {});
     }
@@ -359,7 +388,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       final String url =
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       await Clipboard.setData(ClipboardData(text: url));
-      showToast(context, "Link copied to clipboard");
+      showShortToast(context, "Link copied to clipboard");
     }
   }
 
