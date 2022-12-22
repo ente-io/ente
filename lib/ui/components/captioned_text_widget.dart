@@ -40,7 +40,7 @@ class CaptionedTextWidget extends StatelessWidget {
         Text(
           '\u2022',
           style: enteTextTheme.small.copyWith(
-            color: enteColorScheme.textMuted,
+            color: subTitleColor ?? enteColorScheme.textMuted,
           ),
         ),
       );
