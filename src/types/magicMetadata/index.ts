@@ -10,6 +10,27 @@ export interface EncryptedMagicMetadata
     data: string;
 }
 
+export interface FileMagicMetadataProps {
+    visibility?: VISIBILITY_STATE;
+    filePaths?: string[];
+}
+
+export interface FileMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
+    data: FileMagicMetadataProps;
+}
+
+export interface FilePublicMagicMetadataProps {
+    editedTime?: number;
+    editedName?: string;
+    caption?: string;
+    uploaderName?: string;
+}
+
+export interface FilePublicMagicMetadata
+    extends Omit<MagicMetadataCore, 'data'> {
+    data: FilePublicMagicMetadataProps;
+}
+
 export enum VISIBILITY_STATE {
     VISIBLE = 0,
     ARCHIVED = 1,

@@ -1,7 +1,10 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { FilePublicMagicMetadata, FileAttributes } from 'types/file';
-import { EncryptedMagicMetadata } from 'types/magicMetadata';
+import { FileAttributes } from 'types/file';
+import {
+    EncryptedMagicMetadata,
+    FilePublicMagicMetadata,
+} from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -132,7 +135,7 @@ export interface ProcessedFile {
     file: LocalFileAttributes<Uint8Array | DataStream>;
     thumbnail: LocalFileAttributes<Uint8Array>;
     metadata: LocalFileAttributes<string>;
-    pubMagicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: FilePublicMagicMetadata;
     localID: number;
 }
 export interface BackupedFile {
