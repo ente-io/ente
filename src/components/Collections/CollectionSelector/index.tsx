@@ -14,6 +14,7 @@ export interface CollectionSelectorAttributes {
     showNextModal: () => void;
     title: string;
     fromCollection?: number;
+    onCancel?: () => void;
 }
 
 interface Props {
@@ -61,7 +62,10 @@ function CollectionSelector({
         props.onClose();
     };
 
-    const onCloseButtonClick = () => props.onClose(true);
+    const onCloseButtonClick = () => {
+        attributes?.onCancel();
+        props.onClose(true);
+    };
 
     return (
         <AllCollectionDialog

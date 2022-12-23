@@ -3,24 +3,24 @@ import {
     MagicMetadataCore,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
-import { DataStream, Metadata } from 'types/upload';
+import { Metadata } from 'types/upload';
 
-export interface FileAttribute {
-    encryptedData: DataStream | Uint8Array;
+interface FileAttributesBase {
     decryptionHeader: string;
 }
 
-export interface B64FileAttribute {
+interface MetadataFileAttributes extends FileAttributesBase {
     encryptedData: string;
-    decryptionHeader: string;
+    objectKey?: string;
 }
-
-export interface S3FileAttribute {
+interface S3FileAttributes extends FileAttributesBase {
     objectKey: string;
-    decryptionHeader: string;
+    encryptedData?: string;
 }
 
-export interface EnteFileInfo {
+export type FileAttributes = MetadataFileAttributes | S3FileAttributes;
+
+export interface FileInfo {
     fileSize: number;
     thumbSize: number;
 }
@@ -29,10 +29,10 @@ export interface EncryptedEnteFile {
     id: number;
     collectionID: number;
     ownerID: number;
-    file: S3FileAttribute;
-    thumbnail: S3FileAttribute;
-    metadata: B64FileAttribute;
-    info: EnteFileInfo;
+    file: FileAttributes;
+    thumbnail: FileAttributes;
+    metadata: FileAttributes;
+    info: FileInfo;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     encryptedKey: string;
@@ -81,6 +81,7 @@ export interface FilePublicMagicMetadataProps {
     editedTime?: number;
     editedName?: string;
     caption?: string;
+    uploaderName?: string;
 }
 
 export interface FilePublicMagicMetadata

@@ -521,7 +521,7 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
 
     const worker = await new CryptoWorker();
 
-    const { file: encryptedMagicMetadata }: EncryptionResult =
+    const { file: encryptedMagicMetadata }: EncryptionResult<string> =
         await worker.encryptMetadata(
             collection.magicMetadata.data,
             collection.key
@@ -532,7 +532,7 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
         magicMetadata: {
             version: collection.magicMetadata.version,
             count: collection.magicMetadata.count,
-            data: encryptedMagicMetadata.encryptedData as unknown as string,
+            data: encryptedMagicMetadata.encryptedData,
             header: encryptedMagicMetadata.decryptionHeader,
         },
     };
@@ -736,11 +736,6 @@ export function sortCollectionSummaries(
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
-                    return compareCollectionsLatestFile(
-                        b.latestFile,
-                        a.latestFile
-                    );
                 case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *

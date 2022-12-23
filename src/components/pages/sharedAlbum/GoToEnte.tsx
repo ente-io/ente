@@ -1,7 +1,7 @@
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
 import React, { useEffect, useState } from 'react';
 import { Button, styled } from '@mui/material';
-import GetDeviceOS, { OS } from 'utils/common/deviceDetection';
+import { getDeviceOS, OS } from 'utils/common/deviceDetection';
 import constants from 'utils/strings/constants';
 
 export const NoStyleAnchor = styled('a')`
@@ -16,7 +16,7 @@ function GoToEnte() {
     const [os, setOS] = useState<OS>(OS.UNKNOWN);
 
     useEffect(() => {
-        const os = GetDeviceOS();
+        const os = getDeviceOS();
         setOS(os);
     }, []);
 

@@ -32,15 +32,19 @@ export const getPublicCollectionThumbnailURL = (id: number) => {
     return `https://public-albums.ente.io/preview/?fileID=${id}`;
 };
 
-export const getSentryTunnelURL = () => {
-    return `https://sentry-reporter.ente.io`;
-};
-
 export const getPaymentsURL = () => {
-    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
+    if (process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT !== undefined) {
         return process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
     }
     return `https://payments.ente.io`;
+};
+
+export const getAlbumsURL = () => {
+    const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT;
+    if (isDevDeployment() && albumsURL) {
+        return albumsURL;
+    }
+    return `https://albums.ente.io`;
 };
 
 // getFamilyPortalURL returns the endpoint for the family dashboard which can be used to
@@ -58,3 +62,11 @@ export const getUploadEndpoint = () => {
     }
     return `https://uploader.ente.io`;
 };
+
+export const getSentryTunnelURL = () => {
+    return `https://sentry-reporter.ente.io`;
+};
+
+const isDevDeployment = () =>
+    process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT === window.location.origin ||
+    process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT === window.location.origin;

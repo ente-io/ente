@@ -33,7 +33,7 @@ async function encryptFileStream(worker, fileData: DataStream) {
 export async function encryptFiledata(
     worker,
     filedata: Uint8Array | DataStream
-): Promise<EncryptionResult> {
+): Promise<EncryptionResult<Uint8Array | DataStream>> {
     return isDataStream(filedata)
         ? await encryptFileStream(worker, filedata)
         : await worker.encryptFile(filedata);
