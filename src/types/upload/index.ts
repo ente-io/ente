@@ -12,8 +12,15 @@ export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
 }
 
-export interface EncryptionResult {
-    file: fileAttribute;
+export interface LocalFileAttributes<
+    T extends string | Uint8Array | DataStream
+> {
+    encryptedData: T;
+    decryptionHeader: string;
+}
+
+export interface EncryptionResult<T extends string | Uint8Array | DataStream> {
+    file: LocalFileAttributes<T>;
     key: string;
 }
 
@@ -122,13 +129,18 @@ export interface EncryptedFile {
     fileKey: B64EncryptionResult;
 }
 export interface ProcessedFile {
+    file: LocalFileAttributes<Uint8Array | DataStream>;
+    thumbnail: LocalFileAttributes<Uint8Array>;
+    metadata: LocalFileAttributes<string>;
+    pubMagicMetadata: EncryptedMagicMetadataCore;
+    localID: number;
+}
+export interface BackupedFile {
     file: fileAttribute;
     thumbnail: fileAttribute;
     metadata: fileAttribute;
     pubMagicMetadata: EncryptedMagicMetadataCore;
-    localID: number;
 }
-export interface BackupedFile extends Omit<ProcessedFile, 'localID'> {}
 
 export interface UploadFile extends BackupedFile {
     collectionID: number;

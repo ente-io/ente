@@ -175,13 +175,13 @@ class UploadService {
             if (USE_CF_PROXY) {
                 thumbnailObjectKey = await UploadHttpClient.putFileV2(
                     thumbnailUploadURL,
-                    file.thumbnail.encryptedData as Uint8Array,
+                    file.thumbnail.encryptedData,
                     null
                 );
             } else {
                 thumbnailObjectKey = await UploadHttpClient.putFile(
                     thumbnailUploadURL,
-                    file.thumbnail.encryptedData as Uint8Array,
+                    file.thumbnail.encryptedData,
                     null
                 );
             }
