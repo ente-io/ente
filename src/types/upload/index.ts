@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { fileAttribute, FilePublicMagicMetadata } from 'types/file';
+import { FilePublicMagicMetadata } from 'types/file';
 import { EncryptedMagicMetadataCore } from 'types/magicMetadata';
 
 export interface DataStream {
@@ -12,8 +12,15 @@ export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
 }
 
-export interface EncryptionResult {
-    file: fileAttribute;
+export interface LocalFileAttributes<
+    T extends string | Uint8Array | DataStream
+> {
+    encryptedData: T;
+    decryptionHeader: string;
+}
+
+export interface EncryptionResult<T extends string | Uint8Array | DataStream> {
+    file: LocalFileAttributes<T>;
     key: string;
 }
 
@@ -122,9 +129,9 @@ export interface EncryptedFile {
     fileKey: B64EncryptionResult;
 }
 export interface ProcessedFile {
-    file: fileAttribute;
-    thumbnail: fileAttribute;
-    metadata: fileAttribute;
+    file: LocalFileAttributes<Uint8Array | DataStream>;
+    thumbnail: LocalFileAttributes<Uint8Array>;
+    metadata: LocalFileAttributes<string>;
     pubMagicMetadata: EncryptedMagicMetadataCore;
     localID: number;
 }
