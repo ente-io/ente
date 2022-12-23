@@ -121,7 +121,7 @@ const getCollections = async (
             resp.data.collections.map(
                 async (collection: EncryptedCollection) => {
                     if (collection.isDeleted) {
-                        return null;
+                        return collection;
                     }
                     try {
                         return await getCollectionWithSecrets(collection, key);
@@ -129,15 +129,16 @@ const getCollections = async (
                         logError(e, `decryption failed for collection`, {
                             collectionID: collection.id,
                         });
-                        return null;
+                        return collection;
                     }
                 }
             )
         );
-        const nonNullCollections = decryptedCollections.filter(
-            (collection) => !!collection
+        // only allow deleted or collection with key, filtering out collection whose decryption failed
+        const collections = decryptedCollections.filter(
+            (collection) => collection.isDeleted || collection.key
         );
-        return nonNullCollections;
+        return collections;
     } catch (e) {
         logError(e, 'getCollections failed');
         throw e;
