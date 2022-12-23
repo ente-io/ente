@@ -1,13 +1,21 @@
 import { Box, Typography } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
+import { PublicURL, Collection, UpdatePublicURL } from 'types/collection';
 import constants from 'utils/strings/constants';
 import PublicShareSwitch from '../switch';
+
+interface Iprops {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    updatePublicShareURLHelper: (req: UpdatePublicURL) => Promise<void>;
+}
+
 export function ManageDownloadAccess({
     publicShareProp,
     updatePublicShareURLHelper,
     collection,
-}) {
+}: Iprops) {
     const appContext = useContext(AppContext);
 
     const handleFileDownloadSetting = () => {
@@ -41,7 +49,7 @@ export function ManageDownloadAccess({
         <Box>
             <Typography mb={0.5}>{constants.FILE_DOWNLOAD}</Typography>
             <PublicShareSwitch
-                checked={publicShareProp?.enableDownload ?? false}
+                checked={publicShareProp?.enableDownload ?? true}
                 onChange={handleFileDownloadSetting}
             />
         </Box>

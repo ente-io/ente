@@ -6,10 +6,6 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 
-export interface formValues {
-    filename: string;
-}
-
 export const FileNameEditDialog = ({
     isInEditMode,
     closeEditMode,

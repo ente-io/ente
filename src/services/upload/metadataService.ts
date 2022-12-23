@@ -30,6 +30,7 @@ const NULL_PARSED_METADATA_JSON: ParsedMetadataJSON = {
 };
 
 export async function extractMetadata(
+    worker,
     receivedFile: File | ElectronFile,
     fileTypeInfo: FileTypeInfo
 ) {
@@ -39,7 +40,7 @@ export async function extractMetadata(
     } else if (fileTypeInfo.fileType === FILE_TYPE.VIDEO) {
         extractedMetadata = await getVideoMetadata(receivedFile);
     }
-    const fileHash = await getFileHash(receivedFile);
+    const fileHash = await getFileHash(worker, receivedFile);
 
     const metadata: Metadata = {
         title: receivedFile.name,

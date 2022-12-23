@@ -45,7 +45,9 @@ const englishConstants = {
     NEW_USER: 'New to ente',
     EXISTING_USER: 'Existing user',
     NAME: 'Name',
-    ENTER_NAME: 'Your name',
+    ENTER_NAME: 'Enter name',
+    PUBLIC_UPLOADER_NAME_MESSAGE:
+        'Add a name so that your friends know who to thank for these great photos!',
     EMAIL: 'Email',
     ENTER_EMAIL: 'Enter email address',
     DATA_DISCLAIMER: "We'll never share your data with anyone else.",
@@ -105,6 +107,9 @@ const englishConstants = {
     NO: 'No',
     NOTHING_HERE: 'Nothing to see here yet 👀',
     UPLOAD: 'Upload',
+    ADD_MORE_PHOTOS: 'Add more photos',
+    ADD_PHOTOS: 'Add photos',
+    SELECT_PHOTOS: 'Select photos',
     FILE_UPLOAD: 'File Upload',
     UPLOAD_STAGE_MESSAGE: {
         0: 'Preparing to upload',
@@ -224,7 +229,7 @@ const englishConstants = {
     LOGOUT_MESSAGE: 'Are you sure you want to logout?',
     CHANGE: 'Change',
     CHANGE_EMAIL: 'Change email',
-    OK: 'Ok',
+    OK: 'OK',
     SUCCESS: 'Success',
     ERROR: 'Error',
     MESSAGE: 'Message',
@@ -522,7 +527,7 @@ const englishConstants = {
     RETRY: 'Retry',
     SEND_OTT: 'Send OTP',
     EMAIl_ALREADY_OWNED: 'Email already taken',
-    EMAIL_UDPATE_SUCCESSFUL: 'Your email has been udpated successfully',
+    EMAIL_UDPATE_SUCCESSFUL: 'Your email has been updated successfully',
     UPLOAD_FAILED: 'Upload failed',
     ETAGS_BLOCKED: (link: string) => (
         <>
@@ -540,9 +545,24 @@ const englishConstants = {
             </Box>
         </>
     ),
+    SKIPPED_VIDEOS_INFO: (link: string) => (
+        <>
+            <Box mb={1}>
+                Presently we do not support adding videos via public links.{' '}
+            </Box>
+            <Box>
+                To share videos, please{' '}
+                <Link href={link} target="_blank">
+                    signup
+                </Link>{' '}
+                for ente and share with the intended recipients using their
+                email.
+            </Box>
+        </>
+    ),
 
     LIVE_PHOTOS_DETECTED:
-        'The photo and video files from your Live Photos have been merged into a single ELP file',
+        'The photo and video files from your Live Photos have been merged into a single file',
 
     RETRY_FAILED: 'Retry failed uploads',
     FAILED_UPLOADS: 'Failed uploads ',
@@ -554,6 +574,7 @@ const englishConstants = {
         'Skipped these as there are files with matching names in the same album',
     UNSUPPORTED_INFO: 'ente does not support these file formats yet',
     BLOCKED_UPLOADS: 'Blocked uploads',
+    SKIPPED_VIDEOS: 'Skipped videos',
     INPROGRESS_METADATA_EXTRACTION: 'In progress',
     INPROGRESS_UPLOADS: 'Uploads in progress',
     TOO_LARGE_UPLOADS: 'Large files',
@@ -636,7 +657,7 @@ const englishConstants = {
         <>File time updation failed for some files, please retry</>
     ),
     FILE_NAME_CHARACTER_LIMIT: '100 characters max',
-    CAPTION_CHARACTER_LIMIT: '280 characters max',
+    CAPTION_CHARACTER_LIMIT: '5000 characters max',
 
     DATE_TIME_ORIGINAL: 'EXIF:DateTimeOriginal',
     DATE_TIME_DIGITIZED: 'EXIF:DateTimeDigitized',
@@ -655,7 +676,8 @@ const englishConstants = {
     ALBUM_URL: 'Album url',
     PUBLIC_SHARING: 'Public link',
     NOT_FOUND: '404 - not found',
-    LINK_EXPIRED: 'This link has either expired or been disabled!',
+    LINK_EXPIRED: 'Link expired',
+    LINK_EXPIRED_MESSAGE: 'This link has either expired or been disabled!',
     MANAGE_LINK: 'Manage link',
     LINK_TOO_MANY_REQUESTS: 'This album is too popular for us to handle!',
     DISABLE_PUBLIC_SHARING: "'Disable public sharing",
@@ -663,6 +685,7 @@ const englishConstants = {
         'Are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'Allow downloads',
     LINK_PASSWORD_LOCK: 'Password lock',
+    PUBLIC_COLLECT: 'Allow adding photos',
     LINK_DEVICE_LIMIT: 'Device limit',
     LINK_EXPIRY: 'Link expiry',
     LINK_EXPIRY_NEVER: 'Never',
@@ -675,7 +698,7 @@ const englishConstants = {
             </p>{' '}
             <p>
                 Viewers can still take screenshots or save a copy of your photos
-                using external tools'{' '}
+                using external tools{' '}
             </p>
         </>
     ),
@@ -707,7 +730,7 @@ const englishConstants = {
     TERM_1: 'I hereby state that I have a good faith belief that the sharing of copyrighted material at the location above is not authorized by the copyright owner, its agent, or the law (e.g., as a fair use). ',
     TERM_2: 'I hereby state that the information in this Notice is accurate and, under penalty of perjury, that I am the owner, or authorized to act on behalf of, the owner, of the copyright or of an exclusive right under the copyright that is allegedly infringed. ',
     TERM_3: 'I acknowledge that any person who knowingly materially misrepresents that material or activity is infringing may be subject to liability for damages. ',
-    PRESERVED_BY: 'Preserved by',
+    SHARED_USING: 'Shared using ',
     ENTE_IO: 'ente.io',
     LIVE: 'LIVE',
     DISABLE_PASSWORD: 'Disable password lock',
@@ -844,10 +867,22 @@ const englishConstants = {
         'A new version of ente has been released, but it cannot be automatically downloaded and installed.',
     DOWNLOAD_AND_INSTALL: 'Download and install',
     IGNORE_THIS_VERSION: 'Ignore this version',
-    RUN_TESTS: 'Run tests',
     TODAY: 'Today',
     YESTERDAY: 'Yesterday',
     AT: 'at',
+    NAME_PLACEHOLDER: 'Name...',
+    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED:
+        'Cannot create albums from file/folder mix',
+    ROOT_LEVEL_FILE_WITH_FOLDER_NOT_ALLOWED_MESSAGE: () => (
+        <>
+            <p>You have dragged and dropped a mixture of files and folders.</p>
+            <p>
+                Please provide either only files, or only folders when selecting
+                option to create separate albums
+            </p>
+        </>
+    ),
+    ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
 };
 
 export default englishConstants;

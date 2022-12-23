@@ -23,6 +23,7 @@ import {
     getUint8ArrayView,
 } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
+import { EncryptedMagicMetadataCore } from 'types/magicMetadata';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
@@ -69,10 +70,11 @@ export async function readFile(
 }
 
 export async function extractFileMetadata(
+    worker,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
-    rawFile: File | ElectronFile,
     collectionID: number,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
+    rawFile: File | ElectronFile
 ) {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
@@ -80,6 +82,7 @@ export async function extractFileMetadata(
             getMetadataJSONMapKey(collectionID, originalName)
         ) ?? {};
     const extractedMetadata: Metadata = await extractMetadata(
+        worker,
         rawFile,
         fileTypeInfo
     );
@@ -109,6 +112,21 @@ export async function encryptFile(
         const { file: encryptedMetadata }: MetadataEncryptionResult =
             await worker.encryptMetadata(file.metadata, fileKey);
 
+        let encryptedPubMagicMetadata: EncryptedMagicMetadataCore;
+        if (file.pubMagicMetadata) {
+            const { file: encryptedPubMagicMetadataData }: EncryptionResult =
+                await worker.encryptMetadata(
+                    file.pubMagicMetadata.data,
+                    fileKey
+                );
+            encryptedPubMagicMetadata = {
+                version: file.pubMagicMetadata.version,
+                count: file.pubMagicMetadata.count,
+                data: encryptedPubMagicMetadataData.encryptedData as unknown as string,
+                header: encryptedPubMagicMetadataData.decryptionHeader,
+            };
+        }
+
         const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
             fileKey,
             encryptionKey
@@ -119,6 +137,7 @@ export async function encryptFile(
                 file: encryptedFiledata,
                 thumbnail: encryptedThumbnail,
                 metadata: encryptedMetadata,
+                pubMagicMetadata: encryptedPubMagicMetadata,
                 localID: file.localID,
             },
             fileKey: encryptedKey,

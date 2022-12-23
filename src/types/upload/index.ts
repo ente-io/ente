@@ -1,6 +1,12 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { B64FileAttribute, FileAttribute, S3FileAttribute } from 'types/file';
+import {
+    B64FileAttribute,
+    FileAttribute,
+    S3FileAttribute,
+    FilePublicMagicMetadata,
+} from 'types/file';
+import { EncryptedMagicMetadata } from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -94,13 +100,7 @@ export interface FileWithCollection extends UploadAsset {
     collection?: Collection;
     collectionID?: number;
 }
-export interface MetadataAndFileTypeInfo {
-    metadata: Metadata;
-    fileTypeInfo: FileTypeInfo;
-    filePath: string;
-}
 
-export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;
 export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
@@ -124,6 +124,7 @@ export interface FileWithMetadata
     extends Omit<FileInMemory, 'hasStaticThumbnail'> {
     metadata: Metadata;
     localID: number;
+    pubMagicMetadata: FilePublicMagicMetadata;
 }
 
 export interface EncryptedFile {
@@ -133,7 +134,8 @@ export interface EncryptedFile {
 export interface ProcessedFile {
     file: FileAttribute;
     thumbnail: FileAttribute;
-    metadata: B64FileAttribute;
+    metadata: FileAttribute;
+    pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
 
@@ -158,4 +160,11 @@ export interface ParsedExtractedMetadata {
 export interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
+    hasRootLevelFileWithFolder: boolean;
+}
+
+export interface PublicUploadProps {
+    token: string;
+    passwordToken: string;
+    accessedThroughSharedURL: boolean;
 }

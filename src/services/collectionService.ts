@@ -738,11 +738,6 @@ export function sortCollectionSummaries(
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
-                    return compareCollectionsLatestFile(
-                        b.latestFile,
-                        a.latestFile
-                    );
                 case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *
