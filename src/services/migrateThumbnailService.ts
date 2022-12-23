@@ -107,19 +107,19 @@ export async function uploadThumbnail(
     updatedThumbnail: Uint8Array,
     uploadURL: UploadURL
 ): Promise<fileAttribute> {
-    const { file: encryptedThumbnail }: EncryptionResult =
+    const { file: encryptedThumbnail }: EncryptionResult<Uint8Array> =
         await worker.encryptThumbnail(updatedThumbnail, fileKey);
     let thumbnailObjectKey: string = null;
     if (USE_CF_PROXY) {
         thumbnailObjectKey = await uploadHttpClient.putFileV2(
             uploadURL,
-            encryptedThumbnail.encryptedData as Uint8Array,
+            encryptedThumbnail.encryptedData,
             () => {}
         );
     } else {
         thumbnailObjectKey = await uploadHttpClient.putFile(
             uploadURL,
-            encryptedThumbnail.encryptedData as Uint8Array,
+            encryptedThumbnail.encryptedData,
             () => {}
         );
     }

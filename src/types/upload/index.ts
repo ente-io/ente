@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { FilePublicMagicMetadata } from 'types/file';
+import { fileAttribute, FilePublicMagicMetadata } from 'types/file';
 import { EncryptedMagicMetadataCore } from 'types/magicMetadata';
 
 export interface DataStream {
@@ -135,7 +135,12 @@ export interface ProcessedFile {
     pubMagicMetadata: EncryptedMagicMetadataCore;
     localID: number;
 }
-export interface BackupedFile extends Omit<ProcessedFile, 'localID'> {}
+export interface BackupedFile {
+    file: fileAttribute;
+    thumbnail: fileAttribute;
+    metadata: fileAttribute;
+    pubMagicMetadata: EncryptedMagicMetadataCore;
+}
 
 export interface UploadFile extends BackupedFile {
     collectionID: number;

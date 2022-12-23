@@ -252,14 +252,14 @@ export const updateFileMagicMetadata = async (files: EnteFile[]) => {
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const { file: encryptedMagicMetadata }: EncryptionResult =
+        const { file: encryptedMagicMetadata }: EncryptionResult<string> =
             await worker.encryptMetadata(file.magicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: file.magicMetadata.version,
                 count: file.magicMetadata.count,
-                data: encryptedMagicMetadata.encryptedData as unknown as string,
+                data: encryptedMagicMetadata.encryptedData,
                 header: encryptedMagicMetadata.decryptionHeader,
             },
         });
@@ -286,14 +286,14 @@ export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const { file: encryptedPubMagicMetadata }: EncryptionResult =
+        const { file: encryptedPubMagicMetadata }: EncryptionResult<string> =
             await worker.encryptMetadata(file.pubMagicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: file.pubMagicMetadata.version,
                 count: file.pubMagicMetadata.count,
-                data: encryptedPubMagicMetadata.encryptedData as unknown as string,
+                data: encryptedPubMagicMetadata.encryptedData,
                 header: encryptedPubMagicMetadata.decryptionHeader,
             },
         });
