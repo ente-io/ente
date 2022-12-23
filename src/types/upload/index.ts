@@ -135,7 +135,7 @@ export interface ProcessedFile {
     file: LocalFileAttributes<Uint8Array | DataStream>;
     thumbnail: LocalFileAttributes<Uint8Array>;
     metadata: LocalFileAttributes<string>;
-    pubMagicMetadata: FilePublicMagicMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
 export interface BackupedFile {

@@ -360,7 +360,7 @@ class UploadManager {
             await this.watchFolderCallback(
                 fileUploadResult,
                 fileWithCollection,
-                decryptedFile
+                uploadedFile as EncryptedEnteFile
             );
             return fileUploadResult;
         } catch (e) {
@@ -372,7 +372,7 @@ class UploadManager {
     private async watchFolderCallback(
         fileUploadResult: UPLOAD_RESULT,
         fileWithCollection: FileWithCollection,
-        uploadedFile: EnteFile
+        uploadedFile: EncryptedEnteFile
     ) {
         if (isElectron()) {
             await watchFolderService.onFileUpload(
