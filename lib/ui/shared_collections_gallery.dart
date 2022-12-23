@@ -91,8 +91,16 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           }
         }
         outgoing.sort((first, second) {
-          return second.collection.updationTime
-              .compareTo(first.collection.updationTime);
+          if (second.collection.isSharedFilesCollection() ==
+              first.collection.isSharedFilesCollection()) {
+            return second.collection.updationTime
+                .compareTo(first.collection.updationTime);
+          } else {
+            if (first.collection.isSharedFilesCollection()) {
+              return 1;
+            }
+            return -1;
+          }
         });
         incoming.sort((first, second) {
           return second.collection.updationTime
