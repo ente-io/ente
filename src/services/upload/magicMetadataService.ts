@@ -1,4 +1,3 @@
-import {} from 'types/file';
 import {
     NEW_FILE_MAGIC_METADATA,
     FilePublicMagicMetadataProps,
