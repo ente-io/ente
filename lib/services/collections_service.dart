@@ -457,6 +457,11 @@ class CollectionsService {
 
   Future<void> rename(Collection collection, String newName) async {
     try {
+      // Note: when collection created to sharing few files is renamed
+      // convert that collection to a regular collection type.
+      if (collection.isSharedFilesCollection()) {
+        await updateMagicMetadata(collection, {"subType": 0});
+      }
       final encryptedName = CryptoUtil.encryptSync(
         utf8.encode(newName),
         getCollectionKey(collection.id),
@@ -1029,8 +1034,24 @@ class CollectionsService {
       "/collections",
       data: payload,
     )
-        .then((response) {
-      final collection = Collection.fromMap(response.data["collection"]);
+        .then((response) async {
+      final collectionData = response.data["collection"];
+      final collection = Collection.fromMap(collectionData);
+      if (createRequest != null) {
+        if (collectionData['magicMetadata'] != null) {
+          final decryptionKey = _getAndCacheDecryptedKey(collection);
+          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            Sodium.base642bin(collectionData['magicMetadata']['data']),
+            decryptionKey,
+            Sodium.base642bin(collectionData['magicMetadata']['header']),
+          );
+          collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+          collection.mMdVersion = collectionData['magicMetadata']['version'];
+          collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+            collection.mMdEncodedJson,
+          );
+        }
+      }
       return _cacheCollectionAttributes(collection);
     });
   }
