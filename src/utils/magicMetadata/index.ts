@@ -1,6 +1,10 @@
 import { Collection } from 'types/collection';
-import { EnteFile, FileMagicMetadataProps } from 'types/file';
-import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
+import { EnteFile } from 'types/file';
+import {
+    FileMagicMetadataProps,
+    MagicMetadataCore,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 import CryptoWorker from 'utils/crypto';
 
 export function IsArchived(item: Collection | EnteFile) {

@@ -10,7 +10,6 @@ import {
     ParsedMetadataJSONMap,
     DataStream,
     ElectronFile,
-    MetadataEncryptionResult,
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -23,7 +22,7 @@ import {
     getUint8ArrayView,
 } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
-import { EncryptedMagicMetadataCore } from 'types/magicMetadata';
+import { EncryptedMagicMetadata } from 'types/magicMetadata';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
@@ -107,22 +106,23 @@ export async function encryptFile(
             file.filedata
         );
 
-        const { file: encryptedThumbnail }: EncryptionResult =
+        const { file: encryptedThumbnail }: EncryptionResult<Uint8Array> =
             await worker.encryptThumbnail(file.thumbnail, fileKey);
-        const { file: encryptedMetadata }: MetadataEncryptionResult =
+        const { file: encryptedMetadata }: EncryptionResult<string> =
             await worker.encryptMetadata(file.metadata, fileKey);
 
-        let encryptedPubMagicMetadata: EncryptedMagicMetadataCore;
+        let encryptedPubMagicMetadata: EncryptedMagicMetadata;
         if (file.pubMagicMetadata) {
-            const { file: encryptedPubMagicMetadataData }: EncryptionResult =
-                await worker.encryptMetadata(
-                    file.pubMagicMetadata.data,
-                    fileKey
-                );
+            const {
+                file: encryptedPubMagicMetadataData,
+            }: EncryptionResult<string> = await worker.encryptMetadata(
+                file.pubMagicMetadata.data,
+                fileKey
+            );
             encryptedPubMagicMetadata = {
                 version: file.pubMagicMetadata.version,
                 count: file.pubMagicMetadata.count,
-                data: encryptedPubMagicMetadataData.encryptedData as unknown as string,
+                data: encryptedPubMagicMetadataData.encryptedData,
                 header: encryptedPubMagicMetadataData.decryptionHeader,
             };
         }

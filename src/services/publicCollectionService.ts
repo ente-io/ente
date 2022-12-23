@@ -262,8 +262,9 @@ const getPublicFiles = async (
                     resp.data.diff.map(async (file: EncryptedEnteFile) => {
                         if (!file.isDeleted) {
                             return await decryptFile(file, collection.key);
+                        } else {
+                            return file;
                         }
-                        return file;
                     }) as Promise<EnteFile>[]
                 )),
             ];

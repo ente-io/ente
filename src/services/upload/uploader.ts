@@ -1,4 +1,4 @@
-import { EnteFile, FilePublicMagicMetadata } from 'types/file';
+import { EnteFile } from 'types/file';
 import { handleUploadError, CustomError } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { findMatchingExistingFiles } from 'utils/upload';
@@ -19,6 +19,7 @@ import { sleep } from 'utils/common';
 import { addToCollection } from 'services/collectionService';
 import uploadCancelService from './uploadCancelService';
 import uploadService from './uploadService';
+import { FilePublicMagicMetadata } from 'types/magicMetadata';
 
 interface UploadResponse {
     fileUploadResult: UPLOAD_RESULT;

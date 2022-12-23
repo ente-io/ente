@@ -35,7 +35,7 @@ import UIService from './uiService';
 import { USE_CF_PROXY } from 'constants/upload';
 import publicUploadHttpClient from './publicUploadHttpClient';
 import { constructPublicMagicMetadata } from './magicMetadataService';
-import { FilePublicMagicMetadataProps } from 'types/file';
+import { FilePublicMagicMetadataProps } from 'types/magicMetadata';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -175,13 +175,13 @@ class UploadService {
             if (USE_CF_PROXY) {
                 thumbnailObjectKey = await UploadHttpClient.putFileV2(
                     thumbnailUploadURL,
-                    file.thumbnail.encryptedData as Uint8Array,
+                    file.thumbnail.encryptedData,
                     null
                 );
             } else {
                 thumbnailObjectKey = await UploadHttpClient.putFile(
                     thumbnailUploadURL,
-                    file.thumbnail.encryptedData as Uint8Array,
+                    file.thumbnail.encryptedData,
                     null
                 );
             }

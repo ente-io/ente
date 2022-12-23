@@ -1,12 +1,5 @@
 import { SelectedState } from 'types/gallery';
-import {
-    EnteFile,
-    EncryptedEnteFile,
-    FileMagicMetadata,
-    FileMagicMetadataProps,
-    FilePublicMagicMetadata,
-    FilePublicMagicMetadataProps,
-} from 'types/file';
+import { EnteFile, EncryptedEnteFile } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
@@ -25,7 +18,14 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
-import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
+import {
+    FileMagicMetadata,
+    FileMagicMetadataProps,
+    FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
+    NEW_FILE_MAGIC_METADATA,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';

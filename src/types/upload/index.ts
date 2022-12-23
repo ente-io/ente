@@ -1,12 +1,10 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
+import { FileAttributes } from 'types/file';
 import {
-    B64FileAttribute,
-    FileAttribute,
-    S3FileAttribute,
+    EncryptedMagicMetadata,
     FilePublicMagicMetadata,
-} from 'types/file';
-import { EncryptedMagicMetadata } from 'types/magicMetadata';
+} from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -17,13 +15,15 @@ export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
 }
 
-export interface EncryptionResult {
-    file: FileAttribute;
-    key: string;
+export interface LocalFileAttributes<
+    T extends string | Uint8Array | DataStream
+> {
+    encryptedData: T;
+    decryptionHeader: string;
 }
 
-export interface MetadataEncryptionResult {
-    file: B64FileAttribute;
+export interface EncryptionResult<T extends string | Uint8Array | DataStream> {
+    file: LocalFileAttributes<T>;
     key: string;
 }
 
@@ -132,17 +132,17 @@ export interface EncryptedFile {
     fileKey: B64EncryptionResult;
 }
 export interface ProcessedFile {
-    file: FileAttribute;
-    thumbnail: FileAttribute;
-    metadata: FileAttribute;
+    file: LocalFileAttributes<Uint8Array | DataStream>;
+    thumbnail: LocalFileAttributes<Uint8Array>;
+    metadata: LocalFileAttributes<string>;
     pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
-
 export interface BackupedFile {
-    file: S3FileAttribute;
-    thumbnail: S3FileAttribute;
-    metadata: B64FileAttribute;
+    file: FileAttributes;
+    thumbnail: FileAttributes;
+    metadata: FileAttributes;
+    pubMagicMetadata: EncryptedMagicMetadata;
 }
 
 export interface UploadFile extends BackupedFile {

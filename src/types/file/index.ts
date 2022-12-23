@@ -1,26 +1,26 @@
 import {
     EncryptedMagicMetadata,
-    MagicMetadataCore,
-    VISIBILITY_STATE,
+    FileMagicMetadata,
+    FilePublicMagicMetadata,
 } from 'types/magicMetadata';
-import { DataStream, Metadata } from 'types/upload';
+import { Metadata } from 'types/upload';
 
-export interface FileAttribute {
-    encryptedData: DataStream | Uint8Array;
+interface FileAttributesBase {
     decryptionHeader: string;
 }
 
-export interface B64FileAttribute {
+interface MetadataFileAttributes extends FileAttributesBase {
     encryptedData: string;
-    decryptionHeader: string;
+    objectKey?: string;
 }
-
-export interface S3FileAttribute {
+interface S3FileAttributes extends FileAttributesBase {
     objectKey: string;
-    decryptionHeader: string;
+    encryptedData?: string;
 }
 
-export interface EnteFileInfo {
+export type FileAttributes = MetadataFileAttributes | S3FileAttributes;
+
+export interface FileInfo {
     fileSize: number;
     thumbSize: number;
 }
@@ -29,10 +29,10 @@ export interface EncryptedEnteFile {
     id: number;
     collectionID: number;
     ownerID: number;
-    file: S3FileAttribute;
-    thumbnail: S3FileAttribute;
-    metadata: B64FileAttribute;
-    info: EnteFileInfo;
+    file: FileAttributes;
+    thumbnail: FileAttributes;
+    metadata: FileAttributes;
+    info: FileInfo;
     magicMetadata: EncryptedMagicMetadata;
     pubMagicMetadata: EncryptedMagicMetadata;
     encryptedKey: string;
@@ -66,27 +66,6 @@ export interface EnteFile
     originalVideoURL?: string;
     originalImageURL?: string;
     dataIndex?: number;
-}
-
-export interface FileMagicMetadataProps {
-    visibility?: VISIBILITY_STATE;
-    filePaths?: string[];
-}
-
-export interface FileMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
-    data: FileMagicMetadataProps;
-}
-
-export interface FilePublicMagicMetadataProps {
-    editedTime?: number;
-    editedName?: string;
-    caption?: string;
-    uploaderName?: string;
-}
-
-export interface FilePublicMagicMetadata
-    extends Omit<MagicMetadataCore, 'data'> {
-    data: FilePublicMagicMetadataProps;
 }
 
 export interface TrashRequest {
