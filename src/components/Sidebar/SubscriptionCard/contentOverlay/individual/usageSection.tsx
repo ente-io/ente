@@ -13,7 +13,7 @@ interface Iprops {
 export function IndividualUsageSection({ usage, storage, fileCount }: Iprops) {
     return (
         <Box width="100%">
-            <Progressbar value={(usage * 100) / storage} />
+            <Progressbar value={Math.min((usage * 100) / storage, 100)} />
             <SpaceBetweenFlex
                 sx={{
                     marginTop: 1.5,

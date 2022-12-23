@@ -26,10 +26,15 @@ const SubmitButton: FC<ButtonProps<'button', SubmitButtonProps>> = ({
             disabled={disabled || loading || success}
             sx={{
                 my: 4,
-                '&.Mui-disabled': {
-                    backgroundColor: (theme) => theme.palette.accent.main,
-                    color: (theme) => theme.palette.text.primary,
-                },
+                ...(loading
+                    ? {
+                          '&.Mui-disabled': {
+                              backgroundColor: (theme) =>
+                                  theme.palette.accent.main,
+                              color: (theme) => theme.palette.text.primary,
+                          },
+                      }
+                    : {}),
                 ...sx,
             }}
             {...props}>

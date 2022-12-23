@@ -11,6 +11,7 @@ import {
 export interface EncryptedCollection {
     id: number;
     owner: User;
+    // collection name was unencrypted in the past, so we need to keep it as optional
     name?: string;
     encryptedKey: string;
     keyDecryptionNonce: string;
@@ -45,6 +46,7 @@ export interface PublicURL {
     deviceLimit: number;
     validTill: number;
     enableDownload: boolean;
+    enableCollect: boolean;
     passwordEnabled: boolean;
     nonce?: string;
     opsLimit?: number;
@@ -55,6 +57,7 @@ export interface UpdatePublicURL {
     collectionID: number;
     disablePassword?: boolean;
     enableDownload?: boolean;
+    enableCollect?: boolean;
     validTill?: number;
     deviceLimit?: number;
     passHash?: string;

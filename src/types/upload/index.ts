@@ -1,6 +1,10 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { B64FileAttribute, FileAttribute, S3FileAttribute } from 'types/file';
+import { FileAttributes } from 'types/file';
+import {
+    EncryptedMagicMetadata,
+    FilePublicMagicMetadata,
+} from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -11,13 +15,15 @@ export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
 }
 
-export interface EncryptionResult {
-    file: FileAttribute;
-    key: string;
+export interface LocalFileAttributes<
+    T extends string | Uint8Array | DataStream
+> {
+    encryptedData: T;
+    decryptionHeader: string;
 }
 
-export interface MetadataEncryptionResult {
-    file: B64FileAttribute;
+export interface EncryptionResult<T extends string | Uint8Array | DataStream> {
+    file: LocalFileAttributes<T>;
     key: string;
 }
 
@@ -94,13 +100,7 @@ export interface FileWithCollection extends UploadAsset {
     collection?: Collection;
     collectionID?: number;
 }
-export interface MetadataAndFileTypeInfo {
-    metadata: Metadata;
-    fileTypeInfo: FileTypeInfo;
-    filePath: string;
-}
 
-export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;
 export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
@@ -124,6 +124,7 @@ export interface FileWithMetadata
     extends Omit<FileInMemory, 'hasStaticThumbnail'> {
     metadata: Metadata;
     localID: number;
+    pubMagicMetadata: FilePublicMagicMetadata;
 }
 
 export interface EncryptedFile {
@@ -131,16 +132,17 @@ export interface EncryptedFile {
     fileKey: B64EncryptionResult;
 }
 export interface ProcessedFile {
-    file: FileAttribute;
-    thumbnail: FileAttribute;
-    metadata: B64FileAttribute;
+    file: LocalFileAttributes<Uint8Array | DataStream>;
+    thumbnail: LocalFileAttributes<Uint8Array>;
+    metadata: LocalFileAttributes<string>;
+    pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
-
 export interface BackupedFile {
-    file: S3FileAttribute;
-    thumbnail: S3FileAttribute;
-    metadata: B64FileAttribute;
+    file: FileAttributes;
+    thumbnail: FileAttributes;
+    metadata: FileAttributes;
+    pubMagicMetadata: EncryptedMagicMetadata;
 }
 
 export interface UploadFile extends BackupedFile {
@@ -158,4 +160,11 @@ export interface ParsedExtractedMetadata {
 export interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
+    hasRootLevelFileWithFolder: boolean;
+}
+
+export interface PublicUploadProps {
+    token: string;
+    passwordToken: string;
+    accessedThroughSharedURL: boolean;
 }

@@ -2,7 +2,6 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
-import { MetadataEncryptionResult } from 'types/upload';
 import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
@@ -20,6 +19,7 @@ import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
 import { isCollectionHidden } from 'utils/collection';
 import { CustomError } from 'utils/error';
+import { EncryptionResult } from 'types/upload';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -253,14 +253,14 @@ export const updateFileMagicMetadata = async (files: EnteFile[]) => {
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const { file: encryptedMagicMetadata }: MetadataEncryptionResult =
+        const { file: encryptedMagicMetadata }: EncryptionResult<string> =
             await worker.encryptMetadata(file.magicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: file.magicMetadata.version,
                 count: file.magicMetadata.count,
-                data: encryptedMagicMetadata.encryptedData as unknown as string,
+                data: encryptedMagicMetadata.encryptedData,
                 header: encryptedMagicMetadata.decryptionHeader,
             },
         });
@@ -287,14 +287,14 @@ export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const { file: encryptedPubMagicMetadata }: MetadataEncryptionResult =
+        const { file: encryptedPubMagicMetadata }: EncryptionResult<string> =
             await worker.encryptMetadata(file.pubMagicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: file.pubMagicMetadata.version,
                 count: file.pubMagicMetadata.count,
-                data: encryptedPubMagicMetadata.encryptedData as unknown as string,
+                data: encryptedPubMagicMetadata.encryptedData,
                 header: encryptedPubMagicMetadata.decryptionHeader,
             },
         });

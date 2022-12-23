@@ -1,11 +1,11 @@
 import React from 'react';
-import { IconButton, styled } from '@mui/material';
+import { ButtonProps, IconButton, styled } from '@mui/material';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import { Button } from '@mui/material';
 import constants from 'utils/strings/constants';
 import uploadManager from 'services/upload/uploadManager';
 
-const Wrapper = styled('div')`
+const Wrapper = styled('div')<{ disableShrink: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,22 +14,35 @@ const Wrapper = styled('div')`
     & .mobile-button {
         display: none;
     }
-    @media (max-width: 624px) {
+    ${({ disableShrink }) =>
+        !disableShrink &&
+        `@media (max-width: 624px) {
         & .mobile-button {
             display: block;
         }
         & .desktop-button {
             display: none;
         }
-    }
+    }`}
 `;
 
 interface Iprops {
     openUploader: () => void;
+    text?: string;
+    color?: ButtonProps['color'];
+    disableShrink?: boolean;
+    icon?: JSX.Element;
 }
-function UploadButton({ openUploader }: Iprops) {
+function UploadButton({
+    openUploader,
+    text,
+    color,
+    disableShrink,
+    icon,
+}: Iprops) {
     return (
         <Wrapper
+            disableShrink={disableShrink}
             style={{
                 cursor: !uploadManager.shouldAllowNewUpload() && 'not-allowed',
             }}>
@@ -37,9 +50,9 @@ function UploadButton({ openUploader }: Iprops) {
                 onClick={openUploader}
                 disabled={!uploadManager.shouldAllowNewUpload()}
                 className="desktop-button"
-                color="secondary"
-                startIcon={<FileUploadOutlinedIcon />}>
-                {constants.UPLOAD}
+                color={color ?? 'secondary'}
+                startIcon={icon ?? <FileUploadOutlinedIcon />}>
+                {text ?? constants.UPLOAD}
             </Button>
 
             <IconButton

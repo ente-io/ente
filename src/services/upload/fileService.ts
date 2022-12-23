@@ -9,7 +9,7 @@ import {
     ParsedMetadataJSONMap,
     DataStream,
     ElectronFile,
-    MetadataEncryptionResult,
+    B64EncryptionResult,
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -24,6 +24,7 @@ import {
 import { generateThumbnail } from './thumbnailService';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { Remote } from 'comlink';
+import { EncryptedMagicMetadata } from 'types/magicMetadata';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
@@ -70,10 +71,11 @@ export async function readFile(
 }
 
 export async function extractFileMetadata(
+    worker,
     parsedMetadataJSONMap: ParsedMetadataJSONMap,
-    rawFile: File | ElectronFile,
     collectionID: number,
-    fileTypeInfo: FileTypeInfo
+    fileTypeInfo: FileTypeInfo,
+    rawFile: File | ElectronFile
 ) {
     const originalName = getFileOriginalName(rawFile);
     const googleMetadata =
@@ -81,6 +83,7 @@ export async function extractFileMetadata(
             getMetadataJSONMapKey(collectionID, originalName)
         ) ?? {};
     const extractedMetadata: Metadata = await extractMetadata(
+        worker,
         rawFile,
         fileTypeInfo
     );
@@ -105,18 +108,38 @@ export async function encryptFile(
             file.filedata
         );
 
-        const { file: encryptedThumbnail }: EncryptionResult =
+        const { file: encryptedThumbnail }: EncryptionResult<Uint8Array> =
             await worker.encryptThumbnail(file.thumbnail, fileKey);
-        const { file: encryptedMetadata }: MetadataEncryptionResult =
+        const { file: encryptedMetadata }: EncryptionResult<string> =
             await worker.encryptMetadata(file.metadata, fileKey);
 
-        const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
+        let encryptedPubMagicMetadata: EncryptedMagicMetadata;
+        if (file.pubMagicMetadata) {
+            const {
+                file: encryptedPubMagicMetadataData,
+            }: EncryptionResult<string> = await worker.encryptMetadata(
+                file.pubMagicMetadata.data,
+                fileKey
+            );
+            encryptedPubMagicMetadata = {
+                version: file.pubMagicMetadata.version,
+                count: file.pubMagicMetadata.count,
+                data: encryptedPubMagicMetadataData.encryptedData,
+                header: encryptedPubMagicMetadataData.decryptionHeader,
+            };
+        }
+
+        const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
+            fileKey,
+            encryptionKey
+        );
 
         const result: EncryptedFile = {
             file: {
                 file: encryptedFiledata,
                 thumbnail: encryptedThumbnail,
                 metadata: encryptedMetadata,
+                pubMagicMetadata: encryptedPubMagicMetadata,
                 localID: file.localID,
             },
             fileKey: encryptedKey,

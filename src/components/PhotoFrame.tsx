@@ -187,7 +187,13 @@ const PhotoFrame = ({
                 }
                 return false;
             });
-    }, [files, deletedFileIds, search, activeCollection]);
+    }, [
+        files,
+        deletedFileIds,
+        search?.date,
+        search?.location,
+        activeCollection,
+    ]);
 
     const fileToCollectionsMap = useMemo(() => {
         const fileToCollectionsMap = new Map<number, number[]>();
@@ -576,7 +582,8 @@ const PhotoFrame = ({
                 let convertedVideoURL;
 
                 if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                    [originalImageURL, originalVideoURL] = urls.converted;
+                    [originalImageURL, originalVideoURL] = urls.original;
+                    [convertedImageURL, convertedVideoURL] = urls.converted;
                 } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                     [originalVideoURL] = urls.original;
                     [convertedVideoURL] = urls.converted;

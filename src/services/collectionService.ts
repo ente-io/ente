@@ -40,7 +40,7 @@ import {
     CollectionSummaryType,
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { MetadataEncryptionResult } from 'types/upload';
+import { EncryptionResult } from 'types/upload';
 import constants from 'utils/strings/constants';
 import { IsArchived } from 'utils/magicMetadata';
 import { User } from 'types/user';
@@ -120,7 +120,7 @@ const getCollections = async (
             resp.data.collections.map(
                 async (collection: EncryptedCollection) => {
                     if (collection.isDeleted) {
-                        return null;
+                        return collection;
                     }
                     try {
                         return await getCollectionWithSecrets(collection, key);
@@ -128,15 +128,16 @@ const getCollections = async (
                         logError(e, `decryption failed for collection`, {
                             collectionID: collection.id,
                         });
-                        return null;
+                        return collection;
                     }
                 }
             )
         );
-        const nonNullCollections = decryptedCollections.filter(
-            (collection) => !!collection
+        // only allow deleted or collection with key, filtering out collection whose decryption failed
+        const collections = decryptedCollections.filter(
+            (collection) => collection.isDeleted || collection.key
         );
-        return nonNullCollections;
+        return collections;
     } catch (e) {
         logError(e, 'getCollections failed');
         throw e;
@@ -512,7 +513,7 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
 
     const worker = await new CryptoWorker();
 
-    const { file: encryptedMagicMetadata }: MetadataEncryptionResult =
+    const { file: encryptedMagicMetadata }: EncryptionResult<string> =
         await worker.encryptMetadata(
             collection.magicMetadata.data,
             collection.key
@@ -523,7 +524,7 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
         magicMetadata: {
             version: collection.magicMetadata.version,
             count: collection.magicMetadata.count,
-            data: encryptedMagicMetadata.encryptedData as unknown as string,
+            data: encryptedMagicMetadata.encryptedData,
             header: encryptedMagicMetadata.decryptionHeader,
         },
     };
@@ -722,11 +723,6 @@ export function sortCollectionSummaries(
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
-                    return compareCollectionsLatestFile(
-                        b.latestFile,
-                        a.latestFile
-                    );
                 case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *
