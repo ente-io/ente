@@ -29,6 +29,7 @@ export const getDedicatedCryptoWorker = () => {
         return cryptoComlinkWorker;
     }
 };
+
 export const CryptoWorker = getDedicatedCryptoWorker()?.remote;
 
 export const getDedicatedConvertWorker = () => {

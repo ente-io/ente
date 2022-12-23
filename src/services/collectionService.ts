@@ -44,7 +44,6 @@ import constants from 'utils/strings/constants';
 import { IsArchived } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import { getNonHiddenCollections } from 'utils/collection';
-import { EncryptionResult } from 'types/crypto';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -282,7 +281,7 @@ export const createCollection = async (
         const worker = await new CryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
-        const collectionKey: string = await worker.generateEncryptionKey();
+        const collectionKey = await worker.generateEncryptionKey();
         const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
             await worker.encryptToB64(collectionKey, encryptionKey);
         const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
@@ -513,11 +512,10 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
 
     const worker = await new CryptoWorker();
 
-    const { file: encryptedMagicMetadata }: EncryptionResult<string> =
-        await worker.encryptMetadata(
-            collection.magicMetadata.data,
-            collection.key
-        );
+    const { file: encryptedMagicMetadata } = await worker.encryptMetadata(
+        collection.magicMetadata.data,
+        collection.key
+    );
 
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
@@ -578,10 +576,7 @@ export const shareCollection = async (
 
         const token = getToken();
         const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey: string = await worker.boxSeal(
-            collection.key,
-            publicKey
-        );
+        const encryptedKey = await worker.boxSeal(collection.key, publicKey);
         const shareCollectionRequest = {
             collectionID: collection.id,
             email: withUserEmail,

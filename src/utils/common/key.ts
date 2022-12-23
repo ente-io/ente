@@ -11,7 +11,7 @@ export const getActualKey = async () => {
         );
 
         const cryptoWorker = await new CryptoWorker();
-        const key: string = await cryptoWorker.decryptB64(
+        const key = await cryptoWorker.decryptB64(
             encryptionKeyAttributes.encryptedData,
             encryptionKeyAttributes.nonce,
             encryptionKeyAttributes.key

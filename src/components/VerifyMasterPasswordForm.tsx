@@ -43,7 +43,7 @@ export default function VerifyMasterPasswordForm({
                 throw Error(CustomError.WEAK_DEVICE);
             }
             try {
-                const key: string = await cryptoWorker.decryptB64(
+                const key = await cryptoWorker.decryptB64(
                     keyAttributes.encryptedKey,
                     keyAttributes.keyDecryptionNonce,
                     kek

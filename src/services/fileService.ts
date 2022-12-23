@@ -19,7 +19,6 @@ import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
 import { isCollectionHidden } from 'utils/collection';
 import { CustomError } from 'utils/error';
-import { EncryptionResult } from 'types/crypto';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -253,8 +252,10 @@ export const updateFileMagicMetadata = async (files: EnteFile[]) => {
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const { file: encryptedMagicMetadata }: EncryptionResult<string> =
-            await worker.encryptMetadata(file.magicMetadata.data, file.key);
+        const { file: encryptedMagicMetadata } = await worker.encryptMetadata(
+            file.magicMetadata.data,
+            file.key
+        );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
@@ -287,7 +288,7 @@ export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const { file: encryptedPubMagicMetadata }: EncryptionResult<string> =
+        const { file: encryptedPubMagicMetadata } =
             await worker.encryptMetadata(file.pubMagicMetadata.data, file.key);
         reqBody.metadataList.push({
             id: file.id,

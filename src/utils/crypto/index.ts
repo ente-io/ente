@@ -1,4 +1,4 @@
-import { KEK, KeyAttributes } from 'types/user';
+import { KeyAttributes } from 'types/user';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
@@ -62,9 +62,8 @@ export async function generateAndSaveIntermediateKeyAttributes(
     key: string
 ): Promise<KeyAttributes> {
     const cryptoWorker = await new CryptoWorker();
-    const intermediateKekSalt: string =
-        await cryptoWorker.generateSaltToDeriveKey();
-    const intermediateKek: KEK = await cryptoWorker.deriveInteractiveKey(
+    const intermediateKekSalt = await cryptoWorker.generateSaltToDeriveKey();
+    const intermediateKek = await cryptoWorker.deriveInteractiveKey(
         passphrase,
         intermediateKekSalt
     );
@@ -131,7 +130,7 @@ async function createNewRecoveryKey() {
 
     const cryptoWorker = await new CryptoWorker();
 
-    const recoveryKey: string = await cryptoWorker.generateEncryptionKey();
+    const recoveryKey = await cryptoWorker.generateEncryptionKey();
     const encryptedMasterKey = await cryptoWorker.encryptToB64(
         masterKey,
         recoveryKey

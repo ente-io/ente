@@ -98,7 +98,7 @@ class PublicCollectionDownloadManager {
             throw Error(CustomError.REQUEST_FAILED);
         }
         const worker = await new CryptoWorker();
-        const decrypted: Uint8Array = await worker.decryptThumbnail(
+        const decrypted = await worker.decryptThumbnail(
             new Uint8Array(resp.data),
             await worker.fromB64(file.thumbnail.decryptionHeader),
             file.key
@@ -170,7 +170,7 @@ class PublicCollectionDownloadManager {
             if (typeof resp.data === 'undefined') {
                 throw Error(CustomError.REQUEST_FAILED);
             }
-            const decrypted: any = await worker.decryptFile(
+            const decrypted = await worker.decryptFile(
                 new Uint8Array(resp.data),
                 await worker.fromB64(file.file.decryptionHeader),
                 file.key

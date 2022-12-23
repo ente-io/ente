@@ -46,7 +46,7 @@ class HEICConverter {
                                         reject(Error('wait time exceeded'));
                                     }, WAIT_TIME_IN_MICROSECONDS);
                                     const startTime = Date.now();
-                                    const convertedHEIC: Blob =
+                                    const convertedHEIC =
                                         await worker.convertHEIC(
                                             fileBlob,
                                             CONVERT_FORMAT
