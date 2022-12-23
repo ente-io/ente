@@ -87,7 +87,7 @@ class _DeviceFoldersGridViewWidgetState
                         itemCount: snapshot.data.length,
                       );
               } else if (snapshot.hasError) {
-                logger.severe("failed to load device galler", snapshot.error);
+                logger.severe("failed to load device gallery", snapshot.error);
                 return const Text("Failed to load albums");
               } else {
                 return const EnteLoadingWidget();
