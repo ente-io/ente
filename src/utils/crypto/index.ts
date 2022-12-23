@@ -8,12 +8,6 @@ import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
 import { CryptoWorker } from 'utils/comlink';
 
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
-}
-
 export async function generateKeyAttributes(
     passphrase: string
 ): Promise<{ keyAttributes: KeyAttributes; masterKey: string }> {

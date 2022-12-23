@@ -10,9 +10,10 @@ import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
-import { EncryptionResult, UploadURL } from 'types/upload';
+import { UploadURL } from 'types/upload';
 import { FileAttributes } from 'types/file';
 import { USE_CF_PROXY } from 'constants/upload';
+import { EncryptionResult } from 'types/crypto';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB

@@ -40,11 +40,11 @@ import {
     CollectionSummaryType,
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { EncryptionResult } from 'types/upload';
 import constants from 'utils/strings/constants';
 import { IsArchived } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import { getNonHiddenCollections } from 'utils/collection';
+import { EncryptionResult } from 'types/crypto';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';

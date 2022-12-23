@@ -1,7 +1,7 @@
 import sodium, { StateAddress } from 'libsodium-wrappers';
 import { ENCRYPTION_CHUNK_SIZE } from 'constants/crypto';
 import assert from 'assert';
-import { B64EncryptionResult } from '.';
+import { B64EncryptionResult } from 'types/crypto';
 
 export async function decryptChaChaOneShot(
     data: Uint8Array,

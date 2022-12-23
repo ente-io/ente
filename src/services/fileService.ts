@@ -19,7 +19,7 @@ import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
 import { isCollectionHidden } from 'utils/collection';
 import { CustomError } from 'utils/error';
-import { EncryptionResult } from 'types/upload';
+import { EncryptionResult } from 'types/crypto';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';

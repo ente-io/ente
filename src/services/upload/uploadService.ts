@@ -5,7 +5,6 @@ import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
 import { CustomError, handleUploadError } from 'utils/error';
 import {
-    B64EncryptionResult,
     BackupedFile,
     EncryptedFile,
     FileTypeInfo,
@@ -38,6 +37,7 @@ import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import publicUploadHttpClient from './publicUploadHttpClient';
 import { constructPublicMagicMetadata } from './magicMetadataService';
 import { FilePublicMagicMetadataProps } from 'types/magicMetadata';
+import { B64EncryptionResult } from 'types/crypto';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];

@@ -4,12 +4,10 @@ import {
     FileInMemory,
     Metadata,
     EncryptedFile,
-    EncryptionResult,
     FileWithMetadata,
     ParsedMetadataJSONMap,
     DataStream,
     ElectronFile,
-    B64EncryptionResult,
 } from 'types/upload';
 import { splitFilenameAndExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -25,6 +23,7 @@ import { generateThumbnail } from './thumbnailService';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { Remote } from 'comlink';
 import { EncryptedMagicMetadata } from 'types/magicMetadata';
+import { EncryptionResult, B64EncryptionResult } from 'types/crypto';
 
 const EDITED_FILE_SUFFIX = '-edited';
 
