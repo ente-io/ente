@@ -11,6 +11,7 @@ import {
 export interface EncryptedCollection {
     id: number;
     owner: User;
+    // collection name was unencrypted in the past, so we need to keep it as optional
     name?: string;
     encryptedKey: string;
     keyDecryptionNonce: string;
