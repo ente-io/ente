@@ -138,7 +138,12 @@ class Actions extends StatelessWidget {
       children: addSeparators(
         buttons,
         const SizedBox(
-          height: 8,
+          // In figma this white space is of height 8pts. But the Button
+          // component has 1pts of invisible border by default in code. So two
+          // 1pts borders will visually make the whitespace 8pts.
+          // Height of button component in figma = 48, in code = 50 (2pts for
+          // top + bottom border)
+          height: 6,
         ),
       ),
     );
