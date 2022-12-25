@@ -35,7 +35,7 @@ import UIService from './uiService';
 import { USE_CF_PROXY } from 'constants/upload';
 import publicUploadHttpClient from './publicUploadHttpClient';
 import { constructPublicMagicMetadata } from './magicMetadataService';
-import { FilePublicMagicMetadataProps } from 'types/file';
+import { FilePublicMagicMetadataProps } from 'types/magicMetadata';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
