@@ -117,9 +117,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       (e) => (e.collection.isSharedFilesCollection()),
     );
 
-    return favMathResult.matched +
-        potentialSharedLinkCollection.unmatched +
-        potentialSharedLinkCollection.matched;
+    return favMathResult.matched + potentialSharedLinkCollection.unmatched;
   }
 
   Widget _getCollectionsGalleryWidget(
