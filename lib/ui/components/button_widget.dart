@@ -56,7 +56,7 @@ class ButtonWidget extends StatelessWidget {
   final bool isInAlert;
   const ButtonWidget({
     required this.buttonType,
-    required this.buttonSize,
+    this.buttonSize = ButtonSize.large,
     this.icon,
     this.labelText,
     this.onTap,
