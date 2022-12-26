@@ -208,7 +208,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getCaptionResults(
+  Future<List<GenericSearchResult>> getCaptionAndNameResults(
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
@@ -217,15 +217,31 @@ class SearchService {
     }
     final RegExp pattern = RegExp(query, caseSensitive: false);
     final List<File> allFiles = await _getAllFiles();
-    final matchedFiles = allFiles
-        .where((e) => e.caption != null && pattern.hasMatch(e.caption))
-        .toList();
-    if (matchedFiles.isNotEmpty) {
+    final List<File> captionMatch = <File>[];
+    final List<File> displayNameMatch = <File>[];
+    for (File eachFile in allFiles) {
+      if (eachFile.caption != null && pattern.hasMatch(eachFile.caption)) {
+        captionMatch.add(eachFile);
+      }
+      if (pattern.hasMatch(eachFile.displayName)) {
+        displayNameMatch.add(eachFile);
+      }
+    }
+    if (captionMatch.isNotEmpty) {
       searchResults.add(
         GenericSearchResult(
           ResultType.fileCaption,
           query,
-          matchedFiles,
+          captionMatch,
+        ),
+      );
+    }
+    if (displayNameMatch.isNotEmpty) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.file,
+          query,
+          displayNameMatch,
         ),
       );
     }

@@ -208,8 +208,9 @@ class _SearchWidgetState extends State<SearchWidget> {
           await _searchService.getFileTypeResults(query);
       allResults.addAll(fileTypeSearchResults);
 
-      final fileCaptionResults = await _searchService.getCaptionResults(query);
-      allResults.addAll(fileCaptionResults);
+      final captionAndDisplayNameResult =
+          await _searchService.getCaptionAndNameResults(query);
+      allResults.addAll(captionAndDisplayNameResult);
 
       final fileExtnResult =
           await _searchService.getFileExtensionResults(query);
