@@ -80,6 +80,22 @@ extension GalleyTypeExtension on GalleryType {
     }
   }
 
+  bool showCreateLink() {
+    switch (this) {
+      case GalleryType.ownedCollection:
+      case GalleryType.searchResults:
+      case GalleryType.homepage:
+      case GalleryType.favorite:
+      case GalleryType.archive:
+        return true;
+      case GalleryType.hidden:
+      case GalleryType.localFolder:
+      case GalleryType.trash:
+      case GalleryType.sharedCollection:
+        return false;
+    }
+  }
+
   bool showRemoveFromAlbum() {
     switch (this) {
       case GalleryType.ownedCollection:

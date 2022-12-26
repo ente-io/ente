@@ -202,6 +202,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       includeCollabCollections:
           widget.actionType == CollectionActionType.addFiles,
     );
+    collectionsWithThumbnail.removeWhere(
+      (element) => (element.collection.type == CollectionType.favorites ||
+          element.collection.type == CollectionType.uncategorized ||
+          element.collection.isSharedFilesCollection()),
+    );
     collectionsWithThumbnail.sort((first, second) {
       return compareAsciiLowerCaseNatural(
         first.collection.name ?? "",
