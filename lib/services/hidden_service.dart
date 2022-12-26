@@ -14,6 +14,7 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 
@@ -90,7 +91,7 @@ extension HiddenService on CollectionsService {
     } catch (e, s) {
       _logger.severe("Could not hide", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return false;
     } finally {
       await dialog.hide();

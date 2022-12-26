@@ -24,6 +24,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -107,7 +108,7 @@ Future<void> deleteFilesFromEverywhere(
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       rethrow;
     }
     for (final collectionID in updatedCollectionIDs) {
@@ -172,7 +173,7 @@ Future<void> deleteFilesFromRemoteOnly(
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
     await dialog.hide();
-    showGenericErrorDialog(context);
+    showGenericErrorDialog(context: context);
     rethrow;
   }
   for (final collectionID in updatedCollectionIDs) {
@@ -288,7 +289,7 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
   } catch (e, s) {
     _logger.info("failed to delete from trash", e, s);
     await dialog.hide();
-    await showGenericErrorDialog(context);
+    await showGenericErrorDialog(context: context);
     return false;
   }
 }
@@ -314,7 +315,7 @@ Future<bool> emptyTrash(BuildContext context) async {
   } catch (e, s) {
     _logger.info("failed empty trash", e, s);
     await dialog.hide();
-    await showGenericErrorDialog(context);
+    await showGenericErrorDialog(context: context);
     return false;
   }
 }

@@ -14,6 +14,7 @@ import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -318,7 +319,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return false;
     }
   }
@@ -340,7 +341,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return false;
     }
   }
@@ -386,7 +387,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     } catch (e, s) {
       _logger.severe("Could not add to album", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
     return false;
   }
@@ -400,7 +401,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     } finally {
       await dialog.hide();
     }

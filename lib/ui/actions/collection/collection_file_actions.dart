@@ -8,6 +8,7 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -51,8 +52,10 @@ extension CollectionFileActions on CollectionActions {
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
-            final dialog = createProgressDialog(context,
-                showDeletePrompt ? "Deleting files..." : "Removing files...",);
+            final dialog = createProgressDialog(
+              context,
+              showDeletePrompt ? "Deleting files..." : "Removing files...",
+            );
             await dialog.show();
             try {
               await collectionsService.removeFromCollection(
@@ -64,7 +67,7 @@ extension CollectionFileActions on CollectionActions {
             } catch (e, s) {
               logger.severe(e, s);
               await dialog.hide();
-              showGenericErrorDialog(context);
+              showGenericErrorDialog(context: context);
             }
           },
           child: Text(showDeletePrompt ? "Yes, delete" : "Yes, remove"),

@@ -173,7 +173,7 @@ class DeleteAccountPage extends StatelessWidget {
         },
       );
       if (choice == ButtonAction.error) {
-        showNewGenericErrorDialog(context: context);
+        showGenericErrorDialog(context: context);
       }
       if (choice != ButtonAction.first) {
         return;

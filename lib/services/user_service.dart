@@ -30,6 +30,7 @@ import 'package:photos/ui/account/password_reentry_page.dart';
 import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -96,7 +97,7 @@ class UserService {
         );
         return;
       }
-      unawaited(showGenericErrorDialog(context));
+      unawaited(showGenericErrorDialog(context: context));
     } on DioError catch (e) {
       await dialog.hide();
       _logger.info(e);
@@ -109,12 +110,12 @@ class UserService {
           ),
         );
       } else {
-        unawaited(showGenericErrorDialog(context));
+        unawaited(showGenericErrorDialog(context: context));
       }
     } catch (e) {
       await dialog.hide();
       _logger.severe(e);
-      unawaited(showGenericErrorDialog(context));
+      unawaited(showGenericErrorDialog(context: context));
     }
   }
 
@@ -196,7 +197,7 @@ class UserService {
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -220,7 +221,7 @@ class UserService {
     } catch (e) {
       _logger.severe(e);
       await dialog.hide();
-      await showGenericErrorDialog(context);
+      await showGenericErrorDialog(context: context);
       return null;
     }
   }
@@ -647,7 +648,7 @@ class UserService {
     try {
       recoveryKey = await getOrCreateRecoveryKey(context);
     } catch (e) {
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return false;
     }
     final dialog = createProgressDialog(context, "Verifying...");

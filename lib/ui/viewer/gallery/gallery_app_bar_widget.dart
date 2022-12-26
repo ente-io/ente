@@ -21,6 +21,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -132,7 +133,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -159,7 +160,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -176,7 +177,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           .getBackupStatus(pathID: widget.deviceCollection.id);
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return;
     }
 
@@ -423,7 +424,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     } catch (e, s) {
       _logger.severe("failed to trash collection", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -454,7 +455,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
     } catch (e, s) {
       _logger.severe(e, s);
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 }

@@ -14,6 +14,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -49,7 +50,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
               "Please check your internet connection and try again.",
             );
           } else {
-            await showGenericErrorDialog(context);
+            await showGenericErrorDialog(context: context);
           }
           return;
         }
@@ -111,7 +112,7 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           ),
         );
       } catch (e) {
-        showGenericErrorDialog(context);
+        showGenericErrorDialog(context: context);
         return;
       }
     }

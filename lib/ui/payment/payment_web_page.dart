@@ -12,6 +12,7 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PaymentWebPage extends StatefulWidget {
@@ -186,7 +187,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     } else {
       // should never reach here
       _logger.severe("unexpected status", uri.toString());
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 

@@ -68,10 +68,6 @@ Future<dynamic> showErrorDialog(
   );
 }
 
-Future<dynamic> showGenericErrorDialog(BuildContext context) {
-  return showErrorDialog(context, "Something went wrong", "Please try again.");
-}
-
 Future<T> showConfettiDialog<T>({
   @required BuildContext context,
   WidgetBuilder builder,

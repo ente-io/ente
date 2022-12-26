@@ -11,6 +11,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -93,7 +94,7 @@ class _PasswordReminderState extends State<PasswordReminder> {
         );
       }
     } catch (e) {
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return;
     }
   }
