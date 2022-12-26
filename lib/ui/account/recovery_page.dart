@@ -53,7 +53,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
           try {
             await Configuration.instance.recover(_recoveryKey.text.trim());
             await dialog.hide();
-            showToast(context, "Recovery successful!");
+            showShortToast(context, "Recovery successful!");
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (BuildContext context) {

@@ -91,7 +91,7 @@ Future<bool> editTime(
     );
     return true;
   } catch (e) {
-    showToast(context, 'something went wrong');
+    showShortToast(context, 'something went wrong');
     return false;
   }
 }
@@ -124,7 +124,7 @@ Future<bool> editFilename(
     );
     return true;
   } catch (e) {
-    showToast(context, 'Something went wrong');
+    showShortToast(context, 'Something went wrong');
     return false;
   }
 }
@@ -145,7 +145,7 @@ Future<bool> editFileCaption(
     return true;
   } catch (e) {
     if (context != null) {
-      showToast(context, "Something went wrong");
+      showShortToast(context, "Something went wrong");
     }
     return false;
   }

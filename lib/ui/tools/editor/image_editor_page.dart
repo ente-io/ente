@@ -362,7 +362,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       await LocalSyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       SyncService.instance.sync();
-      showToast(context, "Edits saved");
+      showShortToast(context, "Edits saved");
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
       final existingFiles = widget.detailPageConfig.files;
