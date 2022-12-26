@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -269,7 +270,7 @@ class File extends EnteFile {
     if (pubMagicMetadata != null && pubMagicMetadata!.editedName != null) {
       return pubMagicMetadata!.editedName!;
     }
-    if (title == null) _logger.severe('File title is null');
+    if (title == null && kDebugMode) _logger.severe('File title is null');
     return title ?? '';
   }
 
