@@ -364,7 +364,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           isDestructiveAction: true,
           onPressed: () async {
             await deleteFilesOnDeviceOnly(context, [file]);
-            showToast(context, "File deleted from device");
+            showShortToast(context, "File deleted from device");
             Navigator.of(context, rootNavigator: true).pop();
             // TODO: Fix behavior when inside a device folder
           },

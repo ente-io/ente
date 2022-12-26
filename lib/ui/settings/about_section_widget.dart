@@ -79,7 +79,8 @@ class AboutSectionWidget extends StatelessWidget {
                           barrierColor: Colors.black.withOpacity(0.85),
                         );
                       } else {
-                        showToast(context, "You are on the latest version");
+                        showShortToast(
+                            context, "You are on the latest version");
                       }
                     },
                   ),

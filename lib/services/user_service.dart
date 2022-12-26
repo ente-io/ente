@@ -341,7 +341,7 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        showToast(context, "Email changed to " + email);
+        showShortToast(context, "Email changed to " + email);
         await setEmail(email);
         Navigator.of(context).popUntil((route) => route.isFirst);
         Bus.instance.fire(UserDetailsChangedEvent());
@@ -441,7 +441,7 @@ class UserService {
       );
       await dialog.hide();
       if (response != null && response.statusCode == 200) {
-        showToast(context, "Authentication successful!");
+        showShortToast(context, "Authentication successful!");
         await _saveConfiguration(response);
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(
@@ -712,7 +712,7 @@ class UserService {
       await dialog.hide();
       Bus.instance.fire(TwoFactorStatusChangeEvent(false));
       unawaited(
-        showToast(
+        showShortToast(
           context,
           "Two-factor authentication has been disabled",
         ),
