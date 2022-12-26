@@ -158,7 +158,8 @@ class DeleteAccountPage extends StatelessWidget {
         body:
             'Your uploaded data will be scheduled for deletion, and your account'
             'will be permanently deleted. \n\nThis action is not reversible.',
-        firstButtonLabel: "Delete",
+        firstButtonLabel: "Delete my account",
+        isCritical: true,
         firstButtonOnTap: () async {
           final decryptChallenge = CryptoUtil.openSealSync(
             Sodium.base642bin(response.encryptedChallenge),
