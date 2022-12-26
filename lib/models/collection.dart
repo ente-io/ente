@@ -58,6 +58,10 @@ class Collection {
     return (magicMetadata.subType ?? 0) == subTypeDefaultHidden;
   }
 
+  bool isSharedFilesCollection() {
+    return (magicMetadata.subType ?? 0) == subTypeSharedFilesCollection;
+  }
+
   List<User> getSharees() {
     final List<User> result = [];
     if (sharees == null) {

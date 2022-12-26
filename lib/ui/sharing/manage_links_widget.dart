@@ -492,7 +492,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     try {
       await CollectionsService.instance.updateShareUrl(widget.collection, prop);
       await dialog.hide();
-      showToast(context, "Album updated");
+      showShortToast(context, "Album updated");
     } catch (e) {
       await dialog.hide();
       await showGenericErrorDialog(context: context);

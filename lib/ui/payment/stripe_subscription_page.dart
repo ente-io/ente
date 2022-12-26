@@ -381,7 +381,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           : await _billingService.cancelStripeSubscription();
       await _fetchSub();
     } catch (e) {
-      showToast(
+      showShortToast(
         context,
         isRenewCancelled ? 'failed to renew' : 'failed to cancel',
       );

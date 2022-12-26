@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
+import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/share_util.dart';
@@ -62,6 +67,51 @@ class CollectionActions {
     }
   }
 
+  Future<Collection?> createSharedCollectionLink(
+    BuildContext context,
+    List<File> files,
+  ) async {
+    final dialog =
+        createProgressDialog(context, "Creating link...", isDismissible: true);
+    dialog.show();
+    try {
+      // create album with emptyName, use collectionCreationTime on UI to
+      // show name
+      logger.finest("creating album for sharing files");
+      final File fileWithMinCreationTime = files.reduce(
+        (a, b) => (a.creationTime ?? 0) < (b.creationTime ?? 0) ? a : b,
+      );
+      final File fileWithMaxCreationTime = files.reduce(
+        (a, b) => (a.creationTime ?? 0) > (b.creationTime ?? 0) ? a : b,
+      );
+      final String dummyName = getNameForDateRange(
+        fileWithMinCreationTime.creationTime!,
+        fileWithMaxCreationTime.creationTime!,
+      );
+      final CreateRequest req =
+          await collectionsService.buildCollectionCreateRequest(
+        dummyName,
+        visibility: visibilityVisible,
+        subType: subTypeSharedFilesCollection,
+      );
+      final collection = await collectionsService.createAndCacheCollection(
+        null,
+        createRequest: req,
+      );
+      logger.finest("adding files to share to new album");
+      await collectionsService.addToCollection(collection.id, files);
+      logger.finest("creating public link for the newly created album");
+      await CollectionsService.instance.createShareUrl(collection);
+      dialog.hide();
+      return collection;
+    } catch (e, s) {
+      dialog.hide();
+      showGenericErrorDialog(context);
+      logger.severe("Failing to create link for selected files", e, s);
+    }
+    return null;
+  }
+
   // removeParticipant remove the user from a share album
   Future<bool?> removeParticipant(
     BuildContext context,
@@ -88,7 +138,7 @@ class CollectionActions {
           await CollectionsService.instance.unshare(collection.id, user.email);
       collection.updateSharees(newSharees);
       await dialog.hide();
-      showToast(context, "Stopped sharing with " + user.email + ".");
+      showShortToast(context, "Stopped sharing with " + user.email + ".");
       return true;
     } catch (e, s) {
       Logger("EmailItemWidget").severe(e, s);

@@ -7,6 +7,7 @@ const visibilityHidden = 2;
 
 // Collection SubType Constants
 const subTypeDefaultHidden = 1;
+const subTypeSharedFilesCollection = 2;
 
 const magicKeyVisibility = 'visibility';
 // key for collection subType
@@ -76,6 +77,7 @@ class CollectionMagicMetadata {
 
   // null/0 value -> no subType
   // 1 -> DEFAULT_HIDDEN COLLECTION for files hidden individually
+  // 2 -> Collections created for sharing selected files
   int? subType;
 
   CollectionMagicMetadata({required this.visibility, this.subType});

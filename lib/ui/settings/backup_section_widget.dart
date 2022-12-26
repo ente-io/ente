@@ -241,7 +241,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
             "Ok",
           ),
           onPressed: () {
-            showToast(
+            showShortToast(
               context,
               "Also empty your \"Trash\" to claim the freed up space",
             );

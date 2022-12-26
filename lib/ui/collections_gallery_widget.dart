@@ -83,10 +83,18 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Future<List<CollectionWithThumbnail>> _getCollections() async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail =
         await CollectionsService.instance.getCollectionsWithThumbnails();
-    final result = collectionsWithThumbnail.splitMatch(
+    final ListMatch<CollectionWithThumbnail> favMathResult =
+        collectionsWithThumbnail.splitMatch(
       (element) => element.collection.type == CollectionType.favorites,
     );
-    result.unmatched.sort(
+    // Hide fav collection if it's empty and not shared
+    favMathResult.matched.removeWhere(
+      (element) =>
+          element.thumbnail == null &&
+          (element.collection.publicURLs?.isEmpty ?? false),
+    );
+
+    favMathResult.unmatched.sort(
       (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
@@ -102,12 +110,14 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         }
       },
     );
-    result.matched.removeWhere(
-      (element) =>
-          element.thumbnail == null &&
-          (element.collection.publicURLs?.isEmpty ?? false),
+    // This is a way to identify collection which were automatically created
+    // during create link flow for selected files
+    final ListMatch<CollectionWithThumbnail> potentialSharedLinkCollection =
+        favMathResult.unmatched.splitMatch(
+      (e) => (e.collection.isSharedFilesCollection()),
     );
-    return result.matched + result.unmatched;
+
+    return favMathResult.matched + potentialSharedLinkCollection.unmatched;
   }
 
   Widget _getCollectionsGalleryWidget(

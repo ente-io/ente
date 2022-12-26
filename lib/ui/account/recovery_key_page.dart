@@ -134,7 +134,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                                   await Clipboard.setData(
                                     ClipboardData(text: recoveryKey),
                                   );
-                                  showToast(
+                                  showShortToast(
                                     context,
                                     "Recovery key copied to clipboard",
                                   );

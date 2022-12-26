@@ -145,7 +145,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
               pressedColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
                 await Clipboard.setData(ClipboardData(text: url));
-                showToast(context, "Link copied to clipboard");
+                showShortToast(context, "Link copied to clipboard");
               },
               isBottomBorderRadiusRemoved: true,
             ),

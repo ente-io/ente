@@ -18,6 +18,9 @@ import 'package:photos/models/location.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/tools/editor/filtered_image.dart';
 import 'package:photos/ui/viewer/file/detail_page.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -362,7 +365,7 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
       await LocalSyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       SyncService.instance.sync();
-      showToast(context, "Edits saved");
+      showShortToast(context, "Edits saved");
       _logger.info("Original file " + widget.originalFile.toString());
       _logger.info("Saved edits to file " + newFile.toString());
       final existingFiles = widget.detailPageConfig.files;
@@ -495,31 +498,31 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
   }
 
   Future<void> _showExitConfirmationDialog() async {
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Discard edits?"),
-      actions: [
-        TextButton(
-          child: const Text("Yes", style: TextStyle(color: Colors.red)),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            replacePage(context, DetailPage(widget.detailPageConfig));
-          },
+    final actionResult = await showActionSheet(
+      context: context,
+      buttons: [
+        const ButtonWidget(
+          labelText: "Yes, discard changes",
+          buttonType: ButtonType.critical,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          isInAlert: true,
         ),
-        TextButton(
-          child: const Text("No", style: TextStyle(color: Colors.white)),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
+        const ButtonWidget(
+          labelText: "No",
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
         ),
       ],
+      body: "Do you want to discard the edits you have made?",
+      actionSheetType: ActionSheetType.defaultActionSheet,
     );
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-      barrierColor: Colors.black87,
-    );
+    if (actionResult != null && actionResult == ButtonAction.first) {
+      replacePage(context, DetailPage(widget.detailPageConfig));
+    }
   }
 }
