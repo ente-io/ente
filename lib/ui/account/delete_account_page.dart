@@ -8,8 +8,9 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -150,26 +151,34 @@ class DeleteAccountPage extends StatelessWidget {
     );
 
     if (hasAuthenticated) {
-      final choice = await showChoiceDialog(
-        context,
-        'Are you sure you want to delete your account?',
-        'Your uploaded data will be scheduled for deletion, and your account '
+      final choice = await showNewChoiceDialog(
+        context: context,
+        title: 'Are you sure you want to delete your account?',
+        body:
+            'Your uploaded data will be scheduled for deletion, and your account'
             'will be permanently deleted. \n\nThis action is not reversible.',
-        firstAction: 'Cancel',
-        secondAction: 'Delete',
-        firstActionColor: Theme.of(context).colorScheme.onSurface,
-        secondActionColor: Colors.red,
+        firstButtonLabel: "Delete my account",
+        isCritical: true,
+        firstButtonOnTap: () async {
+          final decryptChallenge = CryptoUtil.openSealSync(
+            Sodium.base642bin(response.encryptedChallenge),
+            Sodium.base642bin(
+              Configuration.instance.getKeyAttributes().publicKey,
+            ),
+            Configuration.instance.getSecretKey(),
+          );
+          final challengeResponseStr = utf8.decode(decryptChallenge);
+          await UserService.instance
+              .deleteAccount(context, challengeResponseStr);
+        },
       );
-      if (choice != DialogUserChoice.secondChoice) {
+      if (choice == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      if (choice != ButtonAction.first) {
         return;
       }
-      final decryptChallenge = CryptoUtil.openSealSync(
-        Sodium.base642bin(response.encryptedChallenge),
-        Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
-        Configuration.instance.getSecretKey(),
-      );
-      final challengeResponseStr = utf8.decode(decryptChallenge);
-      await UserService.instance.deleteAccount(context, challengeResponseStr);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

@@ -12,6 +12,7 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -399,7 +400,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -429,7 +430,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
         } catch (e, s) {
           _logger.severe(e, s);
           await dialog.hide();
-          showGenericErrorDialog(context);
+          showGenericErrorDialog(context: context);
         }
       }
 
@@ -454,7 +455,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
           "Sorry, we could not generate secure keys on this device.\n\nplease sign up from a different device.",
         );
       } else {
-        showGenericErrorDialog(context);
+        showGenericErrorDialog(context: context);
       }
     }
   }

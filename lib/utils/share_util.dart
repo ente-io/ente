@@ -10,6 +10,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/exif_util.dart';
@@ -61,7 +62,7 @@ Future<void> share(
       s,
     );
     await dialog.hide();
-    await showGenericErrorDialog(context);
+    await showGenericErrorDialog(context: context);
   }
 }
 

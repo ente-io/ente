@@ -13,10 +13,10 @@ import 'package:photos/ui/account/delete_account_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
-import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class AccountSectionWidget extends StatelessWidget {
@@ -53,7 +53,7 @@ class AccountSectionWidget extends StatelessWidget {
               try {
                 recoveryKey = await _getOrCreateRecoveryKey(context);
               } catch (e) {
-                await showGenericErrorDialog(context);
+                await showGenericErrorDialog(context: context);
                 return;
               }
               unawaited(
@@ -158,7 +158,7 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-    Future<void> _onLogoutTapped(BuildContext context) async {
+  Future<void> _onLogoutTapped(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       title: const Text(
         "Logout",

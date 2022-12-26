@@ -25,6 +25,7 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/delete_file_util.dart';
@@ -264,7 +265,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       }
     } catch (e, s) {
       _logger.severe("failed to update file visibility", e, s);
-      await showGenericErrorDialog(context);
+      await showGenericErrorDialog(context: context);
     }
   }
 
@@ -469,7 +470,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     } catch (e) {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -517,7 +518,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     } catch (e) {
       dialog.hide();
       _logger.severe("Failed to use as", e);
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 }

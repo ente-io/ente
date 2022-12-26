@@ -11,6 +11,7 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -60,7 +61,7 @@ class CollectionActions {
         _showUnSupportedAlert(context);
       } else {
         logger.severe("Failed to update shareUrl collection", e);
-        showGenericErrorDialog(context);
+        showGenericErrorDialog(context: context);
       }
       return false;
     }
@@ -105,7 +106,7 @@ class CollectionActions {
       return collection;
     } catch (e, s) {
       dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       logger.severe("Failing to create link for selected files", e, s);
     }
     return null;
@@ -142,7 +143,7 @@ class CollectionActions {
     } catch (e, s) {
       Logger("EmailItemWidget").severe(e, s);
       await dialog.hide();
-      await showGenericErrorDialog(context);
+      await showGenericErrorDialog(context: context);
       return false;
     }
   }
@@ -182,7 +183,7 @@ class CollectionActions {
         await dialog.hide();
       } catch (e) {
         logger.severe("Failed to get public key", e);
-        showGenericErrorDialog(context);
+        showGenericErrorDialog(context: context);
         await dialog.hide();
       }
     }
@@ -238,7 +239,7 @@ class CollectionActions {
           _showUnSupportedAlert(context);
         } else {
           logger.severe("failed to share collection", e);
-          showGenericErrorDialog(context);
+          showGenericErrorDialog(context: context);
         }
         return false;
       }
