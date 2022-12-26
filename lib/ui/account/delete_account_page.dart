@@ -12,7 +12,6 @@ import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
-import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -174,7 +173,7 @@ class DeleteAccountPage extends StatelessWidget {
         },
       );
       if (choice == ButtonAction.error) {
-        showGenericErrorDialog(context);
+        showNewGenericErrorDialog(context: context);
       }
       if (choice != ButtonAction.first) {
         return;

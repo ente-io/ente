@@ -9,6 +9,22 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
 
+void showNewGenericErrorDialog({required BuildContext context}) async {
+  showDialogWidget(
+    context: context,
+    title: "Error",
+    icon: Icons.error_outline_outlined,
+    body: "It looks like something went wrong.",
+    buttons: const [
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "OK",
+        isInAlert: true,
+      ),
+    ],
+  );
+}
+
 Future<ButtonAction?> showNewChoiceDialog({
   required BuildContext context,
   required String title,
