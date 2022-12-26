@@ -156,7 +156,7 @@ class DeleteAccountPage extends StatelessWidget {
         title: 'Are you sure you want to delete your account?',
         body:
             'Your uploaded data will be scheduled for deletion, and your account'
-            'will be permanently deleted. \n\nThis action is not reversible.',
+            ' will be permanently deleted. \n\nThis action is not reversible.',
         firstButtonLabel: "Delete my account",
         isCritical: true,
         firstButtonOnTap: () async {

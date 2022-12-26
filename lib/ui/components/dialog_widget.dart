@@ -30,7 +30,7 @@ Future<ButtonAction?> showGenericErrorDialog({
 Future<ButtonAction?> showNewChoiceDialog({
   required BuildContext context,
   required String title,
-  required String body,
+  String? body,
   required String firstButtonLabel,
   String secondButtonLabel = "Cancel",
   ButtonType firstButtonType = ButtonType.neutral,
@@ -63,13 +63,14 @@ Future<ButtonAction?> showNewChoiceDialog({
     title: title,
     body: body,
     buttons: buttons,
+    icon: icon,
   );
 }
 
 Future<ButtonAction?> showDialogWidget({
   required BuildContext context,
   required String title,
-  required String body,
+  String? body,
   required List<ButtonWidget> buttons,
   IconData? icon,
 }) {
@@ -99,13 +100,13 @@ Future<ButtonAction?> showDialogWidget({
 
 class DialogWidget extends StatelessWidget {
   final String title;
-  final String body;
+  final String? body;
   final List<ButtonWidget> buttons;
   final IconData? icon;
   final bool isMobileSmall;
   const DialogWidget({
     required this.title,
-    required this.body,
+    this.body,
     required this.buttons,
     required this.isMobileSmall,
     this.icon,
@@ -147,11 +148,11 @@ class DialogWidget extends StatelessWidget {
 
 class ContentContainer extends StatelessWidget {
   final String title;
-  final String body;
+  final String? body;
   final IconData? icon;
   const ContentContainer({
     required this.title,
-    required this.body,
+    this.body,
     this.icon,
     super.key,
   });
@@ -176,11 +177,13 @@ class ContentContainer extends StatelessWidget {
               ),
         icon == null ? const SizedBox.shrink() : const SizedBox(height: 19),
         Text(title, style: textTheme.h3Bold),
-        const SizedBox(height: 19),
-        Text(
-          body,
-          style: textTheme.body.copyWith(color: colorScheme.textMuted),
-        ),
+        body != null ? const SizedBox(height: 19) : const SizedBox.shrink(),
+        body != null
+            ? Text(
+                body!,
+                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              )
+            : const SizedBox.shrink(),
       ],
     );
   }
