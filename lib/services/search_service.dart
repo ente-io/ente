@@ -52,20 +52,6 @@ class SearchService {
     return _cachedFilesFuture;
   }
 
-  Future<List<File>> getFileSearchResults(String query) async {
-    final List<File> fileSearchResults = [];
-    final List<File> files = await _getAllFiles();
-    for (var file in files) {
-      if (fileSearchResults.length >= _maximumResultsLimit) {
-        break;
-      }
-      if (file.title.toLowerCase().contains(query.toLowerCase())) {
-        fileSearchResults.add(file);
-      }
-    }
-    return fileSearchResults;
-  }
-
   void clearCache() {
     _cachedFilesFuture = null;
   }
