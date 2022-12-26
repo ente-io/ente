@@ -106,7 +106,7 @@ class CollectionActions {
       return collection;
     } catch (e, s) {
       dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       logger.severe("Failing to create link for selected files", e, s);
     }
     return null;
