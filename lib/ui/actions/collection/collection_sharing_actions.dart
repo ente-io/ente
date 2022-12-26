@@ -137,7 +137,7 @@ class CollectionActions {
           await CollectionsService.instance.unshare(collection.id, user.email);
       collection.updateSharees(newSharees);
       await dialog.hide();
-      showToast(context, "Stopped sharing with " + user.email + ".");
+      showShortToast(context, "Stopped sharing with " + user.email + ".");
       return true;
     } catch (e, s) {
       Logger("EmailItemWidget").severe(e, s);

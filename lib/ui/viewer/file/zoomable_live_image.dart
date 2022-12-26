@@ -4,7 +4,6 @@ import 'dart:io' as io;
 
 import 'package:chewie/chewie.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/models/file.dart';
@@ -122,7 +121,7 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     }
     _isLoadingVideoPlayer = true;
     if (_file.isRemoteFile && !(await isFileCached(_file, liveVideo: true))) {
-      showToast(context, "Downloading...", toastLength: Toast.LENGTH_LONG);
+      showShortToast(context, "Downloading...");
     }
 
     var videoFile = await getFile(widget.file, liveVideo: true)
