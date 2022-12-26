@@ -357,7 +357,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (executionState == ExecutionState.inProgress) {
         setState(() {
           executionState = ExecutionState.successful;
-          Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
+          Future.delayed(const Duration(seconds: 2), () {
             widget.isInAlert
                 ? Navigator.of(context, rootNavigator: true)
                     .pop(widget.buttonAction)
