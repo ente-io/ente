@@ -6,9 +6,49 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
 
-Future<dynamic> showDialogWidget({
+Future<ButtonAction?> showNewChoiceDialog({
+  required BuildContext context,
+  required String title,
+  required String body,
+  required String firstButtonLabel,
+  String secondButtonLabel = "Cancel",
+  ButtonType firstButtonType = ButtonType.neutral,
+  ButtonType secondButtonType = ButtonType.secondary,
+  ButtonAction firstButtonAction = ButtonAction.first,
+  ButtonAction secondButtonAction = ButtonAction.cancel,
+  FutureVoidCallback? firstButtonOnTap,
+  FutureVoidCallback? secondButtonOnTap,
+  bool isCritical = false,
+  IconData? icon,
+}) async {
+  final buttons = [
+    ButtonWidget(
+      buttonType: isCritical ? ButtonType.critical : firstButtonType,
+      labelText: firstButtonLabel,
+      isInAlert: true,
+      onTap: firstButtonOnTap,
+      buttonAction: firstButtonAction,
+    ),
+    ButtonWidget(
+      buttonType: secondButtonType,
+      labelText: secondButtonLabel,
+      isInAlert: true,
+      onTap: secondButtonOnTap,
+      buttonAction: secondButtonAction,
+    ),
+  ];
+  return showDialogWidget(
+    context: context,
+    title: title,
+    body: body,
+    buttons: buttons,
+  );
+}
+
+Future<ButtonAction?> showDialogWidget({
   required BuildContext context,
   required String title,
   required String body,

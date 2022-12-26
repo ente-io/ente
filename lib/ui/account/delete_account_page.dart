@@ -11,7 +11,6 @@ import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -154,39 +153,25 @@ class DeleteAccountPage extends StatelessWidget {
     );
 
     if (hasAuthenticated) {
-      final choice = await showDialogWidget(
+      final choice = await showNewChoiceDialog(
         context: context,
         title: 'Are you sure you want to delete your account?',
         body:
             'Your uploaded data will be scheduled for deletion, and your account'
             'will be permanently deleted. \n\nThis action is not reversible.',
-        buttons: [
-          ButtonWidget(
-            labelText: "Delete",
-            isInAlert: true,
-            buttonType: ButtonType.neutral,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.first,
-            onTap: () async {
-              final decryptChallenge = CryptoUtil.openSealSync(
-                Sodium.base642bin(response.encryptedChallenge),
-                Sodium.base642bin(
-                    Configuration.instance.getKeyAttributes().publicKey),
-                Configuration.instance.getSecretKey(),
-              );
-              final challengeResponseStr = utf8.decode(decryptChallenge);
-              await UserService.instance
-                  .deleteAccount(context, challengeResponseStr);
-            },
-          ),
-          const ButtonWidget(
-            labelText: "Cancel",
-            isInAlert: true,
-            buttonType: ButtonType.secondary,
-            buttonSize: ButtonSize.large,
-            buttonAction: ButtonAction.cancel,
-          ),
-        ],
+        firstButtonLabel: "Delete",
+        firstButtonOnTap: () async {
+          final decryptChallenge = CryptoUtil.openSealSync(
+            Sodium.base642bin(response.encryptedChallenge),
+            Sodium.base642bin(
+              Configuration.instance.getKeyAttributes().publicKey,
+            ),
+            Configuration.instance.getSecretKey(),
+          );
+          final challengeResponseStr = utf8.decode(decryptChallenge);
+          await UserService.instance
+              .deleteAccount(context, challengeResponseStr);
+        },
       );
       if (choice == ButtonAction.error) {
         showGenericErrorDialog(context);
