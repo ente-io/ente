@@ -38,6 +38,11 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
+  ///Setting this flag to true will disable the loading and success states
+  ///of the button. This can be set to true if loading and success states aren't
+  ///required in a particular context
+  final bool shouldDisableExecutionStates;
+
   /// iconColor should only be specified when we do not want to honor the default
   /// iconColor based on buttonType. Most of the items, default iconColor is what
   /// we need unless we want to pop out the icon in a non-primary button type
@@ -65,6 +70,7 @@ class ButtonWidget extends StatelessWidget {
     this.buttonAction,
     this.isInAlert = false,
     this.iconColor,
+    this.shouldDisableExecutionStates = false,
     super.key,
   });
 
@@ -129,6 +135,7 @@ class ButtonWidget extends StatelessWidget {
       labelText: labelText,
       icon: icon,
       buttonAction: buttonAction,
+      shouldDisableExecutionStates: shouldDisableExecutionStates,
     );
   }
 }
@@ -143,12 +150,14 @@ class ButtonChildWidget extends StatefulWidget {
   final ButtonSize buttonSize;
   final ButtonAction? buttonAction;
   final bool isInAlert;
+  final bool shouldDisableExecutionStates;
   const ButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
     required this.buttonSize,
     required this.isInAlert,
+    required this.shouldDisableExecutionStates,
     this.onTap,
     this.labelText,
     this.icon,
@@ -221,7 +230,8 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
               duration: const Duration(milliseconds: 175),
               switchInCurve: Curves.easeInOutExpo,
               switchOutCurve: Curves.easeInOutExpo,
-              child: executionState == ExecutionState.idle
+              child: executionState == ExecutionState.idle ||
+                      widget.shouldDisableExecutionStates
                   ? widget.buttonType.hasTrailingIcon
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -329,7 +339,9 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }
 
   bool get _shouldRegisterGestures =>
-      !widget.isDisabled && executionState == ExecutionState.idle;
+      !widget.isDisabled &&
+      (executionState == ExecutionState.idle ||
+          widget.shouldDisableExecutionStates);
 
   void _onTap() async {
     if (widget.onTap != null) {
