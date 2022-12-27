@@ -8,9 +8,9 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/email_util.dart';
 
@@ -74,9 +74,10 @@ class DeleteAccountPage extends StatelessWidget {
               const SizedBox(
                 height: 24,
               ),
-              GradientButton(
-                text: "Yes, send feedback",
-                iconData: Icons.check,
+              ButtonWidget(
+                buttonType: ButtonType.primary,
+                labelText: "Yes, send feedback",
+                icon: Icons.check_outlined,
                 onTap: () async {
                   await sendEmail(
                     context,
@@ -85,41 +86,14 @@ class DeleteAccountPage extends StatelessWidget {
                   );
                 },
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-              ),
-              InkWell(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      side: const BorderSide(
-                        color: Colors.redAccent,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 18,
-                        horizontal: 10,
-                      ),
-                      backgroundColor: Colors.white,
-                    ),
-                    label: const Text(
-                      "No, delete account",
-                      style: TextStyle(
-                        color: Colors.redAccent, // same for both themes
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    onPressed: () async => {await _initiateDelete(context)},
-                    icon: const Icon(
-                      Icons.no_accounts,
-                      color: Colors.redAccent,
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 8),
+              ButtonWidget(
+                buttonType: ButtonType.tertiaryCritical,
+                labelText: "No, delete account",
+                icon: Icons.no_accounts_outlined,
+                onTap: () async => {await _initiateDelete(context)},
+                shouldDisableExecutionStates: true,
+              )
             ],
           ),
         ),
