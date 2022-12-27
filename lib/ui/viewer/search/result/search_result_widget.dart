@@ -116,7 +116,7 @@ class SearchResultWidget extends StatelessWidget {
       case ResultType.month:
         return "Month";
       case ResultType.file:
-        return "Memory";
+        return "File name";
       case ResultType.event:
         return "Day";
       case ResultType.location:
@@ -124,7 +124,7 @@ class SearchResultWidget extends StatelessWidget {
       case ResultType.fileType:
         return "Type";
       case ResultType.fileExtension:
-        return "File Extension";
+        return "File extension";
       case ResultType.fileCaption:
         return "Description";
       default:
