@@ -340,9 +340,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   }
 
   bool get _shouldRegisterGestures =>
-      !widget.isDisabled &&
-      (executionState == ExecutionState.idle ||
-          !widget.shouldSurfaceExecutionStates);
+      !widget.isDisabled && executionState == ExecutionState.idle;
 
   void _onTap() async {
     if (widget.onTap != null) {
@@ -370,7 +368,9 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (executionState == ExecutionState.inProgress) {
         setState(() {
           executionState = ExecutionState.successful;
-          Future.delayed(const Duration(seconds: 2), () {
+          Future.delayed(
+              Duration(seconds: widget.shouldSurfaceExecutionStates ? 2 : 0),
+              () {
             widget.isInAlert
                 ? Navigator.of(context, rootNavigator: true)
                     .pop(widget.buttonAction)
