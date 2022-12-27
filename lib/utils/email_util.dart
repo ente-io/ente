@@ -16,6 +16,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/tools/debug/log_file_viewer.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -260,7 +261,8 @@ Future<void> sendEmail(
 
 Future<String> _clientInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
-  final String debugInfo = '\n\n\n\n ------------------- \nFollowing information can '
+  final String debugInfo =
+      '\n\n\n\n ------------------- \nFollowing information can '
       'help us in debugging if you are facing any issue '
       '\nRegistered email: ${Configuration.instance.getEmail()}'
       '\nClient: ${packageInfo.packageName}'
@@ -269,27 +271,15 @@ Future<String> _clientInfo() async {
 }
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
-  showDialog(
+  showNewChoiceDialog(
+    icon: Icons.email_outlined,
     context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Please email us at $toEmail'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text("Copy email"),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: toEmail));
-              showShortToast(context, 'Copied');
-            },
-          ),
-          TextButton(
-            child: const Text("OK"),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          )
-        ],
-      );
+    title: 'Please email us at $toEmail',
+    firstButtonLabel: "Copy email address",
+    secondButtonLabel: "Dismiss",
+    firstButtonOnTap: () async {
+      await Clipboard.setData(ClipboardData(text: toEmail));
+      showShortToast(context, 'Copied');
     },
   );
 }
