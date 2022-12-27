@@ -50,6 +50,7 @@ const kFGSyncFrequency = Duration(minutes: 5);
 const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
+const kBackgroundLockLatency = Duration(seconds: 3);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +70,7 @@ Future<void> _runInForeground() async {
         enabled: Configuration.instance.shouldShowLockScreen(),
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
+        backgroundLockLatency: kBackgroundLockLatency,
       ),
     );
   });
