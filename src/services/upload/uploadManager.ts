@@ -1,6 +1,5 @@
 import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
-import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFiles,
     preservePhotoswipeProps,
@@ -25,8 +24,8 @@ import {
     ParsedMetadataJSONMap,
     PublicUploadProps,
 } from 'types/upload';
+
 import { UPLOAD_RESULT, UPLOAD_STAGES } from 'constants/upload';
-import { ComlinkWorker } from 'utils/comlink';
 import uiService from './uiService';
 import { addLogLine, getFileNameSize } from 'utils/logging';
 import isElectron from 'is-electron';
@@ -34,6 +33,10 @@ import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { getDedicatedCryptoWorker } from 'utils/comlink';
+import { Remote } from 'comlink';
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
@@ -43,7 +46,9 @@ const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
 
 class UploadManager {
-    private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
+    private cryptoWorkers = new Array<
+        ComlinkWorker<typeof DedicatedCryptoWorker>
+    >(MAX_CONCURRENT_UPLOADS);
     private parsedMetadataJSONMap: ParsedMetadataJSONMap;
     private filesToBeUploaded: FileWithCollection[];
     private remainingFiles: FileWithCollection[] = [];
@@ -182,7 +187,7 @@ class UploadManager {
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
-                this.cryptoWorkers[i]?.worker.terminate();
+                this.cryptoWorkers[i]?.terminate();
             }
             this.uploadInProgress = false;
         }
@@ -272,13 +277,13 @@ class UploadManager {
             i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
             i++
         ) {
-            const worker = await new this.cryptoWorkers[i].comlink();
+            const worker = await new this.cryptoWorkers[i].remote();
             uploadProcesses.push(this.uploadNextFileInQueue(worker));
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextFileInQueue(worker: any) {
+    private async uploadNextFileInQueue(worker: Remote<DedicatedCryptoWorker>) {
         while (this.filesToBeUploaded.length > 0) {
             if (uploadCancelService.isUploadCancelationRequested()) {
                 throw Error(CustomError.UPLOAD_CANCELLED);

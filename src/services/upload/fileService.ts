@@ -3,9 +3,7 @@ import {
     FileTypeInfo,
     FileInMemory,
     Metadata,
-    B64EncryptionResult,
     EncryptedFile,
-    EncryptionResult,
     FileWithMetadata,
     ParsedMetadataJSONMap,
     DataStream,
@@ -22,6 +20,8 @@ import {
     getUint8ArrayView,
 } from '../readerService';
 import { generateThumbnail } from './thumbnailService';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { Remote } from 'comlink';
 import { EncryptedMagicMetadata } from 'types/magicMetadata';
 
 const EDITED_FILE_SUFFIX = '-edited';
@@ -96,7 +96,7 @@ export async function extractFileMetadata(
 }
 
 export async function encryptFile(
-    worker: any,
+    worker: Remote<DedicatedCryptoWorker>,
     file: FileWithMetadata,
     encryptionKey: string
 ): Promise<EncryptedFile> {
@@ -106,19 +106,22 @@ export async function encryptFile(
             file.filedata
         );
 
-        const { file: encryptedThumbnail }: EncryptionResult<Uint8Array> =
-            await worker.encryptThumbnail(file.thumbnail, fileKey);
-        const { file: encryptedMetadata }: EncryptionResult<string> =
-            await worker.encryptMetadata(file.metadata, fileKey);
+        const { file: encryptedThumbnail } = await worker.encryptThumbnail(
+            file.thumbnail,
+            fileKey
+        );
+        const { file: encryptedMetadata } = await worker.encryptMetadata(
+            file.metadata,
+            fileKey
+        );
 
         let encryptedPubMagicMetadata: EncryptedMagicMetadata;
         if (file.pubMagicMetadata) {
-            const {
-                file: encryptedPubMagicMetadataData,
-            }: EncryptionResult<string> = await worker.encryptMetadata(
-                file.pubMagicMetadata.data,
-                fileKey
-            );
+            const { file: encryptedPubMagicMetadataData } =
+                await worker.encryptMetadata(
+                    file.pubMagicMetadata.data,
+                    fileKey
+                );
             encryptedPubMagicMetadata = {
                 version: file.pubMagicMetadata.version,
                 count: file.pubMagicMetadata.count,
@@ -127,10 +130,7 @@ export async function encryptFile(
             };
         }
 
-        const encryptedKey: B64EncryptionResult = await worker.encryptToB64(
-            fileKey,
-            encryptionKey
-        );
+        const encryptedKey = await worker.encryptToB64(fileKey, encryptionKey);
 
         const result: EncryptedFile = {
             file: {

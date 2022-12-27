@@ -73,7 +73,7 @@ export default function Recover() {
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
             const cryptoWorker = await new CryptoWorker();
-            const masterKey: string = await cryptoWorker.decryptB64(
+            const masterKey = await cryptoWorker.decryptB64(
                 keyAttributes.masterKeyEncryptedWithRecoveryKey,
                 keyAttributes.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey)

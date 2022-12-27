@@ -5,7 +5,6 @@ import localForage from 'utils/storage/localForage';
 import { getActualKey, getToken } from 'utils/common/key';
 import CryptoWorker from 'utils/crypto';
 import { getPublicKey } from './userService';
-import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
@@ -41,7 +40,6 @@ import {
     CollectionSummaryType,
 } from 'constants/collection';
 import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { EncryptionResult } from 'types/upload';
 import constants from 'utils/strings/constants';
 import { IsArchived } from 'utils/magicMetadata';
 import { User } from 'types/user';
@@ -283,21 +281,11 @@ export const createCollection = async (
         const worker = await new CryptoWorker();
         const encryptionKey = await getActualKey();
         const token = getToken();
-        const collectionKey: string = await worker.generateEncryptionKey();
-        const {
-            encryptedData: encryptedKey,
-            nonce: keyDecryptionNonce,
-        }: B64EncryptionResult = await worker.encryptToB64(
-            collectionKey,
-            encryptionKey
-        );
-        const {
-            encryptedData: encryptedName,
-            nonce: nameDecryptionNonce,
-        }: B64EncryptionResult = await worker.encryptUTF8(
-            collectionName,
-            collectionKey
-        );
+        const collectionKey = await worker.generateEncryptionKey();
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+            await worker.encryptToB64(collectionKey, encryptionKey);
+        const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+            await worker.encryptUTF8(collectionName, collectionKey);
         const newCollection: EncryptedCollection = {
             id: null,
             owner: null,
@@ -462,7 +450,7 @@ const encryptWithNewCollectionKey = async (
     const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
     const worker = await new CryptoWorker();
     for (const file of files) {
-        const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(
+        const newEncryptedKey = await worker.encryptToB64(
             file.key,
             newCollection.key
         );
@@ -524,11 +512,10 @@ export const updateCollectionMagicMetadata = async (collection: Collection) => {
 
     const worker = await new CryptoWorker();
 
-    const { file: encryptedMagicMetadata }: EncryptionResult<string> =
-        await worker.encryptMetadata(
-            collection.magicMetadata.data,
-            collection.key
-        );
+    const { file: encryptedMagicMetadata } = await worker.encryptMetadata(
+        collection.magicMetadata.data,
+        collection.key
+    );
 
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
@@ -564,13 +551,8 @@ export const renameCollection = async (
 ) => {
     const token = getToken();
     const worker = await new CryptoWorker();
-    const {
-        encryptedData: encryptedName,
-        nonce: nameDecryptionNonce,
-    }: B64EncryptionResult = await worker.encryptUTF8(
-        newCollectionName,
-        collection.key
-    );
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+        await worker.encryptUTF8(newCollectionName, collection.key);
     const collectionRenameRequest = {
         collectionID: collection.id,
         encryptedName,
@@ -594,10 +576,7 @@ export const shareCollection = async (
 
         const token = getToken();
         const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey: string = await worker.boxSeal(
-            collection.key,
-            publicKey
-        );
+        const encryptedKey = await worker.boxSeal(collection.key, publicKey);
         const shareCollectionRequest = {
             collectionID: collection.id,
             email: withUserEmail,

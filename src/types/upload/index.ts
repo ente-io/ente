@@ -1,5 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
+import { B64EncryptionResult, LocalFileAttributes } from 'types/crypto';
 import { FileAttributes } from 'types/file';
 import {
     EncryptedMagicMetadata,
@@ -13,18 +14,6 @@ export interface DataStream {
 
 export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
-}
-
-export interface LocalFileAttributes<
-    T extends string | Uint8Array | DataStream
-> {
-    encryptedData: T;
-    decryptionHeader: string;
-}
-
-export interface EncryptionResult<T extends string | Uint8Array | DataStream> {
-    file: LocalFileAttributes<T>;
-    key: string;
 }
 
 export interface Metadata {
@@ -106,12 +95,6 @@ export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 export interface UploadURL {
     url: string;
     objectKey: string;
-}
-
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
 }
 
 export interface FileInMemory {

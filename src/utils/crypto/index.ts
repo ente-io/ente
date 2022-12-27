@@ -1,52 +1,40 @@
-import { KEK, KeyAttributes } from 'types/user';
-import * as Comlink from 'comlink';
-import { runningInBrowser } from 'utils/common';
+import { KeyAttributes } from 'types/user';
 import { SESSION_KEYS, setKey } from 'utils/storage/sessionStorage';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { getActualKey, getToken } from 'utils/common/key';
 import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
-import { ComlinkWorker } from 'utils/comlink';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
-
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
-}
-
-export const getDedicatedCryptoWorker = (): ComlinkWorker => {
-    if (runningInBrowser()) {
-        const worker = new Worker(
-            new URL('worker/crypto.worker.js', import.meta.url),
-            { name: 'ente-crypto-worker' }
-        );
-        const comlink = Comlink.wrap(worker);
-        return { comlink, worker };
-    }
-};
-const CryptoWorker: any = getDedicatedCryptoWorker()?.comlink;
+import { CryptoWorker } from 'utils/comlink';
 
 export async function generateKeyAttributes(
     passphrase: string
 ): Promise<{ keyAttributes: KeyAttributes; masterKey: string }> {
     const cryptoWorker = await new CryptoWorker();
-    const masterKey: string = await cryptoWorker.generateEncryptionKey();
-    const recoveryKey: string = await cryptoWorker.generateEncryptionKey();
-    const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+    const masterKey = await cryptoWorker.generateEncryptionKey();
+    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
     const kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
 
-    const masterKeyEncryptedWithKek: B64EncryptionResult =
-        await cryptoWorker.encryptToB64(masterKey, kek.key);
-    const masterKeyEncryptedWithRecoveryKey: B64EncryptionResult =
-        await cryptoWorker.encryptToB64(masterKey, recoveryKey);
-    const recoveryKeyEncryptedWithMasterKey: B64EncryptionResult =
-        await cryptoWorker.encryptToB64(recoveryKey, masterKey);
+    const masterKeyEncryptedWithKek = await cryptoWorker.encryptToB64(
+        masterKey,
+        kek.key
+    );
+    const masterKeyEncryptedWithRecoveryKey = await cryptoWorker.encryptToB64(
+        masterKey,
+        recoveryKey
+    );
+    const recoveryKeyEncryptedWithMasterKey = await cryptoWorker.encryptToB64(
+        recoveryKey,
+        masterKey
+    );
 
     const keyPair = await cryptoWorker.generateKeyPair();
-    const encryptedKeyPairAttributes: B64EncryptionResult =
-        await cryptoWorker.encryptToB64(keyPair.privateKey, masterKey);
+    const encryptedKeyPairAttributes = await cryptoWorker.encryptToB64(
+        keyPair.privateKey,
+        masterKey
+    );
 
     const keyAttributes: KeyAttributes = {
         kekSalt,
@@ -69,19 +57,20 @@ export async function generateKeyAttributes(
 }
 
 export async function generateAndSaveIntermediateKeyAttributes(
-    passphrase,
-    existingKeyAttributes,
-    key
+    passphrase: string,
+    existingKeyAttributes: KeyAttributes,
+    key: string
 ): Promise<KeyAttributes> {
     const cryptoWorker = await new CryptoWorker();
-    const intermediateKekSalt: string =
-        await cryptoWorker.generateSaltToDeriveKey();
-    const intermediateKek: KEK = await cryptoWorker.deriveInteractiveKey(
+    const intermediateKekSalt = await cryptoWorker.generateSaltToDeriveKey();
+    const intermediateKek = await cryptoWorker.deriveInteractiveKey(
         passphrase,
         intermediateKekSalt
     );
-    const encryptedKeyAttributes: B64EncryptionResult =
-        await cryptoWorker.encryptToB64(key, intermediateKek.key);
+    const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
+        key,
+        intermediateKek.key
+    );
 
     const intermediateKeyAttributes = Object.assign(existingKeyAttributes, {
         kekSalt: intermediateKekSalt,
@@ -141,11 +130,15 @@ async function createNewRecoveryKey() {
 
     const cryptoWorker = await new CryptoWorker();
 
-    const recoveryKey: string = await cryptoWorker.generateEncryptionKey();
-    const encryptedMasterKey: B64EncryptionResult =
-        await cryptoWorker.encryptToB64(masterKey, recoveryKey);
-    const encryptedRecoveryKey: B64EncryptionResult =
-        await cryptoWorker.encryptToB64(recoveryKey, masterKey);
+    const recoveryKey = await cryptoWorker.generateEncryptionKey();
+    const encryptedMasterKey = await cryptoWorker.encryptToB64(
+        masterKey,
+        recoveryKey
+    );
+    const encryptedRecoveryKey = await cryptoWorker.encryptToB64(
+        recoveryKey,
+        masterKey
+    );
     const recoveryKeyAttributes = {
         masterKeyEncryptedWithRecoveryKey: encryptedMasterKey.encryptedData,
         masterKeyDecryptionNonce: encryptedMasterKey.nonce,
@@ -195,10 +188,7 @@ export async function encryptWithRecoveryKey(key: string) {
     const cryptoWorker = await new CryptoWorker();
     const hexRecoveryKey = await getRecoveryKey();
     const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
-    const encryptedKey: B64EncryptionResult = await cryptoWorker.encryptToB64(
-        key,
-        recoveryKey
-    );
+    const encryptedKey = await cryptoWorker.encryptToB64(key, recoveryKey);
     return encryptedKey;
 }
 

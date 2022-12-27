@@ -10,9 +10,11 @@ import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
-import { EncryptionResult, UploadURL } from 'types/upload';
+import { UploadURL } from 'types/upload';
 import { FileAttributes } from 'types/file';
 import { USE_CF_PROXY } from 'constants/upload';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
@@ -102,13 +104,15 @@ export async function replaceThumbnail(
 }
 
 export async function uploadThumbnail(
-    worker,
+    worker: Remote<DedicatedCryptoWorker>,
     fileKey: string,
     updatedThumbnail: Uint8Array,
     uploadURL: UploadURL
 ): Promise<FileAttributes> {
-    const { file: encryptedThumbnail }: EncryptionResult<Uint8Array> =
-        await worker.encryptThumbnail(updatedThumbnail, fileKey);
+    const { file: encryptedThumbnail } = await worker.encryptThumbnail(
+        updatedThumbnail,
+        fileKey
+    );
     let thumbnailObjectKey: string = null;
     if (USE_CF_PROXY) {
         thumbnailObjectKey = await uploadHttpClient.putFileV2(

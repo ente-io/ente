@@ -1,8 +1,8 @@
 import * as Comlink from 'comlink';
 import { WasmFFmpeg } from 'services/wasm/ffmpeg';
 
-export class FFmpeg {
-    wasmFFmpeg;
+export class DedicatedFFmpegWorker {
+    wasmFFmpeg: WasmFFmpeg;
     constructor() {
         this.wasmFFmpeg = new WasmFFmpeg();
     }
@@ -12,4 +12,4 @@ export class FFmpeg {
     }
 }
 
-Comlink.expose(FFmpeg);
+Comlink.expose(DedicatedFFmpegWorker, self);

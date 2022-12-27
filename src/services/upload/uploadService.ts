@@ -5,7 +5,6 @@ import { extractFileMetadata, getFilename } from './fileService';
 import { getFileType } from '../typeDetectionService';
 import { CustomError, handleUploadError } from 'utils/error';
 import {
-    B64EncryptionResult,
     BackupedFile,
     EncryptedFile,
     FileTypeInfo,
@@ -33,9 +32,12 @@ import { encryptFile, getFileSize, readFile } from './fileService';
 import { uploadStreamUsingMultipart } from './multiPartUploadService';
 import UIService from './uiService';
 import { USE_CF_PROXY } from 'constants/upload';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import publicUploadHttpClient from './publicUploadHttpClient';
 import { constructPublicMagicMetadata } from './magicMetadataService';
 import { FilePublicMagicMetadataProps } from 'types/magicMetadata';
+import { B64EncryptionResult } from 'types/crypto';
 
 class UploadService {
     private uploadURLs: UploadURL[] = [];
@@ -136,7 +138,7 @@ class UploadService {
     }
 
     async encryptAsset(
-        worker: any,
+        worker: Remote<DedicatedCryptoWorker>,
         file: FileWithMetadata,
         encryptionKey: string
     ): Promise<EncryptedFile> {
@@ -159,13 +161,13 @@ class UploadService {
                 if (USE_CF_PROXY) {
                     fileObjectKey = await UploadHttpClient.putFileV2(
                         fileUploadURL,
-                        file.file.encryptedData,
+                        file.file.encryptedData as Uint8Array,
                         progressTracker
                     );
                 } else {
                     fileObjectKey = await UploadHttpClient.putFile(
                         fileUploadURL,
-                        file.file.encryptedData,
+                        file.file.encryptedData as Uint8Array,
                         progressTracker
                     );
                 }

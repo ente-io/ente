@@ -1,4 +1,4 @@
-import { B64EncryptionResult } from 'utils/crypto';
+import { B64EncryptionResult } from 'types/crypto';
 import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
@@ -11,7 +11,7 @@ export const getActualKey = async () => {
         );
 
         const cryptoWorker = await new CryptoWorker();
-        const key: string = await cryptoWorker.decryptB64(
+        const key = await cryptoWorker.decryptB64(
             encryptionKeyAttributes.encryptedData,
             encryptionKeyAttributes.nonce,
             encryptionKeyAttributes.key
