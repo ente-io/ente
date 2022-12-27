@@ -61,6 +61,6 @@ export const SelectStyles = {
         color: 'rgba(255, 255, 255, 0.7)',
         wordSpacing: '2px',
         whiteSpace: 'nowrap',
-        marginLeft: '38px',
+        marginLeft: '40px',
     }),
 };
