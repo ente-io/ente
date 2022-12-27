@@ -390,7 +390,7 @@ const englishConstants = {
     CREATE_ALBUM_FAILED: 'Failed to create album , please try again',
 
     SEARCH_RESULTS: 'Search results',
-    SEARCH_HINT: () => <span>Search for location, dates, albums ...</span>,
+    SEARCH_HINT: () => <span>Search for albums, dates ...</span>,
     SEARCH_TYPE: (type: SuggestionType) => {
         switch (type) {
             case SuggestionType.COLLECTION:
