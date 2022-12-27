@@ -38,7 +38,7 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
-  ///Setting this flag to true will restrict the loading and success states of
+  ///Setting this flag to false will restrict the loading and success states of
   ///the button from surfacing on the UI. The ExecutionState of the button will
   ///change irrespective of the value of this flag. Only that it won't be
   ///surfaced on the UI
