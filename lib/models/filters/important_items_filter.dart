@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:path/path.dart';
@@ -15,7 +13,10 @@ class ImportantItemsFilter implements GalleryItemsFilter {
     if (file.uploadedFileID != null) {
       return true;
     }
-    final String folder = basename(file.deviceFolder);
+    if (file.deviceFolder == null) {
+      return false;
+    }
+    final String folder = basename(file.deviceFolder!);
     if (_importantPaths.isEmpty && Platform.isAndroid) {
       return folder == "Camera" ||
           folder == "Recents" ||
