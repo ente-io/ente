@@ -220,11 +220,17 @@ extension DeviceFiles on FilesDB {
       existingPathIds.removeAll(devicePathInfo.map((e) => e.item1.id).toSet());
       if (existingPathIds.isNotEmpty) {
         hasUpdated = true;
-        _logger.info('Deleting following pathIds from local $existingPathIds ');
+        _logger.info('Deleting non-backed up pathIds from local '
+            '$existingPathIds');
         for (String pathID in existingPathIds) {
+          // do not delete device collection entries for paths which are
+          // marked for backup. This is to handle "Free up space"
+          // feature, where we delete files which are backed up. Deleting such
+          // entries here result in us losing out on the information that
+          // those folders were marked for automatic backup.
           await db.delete(
             "device_collections",
-            where: 'id = ?',
+            where: 'id = ? and should_backup = $_sqlBoolFalse ',
             whereArgs: [pathID],
           );
           await db.delete(
@@ -389,7 +395,7 @@ extension DeviceFiles on FilesDB {
             final File result =
                 await getDeviceCollectionThumbnail(deviceCollection.id);
             if (result == null) {
-              _logger.severe(
+              _logger.finest(
                 'Failed to find coverThumbnail for deviceFolder',
               );
               continue;
