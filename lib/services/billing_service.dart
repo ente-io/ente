@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -39,7 +37,7 @@ class BillingService {
 
   bool _isOnSubscriptionPage = false;
 
-  Future<BillingPlans> _future;
+  Future<BillingPlans>? _future;
 
   void init() {
     // if (Platform.isIOS && kDebugMode) {
@@ -75,7 +73,7 @@ class BillingService {
     _future ??= _fetchBillingPlans().then((response) {
       return BillingPlans.fromMap(response.data);
     });
-    return _future;
+    return _future!;
   }
 
   Future<Response<dynamic>> _fetchBillingPlans() {
@@ -99,7 +97,7 @@ class BillingService {
       );
       return Subscription.fromMap(response.data["subscription"]);
     } on DioError catch (e) {
-      if (e.response != null && e.response.statusCode == 409) {
+      if (e.response != null && e.response?.statusCode == 409) {
         throw SubscriptionAlreadyClaimedError();
       } else {
         rethrow;
