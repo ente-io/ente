@@ -146,6 +146,7 @@ class UserService {
     bool memoryCount = true,
     bool shouldCache = false,
   }) async {
+    _logger.info("Fetching user details");
     try {
       final response = await _enteDio.get(
         "/users/details/v2",
