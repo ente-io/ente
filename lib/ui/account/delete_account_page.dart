@@ -100,7 +100,7 @@ class DeleteAccountPage extends StatelessWidget {
                 labelText: "No, delete account",
                 icon: Icons.no_accounts_outlined,
                 onTap: () async => {await _initiateDelete(context)},
-                shouldDisableExecutionStates: true,
+                shouldSurfaceExecutionStates: false,
               )
             ],
           ),

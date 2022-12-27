@@ -38,10 +38,11 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
-  ///Setting this flag to true will disable the loading and success states
-  ///of the button. This can be set to true if loading and success states aren't
-  ///required in a particular context
-  final bool shouldDisableExecutionStates;
+  ///Setting this flag to true will restrict the loading and success states of
+  ///the button from surfacing on the UI. The ExecutionState of the button will
+  ///change irrespective of the value of this flag. Only that it won't be
+  ///surfaced on the UI
+  final bool shouldSurfaceExecutionStates;
 
   /// iconColor should only be specified when we do not want to honor the default
   /// iconColor based on buttonType. Most of the items, default iconColor is what
@@ -70,7 +71,7 @@ class ButtonWidget extends StatelessWidget {
     this.buttonAction,
     this.isInAlert = false,
     this.iconColor,
-    this.shouldDisableExecutionStates = false,
+    this.shouldSurfaceExecutionStates = true,
     super.key,
   });
 
@@ -135,7 +136,7 @@ class ButtonWidget extends StatelessWidget {
       labelText: labelText,
       icon: icon,
       buttonAction: buttonAction,
-      shouldDisableExecutionStates: shouldDisableExecutionStates,
+      shouldSurfaceExecutionStates: shouldSurfaceExecutionStates,
     );
   }
 }
@@ -150,14 +151,14 @@ class ButtonChildWidget extends StatefulWidget {
   final ButtonSize buttonSize;
   final ButtonAction? buttonAction;
   final bool isInAlert;
-  final bool shouldDisableExecutionStates;
+  final bool shouldSurfaceExecutionStates;
   const ButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
     required this.buttonSize,
     required this.isInAlert,
-    required this.shouldDisableExecutionStates,
+    required this.shouldSurfaceExecutionStates,
     this.onTap,
     this.labelText,
     this.icon,
@@ -231,7 +232,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
               switchInCurve: Curves.easeInOutExpo,
               switchOutCurve: Curves.easeInOutExpo,
               child: executionState == ExecutionState.idle ||
-                      widget.shouldDisableExecutionStates
+                      !widget.shouldSurfaceExecutionStates
                   ? widget.buttonType.hasTrailingIcon
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -341,7 +342,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   bool get _shouldRegisterGestures =>
       !widget.isDisabled &&
       (executionState == ExecutionState.idle ||
-          widget.shouldDisableExecutionStates);
+          !widget.shouldSurfaceExecutionStates);
 
   void _onTap() async {
     if (widget.onTap != null) {
