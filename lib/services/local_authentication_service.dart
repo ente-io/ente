@@ -40,7 +40,7 @@ class LocalAuthenticationService {
     String errorDialogContent, [
     String errorDialogTitle = "",
   ]) async {
-    if (await LocalAuthentication().isDeviceSupported()) {
+    if (await _isLocalAuthSupportedOnDevice()) {
       AppLock.of(context).disable();
       final result = await requestAuthentication(
         infoMessage,
@@ -65,6 +65,6 @@ class LocalAuthenticationService {
   }
 
   Future<bool> _isLocalAuthSupportedOnDevice() async {
-    return await LocalAuthentication().isDeviceSupported();
+    return LocalAuthentication().isDeviceSupported();
   }
 }
