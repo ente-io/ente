@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
@@ -25,14 +23,14 @@ import 'package:photos/utils/toast_util.dart';
 class ShareCollectionPage extends StatefulWidget {
   final Collection collection;
 
-  const ShareCollectionPage(this.collection, {Key key}) : super(key: key);
+  const ShareCollectionPage(this.collection, {Key? key}) : super(key: key);
 
   @override
   State<ShareCollectionPage> createState() => _ShareCollectionPageState();
 }
 
 class _ShareCollectionPageState extends State<ShareCollectionPage> {
-  List<User> _sharees;
+  late List<User?> _sharees;
   final Logger _logger = Logger("SharingDialogState");
   final CollectionActions collectionActions =
       CollectionActions(CollectionsService.instance);
@@ -132,7 +130,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           CollectionsService.instance.getCollectionKey(widget.collection.id),
         );
         final String url =
-            "${widget.collection.publicURLs.first.url}#$collectionKey";
+            "${widget.collection.publicURLs!.first!.url}#$collectionKey";
         children.addAll(
           [
             MenuItemWidget(
@@ -235,8 +233,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.collection.name,
-          style: Theme.of(context).textTheme.headline5.copyWith(fontSize: 16),
+          widget.collection.name ?? "Unnamed",
+          style: Theme.of(context).textTheme.headline5?.copyWith(fontSize: 16),
         ),
         elevation: 0,
         centerTitle: false,
@@ -260,12 +258,12 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
 class EmailItemWidget extends StatelessWidget {
   final Collection collection;
-  final Function onTap;
+  final Function? onTap;
 
   const EmailItemWidget(
     this.collection, {
     this.onTap,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -291,7 +289,7 @@ class EmailItemWidget extends StatelessWidget {
             trailingIcon: Icons.chevron_right,
             onTap: () async {
               if (onTap != null) {
-                onTap();
+                onTap!();
               }
             },
             isBottomBorderRadiusRemoved: true,
@@ -317,7 +315,7 @@ class EmailItemWidget extends StatelessWidget {
             trailingIcon: Icons.chevron_right,
             onTap: () async {
               if (onTap != null) {
-                onTap();
+                onTap!();
               }
             },
             isBottomBorderRadiusRemoved: true,
