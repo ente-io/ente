@@ -45,7 +45,7 @@ class Subscription {
       price: map['price'],
       period: map['period'],
       attributes: map["attributes"] != null
-          ? Attributes.fromJson(map["attributes"])
+          ? Attributes.fromMap(map["attributes"])
           : null,
     );
   }
@@ -65,7 +65,8 @@ class Subscription {
 
   String toJson() => json.encode(toMap());
 
-  factory Subscription.fromJson(String source) => Subscription.fromMap(json.decode(source));
+  factory Subscription.fromJson(String source) =>
+      Subscription.fromMap(json.decode(source));
 }
 
 class Attributes {
@@ -93,5 +94,6 @@ class Attributes {
 
   String toJson() => json.encode(toMap());
 
-  factory Attributes.fromJson(String source) => Attributes.fromMap(json.decode(source));
+  factory Attributes.fromJson(String source) =>
+      Attributes.fromMap(json.decode(source));
 }
