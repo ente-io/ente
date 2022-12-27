@@ -8,6 +8,7 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -21,6 +22,7 @@ class DeleteAccountPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -49,7 +51,10 @@ class DeleteAccountPage extends StatelessWidget {
               Center(
                 child: Text(
                   "We'll be sorry to see you go. Are you facing some issue?",
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle1
+                      .copyWith(color: colorScheme.textMuted),
                 ),
               ),
               const SizedBox(
@@ -68,7 +73,10 @@ class DeleteAccountPage extends StatelessWidget {
                       text: ", maybe there is a way we can help.",
                     ),
                   ],
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle1
+                      .copyWith(color: colorScheme.textMuted),
                 ),
               ),
               const SizedBox(
