@@ -64,8 +64,9 @@ You can alternatively install the build from PlayStore or F-Droid.
 1. [Install Flutter](https://flutter.dev/docs/get-started/install)
 2. Clone this repository with `git clone git@github.com:ente-io/photos-app.git`
 3. Pull in all submodules with `git submodule update --init --recursive`
-4. For Android, run `flutter build apk --release --flavor independent`
-5. For iOS, run `flutter build ios`
+4. Enable repo git hooks `git config core.hooksPath hooks`
+5. For Android, run `flutter build apk --release --flavor independent`
+6. For iOS, run `flutter build ios`
 
 <br/>
 
