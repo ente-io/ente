@@ -28,12 +28,7 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
     _userDetails = UserService.instance.getCachedUserDetails();
     _openedSettingsEventSubscription =
         Bus.instance.on<OpenedSettingsEvent>().listen((event) {
-      Future.delayed(
-        const Duration(
-          milliseconds: 750,
-        ),
-        _fetchUserDetails,
-      );
+      _fetchUserDetails();
     });
     super.initState();
   }
