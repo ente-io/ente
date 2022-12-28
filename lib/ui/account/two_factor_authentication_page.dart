@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/services/user_service.dart';
@@ -9,7 +7,7 @@ import 'package:pinput/pin_put/pin_put.dart';
 class TwoFactorAuthenticationPage extends StatefulWidget {
   final String sessionID;
 
-  const TwoFactorAuthenticationPage(this.sessionID, {Key key})
+  const TwoFactorAuthenticationPage(this.sessionID, {Key? key})
       : super(key: key);
 
   @override
@@ -25,7 +23,7 @@ class _TwoFactorAuthenticationPageState
     borderRadius: BorderRadius.circular(15.0),
   );
   String _code = "";
-  LifecycleEventHandler _lifecycleEventHandler;
+  late LifecycleEventHandler _lifecycleEventHandler;
 
   @override
   void initState() {
@@ -33,8 +31,8 @@ class _TwoFactorAuthenticationPageState
       resumeCallBack: () async {
         if (mounted) {
           final data = await Clipboard.getData(Clipboard.kTextPlain);
-          if (data != null && data.text != null && data.text.length == 6) {
-            _pinController.text = data.text;
+          if (data != null && data.text != null && data.text!.length == 6) {
+            _pinController.text = data.text!;
           }
         }
       },
