@@ -12,12 +12,14 @@ import 'package:photos/utils/separators_util.dart';
 ///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showGenericErrorDialog({
   required BuildContext context,
+  bool isDismissible = true,
 }) async {
   return showDialogWidget(
     context: context,
     title: "Error",
     icon: Icons.error_outline_outlined,
     body: "It looks like something went wrong. Please try again.",
+    isDismissible: isDismissible,
     buttons: const [
       ButtonWidget(
         buttonType: ButtonType.secondary,
@@ -43,6 +45,7 @@ Future<ButtonAction?> showNewChoiceDialog({
   FutureVoidCallback? secondButtonOnTap,
   bool isCritical = false,
   IconData? icon,
+  bool isDismissible = true,
 }) async {
   final buttons = [
     ButtonWidget(
@@ -66,6 +69,7 @@ Future<ButtonAction?> showNewChoiceDialog({
     body: body,
     buttons: buttons,
     icon: icon,
+    isDismissible: isDismissible,
   );
 }
 
@@ -76,8 +80,10 @@ Future<ButtonAction?> showDialogWidget({
   String? body,
   required List<ButtonWidget> buttons,
   IconData? icon,
+  bool isDismissible = true,
 }) {
   return showDialog(
+    barrierDismissible: isDismissible,
     barrierColor: backdropFaintDark,
     context: context,
     builder: (context) {

@@ -19,6 +19,8 @@ Future<ButtonAction?> showActionSheet({
   required BuildContext context,
   required List<ButtonWidget> buttons,
   required ActionSheetType actionSheetType,
+  bool enableDrag = true,
+  bool isDismissible = true,
   bool isCheckIconGreen = false,
   String? title,
   String? body,
@@ -28,6 +30,8 @@ Future<ButtonAction?> showActionSheet({
     barrierColor: backdropFaintDark,
     useRootNavigator: true,
     context: context,
+    isDismissible: isDismissible,
+    enableDrag: enableDrag,
     builder: (_) {
       return ActionSheetWidget(
         title: title,
