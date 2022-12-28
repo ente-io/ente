@@ -1,0 +1,116 @@
+{
+  "@@locale": "en",
+  "counterAppBarTitle": "Zähler",
+  "@counterAppBarTitle": {
+    "description": "Text, der in der AppBar der Zähler-Seite angezeigt wird"
+  },
+  "onBoardingBody": "Sichern Sie Ihre 2FA-Codes",
+  "onBoardingGetStarted": "Los geht's",
+  "setupFirstAccount": "Ihr erstes Konto einrichten",
+  "importScanQrCode": "Scannen eines QR-Codes",
+  "importEnterSetupKey": "Einen Setup-Schlüssel eingeben",
+  "importAccountPageTitle": "Kontodaten eingeben",
+  "codeIssuerHint": "Aussteller",
+  "codeSecretKeyHint" : "Geheimer Schlüssel",
+  "codeAccountHint": "Konto (you@domain.com)",
+  "accountKeyType": "Art des Schlüssels",
+  "timeBasedKeyType": "Zeitbasiert (TOTP)",
+  "counterBasedKeyType": "Zählerbasiert (HOTP)",
+  "saveAction": "Speichern",
+  "nextTotpTitle": "Weiter",
+  "deleteCodeTitle": "Code löschen?",
+  "deleteCodeMessage": "Sind Sie sicher, dass Sie diesen Code löschen wollen? Diese Aktion ist unumkehrbar.",
+  "viewLogsAction": "Protokolle anzeigen",
+  "sendLogsDescription": "Dadurch werden Protokolle übermittelt, die uns bei der Behebung Ihres Problems helfen. Obwohl wir Vorkehrungen treffen, um sicherzustellen, dass keine sensiblen Informationen protokolliert werden, empfehlen wir Ihnen, diese Protokolle anzusehen, bevor Sie sie weitergeben.",
+  "preparingLogsTitle": "Vorbereiten der Protokolle...",
+  "emailLogsTitle": "Protokolle versenden",
+  "emailLogsMessage": "Bitte senden Sie die Protokolle an {email}",
+  "@emailLogsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "copyEmailAction": "E-Mail kopieren",
+  "exportLogsAction": "Protokolle exportieren",
+  "reportABug": "Fehlermelden",
+  "crashAndErrorReporting": "Absturz- und Fehlerberichte",
+  "reportBug": "Fehlermelden",
+  "emailUsMessage": "Bitte senden Sie uns eine E-Mail an {email}",
+  "@emailUsMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "contactSupport": "Support kontaktieren",
+  "verifyPassword": "Passwort überprüfen",
+  "pleaseWaitTitle": "Bitte warten...",
+  "generatingEncryptionKeysTitle": "Generierung von Verschlüsselungsschlüsseln...",
+  "recreatePassword": "Passwort wiederherstellen",
+  "recreatePasswordMessage": "Das aktuelle Gerät ist nicht leistungsfähig genug, um Ihr Passwort zu verifizieren, daher müssen wir es einmalig auf eine Weise neu generieren, die mit allen Geräten funktioniert. \n\nBitte melden Sie sich mit Ihrem Wiederherstellungsschlüssel an und generieren Sie Ihr Passwort neu (Sie können dasselbe erneut verwenden, wenn Sie möchten).",
+  "useRecoveryKeyAction": "Wiederherstellungsschlüssel verwenden",
+  "incorrectPassword": "Falsches Passwort",
+  "welcomeBackTitle": "Willkommen zurück!",
+  "madeWithLoveAtPrefix": "gemacht mit ❤️ bei ",
+  "changeEmail": "E-Mail ändern",
+  "ok": "OK",
+  "cancel": "Abbrechen",
+  "yes": "Ja",
+  "no": "Nein",
+  "email": "E-Mail",
+  "support": "Support",
+  "settings": "Einstellungen",
+  "copied": "Kopiert",
+  "tryAgainMessage": "Bitte versuchen Sie es erneut",
+  "existingUser": "Bestehender Benutzer",
+  "newUser" : "Neu bei ente",
+  "delete": "Löschen",
+  "enterYourPasswordHint": "Geben Sie Ihr Passwort ein",
+  "forgotPassword": "Passwort vergessen",
+  "oops": "Oops",
+  "somethingWentWrongMessage": "Ein Fehler ist aufgetreten, bitte versuchen Sie es erneut",
+  "leaveFamily": "Familie verlassen",
+  "leaveFamilyMessage": "Sind Sie sicher, dass Sie den Familien-Plan verlassen wollen?",
+  "inFamilyPlanMessage": "Sie haben einen Familien-Plan!",
+  "swipeHint": "Wischen Sie nach links, um Codes zu bearbeiten oder zu entfernen",
+  "scan": "Scannen",
+  "scanACode": "Scannen eines Codes",
+  "verify": "Überprüfen Sie",
+  "enterCodeHint": "Geben Sie den 6-stelligen Code \naus Ihrer Authentifikator-App ein.",
+  "lostDeviceTitle": "Gerät verloren?",
+  "twoFactorAuthTitle": "Zwei-Faktor-Authentifizierung",
+  "recoverAccount": "Konto wiederherstellen",
+  "enterRecoveryKeyHint": "Geben Sie Ihren Wiederherstellungsschlüssel ein",
+  "recover": "Wiederherstellen",
+  "contactSupportViaEmailMessage":"Bitte senden Sie eine E-Mail an {email} von Ihrer registrierten E-Mail-Adresse",
+  "@contactSupportViaEmailMessage": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "noRecoveryKeyTitle": "Kein Wiederherstellungsschlüssel?",
+  "enterEmailHint": "Geben Sie Ihre E-Mail Adresse ein",
+  "invalidEmailTitle": "Ungültige E-Mail Adresse",
+  "invalidEmailMessage": "Bitte geben Sie eine gültige E-Mail Adresse ein.",
+  "deleteAccount": "Konto löschen",
+  "deleteAccountQuery": "Es wird uns leid tun, Sie gehen zu sehen. Haben Sie ein Problem?",
+  "yesSendFeedbackAction": "Ja, Feedback senden",
+  "noDeleteAccountAction": "Nein, Konto löschen",
+  "initiateAccountDeleteTitle": "Bitte authentifizieren Sie sich, um die Kontolöschung einzuleiten",
+  "confirmAccountDeleteTitle": "Sind Sie sicher, dass Sie Ihr ente Konto löschen wollen?",
+  "confirmAccountDeleteMessage": "Ihre hochgeladenen Daten werden in allen Anwendungen (sowohl Fotos als auch Authenticator) zur Löschung vorgesehen und Ihr Konto wird dauerhaft gelöscht.",
+  "sendEmail": "E-Mail senden",
+  "createNewAccount": "Neues Konto erstellen",
+  "passwordStrengthWeak": "Schwach",
+  "passwordStrengthStrong": "Stark",
+  "passwordStrengthModerate": "Mittel",
+  "confirmPassword": "Bestätigen Sie das Passwort",
+  "close": "Schließen",
+  "oopsSomethingWentWrong": "Ups, da ist etwas schief gelaufen."
+
+}
