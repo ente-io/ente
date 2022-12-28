@@ -98,6 +98,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 child: IntrinsicHeight(
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       widget.showAppBar
                           ? const SizedBox.shrink()
