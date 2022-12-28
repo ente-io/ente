@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 const freeProductID = "free";
 const stripe = "stripe";
 const appStore = "appstore";
@@ -43,10 +45,28 @@ class Subscription {
       price: map['price'],
       period: map['period'],
       attributes: map["attributes"] != null
-          ? Attributes.fromJson(map["attributes"])
+          ? Attributes.fromMap(map["attributes"])
           : null,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'productID': productID,
+      'storage': storage,
+      'originalTransactionID': originalTransactionID,
+      'paymentProvider': paymentProvider,
+      'expiryTime': expiryTime,
+      'price': price,
+      'period': period,
+      'attributes': attributes?.toMap(),
+    };
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Subscription.fromJson(String source) =>
+      Subscription.fromMap(json.decode(source));
 }
 
 class Attributes {
@@ -58,8 +78,22 @@ class Attributes {
     this.customerID,
   });
 
-  Attributes.fromJson(dynamic json) {
-    isCancelled = json["isCancelled"];
-    customerID = json["customerID"];
+  Map<String, dynamic> toMap() {
+    return {
+      'isCancelled': isCancelled,
+      'customerID': customerID,
+    };
   }
+
+  factory Attributes.fromMap(Map<String, dynamic> map) {
+    return Attributes(
+      isCancelled: map['isCancelled'],
+      customerID: map['customerID'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory Attributes.fromJson(String source) =>
+      Attributes.fromMap(json.decode(source));
 }
