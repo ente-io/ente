@@ -9,6 +9,7 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
 
+///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showGenericErrorDialog({
   required BuildContext context,
 }) async {
@@ -27,6 +28,7 @@ Future<ButtonAction?> showGenericErrorDialog({
   );
 }
 
+///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showNewChoiceDialog({
   required BuildContext context,
   required String title,
@@ -67,6 +69,7 @@ Future<ButtonAction?> showNewChoiceDialog({
   );
 }
 
+///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showDialogWidget({
   required BuildContext context,
   required String title,
@@ -75,7 +78,6 @@ Future<ButtonAction?> showDialogWidget({
   IconData? icon,
 }) {
   return showDialog(
-    barrierDismissible: false,
     barrierColor: backdropFaintDark,
     context: context,
     builder: (context) {
