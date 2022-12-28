@@ -1,7 +1,7 @@
 import util from 'util';
 import { exec } from 'child_process';
 
-import { rmSync } from 'fs';
+import { existsSync, rmSync } from 'fs';
 import { readFile, writeFile } from 'promise-fs';
 import { generateTempFilePath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
@@ -30,6 +30,9 @@ export async function convertHEIC(
 
         await runConvertCommand(tempInputFilePath, tempOutputFilePath);
 
+        if (!existsSync(tempOutputFilePath)) {
+            throw new Error('heic convert output file not found');
+        }
         const convertedFileData = new Uint8Array(
             await readFile(tempOutputFilePath)
         );
