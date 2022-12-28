@@ -45,7 +45,7 @@ export async function runFFmpegCmd(
         throw e;
     } finally {
         try {
-            rmSync(tempOutputFilePath);
+            rmSync(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, 'failed to remove tempOutputFile');
         }
@@ -66,5 +66,5 @@ export async function deleteTempFile(tempFilePath: string) {
             'tried to delete a non temp file'
         );
     }
-    rmSync(tempFilePath);
+    rmSync(tempFilePath, { force: true });
 }

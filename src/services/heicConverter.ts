@@ -39,12 +39,12 @@ export async function convertHEIC(
         throw e;
     } finally {
         try {
-            rmSync(tempInputFilePath);
+            rmSync(tempInputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, 'failed to remove tempInputFile');
         }
         try {
-            rmSync(tempOutputFilePath);
+            rmSync(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, 'failed to remove tempOutputFile');
         }
