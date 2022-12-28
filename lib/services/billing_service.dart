@@ -97,7 +97,7 @@ class BillingService {
       );
       return Subscription.fromMap(response.data["subscription"]);
     } on DioError catch (e) {
-      if (e.response != null && e.response?.statusCode == 409) {
+      if (e.response != null && e.response!.statusCode == 409) {
         throw SubscriptionAlreadyClaimedError();
       } else {
         rethrow;
