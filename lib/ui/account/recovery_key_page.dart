@@ -65,6 +65,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     return Scaffold(
       appBar: widget.showProgressBar
           ? AppBar(
+              automaticallyImplyLeading: false,
               elevation: 0,
               title: Hero(
                 tag: "recovery_key",
