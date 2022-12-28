@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:photos/core/configuration.dart';
@@ -15,7 +13,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class DebugSectionWidget extends StatelessWidget {
-  const DebugSectionWidget({Key key}) : super(key: key);
+  const DebugSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +73,7 @@ class DebugSectionWidget extends StatelessWidget {
   }
 
   void _showKeyAttributesDialog(BuildContext context) {
-    final keyAttributes = Configuration.instance.getKeyAttributes();
+    final keyAttributes = Configuration.instance.getKeyAttributes()!;
     final AlertDialog alert = AlertDialog(
       title: const Text("key attributes"),
       content: SingleChildScrollView(
@@ -85,7 +83,7 @@ class DebugSectionWidget extends StatelessWidget {
               "Key",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(Sodium.bin2base64(Configuration.instance.getKey())),
+            Text(Sodium.bin2base64(Configuration.instance.getKey()!)),
             const Padding(padding: EdgeInsets.all(12)),
             const Text(
               "Encrypted Key",

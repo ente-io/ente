@@ -2,8 +2,9 @@
 # This git hook fails if a user is trying to add a new file which is
 # not null safe.
 
-# Check the contents of each file that is being added or modified
-for file in `git diff --name-only --cached`; do
+# Check the contents of each file that is being added(A) or modified(N) or
+# copied (C)
+for file in `git diff --name-only --diff-filter=ACM --cached`; do
   # Ignore the hooks from any pre-commit check
   if echo "$file" | grep -q 'hooks/'; then
     continue

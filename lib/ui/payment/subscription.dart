@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/cupertino.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/services/feature_flag_service.dart';
@@ -24,5 +22,5 @@ StatefulWidget getSubscriptionPage({bool isOnBoarding = false}) {
 // users who might have paid via playStore. This method should be removed once
 // we have better handling for active play/app store subscription & stripe plans.
 bool _isUserCreatedPostStripeSupport() {
-  return Configuration.instance.getUserID() > 1580559962386460;
+  return Configuration.instance.getUserID()! > 1580559962386460;
 }

@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -12,7 +10,7 @@ import 'package:photos/utils/navigation_util.dart';
 class TrashButtonWidget extends StatefulWidget {
   const TrashButtonWidget(
     this.textStyle, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final TextStyle textStyle;
@@ -22,7 +20,7 @@ class TrashButtonWidget extends StatefulWidget {
 }
 
 class _TrashButtonWidgetState extends State<TrashButtonWidget> {
-  StreamSubscription<TrashUpdatedEvent> _trashUpdatedEventSubscription;
+  late StreamSubscription<TrashUpdatedEvent> _trashUpdatedEventSubscription;
 
   @override
   void initState() {
@@ -37,7 +35,7 @@ class _TrashButtonWidgetState extends State<TrashButtonWidget> {
 
   @override
   void dispose() {
-    _trashUpdatedEventSubscription?.cancel();
+    _trashUpdatedEventSubscription.cancel();
     super.dispose();
   }
 
@@ -52,7 +50,7 @@ class _TrashButtonWidgetState extends State<TrashButtonWidget> {
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
-          color: Theme.of(context).iconTheme.color.withOpacity(0.24),
+          color: Theme.of(context).iconTheme.color!.withOpacity(0.24),
         ),
       ),
       child: SizedBox(
@@ -73,7 +71,7 @@ class _TrashButtonWidgetState extends State<TrashButtonWidget> {
                   FutureBuilder<int>(
                     future: TrashDB.instance.count(),
                     builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data > 0) {
+                      if (snapshot.hasData && snapshot.data! > 0) {
                         return RichText(
                           text: TextSpan(
                             style: widget.textStyle,

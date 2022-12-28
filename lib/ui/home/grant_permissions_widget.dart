@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -7,7 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/services/sync_service.dart';
 
 class GrantPermissionsWidget extends StatelessWidget {
-  const GrantPermissionsWidget({Key key}) : super(key: key);
+  const GrantPermissionsWidget({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final isLightMode =
@@ -55,7 +53,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   text: TextSpan(
                     style: Theme.of(context)
                         .textTheme
-                        .headline5
+                        .headline5!
                         .copyWith(fontWeight: FontWeight.w700),
                     children: [
                       const TextSpan(text: 'ente '),
@@ -63,7 +61,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                         text: "needs permission to ",
                         style: Theme.of(context)
                             .textTheme
-                            .headline5
+                            .headline5!
                             .copyWith(fontWeight: FontWeight.w400),
                       ),
                       const TextSpan(text: 'preserve your photos'),
@@ -109,7 +107,7 @@ class GrantPermissionsWidget extends StatelessWidget {
                   TextButton(
                     child: Text(
                       "OK",
-                      style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      style: Theme.of(context).textTheme.subtitle1!.copyWith(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
                           ),

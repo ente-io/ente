@@ -1,12 +1,10 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 class PlaceHolderWidget extends StatelessWidget {
   const PlaceHolderWidget(
     this.count,
     this.columns, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final int count, columns;
@@ -33,7 +31,7 @@ class PlaceHolderWidget extends StatelessWidget {
         ),
       );
     }
-    return _gridViewCache[key];
+    return _gridViewCache[key]!;
   }
 
   String _getCacheKey(int totalCount, int columns) {

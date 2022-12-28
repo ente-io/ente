@@ -1,10 +1,8 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class NoResultWidget extends StatelessWidget {
-  const NoResultWidget({Key key}) : super(key: key);
+  const NoResultWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

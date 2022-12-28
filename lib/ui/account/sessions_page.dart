@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
@@ -12,14 +10,14 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class SessionsPage extends StatefulWidget {
-  const SessionsPage({Key key}) : super(key: key);
+  const SessionsPage({Key? key}) : super(key: key);
 
   @override
   State<SessionsPage> createState() => _SessionsPageState();
 }
 
 class _SessionsPageState extends State<SessionsPage> {
-  Sessions _sessions;
+  Sessions? _sessions;
   final Logger _logger = Logger("SessionsPageState");
 
   @override
@@ -45,7 +43,7 @@ class _SessionsPageState extends State<SessionsPage> {
     }
     final List<Widget> rows = [];
     rows.add(const Padding(padding: EdgeInsets.all(4)));
-    for (final session in _sessions.sessions) {
+    for (final session in _sessions!.sessions) {
       rows.add(_getSessionWidget(session));
     }
     return SingleChildScrollView(
@@ -133,12 +131,14 @@ class _SessionsPageState extends State<SessionsPage> {
         .getActiveSessions()
         .onError((error, stackTrace) {
       showToast(context, "Failed to fetch active sessions");
-      throw error;
+      throw error!;
     });
-    _sessions.sessions.sort((first, second) {
-      return second.lastUsedTime.compareTo(first.lastUsedTime);
-    });
-    setState(() {});
+    if (_sessions != null) {
+      _sessions!.sessions.sort((first, second) {
+        return second.lastUsedTime.compareTo(first.lastUsedTime);
+      });
+      setState(() {});
+    }
   }
 
   void _showSessionTerminationDialog(Session session) {
