@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -20,7 +18,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class AccountSectionWidget extends StatelessWidget {
-  const AccountSectionWidget({Key key}) : super(key: key);
+  const AccountSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

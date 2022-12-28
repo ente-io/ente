@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/device_collection.dart';
@@ -12,7 +10,7 @@ class DeviceFolderIcon extends StatelessWidget {
   final DeviceCollection deviceCollection;
   const DeviceFolderIcon(
     this.deviceCollection, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -35,7 +33,7 @@ class DeviceFolderIcon extends StatelessWidget {
                   child: Hero(
                     tag: "device_folder:" +
                         deviceCollection.name +
-                        deviceCollection.thumbnail.tag,
+                        deviceCollection.thumbnail!.tag,
                     child: Stack(
                       children: [
                         ThumbnailWidget(
@@ -44,7 +42,7 @@ class DeviceFolderIcon extends StatelessWidget {
                           key: Key(
                             "device_folder:" +
                                 deviceCollection.name +
-                                deviceCollection.thumbnail.tag,
+                                deviceCollection.thumbnail!.tag,
                           ),
                         ),
                         isBackedUp ? Container() : const UnSyncedIcon(),

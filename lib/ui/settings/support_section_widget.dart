@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -15,7 +13,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/utils/email_util.dart';
 
 class SupportSectionWidget extends StatelessWidget {
-  const SupportSectionWidget({Key key}) : super(key: key);
+  const SupportSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +61,9 @@ class SupportSectionWidget extends StatelessWidget {
                   final endpoint = Configuration.instance.getHttpEndpoint() +
                       "/users/roadmap";
                   final url = Configuration.instance.isLoggedIn()
-                      ? endpoint + "?token=" + Configuration.instance.getToken()
+                      ? endpoint +
+                          "?token=" +
+                          Configuration.instance.getToken()!
                       : roadmapURL;
                   return WebPage("Suggest features", url);
                 },
