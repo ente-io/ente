@@ -41,6 +41,7 @@ Future<ButtonAction?> showCommonActionSheet({
   );
 }
 
+///Returns null if dismissed by tapping outside
 Future<ButtonAction?> showActionSheet({
   required BuildContext context,
   required List<ButtonWidget> buttons,
@@ -63,7 +64,6 @@ Future<ButtonAction?> showActionSheet({
         isCheckIconGreen: isCheckIconGreen,
       );
     },
-    isDismissible: false,
     enableDrag: false,
   );
 }
