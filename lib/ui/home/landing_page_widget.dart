@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:dots_indicator/dots_indicator.dart';
@@ -17,7 +15,7 @@ import 'package:photos/ui/common/gradient_button.dart';
 import 'package:photos/ui/payment/subscription.dart';
 
 class LandingPageWidget extends StatefulWidget {
-  const LandingPageWidget({Key key}) : super(key: key);
+  const LandingPageWidget({Key? key}) : super(key: key);
 
   @override
   State<LandingPageWidget> createState() => _LandingPageWidgetState();
@@ -240,7 +238,7 @@ class FeatureItemWidget extends StatelessWidget {
     this.featureTitleFirstLine,
     this.featureTitleSecondLine,
     this.subText, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
