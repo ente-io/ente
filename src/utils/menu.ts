@@ -189,14 +189,10 @@ export async function buildMenuBar(): Promise<Menu> {
         {
             label: 'View',
             submenu: [
-                ...((isDev
-                    ? [
-                          { role: 'reload', label: 'Reload' },
-                          { role: 'forceReload', label: 'Force reload' },
-                          { role: 'toggleDevTools', label: 'Toggle dev tools' },
-                          { type: 'separator' },
-                      ]
-                    : []) as MenuItemConstructorOptions[]),
+                { role: 'reload', label: 'Reload' },
+                { role: 'forceReload', label: 'Force reload' },
+                { role: 'toggleDevTools', label: 'Toggle dev tools' },
+                { type: 'separator' },
                 { role: 'resetZoom', label: 'Reset zoom' },
                 { role: 'zoomIn', label: 'Zoom in' },
                 { role: 'zoomOut', label: 'Zoom out' },
@@ -240,24 +236,6 @@ export async function buildMenuBar(): Promise<Menu> {
                     click: () => {
                         shell.openPath(app.getPath('logs'));
                     },
-                },
-            ],
-        },
-        {
-            label: 'Help',
-            submenu: [
-                {
-                    label: 'FAQ',
-                    click: () => shell.openExternal('https://ente.io/faq/'),
-                },
-                { type: 'separator' },
-                {
-                    label: 'Support',
-                    click: () => shell.openExternal('mailto:support@ente.io'),
-                },
-                {
-                    label: 'Product updates',
-                    click: () => shell.openExternal('https://ente.io/blog/'),
                 },
             ],
         },
