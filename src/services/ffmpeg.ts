@@ -5,6 +5,7 @@ import log from 'electron-log';
 import { readFile, rmSync, writeFile } from 'promise-fs';
 import { logErrorSentry } from './sentry';
 import { generateTempFilePath, getTempDirPath } from '../utils/temp';
+import { existsSync } from 'fs';
 
 const execAsync = util.promisify(require('child_process').exec);
 
@@ -39,13 +40,17 @@ export async function runFFmpegCmd(
         cmd = shellescape(cmd);
         log.info('cmd', cmd);
         await execAsync(cmd);
-        return new Uint8Array(await readFile(tempOutputFilePath));
+        if (!existsSync(tempOutputFilePath)) {
+            throw new Error('ffmpeg output file not found');
+        }
+        const outputFile = await readFile(tempOutputFilePath);
+        return new Uint8Array(outputFile);
     } catch (e) {
         logErrorSentry(e, 'ffmpeg run command error');
         throw e;
     } finally {
         try {
-            rmSync(tempOutputFilePath);
+            rmSync(tempOutputFilePath, { force: true });
         } catch (e) {
             logErrorSentry(e, 'failed to remove tempOutputFile');
         }
@@ -66,5 +71,5 @@ export async function deleteTempFile(tempFilePath: string) {
             'tried to delete a non temp file'
         );
     }
-    rmSync(tempFilePath);
+    rmSync(tempFilePath, { force: true });
 }

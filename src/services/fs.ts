@@ -5,6 +5,7 @@ import { ElectronFile } from '../types';
 import StreamZip from 'node-stream-zip';
 import { Readable } from 'stream';
 import { logError } from './logging';
+import { existsSync } from 'fs';
 
 // https://stackoverflow.com/a/63111390
 export const getDirFilePaths = async (dirPath: string) => {
@@ -64,13 +65,22 @@ export async function getElectronFile(filePath: string): Promise<ElectronFile> {
         size: fileStats.size,
         lastModified: fileStats.mtime.valueOf(),
         stream: async () => {
+            if (!existsSync(filePath)) {
+                throw new Error('electronFile does not exist');
+            }
             return await getFileStream(filePath);
         },
         blob: async () => {
+            if (!existsSync(filePath)) {
+                throw new Error('electronFile does not exist');
+            }
             const blob = await fs.readFile(filePath);
             return new Blob([new Uint8Array(blob)]);
         },
         arrayBuffer: async () => {
+            if (!existsSync(filePath)) {
+                throw new Error('electronFile does not exist');
+            }
             const blob = await fs.readFile(filePath);
             return new Uint8Array(blob);
         },
@@ -207,5 +217,8 @@ export function writeStream(filePath: string, fileStream: any) {
 }
 
 export async function readTextFile(filePath: string) {
+    if (!existsSync(filePath)) {
+        throw new Error('File does not exist');
+    }
     return await fs.readFile(filePath, 'utf-8');
 }
