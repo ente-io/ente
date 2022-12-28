@@ -34,9 +34,6 @@ jobs:
       - name: Install libarchive-tools for pacman build # Related https://github.com/electron-userland/electron-builder/issues/4181
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get install libarchive-tools
-      
-      - name: Increase yarn network timeout to 100000 ms
-        run: yarn config set network-timeout 100000 -g
 
       - name: Electron Builder Action
         uses: samuelmeuli/action-electron-builder@v1.6.0
