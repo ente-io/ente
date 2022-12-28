@@ -39,6 +39,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class UserService {
   static const keyHasEnabledTwoFactor = "has_enabled_two_factor";
+  static const keyUserDetails = "user_details";
   final _dio = Network.instance.getDio();
   final _enteDio = Network.instance.enteDio;
   final _logger = Logger((UserService).toString());
@@ -134,7 +135,18 @@ class UserService {
     }
   }
 
-  Future<UserDetails> getUserDetailsV2({bool memoryCount = true}) async {
+  UserDetails getCachedUserDetails() {
+    if (_preferences.containsKey(keyUserDetails)) {
+      return UserDetails.fromJson(_preferences.getString(keyUserDetails));
+    }
+    return null;
+  }
+
+  Future<UserDetails> getUserDetailsV2({
+    bool memoryCount = true,
+    bool shouldCache = false,
+  }) async {
+    _logger.info("Fetching user details");
     try {
       final response = await _enteDio.get(
         "/users/details/v2",
@@ -142,7 +154,12 @@ class UserService {
           "memoryCount": memoryCount,
         },
       );
-      return UserDetails.fromMap(response.data);
+      final userDetails = UserDetails.fromMap(response.data);
+      if (shouldCache) {
+        await _preferences.setString(keyUserDetails, userDetails.toJson());
+      }
+      _logger.info("User details fetched: " + userDetails.toJson());
+      return userDetails;
     } on DioError catch (e) {
       _logger.info(e);
       rethrow;
