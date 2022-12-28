@@ -213,14 +213,12 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       final result = await showChoiceDialog(
         context,
         "Please login again",
-        '''Unfortunately, the ente app had to log you out because of some technical issues. Sorry!\n\nPlease login again.''',
+        '''The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.!\n\Our apologies for the inconvenience, but this was unavoidable..''',
         firstAction: "Cancel",
         secondAction: "Login",
       );
-      if (result != null) {
-        await Configuration.instance.clearAutoLogoutFlag();
-      }
-      if (result == DialogUserChoice.secondChoice) {
+      await Configuration.instance.clearAutoLogoutFlag();
+      if (result != null && result == DialogUserChoice.secondChoice) {
         _navigateToSignInPage();
       }
     }
