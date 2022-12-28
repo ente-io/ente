@@ -1,7 +1,7 @@
 import { getElectronFile } from './../services/fs';
 import { uploadStatusStore } from '../stores/upload.store';
 import { ElectronFile, FILE_PATH_TYPE } from '../types';
-import { logError } from '../utils/logging';
+import { logError } from '../services/logging';
 import { ipcRenderer } from 'electron';
 import {
     getElectronFilesFromGoogleZip,
@@ -18,7 +18,10 @@ export const getPendingUploads = async () => {
     if (zipPaths.length) {
         type = FILE_PATH_TYPE.ZIPS;
         for (const zipPath of zipPaths) {
-            files.push(...(await getElectronFilesFromGoogleZip(zipPath)));
+            files = [
+                ...files,
+                ...(await getElectronFilesFromGoogleZip(zipPath)),
+            ];
         }
         const pendingFilePaths = new Set(filePaths);
         files = files.filter((file) => pendingFilePaths.has(file.path));
@@ -62,10 +65,13 @@ export const showUploadZipDialog = async () => {
         const filePaths: string[] = await ipcRenderer.invoke(
             'show-upload-zip-dialog'
         );
-        const files: ElectronFile[] = [];
+        let files: ElectronFile[] = [];
 
         for (const filePath of filePaths) {
-            files.push(...(await getElectronFilesFromGoogleZip(filePath)));
+            files = [
+                ...files,
+                ...(await getElectronFilesFromGoogleZip(filePath)),
+            ];
         }
 
         return {

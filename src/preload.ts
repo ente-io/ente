@@ -1,4 +1,11 @@
-import { reloadWindow, sendNotification, showOnTray } from './api/system';
+import {
+    registerUpdateEventListener,
+    reloadWindow,
+    sendNotification,
+    showOnTray,
+    updateAndRestart,
+    skipAppVersion,
+} from './api/system';
 import {
     showUploadDirsDialog,
     showUploadFilesDialog,
@@ -32,11 +39,23 @@ import {
     setExportRecord,
     exists,
 } from './api/export';
-import { selectRootDirectory } from './api/common';
+import {
+    selectRootDirectory,
+    logToDisk,
+    openLogDirectory,
+    getSentryUserID,
+    getAppVersion,
+} from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
+import { convertHEIC } from './api/heicConvert';
+import { setupLogging } from './utils/logging';
+import { setupRendererProcessStatsLogger } from './utils/processStats';
+import { runFFmpegCmd } from './api/ffmpeg';
 
 fixHotReloadNext12();
+setupLogging();
+setupRendererProcessStatsLogger();
 
 const windowObject: any = window;
 
@@ -76,4 +95,13 @@ windowObject['ElectronAPIs'] = {
     isFolder,
     updateWatchMappingSyncedFiles,
     updateWatchMappingIgnoredFiles,
+    logToDisk,
+    convertHEIC,
+    openLogDirectory,
+    registerUpdateEventListener,
+    updateAndRestart,
+    skipAppVersion,
+    getSentryUserID,
+    getAppVersion,
+    runFFmpegCmd,
 };

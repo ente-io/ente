@@ -13,8 +13,12 @@ import {
     setupNextElectronServe,
     enableSharedArrayBufferSupport,
     handleDockIconHideOnAutoLaunch,
+    logSystemInfo,
 } from './utils/main';
 import { initSentry } from './services/sentry';
+import { setupLogging } from './utils/logging';
+import { isDev } from './utils/common';
+import { setupMainProcessStatsLogger } from './utils/processStats';
 
 let mainWindow: BrowserWindow;
 
@@ -41,6 +45,8 @@ setupMainHotReload();
 
 setupNextElectronServe();
 
+setupLogging(isDev);
+
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
     app.quit();
@@ -62,14 +68,16 @@ if (!gotTheLock) {
     // initialization and is ready to create browser windows.
     // Some APIs can only be used after this event occurs.
     app.on('ready', async () => {
+        logSystemInfo();
+        setupMainProcessStatsLogger();
+        initSentry();
         mainWindow = await createWindow();
         const tray = setupTrayItem(mainWindow);
         const watcher = initWatcher(mainWindow);
         setupMacWindowOnDockIconClick();
-        initSentry();
         setupMainMenu();
         setupIpcComs(tray, mainWindow, watcher);
-        handleUpdates(mainWindow, tray);
+        handleUpdates(mainWindow);
         handleDownloads(mainWindow);
         addAllowOriginHeader(mainWindow);
     });

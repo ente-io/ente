@@ -1,7 +1,7 @@
 {
   "name": "ente",
   "productName": "ente",
-  "version": "1.7.0-alpha.7",
+  "version": "1.6.16",
   "private": true,
   "description": "Desktop client for ente.io",
   "main": "app/main.js",
@@ -39,6 +39,11 @@
         ]
       }
     ],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/bin/${os}/${arch}/ffmpeg",
+      "node_modules/ffmpeg-static/index.js",
+      "node_modules/ffmpeg-static/package.json"
+    ],
     "files": [
       "app/**/*",
       {
@@ -63,17 +68,22 @@
     "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
     "build-renderer": "cd ui && yarn install && yarn build && cd ..",
     "build": "yarn build-renderer && yarn build-main",
-    "test-release": "yarn build && electron-builder"
+    "test-release": "yarn build && electron-builder --config.compression=store"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
     "@sentry/cli": "^1.68.0",
     "@types/auto-launch": "^5.0.2",
+    "@types/ffmpeg-static": "^3.0.1",
     "@types/get-folder-size": "^2.0.0",
+    "@types/node": "^16.18.3",
+    "@types/node-fetch": "^2.6.2",
+    "@types/promise-fs": "^2.1.1",
+    "@types/semver-compare": "^1.0.1",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "concurrently": "^7.0.0",
-    "electron": "^15.3.0",
+    "electron": "^21.2.2",
     "electron-builder": "^23.0.3",
     "electron-builder-notarize": "^1.2.0",
     "electron-download": "^4.1.1",
@@ -87,18 +97,20 @@
   },
   "dependencies": {
     "@sentry/electron": "^2.5.1",
-    "@types/node": "^14.14.37",
-    "@types/promise-fs": "^2.1.1",
-    "chokidar": "^3.5.3",
+    "any-shell-escape": "^0.1.1",
     "auto-launch": "^5.0.5",
+    "chokidar": "^3.5.3",
     "electron-log": "^4.3.5",
     "electron-reload": "^2.0.0-alpha.1",
     "electron-store": "^8.0.1",
     "electron-updater": "^4.3.8",
+    "ffmpeg-static": "^5.1.0",
     "get-folder-size": "^2.0.1",
     "next-electron-server": "file:./thirdparty/next-electron-server",
+    "node-fetch": "^2.6.7",
     "node-stream-zip": "^1.15.0",
-    "promise-fs": "^2.1.1"
+    "promise-fs": "^2.1.1",
+    "semver-compare": "^1.0.0"
   },
   "standard": {
     "parser": "babel-eslint"

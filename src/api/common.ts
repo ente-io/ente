@@ -1,5 +1,5 @@
 import { ipcRenderer } from 'electron/renderer';
-import { logError } from '../utils/logging';
+import { logError } from '../services/logging';
 
 export const selectRootDirectory = async (): Promise<string> => {
     try {
@@ -8,3 +8,18 @@ export const selectRootDirectory = async (): Promise<string> => {
         logError(e, 'error while selecting root directory');
     }
 };
+
+export const getAppVersion = async (): Promise<string> => {
+    try {
+        return await ipcRenderer.invoke('get-app-version');
+    } catch (e) {
+        logError(e, 'failed to get release version');
+        throw e;
+    }
+};
+
+export {
+    logToDisk,
+    openLogDirectory,
+    getSentryUserID,
+} from '../services/logging';

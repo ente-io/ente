@@ -6,13 +6,25 @@ import {
     Notification,
     safeStorage,
     app,
+    shell,
 } from 'electron';
 import { createWindow } from './createWindow';
 import { buildContextMenu } from './menu';
-import { logErrorSentry } from '../services/sentry';
+import { getSentryUserID, logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
+import { convertHEIC } from '../services/heicConverter';
+import {
+    getAppVersion,
+    skipAppVersion,
+    updateAndRestart,
+} from '../services/appUpdater';
+import {
+    deleteTempFile,
+    runFFmpegCmd,
+    writeTempFile,
+} from '../services/ffmpeg';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -67,7 +79,7 @@ export default function setupIpcComs(
 
         let files: string[] = [];
         for (const dirPath of dir.filePaths) {
-            files = files.concat(await getDirFilePaths(dirPath));
+            files = [...files, ...(await getDirFilePaths(dirPath))];
         }
 
         return files;
@@ -95,5 +107,43 @@ export default function setupIpcComs(
 
     ipcMain.handle('get-path', (_, message) => {
         return app.getPath(message);
+    });
+
+    ipcMain.handle('convert-heic', (_, fileData) => {
+        return convertHEIC(fileData);
+    });
+
+    ipcMain.handle('open-log-dir', () => {
+        shell.openPath(app.getPath('logs'));
+    });
+
+    ipcMain.on('update-and-restart', () => {
+        updateAndRestart();
+    });
+    ipcMain.on('skip-app-version', (_, version) => {
+        skipAppVersion(version);
+    });
+    ipcMain.handle('get-sentry-id', () => {
+        return getSentryUserID();
+    });
+
+    ipcMain.handle('get-app-version', () => {
+        return getAppVersion();
+    });
+
+    ipcMain.handle(
+        'run-ffmpeg-cmd',
+        (_, cmd, inputFilePath, outputFileName) => {
+            return runFFmpegCmd(cmd, inputFilePath, outputFileName);
+        }
+    );
+    ipcMain.handle(
+        'write-temp-file',
+        (_, fileStream: Uint8Array, fileName: string) => {
+            return writeTempFile(fileStream, fileName);
+        }
+    );
+    ipcMain.handle('remove-temp-file', (_, tempFilePath: string) => {
+        return deleteTempFile(tempFilePath);
     });
 }

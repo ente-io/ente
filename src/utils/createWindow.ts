@@ -3,7 +3,7 @@ import * as path from 'path';
 import { isDev } from './common';
 import { isAppQuitting } from '../main';
 import { PROD_HOST_URL } from '../config';
-import { isPlatformMac } from './main';
+import { isPlatform } from './main';
 import { getHideDockIconPreference } from '../services/userPreference';
 import autoLauncher from '../services/autoLauncher';
 
@@ -16,13 +16,13 @@ export async function createWindow(): Promise<BrowserWindow> {
     const mainWindow = new BrowserWindow({
         height: 600,
         width: 800,
-        backgroundColor: '#111111',
         webPreferences: {
+            sandbox: false,
             preload: path.join(__dirname, '../preload.js'),
             contextIsolation: false,
         },
         icon: appIcon,
-        show: false, // don't show the main window on load
+        show: false, // don't show the main window on load,
     });
     mainWindow.maximize();
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
@@ -55,11 +55,25 @@ export async function createWindow(): Promise<BrowserWindow> {
               );
     });
     mainWindow.once('ready-to-show', async () => {
-        splash.destroy();
-        if (!wasAutoLaunched) {
-            mainWindow.show();
+        try {
+            splash.destroy();
+            if (!wasAutoLaunched) {
+                mainWindow.show();
+            }
+        } catch (e) {
+            // ignore
         }
     });
+    setTimeout(() => {
+        try {
+            splash.destroy();
+            if (!wasAutoLaunched) {
+                mainWindow.show();
+            }
+        } catch (e) {
+            // ignore
+        }
+    }, 2000);
     mainWindow.on('close', function (event) {
         if (!isAppQuitting()) {
             event.preventDefault();
@@ -69,12 +83,12 @@ export async function createWindow(): Promise<BrowserWindow> {
     });
     mainWindow.on('hide', () => {
         const shouldHideDockIcon = getHideDockIconPreference();
-        if (isPlatformMac() && shouldHideDockIcon) {
+        if (isPlatform('mac') && shouldHideDockIcon) {
             app.dock.hide();
         }
     });
     mainWindow.on('show', () => {
-        if (isPlatformMac()) {
+        if (isPlatform('mac')) {
             app.dock.show();
         }
     });

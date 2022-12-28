@@ -2,7 +2,7 @@ import path from 'path';
 import { readdir, stat, unlink } from 'promise-fs';
 import getFolderSize from 'get-folder-size';
 import { utimes, close, open } from 'promise-fs';
-import { logError } from '../utils/logging';
+import { logError } from '../services/logging';
 
 export interface LeastRecentlyUsedResult {
     atime: Date;

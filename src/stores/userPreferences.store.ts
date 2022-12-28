@@ -5,6 +5,9 @@ const userPreferencesSchema: Schema<UserPreferencesType> = {
     hideDockIcon: {
         type: 'boolean',
     },
+    skipAppVersion: {
+        type: 'string',
+    },
 };
 
 export const userPreferencesStore = new Store({

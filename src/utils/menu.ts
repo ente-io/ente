@@ -9,11 +9,10 @@ import {
     getHideDockIconPreference,
     setHideDockIconPreference,
 } from '../services/userPreference';
-import { isUpdateAvailable, setIsAppQuitting } from '../main';
+import { setIsAppQuitting } from '../main';
 import autoLauncher from '../services/autoLauncher';
-import { isPlatformMac } from './main';
-import { showUpdateDialog } from '../services/appUpdater';
-import { isDev } from './common';
+import { isPlatform } from './main';
+import ElectronLog from 'electron-log';
 
 export function buildContextMenu(
     mainWindow: BrowserWindow,
@@ -26,15 +25,6 @@ export function buildContextMenu(
         paused,
     } = args;
     const contextMenu = Menu.buildFromTemplate([
-        ...(isUpdateAvailable()
-            ? [
-                  {
-                      label: 'Update available',
-                      click: () => showUpdateDialog(),
-                  },
-              ]
-            : []),
-        { type: 'separator' },
         ...(exportProgress
             ? [
                   {
@@ -87,6 +77,7 @@ export function buildContextMenu(
         {
             label: 'Quit ente',
             click: function () {
+                ElectronLog.log('user quit the app');
                 setIsAppQuitting(true);
                 app.quit();
             },
@@ -97,7 +88,7 @@ export function buildContextMenu(
 
 export async function buildMenuBar(): Promise<Menu> {
     let isAutoLaunchEnabled = await autoLauncher.isEnabled();
-    const isMac = isPlatformMac();
+    const isMac = isPlatform('mac');
     let shouldHideDockIcon = getHideDockIconPreference();
     const template: MenuItemConstructorOptions[] = [
         {
@@ -216,6 +207,7 @@ export async function buildMenuBar(): Promise<Menu> {
         {
             label: 'Window',
             submenu: [
+                { role: 'close', label: 'Close' },
                 { role: 'minimize', label: 'Minimize' },
                 ...((isMac
                     ? [
@@ -224,9 +216,31 @@ export async function buildMenuBar(): Promise<Menu> {
                           { type: 'separator' },
                           { role: 'window', label: 'ente' },
                       ]
-                    : [
-                          { role: 'close', label: 'Close ente' },
-                      ]) as MenuItemConstructorOptions[]),
+                    : []) as MenuItemConstructorOptions[]),
+            ],
+        },
+        {
+            label: 'Help',
+            submenu: [
+                {
+                    label: 'FAQ',
+                    click: () => shell.openExternal('https://ente.io/faq/'),
+                },
+                { type: 'separator' },
+                {
+                    label: 'Support',
+                    click: () => shell.openExternal('mailto:support@ente.io'),
+                },
+                {
+                    label: 'Product updates',
+                    click: () => shell.openExternal('https://ente.io/blog/'),
+                },
+                {
+                    label: 'View logs',
+                    click: () => {
+                        shell.openPath(app.getPath('logs'));
+                    },
+                },
             ],
         },
         {
