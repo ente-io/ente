@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:math';
 
@@ -57,7 +55,7 @@ class TrashDiffFetcher {
           final encodedMetadata = await CryptoUtil.decryptChaCha(
             Sodium.base642bin(item["file"]["metadata"]["encryptedData"]),
             fileDecryptionKey,
-            Sodium.base642bin(trash.metadataDecryptionHeader),
+            Sodium.base642bin(trash.metadataDecryptionHeader!),
           );
           final Map<String, dynamic> metadata =
               jsonDecode(utf8.decode(encodedMetadata));
@@ -80,7 +78,7 @@ class TrashDiffFetcher {
             trash.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
             trash.pubMmdVersion = item["file"]['pubMagicMetadata']['version'];
             trash.pubMagicMetadata =
-                PubMagicMetadata.fromEncodedJson(trash.pubMmdEncodedJson);
+                PubMagicMetadata.fromEncodedJson(trash.pubMmdEncodedJson!);
           }
           if (item['isRestored']) {
             restoredFiles.add(trash);

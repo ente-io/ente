@@ -16,6 +16,9 @@ final _logger = Logger("ExifUtil");
 Future<Map<String, IfdTag>> getExif(File file) async {
   try {
     final originFile = await getFile(file, isOrigin: true);
+    if (originFile == null) {
+      throw Exception("Failed to fetch origin file");
+    }
     final exif = await readExifFromFile(originFile);
     if (!file.isRemoteFile && io.Platform.isIOS) {
       await originFile.delete();
