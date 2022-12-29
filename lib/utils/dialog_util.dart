@@ -7,6 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
+
+typedef DialogBuilder = DialogWidget Function(BuildContext context);
 
 ProgressDialog createProgressDialog(
   BuildContext context,
@@ -33,7 +36,7 @@ ProgressDialog createProgressDialog(
 
 Future<T> showConfettiDialog<T>({
   @required BuildContext context,
-  WidgetBuilder builder,
+  DialogBuilder builder,
   bool barrierDismissible = true,
   Color barrierColor,
   bool useSafeArea = true,
