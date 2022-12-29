@@ -1,9 +1,7 @@
-// @dart = 2.9
 import 'dart:io';
 import 'dart:math';
 
 import 'package:computer/computer.dart';
-import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
@@ -129,8 +127,10 @@ Future<LocalDiffResult> getDiffWithLocal(
   args['pathToLocalIDs'] = pathToLocalIDs;
   final LocalDiffResult diffResult =
       await computer.compute(_getLocalAssetsDiff, param: args);
-  diffResult.uniqueLocalFiles =
-      await _convertLocalAssetsToUniqueFiles(diffResult.localPathAssets);
+  if (diffResult.localPathAssets != null) {
+    diffResult.uniqueLocalFiles =
+        await _convertLocalAssetsToUniqueFiles(diffResult.localPathAssets!);
+  }
   return diffResult;
 }
 
@@ -211,12 +211,12 @@ Future<List<File>> _convertLocalAssetsToUniqueFiles(
 /// [needTitle] impacts the performance for fetching the actual [AssetEntity]
 /// in iOS. Same is true for [containsModifiedPath]
 Future<List<AssetPathEntity>> _getGalleryList({
-  final int updateFromTime,
-  final int updateToTime,
+  final int? updateFromTime,
+  final int? updateToTime,
   final bool containsModifiedPath = false,
   // in iOS fetching the AssetEntity title impacts performance
   final bool needsTitle = true,
-  final OrderOption orderOption,
+  final OrderOption? orderOption,
 }) async {
   final filterOptionGroup = FilterOptionGroup();
   filterOptionGroup.setOption(
@@ -312,24 +312,24 @@ class LocalPathAsset {
   final String pathName;
 
   LocalPathAsset({
-    @required this.localIDs,
-    @required this.pathName,
-    @required this.pathID,
+    required this.localIDs,
+    required this.pathName,
+    required this.pathID,
   });
 }
 
 class LocalDiffResult {
   // unique localPath Assets.
-  final List<LocalPathAsset> localPathAssets;
+  final List<LocalPathAsset>? localPathAssets;
 
   // set of File object created from localPathAssets
-  List<File> uniqueLocalFiles;
+  List<File>? uniqueLocalFiles;
 
   // newPathToLocalIDs represents new entries which needs to be synced to
   // the local db
-  final Map<String, Set<String>> newPathToLocalIDs;
+  final Map<String, Set<String>>? newPathToLocalIDs;
 
-  final Map<String, Set<String>> deletePathToLocalIDs;
+  final Map<String, Set<String>>? deletePathToLocalIDs;
 
   LocalDiffResult({
     this.uniqueLocalFiles,
