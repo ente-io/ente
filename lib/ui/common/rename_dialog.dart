@@ -1,7 +1,7 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
-import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 
 class RenameDialog extends StatefulWidget {
   final String name;

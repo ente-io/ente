@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/utils/dialog_util.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/email_util.dart';
 
 class ChangeEmailDialog extends StatefulWidget {

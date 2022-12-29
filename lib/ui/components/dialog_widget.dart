@@ -9,6 +9,28 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
 
+Future<ButtonAction?> showErrorDialog(
+  BuildContext context,
+  String title,
+  String body, {
+  bool isDismissable = true,
+}) async {
+  return showDialogWidget(
+    context: context,
+    title: title,
+    body: body,
+    isDismissible: isDismissable,
+    buttons: const [
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "OK",
+        isInAlert: true,
+        buttonAction: ButtonAction.first,
+      ),
+    ],
+  );
+}
+
 ///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showGenericErrorDialog({
   required BuildContext context,

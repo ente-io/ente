@@ -30,44 +30,6 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-Future<dynamic> showErrorDialog(
-  BuildContext context,
-  String title,
-  String content,
-) {
-  final AlertDialog alert = AlertDialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    title: title.isEmpty
-        ? const SizedBox.shrink()
-        : Text(
-            title,
-            style: Theme.of(context).textTheme.headline6,
-          ),
-    content: Text(content),
-    actions: [
-      TextButton(
-        child: Text(
-          "Ok",
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        onPressed: () {
-          Navigator.of(context, rootNavigator: true).pop('dialog');
-        },
-      ),
-    ],
-  );
-
-  return showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-    barrierColor: Colors.black12,
-  );
-}
-
 Future<T> showConfettiDialog<T>({
   @required BuildContext context,
   WidgetBuilder builder,
