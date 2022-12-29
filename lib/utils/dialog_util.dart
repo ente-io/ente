@@ -4,6 +4,7 @@ import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 
@@ -40,6 +41,8 @@ Future<T> showConfettiDialog<T>({
   RouteSettings routeSettings,
   Alignment confettiAlignment = Alignment.center,
 }) {
+  final widthOfScreen = MediaQuery.of(context).size.width;
+  final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
   final pageBuilder = Builder(
     builder: builder,
   );
@@ -49,22 +52,25 @@ Future<T> showConfettiDialog<T>({
   return showDialog(
     context: context,
     builder: (BuildContext buildContext) {
-      return Stack(
-        children: [
-          pageBuilder,
-          Align(
-            alignment: confettiAlignment,
-            child: ConfettiWidget(
-              confettiController: confettiController,
-              blastDirection: pi / 2,
-              emissionFrequency: 0,
-              numberOfParticles: 100,
-              // a lot of particles at once
-              gravity: 1,
-              blastDirectionality: BlastDirectionality.explosive,
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: isMobileSmall ? 8 : 0),
+        child: Stack(
+          children: [
+            Align(alignment: Alignment.center, child: pageBuilder),
+            Align(
+              alignment: confettiAlignment,
+              child: ConfettiWidget(
+                confettiController: confettiController,
+                blastDirection: pi / 2,
+                emissionFrequency: 0,
+                numberOfParticles: 100,
+                // a lot of particles at once
+                gravity: 1,
+                blastDirectionality: BlastDirectionality.explosive,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     },
     barrierDismissible: barrierDismissible,
