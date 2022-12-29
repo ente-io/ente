@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:math';
 
@@ -45,7 +43,7 @@ class DiffFetcher {
           file.uploadedFileID = item["id"];
           file.collectionID = item["collectionID"];
           file.updationTime = item["updationTime"];
-          latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime);
+          latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime!);
           if (item["isDeleted"]) {
             if (existingFiles.contains(file.uploadedFileID)) {
               deletedFiles.add(file);
@@ -54,7 +52,7 @@ class DiffFetcher {
           }
           if (existingFiles.contains(file.uploadedFileID)) {
             final existingFile = await FilesDB.instance
-                .getUploadedFile(file.uploadedFileID, file.collectionID);
+                .getUploadedFile(file.uploadedFileID!, file.collectionID!);
             if (existingFile != null) {
               file.generatedID = existingFile.generatedID;
             }
@@ -74,7 +72,7 @@ class DiffFetcher {
           final encodedMetadata = await CryptoUtil.decryptChaCha(
             Sodium.base642bin(item["metadata"]["encryptedData"]),
             fileDecryptionKey,
-            Sodium.base642bin(file.metadataDecryptionHeader),
+            Sodium.base642bin(file.metadataDecryptionHeader!),
           );
           final Map<String, dynamic> metadata =
               jsonDecode(utf8.decode(encodedMetadata));
@@ -88,7 +86,7 @@ class DiffFetcher {
             file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
             file.mMdVersion = item['magicMetadata']['version'];
             file.magicMetadata =
-                MagicMetadata.fromEncodedJson(file.mMdEncodedJson);
+                MagicMetadata.fromEncodedJson(file.mMdEncodedJson!);
           }
           if (item['pubMagicMetadata'] != null) {
             final utfEncodedMmd = await CryptoUtil.decryptChaCha(
@@ -99,7 +97,7 @@ class DiffFetcher {
             file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
             file.pubMmdVersion = item['pubMagicMetadata']['version'];
             file.pubMagicMetadata =
-                PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson);
+                PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
           }
           files.add(file);
         }
