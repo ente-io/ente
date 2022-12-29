@@ -9,10 +9,11 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
 
+///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showErrorDialog(
   BuildContext context,
   String title,
-  String body, {
+  String? body, {
   bool isDismissable = true,
 }) async {
   return showDialogWidget(
