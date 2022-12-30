@@ -78,7 +78,9 @@ class AboutSectionWidget extends StatelessWidget {
                         );
                       } else {
                         showShortToast(
-                            context, "You are on the latest version");
+                          context,
+                          "You are on the latest version",
+                        );
                       }
                     },
                   ),

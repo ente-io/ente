@@ -45,7 +45,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                   FutureBuilder<int>(
                     future: FilesDB.instance.fileCountWithVisibility(
                       visibilityArchive,
-                      Configuration.instance.getUserID(),
+                      Configuration.instance.getUserID()!,
                     ),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data! > 0) {

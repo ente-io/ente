@@ -6,8 +6,11 @@ class FileSelectionCommonActionWidget extends StatelessWidget {
   final GalleryType type;
   final SelectedFiles selectedFiles;
 
-  const FileSelectionCommonActionWidget(
-      {super.key, required this.type, required this.selectedFiles});
+  const FileSelectionCommonActionWidget({
+    super.key,
+    required this.type,
+    required this.selectedFiles,
+  });
   @override
   Widget build(BuildContext context) {
     // TODO: implement build

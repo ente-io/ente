@@ -1,7 +1,6 @@
 // @dart=2.9
 
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -37,15 +36,12 @@ class CollectionPage extends StatefulWidget {
 class _CollectionPageState extends State<CollectionPage> {
   final _selectedFiles = SelectedFiles();
 
-  bool _isCollectionOwner = false;
   final GlobalKey shareButtonKey = GlobalKey();
   final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
 
   @override
   void initState() {
     _selectedFiles.addListener(_selectedFilesListener);
-    _isCollectionOwner =
-        Configuration.instance.getUserID() == widget.c.collection.owner.id;
     super.initState();
   }
 

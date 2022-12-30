@@ -21,7 +21,9 @@ extension CollectionFileActions on CollectionActions {
     final count = selectedFiles.files.length;
     final textTheme = getEnteTextTheme(context);
     final showDeletePrompt = await _anyItemPresentOnlyInCurrentAlbum(
-        selectedFiles.files, collection.id);
+      selectedFiles.files,
+      collection.id,
+    );
     final String title =
         showDeletePrompt ? "Delete items?" : "Remove from album?";
     final String message1 = showDeletePrompt
