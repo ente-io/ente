@@ -63,7 +63,7 @@ function CollectionSelector({
     };
 
     const onCloseButtonClick = () => {
-        attributes?.onCancel();
+        attributes.onCancel?.();
         props.onClose(true);
     };
 
