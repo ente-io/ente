@@ -77,16 +77,16 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         allowCacheClear: true,
       ),
     ]);
-    // if (internalUser) {
-    paths.addAll([
-      PathStorageItem.name(appDocumentsDirectory.path, "App Documents Dir"),
-      PathStorageItem.name(appSupportDirectory.path, "App Support Dir"),
-      PathStorageItem.name(appTemporaryDirectory.path, "App Temp Dir"),
-    ]);
-    if (!Platform.isAndroid) {
-      paths.add(PathStorageItem.name(iOSOnlyTempDirectory, "/tmp directory"));
+    if (internalUser) {
+      paths.addAll([
+        PathStorageItem.name(appDocumentsDirectory.path, "App Documents Dir"),
+        PathStorageItem.name(appSupportDirectory.path, "App Support Dir"),
+        PathStorageItem.name(appTemporaryDirectory.path, "App Temp Dir"),
+      ]);
+      if (!Platform.isAndroid) {
+        paths.add(PathStorageItem.name(iOSOnlyTempDirectory, "/tmp directory"));
+      }
     }
-    // }
     if (mounted) {
       setState(() => {});
     }
