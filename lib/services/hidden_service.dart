@@ -14,7 +14,6 @@ import 'package:photos/models/file.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/file_magic_service.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 

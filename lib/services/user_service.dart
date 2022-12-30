@@ -30,7 +30,6 @@ import 'package:photos/ui/account/password_reentry_page.dart';
 import 'package:photos/ui/account/two_factor_authentication_page.dart';
 import 'package:photos/ui/account/two_factor_recovery_page.dart';
 import 'package:photos/ui/account/two_factor_setup_page.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';

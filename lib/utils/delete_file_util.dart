@@ -24,7 +24,6 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
