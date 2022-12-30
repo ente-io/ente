@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -79,7 +77,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     final billingPlans = await _billingService.getBillingPlans();
     _freePlan = billingPlans.freePlan;
     _plans = billingPlans.plans.where((plan) {
-      if (plan.stripeID == null || plan.stripeID.isEmpty) {
+      if (plan.stripeID.isEmpty) {
         return false;
       }
       final isYearlyPlan = plan.period == 'year';
@@ -393,11 +391,11 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     bool foundActivePlan = false;
     for (final plan in _plans) {
       final productID = plan.stripeID;
-      if (productID == null || productID.isEmpty) {
+      if (productID.isEmpty) {
         continue;
       }
-      final isActive =
-          _hasActiveSubscription && _currentSubscription!.productID == productID;
+      final isActive = _hasActiveSubscription &&
+          _currentSubscription!.productID == productID;
       if (isActive) {
         foundActivePlan = true;
       }

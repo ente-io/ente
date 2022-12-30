@@ -124,8 +124,10 @@ class _VideoWidgetState extends State<VideoWidget> {
     super.dispose();
   }
 
-  VideoPlayerController _setVideoPlayerController(
-      {String? url, io.File? file}) {
+  VideoPlayerController _setVideoPlayerController({
+    String? url,
+    io.File? file,
+  }) {
     VideoPlayerController videoPlayerController;
     if (url != null) {
       videoPlayerController = VideoPlayerController.network(url);
@@ -230,7 +232,7 @@ class _VideoWidgetState extends State<VideoWidget> {
         if (widget.playbackCallback != null) {
           widget.playbackCallback!(_isPlaying);
         }
-        unawaited(_keepScreenAliveOnPlaying(_isPlaying!));
+        unawaited(_keepScreenAliveOnPlaying(_isPlaying));
       }
     });
     _chewieController = ChewieController(

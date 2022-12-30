@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 
 import 'package:chewie/chewie.dart';
@@ -63,8 +61,7 @@ class _VideoControlsState extends State<VideoControls> {
               Column(
                 children: [
                   _latestValue != null &&
-                              !_latestValue!.isPlaying &&
-                              _latestValue!.duration == null ||
+                          !_latestValue!.isPlaying &&
                           _latestValue!.isBuffering
                       ? const Center(
                           child: CircularProgressIndicator(),
@@ -181,9 +178,8 @@ class _VideoControlsState extends State<VideoControls> {
   }
 
   Widget _buildCurrentPosition(Color? iconColor) {
-    final position = _latestValue != null && _latestValue!.position != null
-        ? _latestValue!.position
-        : Duration.zero;
+    final position =
+        _latestValue != null ? _latestValue!.position : Duration.zero;
 
     return Container(
       margin: const EdgeInsets.only(left: 20.0, right: 16.0),
@@ -198,9 +194,8 @@ class _VideoControlsState extends State<VideoControls> {
   }
 
   Widget _buildTotalDuration(Color? iconColor) {
-    final duration = _latestValue != null && _latestValue!.duration != null
-        ? _latestValue!.duration
-        : Duration.zero;
+    final duration =
+        _latestValue != null ? _latestValue!.duration : Duration.zero;
 
     return Padding(
       padding: const EdgeInsets.only(right: 20.0),
@@ -229,8 +224,7 @@ class _VideoControlsState extends State<VideoControls> {
 
     _updateState();
 
-    if ((controller.value != null && controller.value.isPlaying) ||
-        chewieController!.autoPlay) {
+    if ((controller.value.isPlaying) || chewieController!.autoPlay) {
       _startHideTimer();
     }
 

@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -8,7 +6,6 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
-import 'package:photos/models/key_attributes.dart';
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
@@ -283,11 +280,5 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
         ),
       ],
     );
-  }
-
-  void validatePreVerificationState(KeyAttributes keyAttributes) {
-    if (keyAttributes == null) {
-      throw Exception("Key Attributes can not be null");
-    }
   }
 }

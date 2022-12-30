@@ -224,14 +224,10 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         paymentProvider: stripe,
       );
       await _dialog.hide();
-      if (response != null) {
-        final content = widget.actionType == 'buy'
-            ? 'Your purchase was successful'
-            : 'Your subscription was updated successfully';
-        await _showExitPageDialog(title: 'Thank you', content: content);
-      } else {
-        throw Exception("verifySubscription api failed");
-      }
+      final content = widget.actionType == 'buy'
+          ? 'Your purchase was successful'
+          : 'Your subscription was updated successfully';
+      await _showExitPageDialog(title: 'Thank you', content: content);
     } catch (error) {
       _logger.severe(error);
       await _dialog.hide();

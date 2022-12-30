@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -231,7 +229,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
       return event!.reason;
     }
     if (event!.status == SyncStatus.error) {
-      return event!.reason ?? "Upload failed";
+      return event!.reason;
     }
     if (event!.status == SyncStatus.completedBackup) {
       if (event!.wasStopped) {

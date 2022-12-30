@@ -109,7 +109,7 @@ class TrashDB {
       orderBy: '$columnTrashDeleteBy DESC',
       limit: 1,
     );
-    if (rows == null || rows.isEmpty) {
+    if (rows.isEmpty) {
       return null;
     }
     return _getTrashFromRow(rows[0]);
@@ -264,10 +264,10 @@ class TrashDB {
     row[columnCreationTime] = trash.creationTime;
     row[columnFileMetadata] = jsonEncode(trash.metadata);
 
-    row[columnMMdVersion] = trash.mMdVersion ?? 0;
+    row[columnMMdVersion] = trash.mMdVersion;
     row[columnMMdEncodedJson] = trash.mMdEncodedJson ?? '{}';
 
-    row[columnPubMMdVersion] = trash.pubMmdVersion ?? 0;
+    row[columnPubMMdVersion] = trash.pubMmdVersion;
     row[columnPubMMdEncodedJson] = trash.pubMmdEncodedJson ?? '{}';
     return row;
   }

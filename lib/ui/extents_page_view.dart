@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart' hide PageView;
@@ -211,8 +209,7 @@ class ExtentsPageView extends StatefulWidget {
     required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.openDrawer,
-  })  : assert(childrenDelegate != null),
-        extents = 0,
+  })  : extents = 0,
         controller = controller ?? _defaultPageController,
         super(key: key);
 
@@ -317,7 +314,6 @@ class _PageViewState extends State<ExtentsPageView> {
       case Axis.vertical:
         return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
-    return null;
   }
 
   @override

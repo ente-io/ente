@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import "package:exif/exif.dart";
 import "package:flutter/cupertino.dart";
 import "package:flutter/material.dart";
@@ -76,8 +74,8 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     final bool isFileOwner =
         file.ownerID == null || file.ownerID == _currentUserID;
     late Future<Set<int>> allCollectionIDsOfFile;
-    ; //Typing this as Future<Set<T>> as it would be easier to implement showing multiple device folders for a file in the future
-    Future<Set<String>> allDeviceFoldersOfFile =
+    //Typing this as Future<Set<T>> as it would be easier to implement showing multiple device folders for a file in the future
+    final Future<Set<String>> allDeviceFoldersOfFile =
         Future.sync(() => {file.deviceFolder ?? ''});
     if (fileIsBackedup) {
       allCollectionIDsOfFile = FilesDB.instance.getAllCollectionIDsOfFile(
@@ -326,9 +324,7 @@ class _FileInfoWidgetState extends State<FileInfoWidget> {
     } else {
       final fileOwner = CollectionsService.instance
           .getFileOwner(file.ownerID!, file.collectionID);
-      if (fileOwner != null) {
-        addedBy = fileOwner.email;
-      }
+      addedBy = fileOwner.email;
     }
     if (addedBy == null || addedBy.isEmpty) {
       return const SizedBox.shrink();

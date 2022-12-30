@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:photos/core/constants.dart';
@@ -138,7 +136,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       } else if (sortKey == SortKey.count) {
         return second.files.length - first.files.length;
       } else {
-        return second.files.first.creationTime! - first.files.first.creationTime!;
+        return second.files.first.creationTime! -
+            first.files.first.creationTime!;
       }
     });
   }
@@ -273,7 +272,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       children: [
         Container(),
         PopupMenuButton(
-          initialValue: sortKey?.index ?? 0,
+          initialValue: sortKey.index,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 6, 24, 6),
             child: Row(
@@ -473,7 +472,8 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
               CollectionsService.instance
                   .getCollectionByID(file.collectionID!)!
                   .name!,
-              style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 12),
+              style:
+                  Theme.of(context).textTheme.caption!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),

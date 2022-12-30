@@ -107,7 +107,6 @@ class BottomActionBarWidget extends StatelessWidget {
       ...?iconButtons,
       ExpansionIconWidget(expandableController: _expandableController)
     ];
-    iconButtonsWithExpansionIcon.removeWhere((element) => element == null);
     return iconButtonsWithExpansionIcon;
   }
 

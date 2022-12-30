@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:io';
 
@@ -166,7 +164,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             : Platform.isAndroid
                 ? plan.androidID
                 : plan.iosID;
-        return productID != null && productID.isNotEmpty;
+        return productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
       _hasLoadedData = true;
@@ -320,11 +318,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     bool foundActivePlan = false;
     for (final plan in _plans) {
       final productID = plan.stripeID;
-      if (productID == null || productID.isEmpty) {
+      if (productID.isEmpty) {
         continue;
       }
-      final isActive =
-          _hasActiveSubscription && _currentSubscription!.productID == productID;
+      final isActive = _hasActiveSubscription &&
+          _currentSubscription!.productID == productID;
       if (isActive) {
         foundActivePlan = true;
       }
@@ -375,8 +373,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     for (final plan in _plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      final isActive =
-          _hasActiveSubscription && _currentSubscription!.productID == productID;
+      final isActive = _hasActiveSubscription &&
+          _currentSubscription!.productID == productID;
       if (isActive) {
         foundActivePlan = true;
       }

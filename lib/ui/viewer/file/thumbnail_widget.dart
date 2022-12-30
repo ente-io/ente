@@ -226,7 +226,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         return;
       }
 
-      if (thumbData != null && mounted) {
+      if (mounted) {
         final imageProvider = Image.memory(thumbData).image;
         _cacheAndRender(imageProvider);
       }

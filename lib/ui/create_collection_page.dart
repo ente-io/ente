@@ -292,7 +292,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       case CollectionActionType.restoreFiles:
         return _restoreFilesToCollection(collectionID);
     }
-    throw AssertionError("unexpected actionType ${widget.actionType}");
   }
 
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
@@ -307,7 +306,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,
-        widget.selectedFiles!.files?.toList() ?? <File>[],
+        widget.selectedFiles!.files.toList(),
       );
       await dialog.hide();
       RemoteSyncService.instance.sync(silently: true);
@@ -330,8 +329,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     final dialog = createProgressDialog(context, "Restoring files...");
     await dialog.show();
     try {
-      await CollectionsService.instance.restore(
-          toCollectionID, widget.selectedFiles!.files?.toList() ?? <File>[]);
+      await CollectionsService.instance
+          .restore(toCollectionID, widget.selectedFiles!.files.toList());
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
       await dialog.hide();

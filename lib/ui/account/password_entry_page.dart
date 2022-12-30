@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -187,10 +185,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         ),
                         TextSpan(
                           text: "we cannot decrypt your data",
-                          style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                                fontSize: 14,
-                                decoration: TextDecoration.underline,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.subtitle1!.copyWith(
+                                    fontSize: 14,
+                                    decoration: TextDecoration.underline,
+                                  ),
                         ),
                       ],
                     ),
@@ -321,8 +320,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     onChanged: (cnfPassword) {
                       setState(() {
                         _passwordInInputConfirmationBox = cnfPassword;
-                        if (_passwordInInputBox != null ||
-                            _passwordInInputBox != '') {
+                        if (_passwordInInputBox != '') {
                           _passwordsMatch = _passwordInInputBox ==
                               _passwordInInputConfirmationBox;
                         }

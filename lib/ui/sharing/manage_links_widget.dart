@@ -499,33 +499,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     }
   }
 
-  Text _getLinkExpiryTimeWidget() {
-    final int validTill =
-        widget.collection!.publicURLs?.firstOrNull?.validTill ?? 0;
-    if (validTill == 0) {
-      return const Text(
-        'Never',
-        style: TextStyle(
-          color: Colors.grey,
-        ),
-      );
-    }
-    if (validTill < DateTime.now().microsecondsSinceEpoch) {
-      return Text(
-        'Expired',
-        style: TextStyle(
-          color: Colors.orange[300],
-        ),
-      );
-    }
-    return Text(
-      getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill)),
-      style: const TextStyle(
-        color: Colors.grey,
-      ),
-    );
-  }
-
   Future<void> _showDeviceLimitPicker() async {
     final List<Text> options = [];
     for (int i = 50; i > 0; i--) {

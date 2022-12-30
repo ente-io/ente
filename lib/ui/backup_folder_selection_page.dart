@@ -358,9 +358,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       const Padding(padding: EdgeInsets.only(top: 2)),
                       Text(
                         (kDebugMode ? 'inApp: $importedCount : device ' : '') +
-                            (deviceCollection.count ?? 0).toString() +
+                            (deviceCollection.count).toString() +
                             " item" +
-                            ((deviceCollection.count ?? 0) == 1 ? "" : "s"),
+                            ((deviceCollection.count) == 1 ? "" : "s"),
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 12,

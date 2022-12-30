@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/user_service.dart';
@@ -65,8 +63,7 @@ class _OTTVerificationPageState extends State<OTTVerificationPage> {
       body: _getBody(),
       floatingActionButton: DynamicFAB(
         isKeypadOpen: isKeypadOpen,
-        isFormValid: !(_verificationCodeController.text == null ||
-            _verificationCodeController.text.isEmpty),
+        isFormValid: _verificationCodeController.text.isNotEmpty,
         buttonText: 'Verify',
         onPressedFunction: () {
           if (widget.isChangeEmail) {

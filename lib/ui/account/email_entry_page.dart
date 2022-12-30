@@ -1,5 +1,3 @@
-
-
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -33,8 +31,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   String _cnfPassword = '';
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
-  bool? _hasAgreedToTOS = true;
-  bool? _hasAgreedToE2E = false;
+  bool _hasAgreedToTOS = true;
+  bool _hasAgreedToE2E = false;
   bool _password1Visible = false;
   bool _password2Visible = false;
   bool _passwordsMatch = false;
@@ -352,7 +350,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _hasAgreedToTOS = !_hasAgreedToTOS!;
+          _hasAgreedToTOS = !_hasAgreedToTOS;
         });
       },
       behavior: HitTestBehavior.translucent,
@@ -363,7 +361,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             side: CheckboxTheme.of(context).side,
             onChanged: (value) {
               setState(() {
-                _hasAgreedToTOS = value;
+                _hasAgreedToTOS = value!;
               });
             },
           ),
@@ -431,7 +429,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          _hasAgreedToE2E = !_hasAgreedToE2E!;
+          _hasAgreedToE2E = !_hasAgreedToE2E;
         });
       },
       behavior: HitTestBehavior.translucent,
@@ -442,7 +440,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             side: CheckboxTheme.of(context).side,
             onChanged: (value) {
               setState(() {
-                _hasAgreedToE2E = value;
+                _hasAgreedToE2E = value!;
               });
             },
           ),
@@ -491,8 +489,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   bool _isFormValid() {
     return _emailIsValid &&
         _passwordsMatch &&
-        _hasAgreedToTOS! &&
-        _hasAgreedToE2E! &&
+        _hasAgreedToTOS &&
+        _hasAgreedToE2E &&
         _passwordIsValid;
   }
 }
