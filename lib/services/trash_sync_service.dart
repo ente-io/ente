@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:dio/dio.dart';
@@ -25,7 +23,7 @@ class TrashSyncService {
   final _diffFetcher = TrashDiffFetcher();
   final _trashDB = TrashDB.instance;
   static const kLastTrashSyncTime = "last_trash_sync_time";
-  SharedPreferences _prefs;
+  late SharedPreferences _prefs;
 
   TrashSyncService._privateConstructor();
 
@@ -55,7 +53,7 @@ class TrashSyncService {
     if (diff.restoredFiles.isNotEmpty) {
       _logger.fine("discard ${diff.restoredFiles.length} restored items");
       final itemsDeleted = await _trashDB
-          .delete(diff.restoredFiles.map((e) => e.uploadedFileID).toList());
+          .delete(diff.restoredFiles.map((e) => e.uploadedFileID!).toList());
       isLocalTrashUpdated = isLocalTrashUpdated || itemsDeleted > 0;
     }
 
@@ -97,7 +95,7 @@ class TrashSyncService {
     }
   }
 
-  Future<void> _setSyncTime(int time) async {
+  Future<bool> _setSyncTime(int time) async {
     return _prefs.setInt(kLastTrashSyncTime, time);
   }
 
@@ -136,7 +134,7 @@ class TrashSyncService {
 
   Future<void> deleteFromTrash(List<File> files) async {
     final params = <String, dynamic>{};
-    final uniqueFileIds = files.map((e) => e.uploadedFileID).toSet().toList();
+    final uniqueFileIds = files.map((e) => e.uploadedFileID!).toSet().toList();
     final batchedFileIDs = uniqueFileIds.chunks(batchSize);
     for (final batch in batchedFileIDs) {
       params["fileIDs"] = [];
