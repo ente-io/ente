@@ -35,7 +35,7 @@ ProgressDialog createProgressDialog(
 
 Future<ButtonAction?> showConfettiDialog<T>({
   required BuildContext context,
-  DialogBuilder? dialogBuilder,
+  required DialogBuilder dialogBuilder,
   bool barrierDismissible = true,
   Color? barrierColor,
   bool useSafeArea = true,
@@ -45,11 +45,9 @@ Future<ButtonAction?> showConfettiDialog<T>({
 }) {
   final widthOfScreen = MediaQuery.of(context).size.width;
   final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
-  final pageBuilder = dialogBuilder != null
-      ? Builder(
-          builder: dialogBuilder,
-        )
-      : null;
+  final pageBuilder = Builder(
+    builder: dialogBuilder,
+  );
   final ConfettiController confettiController =
       ConfettiController(duration: const Duration(seconds: 1));
   confettiController.play();
