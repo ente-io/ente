@@ -682,19 +682,13 @@ class CollectionsService {
     final encryptedName =
         CryptoUtil.encryptSync(utf8.encode(albumName) as Uint8List, key);
     final collection = await createAndCacheCollection(
-      Collection(
-        null,
-        null,
-        Sodium.bin2base64(encryptedKeyData.encryptedData!),
-        Sodium.bin2base64(encryptedKeyData.nonce!),
-        null,
-        Sodium.bin2base64(encryptedName.encryptedData!),
-        Sodium.bin2base64(encryptedName.nonce!),
-        CollectionType.album,
-        CollectionAttributes(),
-        null,
-        null,
-        null,
+      CreateRequest(
+        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
+        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
+        encryptedName: Sodium.bin2base64(encryptedName.encryptedData!),
+        nameDecryptionNonce: Sodium.bin2base64(encryptedName.nonce!),
+        type: CollectionType.album,
+        attributes: CollectionAttributes(),
       ),
     );
     return collection;
@@ -751,24 +745,17 @@ class CollectionsService {
     final encryptedPath =
         CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, key);
     final collection = await createAndCacheCollection(
-      Collection(
-        null,
-        null,
-        Sodium.bin2base64(encryptedKeyData.encryptedData!),
-        Sodium.bin2base64(encryptedKeyData.nonce!),
-        null,
-        Sodium.bin2base64(encryptedPath.encryptedData!),
-        Sodium.bin2base64(encryptedPath.nonce!),
-        CollectionType.folder,
-        CollectionAttributes(
-          encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData!),
-          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
-          version: 1,
-        ),
-        null,
-        null,
-        null,
-      ),
+      CreateRequest(
+          encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
+          keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
+          encryptedName: Sodium.bin2base64(encryptedPath.encryptedData!),
+          nameDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
+          type: CollectionType.folder,
+          attributes: CollectionAttributes(
+            encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData!),
+            pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
+            version: 1,
+          )),
     );
     return collection;
   }
@@ -1034,11 +1021,9 @@ class CollectionsService {
   }
 
   Future<Collection> createAndCacheCollection(
-    Collection? collection, {
-    CreateRequest? createRequest,
-  }) async {
-    final dynamic payload =
-        createRequest != null ? createRequest.toJson() : collection!.toMap();
+    CreateRequest createRequest,
+  ) async {
+    final dynamic payload = createRequest.toJson();
     return _enteDio
         .post(
       "/collections",
@@ -1047,21 +1032,19 @@ class CollectionsService {
         .then((response) async {
       final collectionData = response.data["collection"];
       final collection = Collection.fromMap(collectionData);
-      if (createRequest != null) {
-        if (collectionData['magicMetadata'] != null) {
-          final decryptionKey =
-              _getAndCacheDecryptedKey(collection, source: "create");
-          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(collectionData['magicMetadata']['data']),
-            decryptionKey,
-            Sodium.base642bin(collectionData['magicMetadata']['header']),
-          );
-          collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-          collection.mMdVersion = collectionData['magicMetadata']['version'];
-          collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-            collection.mMdEncodedJson,
-          );
-        }
+      if (collectionData['magicMetadata'] != null) {
+        final decryptionKey =
+            _getAndCacheDecryptedKey(collection, source: "create");
+        final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+          Sodium.base642bin(collectionData['magicMetadata']['data']),
+          decryptionKey,
+          Sodium.base642bin(collectionData['magicMetadata']['header']),
+        );
+        collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+        collection.mMdVersion = collectionData['magicMetadata']['version'];
+        collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+          collection.mMdEncodedJson,
+        );
       }
       return _cacheCollectionAttributes(collection);
     });

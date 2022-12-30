@@ -10,6 +10,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
@@ -181,22 +182,16 @@ class FavoritesService {
       return _cachedFavoritesCollectionID;
     }
     final key = CryptoUtil.generateKey();
-    final encryptedKeyData = CryptoUtil.encryptSync(key, _config.getKey());
-    final encryptedName = CryptoUtil.encryptSync(utf8.encode("Favorites"), key);
+    final encKey = CryptoUtil.encryptSync(key, _config.getKey());
+    final encName = CryptoUtil.encryptSync(utf8.encode("Favorites"), key);
     final collection = await _collectionsService.createAndCacheCollection(
-      Collection(
-        null,
-        null,
-        Sodium.bin2base64(encryptedKeyData.encryptedData),
-        Sodium.bin2base64(encryptedKeyData.nonce),
-        null,
-        Sodium.bin2base64(encryptedName.encryptedData),
-        Sodium.bin2base64(encryptedName.nonce),
-        CollectionType.favorites,
-        CollectionAttributes(),
-        null,
-        null,
-        null,
+      CreateRequest(
+        encryptedKey: Sodium.bin2base64(encKey.encryptedData),
+        keyDecryptionNonce: Sodium.bin2base64(encKey.nonce),
+        encryptedName: Sodium.bin2base64(encName.encryptedData),
+        nameDecryptionNonce: Sodium.bin2base64(encName.nonce),
+        type: CollectionType.favorites,
+        attributes: CollectionAttributes(),
       ),
     );
     _cachedFavoritesCollectionID = collection.id;

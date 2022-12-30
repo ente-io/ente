@@ -106,8 +106,7 @@ extension HiddenService on CollectionsService {
       subType: subTypeDefaultHidden,
     );
     _logger.info("Creating Hidden Collection");
-    final collection =
-        await createAndCacheCollection(null, createRequest: createRequest);
+    final collection = await createAndCacheCollection(createRequest);
     _logger.info("Creating Hidden Collection Created Successfully");
     final Collection collectionFromServer =
         await fetchCollectionByID(collection.id);
