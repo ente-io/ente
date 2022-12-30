@@ -87,7 +87,8 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
                         launchUrlString(
-                            UpdateService.instance.getRateDetails().item2);
+                          UpdateService.instance.getRateDetails().item2,
+                        );
                       },
                     ),
                     const SizedBox(height: 8),

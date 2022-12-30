@@ -55,7 +55,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   @override
   Widget build(BuildContext context) {
     debugPrint(
-        '$runtimeType building with ${widget.selectedFiles.files.length}');
+      '$runtimeType building with ${widget.selectedFiles.files.length}',
+    );
     final List<IconButtonWidget> iconsButton = [];
     final iconColor = getEnteColorScheme(context).blurStrokeBase;
     if (showDeleteOption) {
