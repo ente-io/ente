@@ -72,7 +72,9 @@ class PushService {
   }
 
   Future<void> _setPushTokenOnServer(
-      String? fcmToken, String? apnsToken) async {
+    String? fcmToken,
+    String? apnsToken,
+  ) async {
     await Network.instance.enteDio.post(
       "/push/token",
       data: {
