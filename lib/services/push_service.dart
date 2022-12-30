@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:logging/logging.dart';
@@ -21,7 +19,7 @@ class PushService {
   static final PushService instance = PushService._privateConstructor();
   static final _logger = Logger("PushService");
 
-  SharedPreferences _prefs;
+  late SharedPreferences _prefs;
 
   PushService._privateConstructor();
 
@@ -46,14 +44,15 @@ class PushService {
   }
 
   Future<void> _configurePushToken() async {
-    final fcmToken = await FirebaseMessaging.instance.getToken();
+    final String? fcmToken = await FirebaseMessaging.instance.getToken();
     final shouldForceRefreshServerToken =
         DateTime.now().microsecondsSinceEpoch -
                 (_prefs.getInt(kLastFCMTokenUpdationTime) ?? 0) >
             kFCMTokenUpdationIntervalInMicroSeconds;
-    if (_prefs.getString(kFCMPushToken) != fcmToken ||
-        shouldForceRefreshServerToken) {
-      final apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+    if (fcmToken != null &&
+        (_prefs.getString(kFCMPushToken) != fcmToken ||
+            shouldForceRefreshServerToken)) {
+      final String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       try {
         _logger.info("Updating token on server");
         await _setPushTokenOnServer(fcmToken, apnsToken);
@@ -71,7 +70,10 @@ class PushService {
     }
   }
 
-  Future<void> _setPushTokenOnServer(String fcmToken, String apnsToken) async {
+  Future<void> _setPushTokenOnServer(
+    String fcmToken,
+    String? apnsToken,
+  ) async {
     await Network.instance.enteDio.post(
       "/push/token",
       data: {
