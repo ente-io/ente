@@ -56,6 +56,7 @@ class FileUploader {
   // Maintains the count of files in the current upload session.
   // Upload session is the period between the first entry into the _queue and last entry out of the _queue
   int _totalCountInUploadSession = 0;
+
   // _uploadCounter indicates number of uploads which are currently in progress
   int _uploadCounter = 0;
   int _videoUploadCounter = 0;
@@ -68,6 +69,7 @@ class FileUploader {
       _uploadURLFetchInProgress = null;
     });
   }
+
   static FileUploader instance = FileUploader._privateConstructor();
 
   Future<void> init(SharedPreferences preferences, bool isBackground) async {
