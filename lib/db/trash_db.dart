@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 import 'dart:io';
 
@@ -77,12 +75,12 @@ class TrashDB {
   static final TrashDB instance = TrashDB._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static Future<Database> _dbFuture;
+  static Future<Database>? _dbFuture;
 
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
-    return _dbFuture;
+    return _dbFuture!;
   }
 
   // this opens the database (and creates it if it doesn't exist)
@@ -104,7 +102,7 @@ class TrashDB {
   }
 
   // getRecentlyTrashedFile returns the file which was trashed recently
-  Future<TrashFile> getRecentlyTrashedFile() async {
+  Future<TrashFile?> getRecentlyTrashedFile() async {
     final db = await instance.database;
     final rows = await db.query(
       tableName,
@@ -122,7 +120,7 @@ class TrashDB {
     final count = Sqflite.firstIntValue(
       await db.rawQuery('SELECT COUNT(*) FROM $tableName'),
     );
-    return count;
+    return count ?? 0;
   }
 
   Future<void> insertMultiple(List<TrashFile> trashFiles) async {
@@ -188,8 +186,8 @@ class TrashDB {
   Future<FileLoadResult> getTrashedFiles(
     int startTime,
     int endTime, {
-    int limit,
-    bool asc,
+    int? limit,
+    bool? asc,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -218,7 +216,7 @@ class TrashDB {
     trashFile.deleteBy = row[columnTrashDeleteBy];
     trashFile.uploadedFileID = row[columnUploadedFileID];
     // dirty hack to ensure that the file_downloads & cache mechanism works
-    trashFile.generatedID = -1 * trashFile.uploadedFileID;
+    trashFile.generatedID = -1 * trashFile.uploadedFileID!;
     trashFile.ownerID = row[columnOwnerID];
     trashFile.collectionID =
         row[columnCollectionID] == -1 ? null : row[columnCollectionID];
@@ -240,10 +238,10 @@ class TrashDB {
     trashFile.pubMmdEncodedJson = row[columnPubMMdEncodedJson] ?? '{}';
 
     if (trashFile.pubMagicMetadata != null &&
-        trashFile.pubMagicMetadata.editedTime != null) {
+        trashFile.pubMagicMetadata!.editedTime != null) {
       // override existing creationTime to avoid re-writing all queries related
       // to loading the gallery
-      row[columnCreationTime] = trashFile.pubMagicMetadata.editedTime;
+      row[columnCreationTime] = trashFile.pubMagicMetadata!.editedTime!;
     }
 
     return trashFile;
