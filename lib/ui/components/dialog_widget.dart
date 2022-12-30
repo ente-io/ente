@@ -9,14 +9,17 @@ import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
 
+///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showGenericErrorDialog({
   required BuildContext context,
+  bool isDismissible = true,
 }) async {
   return showDialogWidget(
     context: context,
     title: "Error",
     icon: Icons.error_outline_outlined,
     body: "It looks like something went wrong. Please try again.",
+    isDismissible: isDismissible,
     buttons: const [
       ButtonWidget(
         buttonType: ButtonType.secondary,
@@ -27,6 +30,7 @@ Future<ButtonAction?> showGenericErrorDialog({
   );
 }
 
+///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showNewChoiceDialog({
   required BuildContext context,
   required String title,
@@ -41,6 +45,7 @@ Future<ButtonAction?> showNewChoiceDialog({
   FutureVoidCallback? secondButtonOnTap,
   bool isCritical = false,
   IconData? icon,
+  bool isDismissible = true,
 }) async {
   final buttons = [
     ButtonWidget(
@@ -64,18 +69,21 @@ Future<ButtonAction?> showNewChoiceDialog({
     body: body,
     buttons: buttons,
     icon: icon,
+    isDismissible: isDismissible,
   );
 }
 
+///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showDialogWidget({
   required BuildContext context,
   required String title,
   String? body,
   required List<ButtonWidget> buttons,
   IconData? icon,
+  bool isDismissible = true,
 }) {
   return showDialog(
-    barrierDismissible: false,
+    barrierDismissible: isDismissible,
     barrierColor: backdropFaintDark,
     context: context,
     builder: (context) {
