@@ -22,6 +22,7 @@ import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -200,46 +201,31 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Success"),
-      content: Text(
-        "You have successfully freed up " + formatBytes(status.size) + "!",
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            "Rate us",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            // TODO: Replace with https://pub.dev/packages/in_app_review
-            final url = UpdateService.instance.getRateDetails().item2;
-            launchUrlString(url);
-          },
-        ),
-        TextButton(
-          child: const Text(
-            "Ok",
-          ),
-          onPressed: () {
-            if (Platform.isIOS) {
-              showToast(
-                context,
-                "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
-              );
-            }
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
+    final DialogWidget dialog = choiceDialog(
+      title: "Success",
+      body: "You have successfully freed up " + formatBytes(status.size) + "!",
+      firstButtonLabel: "Rate us",
+      firstButtonOnTap: () async {
+        // TODO: Replace with https://pub.dev/packages/in_app_review
+        final url = UpdateService.instance.getRateDetails().item2;
+        launchUrlString(url);
+      },
+      firstButtonType: ButtonType.primary,
+      secondButtonLabel: "OK",
+      secondButtonOnTap: () async {
+        if (Platform.isIOS) {
+          showToast(
+            context,
+            "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
+          );
+        }
+      },
     );
+
     showConfettiDialog(
       context: context,
-      builder: (BuildContext context) {
-        return alert;
+      dialogBuilder: (BuildContext context) {
+        return dialog;
       },
       barrierColor: Colors.black87,
       confettiAlignment: Alignment.topCenter,
