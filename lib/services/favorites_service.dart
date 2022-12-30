@@ -1,7 +1,6 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -18,13 +17,14 @@ import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 
 class FavoritesService {
-  Configuration _config;
-  CollectionsService _collectionsService;
-  FilesDB _filesDB;
-  int _cachedFavoritesCollectionID;
+  late Configuration _config;
+  late CollectionsService _collectionsService;
+  late FilesDB _filesDB;
+  int? _cachedFavoritesCollectionID;
   final Set<int> _cachedFavUploadedIDs = {};
   final Set<String> _cachedPendingLocalIDs = {};
-  StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
+  late StreamSubscription<CollectionUpdatedEvent>
+      _collectionUpdatesSubscription;
 
   FavoritesService._privateConstructor() {
     _config = Configuration.instance;
@@ -90,27 +90,27 @@ class FavoritesService {
 
   Future<bool> isFavorite(File file) async {
     final collection = await _getFavoritesCollection();
-    if (collection == null) {
+    if (collection == null || file.uploadedFileID == null) {
       return false;
     }
     return _filesDB.doesFileExistInCollection(
-      file.uploadedFileID,
+      file.uploadedFileID!,
       collection.id,
     );
   }
 
-  void _updateFavoriteFilesCache(List<File> files, {@required bool favFlag}) {
+  void _updateFavoriteFilesCache(List<File> files, {required bool favFlag}) {
     final Set<int> updatedIDs = {};
     final Set<String> localIDs = {};
     for (var file in files) {
       if (file.uploadedFileID != null) {
-        updatedIDs.add(file.uploadedFileID);
+        updatedIDs.add(file.uploadedFileID!);
       } else if (file.localID != null || file.localID != "") {
         /* Note: Favorite un-uploaded files
         For such files, as we don't have uploaded IDs yet, we will cache
         cache the local ID for showing the fav icon in the gallery
          */
-        localIDs.add(file.localID);
+        localIDs.add(file.localID!);
       }
     }
     if (favFlag) {
@@ -135,7 +135,7 @@ class FavoritesService {
   }
 
   Future<void> updateFavorites(List<File> files, bool favFlag) async {
-    final int currentUserID = Configuration.instance.getUserID();
+    final int currentUserID = Configuration.instance.getUserID()!;
     if (files.any((f) => f.uploadedFileID == null)) {
       throw AssertionError("Can only favorite uploaded items");
     }
@@ -162,11 +162,11 @@ class FavoritesService {
     _updateFavoriteFilesCache([file], favFlag: false);
   }
 
-  Future<Collection> _getFavoritesCollection() async {
+  Future<Collection?> _getFavoritesCollection() async {
     if (_cachedFavoritesCollectionID == null) {
       final collections = _collectionsService.getActiveCollections();
       for (final collection in collections) {
-        if (collection.owner.id == _config.getUserID() &&
+        if (collection.owner!.id == _config.getUserID() &&
             collection.type == CollectionType.favorites) {
           _cachedFavoritesCollectionID = collection.id;
           return collection;
@@ -174,22 +174,23 @@ class FavoritesService {
       }
       return null;
     }
-    return _collectionsService.getCollectionByID(_cachedFavoritesCollectionID);
+    return _collectionsService.getCollectionByID(_cachedFavoritesCollectionID!);
   }
 
   Future<int> _getOrCreateFavoriteCollectionID() async {
     if (_cachedFavoritesCollectionID != null) {
-      return _cachedFavoritesCollectionID;
+      return _cachedFavoritesCollectionID!;
     }
     final key = CryptoUtil.generateKey();
-    final encKey = CryptoUtil.encryptSync(key, _config.getKey());
-    final encName = CryptoUtil.encryptSync(utf8.encode("Favorites"), key);
+    final encKey = CryptoUtil.encryptSync(key, _config.getKey()!);
+    final encName =
+        CryptoUtil.encryptSync(utf8.encode("Favorites") as Uint8List, key);
     final collection = await _collectionsService.createAndCacheCollection(
       CreateRequest(
-        encryptedKey: Sodium.bin2base64(encKey.encryptedData),
-        keyDecryptionNonce: Sodium.bin2base64(encKey.nonce),
-        encryptedName: Sodium.bin2base64(encName.encryptedData),
-        nameDecryptionNonce: Sodium.bin2base64(encName.nonce),
+        encryptedKey: Sodium.bin2base64(encKey.encryptedData!),
+        keyDecryptionNonce: Sodium.bin2base64(encKey.nonce!),
+        encryptedName: Sodium.bin2base64(encName.encryptedData!),
+        nameDecryptionNonce: Sodium.bin2base64(encName.nonce!),
         type: CollectionType.favorites,
         attributes: CollectionAttributes(),
       ),
