@@ -823,19 +823,19 @@ class FilesDB {
 
   Future<int> updateUploadedFile(
     String localID,
-    String title,
-    Location location,
+    String? title,
+    Location? location,
     int creationTime,
     int modificationTime,
-    int updationTime,
+    int? updationTime,
   ) async {
     final db = await instance.database;
     return await db.update(
       filesTable,
       {
         columnTitle: title,
-        columnLatitude: location.latitude,
-        columnLongitude: location.longitude,
+        columnLatitude: location?.latitude,
+        columnLongitude: location?.longitude,
         columnCreationTime: creationTime,
         columnModificationTime: modificationTime,
         columnUpdationTime: updationTime,

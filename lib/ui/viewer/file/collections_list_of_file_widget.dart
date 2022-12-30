@@ -30,7 +30,7 @@ class CollectionsListOfFileWidget extends StatelessWidget {
           for (var collectionID in collectionIDs) {
             final c =
                 CollectionsService.instance.getCollectionByID(collectionID);
-            collections.add(c);
+            collections.add(c!);
           }
           return ListView.builder(
             itemCount: collections.length,

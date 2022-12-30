@@ -85,7 +85,7 @@ class UpdateService {
         (now - lastNotificationShownTime) > (3 * microSecondsInDay);
     if (shouldUpdate &&
         hasBeen3DaysSinceLastNotification &&
-        _latestVersion.shouldNotify) {
+        _latestVersion!.shouldNotify) {
       NotificationService.instance.showNotification(
         "Update available",
         "Click to install our best version yet",
