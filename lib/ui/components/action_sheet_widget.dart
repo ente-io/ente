@@ -14,37 +14,13 @@ enum ActionSheetType {
   iconOnly,
 }
 
-Future<ButtonAction?> showCommonActionSheet({
-  required BuildContext context,
-  required List<ButtonWidget> buttons,
-  required ActionSheetType actionSheetType,
-  bool isCheckIconGreen = false,
-  String? title,
-  String? body,
-}) {
-  return showMaterialModalBottomSheet(
-    backgroundColor: Colors.transparent,
-    barrierColor: backdropFaintDark,
-    useRootNavigator: true,
-    context: context,
-    builder: (_) {
-      return ActionSheetWidget(
-        title: title,
-        body: body,
-        actionButtons: buttons,
-        actionSheetType: actionSheetType,
-        isCheckIconGreen: isCheckIconGreen,
-      );
-    },
-    isDismissible: false,
-    enableDrag: false,
-  );
-}
-
+///Returns null if dismissed
 Future<ButtonAction?> showActionSheet({
   required BuildContext context,
   required List<ButtonWidget> buttons,
   required ActionSheetType actionSheetType,
+  bool enableDrag = true,
+  bool isDismissible = true,
   bool isCheckIconGreen = false,
   String? title,
   String? body,
@@ -54,6 +30,8 @@ Future<ButtonAction?> showActionSheet({
     barrierColor: backdropFaintDark,
     useRootNavigator: true,
     context: context,
+    isDismissible: isDismissible,
+    enableDrag: enableDrag,
     builder: (_) {
       return ActionSheetWidget(
         title: title,
@@ -63,8 +41,6 @@ Future<ButtonAction?> showActionSheet({
         isCheckIconGreen: isCheckIconGreen,
       );
     },
-    isDismissible: false,
-    enableDrag: false,
   );
 }
 
