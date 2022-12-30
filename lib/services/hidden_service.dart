@@ -25,7 +25,7 @@ extension HiddenService on CollectionsService {
   // collection
   Future<Collection> getDefaultHiddenCollection() async {
     if (cachedDefaultHiddenCollection != null) {
-      return cachedDefaultHiddenCollection;
+      return cachedDefaultHiddenCollection!;
     }
     final int userID = config.getUserID()!;
     final Collection? defaultHidden =
@@ -34,12 +34,12 @@ extension HiddenService on CollectionsService {
     );
     if (defaultHidden != null) {
       cachedDefaultHiddenCollection = defaultHidden;
-      return cachedDefaultHiddenCollection;
+      return cachedDefaultHiddenCollection!;
     }
     final Collection createdHiddenCollection =
         await _createDefaultHiddenAlbum();
     cachedDefaultHiddenCollection = createdHiddenCollection;
-    return cachedDefaultHiddenCollection;
+    return cachedDefaultHiddenCollection!;
   }
 
   Future<bool> hideFiles(
