@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -19,10 +17,10 @@ class UpdateService {
   static const changeLogVersionKey = "update_change_log_key";
   static const currentChangeLogVersion = 3;
 
-  LatestVersionInfo _latestVersion;
+  LatestVersionInfo? _latestVersion;
   final _logger = Logger("UpdateService");
-  PackageInfo _packageInfo;
-  SharedPreferences _prefs;
+  late PackageInfo _packageInfo;
+  late SharedPreferences _prefs;
 
   Future<void> init() async {
     _packageInfo = await PackageInfo.fromPlatform();
@@ -51,7 +49,7 @@ class UpdateService {
     try {
       _latestVersion = await _getLatestVersionInfo();
       final currentVersionCode = int.parse(_packageInfo.buildNumber);
-      return currentVersionCode < _latestVersion.code;
+      return currentVersionCode < _latestVersion!.code;
     } catch (e) {
       _logger.severe(e);
       return false;
@@ -71,7 +69,7 @@ class UpdateService {
     }
   }
 
-  LatestVersionInfo getLatestVersionInfo() {
+  LatestVersionInfo? getLatestVersionInfo() {
     return _latestVersion;
   }
 

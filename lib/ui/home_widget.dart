@@ -166,7 +166,7 @@ class _HomeWidgetState extends State<HomeWidget> {
             context: context,
             builder: (BuildContext context) {
               return AppUpdateDialog(
-                UpdateService.instance.getLatestVersionInfo(),
+                UpdateService.instance.getLatestVersionInfo()!,
               );
             },
             barrierColor: Colors.black.withOpacity(0.85),
