@@ -11,8 +11,8 @@ class KeyAttributes {
   final int opsLimit;
   final String masterKeyEncryptedWithRecoveryKey;
   final String masterKeyDecryptionNonce;
-  final String recoveryKeyEncryptedWithMasterKey;
-  final String recoveryKeyDecryptionNonce;
+  final String? recoveryKeyEncryptedWithMasterKey;
+  final String? recoveryKeyDecryptionNonce;
 
   KeyAttributes(
     this.kekSalt,

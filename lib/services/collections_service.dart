@@ -437,7 +437,7 @@ class CollectionsService {
       " $source",
     );
     final encryptedKey = Sodium.base642bin(collection.encryptedKey);
-    Uint8List collectionKey;
+    Uint8List? collectionKey;
     if (collection.owner?.id == _config.getUserID()) {
       if (_config.getKey() == null) {
         throw Exception("key can not be null");
@@ -746,16 +746,17 @@ class CollectionsService {
         CryptoUtil.encryptSync(utf8.encode(path) as Uint8List, key);
     final collection = await createAndCacheCollection(
       CreateRequest(
-          encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
-          keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
-          encryptedName: Sodium.bin2base64(encryptedPath.encryptedData!),
-          nameDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
-          type: CollectionType.folder,
-          attributes: CollectionAttributes(
-            encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData!),
-            pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
-            version: 1,
-          )),
+        encryptedKey: Sodium.bin2base64(encryptedKeyData.encryptedData!),
+        keyDecryptionNonce: Sodium.bin2base64(encryptedKeyData.nonce!),
+        encryptedName: Sodium.bin2base64(encryptedPath.encryptedData!),
+        nameDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
+        type: CollectionType.folder,
+        attributes: CollectionAttributes(
+          encryptedPath: Sodium.bin2base64(encryptedPath.encryptedData!),
+          pathDecryptionNonce: Sodium.bin2base64(encryptedPath.nonce!),
+          version: 1,
+        ),
+      ),
     );
     return collection;
   }
@@ -1085,7 +1086,7 @@ class CollectionsService {
       return collection.copyWith(name: "Deleted Album");
     }
     if (collection.encryptedName != null &&
-        collection.encryptedName.isNotEmpty) {
+        collection.encryptedName!.isNotEmpty) {
       String name;
       try {
         final collectionKey = _getAndCacheDecryptedKey(
@@ -1093,9 +1094,9 @@ class CollectionsService {
           source: "Name",
         );
         final result = CryptoUtil.decryptSync(
-          Sodium.base642bin(collection.encryptedName),
+          Sodium.base642bin(collection.encryptedName!),
           collectionKey,
-          Sodium.base642bin(collection.nameDecryptionNonce),
+          Sodium.base642bin(collection.nameDecryptionNonce!),
         );
         name = utf8.decode(result);
       } catch (e, s) {
