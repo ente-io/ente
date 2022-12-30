@@ -13,7 +13,6 @@ import 'package:photos/models/subscription.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/web_page.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 const kWebPaymentRedirectUrl = "https://payments.ente.io/frameRedirect";

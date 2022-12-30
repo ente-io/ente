@@ -6,72 +6,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/effects.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/button_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/separators_util.dart';
-
-///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showGenericErrorDialog({
-  required BuildContext context,
-  bool isDismissible = true,
-}) async {
-  return showDialogWidget(
-    context: context,
-    title: "Error",
-    icon: Icons.error_outline_outlined,
-    body: "It looks like something went wrong. Please try again.",
-    isDismissible: isDismissible,
-    buttons: const [
-      ButtonWidget(
-        buttonType: ButtonType.secondary,
-        labelText: "OK",
-        isInAlert: true,
-      ),
-    ],
-  );
-}
-
-///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showNewChoiceDialog({
-  required BuildContext context,
-  required String title,
-  String? body,
-  required String firstButtonLabel,
-  String secondButtonLabel = "Cancel",
-  ButtonType firstButtonType = ButtonType.neutral,
-  ButtonType secondButtonType = ButtonType.secondary,
-  ButtonAction firstButtonAction = ButtonAction.first,
-  ButtonAction secondButtonAction = ButtonAction.cancel,
-  FutureVoidCallback? firstButtonOnTap,
-  FutureVoidCallback? secondButtonOnTap,
-  bool isCritical = false,
-  IconData? icon,
-  bool isDismissible = true,
-}) async {
-  final buttons = [
-    ButtonWidget(
-      buttonType: isCritical ? ButtonType.critical : firstButtonType,
-      labelText: firstButtonLabel,
-      isInAlert: true,
-      onTap: firstButtonOnTap,
-      buttonAction: firstButtonAction,
-    ),
-    ButtonWidget(
-      buttonType: secondButtonType,
-      labelText: secondButtonLabel,
-      isInAlert: true,
-      onTap: secondButtonOnTap,
-      buttonAction: secondButtonAction,
-    ),
-  ];
-  return showDialogWidget(
-    context: context,
-    title: title,
-    body: body,
-    buttons: buttons,
-    icon: icon,
-    isDismissible: isDismissible,
-  );
-}
 
 ///Will return null if dismissed by tapping outside
 Future<ButtonAction?> showDialogWidget({
@@ -97,7 +32,6 @@ Future<ButtonAction?> showDialogWidget({
             title: title,
             body: body,
             buttons: buttons,
-            isMobileSmall: isMobileSmall,
             icon: icon,
           ),
         ),
@@ -111,12 +45,10 @@ class DialogWidget extends StatelessWidget {
   final String? body;
   final List<ButtonWidget> buttons;
   final IconData? icon;
-  final bool isMobileSmall;
   const DialogWidget({
     required this.title,
     this.body,
     required this.buttons,
-    required this.isMobileSmall,
     this.icon,
     super.key,
   });
@@ -124,6 +56,7 @@ class DialogWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.of(context).size.width;
+    final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
     final colorScheme = getEnteColorScheme(context);
     return Container(
       width: min(widthOfScreen, 320),
