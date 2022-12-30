@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -18,13 +17,13 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 class HomeGalleryWidget extends StatelessWidget {
   final Widget? header;
   final Widget? footer;
-  final SelectedFiles? selectedFiles;
+  final SelectedFiles selectedFiles;
 
   const HomeGalleryWidget({
     Key? key,
     this.header,
     this.footer,
-    this.selectedFiles,
+    required this.selectedFiles,
   }) : super(key: key);
 
   @override
@@ -88,7 +87,7 @@ class HomeGalleryWidget extends StatelessWidget {
     return Stack(
       children: [
         gallery,
-        FileSelectionOverlayBar(GalleryType.homepage, selectedFiles!)
+        FileSelectionOverlayBar(GalleryType.homepage, selectedFiles)
       ],
     );
     // return gallery;

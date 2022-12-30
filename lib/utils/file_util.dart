@@ -157,7 +157,7 @@ Future<bool> isFileCached(ente.File file, {bool liveVideo = false}) async {
 }
 
 final Map<int, Future<_LivePhoto?>> _livePhotoDownloadsTracker =
-    <int, Future<_LivePhoto>>{};
+    <int, Future<_LivePhoto?>>{};
 
 Future<io.File?> _getLivePhotoFromServer(
   ente.File file, {

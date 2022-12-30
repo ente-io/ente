@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -45,7 +43,7 @@ class DeviceFolderPage extends StatelessWidget {
       header: Configuration.instance.hasConfiguredAccount()
           ? BackupConfigurationHeaderWidget(deviceCollection)
           : const SizedBox.shrink(),
-      initialFiles: [deviceCollection.thumbnail],
+      initialFiles: [deviceCollection.thumbnail!],
     );
     return Scaffold(
       appBar: PreferredSize(

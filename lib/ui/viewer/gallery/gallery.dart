@@ -29,11 +29,11 @@ typedef GalleryLoader = Future<FileLoadResult> Function(
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
-  final List<File?>? initialFiles;
+  final List<File>? initialFiles;
   final Stream<FilesUpdatedEvent>? reloadEvent;
   final List<Stream<Event>>? forceReloadEvents;
   final Set<EventType> removalEventTypes;
-  final SelectedFiles? selectedFiles;
+  final SelectedFiles selectedFiles;
   final String tagPrefix;
   final Widget? header;
   final Widget? footer;
@@ -69,7 +69,7 @@ class _GalleryState extends State<Gallery> {
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
   late Logger _logger;
-  List<List<File?>> _collatedFiles = [];
+  List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
   ItemScrollController? _itemScroller;
   StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
@@ -167,7 +167,7 @@ class _GalleryState extends State<Gallery> {
   }
 
   // Collates files and returns `true` if it resulted in a gallery reload
-  bool _onFilesLoaded(List<File?> files) {
+  bool _onFilesLoaded(List<File> files) {
     final updatedCollatedFiles = _collateFiles(files);
     if (_collatedFiles.length != updatedCollatedFiles.length ||
         _collatedFiles.isEmpty) {
@@ -260,7 +260,7 @@ class _GalleryState extends State<Gallery> {
       labelTextBuilder: (int index) {
         return getMonthAndYear(
           DateTime.fromMicrosecondsSinceEpoch(
-            _collatedFiles[index][0]!.creationTime!,
+            _collatedFiles[index][0].creationTime!,
           ),
         );
       },
@@ -278,16 +278,16 @@ class _GalleryState extends State<Gallery> {
     );
   }
 
-  List<List<File?>> _collateFiles(List<File?> files) {
-    final List<File?> dailyFiles = [];
-    final List<List<File?>> collatedFiles = [];
+  List<List<File>> _collateFiles(List<File> files) {
+    final List<File> dailyFiles = [];
+    final List<List<File>> collatedFiles = [];
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
           !areFromSameDay(
-            files[index - 1]!.creationTime!,
-            files[index]!.creationTime!,
+            files[index - 1].creationTime!,
+            files[index].creationTime!,
           )) {
-        final List<File?> collatedDailyFiles = [];
+        final List<File> collatedDailyFiles = [];
         collatedDailyFiles.addAll(dailyFiles);
         collatedFiles.add(collatedDailyFiles);
         dailyFiles.clear();
@@ -298,7 +298,7 @@ class _GalleryState extends State<Gallery> {
       collatedFiles.add(dailyFiles);
     }
     collatedFiles
-        .sort((a, b) => b[0]!.creationTime!.compareTo(a[0]!.creationTime!));
+        .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
     return collatedFiles;
   }
 }

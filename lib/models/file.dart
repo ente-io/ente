@@ -10,12 +10,9 @@ import 'package:photos/models/ente_file.dart';
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/models/magic_metadata.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/utils/date_time_util.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/exif_util.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/file_uploader_util.dart';
 
 class File extends EnteFile {
