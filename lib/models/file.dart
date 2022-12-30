@@ -152,7 +152,7 @@ class File extends EnteFile {
     } else {
       location = Location(latitude, longitude);
     }
-    fileType = getFileType(metadata["fileType"]);
+    fileType = getFileType(metadata["fileType"] ?? -1);
     fileSubType = metadata["subType"] ?? -1;
     duration = metadata["duration"] ?? 0;
     exif = metadata["exif"];
