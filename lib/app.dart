@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:io';
 
@@ -23,7 +23,7 @@ class EnteApp extends StatefulWidget {
   const EnteApp(
     this.runBackgroundTask,
     this.killBackgroundTask, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

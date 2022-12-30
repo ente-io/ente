@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -10,7 +10,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoControls extends StatefulWidget {
-  const VideoControls({Key key}) : super(key: key);
+  const VideoControls({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -19,27 +19,27 @@ class VideoControls extends StatefulWidget {
 }
 
 class _VideoControlsState extends State<VideoControls> {
-  VideoPlayerValue _latestValue;
+  VideoPlayerValue? _latestValue;
   bool _hideStuff = true;
-  Timer _hideTimer;
-  Timer _initTimer;
-  Timer _showAfterExpandCollapseTimer;
+  Timer? _hideTimer;
+  Timer? _initTimer;
+  Timer? _showAfterExpandCollapseTimer;
   bool _dragging = false;
   bool _displayTapped = false;
 
   final barHeight = 120.0;
   final marginSize = 5.0;
 
-  VideoPlayerController controller;
-  ChewieController chewieController;
+  late VideoPlayerController controller;
+  ChewieController? chewieController;
 
   @override
   Widget build(BuildContext context) {
-    if (_latestValue.hasError) {
-      return chewieController.errorBuilder != null
-          ? chewieController.errorBuilder(
+    if (_latestValue!.hasError) {
+      return chewieController!.errorBuilder != null
+          ? chewieController!.errorBuilder!(
               context,
-              chewieController.videoPlayerController.value.errorDescription,
+              chewieController!.videoPlayerController.value.errorDescription!,
             )
           : Center(
               child: Icon(
@@ -63,9 +63,9 @@ class _VideoControlsState extends State<VideoControls> {
               Column(
                 children: [
                   _latestValue != null &&
-                              !_latestValue.isPlaying &&
-                              _latestValue.duration == null ||
-                          _latestValue.isBuffering
+                              !_latestValue!.isPlaying &&
+                              _latestValue!.duration == null ||
+                          _latestValue!.isBuffering
                       ? const Center(
                           child: CircularProgressIndicator(),
                         )
@@ -100,7 +100,7 @@ class _VideoControlsState extends State<VideoControls> {
   void didChangeDependencies() {
     final oldController = chewieController;
     chewieController = ChewieController.of(context);
-    controller = chewieController.videoPlayerController;
+    controller = chewieController!.videoPlayerController;
 
     if (oldController != chewieController) {
       _dispose();
@@ -113,7 +113,7 @@ class _VideoControlsState extends State<VideoControls> {
   Widget _buildBottomBar(
     BuildContext context,
   ) {
-    final iconColor = Theme.of(context).textTheme.button.color;
+    final iconColor = Theme.of(context).textTheme.button!.color;
 
     return Container(
       padding: const EdgeInsets.only(bottom: 60),
@@ -126,7 +126,7 @@ class _VideoControlsState extends State<VideoControls> {
           child: Row(
             children: <Widget>[
               _buildCurrentPosition(iconColor),
-              chewieController.isLive ? const SizedBox() : _buildProgressBar(),
+              chewieController!.isLive ? const SizedBox() : _buildProgressBar(),
               _buildTotalDuration(iconColor),
             ],
           ),
@@ -167,7 +167,7 @@ class _VideoControlsState extends State<VideoControls> {
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Icon(
-                    _latestValue.isPlaying ? Icons.pause : Icons.play_arrow,
+                    _latestValue!.isPlaying ? Icons.pause : Icons.play_arrow,
                     color: Colors.white, // same for both themes
                     size: 64.0,
                   ),
@@ -180,9 +180,9 @@ class _VideoControlsState extends State<VideoControls> {
     );
   }
 
-  Widget _buildCurrentPosition(Color iconColor) {
-    final position = _latestValue != null && _latestValue.position != null
-        ? _latestValue.position
+  Widget _buildCurrentPosition(Color? iconColor) {
+    final position = _latestValue != null && _latestValue!.position != null
+        ? _latestValue!.position
         : Duration.zero;
 
     return Container(
@@ -197,9 +197,9 @@ class _VideoControlsState extends State<VideoControls> {
     );
   }
 
-  Widget _buildTotalDuration(Color iconColor) {
-    final duration = _latestValue != null && _latestValue.duration != null
-        ? _latestValue.duration
+  Widget _buildTotalDuration(Color? iconColor) {
+    final duration = _latestValue != null && _latestValue!.duration != null
+        ? _latestValue!.duration
         : Duration.zero;
 
     return Padding(
@@ -230,11 +230,11 @@ class _VideoControlsState extends State<VideoControls> {
     _updateState();
 
     if ((controller.value != null && controller.value.isPlaying) ||
-        chewieController.autoPlay) {
+        chewieController!.autoPlay) {
       _startHideTimer();
     }
 
-    if (chewieController.showControlsOnInitialize) {
+    if (chewieController!.showControlsOnInitialize) {
       _initTimer = Timer(const Duration(milliseconds: 200), () {
         setState(() {
           _hideStuff = false;
@@ -244,7 +244,7 @@ class _VideoControlsState extends State<VideoControls> {
   }
 
   void _playPause() {
-    final bool isFinished = _latestValue.position >= _latestValue.duration;
+    final bool isFinished = _latestValue!.position >= _latestValue!.duration;
 
     setState(() {
       if (controller.value.isPlaying) {
@@ -302,7 +302,7 @@ class _VideoControlsState extends State<VideoControls> {
 
             _startHideTimer();
           },
-          colors: chewieController.materialProgressColors ??
+          colors: chewieController!.materialProgressColors ??
               ChewieProgressColors(
                 playedColor: Theme.of(context).colorScheme.greenAlternative,
                 handleColor: Colors.white,

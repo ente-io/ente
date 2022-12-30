@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +21,7 @@ import 'package:photos/utils/toast_util.dart';
 class DeduplicatePage extends StatefulWidget {
   final List<DuplicateFiles> duplicates;
 
-  const DeduplicatePage(this.duplicates, {Key key}) : super(key: key);
+  const DeduplicatePage(this.duplicates, {Key? key}) : super(key: key);
 
   @override
   State<DeduplicatePage> createState() => _DeduplicatePageState();
@@ -47,9 +47,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   );
 
   final Set<File> _selectedFiles = <File>{};
-  final Map<int, int> _fileSizeMap = {};
-  List<DuplicateFiles> _duplicates;
-  bool _shouldClubByCaptureTime = true;
+  final Map<int?, int> _fileSizeMap = {};
+  late List<DuplicateFiles> _duplicates;
+  bool? _shouldClubByCaptureTime = true;
 
   SortKey sortKey = SortKey.size;
 
@@ -91,7 +91,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                 Radius.circular(8),
               ),
             ),
-            onSelected: (value) {
+            onSelected: (dynamic value) {
               setState(() {
                 _selectedFiles.clear();
               });
@@ -114,7 +114,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
                         "Deselect all",
                         style: Theme.of(context)
                             .textTheme
-                            .subtitle1
+                            .subtitle1!
                             .copyWith(fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -138,7 +138,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       } else if (sortKey == SortKey.count) {
         return second.files.length - first.files.length;
       } else {
-        return second.files.first.creationTime - first.files.first.creationTime;
+        return second.files.first.creationTime! - first.files.first.creationTime!;
       }
     });
   }
@@ -197,7 +197,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
         children: [
           Text(
             "Following files were clubbed based on their sizes" +
-                ((_shouldClubByCaptureTime ? " and capture times." : ".")),
+                (_shouldClubByCaptureTime! ? " and capture times." : "."),
             style: Theme.of(context).textTheme.subtitle2,
           ),
           const Padding(
@@ -234,7 +234,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
   }
 
   void _resetEntriesAndSelection() {
-    if (_shouldClubByCaptureTime) {
+    if (_shouldClubByCaptureTime!) {
       _duplicates =
           DeduplicationService.instance.clubDuplicatesByTime(_duplicates);
     } else {
@@ -259,9 +259,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.subtitle1.copyWith(
+        style: Theme.of(context).textTheme.subtitle1!.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color.withOpacity(0.7),
+              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
             ),
       );
     }
@@ -320,7 +320,7 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
     }
     int size = 0;
     for (final file in _selectedFiles) {
-      size += _fileSizeMap[file.uploadedFileID];
+      size += _fileSizeMap[file.uploadedFileID]!;
     }
     return SizedBox(
       width: double.infinity,
@@ -471,9 +471,9 @@ class _DeduplicatePageState extends State<DeduplicatePage> {
             padding: const EdgeInsets.only(right: 2),
             child: Text(
               CollectionsService.instance
-                  .getCollectionByID(file.collectionID)
-                  .name,
-              style: Theme.of(context).textTheme.caption.copyWith(fontSize: 12),
+                  .getCollectionByID(file.collectionID!)!
+                  .name!,
+              style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 12),
               overflow: TextOverflow.ellipsis,
             ),
           ),

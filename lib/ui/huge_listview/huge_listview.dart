@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:math' show max;
 
@@ -17,7 +17,7 @@ typedef HugeListViewErrorBuilder = Widget Function(
 
 class HugeListView<T> extends StatefulWidget {
   /// A [ScrollablePositionedList] controller for jumping or scrolling to an item.
-  final ItemScrollController controller;
+  final ItemScrollController? controller;
 
   /// Index of an item to initially align within the viewport.
   final int startIndex;
@@ -46,29 +46,29 @@ class HugeListView<T> extends StatefulWidget {
   final HugeListViewItemBuilder<T> itemBuilder;
 
   /// Called to build a progress widget while the whole list is initialized.
-  final WidgetBuilder waitBuilder;
+  final WidgetBuilder? waitBuilder;
 
   /// Called to build a widget when the list is empty.
-  final WidgetBuilder emptyResultBuilder;
+  final WidgetBuilder? emptyResultBuilder;
 
   /// Called to build a widget when there is an error.
-  final HugeListViewErrorBuilder errorBuilder;
+  final HugeListViewErrorBuilder? errorBuilder;
 
   /// Event to call with the index of the topmost visible item in the viewport while scrolling.
   /// Can be used to display the current letter of an alphabetically sorted list, for instance.
-  final ValueChanged<int> firstShown;
+  final ValueChanged<int>? firstShown;
 
   final bool isDraggableScrollbarEnabled;
 
-  final EdgeInsetsGeometry thumbPadding;
+  final EdgeInsetsGeometry? thumbPadding;
 
   const HugeListView({
-    Key key,
+    Key? key,
     this.controller,
-    @required this.startIndex,
-    @required this.totalCount,
-    @required this.labelTextBuilder,
-    @required this.itemBuilder,
+    required this.startIndex,
+    required this.totalCount,
+    required this.labelTextBuilder,
+    required this.itemBuilder,
     this.waitBuilder,
     this.emptyResultBuilder,
     this.errorBuilder,
@@ -121,13 +121,13 @@ class HugeListViewState<T> extends State<HugeListView<T>> {
   @override
   Widget build(BuildContext context) {
     if (error != null && widget.errorBuilder != null) {
-      return widget.errorBuilder(context, error);
+      return widget.errorBuilder!(context, error);
     }
     if (widget.totalCount == -1 && widget.waitBuilder != null) {
-      return widget.waitBuilder(context);
+      return widget.waitBuilder!(context);
     }
     if (widget.totalCount == 0 && widget.emptyResultBuilder != null) {
-      return widget.emptyResultBuilder(context);
+      return widget.emptyResultBuilder!(context);
     }
 
     return LayoutBuilder(

@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -17,7 +17,7 @@ import 'package:photos/utils/debouncer.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class SearchIconWidget extends StatefulWidget {
-  const SearchIconWidget({Key key}) : super(key: key);
+  const SearchIconWidget({Key? key}) : super(key: key);
 
   @override
   State<SearchIconWidget> createState() => _SearchIconWidgetState();
@@ -50,7 +50,7 @@ class _SearchIconWidgetState extends State<SearchIconWidget> {
 }
 
 class SearchWidget extends StatefulWidget {
-  const SearchWidget({Key key}) : super(key: key);
+  const SearchWidget({Key? key}) : super(key: key);
 
   @override
   State<SearchWidget> createState() => _SearchWidgetState();
@@ -129,7 +129,7 @@ class _SearchWidgetState extends State<SearchWidget> {
                           builder: (
                             BuildContext context,
                             bool isDebouncing,
-                            Widget child,
+                            Widget? child,
                           ) {
                             return SearchSuffixIcon(
                               isDebouncing,

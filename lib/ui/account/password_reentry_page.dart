@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -17,7 +17,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
 class PasswordReentryPage extends StatefulWidget {
-  const PasswordReentryPage({Key key}) : super(key: key);
+  const PasswordReentryPage({Key? key}) : super(key: key);
 
   @override
   State<PasswordReentryPage> createState() => _PasswordReentryPageState();
@@ -27,7 +27,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   final _logger = Logger((_PasswordReentryPageState).toString());
   final _passwordController = TextEditingController();
   final FocusNode _passwordFocusNode = FocusNode();
-  String email;
+  String? email;
   bool _passwordInFocus = false;
   bool _passwordVisible = false;
 
@@ -46,7 +46,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -78,7 +78,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           try {
             await Configuration.instance.decryptAndSaveSecrets(
               _passwordController.text,
-              Configuration.instance.getKeyAttributes(),
+              Configuration.instance.getKeyAttributes()!,
             );
           } on KeyDerivationError catch (e, s) {
             _logger.severe("Password verification failed", e, s);
@@ -245,7 +245,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           child: Text(
                             "Forgot password",
                             style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,
                                       decoration: TextDecoration.underline,
                                     ),
@@ -267,7 +267,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
                           child: Text(
                             "Change email",
                             style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,
                                       decoration: TextDecoration.underline,
                                     ),

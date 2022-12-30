@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
@@ -22,7 +22,7 @@ class SearchResultPage extends StatelessWidget {
 
   SearchResultPage(
     this.searchResult, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -33,8 +33,8 @@ class SearchResultPage extends StatelessWidget {
         final result = files
             .where(
               (file) =>
-                  file.creationTime >= creationStartTime &&
-                  file.creationTime <= creationEndTime,
+                  file.creationTime! >= creationStartTime &&
+                  file.creationTime! <= creationEndTime,
             )
             .toList();
         return Future.value(

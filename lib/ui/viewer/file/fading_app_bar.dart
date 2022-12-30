@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 import 'dart:io' as io;
 
@@ -37,7 +35,7 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
   final Function(File) onFileRemoved;
   final double height;
   final bool shouldShowActions;
-  final int userID;
+  final int? userID;
 
   const FadingAppBar(
     this.file,
@@ -45,7 +43,7 @@ class FadingAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.userID,
     this.height,
     this.shouldShowActions, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -84,7 +82,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           ),
         ),
       ),
-      height: Platform.isAndroid ? 80 : 96,
+      Size.fromHeight(Platform.isAndroid ? 80 : 96),
     );
   }
 
@@ -114,7 +112,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     bool isFileHidden = false;
     if (isOwnedByUser && isFileUploaded) {
       isFileHidden = CollectionsService.instance
-              .getCollectionByID(widget.file.collectionID)
+              .getCollectionByID(widget.file.collectionID!)
               ?.isHidden() ??
           false;
     }
@@ -231,7 +229,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           }
           return items;
         },
-        onSelected: (value) {
+        onSelected: (dynamic value) {
           if (value == 1) {
             _download(widget.file);
           } else if (value == 2) {
@@ -285,7 +283,7 @@ class FadingAppBarState extends State<FadingAppBar> {
   }
 
   Widget _getFavoriteButton() {
-    return FutureBuilder(
+    return FutureBuilder<bool>(
       future: FavoritesService.instance.isFavorite(widget.file),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
@@ -297,7 +295,7 @@ class FadingAppBarState extends State<FadingAppBar> {
     );
   }
 
-  Widget _getLikeButton(File file, bool isLiked) {
+  Widget _getLikeButton(File file, bool? isLiked) {
     return LikeButton(
       isLiked: isLiked,
       onTap: (oldValue) async {
@@ -305,7 +303,7 @@ class FadingAppBarState extends State<FadingAppBar> {
         bool hasError = false;
         if (isLiked) {
           final shouldBlockUser = file.uploadedFileID == null;
-          ProgressDialog dialog;
+          late ProgressDialog dialog;
           if (shouldBlockUser) {
             dialog = createProgressDialog(context, "Adding to favorites...");
             await dialog.show();
@@ -417,27 +415,27 @@ class FadingAppBarState extends State<FadingAppBar> {
       final FileType type = file.fileType;
       final bool downloadLivePhotoOnDroid =
           type == FileType.livePhoto && Platform.isAndroid;
-      AssetEntity savedAsset;
-      final io.File fileToSave = await getFile(file);
+      AssetEntity? savedAsset;
+      final io.File? fileToSave = await getFile(file);
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
-            .saveImageWithPath(fileToSave.path, title: file.title);
+            .saveImageWithPath(fileToSave!.path, title: file.title!);
       } else if (type == FileType.video) {
-        savedAsset =
-            await PhotoManager.editor.saveVideo(fileToSave, title: file.title);
+        savedAsset = await PhotoManager.editor
+            .saveVideo(fileToSave!, title: file.title!);
       } else if (type == FileType.livePhoto) {
-        final io.File liveVideoFile =
+        final io.File? liveVideoFile =
             await getFileFromServer(file, liveVideo: true);
         if (liveVideoFile == null) {
           throw AssertionError("Live video can not be null");
         }
         if (downloadLivePhotoOnDroid) {
-          await _saveLivePhotoOnDroid(fileToSave, liveVideoFile, file);
+          await _saveLivePhotoOnDroid(fileToSave!, liveVideoFile, file);
         } else {
           savedAsset = await PhotoManager.editor.darwin.saveLivePhoto(
-            imageFile: fileToSave,
+            imageFile: fileToSave!,
             videoFile: liveVideoFile,
-            title: file.title,
+            title: file.title!,
           );
         }
       }
@@ -479,8 +477,11 @@ class FadingAppBarState extends State<FadingAppBar> {
     File enteFile,
   ) async {
     debugPrint("Downloading LivePhoto on Droid");
-    AssetEntity savedAsset = await PhotoManager.editor
-        .saveImageWithPath(image.path, title: enteFile.title);
+    AssetEntity? savedAsset = await (PhotoManager.editor
+        .saveImageWithPath(image.path, title: enteFile.title!));
+    if (savedAsset == null) {
+      throw Exception("Failed to save image of live photo");
+    }
     IgnoredFile ignoreVideoFile = IgnoredFile(
       savedAsset.id,
       savedAsset.title ?? '',
@@ -488,12 +489,16 @@ class FadingAppBarState extends State<FadingAppBar> {
       "remoteDownload",
     );
     await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
-    final videoTitle = file_path.basenameWithoutExtension(enteFile.title) +
+    final videoTitle = file_path.basenameWithoutExtension(enteFile.title!) +
         file_path.extension(video.path);
-    savedAsset = (await PhotoManager.editor.saveVideo(
+    savedAsset = (await (PhotoManager.editor.saveVideo(
       video,
       title: videoTitle,
-    ));
+    )));
+    if (savedAsset == null) {
+      throw Exception("Failed to save video of live photo");
+    }
+
     ignoreVideoFile = IgnoredFile(
       savedAsset.id,
       savedAsset.title ?? videoTitle,
@@ -507,7 +512,10 @@ class FadingAppBarState extends State<FadingAppBar> {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      final io.File fileToSave = await getFile(file);
+      final io.File? fileToSave = await (getFile(file));
+      if (fileToSave == null) {
+        throw Exception("Fail to get file for setAs operation");
+      }
       final m = MediaExtension();
       final bool result = await m.setAs("file://${fileToSave.path}", "image/*");
       if (result == false) {

@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:math' as math;
 
@@ -6,13 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class DynamicFAB extends StatelessWidget {
-  final bool isKeypadOpen;
-  final bool isFormValid;
-  final String buttonText;
-  final Function onPressedFunction;
+  final bool? isKeypadOpen;
+  final bool? isFormValid;
+  final String? buttonText;
+  final Function? onPressedFunction;
 
   const DynamicFAB({
-    Key key,
+    Key? key,
     this.isKeypadOpen,
     this.buttonText,
     this.isFormValid,
@@ -21,7 +21,7 @@ class DynamicFAB extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isKeypadOpen) {
+    if (isKeypadOpen!) {
       return Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -43,13 +43,13 @@ class DynamicFAB extends StatelessWidget {
                   Theme.of(context).colorScheme.dynamicFABBackgroundColor,
               foregroundColor:
                   Theme.of(context).colorScheme.dynamicFABTextColor,
-              onPressed: isFormValid
-                  ? onPressedFunction
+              onPressed: isFormValid!
+                  ? onPressedFunction as void Function()?
                   : () {
                       FocusScope.of(context).unfocus();
                     },
               child: Transform.rotate(
-                angle: isFormValid ? 0 : math.pi / 2,
+                angle: isFormValid! ? 0 : math.pi / 2,
                 child: const Icon(
                   Icons.chevron_right,
                   size: 36,
@@ -65,8 +65,8 @@ class DynamicFAB extends StatelessWidget {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: OutlinedButton(
-          onPressed: isFormValid ? onPressedFunction : null,
-          child: Text(buttonText),
+          onPressed: isFormValid! ? onPressedFunction as void Function()? : null,
+          child: Text(buttonText!),
         ),
       );
     }
@@ -75,17 +75,17 @@ class DynamicFAB extends StatelessWidget {
 
 class NoScalingAnimation extends FloatingActionButtonAnimator {
   @override
-  Offset getOffset({Offset begin, Offset end, double progress}) {
+  Offset getOffset({Offset? begin, required Offset end, double? progress}) {
     return end;
   }
 
   @override
-  Animation<double> getRotationAnimation({Animation<double> parent}) {
+  Animation<double> getRotationAnimation({required Animation<double> parent}) {
     return Tween<double>(begin: 1.0, end: 1.0).animate(parent);
   }
 
   @override
-  Animation<double> getScaleAnimation({Animation<double> parent}) {
+  Animation<double> getScaleAnimation({required Animation<double> parent}) {
     return Tween<double>(begin: 1.0, end: 1.0).animate(parent);
   }
 }

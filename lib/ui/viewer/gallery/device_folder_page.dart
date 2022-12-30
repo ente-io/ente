@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
@@ -20,7 +20,7 @@ class DeviceFolderPage extends StatelessWidget {
   final DeviceCollection deviceCollection;
   final _selectedFiles = SelectedFiles();
 
-  DeviceFolderPage(this.deviceCollection, {Key key}) : super(key: key);
+  DeviceFolderPage(this.deviceCollection, {Key? key}) : super(key: key);
 
   @override
   Widget build(Object context) {
@@ -74,7 +74,7 @@ class DeviceFolderPage extends StatelessWidget {
 class BackupConfigurationHeaderWidget extends StatefulWidget {
   final DeviceCollection deviceCollection;
 
-  const BackupConfigurationHeaderWidget(this.deviceCollection, {Key key})
+  const BackupConfigurationHeaderWidget(this.deviceCollection, {Key? key})
       : super(key: key);
 
   @override
@@ -84,7 +84,7 @@ class BackupConfigurationHeaderWidget extends StatefulWidget {
 
 class _BackupConfigurationHeaderWidgetState
     extends State<BackupConfigurationHeaderWidget> {
-  bool _isBackedUp;
+  late bool _isBackedUp;
 
   @override
   void initState() {

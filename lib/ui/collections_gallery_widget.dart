@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -26,7 +26,7 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
-  const CollectionsGalleryWidget({Key key}) : super(key: key);
+  const CollectionsGalleryWidget({Key? key}) : super(key: key);
 
   @override
   State<CollectionsGalleryWidget> createState() =>
@@ -36,10 +36,10 @@ class CollectionsGalleryWidget extends StatefulWidget {
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     with AutomaticKeepAliveClientMixin {
   final _logger = Logger((_CollectionsGalleryWidgetState).toString());
-  StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
-  StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
-  StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
-  AlbumSortKey sortKey;
+  late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
+  late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
+  late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  AlbumSortKey? sortKey;
   String _loadReason = "init";
 
   @override
@@ -98,8 +98,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
-            first.collection.name,
-            second.collection.name,
+            first.collection.name!,
+            second.collection.name!,
           );
         } else if (sortKey == AlbumSortKey.newestPhoto) {
           return (second.thumbnail?.creationTime ?? -1 * intMaxValue)
@@ -121,13 +121,13 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Widget _getCollectionsGalleryWidget(
-    List<CollectionWithThumbnail> collections,
+    List<CollectionWithThumbnail>? collections,
   ) {
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
-        .subtitle1
+        .subtitle1!
         .copyWith(
-          color: Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5),
+          color: Theme.of(context).textTheme.subtitle1!.color!.withOpacity(0.5),
         );
 
     return SingleChildScrollView(
@@ -190,9 +190,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.subtitle1.copyWith(
+        style: Theme.of(context).textTheme.subtitle1!.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color.withOpacity(0.7),
+              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
             ),
       );
     }
@@ -228,7 +228,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         ),
         onSelected: (int index) async {
           sortKey = AlbumSortKey.values[index];
-          await LocalSettings.instance.setAlbumSortKey(sortKey);
+          await LocalSettings.instance.setAlbumSortKey(sortKey!);
           setState(() {});
         },
         itemBuilder: (context) {

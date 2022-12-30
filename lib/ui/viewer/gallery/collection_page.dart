@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
@@ -26,7 +26,7 @@ class CollectionPage extends StatefulWidget {
     this.tagPrefix = "collection",
     this.appBarType = GalleryType.ownedCollection,
     this.hasVerifiedLock = false,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

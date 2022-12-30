@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:io';
@@ -51,7 +51,7 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:uni_links/uni_links.dart';
 
 class HomeWidget extends StatefulWidget {
-  const HomeWidget({Key key}) : super(key: key);
+  const HomeWidget({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _HomeWidgetState();
@@ -74,17 +74,17 @@ class _HomeWidgetState extends State<HomeWidget> {
 
   // for receiving media files
   // ignore: unused_field
-  StreamSubscription _intentDataStreamSubscription;
-  List<SharedMediaFile> _sharedFiles;
+  StreamSubscription? _intentDataStreamSubscription;
+  List<SharedMediaFile>? _sharedFiles;
 
-  StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
-  StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
-  StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
-  StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
-  StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
-  StreamSubscription<SyncStatusUpdate> _firstImportEvent;
-  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
-  StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
+  late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
+  late StreamSubscription<SubscriptionPurchasedEvent> _subscriptionPurchaseEvent;
+  late StreamSubscription<TriggerLogoutEvent> _triggerLogoutEvent;
+  late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  late StreamSubscription<PermissionGrantedEvent> _permissionGrantedEvent;
+  late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
+  late StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
+  late StreamSubscription<AccountConfiguredEvent> _accountConfiguredEvent;
 
   @override
   void initState() {
@@ -323,7 +323,7 @@ class _HomeWidgetState extends State<HomeWidget> {
     if (UserRemoteFlagService.instance.showPasswordReminder()) {
       return const PasswordReminder();
     }
-    if (_sharedFiles != null && _sharedFiles.isNotEmpty) {
+    if (_sharedFiles != null && _sharedFiles!.isNotEmpty) {
       ReceiveSharingIntent.reset();
       return CreateCollectionPage(null, _sharedFiles);
     }
@@ -392,7 +392,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   Future<bool> _initDeepLinks() async {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      final String initialLink = await getInitialLink();
+      final String? initialLink = await getInitialLink();
       // Parse the link and warn the user, if it is not correct,
       // but keep in mind it could be `null`.
       if (initialLink != null) {
@@ -410,8 +410,8 @@ class _HomeWidgetState extends State<HomeWidget> {
 
     // Attach a listener to the stream
     linkStream.listen(
-      (String link) {
-        _logger.info("Link received: " + link);
+      (String? link) {
+        _logger.info("Link received: " + link!);
         _getCredentials(context, link);
       },
       onError: (err) {
@@ -421,11 +421,11 @@ class _HomeWidgetState extends State<HomeWidget> {
     return false;
   }
 
-  void _getCredentials(BuildContext context, String link) {
+  void _getCredentials(BuildContext context, String? link) {
     if (Configuration.instance.hasConfiguredAccount()) {
       return;
     }
-    final ott = Uri.parse(link).queryParameters["ott"];
+    final ott = Uri.parse(link!).queryParameters["ott"]!;
     UserService.instance.verifyEmail(context, ott);
   }
 

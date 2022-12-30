@@ -1,7 +1,6 @@
-// @dart=2.9
-
 import 'dart:io';
 
+import 'package:collection/collection.dart' show IterableNullableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -15,10 +14,10 @@ import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class PaymentWebPage extends StatefulWidget {
-  final String planId;
-  final String actionType;
+  final String? planId;
+  final String? actionType;
 
-  const PaymentWebPage({Key key, this.planId, this.actionType})
+  const PaymentWebPage({Key? key, this.planId, this.actionType})
       : super(key: key);
 
   @override
@@ -30,10 +29,10 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   final UserService userService = UserService.instance;
   final BillingService billingService = BillingService.instance;
   final String basePaymentUrl = kWebPaymentBaseEndpoint;
-  ProgressDialog _dialog;
-  InAppWebViewController webView;
+  late ProgressDialog _dialog;
+  InAppWebViewController? webView;
   double progress = 0;
-  Uri initPaymentUrl;
+  Uri? initPaymentUrl;
 
   @override
   void initState() {
@@ -54,7 +53,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
       return const EnteLoadingWidget();
     }
     return WillPopScope(
-      onWillPop: () async => _buildPageExitWidget(context),
+      onWillPop: (() async => _buildPageExitWidget(context)),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Subscription'),
@@ -83,7 +82,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                   _logger.info("Loading url $loadingUri");
                   // handle the payment response
                   if (_isPaymentActionComplete(loadingUri)) {
-                    await _handlePaymentResponse(loadingUri);
+                    await _handlePaymentResponse(loadingUri!);
                     return NavigationActionPolicy.CANCEL;
                   }
                   return NavigationActionPolicy.ALLOW;
@@ -113,7 +112,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
                 },
               ),
             ),
-          ].where((Object o) => o != null).toList(),
+          ].whereNotNull().toList(),
         ),
       ),
     );
@@ -125,7 +124,7 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     super.dispose();
   }
 
-  Uri _getPaymentUrl(String paymentToken) {
+  Uri _getPaymentUrl(String? paymentToken) {
     final queryParameters = {
       'productID': widget.planId,
       'paymentToken': paymentToken,
@@ -134,15 +133,15 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
     };
     final tryParse = Uri.tryParse(kWebPaymentBaseEndpoint);
     if (kDebugMode && kWebPaymentBaseEndpoint.startsWith("http://")) {
-      return Uri.http(tryParse.authority, tryParse.path, queryParameters);
+      return Uri.http(tryParse!.authority, tryParse.path, queryParameters);
     } else {
-      return Uri.https(tryParse.authority, tryParse.path, queryParameters);
+      return Uri.https(tryParse!.authority, tryParse.path, queryParameters);
     }
   }
 
   // show dialog to handle accidental back press.
-  Future<bool> _buildPageExitWidget(BuildContext context) {
-    return showDialog(
+  Future<bool> _buildPageExitWidget(BuildContext context) async {
+    final result = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Are you sure you want to exit?'),
@@ -168,9 +167,13 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
         ],
       ),
     );
+    if (result != null) {
+      return result;
+    }
+    return false;
   }
 
-  bool _isPaymentActionComplete(Uri loadingUri) {
+  bool _isPaymentActionComplete(Uri? loadingUri) {
     return loadingUri.toString().startsWith(kWebPaymentRedirectUrl);
   }
 
@@ -240,13 +243,13 @@ class _PaymentWebPageState extends State<PaymentWebPage> {
   }
 
   // warn the user to wait for sometime before trying another payment
-  Future<dynamic> _showExitPageDialog({String title, String content}) {
+  Future<dynamic> _showExitPageDialog({String? title, String? content}) {
     return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
+        title: Text(title!),
+        content: Text(content!),
         actions: <Widget>[
           TextButton(
             child: Text(

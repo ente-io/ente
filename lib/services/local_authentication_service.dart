@@ -16,9 +16,9 @@ class LocalAuthenticationService {
     String infoMessage,
   ) async {
     if (await _isLocalAuthSupportedOnDevice()) {
-      AppLock.of(context).setEnabled(false);
+      AppLock.of(context)!.setEnabled(false);
       final result = await requestAuthentication(infoMessage);
-      AppLock.of(context).setEnabled(
+      AppLock.of(context)!.setEnabled(
         Configuration.instance.shouldShowLockScreen(),
       );
       if (!result) {
@@ -39,17 +39,17 @@ class LocalAuthenticationService {
     String errorDialogTitle = "",
   ]) async {
     if (await _isLocalAuthSupportedOnDevice()) {
-      AppLock.of(context).disable();
+      AppLock.of(context)!.disable();
       final result = await requestAuthentication(
         infoMessage,
       );
       if (result) {
-        AppLock.of(context).setEnabled(shouldEnableLockScreen);
+        AppLock.of(context)!.setEnabled(shouldEnableLockScreen);
         await Configuration.instance
             .setShouldShowLockScreen(shouldEnableLockScreen);
         return true;
       } else {
-        AppLock.of(context)
+        AppLock.of(context)!
             .setEnabled(Configuration.instance.shouldShowLockScreen());
       }
     } else {

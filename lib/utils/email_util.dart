@@ -62,7 +62,7 @@ Future<void> sendLogs(
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return LogFileViewer(SuperLogging.logFile);
+            return LogFileViewer(SuperLogging.logFile!);
           },
           barrierColor: Colors.black87,
           barrierDismissible: false,

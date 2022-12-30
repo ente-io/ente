@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -14,20 +14,20 @@ import 'package:photos/utils/share_util.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class MemoriesWidget extends StatelessWidget {
-  const MemoriesWidget({Key key}) : super(key: key);
+  const MemoriesWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Memory>>(
       future: MemoriesService.instance.getMemories(),
       builder: (context, snapshot) {
-        if (snapshot.hasError || !snapshot.hasData || snapshot.data.isEmpty) {
+        if (snapshot.hasError || !snapshot.hasData || snapshot.data!.isEmpty) {
           return const SizedBox.shrink();
         } else {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildMemories(snapshot.data),
+              _buildMemories(snapshot.data!),
               const Divider(),
             ],
           );
@@ -69,17 +69,17 @@ class MemoriesWidget extends StatelessWidget {
 
   bool _areMemoriesFromSameYear(Memory first, Memory second) {
     final firstDate =
-        DateTime.fromMicrosecondsSinceEpoch(first.file.creationTime);
+        DateTime.fromMicrosecondsSinceEpoch(first.file.creationTime!);
     final secondDate =
-        DateTime.fromMicrosecondsSinceEpoch(second.file.creationTime);
+        DateTime.fromMicrosecondsSinceEpoch(second.file.creationTime!);
     return firstDate.year == secondDate.year;
   }
 }
 
 class MemoryWidget extends StatefulWidget {
   const MemoryWidget({
-    Key key,
-    @required this.memories,
+    Key? key,
+    required this.memories,
   }) : super(key: key);
 
   final List<Memory> memories;
@@ -119,7 +119,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
                     title,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1
+                        .subtitle1!
                         .copyWith(fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
@@ -186,7 +186,7 @@ class _MemoryWidgetState extends State<MemoryWidget> {
 
   String _getTitle(Memory memory) {
     final present = DateTime.now();
-    final then = DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime);
+    final then = DateTime.fromMicrosecondsSinceEpoch(memory.file.creationTime!);
     final diffInYears = present.year - then.year;
     if (diffInYears == 1) {
       return "1 year ago";
@@ -201,7 +201,7 @@ class FullScreenMemory extends StatefulWidget {
   final List<Memory> memories;
   final int index;
 
-  const FullScreenMemory(this.title, this.memories, this.index, {Key key})
+  const FullScreenMemory(this.title, this.memories, this.index, {Key? key})
       : super(key: key);
 
   @override
@@ -215,7 +215,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
   // when the top step indicator isn't visible.
   bool _showCounter = false;
   bool _showStepIndicator = true;
-  PageController _pageController;
+  PageController? _pageController;
   bool _shouldDisableScroll = false;
   final GlobalKey shareButtonKey = GlobalKey();
 
@@ -273,9 +273,9 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 ),
                 Text(
                   getFormattedDate(
-                    DateTime.fromMicrosecondsSinceEpoch(file.creationTime),
+                    DateTime.fromMicrosecondsSinceEpoch(file.creationTime!),
                   ),
-                  style: Theme.of(context).textTheme.subtitle1.copyWith(
+                  style: Theme.of(context).textTheme.subtitle1!.copyWith(
                         fontSize: 14,
                         color: Colors.white,
                       ), //same for both themes
@@ -328,7 +328,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                 '${_index + 1}/${widget.memories.length}',
                 style: Theme.of(context)
                     .textTheme
-                    .bodyText1
+                    .bodyText1!
                     .copyWith(color: Colors.white.withOpacity(0.4)),
               )
             : AnimatedOpacity(
@@ -338,7 +338,7 @@ class _FullScreenMemoryState extends State<FullScreenMemory> {
                   widget.title,
                   style: Theme.of(context)
                       .textTheme
-                      .headline4
+                      .headline4!
                       .copyWith(color: Colors.white),
                 ),
               ),

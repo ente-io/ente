@@ -1,11 +1,11 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class SearchSuffixIcon extends StatefulWidget {
   final bool shouldShowSpinner;
-  const SearchSuffixIcon(this.shouldShowSpinner, {Key key}) : super(key: key);
+  const SearchSuffixIcon(this.shouldShowSpinner, {Key? key}) : super(key: key);
 
   @override
   State<SearchSuffixIcon> createState() => _SearchSuffixIconState();

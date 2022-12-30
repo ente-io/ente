@@ -1,14 +1,14 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/utils/data_util.dart';
 
 class SubscriptionPlanWidget extends StatelessWidget {
   const SubscriptionPlanWidget({
-    Key key,
-    @required this.storage,
-    @required this.price,
-    @required this.period,
+    Key? key,
+    required this.storage,
+    required this.price,
+    required this.period,
     this.isActive = false,
   }) : super(key: key);
 
@@ -57,12 +57,12 @@ class SubscriptionPlanWidget extends StatelessWidget {
                   convertBytesToReadableFormat(storage),
                   style: Theme.of(context)
                       .textTheme
-                      .headline6
+                      .headline6!
                       .copyWith(color: textColor),
                 ),
                 Text(
                   _displayPrice(),
-                  style: Theme.of(context).textTheme.headline6.copyWith(
+                  style: Theme.of(context).textTheme.headline6!.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.normal,
                       ),

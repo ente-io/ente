@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:math';
 
@@ -7,14 +7,14 @@ import 'package:image_editor/image_editor.dart';
 
 class FilteredImage extends StatelessWidget {
   const FilteredImage({
-    @required this.child,
+    required this.child,
     this.brightness,
     this.saturation,
     this.hue,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
-  final double brightness, saturation, hue;
+  final double? brightness, saturation, hue;
   final Widget child;
 
   @override
