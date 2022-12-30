@@ -224,7 +224,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
 
     showConfettiDialog(
       context: context,
-      builder: (BuildContext context) {
+      dialogBuilder: (BuildContext context) {
         return dialog;
       },
       barrierColor: Colors.black87,

@@ -184,7 +184,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
     showConfettiDialog(
       context: context,
-      builder: (BuildContext context) {
+      dialogBuilder: (BuildContext context) {
         return dialog;
       },
       barrierColor: Colors.black87,
@@ -222,7 +222,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
 
     showConfettiDialog(
       context: context,
-      builder: (BuildContext context) {
+      dialogBuilder: (BuildContext context) {
         return dialog;
       },
       barrierColor: Colors.black87,
