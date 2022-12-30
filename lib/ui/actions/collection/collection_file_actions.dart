@@ -8,7 +8,6 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
