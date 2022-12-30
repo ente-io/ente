@@ -3,7 +3,6 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class ChildSubscriptionWidget extends StatelessWidget {

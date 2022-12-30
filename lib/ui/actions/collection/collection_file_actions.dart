@@ -8,7 +8,6 @@ import 'package:photos/services/favorites_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
@@ -21,7 +20,9 @@ extension CollectionFileActions on CollectionActions {
     final count = selectedFiles.files.length;
     final textTheme = getEnteTextTheme(context);
     final showDeletePrompt = await _anyItemPresentOnlyInCurrentAlbum(
-        selectedFiles.files, collection.id);
+      selectedFiles.files,
+      collection.id,
+    );
     final String title =
         showDeletePrompt ? "Delete items?" : "Remove from album?";
     final String message1 = showDeletePrompt

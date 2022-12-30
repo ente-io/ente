@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
