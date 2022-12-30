@@ -49,19 +49,18 @@ class PushService {
         DateTime.now().microsecondsSinceEpoch -
                 (_prefs.getInt(kLastFCMTokenUpdationTime) ?? 0) >
             kFCMTokenUpdationIntervalInMicroSeconds;
-    if ((_prefs.getString(kFCMPushToken) != fcmToken ||
-        shouldForceRefreshServerToken)) {
+    if (fcmToken != null &&
+        (_prefs.getString(kFCMPushToken) != fcmToken ||
+            shouldForceRefreshServerToken)) {
       final String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
       try {
         _logger.info("Updating token on server");
         await _setPushTokenOnServer(fcmToken, apnsToken);
-        if (fcmToken != null) {
-          await _prefs.setString(kFCMPushToken, fcmToken);
-          await _prefs.setInt(
-            kLastFCMTokenUpdationTime,
-            DateTime.now().microsecondsSinceEpoch,
-          );
-        }
+        await _prefs.setString(kFCMPushToken, fcmToken);
+        await _prefs.setInt(
+          kLastFCMTokenUpdationTime,
+          DateTime.now().microsecondsSinceEpoch,
+        );
         _logger.info("Push token updated on server");
       } catch (e) {
         _logger.severe("Could not set push token", e, StackTrace.current);
@@ -72,7 +71,7 @@ class PushService {
   }
 
   Future<void> _setPushTokenOnServer(
-    String? fcmToken,
+    String fcmToken,
     String? apnsToken,
   ) async {
     await Network.instance.enteDio.post(
