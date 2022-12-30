@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
@@ -7,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 
 typedef DialogBuilder = DialogWidget Function(BuildContext context);
@@ -34,21 +33,23 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-Future<T> showConfettiDialog<T>({
-  @required BuildContext context,
-  DialogBuilder dialogBuilder,
+Future<ButtonAction?> showConfettiDialog<T>({
+  required BuildContext context,
+  DialogBuilder? dialogBuilder,
   bool barrierDismissible = true,
-  Color barrierColor,
+  Color? barrierColor,
   bool useSafeArea = true,
   bool useRootNavigator = true,
-  RouteSettings routeSettings,
+  RouteSettings? routeSettings,
   Alignment confettiAlignment = Alignment.center,
 }) {
   final widthOfScreen = MediaQuery.of(context).size.width;
   final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
-  final pageBuilder = Builder(
-    builder: dialogBuilder,
-  );
+  final pageBuilder = dialogBuilder != null
+      ? Builder(
+          builder: dialogBuilder,
+        )
+      : null;
   final ConfettiController confettiController =
       ConfettiController(duration: const Duration(seconds: 1));
   confettiController.play();
