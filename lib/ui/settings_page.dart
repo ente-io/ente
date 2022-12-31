@@ -15,6 +15,7 @@ import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/general_section_widget.dart';
+import 'package:photos/ui/settings/inherited_settings_state.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/settings_title_bar_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
@@ -33,7 +34,7 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       body: Container(
         color: enteColorScheme.backdropMuted,
-        child: InheritedSettingsState(
+        child: SettingsStateContainer(
           child: _getBody(context, enteColorScheme),
         ),
       ),
@@ -127,37 +128,5 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-/// Keep track of the number of expanded sections in an entire menu tree.
-///
-/// Since this is an InheritedWidget, subsections can obtain it from the context
-/// and use the current expansion state to style themselves differently if
-/// needed.
-class InheritedSettingsState extends InheritedWidget {
-  int _expandedSectionCount = 0;
-
-  InheritedSettingsState({
-    Key key,
-    Widget child,
-  }) : super(key: key, child: child);
-
-  bool get isAnySectionExpanded => _expandedSectionCount > 0;
-
-  static InheritedSettingsState of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<InheritedSettingsState>();
-
-  void didExpandSection() {
-    _expandedSectionCount += 1;
-  }
-
-  void didCollapseSection() {
-    _expandedSectionCount -= 1;
-  }
-
-  @override
-  bool updateShouldNotify(covariant InheritedSettingsState oldWidget) {
-    return isAnySectionExpanded != oldWidget.isAnySectionExpanded;
   }
 }
