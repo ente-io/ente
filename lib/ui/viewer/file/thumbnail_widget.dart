@@ -216,7 +216,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
             FilesDB.instance.deleteLocalFile(widget.file!);
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
-                [widget.file],
+                [widget.file!],
                 type: EventType.deletedFromDevice,
                 source: "thumbFileDeleted",
               ),

@@ -111,7 +111,7 @@ void preloadThumbnail(ente.File file) {
 }
 
 final Map<String, Future<io.File?>> fileDownloadsInProgress =
-    <String, Future<io.File>>{};
+    <String, Future<io.File?>>{};
 
 Future<io.File?> getFileFromServer(
   ente.File file, {
