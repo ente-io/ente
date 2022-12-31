@@ -213,7 +213,9 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
       final result = await showChoiceDialog(
         context,
         "Please login again",
-        '''The developer account we use to publish ente on App Store has changed. Because of this, you will need to login again.!\n\Our apologies for the inconvenience, but this was unavoidable..''',
+        '''The developer account we use to publish ente on App Store has 
+        changed. Because of this, you will need to login again.\n\nOur 
+        apologies for the inconvenience, but this was unavoidable.''',
         firstAction: "Cancel",
         secondAction: "Login",
       );
