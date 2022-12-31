@@ -132,7 +132,8 @@ Future<io.File?> getFileFromServer(
         file,
         progressCallback: progressCallback,
         needLiveVideo: liveVideo,
-      ).whenComplete(() {
+      );
+      fileDownloadsInProgress[downloadID]!.whenComplete(() {
         fileDownloadsInProgress.remove(downloadID);
       });
     } else {
@@ -140,7 +141,8 @@ Future<io.File?> getFileFromServer(
         file,
         cacheManager,
         progressCallback: progressCallback,
-      ).whenComplete(() {
+      );
+      fileDownloadsInProgress[downloadID]!.whenComplete(() {
         fileDownloadsInProgress.remove(downloadID);
       });
     }
