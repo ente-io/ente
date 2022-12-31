@@ -59,7 +59,7 @@ class _LockScreenState extends State<LockScreen> {
     _logger.info("Showing lockscreen");
     try {
       final result = await requestAuthentication(
-        "Please authenticate to view your memories",
+        "Please authenticate to view your secrets",
       );
       if (result) {
         AppLock.of(context).didUnlock();
