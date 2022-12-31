@@ -67,7 +67,7 @@ class InheritedSettingsState extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<InheritedSettingsState>()!;
 
   static InheritedSettingsState? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<InheritedSettingsState>()!;
+      context.dependOnInheritedWidgetOfExactType<InheritedSettingsState>();
 
   @override
   bool updateShouldNotify(covariant InheritedSettingsState oldWidget) {
