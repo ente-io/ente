@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:ui';
 
@@ -24,7 +22,7 @@ class TwoFactorSetupPage extends StatefulWidget {
     this.secretCode,
     this.qrCode,
     this.completer, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -33,15 +31,15 @@ class TwoFactorSetupPage extends StatefulWidget {
 
 class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
     with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  late TabController _tabController;
   final _pinController = TextEditingController();
   final _pinPutDecoration = BoxDecoration(
     border: Border.all(color: const Color.fromRGBO(45, 194, 98, 1.0)),
     borderRadius: BorderRadius.circular(15.0),
   );
   String _code = "";
-  ImageProvider _imageProvider;
-  LifecycleEventHandler _lifecycleEventHandler;
+  late ImageProvider _imageProvider;
+  late LifecycleEventHandler _lifecycleEventHandler;
 
   @override
   void initState() {
@@ -55,8 +53,8 @@ class _TwoFactorSetupPageState extends State<TwoFactorSetupPage>
       resumeCallBack: () async {
         if (mounted) {
           final data = await Clipboard.getData(Clipboard.kTextPlain);
-          if (data != null && data.text != null && data.text.length == 6) {
-            _pinController.text = data.text;
+          if (data != null && data.text != null && data.text!.length == 6) {
+            _pinController.text = data.text!;
           }
         }
       },

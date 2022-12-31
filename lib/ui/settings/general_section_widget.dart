@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
@@ -14,7 +12,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class GeneralSectionWidget extends StatelessWidget {
-  const GeneralSectionWidget({Key key}) : super(key: key);
+  const GeneralSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

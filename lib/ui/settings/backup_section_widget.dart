@@ -3,7 +3,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/duplicate_files.dart';
 import 'package:photos/services/deduplication_service.dart';
@@ -16,6 +15,7 @@ import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -162,45 +162,30 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Success"),
-      content: Text(
-        "You have successfully freed up " + formatBytes(status.size) + "!",
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            "Rate us",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            final url = UpdateService.instance.getRateDetails().item2;
-            launchUrlString(url);
-          },
-        ),
-        TextButton(
-          child: const Text(
-            "Ok",
-          ),
-          onPressed: () {
-            if (Platform.isIOS) {
-              showToast(
-                context,
-                "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
-              );
-            }
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
+    final DialogWidget dialog = choiceDialog(
+      title: "Success",
+      body: "You have successfully freed up " + formatBytes(status.size) + "!",
+      firstButtonLabel: "Rate us",
+      firstButtonOnTap: () async {
+        final url = UpdateService.instance.getRateDetails().item2;
+        launchUrlString(url);
+      },
+      firstButtonType: ButtonType.primary,
+      secondButtonLabel: "OK",
+      secondButtonOnTap: () async {
+        if (Platform.isIOS) {
+          showToast(
+            context,
+            "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
+          );
+        }
+      },
     );
+
     showConfettiDialog(
       context: context,
-      builder: (BuildContext context) {
-        return alert;
+      dialogBuilder: (BuildContext context) {
+        return dialog;
       },
       barrierColor: Colors.black87,
       confettiAlignment: Alignment.topCenter,
@@ -212,48 +197,33 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     final String countText = result.count.toString() +
         " duplicate file" +
         (result.count == 1 ? "" : "s");
-    final AlertDialog alert = AlertDialog(
-      title: const Text("✨ Success"),
-      content: Text(
-        "You have cleaned up " +
-            countText +
-            ", saving " +
-            formatBytes(result.size) +
-            "!",
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            "Rate us",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            // TODO: Replace with https://pub.dev/packages/in_app_review
-            final url = UpdateService.instance.getRateDetails().item2;
-            launchUrlString(url);
-          },
-        ),
-        TextButton(
-          child: const Text(
-            "Ok",
-          ),
-          onPressed: () {
-            showShortToast(
-              context,
-              "Also empty your \"Trash\" to claim the freed up space",
-            );
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
+    final DialogWidget dialog = choiceDialog(
+      title: "✨ Success",
+      body: "You have cleaned up " +
+          countText +
+          ", saving " +
+          formatBytes(result.size) +
+          "!",
+      firstButtonLabel: "Rate us",
+      firstButtonOnTap: () async {
+        // TODO: Replace with https://pub.dev/packages/in_app_review
+        final url = UpdateService.instance.getRateDetails().item2;
+        launchUrlString(url);
+      },
+      firstButtonType: ButtonType.primary,
+      secondButtonLabel: "OK",
+      secondButtonOnTap: () async {
+        showShortToast(
+          context,
+          "Also empty your \"Trash\" to claim the freed up space",
+        );
+      },
     );
+
     showConfettiDialog(
       context: context,
-      builder: (BuildContext context) {
-        return alert;
+      dialogBuilder: (BuildContext context) {
+        return dialog;
       },
       barrierColor: Colors.black87,
       confettiAlignment: Alignment.topCenter,

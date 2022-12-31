@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io';
 
@@ -20,7 +18,7 @@ import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
-  const SecuritySectionWidget({Key key}) : super(key: key);
+  const SecuritySectionWidget({Key? key}) : super(key: key);
 
   @override
   State<SecuritySectionWidget> createState() => _SecuritySectionWidgetState();
@@ -29,7 +27,8 @@ class SecuritySectionWidget extends StatefulWidget {
 class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
   final _config = Configuration.instance;
 
-  StreamSubscription<TwoFactorStatusChangeEvent> _twoFactorStatusChangeEvent;
+  late StreamSubscription<TwoFactorStatusChangeEvent>
+      _twoFactorStatusChangeEvent;
 
   @override
   void initState() {
