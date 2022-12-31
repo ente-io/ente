@@ -71,7 +71,13 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
                 ),
                 isExpandable: true,
                 leadingIcon: widget.leadingIcon,
+                leadingIconColor: isSuppressed
+                    ? enteColorScheme.strokeMuted
+                    : enteColorScheme.strokeBase,
                 trailingIcon: Icons.expand_more,
+                trailingIconColor: isSuppressed
+                    ? enteColorScheme.strokeMuted
+                    : enteColorScheme.strokeBase,
                 menuItemColor: enteColorScheme.fillFaint,
                 expandableController: expandableController,
               ),
