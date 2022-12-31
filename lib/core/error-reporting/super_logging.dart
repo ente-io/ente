@@ -1,5 +1,3 @@
-// @dart=2.9
-
 library super_logging;
 
 import 'dart:async';
@@ -38,7 +36,7 @@ extension SuperString on String {
 }
 
 extension SuperLogRecord on LogRecord {
-  String toPrettyString([String extraLines]) {
+  String toPrettyString([String? extraLines]) {
     final header = "[$loggerName] [$level] [$time]";
 
     var msg = "$header $message";
@@ -76,9 +74,9 @@ class LogConfig {
   /// ```
   ///
   /// If this is [null], Sentry logger is completely disabled (default).
-  String sentryDsn;
+  String? sentryDsn;
 
-  String tunnel;
+  String? tunnel;
 
   /// A built-in retry mechanism for sending errors to sentry.
   ///
@@ -95,7 +93,7 @@ class LogConfig {
   /// A non-empty string will be treated as an explicit path to a directory.
   ///
   /// The chosen directory can be accessed using [SuperLogging.logFile.parent].
-  String logDirPath;
+  String? logDirPath;
 
   /// The maximum number of log files inside [logDirPath].
   ///
@@ -113,12 +111,12 @@ class LogConfig {
   /// any uncaught errors during its execution will be reported.
   ///
   /// Works by using [FlutterError.onError] and [runZoned].
-  FutureOrVoidCallback body;
+  FutureOrVoidCallback? body;
 
   /// The date format for storing log files.
   ///
   /// `DateFormat('y-M-d')` by default.
-  DateFormat dateFmt;
+  DateFormat? dateFmt;
 
   String prefix;
 
@@ -142,24 +140,24 @@ class SuperLogging {
   static final $ = Logger('ente_logging');
 
   /// The current super logging configuration
-  static LogConfig config;
+  static late LogConfig config;
 
-  static Future<void> main([LogConfig config]) async {
-    config ??= LogConfig();
-    SuperLogging.config = config;
+  static Future<void> main([LogConfig? appConfig]) async {
+    appConfig ??= LogConfig();
+    SuperLogging.config = appConfig;
 
     WidgetsFlutterBinding.ensureInitialized();
 
     appVersion ??= await getAppVersion();
     final isFDroidClient = await isFDroidBuild();
     if (isFDroidClient) {
-      config.sentryDsn = null;
-      config.tunnel = null;
+      appConfig.sentryDsn = null;
+      appConfig.tunnel = null;
     }
 
-    final enable = config.enableInDebugMode || kReleaseMode;
-    sentryIsEnabled = enable && config.sentryDsn != null && !isFDroidClient;
-    fileIsEnabled = enable && config.logDirPath != null;
+    final enable = appConfig.enableInDebugMode || kReleaseMode;
+    sentryIsEnabled = enable && appConfig.sentryDsn != null && !isFDroidClient;
+    fileIsEnabled = enable && appConfig.logDirPath != null;
 
     if (fileIsEnabled) {
       await setupLogDir();
@@ -175,7 +173,7 @@ class SuperLogging {
       assert(
         sentryIsEnabled == false,
         "sentry dsn should be disabled for "
-        "f-droid config  ${config.sentryDsn} & ${config.tunnel}",
+        "f-droid config  ${appConfig.sentryDsn} & ${appConfig.tunnel}",
       );
     }
 
@@ -183,39 +181,42 @@ class SuperLogging {
       $.info("detected debug mode; sentry & file logging disabled.");
     }
     if (fileIsEnabled) {
-      $.info("log file for today: $logFile with prefix ${config.prefix}");
+      $.info("log file for today: $logFile with prefix ${appConfig.prefix}");
     }
     if (sentryIsEnabled) {
       $.info("sentry uploader started");
     }
 
-    if (config.body == null) return;
+    if (appConfig.body == null) return;
 
     if (enable && sentryIsEnabled) {
       await SentryFlutter.init(
         (options) {
-          options.dsn = config.sentryDsn;
+          options.dsn = appConfig!.sentryDsn;
           options.httpClient = http.Client();
-          if (config.tunnel != null) {
+          if (appConfig.tunnel != null) {
             options.transport =
-                TunneledTransport(Uri.parse(config.tunnel), options);
+                TunneledTransport(Uri.parse(appConfig.tunnel!), options);
           }
         },
-        appRunner: () => config.body(),
+        appRunner: () => appConfig!.body!(),
       );
     } else {
-      await config.body();
+      await appConfig.body!();
     }
   }
 
   static void setUserID(String userID) async {
-    if (config?.sentryDsn != null) {
+    if (config.sentryDsn != null) {
       Sentry.configureScope((scope) => scope.user = SentryUser(id: userID));
       $.info("setting sentry user ID to: $userID");
     }
   }
 
-  static Future<void> _sendErrorToSentry(Object error, StackTrace stack) async {
+  static Future<void> _sendErrorToSentry(
+    Object error,
+    StackTrace? stack,
+  ) async {
     try {
       await Sentry.captureException(
         error,
@@ -231,14 +232,14 @@ class SuperLogging {
 
   static Future onLogRecord(LogRecord rec) async {
     // log misc info if it changed
-    String extraLines = "app version: '$appVersion'\n";
+    String? extraLines = "app version: '$appVersion'\n";
     if (extraLines != _lastExtraLines) {
       _lastExtraLines = extraLines;
     } else {
       extraLines = null;
     }
 
-    final str = config.prefix + " " + rec.toPrettyString(extraLines);
+    final str = (config?.prefix ?? '') + " " + rec.toPrettyString(extraLines);
 
     // write to stdout
     printLog(str);
@@ -253,7 +254,7 @@ class SuperLogging {
 
     // add error to sentry queue
     if (sentryIsEnabled && rec.error != null) {
-      _sendErrorToSentry(rec.error, null);
+      _sendErrorToSentry(rec.error!, null);
     }
   }
 
@@ -261,12 +262,12 @@ class SuperLogging {
   static bool isFlushing = false;
 
   static void flushQueue() async {
-    if (isFlushing) {
+    if (isFlushing || logFile == null) {
       return;
     }
     isFlushing = true;
     final entry = fileQueueEntries.removeFirst();
-    await logFile.writeAsString(entry, mode: FileMode.append, flush: true);
+    await logFile!.writeAsString(entry, mode: FileMode.append, flush: true);
     isFlushing = false;
     if (fileQueueEntries.isNotEmpty) {
       flushQueue();
@@ -285,7 +286,7 @@ class SuperLogging {
   static final sentryQueueControl = StreamController<Error>();
 
   /// Whether sentry logging is currently enabled or not.
-  static bool sentryIsEnabled;
+  static bool sentryIsEnabled = false;
 
   static Future<void> setupSentry() async {
     await for (final error in sentryQueueControl.stream.asBroadcastStream()) {
@@ -303,27 +304,27 @@ class SuperLogging {
   }
 
   static void doSentryRetry(Error error) async {
-    await Future.delayed(config.sentryRetryDelay);
+    await Future.delayed(config!.sentryRetryDelay);
     sentryQueueControl.add(error);
   }
 
   /// The log file currently in use.
-  static File logFile;
+  static File? logFile;
 
   /// Whether file logging is currently enabled or not.
-  static bool fileIsEnabled;
+  static bool fileIsEnabled = false;
 
   static Future<void> setupLogDir() async {
-    var dirPath = config.logDirPath;
+    var dirPath = config!.logDirPath;
 
     // choose [logDir]
-    if (dirPath.isEmpty) {
+    if (dirPath == null || dirPath.isEmpty) {
       final root = await getExternalStorageDirectory();
-      dirPath = '${root.path}/logs';
+      dirPath = '${root!.path}/logs';
     }
 
     // create [logDir]
-    final dir = Directory(dirPath);
+    final dir = Directory(dirPath!);
     await dir.create(recursive: true);
 
     final files = <File>[];
@@ -332,16 +333,19 @@ class SuperLogging {
     // collect all log files with valid names
     await for (final file in dir.list()) {
       try {
-        final date = config.dateFmt.parse(basename(file.path));
+        final date = config.dateFmt!.parse(basename(file.path));
         dates[file as File] = date;
         files.add(file);
       } on FormatException {}
     }
+    final nowTime = DateTime.now();
 
     // delete old log files, if [maxLogFiles] is exceeded.
     if (files.length > config.maxLogFiles) {
       // sort files based on ascending order of date (older first)
-      files.sort((a, b) => dates[a].compareTo(dates[b]));
+      files.sort(
+        (a, b) => (dates[a] ?? nowTime).compareTo((dates[b] ?? nowTime)),
+      );
 
       final extra = files.length - config.maxLogFiles;
       final toDelete = files.sublist(0, extra);
@@ -356,13 +360,13 @@ class SuperLogging {
       }
     }
 
-    logFile = File("$dirPath/${config.dateFmt.format(DateTime.now())}.txt");
+    logFile = File("$dirPath/${config!.dateFmt!.format(DateTime.now())}.txt");
   }
 
   /// Current app version, obtained from package_info plugin.
   ///
   /// See: [getAppVersion]
-  static String appVersion;
+  static String? appVersion;
 
   static Future<String> getAppVersion() async {
     final pkgInfo = await PackageInfo.fromPlatform();
