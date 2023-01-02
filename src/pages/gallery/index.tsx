@@ -515,7 +515,6 @@ export default function Gallery() {
         if (newSearch?.collection) {
             setActiveCollection(newSearch?.collection);
         } else {
-            setActiveCollection(ALL_SECTION);
             setSearch(newSearch);
         }
         if (!newSearch?.collection && !newSearch?.file) {
