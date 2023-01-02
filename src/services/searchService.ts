@@ -17,6 +17,7 @@ import {
 } from 'types/search';
 import { FILE_TYPE } from 'constants/file';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
+import { getUniqueFiles } from 'utils/file';
 
 const ENDPOINT = getEndpoint();
 
@@ -114,7 +115,7 @@ function searchCollection(
 }
 
 function searchFiles(searchPhrase: string, files: EnteFile[]) {
-    return files
+    return getUniqueFiles(files)
         .map((file) => ({
             title: file.metadata.title,
             id: file.id,

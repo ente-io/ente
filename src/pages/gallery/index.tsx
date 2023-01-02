@@ -42,7 +42,7 @@ import PhotoFrame from 'components/PhotoFrame';
 import {
     changeFilesVisibility,
     downloadFiles,
-    getNonTrashedUniqueUserFiles,
+    getNonTrashedFiles,
     getSelectedFiles,
     mergeMetadata,
     sortFiles,
@@ -615,7 +615,7 @@ export default function Gallery() {
                     openUploader={openUploader}
                     isInSearchMode={isInSearchMode}
                     collections={collections}
-                    files={getNonTrashedUniqueUserFiles(files)}
+                    files={getNonTrashedFiles(files)}
                     setActiveCollection={setActiveCollection}
                     updateSearch={updateSearch}
                 />
