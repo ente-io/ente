@@ -94,8 +94,7 @@ class CollectionActions {
         subType: subTypeSharedFilesCollection,
       );
       final collection = await collectionsService.createAndCacheCollection(
-        null,
-        createRequest: req,
+        req,
       );
       logger.finest("adding files to share to new album");
       await collectionsService.addToCollection(collection.id, files);

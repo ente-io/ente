@@ -71,7 +71,7 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
               );
               return;
             }
-            UserService.instance.sendOtt(context, _email, isChangeEmail: true);
+            UserService.instance.sendOtt(context, _email!, isChangeEmail: true);
           },
         ),
       ],

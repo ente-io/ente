@@ -239,7 +239,7 @@ class SuperLogging {
       extraLines = null;
     }
 
-    final str = (config?.prefix ?? '') + " " + rec.toPrettyString(extraLines);
+    final str = (config.prefix ?? '') + " " + rec.toPrettyString(extraLines);
 
     // write to stdout
     printLog(str);
@@ -304,7 +304,7 @@ class SuperLogging {
   }
 
   static void doSentryRetry(Error error) async {
-    await Future.delayed(config!.sentryRetryDelay);
+    await Future.delayed(config.sentryRetryDelay);
     sentryQueueControl.add(error);
   }
 
@@ -315,7 +315,7 @@ class SuperLogging {
   static bool fileIsEnabled = false;
 
   static Future<void> setupLogDir() async {
-    var dirPath = config!.logDirPath;
+    var dirPath = config.logDirPath;
 
     // choose [logDir]
     if (dirPath == null || dirPath.isEmpty) {
@@ -324,7 +324,7 @@ class SuperLogging {
     }
 
     // create [logDir]
-    final dir = Directory(dirPath!);
+    final dir = Directory(dirPath);
     await dir.create(recursive: true);
 
     final files = <File>[];
@@ -360,7 +360,7 @@ class SuperLogging {
       }
     }
 
-    logFile = File("$dirPath/${config!.dateFmt!.format(DateTime.now())}.txt");
+    logFile = File("$dirPath/${config.dateFmt!.format(DateTime.now())}.txt");
   }
 
   /// Current app version, obtained from package_info plugin.
