@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
@@ -44,8 +42,8 @@ class RemoteSyncService {
   final LocalFileUpdateService _localFileUpdateService =
       LocalFileUpdateService.instance;
   int _completedUploads = 0;
-  SharedPreferences _prefs;
-  Completer<void> _existingSync;
+  late SharedPreferences _prefs;
+  Completer<void>? _existingSync;
   bool _existingSyncSilent = false;
 
   static const kHasSyncedArchiveKey = "has_synced_archive";
@@ -89,7 +87,7 @@ class RemoteSyncService {
       if (_existingSyncSilent == true && silently == false) {
         _existingSyncSilent = false;
       }
-      return _existingSync.future;
+      return _existingSync?.future;
     }
     _existingSync = Completer<void>();
     _existingSyncSilent = silently;
@@ -120,7 +118,7 @@ class RemoteSyncService {
       final hasUploadedFiles = await _uploadFiles(filesToBeUploaded);
       if (hasUploadedFiles) {
         await _pullDiff();
-        _existingSync.complete();
+        _existingSync?.complete();
         _existingSync = null;
         await syncDeviceCollectionFilesForUpload();
         final hasMoreFilesToBackup = (await _getFilesToBeUploaded()).isNotEmpty;
@@ -133,11 +131,11 @@ class RemoteSyncService {
           Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
         }
       } else {
-        _existingSync.complete();
+        _existingSync?.complete();
         _existingSync = null;
       }
     } catch (e, s) {
-      _existingSync.complete();
+      _existingSync?.complete();
       _existingSync = null;
       // rethrow whitelisted error so that UI status can be updated correctly.
       if (e is UnauthorizedError ||
@@ -202,7 +200,7 @@ class RemoteSyncService {
     final diff =
         await _diffFetcher.getEncryptedFilesDiff(collectionID, sinceTime);
     if (diff.deletedFiles.isNotEmpty) {
-      final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID).toList();
+      final fileIDs = diff.deletedFiles.map((f) => f.uploadedFileID!).toList();
       final deletedFiles = (await _db.getFilesFromIDs(fileIDs)).values.toList();
       await _db.deleteFilesFromCollection(collectionID, fileIDs);
       Bus.instance.fire(
@@ -259,7 +257,7 @@ class RemoteSyncService {
   }
 
   Future<void> syncDeviceCollectionFilesForUpload() async {
-    final int ownerID = _config.getUserID();
+    final int ownerID = _config.getUserID()!;
 
     final deviceCollections = await _db.getDeviceCollections();
     deviceCollections.removeWhere((element) => !element.shouldBackup);
@@ -290,7 +288,7 @@ class RemoteSyncService {
 
       moreFilesMarkedForBackup = true;
       await _db.setCollectionIDForUnMappedLocalFiles(
-        deviceCollection.collectionID,
+        deviceCollection.collectionID!,
         localIDsToSync,
       );
 
@@ -298,7 +296,9 @@ class RemoteSyncService {
       // the collection. This can happen when a user has marked a folder
       // for sync, then un-synced it and again tries to mark if for sync.
       final Set<String> existingMapping =
-          await _db.getLocalFileIDsForCollection(deviceCollection.collectionID);
+          await _db.getLocalFileIDsForCollection(
+        deviceCollection.collectionID!,
+      );
       final Set<String> commonElements =
           localIDsToSync.intersection(existingMapping);
       if (commonElements.isNotEmpty) {
@@ -322,7 +322,7 @@ class RemoteSyncService {
         final List<File> newFilesToInsert = [];
         final Set<String> fileFoundForLocalIDs = {};
         for (var existingFile in filesWithCollectionID) {
-          final String localID = existingFile.localID;
+          final String localID = existingFile.localID!;
           if (!fileFoundForLocalIDs.contains(localID)) {
             existingFile.generatedID = null;
             existingFile.collectionID = deviceCollection.collectionID;
@@ -400,7 +400,7 @@ class RemoteSyncService {
       final List<int> entriesToDelete = [];
       for (File pendingUpload in pendingUploads) {
         if (localIDsInOtherFileEntries.contains(pendingUpload.localID)) {
-          entriesToDelete.add(pendingUpload.generatedID);
+          entriesToDelete.add(pendingUpload.generatedID!);
         } else {
           pendingUpload.collectionID = null;
           entriesToUpdate.add(pendingUpload);
@@ -418,7 +418,7 @@ class RemoteSyncService {
   Future<void> _createCollectionForDevicePath(
     DeviceCollection deviceCollection,
   ) async {
-    int deviceCollectionID = deviceCollection.collectionID;
+    int deviceCollectionID = deviceCollection.collectionID ?? -1;
     if (deviceCollectionID != -1) {
       final collectionByID =
           _collectionsService.getCollectionByID(deviceCollectionID);
@@ -468,7 +468,7 @@ class RemoteSyncService {
   }
 
   Future<bool> _uploadFiles(List<File> filesToBeUploaded) async {
-    final int ownerID = _config.getUserID();
+    final int ownerID = _config.getUserID()!;
     final updatedFileIDs = await _db.getUploadedFileIDsToBeUpdated(ownerID);
     if (updatedFileIDs.isNotEmpty) {
       _logger.info("Identified ${updatedFileIDs.length} files for reupload");
@@ -492,7 +492,9 @@ class RemoteSyncService {
         break;
       }
       final file = await _db.getUploadedFileInAnyCollection(uploadedFileID);
-      _uploadFile(file, file.collectionID, futures);
+      if (file != null) {
+        _uploadFile(file, file.collectionID!, futures);
+      }
     }
 
     for (final file in filesToBeUploaded) {
@@ -504,7 +506,9 @@ class RemoteSyncService {
       // prefer existing collection ID for manually uploaded files.
       // See https://github.com/ente-io/photos-app/pull/187
       final collectionID = file.collectionID ??
-          (await _collectionsService.getOrCreateForPath(file.deviceFolder)).id;
+          (await _collectionsService
+                  .getOrCreateForPath(file.deviceFolder ?? 'Unknown Folder'))
+              .id;
       _uploadFile(file, collectionID, futures);
     }
 
@@ -587,7 +591,7 @@ class RemoteSyncService {
         localUploadedFromDevice = 0,
         localButUpdatedOnDevice = 0,
         remoteNewFile = 0;
-    final int userID = _config.getUserID();
+    final int userID = _config.getUserID()!;
     bool needsGalleryReload = false;
     // this is required when same file is uploaded twice in the same
     // collection. Without this check, if both remote files are part of same
@@ -599,13 +603,14 @@ class RemoteSyncService {
     for (File remoteDiff in diff) {
       // existingFile will be either set to existing collectionID+localID or
       // to the unclaimed aka not already linked to any uploaded file.
-      File existingFile;
+      File? existingFile;
       if (remoteDiff.generatedID != null) {
         // Case [1] Check and clear local cache when uploadedFile already exist
         // Note: Existing file can be null here if it's replaced by the time we
         // reach here
-        existingFile = await _db.getFile(remoteDiff.generatedID);
-        if (_shouldClearCache(remoteDiff, existingFile)) {
+        existingFile = await _db.getFile(remoteDiff.generatedID!);
+        if (existingFile != null &&
+            _shouldClearCache(remoteDiff, existingFile)) {
           needsGalleryReload = true;
           await clearCache(remoteDiff);
         }
@@ -636,9 +641,9 @@ class RemoteSyncService {
       if (existingFile == null && remoteDiff.localID != null) {
         final localFileEntries = await _db.getUnlinkedLocalMatchesForRemoteFile(
           userID,
-          remoteDiff.localID,
+          remoteDiff.localID!,
           remoteDiff.fileType,
-          title: remoteDiff.title,
+          title: remoteDiff.title ?? '',
           deviceFolder: remoteDiff.deviceFolder ?? '',
         );
         if (localFileEntries.isEmpty) {
@@ -653,18 +658,18 @@ class RemoteSyncService {
               )
               .reduce(max);
 
-          /* todo: In case of iOS, we will miss any asset modification in
+          /* Note: In case of iOS, we will miss any asset modification in
             between of two installation. This is done to avoid fetching assets
             from iCloud when modification time could have changed for number of
             reasons. To fix this, we need to identify a way to store version
             for the adjustments or just if the asset has been modified ever.
             https://stackoverflow.com/a/50093266/546896
             */
-          if (maxModificationTime > remoteDiff.modificationTime &&
+          if (maxModificationTime > remoteDiff.modificationTime! &&
               Platform.isAndroid) {
             localButUpdatedOnDevice++;
             await FileUpdationDB.instance.insertMultiple(
-              [remoteDiff.localID],
+              [remoteDiff.localID!],
               FileUpdationDB.modificationTimeUpdated,
             );
           }
@@ -680,7 +685,7 @@ class RemoteSyncService {
             // setting the generated ID of remoteFile to localFile generatedID
             existingFile = localFileEntries.first;
             localUploadedFromDevice++;
-            alreadyClaimedLocalFilesGenID.add(existingFile.generatedID);
+            alreadyClaimedLocalFilesGenID.add(existingFile.generatedID!);
             remoteDiff.generatedID = existingFile.generatedID;
           }
         }
@@ -723,10 +728,10 @@ class RemoteSyncService {
   }
 
   bool _shouldReloadHomeGallery(File remoteFile, File existingFile) {
-    int remoteCreationTime = remoteFile.creationTime;
+    int remoteCreationTime = remoteFile.creationTime!;
     if (remoteFile.pubMmdVersion > 0 &&
-        (remoteFile.pubMagicMetadata.editedTime ?? 0) != 0) {
-      remoteCreationTime = remoteFile.pubMagicMetadata.editedTime;
+        (remoteFile.pubMagicMetadata?.editedTime ?? 0) != 0) {
+      remoteCreationTime = remoteFile.pubMagicMetadata!.editedTime!;
     }
     if (remoteCreationTime != existingFile.creationTime) {
       return true;
@@ -774,7 +779,7 @@ class RemoteSyncService {
   void _sortByTimeAndType(List<File> file) {
     file.sort((first, second) {
       if (first.fileType == second.fileType) {
-        return second.creationTime.compareTo(first.creationTime);
+        return second.creationTime!.compareTo(first.creationTime!);
       } else if (first.fileType == FileType.video) {
         return 1;
       } else {
