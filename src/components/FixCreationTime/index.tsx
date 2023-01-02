@@ -106,7 +106,6 @@ export default function FixCreationTime(props: Props) {
             <div
                 style={{
                     marginBottom: '10px',
-                    padding: '0 5%',
                     display: 'flex',
                     flexDirection: 'column',
                     ...(fixState === FIX_STATE.RUNNING
