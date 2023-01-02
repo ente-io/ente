@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
@@ -24,7 +22,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 final Logger _logger = Logger('email_util');
 
-bool isValidEmail(String email) {
+bool isValidEmail(String? email) {
+  if (email == null) {
+    return false;
+  }
   return EmailValidator.validate(email);
 }
 
@@ -32,9 +33,9 @@ Future<void> sendLogs(
   BuildContext context,
   String title,
   String toEmail, {
-  Function postShare,
-  String subject,
-  String body,
+  Function? postShare,
+  String? subject,
+  String? body,
 }) async {
   final List<Widget> actions = [
     TextButton(
@@ -43,7 +44,7 @@ Future<void> sendLogs(
         children: [
           Icon(
             Icons.feed_outlined,
-            color: Theme.of(context).iconTheme.color.withOpacity(0.85),
+            color: Theme.of(context).iconTheme.color!.withOpacity(0.85),
           ),
           const Padding(padding: EdgeInsets.all(4)),
           Text(
@@ -125,14 +126,14 @@ Future<void> sendLogs(
 Future<void> _sendLogs(
   BuildContext context,
   String toEmail,
-  String subject,
-  String body,
+  String? subject,
+  String? body,
 ) async {
   final String zipFilePath = await getZippedLogsFile(context);
   final Email email = Email(
     recipients: [toEmail],
-    subject: subject,
-    body: body,
+    subject: subject ?? '',
+    body: body ?? '',
     attachmentPaths: [zipFilePath],
     isHTML: false,
   );
@@ -184,9 +185,9 @@ Future<void> shareLogs(
 
 Future<void> sendEmail(
   BuildContext context, {
-  @required String to,
-  String subject,
-  String body,
+  required String to,
+  String? subject,
+  String? body,
 }) async {
   try {
     final String clientDebugInfo = await _clientInfo();

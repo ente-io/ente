@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io' as io;
 import 'dart:io';
@@ -45,11 +43,11 @@ Future<void> deleteFilesFromEverywhere(
     if (file.localID != null) {
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
-        alreadyDeletedIDs.add(file.localID);
+        alreadyDeletedIDs.add(file.localID!);
       } else if (file.isSharedMediaToAppSandbox) {
-        localSharedMediaIDs.add(file.localID);
+        localSharedMediaIDs.add(file.localID!);
       } else {
-        localAssetIDs.add(file.localID);
+        localAssetIDs.add(file.localID!);
       }
     }
     if (file.uploadedFileID == null) {
@@ -82,17 +80,17 @@ Future<void> deleteFilesFromEverywhere(
         deletedFiles.add(file);
         if (file.uploadedFileID != null) {
           uploadedFilesToBeTrashed
-              .add(TrashRequest(file.uploadedFileID, file.collectionID));
-          updatedCollectionIDs.add(file.collectionID);
+              .add(TrashRequest(file.uploadedFileID!, file.collectionID!));
+          updatedCollectionIDs.add(file.collectionID!);
         } else {
           await FilesDB.instance.deleteLocalFile(file);
         }
       }
     } else {
-      updatedCollectionIDs.add(file.collectionID);
+      updatedCollectionIDs.add(file.collectionID!);
       deletedFiles.add(file);
       uploadedFilesToBeTrashed
-          .add(TrashRequest(file.uploadedFileID, file.collectionID));
+          .add(TrashRequest(file.uploadedFileID!, file.collectionID!));
     }
   }
   if (uploadedFilesToBeTrashed.isNotEmpty) {
@@ -162,9 +160,9 @@ Future<void> deleteFilesFromRemoteOnly(
   final List<int> uploadedFileIDs = [];
   final List<TrashRequest> trashRequests = [];
   for (final file in files) {
-    updatedCollectionIDs.add(file.collectionID);
-    uploadedFileIDs.add(file.uploadedFileID);
-    trashRequests.add(TrashRequest(file.uploadedFileID, file.collectionID));
+    updatedCollectionIDs.add(file.collectionID!);
+    uploadedFileIDs.add(file.uploadedFileID!);
+    trashRequests.add(TrashRequest(file.uploadedFileID!, file.collectionID!));
   }
   try {
     await TrashSyncService.instance.trashFilesOnServer(trashRequests);
@@ -212,11 +210,11 @@ Future<void> deleteFilesOnDeviceOnly(
     if (file.localID != null) {
       if (!(await _localFileExist(file))) {
         _logger.warning("Already deleted " + file.toString());
-        alreadyDeletedIDs.add(file.localID);
+        alreadyDeletedIDs.add(file.localID!);
       } else if (file.isSharedMediaToAppSandbox) {
-        localSharedMediaIDs.add(file.localID);
+        localSharedMediaIDs.add(file.localID!);
       } else {
-        localAssetIDs.add(file.localID);
+        localAssetIDs.add(file.localID!);
       }
     }
     if (file.uploadedFileID == null) {
@@ -412,7 +410,7 @@ Future<List<String>> deleteLocalFilesInBatches(
   final List<String> deletedIDs = [];
   for (int index = 0; index < localIDs.length; index += batchSize) {
     if (dialogKey.currentState != null) {
-      dialogKey.currentState.setProgress(index / localIDs.length);
+      dialogKey.currentState!.setProgress(index / localIDs.length);
     }
     final ids = localIDs
         .getRange(index, min(localIDs.length, index + batchSize))
@@ -433,7 +431,7 @@ Future<List<String>> deleteLocalFilesInBatches(
       }
     }
   }
-  Navigator.of(dialogKey.currentContext, rootNavigator: true).pop('dialog');
+  Navigator.of(dialogKey.currentContext!, rootNavigator: true).pop('dialog');
   return deletedIDs;
 }
 
@@ -454,7 +452,7 @@ Future<bool> _localFileExist(File file) {
 Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
   final List<String> actuallyDeletedIDs = [];
   try {
-    return Future.forEach(localIDs, (id) async {
+    return Future.forEach<String>(localIDs, (id) async {
       final String localPath = getSharedMediaPathFromLocalID(id);
       try {
         // verify the file exists as the OS may have already deleted it from cache
