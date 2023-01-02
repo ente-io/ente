@@ -14,7 +14,10 @@ import { getSentryUserID, logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
-import { convertHEIC } from '../services/heicConverter';
+import {
+    convertHEIC,
+    generateImageThumbnail,
+} from '../services/imageProcessor';
 import {
     getAppVersion,
     skipAppVersion,
@@ -145,5 +148,9 @@ export default function setupIpcComs(
     );
     ipcMain.handle('remove-temp-file', (_, tempFilePath: string) => {
         return deleteTempFile(tempFilePath);
+    });
+
+    ipcMain.handle('generate-image-thumbnail', (_, fileData, maxDimension) => {
+        return generateImageThumbnail(fileData, maxDimension);
     });
 }

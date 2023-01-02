@@ -70,3 +70,59 @@ async function runConvertCommand(
         Error(`${process.platform} native heic convert not supported yet`);
     }
 }
+
+export async function generateImageThumbnail(
+    inputFilePath: string,
+    width: number
+): Promise<Uint8Array> {
+    let tempOutputFilePath: string;
+    try {
+        tempOutputFilePath = await generateTempFilePath('.jpeg');
+
+        await runThumbnailGenerationCommand(
+            inputFilePath,
+            tempOutputFilePath,
+            width
+        );
+
+        if (!existsSync(tempOutputFilePath)) {
+            throw new Error('heic convert output file not found');
+        }
+        const convertedFileData = new Uint8Array(
+            await readFile(tempOutputFilePath)
+        );
+        return convertedFileData;
+    } catch (e) {
+        logErrorSentry(e, 'ffmpeg run command error');
+        throw e;
+    } finally {
+        try {
+            rmSync(tempOutputFilePath, { force: true });
+        } catch (e) {
+            logErrorSentry(e, 'failed to remove tempOutputFile');
+        }
+    }
+}
+
+async function runThumbnailGenerationCommand(
+    inputFilePath: string,
+    tempOutputFilePath: string,
+    maxDimension: number
+) {
+    if (isPlatform('mac')) {
+        await asyncExec(
+            `sips -s format jpeg -Z ${maxDimension} ${inputFilePath} --out ${tempOutputFilePath} `
+        );
+    } else if (isPlatform('linux')) {
+        await asyncExec(
+            `${getImageMagickStaticPath()} -define jpeg:size=${
+                2 * maxDimension
+            }x${2 * maxDimension}  ${inputFilePath}  -auto-orient   
+                -thumbnail ${maxDimension}x${maxDimension}> -gravity center -unsharp 0x.5  ${tempOutputFilePath}`
+        );
+    } else {
+        Error(
+            `${process.platform} native thumbnail generation not supported yet`
+        );
+    }
+}
