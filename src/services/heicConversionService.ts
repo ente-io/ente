@@ -1,14 +1,15 @@
-import isElectron from 'is-electron';
 import { logError } from 'utils/sentry';
 import WasmHEICConverterService from './wasmHeicConverter/wasmHEICConverterService';
-import ElectronHEICConvertor from 'services/electron/heicConvertor';
+import ElectronImageMagickService from 'services/electron/imageMagick';
 
 class HeicConversionService {
     async convert(heicFileData: Blob): Promise<Blob> {
         try {
-            if (isElectron() && ElectronHEICConvertor.apiExists()) {
+            if (ElectronImageMagickService.convertAPIExists()) {
                 try {
-                    return await ElectronHEICConvertor.convert(heicFileData);
+                    return await ElectronImageMagickService.convertHEIC(
+                        heicFileData
+                    );
                 } catch (e) {
                     return await WasmHEICConverterService.convert(heicFileData);
                 }

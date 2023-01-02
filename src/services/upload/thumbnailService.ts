@@ -3,6 +3,7 @@ import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import * as FFmpegService from 'services/ffmpeg/ffmpegService';
+import ElectronImageMagickService from 'services/electron/imageMagick';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { isExactTypeHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
@@ -68,20 +69,26 @@ async function generateImageThumbnail(
     fileTypeInfo: FileTypeInfo,
     file: File | ElectronFile
 ) {
-    const isHEIC = isExactTypeHEIC(fileTypeInfo.exactType);
-    return await generateImageThumbnailUsingCanvas(file, isHEIC);
+    if (ElectronImageMagickService.generateImageThumbnailAPIExists()) {
+        return await ElectronImageMagickService.generateImageThumbnail(
+            file,
+            MAX_THUMBNAIL_DIMENSION
+        );
+    } else {
+        return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
+    }
 }
 
 export async function generateImageThumbnailUsingCanvas(
     file: File | ElectronFile,
-    isHEIC: boolean
+    fileTypeInfo: FileTypeInfo
 ) {
     const canvas = document.createElement('canvas');
     const canvasCTX = canvas.getContext('2d');
 
     let imageURL = null;
     let timeout = null;
-
+    const isHEIC = isExactTypeHEIC(fileTypeInfo.exactType);
     if (isHEIC) {
         addLogLine(`HEICConverter called for ${getFileNameSize(file)}`);
         const convertedBlob = await HeicConversionService.convert(
