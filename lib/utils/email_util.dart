@@ -62,7 +62,7 @@ Future<void> sendLogs(
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return LogFileViewer(SuperLogging.logFile);
+            return LogFileViewer(SuperLogging.logFile!);
           },
           barrierColor: Colors.black87,
           barrierDismissible: false,
@@ -191,7 +191,7 @@ Future<void> sendEmail(
 }) async {
   try {
     final String clientDebugInfo = await _clientInfo();
-    final EmailContent email = EmailContent(
+    final EmailContent emailContent = EmailContent(
       to: [
         to,
       ],
@@ -204,7 +204,7 @@ Future<void> sendEmail(
       final Uri params = Uri(
         scheme: 'mailto',
         path: to,
-        query: 'subject=${email.subject}&body=${email.body}',
+        query: 'subject=${emailContent.subject}&body=${emailContent.body}',
       );
       if (await canLaunchUrl(params)) {
         await launchUrl(params);
@@ -215,8 +215,8 @@ Future<void> sendEmail(
     } else {
       final OpenMailAppResult result =
           await OpenMailApp.composeNewEmailInMailApp(
-        nativePickerTitle: 'Select email app',
-        emailContent: email,
+        nativePickerTitle: 'Select emailContent app',
+        emailContent: emailContent,
       );
       if (!result.didOpen && !result.canOpen) {
         _showNoMailAppsDialog(context, to);
@@ -230,15 +230,13 @@ Future<void> sendEmail(
                 CupertinoActionSheetAction(
                   child: Text(app.name),
                   onPressed: () {
-                    final content = email;
-                    if (content != null) {
-                      OpenMailApp.composeNewEmailInSpecificMailApp(
-                        mailApp: app,
-                        emailContent: content,
-                      );
-                    } else {
-                      OpenMailApp.openSpecificMailApp(app);
-                    }
+                    final content = emailContent;
+
+                    OpenMailApp.composeNewEmailInSpecificMailApp(
+                      mailApp: app,
+                      emailContent: content,
+                    );
+
                     Navigator.of(context, rootNavigator: true).pop();
                   },
                 ),
@@ -254,7 +252,7 @@ Future<void> sendEmail(
       }
     }
   } catch (e) {
-    _logger.severe("Failed to send email to $to", e);
+    _logger.severe("Failed to send emailContent to $to", e);
     _showNoMailAppsDialog(context, to);
   }
 }

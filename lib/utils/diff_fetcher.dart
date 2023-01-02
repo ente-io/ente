@@ -31,93 +31,88 @@ class DiffFetcher {
       );
       final files = <File>[];
       int latestUpdatedAtTime = 0;
-      if (response != null) {
-        final diff = response.data["diff"] as List;
-        final bool hasMore = response.data["hasMore"] as bool;
-        final startTime = DateTime.now();
-        final existingFiles =
-            await FilesDB.instance.getUploadedFileIDs(collectionID);
-        final deletedFiles = <File>[];
-        for (final item in diff) {
-          final file = File();
-          file.uploadedFileID = item["id"];
-          file.collectionID = item["collectionID"];
-          file.updationTime = item["updationTime"];
-          latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime!);
-          if (item["isDeleted"]) {
-            if (existingFiles.contains(file.uploadedFileID)) {
-              deletedFiles.add(file);
-            }
-            continue;
-          }
+      final diff = response.data["diff"] as List;
+      final bool hasMore = response.data["hasMore"] as bool;
+      final startTime = DateTime.now();
+      final existingFiles =
+          await FilesDB.instance.getUploadedFileIDs(collectionID);
+      final deletedFiles = <File>[];
+      for (final item in diff) {
+        final file = File();
+        file.uploadedFileID = item["id"];
+        file.collectionID = item["collectionID"];
+        file.updationTime = item["updationTime"];
+        latestUpdatedAtTime = max(latestUpdatedAtTime, file.updationTime!);
+        if (item["isDeleted"]) {
           if (existingFiles.contains(file.uploadedFileID)) {
-            final existingFile = await FilesDB.instance
-                .getUploadedFile(file.uploadedFileID!, file.collectionID!);
-            if (existingFile != null) {
-              file.generatedID = existingFile.generatedID;
-            }
+            deletedFiles.add(file);
           }
-          file.ownerID = item["ownerID"];
-          file.encryptedKey = item["encryptedKey"];
-          file.keyDecryptionNonce = item["keyDecryptionNonce"];
-          file.fileDecryptionHeader = item["file"]["decryptionHeader"];
-          file.thumbnailDecryptionHeader =
-              item["thumbnail"]["decryptionHeader"];
-          file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
-          if (item["info"] != null) {
-            file.fileSize = item["info"]["fileSize"];
+          continue;
+        }
+        if (existingFiles.contains(file.uploadedFileID)) {
+          final existingFile = await FilesDB.instance
+              .getUploadedFile(file.uploadedFileID!, file.collectionID!);
+          if (existingFile != null) {
+            file.generatedID = existingFile.generatedID;
           }
-
-          final fileDecryptionKey = decryptFileKey(file);
-          final encodedMetadata = await CryptoUtil.decryptChaCha(
-            Sodium.base642bin(item["metadata"]["encryptedData"]),
-            fileDecryptionKey,
-            Sodium.base642bin(file.metadataDecryptionHeader!),
-          );
-          final Map<String, dynamic> metadata =
-              jsonDecode(utf8.decode(encodedMetadata));
-          file.applyMetadata(metadata);
-          if (item['magicMetadata'] != null) {
-            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-              Sodium.base642bin(item['magicMetadata']['data']),
-              fileDecryptionKey,
-              Sodium.base642bin(item['magicMetadata']['header']),
-            );
-            file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-            file.mMdVersion = item['magicMetadata']['version'];
-            file.magicMetadata =
-                MagicMetadata.fromEncodedJson(file.mMdEncodedJson!);
-          }
-          if (item['pubMagicMetadata'] != null) {
-            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-              Sodium.base642bin(item['pubMagicMetadata']['data']),
-              fileDecryptionKey,
-              Sodium.base642bin(item['pubMagicMetadata']['header']),
-            );
-            file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
-            file.pubMmdVersion = item['pubMagicMetadata']['version'];
-            file.pubMagicMetadata =
-                PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
-          }
-          files.add(file);
+        }
+        file.ownerID = item["ownerID"];
+        file.encryptedKey = item["encryptedKey"];
+        file.keyDecryptionNonce = item["keyDecryptionNonce"];
+        file.fileDecryptionHeader = item["file"]["decryptionHeader"];
+        file.thumbnailDecryptionHeader = item["thumbnail"]["decryptionHeader"];
+        file.metadataDecryptionHeader = item["metadata"]["decryptionHeader"];
+        if (item["info"] != null) {
+          file.fileSize = item["info"]["fileSize"];
         }
 
-        final endTime = DateTime.now();
-        _logger.info(
-          "time for parsing " +
-              files.length.toString() +
-              " items within collection " +
-              collectionID.toString() +
-              ": " +
-              Duration(
-                microseconds: (endTime.microsecondsSinceEpoch -
-                    startTime.microsecondsSinceEpoch),
-              ).inMilliseconds.toString(),
+        final fileDecryptionKey = decryptFileKey(file);
+        final encodedMetadata = await CryptoUtil.decryptChaCha(
+          Sodium.base642bin(item["metadata"]["encryptedData"]),
+          fileDecryptionKey,
+          Sodium.base642bin(file.metadataDecryptionHeader!),
         );
-        return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
-      } else {
-        return Diff(<File>[], <File>[], false, 0);
+        final Map<String, dynamic> metadata =
+            jsonDecode(utf8.decode(encodedMetadata));
+        file.applyMetadata(metadata);
+        if (item['magicMetadata'] != null) {
+          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            Sodium.base642bin(item['magicMetadata']['data']),
+            fileDecryptionKey,
+            Sodium.base642bin(item['magicMetadata']['header']),
+          );
+          file.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+          file.mMdVersion = item['magicMetadata']['version'];
+          file.magicMetadata =
+              MagicMetadata.fromEncodedJson(file.mMdEncodedJson!);
+        }
+        if (item['pubMagicMetadata'] != null) {
+          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            Sodium.base642bin(item['pubMagicMetadata']['data']),
+            fileDecryptionKey,
+            Sodium.base642bin(item['pubMagicMetadata']['header']),
+          );
+          file.pubMmdEncodedJson = utf8.decode(utfEncodedMmd);
+          file.pubMmdVersion = item['pubMagicMetadata']['version'];
+          file.pubMagicMetadata =
+              PubMagicMetadata.fromEncodedJson(file.pubMmdEncodedJson!);
+        }
+        files.add(file);
       }
+
+      final endTime = DateTime.now();
+      _logger.info(
+        "time for parsing " +
+            files.length.toString() +
+            " items within collection " +
+            collectionID.toString() +
+            ": " +
+            Duration(
+              microseconds: (endTime.microsecondsSinceEpoch -
+                  startTime.microsecondsSinceEpoch),
+            ).inMilliseconds.toString(),
+      );
+      return Diff(files, deletedFiles, hasMore, latestUpdatedAtTime);
     } catch (e, s) {
       _logger.severe(e, s);
       rethrow;

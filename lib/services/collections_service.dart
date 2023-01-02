@@ -454,9 +454,7 @@ class CollectionsService {
         _config.getSecretKey()!,
       );
     }
-    if (collectionKey != null) {
-      _cachedKeys[collection.id] = collectionKey;
-    }
+    _cachedKeys[collection.id] = collectionKey;
     return collectionKey;
   }
 
@@ -642,26 +640,24 @@ class CollectionsService {
         },
       );
       final List<Collection> collections = [];
-      if (response != null) {
-        final c = response.data["collections"];
-        for (final collectionData in c) {
-          final collection = Collection.fromMap(collectionData);
-          if (collectionData['magicMetadata'] != null) {
-            final decryptionKey =
-                _getAndCacheDecryptedKey(collection, source: "fetchCollection");
-            final utfEncodedMmd = await CryptoUtil.decryptChaCha(
-              Sodium.base642bin(collectionData['magicMetadata']['data']),
-              decryptionKey,
-              Sodium.base642bin(collectionData['magicMetadata']['header']),
-            );
-            collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
-            collection.mMdVersion = collectionData['magicMetadata']['version'];
-            collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
-              collection.mMdEncodedJson,
-            );
-          }
-          collections.add(collection);
+      final c = response.data["collections"];
+      for (final collectionData in c) {
+        final collection = Collection.fromMap(collectionData);
+        if (collectionData['magicMetadata'] != null) {
+          final decryptionKey =
+              _getAndCacheDecryptedKey(collection, source: "fetchCollection");
+          final utfEncodedMmd = await CryptoUtil.decryptChaCha(
+            Sodium.base642bin(collectionData['magicMetadata']['data']),
+            decryptionKey,
+            Sodium.base642bin(collectionData['magicMetadata']['header']),
+          );
+          collection.mMdEncodedJson = utf8.decode(utfEncodedMmd);
+          collection.mMdVersion = collectionData['magicMetadata']['version'];
+          collection.magicMetadata = CollectionMagicMetadata.fromEncodedJson(
+            collection.mMdEncodedJson,
+          );
         }
+        collections.add(collection);
       }
       return collections;
     } catch (e) {
@@ -700,7 +696,7 @@ class CollectionsService {
       final response = await _enteDio.get(
         "/collections/$collectionID",
       );
-      assert(response != null && response.data != null);
+      assert(response.data != null);
       final collectionData = response.data["collection"];
       final collection = Collection.fromMap(collectionData);
       if (collectionData['magicMetadata'] != null) {

@@ -1,11 +1,11 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
 class DividerWithPadding extends StatelessWidget {
   final double left, top, right, bottom, thinckness;
   const DividerWithPadding({
-    Key key,
+    Key? key,
     this.left = 0,
     this.top = 0,
     this.right = 0,

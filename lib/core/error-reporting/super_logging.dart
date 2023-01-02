@@ -239,7 +239,7 @@ class SuperLogging {
       extraLines = null;
     }
 
-    final str = (config.prefix ?? '') + " " + rec.toPrettyString(extraLines);
+    final str = (config.prefix) + " " + rec.toPrettyString(extraLines);
 
     // write to stdout
     printLog(str);

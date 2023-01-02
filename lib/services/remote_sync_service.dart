@@ -97,8 +97,7 @@ class RemoteSyncService {
       // remote-sync is done. This is done to avoid adding existing files to
       // the same or different collection when user had already uploaded them
       // before.
-      final bool hasSyncedBefore =
-          _prefs.containsKey(_isFirstRemoteSyncDone) ?? false;
+      final bool hasSyncedBefore = _prefs.containsKey(_isFirstRemoteSyncDone);
       if (hasSyncedBefore) {
         await syncDeviceCollectionFilesForUpload();
       }

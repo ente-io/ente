@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -12,18 +10,18 @@ class DraggableScrollbar extends StatefulWidget {
   final Color backgroundColor;
   final Color drawColor;
   final double heightScrollThumb;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
   final int totalCount;
   final int initialScrollIndex;
   final double bottomSafeArea;
   final int currentFirstIndex;
-  final ValueChanged<double> onChange;
+  final ValueChanged<double>? onChange;
   final String Function(int) labelTextBuilder;
   final bool isEnabled;
 
   const DraggableScrollbar({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
     this.backgroundColor = Colors.white,
     this.drawColor = Colors.grey,
     this.heightScrollThumb = 80.0,
@@ -32,7 +30,7 @@ class DraggableScrollbar extends StatefulWidget {
     this.totalCount = 1,
     this.initialScrollIndex = 0,
     this.currentFirstIndex = 0,
-    @required this.labelTextBuilder,
+    required this.labelTextBuilder,
     this.onChange,
     this.isEnabled = true,
   }) : super(key: key);
@@ -47,18 +45,18 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   static const labelAnimationDuration = Duration(milliseconds: 1000);
   double thumbOffset = 0.0;
   bool isDragging = false;
-  int currentFirstIndex;
+  late int currentFirstIndex;
 
   double get thumbMin => 0.0;
 
   double get thumbMax =>
-      context.size.height - widget.heightScrollThumb - widget.bottomSafeArea;
+      context.size!.height - widget.heightScrollThumb - widget.bottomSafeArea;
 
-  AnimationController _thumbAnimationController;
-  Animation<double> _thumbAnimation;
-  AnimationController _labelAnimationController;
-  Animation<double> _labelAnimation;
-  Timer _fadeoutTimer;
+  late AnimationController _thumbAnimationController;
+  Animation<double>? _thumbAnimation;
+  late AnimationController _labelAnimationController;
+  Animation<double>? _labelAnimation;
+  Timer? _fadeoutTimer;
 
   @override
   void initState() {
@@ -66,7 +64,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
     currentFirstIndex = widget.currentFirstIndex;
 
     if (widget.initialScrollIndex > 0 && widget.totalCount > 1) {
-      WidgetsBinding.instance?.addPostFrameCallback((_) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(
           () => thumbOffset = (widget.initialScrollIndex / widget.totalCount) *
               (thumbMax - thumbMin),
@@ -130,7 +128,7 @@ class DraggableScrollbarState extends State<DraggableScrollbar>
   }
 
   Widget buildThumb() => Padding(
-        padding: widget.padding,
+        padding: widget.padding!,
         child: Container(
           alignment: Alignment.topRight,
           margin: EdgeInsets.only(top: thumbOffset),

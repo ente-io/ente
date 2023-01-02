@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +11,7 @@ import 'package:photos/ui/common/web_page.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class EmailEntryPage extends StatefulWidget {
-  const EmailEntryPage({Key key}) : super(key: key);
+  const EmailEntryPage({Key? key}) : super(key: key);
 
   @override
   State<EmailEntryPage> createState() => _EmailEntryPageState();
@@ -28,8 +26,8 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   final _passwordController2 = TextEditingController();
   final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
 
-  String _email;
-  String _password;
+  String? _email;
+  String? _password;
   String _cnfPassword = '';
   double _passwordStrength = 0.0;
   bool _emailIsValid = false;
@@ -65,7 +63,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -104,9 +102,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
         buttonText: 'Create account',
         onPressedFunction: () {
           _config.setVolatilePassword(_passwordController1.text);
-          UserService.instance.setEmail(_email);
+          UserService.instance.setEmail(_email!);
           UserService.instance
-              .sendOtt(context, _email, isCreateAccountScreen: true);
+              .sendOtt(context, _email!, isCreateAccountScreen: true);
           FocusScope.of(context).unfocus();
         },
       ),
@@ -162,7 +160,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                               size: 20,
                               color: Theme.of(context)
                                   .inputDecorationTheme
-                                  .focusedBorder
+                                  .focusedBorder!
                                   .borderSide
                                   .color,
                             )
@@ -170,9 +168,9 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                     ),
                     onChanged: (value) {
                       _email = value.trim();
-                      if (_emailIsValid != EmailValidator.validate(_email)) {
+                      if (_emailIsValid != EmailValidator.validate(_email!)) {
                         setState(() {
-                          _emailIsValid = EmailValidator.validate(_email);
+                          _emailIsValid = EmailValidator.validate(_email!);
                         });
                       }
                     },
@@ -220,7 +218,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -287,7 +285,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -363,7 +361,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             side: CheckboxTheme.of(context).side,
             onChanged: (value) {
               setState(() {
-                _hasAgreedToTOS = value;
+                _hasAgreedToTOS = value!;
               });
             },
           ),
@@ -416,7 +414,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 ],
                 style: Theme.of(context)
                     .textTheme
-                    .subtitle1
+                    .subtitle1!
                     .copyWith(fontSize: 12),
               ),
               textAlign: TextAlign.left,
@@ -442,7 +440,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
             side: CheckboxTheme.of(context).side,
             onChanged: (value) {
               setState(() {
-                _hasAgreedToE2E = value;
+                _hasAgreedToE2E = value!;
               });
             },
           ),
@@ -477,7 +475,7 @@ class _EmailEntryPageState extends State<EmailEntryPage> {
                 ],
                 style: Theme.of(context)
                     .textTheme
-                    .subtitle1
+                    .subtitle1!
                     .copyWith(fontSize: 12),
               ),
               textAlign: TextAlign.left,

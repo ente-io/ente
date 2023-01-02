@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io';
 
@@ -29,7 +27,7 @@ class SubscriptionPage extends StatefulWidget {
 
   const SubscriptionPage({
     this.isOnboarding = false,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -40,16 +38,16 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   final _logger = Logger("SubscriptionPage");
   final _billingService = BillingService.instance;
   final _userService = UserService.instance;
-  Subscription _currentSubscription;
-  StreamSubscription _purchaseUpdateSubscription;
-  ProgressDialog _dialog;
-  UserDetails _userDetails;
-  bool _hasActiveSubscription;
-  FreePlan _freePlan;
-  List<BillingPlan> _plans;
+  Subscription? _currentSubscription;
+  late StreamSubscription _purchaseUpdateSubscription;
+  late ProgressDialog _dialog;
+  late UserDetails _userDetails;
+  late bool _hasActiveSubscription;
+  late FreePlan _freePlan;
+  late List<BillingPlan> _plans;
   bool _hasLoadedData = false;
   bool _isLoading = false;
-  bool _isActiveStripeSubscriber;
+  late bool _isActiveStripeSubscriber;
 
   @override
   void initState() {
@@ -76,9 +74,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             String text = "Thank you for subscribing!";
             if (!widget.isOnboarding) {
               final isUpgrade = _hasActiveSubscription &&
-                  newSubscription.storage > _currentSubscription.storage;
+                  newSubscription.storage > _currentSubscription!.storage;
               final isDowngrade = _hasActiveSubscription &&
-                  newSubscription.storage < _currentSubscription.storage;
+                  newSubscription.storage < _currentSubscription!.storage;
               if (isUpgrade) {
                 text = "Your plan was successfully upgraded";
               } else if (isDowngrade) {
@@ -87,7 +85,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
             }
             showShortToast(context, text);
             _currentSubscription = newSubscription;
-            _hasActiveSubscription = _currentSubscription.isValid();
+            _hasActiveSubscription = _currentSubscription!.isValid();
             setState(() {});
             await _dialog.hide();
             Bus.instance.fire(SubscriptionPurchasedEvent());
@@ -155,18 +153,18 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     _userService.getUserDetailsV2(memoryCount: false).then((userDetails) async {
       _userDetails = userDetails;
       _currentSubscription = userDetails.subscription;
-      _hasActiveSubscription = _currentSubscription.isValid();
+      _hasActiveSubscription = _currentSubscription!.isValid();
       final billingPlans = await _billingService.getBillingPlans();
       _isActiveStripeSubscriber =
-          _currentSubscription.paymentProvider == stripe &&
-              _currentSubscription.isValid();
+          _currentSubscription!.paymentProvider == stripe &&
+              _currentSubscription!.isValid();
       _plans = billingPlans.plans.where((plan) {
         final productID = _isActiveStripeSubscriber
             ? plan.stripeID
             : Platform.isAndroid
                 ? plan.androidID
                 : plan.iosID;
-        return productID != null && productID.isNotEmpty;
+        return productID.isNotEmpty;
       }).toList();
       _freePlan = billingPlans.freePlan;
       _hasLoadedData = true;
@@ -210,7 +208,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
       widgets.add(ValidityWidget(currentSubscription: _currentSubscription));
     }
 
-    if (_currentSubscription.productID == freeProductID) {
+    if (_currentSubscription!.productID == freeProductID) {
       if (widget.isOnboarding) {
         widgets.add(SkipSubscriptionWidget(freePlan: _freePlan));
       }
@@ -218,20 +216,20 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
 
     if (_hasActiveSubscription &&
-        _currentSubscription.productID != freeProductID) {
+        _currentSubscription!.productID != freeProductID) {
       widgets.addAll([
         Align(
           alignment: Alignment.center,
           child: GestureDetector(
             onTap: () {
               final String paymentProvider =
-                  _currentSubscription.paymentProvider;
+                  _currentSubscription!.paymentProvider;
               if (paymentProvider == appStore && !Platform.isAndroid) {
                 launchUrlString("https://apps.apple.com/account/billing");
               } else if (paymentProvider == playStore && Platform.isAndroid) {
                 launchUrlString(
                   "https://play.google.com/store/account/subscriptions?sku=" +
-                      _currentSubscription.productID +
+                      _currentSubscription!.productID +
                       "&package=io.ente.photos",
                 );
               } else if (paymentProvider == stripe) {
@@ -294,7 +292,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                   RichText(
                     text: TextSpan(
                       text: "Manage family",
-                      style: Theme.of(context).textTheme.bodyMedium.copyWith(
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                             decoration: TextDecoration.underline,
                           ),
                     ),
@@ -320,11 +318,11 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     bool foundActivePlan = false;
     for (final plan in _plans) {
       final productID = plan.stripeID;
-      if (productID == null || productID.isEmpty) {
+      if (productID.isEmpty) {
         continue;
       }
-      final isActive =
-          _hasActiveSubscription && _currentSubscription.productID == productID;
+      final isActive = _hasActiveSubscription &&
+          _currentSubscription!.productID == productID;
       if (isActive) {
         foundActivePlan = true;
       }
@@ -362,7 +360,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     bool foundActivePlan = false;
     final List<Widget> planWidgets = [];
     if (_hasActiveSubscription &&
-        _currentSubscription.productID == freeProductID) {
+        _currentSubscription!.productID == freeProductID) {
       foundActivePlan = true;
       planWidgets.add(
         SubscriptionPlanWidget(
@@ -375,8 +373,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     }
     for (final plan in _plans) {
       final productID = Platform.isAndroid ? plan.androidID : plan.iosID;
-      final isActive =
-          _hasActiveSubscription && _currentSubscription.productID == productID;
+      final isActive = _hasActiveSubscription &&
+          _currentSubscription!.productID == productID;
       if (isActive) {
         foundActivePlan = true;
       }
@@ -408,8 +406,8 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
               }
               final isCrossGradingOnAndroid = Platform.isAndroid &&
                   _hasActiveSubscription &&
-                  _currentSubscription.productID != freeProductID &&
-                  _currentSubscription.productID != plan.androidID;
+                  _currentSubscription!.productID != freeProductID &&
+                  _currentSubscription!.productID != plan.androidID;
               if (isCrossGradingOnAndroid) {
                 await _dialog.hide();
                 showErrorDialog(
@@ -445,7 +443,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   void _addCurrentPlanWidget(List<Widget> planWidgets) {
     int activePlanIndex = 0;
     for (; activePlanIndex < _plans.length; activePlanIndex++) {
-      if (_plans[activePlanIndex].storage > _currentSubscription.storage) {
+      if (_plans[activePlanIndex].storage > _currentSubscription!.storage) {
         break;
       }
     }
@@ -455,9 +453,9 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
         child: InkWell(
           onTap: () {},
           child: SubscriptionPlanWidget(
-            storage: _currentSubscription.storage,
-            price: _currentSubscription.price,
-            period: _currentSubscription.period,
+            storage: _currentSubscription!.storage,
+            price: _currentSubscription!.price,
+            period: _currentSubscription!.period,
             isActive: true,
           ),
         ),

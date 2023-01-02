@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:ui';
 
@@ -10,7 +10,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class RecoveryPage extends StatefulWidget {
-  const RecoveryPage({Key key}) : super(key: key);
+  const RecoveryPage({Key? key}) : super(key: key);
 
   @override
   State<RecoveryPage> createState() => _RecoveryPageState();
@@ -22,7 +22,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
   @override
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -140,7 +140,7 @@ class _RecoveryPageState extends State<RecoveryPage> {
                           child: Text(
                             "No recovery key?",
                             style:
-                                Theme.of(context).textTheme.subtitle1.copyWith(
+                                Theme.of(context).textTheme.subtitle1!.copyWith(
                                       fontSize: 14,
                                       decoration: TextDecoration.underline,
                                     ),

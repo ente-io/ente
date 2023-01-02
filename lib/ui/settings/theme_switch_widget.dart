@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
@@ -11,14 +11,14 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 
 class ThemeSwitchWidget extends StatefulWidget {
-  const ThemeSwitchWidget({Key key}) : super(key: key);
+  const ThemeSwitchWidget({Key? key}) : super(key: key);
 
   @override
   State<ThemeSwitchWidget> createState() => _ThemeSwitchWidgetState();
 }
 
 class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
-  AdaptiveThemeMode currentThemeMode;
+  AdaptiveThemeMode? currentThemeMode;
 
   @override
   void initState() {
@@ -67,7 +67,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
   Widget _menuItem(BuildContext context, AdaptiveThemeMode themeMode) {
     return MenuItemWidget(
       captionedTextWidget: CaptionedTextWidget(
-        title: toBeginningOfSentenceCase(themeMode.name),
+        title: toBeginningOfSentenceCase(themeMode.name)!,
         textStyle: Theme.of(context).colorScheme.enteTheme.textTheme.body,
       ),
       pressedColor: getEnteColorScheme(context).fillFaint,

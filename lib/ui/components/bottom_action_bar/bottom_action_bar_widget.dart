@@ -103,12 +103,11 @@ class BottomActionBarWidget extends StatelessWidget {
   }
 
   List<Widget> _iconButtons(BuildContext context) {
-    final iconButtonsWithExpansionIcon = <Widget?>[
+    final iconButtonsWithExpansionIcon = <Widget>[
       ...?iconButtons,
       ExpansionIconWidget(expandableController: _expandableController)
     ];
-    iconButtonsWithExpansionIcon.removeWhere((element) => element == null);
-    return iconButtonsWithExpansionIcon as List<Widget>;
+    return iconButtonsWithExpansionIcon;
   }
 
   ExpandableThemeData _getExpandableTheme() {

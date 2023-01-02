@@ -111,7 +111,7 @@ void preloadThumbnail(ente.File file) {
 }
 
 final Map<String, Future<io.File?>> fileDownloadsInProgress =
-    <String, Future<io.File>>{};
+    <String, Future<io.File?>>{};
 
 Future<io.File?> getFileFromServer(
   ente.File file, {
@@ -132,7 +132,8 @@ Future<io.File?> getFileFromServer(
         file,
         progressCallback: progressCallback,
         needLiveVideo: liveVideo,
-      ).whenComplete(() {
+      );
+      fileDownloadsInProgress[downloadID]!.whenComplete(() {
         fileDownloadsInProgress.remove(downloadID);
       });
     } else {
@@ -140,7 +141,8 @@ Future<io.File?> getFileFromServer(
         file,
         cacheManager,
         progressCallback: progressCallback,
-      ).whenComplete(() {
+      );
+      fileDownloadsInProgress[downloadID]!.whenComplete(() {
         fileDownloadsInProgress.remove(downloadID);
       });
     }
@@ -157,7 +159,7 @@ Future<bool> isFileCached(ente.File file, {bool liveVideo = false}) async {
 }
 
 final Map<int, Future<_LivePhoto?>> _livePhotoDownloadsTracker =
-    <int, Future<_LivePhoto>>{};
+    <int, Future<_LivePhoto?>>{};
 
 Future<io.File?> _getLivePhotoFromServer(
   ente.File file, {

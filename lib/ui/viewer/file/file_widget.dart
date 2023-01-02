@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -10,11 +10,11 @@ import 'package:photos/ui/viewer/file/zoomable_live_image.dart';
 
 class FileWidget extends StatelessWidget {
   final File file;
-  final String tagPrefix;
-  final Function(bool) shouldDisableScroll;
-  final Function(bool) playbackCallback;
-  final BoxDecoration backgroundDecoration;
-  final bool autoPlay;
+  final String? tagPrefix;
+  final Function(bool)? shouldDisableScroll;
+  final Function(bool)? playbackCallback;
+  final BoxDecoration? backgroundDecoration;
+  final bool? autoPlay;
 
   const FileWidget(
     this.file, {
@@ -23,7 +23,7 @@ class FileWidget extends StatelessWidget {
     this.playbackCallback,
     this.tagPrefix,
     this.backgroundDecoration,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

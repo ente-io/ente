@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:io';
 
@@ -18,16 +18,16 @@ import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ZoomableImage extends StatefulWidget {
-  final File photo;
-  final Function(bool) shouldDisableScroll;
-  final String tagPrefix;
-  final Decoration backgroundDecoration;
+  final File? photo;
+  final Function(bool)? shouldDisableScroll;
+  final String? tagPrefix;
+  final Decoration? backgroundDecoration;
 
   const ZoomableImage(
     this.photo, {
-    Key key,
+    Key? key,
     this.shouldDisableScroll,
-    @required this.tagPrefix,
+    required this.tagPrefix,
     this.backgroundDecoration,
   }) : super(key: key);
 
@@ -38,14 +38,14 @@ class ZoomableImage extends StatefulWidget {
 class _ZoomableImageState extends State<ZoomableImage>
     with SingleTickerProviderStateMixin {
   final Logger _logger = Logger("ZoomableImage");
-  File _photo;
-  ImageProvider _imageProvider;
+  File? _photo;
+  ImageProvider? _imageProvider;
   bool _loadedSmallThumbnail = false;
   bool _loadingLargeThumbnail = false;
   bool _loadedLargeThumbnail = false;
   bool _loadingFinalImage = false;
   bool _loadedFinalImage = false;
-  ValueChanged<PhotoViewScaleState> _scaleStateChangedCallback;
+  ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
 
   @override
@@ -54,7 +54,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     debugPrint('initState for ${_photo.toString()}');
     _scaleStateChangedCallback = (value) {
       if (widget.shouldDisableScroll != null) {
-        widget.shouldDisableScroll(value != PhotoViewScaleState.initial);
+        widget.shouldDisableScroll!(value != PhotoViewScaleState.initial);
       }
       _isZooming = value != PhotoViewScaleState.initial;
       debugPrint("isZooming = $_isZooming, currentState $value");
@@ -65,7 +65,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   @override
   Widget build(BuildContext context) {
-    if (_photo.isRemoteFile) {
+    if (_photo!.isRemoteFile) {
       _loadNetworkImage();
     } else {
       _loadLocalImage(context);
@@ -81,16 +81,16 @@ class _ZoomableImageState extends State<ZoomableImage>
           minScale: PhotoViewComputedScale.contained,
           gaplessPlayback: true,
           heroAttributes: PhotoViewHeroAttributes(
-            tag: widget.tagPrefix + _photo.tag,
+            tag: widget.tagPrefix! + _photo!.tag,
           ),
-          backgroundDecoration: widget.backgroundDecoration,
+          backgroundDecoration: widget.backgroundDecoration as BoxDecoration?,
         ),
       );
     } else {
       content = const EnteLoadingWidget();
     }
 
-    final GestureDragUpdateCallback verticalDragCallback = _isZooming
+    final GestureDragUpdateCallback? verticalDragCallback = _isZooming
         ? null
         : (d) => {
               if (!_isZooming && d.delta.dy > dragSensitivity)
@@ -104,12 +104,12 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailLruCache.get(_photo);
+      final cachedThumbnail = ThumbnailLruCache.get(_photo!);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
       } else {
-        getThumbnailFromServer(_photo).then((file) {
+        getThumbnailFromServer(_photo!).then((file) {
           final imageProvider = Image.memory(file).image;
           if (mounted) {
             precacheImage(imageProvider, context).then((value) {
@@ -128,10 +128,10 @@ class _ZoomableImageState extends State<ZoomableImage>
       }
     }
     if (!_loadedFinalImage) {
-      getFileFromServer(_photo).then((file) {
+      getFileFromServer(_photo!).then((file) {
         _onFinalImageLoaded(
           Image.file(
-            file,
+            file!,
             gaplessPlayback: true,
           ).image,
         );
@@ -143,7 +143,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (!_loadedSmallThumbnail &&
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailLruCache.get(_photo, thumbnailSmallSize);
+      final cachedThumbnail = ThumbnailLruCache.get(_photo!, thumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
@@ -154,7 +154,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
       _loadingLargeThumbnail = true;
-      getThumbnailFromLocal(_photo, size: thumbnailLargeSize, quality: 100)
+      getThumbnailFromLocal(_photo!, size: thumbnailLargeSize, quality: 100)
           .then((cachedThumbnail) {
         if (cachedThumbnail != null) {
           _onLargeThumbnailLoaded(Image.memory(cachedThumbnail).image, context);
@@ -165,7 +165,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (!_loadingFinalImage && !_loadedFinalImage) {
       _loadingFinalImage = true;
       getFile(
-        _photo,
+        _photo!,
         isOrigin: Platform.isIOS &&
             _isGIF(), // since on iOS GIFs playback only when origin-files are loaded
       ).then((file) {
@@ -173,12 +173,12 @@ class _ZoomableImageState extends State<ZoomableImage>
           _onFinalImageLoaded(Image.file(file).image);
         } else {
           _logger.info("File was deleted " + _photo.toString());
-          if (_photo.uploadedFileID != null) {
-            _photo.localID = null;
-            FilesDB.instance.update(_photo);
+          if (_photo!.uploadedFileID != null) {
+            _photo!.localID = null;
+            FilesDB.instance.update(_photo!);
             _loadNetworkImage();
           } else {
-            FilesDB.instance.deleteLocalFile(_photo);
+            FilesDB.instance.deleteLocalFile(_photo!);
             Bus.instance.fire(
               LocalPhotosUpdatedEvent(
                 [_photo],
@@ -221,5 +221,5 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
+  bool _isGIF() => _photo!.displayName.toLowerCase().endsWith(".gif");
 }
