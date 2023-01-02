@@ -44,8 +44,8 @@ export const getAutoCompleteSuggestions =
                 searchQuery: convertSuggestionToSearchQuery(suggestion),
             }))
             .map(({ suggestion, searchQuery }) => {
-                const resultFiles = files.filter((file) =>
-                    isSearchedFile(file, searchQuery)
+                const resultFiles = getUniqueFiles(
+                    files.filter((file) => isSearchedFile(file, searchQuery))
                 );
                 return {
                     ...suggestion,
