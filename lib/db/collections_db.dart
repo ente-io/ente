@@ -171,6 +171,7 @@ class CollectionsDB {
         _getRowForCollection(collection),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+      batchCounter++;
     }
     await batch.commit(noResult: true);
   }
