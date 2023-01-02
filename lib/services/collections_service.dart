@@ -1137,6 +1137,7 @@ class CollectionsService {
     try {
       await _db.insert(collections);
     } catch (e) {
+      _logger.severe("Failed to update collections", e);
       if (attempt < kMaximumWriteAttempts) {
         return _updateDB(collections, attempt: ++attempt);
       } else {
