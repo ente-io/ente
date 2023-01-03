@@ -23,8 +23,8 @@ export async function convertHEIC(
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
-        tempInputFilePath = await generateTempFilePath('.heic');
-        tempOutputFilePath = await generateTempFilePath('.jpeg');
+        tempInputFilePath = await generateTempFilePath('input.heic');
+        tempOutputFilePath = await generateTempFilePath('output.jpeg');
 
         await writeFile(tempInputFilePath, heicFileData);
 
@@ -77,7 +77,7 @@ export async function generateImageThumbnail(
 ): Promise<Uint8Array> {
     let tempOutputFilePath: string;
     try {
-        tempOutputFilePath = await generateTempFilePath('.jpeg');
+        tempOutputFilePath = await generateTempFilePath('thumb.jpeg');
 
         await runThumbnailGenerationCommand(
             inputFilePath,
@@ -86,14 +86,12 @@ export async function generateImageThumbnail(
         );
 
         if (!existsSync(tempOutputFilePath)) {
-            throw new Error('heic convert output file not found');
+            throw new Error('output thumbnail file not found');
         }
-        const convertedFileData = new Uint8Array(
-            await readFile(tempOutputFilePath)
-        );
-        return convertedFileData;
+        const thumbnail = new Uint8Array(await readFile(tempOutputFilePath));
+        return thumbnail;
     } catch (e) {
-        logErrorSentry(e, 'ffmpeg run command error');
+        logErrorSentry(e, 'generate image thumbnail failed');
         throw e;
     } finally {
         try {
