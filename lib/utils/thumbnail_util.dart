@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io' as io;
@@ -44,23 +42,23 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
   if (!_map.containsKey(file.uploadedFileID)) {
     if (_queue.length > kMaximumConcurrentDownloads) {
       final id = _queue.removeFirst();
-      final item = _map.remove(id);
+      final item = _map.remove(id)!;
       item.cancelToken.cancel();
       item.completer.completeError(RequestCancelledError());
     }
     final item =
         FileDownloadItem(file, Completer<Uint8List>(), CancelToken(), 1);
-    _map[file.uploadedFileID] = item;
-    _queue.add(file.uploadedFileID);
+    _map[file.uploadedFileID!] = item;
+    _queue.add(file.uploadedFileID!);
     _downloadItem(item);
     return item.completer.future;
   } else {
-    _map[file.uploadedFileID].counter++;
-    return _map[file.uploadedFileID].completer.future;
+    _map[file.uploadedFileID]!.counter++;
+    return _map[file.uploadedFileID]!.completer.future;
   }
 }
 
-Future<Uint8List> getThumbnailFromLocal(
+Future<Uint8List?> getThumbnailFromLocal(
   File file, {
   int size = thumbnailSmallSize,
   int quality = thumbnailQuality,
@@ -100,7 +98,7 @@ Future<Uint8List> getThumbnailFromLocal(
 
 void removePendingGetThumbnailRequestIfAny(File file) {
   if (_map.containsKey(file.uploadedFileID)) {
-    final item = _map[file.uploadedFileID];
+    final item = _map[file.uploadedFileID]!;
     item.counter--;
     if (item.counter <= 0) {
       _map.remove(file.uploadedFileID);
@@ -151,7 +149,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   var data = await CryptoUtil.decryptChaCha(
     encryptedThumbnail,
     thumbnailDecryptionKey,
-    Sodium.base642bin(file.thumbnailDecryptionHeader),
+    Sodium.base642bin(file.thumbnailDecryptionHeader!),
   );
   final thumbnailSize = data.length;
   if (thumbnailSize > thumbnailDataLimit) {

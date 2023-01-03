@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:math';
 
@@ -27,14 +25,14 @@ import 'package:visibility_detector/visibility_detector.dart';
 class LazyLoadingGallery extends StatefulWidget {
   final List<File> files;
   final int index;
-  final Stream<FilesUpdatedEvent> reloadEvent;
+  final Stream<FilesUpdatedEvent>? reloadEvent;
   final Set<EventType> removalEventTypes;
   final GalleryLoader asyncLoader;
   final SelectedFiles selectedFiles;
   final String tag;
-  final String logTag;
+  final String? logTag;
   final Stream<int> currentIndexStream;
-  final int photoGirdSize;
+  final int? photoGirdSize;
 
   LazyLoadingGallery(
     this.files,
@@ -47,7 +45,7 @@ class LazyLoadingGallery extends StatefulWidget {
     this.currentIndexStream, {
     this.logTag = "",
     this.photoGirdSize = photoGridSizeDefault,
-    Key key,
+    Key? key,
   }) : super(key: key ?? UniqueKey());
 
   @override
@@ -58,12 +56,12 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
   static const kRecycleLimit = 400;
   static const kNumberOfDaysToRenderBeforeAndAfter = 8;
 
-  Logger _logger;
+  late Logger _logger;
 
-  List<File> _files;
-  StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
-  StreamSubscription<int> _currentIndexSubscription;
-  bool _shouldRender;
+  late List<File> _files;
+  late StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
+  late StreamSubscription<int> _currentIndexSubscription;
+  bool? _shouldRender;
   final ValueNotifier<bool> _toggleSelectAllFromDay = ValueNotifier(false);
   final ValueNotifier<bool> _showSelectAllButton = ValueNotifier(false);
   final ValueNotifier<bool> _areAllFromDaySelected = ValueNotifier(false);
@@ -80,7 +78,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
     _logger = Logger("LazyLoading_${widget.logTag}");
     _shouldRender = true;
     _files = widget.files;
-    _reloadEventSubscription = widget.reloadEvent.listen((e) => _onReload(e));
+    _reloadEventSubscription = widget.reloadEvent!.listen((e) => _onReload(e));
 
     _currentIndexSubscription =
         widget.currentIndexStream.listen((currentIndex) {
@@ -96,9 +94,9 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   Future _onReload(FilesUpdatedEvent event) async {
     final galleryDate =
-        DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime);
+        DateTime.fromMicrosecondsSinceEpoch(_files[0].creationTime!);
     final filesUpdatedThisDay = event.updatedFiles.where((file) {
-      final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime);
+      final fileDate = DateTime.fromMicrosecondsSinceEpoch(file.creationTime!);
       return fileDate.year == galleryDate.year &&
           fileDate.month == galleryDate.month &&
           fileDate.day == galleryDate.day;
@@ -125,8 +123,8 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
         }
       } else if (widget.removalEventTypes.contains(event.type)) {
         // Files were removed
-        final generatedFileIDs = <int>{};
-        final uploadedFileIds = <int>{};
+        final generatedFileIDs = <int?>{};
+        final uploadedFileIds = <int?>{};
         for (final file in filesUpdatedThisDay) {
           if (file.generatedID != null) {
             generatedFileIDs.add(file.generatedID);
@@ -191,12 +189,12 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
           children: [
             getDayWidget(
               context,
-              _files[0].creationTime,
-              widget.photoGirdSize,
+              _files[0].creationTime!,
+              widget.photoGirdSize!,
             ),
             ValueListenableBuilder(
               valueListenable: _showSelectAllButton,
-              builder: (context, value, _) {
+              builder: (context, dynamic value, _) {
                 return !value
                     ? const SizedBox.shrink()
                     : GestureDetector(
@@ -206,7 +204,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
                           height: 44,
                           child: ValueListenableBuilder(
                             valueListenable: _areAllFromDaySelected,
-                            builder: (context, value, _) {
+                            builder: (context, dynamic value, _) {
                               return value
                                   ? const Icon(
                                       Icons.check_circle,
@@ -232,11 +230,11 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             )
           ],
         ),
-        _shouldRender
+        _shouldRender!
             ? _getGallery()
             : PlaceHolderWidget(
                 _files.length,
-                widget.photoGirdSize,
+                widget.photoGirdSize!,
               ),
       ],
     );
@@ -244,7 +242,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   Widget _getGallery() {
     final List<Widget> childGalleries = [];
-    final subGalleryItemLimit = widget.photoGirdSize < photoGridSizeDefault
+    final subGalleryItemLimit = widget.photoGirdSize! < photoGridSizeDefault
         ? subGalleryLimitMin
         : subGalleryLimitDefault;
     for (int index = 0; index < _files.length; index += subGalleryItemLimit) {
@@ -289,7 +287,7 @@ class LazyLoadingGridView extends StatefulWidget {
   final bool shouldRecycle;
   final ValueNotifier toggleSelectAllFromDay;
   final ValueNotifier areAllFilesSelected;
-  final int photoGridSize;
+  final int? photoGridSize;
 
   LazyLoadingGridView(
     this.tag,
@@ -301,7 +299,7 @@ class LazyLoadingGridView extends StatefulWidget {
     this.toggleSelectAllFromDay,
     this.areAllFilesSelected,
     this.photoGridSize, {
-    Key key,
+    Key? key,
   }) : super(key: key ?? UniqueKey());
 
   @override
@@ -309,9 +307,9 @@ class LazyLoadingGridView extends StatefulWidget {
 }
 
 class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
-  bool _shouldRender;
-  int _currentUserID;
-  StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
+  bool? _shouldRender;
+  int? _currentUserID;
+  late StreamSubscription<ClearSelectionsEvent> _clearSelectionsEvent;
 
   @override
   void initState() {
@@ -365,25 +363,25 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
           });
         }
       },
-      child: _shouldRender
+      child: _shouldRender!
           ? _getGridView()
-          : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
+          : PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize!),
     );
   }
 
   Widget _getNonRecyclableView() {
-    if (!_shouldRender) {
+    if (!_shouldRender!) {
       return VisibilityDetector(
         key: UniqueKey(),
         onVisibilityChanged: (visibility) {
-          if (mounted && visibility.visibleFraction > 0 && !_shouldRender) {
+          if (mounted && visibility.visibleFraction > 0 && !_shouldRender!) {
             setState(() {
               _shouldRender = true;
             });
           }
         },
         child:
-            PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize),
+            PlaceHolderWidget(widget.filesInDay.length, widget.photoGridSize!),
       );
     } else {
       return _getGridView();
@@ -402,7 +400,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisSpacing: 2,
         mainAxisSpacing: 2,
-        crossAxisCount: widget.photoGridSize,
+        crossAxisCount: widget.photoGridSize!,
       ),
       padding: const EdgeInsets.all(0),
     );
@@ -414,11 +412,11 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
     if (isFileSelected &&
         file.isUploaded &&
         (file.ownerID != _currentUserID ||
-            file.pubMagicMetadata.uploaderName != null)) {
+            file.pubMagicMetadata!.uploaderName != null)) {
       final avatarColors = getEnteColorScheme(context).avatarColors;
       final int randomID = file.ownerID != _currentUserID
-          ? file.ownerID
-          : file.pubMagicMetadata.uploaderName.sumAsciiValues;
+          ? file.ownerID!
+          : file.pubMagicMetadata!.uploaderName.sumAsciiValues;
       selectionColor = avatarColors[(randomID).remainder(avatarColors.length)];
     }
     return GestureDetector(
@@ -452,7 +450,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
                   serverLoadDeferDuration: thumbnailServerLoadDeferDuration,
                   shouldShowLivePhotoOverlay: true,
                   key: Key(widget.tag + file.tag),
-                  thumbnailSize: widget.photoGridSize < photoGridSizeDefault
+                  thumbnailSize: widget.photoGridSize! < photoGridSizeDefault
                       ? thumbnailLargeSize
                       : thumbnailSmallSize,
                   shouldShowOwnerAvatar: !isFileSelected,
@@ -513,10 +511,11 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _toggleSelectAllFromDayListener() {
     if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
       setState(() {
-        widget.selectedFiles.unSelectAll(widget.filesInDay.toSet());
+        widget.selectedFiles
+            .unSelectAll(widget.filesInDay.toSet() as Set<File>);
       });
     } else {
-      widget.selectedFiles.selectAll(widget.filesInDay.toSet());
+      widget.selectedFiles.selectAll(widget.filesInDay.toSet() as Set<File>);
     }
   }
 }

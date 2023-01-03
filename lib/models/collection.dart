@@ -10,8 +10,10 @@ class Collection {
   final String encryptedKey;
   final String? keyDecryptionNonce;
   final String? name;
-  final String encryptedName;
-  final String nameDecryptionNonce;
+  // encryptedName & nameDecryptionNonce will be null for collections
+  // created before we started encrypting collection name
+  final String? encryptedName;
+  final String? nameDecryptionNonce;
   final CollectionType type;
   final CollectionAttributes attributes;
   final List<User?>? sharees;

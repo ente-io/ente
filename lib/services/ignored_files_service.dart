@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io';
 
@@ -17,22 +15,22 @@ class IgnoredFilesService {
   static final IgnoredFilesService instance =
       IgnoredFilesService._privateConstructor();
 
-  Future<Set<String>> _ignoredIDs;
+  Future<Set<String>>? _ignoredIDs;
 
   Future<Set<String>> get ignoredIDs async {
     // lazily instantiate the db the first time it is accessed
     _ignoredIDs ??= _loadExistingIDs();
-    return _ignoredIDs;
+    return _ignoredIDs!;
   }
 
   Future<void> cacheAndInsert(List<IgnoredFile> ignoredFiles) async {
     final existingIDs = await ignoredIDs;
-    existingIDs.addAll(
-      ignoredFiles
-          .map((e) => _idForIgnoredFile(e))
-          .where((id) => id != null)
-          .toSet(),
-    );
+    for (IgnoredFile iFile in ignoredFiles) {
+      final id = _idForIgnoredFile(iFile);
+      if (id != null) {
+        existingIDs.add(id);
+      }
+    }
     return _db.insertMultiple(ignoredFiles);
   }
 
@@ -61,7 +59,8 @@ class IgnoredFilesService {
       if (!shouldSkipUpload(currentlyIgnoredIDs, file)) {
         continue;
       }
-      final id = _getIgnoreID(file.localID, file.deviceFolder, file.title);
+      // _shouldSkipUpload checks for null ignoreID
+      final id = _getIgnoreID(file.localID, file.deviceFolder, file.title)!;
       idsToRemoveFromCache.add(id);
       ignoredFiles.add(
         IgnoredFile(file.localID, file.title, file.deviceFolder, ""),
@@ -81,14 +80,18 @@ class IgnoredFilesService {
 
   Future<Set<String>> _loadExistingIDs() async {
     _logger.fine('loading existing IDs');
-    final result = await _db.getAll();
-    return result
-        .map((e) => _idForIgnoredFile(e))
-        .where((id) => id != null)
-        .toSet();
+    final dbResult = await _db.getAll();
+    final Set<String> result = <String>{};
+    for (IgnoredFile iFile in dbResult) {
+      final id = _idForIgnoredFile(iFile);
+      if (id != null) {
+        result.add(id);
+      }
+    }
+    return result;
   }
 
-  String _idForIgnoredFile(IgnoredFile ignoredFile) {
+  String? _idForIgnoredFile(IgnoredFile ignoredFile) {
     return _getIgnoreID(
       ignoredFile.localID,
       ignoredFile.deviceFolder,
@@ -102,7 +105,7 @@ class IgnoredFilesService {
   // For Android: It returns deviceFolder-title as ID for Android.
   // For iOS, it returns localID as localID is uuid and the title or deviceFolder (aka
   // album name) can be missing due to various reasons.
-  String _getIgnoreID(String localID, String deviceFolder, String title) {
+  String? _getIgnoreID(String? localID, String? deviceFolder, String? title) {
     // file was not uploaded from mobile device
     if (localID == null || localID.isEmpty) {
       return null;

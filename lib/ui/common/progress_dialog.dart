@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 
 enum ProgressDialogType { normal, download }
@@ -7,7 +5,7 @@ enum ProgressDialogType { normal, download }
 String _dialogMessage = "Loading...";
 double _progress = 0.0, _maxProgress = 100.0;
 
-Widget _customBody;
+Widget? _customBody;
 
 TextAlign _textAlign = TextAlign.left;
 Alignment _progressWidgetAlignment = Alignment.centerLeft;
@@ -15,10 +13,10 @@ Alignment _progressWidgetAlignment = Alignment.centerLeft;
 TextDirection _direction = TextDirection.ltr;
 
 bool _isShowing = false;
-BuildContext _context, _dismissingContext;
-ProgressDialogType _progressDialogType;
+BuildContext? _context, _dismissingContext;
+ProgressDialogType? _progressDialogType;
 bool _barrierDismissible = true, _showLogs = false;
-Color _barrierColor;
+Color? _barrierColor;
 
 TextStyle _progressTextStyle = const TextStyle(
       color: Colors.black,
@@ -42,16 +40,16 @@ Widget _progressWidget = Image.asset(
 );
 
 class ProgressDialog {
-  _Body _dialog;
+  _Body? _dialog;
 
   ProgressDialog(
     BuildContext context, {
-    ProgressDialogType type,
-    bool isDismissible,
-    bool showLogs,
-    TextDirection textDirection,
-    Widget customBody,
-    Color barrierColor,
+    ProgressDialogType? type,
+    bool? isDismissible,
+    bool? showLogs,
+    TextDirection? textDirection,
+    Widget? customBody,
+    Color? barrierColor,
   }) {
     _context = context;
     _progressDialogType = type ?? ProgressDialogType.normal;
@@ -63,20 +61,20 @@ class ProgressDialog {
   }
 
   void style({
-    Widget child,
-    double progress,
-    double maxProgress,
-    String message,
-    Widget progressWidget,
-    Color backgroundColor,
-    TextStyle progressTextStyle,
-    TextStyle messageTextStyle,
-    double elevation,
-    TextAlign textAlign,
-    double borderRadius,
-    Curve insetAnimCurve,
-    EdgeInsets padding,
-    Alignment progressWidgetAlignment,
+    Widget? child,
+    double? progress,
+    double? maxProgress,
+    String? message,
+    Widget? progressWidget,
+    Color? backgroundColor,
+    TextStyle? progressTextStyle,
+    TextStyle? messageTextStyle,
+    double? elevation,
+    TextAlign? textAlign,
+    double? borderRadius,
+    Curve? insetAnimCurve,
+    EdgeInsets? padding,
+    Alignment? progressWidgetAlignment,
   }) {
     if (_isShowing) return;
     if (_progressDialogType == ProgressDialogType.download) {
@@ -100,12 +98,12 @@ class ProgressDialog {
   }
 
   void update({
-    double progress,
-    double maxProgress,
-    String message,
-    Widget progressWidget,
-    TextStyle progressTextStyle,
-    TextStyle messageTextStyle,
+    double? progress,
+    double? maxProgress,
+    String? message,
+    Widget? progressWidget,
+    TextStyle? progressTextStyle,
+    TextStyle? messageTextStyle,
   }) {
     if (_progressDialogType == ProgressDialogType.download) {
       _progress = progress ?? _progress;
@@ -117,7 +115,7 @@ class ProgressDialog {
     _messageStyle = messageTextStyle ?? _messageStyle;
     _progressTextStyle = progressTextStyle ?? _progressTextStyle;
 
-    if (_isShowing) _dialog.update();
+    if (_isShowing) _dialog!.update();
   }
 
   bool isShowing() {
@@ -128,7 +126,9 @@ class ProgressDialog {
     try {
       if (_isShowing) {
         _isShowing = false;
-        Navigator.of(_dismissingContext).pop();
+        if (_dismissingContext != null) {
+          Navigator.of(_dismissingContext!).pop();
+        }
         if (_showLogs) debugPrint('ProgressDialog dismissed');
         return Future.value(true);
       } else {
@@ -147,7 +147,7 @@ class ProgressDialog {
       if (!_isShowing) {
         _dialog = _Body();
         showDialog<dynamic>(
-          context: _context,
+          context: _context!,
           barrierDismissible: _barrierDismissible,
           barrierColor: _barrierColor,
           builder: (BuildContext context) {

@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:io';
@@ -230,7 +230,7 @@ Future<bool> _isRunningInForeground() async {
       (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
-Future<void> _killBGTask([String taskId]) async {
+Future<void> _killBGTask([String? taskId]) async {
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
     ProcessType.background.toString(),
     DateTime.now().microsecondsSinceEpoch,
@@ -281,7 +281,7 @@ Future<void> _logFGHeartBeatInfo() async {
   _logger.info('isAlreaduunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
-void _scheduleSuicide(Duration duration, [String taskID]) {
+void _scheduleSuicide(Duration duration, [String? taskID]) {
   final taskIDVal = taskID ?? 'no taskID';
   _logger.warning("Schedule seppuku taskID: $taskIDVal");
   Future.delayed(duration, () {

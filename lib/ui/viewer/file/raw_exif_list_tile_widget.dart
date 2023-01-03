@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:exif/exif.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +15,8 @@ enum Status {
 
 class RawExifListTileWidget extends StatelessWidget {
   final File file;
-  final Map<String, IfdTag> exif;
-  const RawExifListTileWidget(this.exif, this.file, {Key key})
+  final Map<String, IfdTag>? exif;
+  const RawExifListTileWidget(this.exif, this.file, {Key? key})
       : super(key: key);
 
   @override
@@ -24,7 +24,7 @@ class RawExifListTileWidget extends StatelessWidget {
     Status exifStatus = Status.loading;
     if (exif == null) {
       exifStatus = Status.loading;
-    } else if (exif.isNotEmpty) {
+    } else if (exif!.isNotEmpty) {
       exifStatus = Status.exifIsAvailable;
     } else {
       exifStatus = Status.noExif;
@@ -58,7 +58,7 @@ class RawExifListTileWidget extends StatelessWidget {
               : exifStatus == Status.exifIsAvailable
                   ? "View all EXIF data"
                   : "No EXIF data",
-          style: Theme.of(context).textTheme.bodyText2.copyWith(
+          style: Theme.of(context).textTheme.bodyText2!.copyWith(
                 color: Theme.of(context)
                     .colorScheme
                     .defaultTextColor

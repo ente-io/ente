@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/ui/common/loading_widget.dart';
@@ -7,16 +5,16 @@ import 'package:photos/ui/viewer/file/file_info_collection_widget.dart';
 
 class DeviceFoldersListOfFileWidget extends StatelessWidget {
   final Future<Set<String>> allDeviceFoldersOfFile;
-  const DeviceFoldersListOfFileWidget(this.allDeviceFoldersOfFile, {Key key})
+  const DeviceFoldersListOfFileWidget(this.allDeviceFoldersOfFile, {Key? key})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
+    return FutureBuilder<Set<String>>(
       future: allDeviceFoldersOfFile,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          final List<String> deviceFolders = snapshot.data.toList();
+          final List<String> deviceFolders = snapshot.data!.toList();
           return ListView.builder(
             itemCount: deviceFolders.length,
             scrollDirection: Axis.horizontal,

@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:math';
 
@@ -17,11 +17,11 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
   static const fixedGapBetweenAlbum = 8.0;
   static const minGapForHorizontalPadding = 8.0;
 
-  final List<CollectionWithThumbnail> collections;
+  final List<CollectionWithThumbnail>? collections;
 
   const RemoteCollectionsGridViewWidget(
     this.collections, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -46,13 +46,13 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         physics: const ScrollPhysics(),
         // to disable GridView's scrolling
         itemBuilder: (context, index) {
-          if (index < collections.length) {
-            return CollectionItem(collections[index], sideOfThumbnail);
+          if (index < collections!.length) {
+            return CollectionItem(collections![index], sideOfThumbnail);
           } else {
             return const CreateNewAlbumWidget();
           }
         },
-        itemCount: collections.length + 1,
+        itemCount: collections!.length + 1,
         // To include the + button
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: albumsCountInOneRow,

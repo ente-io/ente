@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:logging/logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/network.dart';
@@ -76,16 +74,17 @@ class DeduplicationService {
       int mostFrequentCreationTime = 0, mostFrequentCreationTimeCount = 0;
       // Counts the frequency of creationTimes within the supposed duplicates
       for (final file in dupe.files) {
-        if (creationTimeCounter.containsKey(file.creationTime)) {
-          creationTimeCounter[file.creationTime]++;
+        if (creationTimeCounter.containsKey(file.creationTime!)) {
+          creationTimeCounter[file.creationTime!] =
+              creationTimeCounter[file.creationTime!]! + 1;
         } else {
-          creationTimeCounter[file.creationTime] = 0;
+          creationTimeCounter[file.creationTime!] = 0;
         }
-        if (creationTimeCounter[file.creationTime] >
+        if (creationTimeCounter[file.creationTime]! >
             mostFrequentCreationTimeCount) {
           mostFrequentCreationTimeCount =
-              creationTimeCounter[file.creationTime];
-          mostFrequentCreationTime = file.creationTime;
+              creationTimeCounter[file.creationTime]!;
+          mostFrequentCreationTime = file.creationTime!;
         }
         files.add(file);
       }

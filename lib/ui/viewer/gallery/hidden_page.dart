@@ -1,5 +1,6 @@
-// @dart=2.9
 
+
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -23,7 +24,7 @@ class HiddenPage extends StatelessWidget {
     this.tagPrefix = "hidden_page",
     this.appBarType = GalleryType.hidden,
     this.overlayType = GalleryType.hidden,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -34,16 +35,15 @@ class HiddenPage extends StatelessWidget {
           CollectionsService.instance.getHiddenCollections().toList(),
           creationStartTime,
           creationEndTime,
-          Configuration.instance.getUserID(),
+          Configuration.instance.getUserID()!,
           limit: limit,
           asc: asc,
         );
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
-                event.updatedFiles.firstWhere(
+                event.updatedFiles.firstWhereOrNull(
                   (element) => element.uploadedFileID != null,
-                  orElse: () => null,
                 ) !=
                 null,
           ),
@@ -55,9 +55,8 @@ class HiddenPage extends StatelessWidget {
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
-                  event.updatedFiles.firstWhere(
+                  event.updatedFiles.firstWhereOrNull(
                     (element) => element.uploadedFileID != null,
-                    orElse: () => null,
                   ) !=
                   null,
             ),

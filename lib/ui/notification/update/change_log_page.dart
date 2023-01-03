@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -87,7 +86,8 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
                         launchUrlString(
-                            UpdateService.instance.getRateDetails().item2);
+                          UpdateService.instance.getRateDetails().item2,
+                        );
                       },
                     ),
                     const SizedBox(height: 8),

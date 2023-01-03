@@ -2,7 +2,6 @@ import 'package:collection/collection.dart';
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:logging/logging.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -31,12 +30,11 @@ class ShareCollectionPage extends StatefulWidget {
 
 class _ShareCollectionPageState extends State<ShareCollectionPage> {
   late List<User?> _sharees;
-  final Logger _logger = Logger("SharingDialogState");
   final CollectionActions collectionActions =
       CollectionActions(CollectionsService.instance);
 
   Future<void> _navigateToManageUser() async {
-    final result = await routeToPage(
+    await routeToPage(
       context,
       AlbumParticipantsPage(widget.collection),
     );
@@ -97,7 +95,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
     }
 
     final bool hasExpired =
-        widget.collection?.publicURLs?.firstOrNull?.isExpired ?? false;
+        widget.collection.publicURLs?.firstOrNull?.isExpired ?? false;
     children.addAll([
       const SizedBox(
         height: 24,

@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:http/http.dart';
@@ -10,9 +8,9 @@ class TunneledTransport implements Transport {
   final Uri _tunnel;
   final SentryOptions _options;
 
-  final Dsn _dsn;
+  final Dsn? _dsn;
 
-  _CredentialBuilder _credentialBuilder;
+  _CredentialBuilder? _credentialBuilder;
 
   final Map<String, String> _headers;
 
@@ -21,7 +19,7 @@ class TunneledTransport implements Transport {
   }
 
   TunneledTransport._(this._tunnel, this._options)
-      : _dsn = Dsn.parse(_options.dsn),
+      : _dsn = _options.dsn != null ? Dsn.parse(_options.dsn!) : null,
         _headers = _buildHeaders(
           _options.platformChecker.isWeb,
           _options.sdk.identifier,
@@ -34,7 +32,7 @@ class TunneledTransport implements Transport {
   }
 
   @override
-  Future<SentryId> send(SentryEnvelope envelope) async {
+  Future<SentryId?> send(SentryEnvelope envelope) async {
     final streamedRequest = await _createStreamedRequest(envelope);
     final response = await _options.httpClient
         .send(streamedRequest)
@@ -74,7 +72,7 @@ class TunneledTransport implements Transport {
         .listen(streamedRequest.sink.add)
         .onDone(streamedRequest.sink.close);
 
-    streamedRequest.headers.addAll(_credentialBuilder.configure(_headers));
+    streamedRequest.headers.addAll(_credentialBuilder!.configure(_headers));
 
     return streamedRequest;
   }
@@ -92,13 +90,13 @@ class _CredentialBuilder {
         _clock = clock;
 
   factory _CredentialBuilder(
-    Dsn dsn,
+    Dsn? dsn,
     String sdkIdentifier,
     ClockProvider clock,
   ) {
     final authHeader = _buildAuthHeader(
-      publicKey: dsn.publicKey,
-      secretKey: dsn.secretKey,
+      publicKey: dsn?.publicKey,
+      secretKey: dsn?.secretKey,
       sdkIdentifier: sdkIdentifier,
     );
 
@@ -106,9 +104,9 @@ class _CredentialBuilder {
   }
 
   static String _buildAuthHeader({
-    String publicKey,
-    String secretKey,
-    String sdkIdentifier,
+    String? publicKey,
+    String? secretKey,
+    String? sdkIdentifier,
   }) {
     var header = 'Sentry sentry_version=7, sentry_client=$sdkIdentifier, '
         'sentry_key=$publicKey';

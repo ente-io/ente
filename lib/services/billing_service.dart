@@ -53,9 +53,7 @@ class BillingService {
             purchase.productID,
             purchase.verificationData.serverVerificationData,
           ).then((response) {
-            if (response != null) {
-              InAppPurchase.instance.completePurchase(purchase);
-            }
+            InAppPurchase.instance.completePurchase(purchase);
           });
         } else if (Platform.isIOS && purchase.pendingCompletePurchase) {
           InAppPurchase.instance.completePurchase(purchase);

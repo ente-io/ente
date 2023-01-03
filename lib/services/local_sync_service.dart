@@ -1,11 +1,8 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io';
 
 import 'package:computer/computer.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/configuration.dart';
@@ -28,8 +25,8 @@ class LocalSyncService {
   final _logger = Logger("LocalSyncService");
   final _db = FilesDB.instance;
   final Computer _computer = Computer();
-  SharedPreferences _prefs;
-  Completer<void> _existingSync;
+  late SharedPreferences _prefs;
+  Completer<void>? _existingSync;
 
   static const kDbUpdationTimeKey = "db_updation_time";
   static const kHasCompletedFirstImportKey = "has_completed_firstImport";
@@ -76,7 +73,7 @@ class LocalSyncService {
     }
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
-      return _existingSync.future;
+      return _existingSync!.future;
     }
     _existingSync = Completer<void>();
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
@@ -123,7 +120,7 @@ class LocalSyncService {
       );
     }
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
-        !_prefs.getBool(kHasCompletedFirstImportKey)) {
+        !(_prefs.getBool(kHasCompletedFirstImportKey)!)) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
       // mark device collection has imported on first import
       await _refreshDeviceFolderCountAndCover(isFirstSync: true);
@@ -135,7 +132,7 @@ class LocalSyncService {
     final endTime = DateTime.now().microsecondsSinceEpoch;
     final duration = Duration(microseconds: endTime - startTime);
     _logger.info("Load took " + duration.inMilliseconds.toString() + "ms");
-    _existingSync.complete();
+    _existingSync?.complete();
     _existingSync = null;
   }
 
@@ -207,23 +204,24 @@ class LocalSyncService {
     );
     bool hasAnyMappingChanged = false;
     if (localDiffResult.newPathToLocalIDs?.isNotEmpty ?? false) {
-      await _db.insertPathIDToLocalIDMapping(localDiffResult.newPathToLocalIDs);
+      await _db
+          .insertPathIDToLocalIDMapping(localDiffResult.newPathToLocalIDs!);
       hasAnyMappingChanged = true;
     }
     if (localDiffResult.deletePathToLocalIDs?.isNotEmpty ?? false) {
       await _db
-          .deletePathIDToLocalIDMapping(localDiffResult.deletePathToLocalIDs);
+          .deletePathIDToLocalIDMapping(localDiffResult.deletePathToLocalIDs!);
       hasAnyMappingChanged = true;
     }
     final bool hasUnsyncedFiles =
         localDiffResult.uniqueLocalFiles?.isNotEmpty ?? false;
     if (hasUnsyncedFiles) {
       await _db.insertMultiple(
-        localDiffResult.uniqueLocalFiles,
+        localDiffResult.uniqueLocalFiles!,
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
       _logger.info(
-        "Inserted ${localDiffResult.uniqueLocalFiles.length} "
+        "Inserted ${localDiffResult.uniqueLocalFiles?.length} "
         "un-synced files",
       );
     }
@@ -244,14 +242,18 @@ class LocalSyncService {
   }
 
   Future<void> trackEditedFile(File file) async {
+    if (file.localID == null) {
+      debugPrint("Warning: Edit file has no localID");
+      return;
+    }
     final editedIDs = _getEditedFileIDs();
-    editedIDs.add(file.localID);
+    editedIDs.add(file.localID!);
     await _prefs.setStringList(kEditedFileIDsKey, editedIDs);
   }
 
   List<String> _getEditedFileIDs() {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
-      return _prefs.getStringList(kEditedFileIDsKey);
+      return _prefs.getStringList(kEditedFileIDsKey)!;
     } else {
       final List<String> editedIDs = [];
       return editedIDs;
@@ -266,21 +268,25 @@ class LocalSyncService {
 
   List<String> _getDownloadedFileIDs() {
     if (_prefs.containsKey(kDownloadedFileIDsKey)) {
-      return _prefs.getStringList(kDownloadedFileIDsKey);
+      return _prefs.getStringList(kDownloadedFileIDsKey)!;
     } else {
       return <String>[];
     }
   }
 
   Future<void> trackInvalidFile(File file) async {
+    if (file.localID == null) {
+      debugPrint("Warning: Invalid file has no localID");
+      return;
+    }
     final invalidIDs = _getInvalidFileIDs();
-    invalidIDs.add(file.localID);
+    invalidIDs.add(file.localID!);
     await _prefs.setStringList(kInvalidFileIDsKey, invalidIDs);
   }
 
   List<String> _getInvalidFileIDs() {
     if (_prefs.containsKey(kInvalidFileIDsKey)) {
-      return _prefs.getStringList(kInvalidFileIDsKey);
+      return _prefs.getStringList(kInvalidFileIDsKey)!;
     } else {
       return <String>[];
     }
@@ -388,7 +394,9 @@ class LocalSyncService {
       );
       final List<String> updatedLocalIDs = [];
       for (final file in updatedFiles) {
-        updatedLocalIDs.add(file.localID);
+        if (file.localID != null) {
+          updatedLocalIDs.add(file.localID!);
+        }
       }
       await FileUpdationDB.instance.insertMultiple(
         updatedLocalIDs,
@@ -403,7 +411,7 @@ class LocalSyncService {
     PhotoManager.addChangeCallback((value) async {
       _logger.info("Something changed on disk");
       if (_existingSync != null) {
-        await _existingSync.future;
+        await _existingSync!.future;
       }
       if (hasGrantedLimitedPermissions()) {
         syncAll();

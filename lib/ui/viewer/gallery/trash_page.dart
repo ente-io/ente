@@ -1,7 +1,8 @@
-// @dart=2.9
+
 
 import 'dart:ui';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/trash_db.dart';
@@ -24,7 +25,7 @@ class TrashPage extends StatefulWidget {
     this.tagPrefix = "trash_page",
     this.appBarType = GalleryType.trash,
     this.overlayType = GalleryType.trash,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -32,7 +33,7 @@ class TrashPage extends StatefulWidget {
 }
 
 class _TrashPageState extends State<TrashPage> {
-  Function() _selectedFilesListener;
+  late Function() _selectedFilesListener;
   @override
   void initState() {
     _selectedFilesListener = () {
@@ -63,9 +64,8 @@ class _TrashPageState extends State<TrashPage> {
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
-                event.updatedFiles.firstWhere(
+                event.updatedFiles.firstWhereOrNull(
                   (element) => element.uploadedFileID != null,
-                  orElse: () => null,
                 ) !=
                 null,
           ),
@@ -124,12 +124,12 @@ class _TrashPageState extends State<TrashPage> {
     return FutureBuilder<int>(
       future: TrashDB.instance.count(),
       builder: (context, snapshot) {
-        if (snapshot.hasData && snapshot.data > 0) {
+        if (snapshot.hasData && snapshot.data! > 0) {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
               'Items show the number the days remaining before permanent deletion',
-              style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16),
+              style: Theme.of(context).textTheme.caption!.copyWith(fontSize: 16),
             ),
           );
         } else {
@@ -141,7 +141,7 @@ class _TrashPageState extends State<TrashPage> {
 }
 
 class BottomButtonsWidget extends StatelessWidget {
-  const BottomButtonsWidget({Key key}) : super(key: key);
+  const BottomButtonsWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +167,7 @@ class BottomButtonsWidget extends StatelessWidget {
                     ),
                     child: Text(
                       'Delete All',
-                      style: Theme.of(context).textTheme.subtitle2.copyWith(
+                      style: Theme.of(context).textTheme.subtitle2!.copyWith(
                             color: const Color.fromRGBO(255, 101, 101, 1),
                           ),
                     ),

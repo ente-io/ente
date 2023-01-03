@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -19,18 +17,18 @@ import 'package:photos/utils/navigation_util.dart';
 const double kContainerHeight = 36;
 
 class StatusBarWidget extends StatefulWidget {
-  const StatusBarWidget({Key key}) : super(key: key);
+  const StatusBarWidget({Key? key}) : super(key: key);
 
   @override
   State<StatusBarWidget> createState() => _StatusBarWidgetState();
 }
 
 class _StatusBarWidgetState extends State<StatusBarWidget> {
-  StreamSubscription<SyncStatusUpdate> _subscription;
-  StreamSubscription<NotificationEvent> _notificationSubscription;
+  late StreamSubscription<SyncStatusUpdate> _subscription;
+  late StreamSubscription<NotificationEvent> _notificationSubscription;
   bool _showStatus = false;
   bool _showErrorBanner = false;
-  Error _syncError;
+  Error? _syncError;
 
   @override
   void initState() {
@@ -118,7 +116,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
 }
 
 class SyncStatusWidget extends StatefulWidget {
-  const SyncStatusWidget({Key key}) : super(key: key);
+  const SyncStatusWidget({Key? key}) : super(key: key);
 
   @override
   State<SyncStatusWidget> createState() => _SyncStatusWidgetState();
@@ -127,8 +125,8 @@ class SyncStatusWidget extends StatefulWidget {
 class _SyncStatusWidgetState extends State<SyncStatusWidget> {
   static const Duration kSleepDuration = Duration(milliseconds: 3000);
 
-  SyncStatusUpdate _event;
-  StreamSubscription<SyncStatusUpdate> _subscription;
+  SyncStatusUpdate? _event;
+  late StreamSubscription<SyncStatusUpdate> _subscription;
 
   @override
   void initState() {
@@ -150,17 +148,17 @@ class _SyncStatusWidgetState extends State<SyncStatusWidget> {
   @override
   Widget build(BuildContext context) {
     final bool isNotOutdatedEvent = _event != null &&
-        (_event.status == SyncStatus.completedBackup ||
-            _event.status == SyncStatus.completedFirstGalleryImport) &&
-        (DateTime.now().microsecondsSinceEpoch - _event.timestamp >
+        (_event!.status == SyncStatus.completedBackup ||
+            _event!.status == SyncStatus.completedFirstGalleryImport) &&
+        (DateTime.now().microsecondsSinceEpoch - _event!.timestamp >
             kSleepDuration.inMicroseconds);
     if (_event == null ||
         isNotOutdatedEvent ||
         //sync error cases are handled in StatusBarWidget
-        _event.status == SyncStatus.error) {
+        _event!.status == SyncStatus.error) {
       return const SizedBox.shrink();
     }
-    if (_event.status == SyncStatus.completedBackup) {
+    if (_event!.status == SyncStatus.completedBackup) {
       return const SyncStatusCompletedWidget();
     }
     return RefreshIndicatorWidget(_event);
@@ -173,9 +171,9 @@ class RefreshIndicatorWidget extends StatelessWidget {
     valueColor: AlwaysStoppedAnimation<Color>(Color.fromRGBO(45, 194, 98, 1.0)),
   );
 
-  final SyncStatusUpdate event;
+  final SyncStatusUpdate? event;
 
-  const RefreshIndicatorWidget(this.event, {Key key}) : super(key: key);
+  const RefreshIndicatorWidget(this.event, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -211,30 +209,30 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 
   String _getRefreshingText() {
-    if (event.status == SyncStatus.startedFirstGalleryImport ||
-        event.status == SyncStatus.completedFirstGalleryImport) {
+    if (event!.status == SyncStatus.startedFirstGalleryImport ||
+        event!.status == SyncStatus.completedFirstGalleryImport) {
       return "Loading gallery...";
     }
-    if (event.status == SyncStatus.applyingRemoteDiff) {
+    if (event!.status == SyncStatus.applyingRemoteDiff) {
       return "Syncing...";
     }
-    if (event.status == SyncStatus.preparingForUpload) {
+    if (event!.status == SyncStatus.preparingForUpload) {
       return "Encrypting backup...";
     }
-    if (event.status == SyncStatus.inProgress) {
-      return event.completed.toString() +
+    if (event!.status == SyncStatus.inProgress) {
+      return event!.completed.toString() +
           "/" +
-          event.total.toString() +
+          event!.total.toString() +
           " memories preserved";
     }
-    if (event.status == SyncStatus.paused) {
-      return event.reason;
+    if (event!.status == SyncStatus.paused) {
+      return event!.reason;
     }
-    if (event.status == SyncStatus.error) {
-      return event.reason ?? "Upload failed";
+    if (event!.status == SyncStatus.error) {
+      return event!.reason;
     }
-    if (event.status == SyncStatus.completedBackup) {
-      if (event.wasStopped) {
+    if (event!.status == SyncStatus.completedBackup) {
+      if (event!.wasStopped) {
         return "Sync stopped";
       }
     }
@@ -243,7 +241,7 @@ class RefreshIndicatorWidget extends StatelessWidget {
 }
 
 class BrandingWidget extends StatelessWidget {
-  const BrandingWidget({Key key}) : super(key: key);
+  const BrandingWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -271,7 +269,7 @@ class BrandingWidget extends StatelessWidget {
 }
 
 class SyncStatusCompletedWidget extends StatelessWidget {
-  const SyncStatusCompletedWidget({Key key}) : super(key: key);
+  const SyncStatusCompletedWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

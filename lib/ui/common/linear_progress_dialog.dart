@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -6,14 +6,14 @@ import 'package:photos/ente_theme_data.dart';
 class LinearProgressDialog extends StatefulWidget {
   final String message;
 
-  const LinearProgressDialog(this.message, {Key key}) : super(key: key);
+  const LinearProgressDialog(this.message, {Key? key}) : super(key: key);
 
   @override
   LinearProgressDialogState createState() => LinearProgressDialogState();
 }
 
 class LinearProgressDialogState extends State<LinearProgressDialog> {
-  double _progress;
+  double? _progress;
 
   @override
   void initState() {

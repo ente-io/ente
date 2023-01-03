@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/core/errors.dart';
@@ -7,9 +7,9 @@ import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/email_util.dart';
 
 class HeaderErrorWidget extends StatelessWidget {
-  final Error _error;
+  final Error? _error;
 
-  const HeaderErrorWidget({Key key, @required Error error})
+  const HeaderErrorWidget({Key? key, required Error? error})
       : _error = error,
         super(key: key);
 
@@ -123,7 +123,7 @@ class HeaderErrorWidget extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(50, 16, 50, 16),
                   side: BorderSide(
                     width: 2,
-                    color: Colors.orange[600],
+                    color: Colors.orange[600]!,
                   ),
                 ),
                 child: Text(

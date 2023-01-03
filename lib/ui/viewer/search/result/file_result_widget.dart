@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -11,7 +11,7 @@ import 'package:photos/utils/navigation_util.dart';
 class FileSearchResultWidget extends StatelessWidget {
   final FileSearchResult matchedFile;
 
-  const FileSearchResultWidget(this.matchedFile, {Key key}) : super(key: key);
+  const FileSearchResultWidget(this.matchedFile, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class FileSearchResultWidget extends StatelessWidget {
                   SizedBox(
                     width: 220,
                     child: Text(
-                      matchedFile.file.title,
+                      matchedFile.file.title!,
                       style: const TextStyle(fontSize: 18),
                       overflow: TextOverflow.ellipsis,
                     ),

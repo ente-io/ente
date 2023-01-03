@@ -14,9 +14,10 @@ class CollectionsListOfFileWidget extends StatelessWidget {
   final int currentUserID;
 
   const CollectionsListOfFileWidget(
-      this.allCollectionIDsOfFile, this.currentUserID,
-      {Key? key})
-      : super(key: key);
+    this.allCollectionIDsOfFile,
+    this.currentUserID, {
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class CollectionsListOfFileWidget extends StatelessWidget {
           for (var collectionID in collectionIDs) {
             final c =
                 CollectionsService.instance.getCollectionByID(collectionID);
-            collections.add(c);
+            collections.add(c!);
           }
           return ListView.builder(
             itemCount: collections.length,

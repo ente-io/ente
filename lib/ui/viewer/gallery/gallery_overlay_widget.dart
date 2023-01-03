@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:io';
@@ -28,15 +28,15 @@ import 'package:photos/utils/toast_util.dart';
 class GalleryOverlayWidget extends StatefulWidget {
   final GalleryType type;
   final SelectedFiles selectedFiles;
-  final String path;
-  final Collection collection;
+  final String? path;
+  final Collection? collection;
 
   const GalleryOverlayWidget(
     this.type,
     this.selectedFiles, {
     this.path,
     this.collection,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -44,8 +44,8 @@ class GalleryOverlayWidget extends StatefulWidget {
 }
 
 class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
-  StreamSubscription _userAuthEventSubscription;
-  Function() _selectedFilesListener;
+  late StreamSubscription _userAuthEventSubscription;
+  late Function() _selectedFilesListener;
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
@@ -100,15 +100,15 @@ class _GalleryOverlayWidgetState extends State<GalleryOverlayWidget> {
 class OverlayWidget extends StatefulWidget {
   final GalleryType type;
   final SelectedFiles selectedFiles;
-  final String path;
-  final Collection collection;
+  final String? path;
+  final Collection? collection;
 
   const OverlayWidget(
     this.type,
     this.selectedFiles, {
     this.path,
     this.collection,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -117,8 +117,8 @@ class OverlayWidget extends StatefulWidget {
 
 class _OverlayWidgetState extends State<OverlayWidget> {
   final _logger = Logger("GalleryOverlay");
-  StreamSubscription _userAuthEventSubscription;
-  Function() _selectedFilesListener;
+  late StreamSubscription _userAuthEventSubscription;
+  late Function() _selectedFilesListener;
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
@@ -172,7 +172,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                                 ' selected',
                             style: Theme.of(context)
                                 .textTheme
-                                .subtitle2
+                                .subtitle2!
                                 .copyWith(
                                   fontWeight: FontWeight.w600,
                                   color:
@@ -210,7 +210,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                       child: Center(
                         child: Text(
                           'Cancel',
-                          style: Theme.of(context).textTheme.subtitle2.copyWith(
+                          style: Theme.of(context).textTheme.subtitle2!.copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).colorScheme.iconColor,
                               ),
@@ -307,7 +307,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     }
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type == GalleryType.ownedCollection &&
-        widget.collection.type != CollectionType.favorites) {
+        widget.collection!.type != CollectionType.favorites) {
       actions.add(
         Tooltip(
           message: "Move",
@@ -357,7 +357,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
         ),
       );
     } else if (widget.type == GalleryType.ownedCollection) {
-      if (widget.collection.type == CollectionType.folder) {
+      if (widget.collection!.type == CollectionType.folder) {
         actions.add(
           Tooltip(
             message: "Delete",
@@ -645,7 +645,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             " file" +
             (count == 1 ? "" : "s") +
             " from " +
-            widget.collection.name +
+            widget.collection!.name! +
             "?",
       ),
       actions: <Widget>[
@@ -657,7 +657,7 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             await dialog.show();
             try {
               await CollectionsService.instance.removeFromCollection(
-                widget.collection.id,
+                widget.collection!.id,
                 widget.selectedFiles.files.toList(),
               );
               await dialog.hide();

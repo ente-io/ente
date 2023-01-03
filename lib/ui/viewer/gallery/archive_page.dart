@@ -1,5 +1,6 @@
-// @dart=2.9
 
+
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -23,7 +24,7 @@ class ArchivePage extends StatelessWidget {
     this.tagPrefix = "archived_page",
     this.appBarType = GalleryType.archive,
     this.overlayType = GalleryType.archive,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -35,7 +36,7 @@ class ArchivePage extends StatelessWidget {
         return FilesDB.instance.getAllPendingOrUploadedFiles(
           creationStartTime,
           creationEndTime,
-          Configuration.instance.getUserID(),
+          Configuration.instance.getUserID()!,
           visibility: visibilityArchive,
           limit: limit,
           asc: asc,
@@ -44,9 +45,8 @@ class ArchivePage extends StatelessWidget {
       },
       reloadEvent: Bus.instance.on<FilesUpdatedEvent>().where(
             (event) =>
-                event.updatedFiles.firstWhere(
+                event.updatedFiles.firstWhereOrNull(
                   (element) => element.uploadedFileID != null,
-                  orElse: () => null,
                 ) !=
                 null,
           ),
@@ -54,9 +54,8 @@ class ArchivePage extends StatelessWidget {
       forceReloadEvents: [
         Bus.instance.on<FilesUpdatedEvent>().where(
               (event) =>
-                  event.updatedFiles.firstWhere(
+                  event.updatedFiles.firstWhereOrNull(
                     (element) => element.uploadedFileID != null,
-                    orElse: () => null,
                   ) !=
                   null,
             ),

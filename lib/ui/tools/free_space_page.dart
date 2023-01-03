@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -14,7 +14,7 @@ class FreeSpacePage extends StatefulWidget {
 
   const FreeSpacePage(
     this.status, {
-    Key key,
+    Key? key,
     this.clearSpaceForFolder = false,
   }) : super(key: key);
 

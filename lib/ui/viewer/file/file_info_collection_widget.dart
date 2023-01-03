@@ -1,18 +1,18 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 
 class FileInfoCollectionWidget extends StatelessWidget {
-  final String name;
-  final Function onTap;
-  const FileInfoCollectionWidget({this.name, this.onTap, Key key})
+  final String? name;
+  final Function? onTap;
+  const FileInfoCollectionWidget({this.name, this.onTap, Key? key})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap as void Function()?,
       child: Container(
         margin: const EdgeInsets.only(
           top: 10,
@@ -32,7 +32,7 @@ class FileInfoCollectionWidget extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
-              name,
+              name!,
               style: Theme.of(context).textTheme.subtitle2,
               overflow: TextOverflow.ellipsis,
             ),

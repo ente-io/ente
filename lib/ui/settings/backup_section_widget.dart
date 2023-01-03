@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:io';
 
@@ -26,7 +26,7 @@ import 'package:photos/utils/toast_util.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class BackupSectionWidget extends StatefulWidget {
-  const BackupSectionWidget({Key key}) : super(key: key);
+  const BackupSectionWidget({Key? key}) : super(key: key);
 
   @override
   BackupSectionWidgetState createState() => BackupSectionWidgetState();
@@ -108,7 +108,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                 "You've no files on this device that can be deleted",
               );
             } else {
-              final bool result =
+              final bool? result =
                   await routeToPage(context, FreeSpacePage(status));
               if (result == true) {
                 _showSpaceFreedDialog(status);
@@ -145,7 +145,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
                 "You've no duplicate files that can be cleared",
               );
             } else {
-              final DeduplicationResult result =
+              final DeduplicationResult? result =
                   await routeToPage(context, DeduplicatePage(duplicates));
               if (result != null) {
                 _showDuplicateFilesDeletedDialog(result);
