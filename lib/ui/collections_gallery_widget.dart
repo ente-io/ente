@@ -124,7 +124,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     List<CollectionWithThumbnail>? collections,
   ) {
     final bool showDeleteAlbumsButton =
-        collections!.where((c) => c.thumbnail == null).length > 4;
+        collections!.where((c) => c.thumbnail == null).length >= 3;
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
         .subtitle1!
