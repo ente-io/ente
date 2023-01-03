@@ -392,12 +392,12 @@ class CollectionsService {
     }
   }
 
-  Future<void> trashEmptyCollections(Collection collection) async {
+  Future<void> trashEmptyCollection(Collection collection) async {
     try {
-      // While trashing empty albums, we must pass keeFiles flag as True.
+      // While trashing empty albums, we must pass keepFiles flag as True.
       // The server will verify that the collection is actually empty before
       // deleting the files. If keepFiles is set as False and the collection
-      // is not empty, then the files in the collections will be moved to trash
+      // is not empty, then the files in the collections will be moved to trash.
       await _enteDio.delete(
         "/collections/v3/${collection.id}?keepFiles=True&collectionID=${collection.id}",
       );

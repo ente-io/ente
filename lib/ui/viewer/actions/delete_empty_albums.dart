@@ -19,6 +19,12 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
   bool _isCancelled = false;
 
   @override
+  void dispose() {
+    _deleteProgress.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.centerLeft,
@@ -89,7 +95,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
             "${collections.length} ";
         try {
           await CollectionsService.instance
-              .trashEmptyCollections(collections[i].collection);
+              .trashEmptyCollection(collections[i].collection);
         } catch (_) {
           failedCount++;
         }

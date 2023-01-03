@@ -63,7 +63,6 @@ class ButtonWidget extends StatelessWidget {
 
   /// progressStatus can be used to display information about the action
   /// progress when ExecutionState is in Progress.
-  // when
   final ValueNotifier<String>? progressStatus;
 
   const ButtonWidget({
