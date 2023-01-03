@@ -357,7 +357,7 @@ export default function Uploader(props: Props) {
     ) => {
         try {
             addLogLine(
-                `upload file to an new collections strategy:${strategy}`
+                `upload file to an new collections strategy:${strategy} ,collectionName:${collectionName}`
             );
             await preCollectionCreationAction();
             let filesWithCollectionToUpload: FileWithCollection[] = [];
@@ -593,7 +593,7 @@ export default function Uploader(props: Props) {
         try {
             if (accessedThroughSharedURL) {
                 addLogLine(
-                    `uploading files via public url - ${pendingDesktopUploadCollectionName.current}`
+                    `uploading files to pulbic collection - ${props.uploadCollection.name}  - ${props.uploadCollection.id}`
                 );
                 const uploaderName = await getPublicCollectionUploaderName(
                     getPublicCollectionUID(publicCollectionGalleryContext.token)
@@ -623,6 +623,7 @@ export default function Uploader(props: Props) {
                 return;
             }
             if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
+                addLogLine('uploading zip files');
                 uploadFilesToNewCollections(
                     UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
                 );
@@ -634,7 +635,6 @@ export default function Uploader(props: Props) {
             let showNextModal = () => {};
             if (importSuggestion.hasNestedFolders) {
                 addLogLine(`nested folders detected`);
-
                 showNextModal = () => setChoiceModalView(true);
             } else {
                 showNextModal = () =>
