@@ -4,7 +4,7 @@ import { makeHumanReadableStorage } from 'utils/billing';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 
-class ElectronImageMagickService {
+class ElectronImageProcessorService {
     private electronAPIs: ElectronAPIs;
     constructor() {
         this.electronAPIs = globalThis['ElectronAPIs'];
@@ -61,4 +61,4 @@ class ElectronImageMagickService {
     }
 }
 
-export default new ElectronImageMagickService();
+export default new ElectronImageProcessorService();

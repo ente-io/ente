@@ -3,7 +3,7 @@ import { CustomError, errorWithContext } from 'utils/error';
 import { logError } from 'utils/sentry';
 import { BLACK_THUMBNAIL_BASE64 } from 'constants/upload';
 import * as FFmpegService from 'services/ffmpeg/ffmpegService';
-import ElectronImageMagickService from 'services/electron/imageMagick';
+import ElectronImageProcessorService from 'services/electron/imageProcessor';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { isExactTypeHEIC } from 'utils/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
@@ -80,11 +80,22 @@ async function generateImageThumbnail(
     fileTypeInfo: FileTypeInfo,
     file: File | ElectronFile
 ) {
-    if (ElectronImageMagickService.generateImageThumbnailAPIExists()) {
-        return await ElectronImageMagickService.generateImageThumbnail(
-            file,
-            MAX_THUMBNAIL_DIMENSION
-        );
+    if (ElectronImageProcessorService.generateImageThumbnailAPIExists()) {
+        try {
+            return await ElectronImageProcessorService.generateImageThumbnail(
+                file,
+                MAX_THUMBNAIL_DIMENSION
+            );
+        } catch (e) {
+            logError(
+                e,
+                'Error generating thumbnail using electron image processor',
+                {
+                    fileFormat: fileTypeInfo.exactType,
+                }
+            );
+            return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
+        }
     } else {
         return await generateImageThumbnailUsingCanvas(file, fileTypeInfo);
     }
