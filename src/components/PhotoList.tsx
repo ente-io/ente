@@ -310,10 +310,10 @@ export function PhotoList({
 
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
-        let currentDate = -1;
-
+        let currentDate;
         filteredData.forEach((item, index) => {
             if (
+                !currentDate ||
                 !isSameDay(
                     new Date(item.metadata.creationTime / 1000),
                     new Date(currentDate)
@@ -353,10 +353,20 @@ export function PhotoList({
         });
     };
 
-    const isSameDay = (first, second) =>
-        first.getFullYear() === second.getFullYear() &&
-        first.getMonth() === second.getMonth() &&
-        first.getDate() === second.getDate();
+    const isSameDay = (first, second) => {
+        console.log(
+            first,
+            second,
+            first.getFullYear() === second.getFullYear(),
+            first.getMonth() === second.getMonth(),
+            first.getDate() === second.getDate()
+        );
+        return (
+            first.getFullYear() === second.getFullYear() &&
+            first.getMonth() === second.getMonth() &&
+            first.getDate() === second.getDate()
+        );
+    };
 
     const getPhotoListHeader = (photoListHeader) => {
         return {

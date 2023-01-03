@@ -497,14 +497,9 @@ export function getUniqueFiles(files: EnteFile[]) {
         }
     });
 }
-export function getNonTrashedUniqueUserFiles(files: EnteFile[]) {
-    const user: User = getData(LS_KEYS.USER) ?? {};
-    return getUniqueFiles(
-        files.filter(
-            (file) =>
-                (typeof file.isTrashed === 'undefined' || !file.isTrashed) &&
-                (!user.id || file.ownerID === user.id)
-        )
+export function getNonTrashedFiles(files: EnteFile[]) {
+    return files.filter(
+        (file) => typeof file.isTrashed === 'undefined' || !file.isTrashed
     );
 }
 

@@ -178,7 +178,8 @@ const PhotoFrame = ({
                         activeCollection === ALL_SECTION ||
                         activeCollection === ARCHIVE_SECTION ||
                         activeCollection === TRASH_SECTION ||
-                        activeCollection === item.collectionID
+                        activeCollection === item.collectionID ||
+                        isInSearchMode
                     ) {
                         idSet.add(item.id);
                         return true;
