@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -22,6 +20,7 @@ import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
 
@@ -37,7 +36,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     with AutomaticKeepAliveClientMixin {
   final _logger = Logger((_CollectionsGalleryWidgetState).toString());
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
-  late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
+  late StreamSubscription<CollectionUpdatedEvent>
+      _collectionUpdatesSubscription;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
   AlbumSortKey? sortKey;
   String _loadReason = "init";
@@ -123,6 +123,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Widget _getCollectionsGalleryWidget(
     List<CollectionWithThumbnail>? collections,
   ) {
+    final bool showDeleteAlbumsButton =
+        collections!.where((c) => c.thumbnail == null).length >= 3;
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
         .subtitle1!
@@ -149,6 +151,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 _sortMenu(),
               ],
             ),
+            showDeleteAlbumsButton
+                ? const Padding(
+                    padding: EdgeInsets.only(top: 2, left: 8.5, right: 48),
+                    child: DeleteEmptyAlbums(),
+                  )
+                : const SizedBox.shrink(),
             const SizedBox(height: 12),
             Configuration.instance.hasConfiguredAccount()
                 ? RemoteCollectionsGridViewWidget(collections)
