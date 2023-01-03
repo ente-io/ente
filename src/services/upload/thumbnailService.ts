@@ -38,6 +38,17 @@ export async function generateThumbnail(
             } else {
                 thumbnail = await generateVideoThumbnail(file, fileTypeInfo);
             }
+            if (thumbnail.length > 1.5 * MAX_THUMBNAIL_SIZE) {
+                logError(
+                    Error('thumbnail_too_large'),
+                    'thumbnail greater than max limit',
+                    {
+                        thumbnailSize: convertBytesToHumanReadable(
+                            thumbnail.length
+                        ),
+                    }
+                );
+            }
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
