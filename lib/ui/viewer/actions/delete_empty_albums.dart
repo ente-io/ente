@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -78,7 +77,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
     );
   }
 
-  Future<bool> _deleteEmptyAlbums() async {
+  Future<void> _deleteEmptyAlbums() async {
     final collections =
         await CollectionsService.instance.getCollectionsWithThumbnails();
     collections.removeWhere((element) => element.thumbnail != null);
@@ -94,13 +93,10 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         } catch (_) {
           failedCount++;
         }
-      } else {
-        return false;
       }
     }
     if (failedCount > 0) {
       debugPrint("Delete ops failed for $failedCount collections");
     }
-    return true;
   }
 }

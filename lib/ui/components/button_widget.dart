@@ -372,10 +372,6 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   bool get _shouldRegisterGestures =>
       !widget.isDisabled && executionState == ExecutionState.idle;
 
-  void onTapExternal() async {
-    return _onTap();
-  }
-
   void _onTap() async {
     if (widget.onTap != null) {
       _debouncer.run(
