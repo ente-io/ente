@@ -31,6 +31,7 @@ import { CustomError } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useMemo } from 'react';
+import { Collection } from 'types/collection';
 
 const Container = styled('div')`
     display: block;
@@ -49,6 +50,7 @@ const PHOTOSWIPE_HASH_SUFFIX = '&opened';
 
 interface Props {
     files: EnteFile[];
+    collections?: Collection[];
     syncWithRemote: () => Promise<void>;
     favItemIds?: Set<number>;
     archivedCollections?: Set<number>;
@@ -70,12 +72,15 @@ interface Props {
 }
 
 type SourceURL = {
-    imageURL?: string;
-    videoURL?: string;
+    originalImageURL?: string;
+    originalVideoURL?: string;
+    convertedImageURL?: string;
+    convertedVideoURL?: string;
 };
 
 const PhotoFrame = ({
     files,
+    collections,
     syncWithRemote,
     favItemIds,
     archivedCollections,
@@ -182,7 +187,37 @@ const PhotoFrame = ({
                 }
                 return false;
             });
-    }, [files, deletedFileIds, search, activeCollection]);
+    }, [
+        files,
+        deletedFileIds,
+        search?.date,
+        search?.location,
+        activeCollection,
+    ]);
+
+    const fileToCollectionsMap = useMemo(() => {
+        const fileToCollectionsMap = new Map<number, number[]>();
+        files.forEach((file) => {
+            if (!fileToCollectionsMap.get(file.id)) {
+                fileToCollectionsMap.set(file.id, []);
+            }
+            fileToCollectionsMap.get(file.id).push(file.collectionID);
+        });
+        return fileToCollectionsMap;
+    }, [files]);
+
+    const collectionNameMap = useMemo(() => {
+        if (collections) {
+            return new Map<number, string>(
+                collections.map((collection) => [
+                    collection.id,
+                    collection.name,
+                ])
+            );
+        } else {
+            return new Map();
+        }
+    }, [collections]);
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -300,17 +335,25 @@ const PhotoFrame = ({
     };
 
     const updateSrcURL = async (id: number, srcURL: SourceURL) => {
-        const { videoURL, imageURL } = srcURL;
-        const isPlayable = videoURL && (await isPlaybackPossible(videoURL));
+        const {
+            originalImageURL,
+            convertedImageURL,
+            originalVideoURL,
+            convertedVideoURL,
+        } = srcURL;
+        const isPlayable =
+            convertedVideoURL && (await isPlaybackPossible(convertedVideoURL));
         const updateFile = (file: EnteFile) => {
             file.w = window.innerWidth;
             file.h = window.innerHeight;
-
+            file.isSourceLoaded = true;
+            file.originalImageURL = originalImageURL;
+            file.originalVideoURL = originalVideoURL;
             if (file.metadata.fileType === FILE_TYPE.VIDEO) {
                 if (isPlayable) {
                     file.html = `
             <video controls onContextMenu="return false;">
-                <source src="${videoURL}" />
+                <source src="${convertedVideoURL}" />
                 Your browser does not support the video tag.
             </video>
         `;
@@ -320,7 +363,7 @@ const PhotoFrame = ({
                 <img src="${file.msrc}" onContextMenu="return false;"/>
                 <div class="download-banner" >
                     ${constants.VIDEO_PLAYBACK_FAILED_DOWNLOAD_INSTEAD}
-                    <a class="btn btn-outline-success" href=${videoURL} download="${file.metadata.title}"">Download</a>
+                    <a class="btn btn-outline-success" href=${convertedVideoURL} download="${file.metadata.title}"">Download</a>
                 </div>
             </div>
             `;
@@ -329,9 +372,9 @@ const PhotoFrame = ({
                 if (isPlayable) {
                     file.html = `
                 <div class = 'pswp-item-container'>
-                    <img id = "live-photo-image-${file.id}" src="${imageURL}" onContextMenu="return false;"/>
+                    <img id = "live-photo-image-${file.id}" src="${convertedImageURL}" onContextMenu="return false;"/>
                     <video id = "live-photo-video-${file.id}" loop muted onContextMenu="return false;">
-                        <source src="${videoURL}" />
+                        <source src="${convertedVideoURL}" />
                         Your browser does not support the video tag.
                     </video>
                 </div>
@@ -348,7 +391,7 @@ const PhotoFrame = ({
                 `;
                 }
             } else {
-                file.src = imageURL;
+                file.src = convertedImageURL;
             }
             return file;
         };
@@ -480,6 +523,9 @@ const PhotoFrame = ({
                 item.msrc = newFile.msrc;
                 item.html = newFile.html;
                 item.src = newFile.src;
+                item.isSourceLoaded = newFile.isSourceLoaded;
+                item.originalImageURL = newFile.originalImageURL;
+                item.originalVideoURL = newFile.originalVideoURL;
                 item.w = newFile.w;
                 item.h = newFile.h;
 
@@ -502,10 +548,13 @@ const PhotoFrame = ({
         if (!fetching[item.id]) {
             try {
                 fetching[item.id] = true;
-                let urls: string[];
+                let urls: { original: string[]; converted: string[] };
                 if (galleryContext.files.has(item.id)) {
                     const mergedURL = galleryContext.files.get(item.id);
-                    urls = mergedURL.split(',');
+                    urls = {
+                        original: mergedURL.original.split(','),
+                        converted: mergedURL.converted.split(','),
+                    };
                 } else {
                     appContext.startLoading();
                     if (
@@ -521,26 +570,40 @@ const PhotoFrame = ({
                         urls = await DownloadManager.getFile(item, true);
                     }
                     appContext.finishLoading();
-                    const mergedURL = urls.join(',');
+                    const mergedURL = {
+                        original: urls.original.join(','),
+                        converted: urls.converted.join(','),
+                    };
                     galleryContext.files.set(item.id, mergedURL);
                 }
-                let imageURL;
-                let videoURL;
+                let originalImageURL;
+                let originalVideoURL;
+                let convertedImageURL;
+                let convertedVideoURL;
+
                 if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                    [imageURL, videoURL] = urls;
+                    [originalImageURL, originalVideoURL] = urls.original;
+                    [convertedImageURL, convertedVideoURL] = urls.converted;
                 } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
-                    [videoURL] = urls;
+                    [originalVideoURL] = urls.original;
+                    [convertedVideoURL] = urls.converted;
                 } else {
-                    [imageURL] = urls;
+                    [originalImageURL] = urls.original;
+                    [convertedImageURL] = urls.converted;
                 }
                 setIsSourceLoaded(false);
                 const newFile = await updateSrcURL(item.id, {
-                    imageURL,
-                    videoURL,
+                    originalImageURL,
+                    originalVideoURL,
+                    convertedImageURL,
+                    convertedVideoURL,
                 });
                 item.msrc = newFile.msrc;
                 item.html = newFile.html;
                 item.src = newFile.src;
+                item.isSourceLoaded = newFile.isSourceLoaded;
+                item.originalImageURL = newFile.originalImageURL;
+                item.originalVideoURL = newFile.originalVideoURL;
                 item.w = newFile.w;
                 item.h = newFile.h;
                 try {
@@ -600,6 +663,8 @@ const PhotoFrame = ({
                         isTrashCollection={activeCollection === TRASH_SECTION}
                         enableDownload={enableDownload}
                         isSourceLoaded={isSourceLoaded}
+                        fileToCollectionsMap={fileToCollectionsMap}
+                        collectionNameMap={collectionNameMap}
                     />
                 </Container>
             )}

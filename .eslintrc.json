@@ -53,6 +53,7 @@
         "react-hooks/rules-of-hooks": "off",
         "react-hooks/exhaustive-deps": "off",
         "@next/next/no-img-element": "off",
-        "@typescript-eslint/no-unsafe-argument": "off"
+        "@typescript-eslint/no-unsafe-argument": "off",
+        "jsx-a11y/alt-text": "off"
     }
 }

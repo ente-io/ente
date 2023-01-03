@@ -18,12 +18,9 @@ import { EnteFile } from 'types/file';
 import { mergeMetadata, sortFiles } from 'utils/file';
 import { AppContext } from 'pages/_app';
 import { AbuseReportForm } from 'components/pages/sharedAlbum/AbuseReportForm';
-import {
-    defaultPublicCollectionGalleryContext,
-    PublicCollectionGalleryContext,
-} from 'utils/publicCollectionGallery';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
-import VerticallyCentered from 'components/Container';
+import VerticallyCentered, { CenteredFlex } from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
 import CryptoWorker from 'utils/crypto';
@@ -41,6 +38,16 @@ import FormContainer from 'components/Form/FormContainer';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import Typography from '@mui/material/Typography';
+import Uploader from 'components/Upload/Uploader';
+import { LoadingOverlay } from 'components/LoadingOverlay';
+import FullScreenDropZone from 'components/FullScreenDropZone';
+import useFileInput from 'hooks/useFileInput';
+import { useDropzone } from 'react-dropzone';
+import UploadSelectorInputs from 'components/UploadSelectorInputs';
+import { logoutUser } from 'services/userService';
+import UploadButton from 'components/Upload/UploadButton';
+import bs58 from 'bs58';
+import { AddPhotoAlternateOutlined } from '@mui/icons-material';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -49,7 +56,6 @@ const Loader = () => (
         </EnteSpinner>
     </VerticallyCentered>
 );
-const bs58 = require('bs58');
 export default function PublicCollectionGallery() {
     const token = useRef<string>(null);
     // passwordJWTToken refers to the jwt token which is used for album protected by password.
@@ -58,7 +64,7 @@ export default function PublicCollectionGallery() {
     const url = useRef<string>(null);
     const [publicFiles, setPublicFiles] = useState<EnteFile[]>(null);
     const [publicCollection, setPublicCollection] = useState<Collection>(null);
-    const [errorMessage, setErrorMessage] = useState<String>(null);
+    const [errorMessage, setErrorMessage] = useState<string>(null);
     const appContext = useContext(AppContext);
     const [abuseReportFormView, setAbuseReportFormView] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -69,6 +75,58 @@ export default function PublicCollectionGallery() {
         useState<boolean>(false);
     const [photoListHeader, setPhotoListHeader] =
         useState<TimeStampListItem>(null);
+
+    const [photoListFooter, setPhotoListFooter] =
+        useState<TimeStampListItem>(null);
+
+    const [uploadTypeSelectorView, setUploadTypeSelectorView] = useState(false);
+    const [blockingLoad, setBlockingLoad] = useState(false);
+    const [shouldDisableDropzone, setShouldDisableDropzone] = useState(false);
+
+    const {
+        getRootProps: getDragAndDropRootProps,
+        getInputProps: getDragAndDropInputProps,
+        acceptedFiles: dragAndDropFiles,
+    } = useDropzone({
+        noClick: true,
+        noKeyboard: true,
+        disabled: shouldDisableDropzone,
+    });
+    const {
+        selectedFiles: webFileSelectorFiles,
+        open: openFileSelector,
+        getInputProps: getFileSelectorInputProps,
+    } = useFileInput({
+        directory: false,
+    });
+    const {
+        selectedFiles: webFolderSelectorFiles,
+        open: openFolderSelector,
+        getInputProps: getFolderSelectorInputProps,
+    } = useFileInput({
+        directory: true,
+    });
+
+    const openUploader = () => {
+        setUploadTypeSelectorView(true);
+    };
+
+    const closeUploadTypeSelectorView = () => {
+        setUploadTypeSelectorView(false);
+    };
+
+    const showPublicLinkExpiredMessage = () =>
+        appContext.setDialogMessage({
+            title: constants.LINK_EXPIRED,
+            content: constants.LINK_EXPIRED_MESSAGE,
+
+            nonClosable: true,
+            proceed: {
+                text: constants.LOGIN,
+                action: logoutUser,
+                variant: 'accent',
+            },
+        });
 
     useEffect(() => {
         const currentURL = new URL(window.location.href);
@@ -111,6 +169,9 @@ export default function PublicCollectionGallery() {
                 );
                 if (localCollection) {
                     setPublicCollection(localCollection);
+                    const isPasswordProtected =
+                        localCollection?.publicURLs?.[0]?.passwordEnabled;
+                    setIsPasswordProtected(isPasswordProtected);
                     const collectionUID = getPublicCollectionUID(token.current);
                     const localFiles = await getLocalPublicFiles(collectionUID);
                     const localPublicFiles = sortFiles(
@@ -128,9 +189,8 @@ export default function PublicCollectionGallery() {
         main();
     }, []);
 
-    useEffect(
-        () =>
-            publicCollection &&
+    useEffect(() => {
+        publicCollection &&
             publicFiles &&
             setPhotoListHeader({
                 item: (
@@ -143,14 +203,36 @@ export default function PublicCollectionGallery() {
                 ),
                 itemType: ITEM_TYPE.OTHER,
                 height: 68,
-            }),
-        [publicCollection, publicFiles]
-    );
+            });
+    }, [publicCollection, publicFiles]);
+
+    useEffect(() => {
+        if (publicCollection?.publicURLs?.[0]?.enableCollect) {
+            setPhotoListFooter({
+                item: (
+                    <CenteredFlex sx={{ marginTop: '56px' }}>
+                        <UploadButton
+                            disableShrink
+                            openUploader={openUploader}
+                            text={constants.ADD_MORE_PHOTOS}
+                            color="accent"
+                            icon={<AddPhotoAlternateOutlined />}
+                        />
+                    </CenteredFlex>
+                ),
+                itemType: ITEM_TYPE.OTHER,
+                height: 104,
+            });
+        } else {
+            setPhotoListFooter(null);
+        }
+    }, [publicCollection]);
 
     const syncWithRemote = async () => {
         const collectionUID = getPublicCollectionUID(token.current);
         try {
             appContext.startLoading();
+            setLoading(true);
             const collection = await getPublicCollection(
                 token.current,
                 collectionKey.current
@@ -198,7 +280,7 @@ export default function PublicCollectionGallery() {
                 setErrorMessage(
                     parsedError.message === CustomError.TOO_MANY_REQUESTS
                         ? constants.LINK_TOO_MANY_REQUESTS
-                        : constants.LINK_EXPIRED
+                        : constants.LINK_EXPIRED_MESSAGE
                 );
                 // share has been disabled
                 // local cache should be cleared
@@ -213,6 +295,7 @@ export default function PublicCollectionGallery() {
             }
         } finally {
             appContext.finishLoading();
+            setLoading(false);
         }
     };
 
@@ -299,31 +382,66 @@ export default function PublicCollectionGallery() {
     return (
         <PublicCollectionGalleryContext.Provider
             value={{
-                ...defaultPublicCollectionGalleryContext,
                 token: token.current,
                 passwordToken: passwordJWTToken.current,
                 accessedThroughSharedURL: true,
                 openReportForm,
                 photoListHeader,
+                photoListFooter,
             }}>
-            <SharedAlbumNavbar />
-            <PhotoFrame
-                files={publicFiles}
-                syncWithRemote={syncWithRemote}
-                setSelected={() => null}
-                selected={{ count: 0, collectionID: null }}
-                isFirstLoad={true}
-                activeCollection={ALL_SECTION}
-                isSharedCollection
-                enableDownload={
-                    publicCollection?.publicURLs?.[0]?.enableDownload ?? true
-                }
-            />
-            <AbuseReportForm
-                show={abuseReportFormView}
-                close={closeReportForm}
-                url={url.current}
-            />
+            <FullScreenDropZone
+                getDragAndDropRootProps={getDragAndDropRootProps}>
+                <UploadSelectorInputs
+                    getDragAndDropInputProps={getDragAndDropInputProps}
+                    getFileSelectorInputProps={getFileSelectorInputProps}
+                    getFolderSelectorInputProps={getFolderSelectorInputProps}
+                />
+                <SharedAlbumNavbar
+                    showUploadButton={
+                        publicCollection?.publicURLs?.[0]?.enableCollect
+                    }
+                    openUploader={openUploader}
+                />
+                <PhotoFrame
+                    files={publicFiles}
+                    syncWithRemote={syncWithRemote}
+                    setSelected={() => null}
+                    selected={{ count: 0, collectionID: null }}
+                    isFirstLoad={true}
+                    activeCollection={ALL_SECTION}
+                    isSharedCollection
+                    enableDownload={
+                        publicCollection?.publicURLs?.[0]?.enableDownload ??
+                        true
+                    }
+                />
+                <AbuseReportForm
+                    show={abuseReportFormView}
+                    close={closeReportForm}
+                    url={url.current}
+                />
+                {blockingLoad && (
+                    <LoadingOverlay>
+                        <EnteSpinner />
+                    </LoadingOverlay>
+                )}
+                <Uploader
+                    syncWithRemote={syncWithRemote}
+                    uploadCollection={publicCollection}
+                    setLoading={setBlockingLoad}
+                    setShouldDisableDropzone={setShouldDisableDropzone}
+                    setFiles={setPublicFiles}
+                    webFileSelectorFiles={webFileSelectorFiles}
+                    webFolderSelectorFiles={webFolderSelectorFiles}
+                    dragAndDropFiles={dragAndDropFiles}
+                    uploadTypeSelectorView={uploadTypeSelectorView}
+                    closeUploadTypeSelector={closeUploadTypeSelectorView}
+                    showUploadFilesDialog={openFileSelector}
+                    showUploadDirsDialog={openFolderSelector}
+                    showSessionExpiredMessage={showPublicLinkExpiredMessage}
+                    zipUploadDisabled
+                />
+            </FullScreenDropZone>
         </PublicCollectionGalleryContext.Provider>
     );
 }

@@ -6,7 +6,7 @@ import { clearData, getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 import { getToken } from 'utils/common/key';
 import HTTPService from './HTTPService';
-import { B64EncryptionResult } from 'utils/crypto';
+import { getRecoveryKey } from 'utils/crypto';
 import { logError } from 'utils/sentry';
 import {
     KeyAttributes,
@@ -23,6 +23,7 @@ import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
 import { deleteThumbnailCache } from './cacheService';
+import { B64EncryptionResult } from 'types/crypto';
 
 const ENDPOINT = getEndpoint();
 
@@ -362,5 +363,15 @@ export const deleteAccount = async (challenge: string) => {
     } catch (e) {
         logError(e, 'deleteAccount api call failed');
         throw e;
+    }
+};
+
+export const validateKey = async () => {
+    try {
+        await getRecoveryKey();
+        return true;
+    } catch (e) {
+        await logoutUser();
+        return false;
     }
 };

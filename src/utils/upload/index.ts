@@ -128,6 +128,7 @@ export function getImportSuggestion(
     let i = 0;
     const firstFileFolder = firstPath.substring(0, firstPath.lastIndexOf('/'));
     const lastFileFolder = lastPath.substring(0, lastPath.lastIndexOf('/'));
+
     while (i < L && firstPath.charAt(i) === lastPath.charAt(i)) i++;
     let commonPathPrefix = firstPath.substring(0, i);
 
@@ -145,6 +146,7 @@ export function getImportSuggestion(
     return {
         rootFolderName: commonPathPrefix || null,
         hasNestedFolders: firstFileFolder !== lastFileFolder,
+        hasRootLevelFileWithFolder: firstFileFolder === '',
     };
 }
 

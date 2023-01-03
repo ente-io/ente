@@ -10,7 +10,6 @@ import { SetCollections, SetCollectionSelectorAttributes } from 'types/gallery';
 import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
-import UploadManager from 'services/upload/uploadManager';
 import uploadManager from 'services/upload/uploadManager';
 import ImportService from 'services/importService';
 import isElectron from 'is-electron';
@@ -40,7 +39,10 @@ import {
     PICKED_UPLOAD_TYPE,
 } from 'constants/upload';
 import importService from 'services/importService';
-import { getDownloadAppMessage } from 'utils/ui';
+import {
+    getDownloadAppMessage,
+    getRootLevelFileWithFolderNotAllowMessage,
+} from 'utils/ui';
 import UploadTypeSelector from './UploadTypeSelector';
 import {
     filterOutSystemFiles,
@@ -50,21 +52,28 @@ import {
 import { getUserOwnedCollections } from 'utils/collection';
 import billingService from 'services/billingService';
 import { addLogLine } from 'utils/logging';
+import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
+import UserNameInputDialog from 'components/UserNameInputDialog';
+import {
+    getPublicCollectionUID,
+    getPublicCollectionUploaderName,
+    savePublicCollectionUploaderName,
+} from 'services/publicCollectionService';
 
 const FIRST_ALBUM_NAME = 'My First Album';
 
 interface Props {
     syncWithRemote: (force?: boolean, silent?: boolean) => Promise<void>;
-    closeCollectionSelector: () => void;
+    closeCollectionSelector?: () => void;
     closeUploadTypeSelector: () => void;
-    setCollectionSelectorAttributes: SetCollectionSelectorAttributes;
-    setCollectionNamerAttributes: SetCollectionNamerAttributes;
+    setCollectionSelectorAttributes?: SetCollectionSelectorAttributes;
+    setCollectionNamerAttributes?: SetCollectionNamerAttributes;
     setLoading: SetLoading;
     setShouldDisableDropzone: (value: boolean) => void;
-    showCollectionSelector: () => void;
+    showCollectionSelector?: () => void;
     setFiles: SetFiles;
-    setCollections: SetCollections;
-    isFirstUpload: boolean;
+    setCollections?: SetCollections;
+    isFirstUpload?: boolean;
     uploadTypeSelectorView: boolean;
     showSessionExpiredMessage: () => void;
     showUploadFilesDialog: () => void;
@@ -72,9 +81,17 @@ interface Props {
     webFolderSelectorFiles: File[];
     webFileSelectorFiles: File[];
     dragAndDropFiles: File[];
+    zipUploadDisabled?: boolean;
+    uploadCollection?: Collection;
 }
 
 export default function Uploader(props: Props) {
+    const appContext = useContext(AppContext);
+    const galleryContext = useContext(GalleryContext);
+    const publicCollectionGalleryContext = useContext(
+        PublicCollectionGalleryContext
+    );
+
     const [uploadProgressView, setUploadProgressView] = useState(false);
     const [uploadStage, setUploadStage] = useState<UPLOAD_STAGES>(
         UPLOAD_STAGES.START
@@ -93,11 +110,13 @@ export default function Uploader(props: Props) {
     const [hasLivePhotos, setHasLivePhotos] = useState(false);
 
     const [choiceModalView, setChoiceModalView] = useState(false);
+    const [userNameInputDialogView, setUserNameInputDialogView] =
+        useState(false);
     const [importSuggestion, setImportSuggestion] = useState<ImportSuggestion>(
         DEFAULT_IMPORT_SUGGESTION
     );
-    const appContext = useContext(AppContext);
-    const galleryContext = useContext(GalleryContext);
+    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
+    const [webFiles, setWebFiles] = useState([]);
 
     const toUploadFiles = useRef<File[] | ElectronFile[]>(null);
     const isPendingDesktopUpload = useRef(false);
@@ -106,20 +125,32 @@ export default function Uploader(props: Props) {
     const pickedUploadType = useRef<PICKED_UPLOAD_TYPE>(null);
     const zipPaths = useRef<string[]>(null);
     const currentUploadPromise = useRef<Promise<void>>(null);
-    const [electronFiles, setElectronFiles] = useState<ElectronFile[]>(null);
-    const [webFiles, setWebFiles] = useState([]);
+    const uploadRunning = useRef(false);
+    const uploaderNameRef = useRef<string>(null);
 
     const closeUploadProgress = () => setUploadProgressView(false);
+    const showUserNameInputDialog = () => setUserNameInputDialogView(true);
 
     const setCollectionName = (collectionName: string) => {
         isPendingDesktopUpload.current = true;
         pendingDesktopUploadCollectionName.current = collectionName;
     };
 
-    const uploadRunning = useRef(false);
+    const handleChoiceModalClose = () => {
+        setChoiceModalView(false);
+        uploadRunning.current = false;
+    };
+    const handleCollectionSelectorCancel = () => {
+        uploadRunning.current = false;
+    };
+
+    const handleUserNameInputDialogClose = () => {
+        setUserNameInputDialogView(false);
+        uploadRunning.current = false;
+    };
 
     useEffect(() => {
-        UploadManager.init(
+        uploadManager.init(
             {
                 setPercentComplete,
                 setUploadCounter,
@@ -129,7 +160,8 @@ export default function Uploader(props: Props) {
                 setUploadFilenames: setUploadFileNames,
                 setHasLivePhotos,
             },
-            props.setFiles
+            props.setFiles,
+            publicCollectionGalleryContext
         );
 
         if (isElectron() && ImportService.checkAllElectronAPIsExists()) {
@@ -148,7 +180,11 @@ export default function Uploader(props: Props) {
                 appContext.setIsFolderSyncRunning
             );
         }
-    }, []);
+    }, [
+        publicCollectionGalleryContext.accessedThroughSharedURL,
+        publicCollectionGalleryContext.token,
+        publicCollectionGalleryContext.passwordToken,
+    ]);
 
     // this handles the change of selectorFiles changes on web when user selects
     // files for upload through the opened file/folder selector or dragAndDrop them
@@ -262,7 +298,8 @@ export default function Uploader(props: Props) {
             handleCollectionCreationAndUpload(
                 importSuggestion,
                 props.isFirstUpload,
-                pickedUploadType.current
+                pickedUploadType.current,
+                publicCollectionGalleryContext.accessedThroughSharedURL
             );
             pickedUploadType.current = null;
             props.setLoading(false);
@@ -283,13 +320,16 @@ export default function Uploader(props: Props) {
     };
 
     const preCollectionCreationAction = async () => {
-        props.closeCollectionSelector();
+        props.closeCollectionSelector?.();
         props.setShouldDisableDropzone(!uploadManager.shouldAllowNewUpload());
         setUploadStage(UPLOAD_STAGES.START);
         setUploadProgressView(true);
     };
 
-    const uploadFilesToExistingCollection = async (collection: Collection) => {
+    const uploadFilesToExistingCollection = async (
+        collection: Collection,
+        uploaderName?: string
+    ) => {
         try {
             addLogLine(
                 `upload file to an existing collection - "${collection.name}"`
@@ -301,10 +341,11 @@ export default function Uploader(props: Props) {
                     localID: index,
                     collectionID: collection.id,
                 }));
-            waitInQueueAndUploadFiles(filesWithCollectionToUpload, [
-                collection,
-            ]);
-            toUploadFiles.current = null;
+            waitInQueueAndUploadFiles(
+                filesWithCollectionToUpload,
+                [collection],
+                uploaderName
+            );
         } catch (e) {
             logError(e, 'Failed to upload files to existing collections');
         }
@@ -385,13 +426,18 @@ export default function Uploader(props: Props) {
 
     const waitInQueueAndUploadFiles = (
         filesWithCollectionToUploadIn: FileWithCollection[],
-        collections: Collection[]
+        collections: Collection[],
+        uploaderName?: string
     ) => {
         const currentPromise = currentUploadPromise.current;
         currentUploadPromise.current = waitAndRun(
             currentPromise,
             async () =>
-                await uploadFiles(filesWithCollectionToUploadIn, collections)
+                await uploadFiles(
+                    filesWithCollectionToUploadIn,
+                    collections,
+                    uploaderName
+                )
         );
     };
 
@@ -409,7 +455,8 @@ export default function Uploader(props: Props) {
 
     const uploadFiles = async (
         filesWithCollectionToUploadIn: FileWithCollection[],
-        collections: Collection[]
+        collections: Collection[],
+        uploaderName?: string
     ) => {
         try {
             addLogLine('uploadFiles called');
@@ -437,7 +484,8 @@ export default function Uploader(props: Props) {
             const shouldCloseUploadProgress =
                 await uploadManager.queueFilesForUpload(
                     filesWithCollectionToUploadIn,
-                    collections
+                    collections,
+                    uploaderName
                 );
             if (shouldCloseUploadProgress) {
                 closeUploadProgress();
@@ -467,11 +515,13 @@ export default function Uploader(props: Props) {
         try {
             addLogLine('user retrying failed  upload');
             const filesWithCollections =
-                await uploadManager.getFailedFilesWithCollections();
+                uploadManager.getFailedFilesWithCollections();
+            const uploaderName = uploadManager.getUploaderName();
             await preUploadAction();
             await uploadManager.queueFilesForUpload(
                 filesWithCollections.files,
-                filesWithCollections.collections
+                filesWithCollections.collections,
+                uploaderName
             );
         } catch (err) {
             logError(err, 'retry failed files failed');
@@ -534,52 +584,75 @@ export default function Uploader(props: Props) {
         });
     };
 
-    const handleCollectionCreationAndUpload = (
+    const handleCollectionCreationAndUpload = async (
         importSuggestion: ImportSuggestion,
         isFirstUpload: boolean,
-        pickedUploadType: PICKED_UPLOAD_TYPE
+        pickedUploadType: PICKED_UPLOAD_TYPE,
+        accessedThroughSharedURL?: boolean
     ) => {
-        if (isPendingDesktopUpload.current) {
-            isPendingDesktopUpload.current = false;
-            if (pendingDesktopUploadCollectionName.current) {
+        try {
+            if (accessedThroughSharedURL) {
                 addLogLine(
-                    `upload pending files to collection - ${pendingDesktopUploadCollectionName.current}`
+                    `uploading files via public url - ${pendingDesktopUploadCollectionName.current}`
                 );
-                uploadToSingleNewCollection(
-                    pendingDesktopUploadCollectionName.current
+                const uploaderName = await getPublicCollectionUploaderName(
+                    getPublicCollectionUID(publicCollectionGalleryContext.token)
                 );
-                pendingDesktopUploadCollectionName.current = null;
-            } else {
-                addLogLine(
-                    `pending upload - strategy - "multiple collections" `
-                );
+                uploaderNameRef.current = uploaderName;
+                showUserNameInputDialog();
+                return;
+            }
+            if (isPendingDesktopUpload.current) {
+                isPendingDesktopUpload.current = false;
+                if (pendingDesktopUploadCollectionName.current) {
+                    addLogLine(
+                        `upload pending files to collection - ${pendingDesktopUploadCollectionName.current}`
+                    );
+                    uploadToSingleNewCollection(
+                        pendingDesktopUploadCollectionName.current
+                    );
+                    pendingDesktopUploadCollectionName.current = null;
+                } else {
+                    addLogLine(
+                        `pending upload - strategy - "multiple collections" `
+                    );
+                    uploadFilesToNewCollections(
+                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
+                    );
+                }
+                return;
+            }
+            if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
                 uploadFilesToNewCollections(
                     UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
                 );
+                return;
             }
-            return;
+            if (isFirstUpload && !importSuggestion.rootFolderName) {
+                importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
+            }
+            let showNextModal = () => {};
+            if (importSuggestion.hasNestedFolders) {
+                addLogLine(`nested folders detected`);
+
+                showNextModal = () => setChoiceModalView(true);
+            } else {
+                showNextModal = () =>
+                    uploadToSingleNewCollection(
+                        importSuggestion.rootFolderName
+                    );
+            }
+            props.setCollectionSelectorAttributes({
+                callback: uploadFilesToExistingCollection,
+                onCancel: handleCollectionSelectorCancel,
+                showNextModal,
+                title: constants.UPLOAD_TO_COLLECTION,
+            });
+        } catch (e) {
+            logError(e, 'handleCollectionCreationAndUpload failed');
         }
-        if (isElectron() && pickedUploadType === PICKED_UPLOAD_TYPE.ZIPS) {
-            uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
-            return;
-        }
-        if (isFirstUpload && !importSuggestion.rootFolderName) {
-            importSuggestion.rootFolderName = FIRST_ALBUM_NAME;
-        }
-        let showNextModal = () => {};
-        if (importSuggestion.hasNestedFolders) {
-            addLogLine(`nested folders detected`);
-            showNextModal = () => setChoiceModalView(true);
-        } else {
-            showNextModal = () =>
-                uploadToSingleNewCollection(importSuggestion.rootFolderName);
-        }
-        props.setCollectionSelectorAttributes({
-            callback: uploadFilesToExistingCollection,
-            showNextModal,
-            title: constants.UPLOAD_TO_COLLECTION,
-        });
     };
+
     const handleDesktopUpload = async (type: PICKED_UPLOAD_TYPE) => {
         let files: ElectronFile[];
         pickedUploadType.current = type;
@@ -628,26 +701,57 @@ export default function Uploader(props: Props) {
     const handleFolderUpload = handleUpload(PICKED_UPLOAD_TYPE.FOLDERS);
     const handleZipUpload = handleUpload(PICKED_UPLOAD_TYPE.ZIPS);
 
+    const handlePublicUpload = async (
+        uploaderName: string,
+        skipSave?: boolean
+    ) => {
+        try {
+            if (!skipSave) {
+                savePublicCollectionUploaderName(
+                    getPublicCollectionUID(
+                        publicCollectionGalleryContext.token
+                    ),
+                    uploaderName
+                );
+            }
+            await uploadFilesToExistingCollection(
+                props.uploadCollection,
+                uploaderName
+            );
+        } catch (e) {
+            logError(e, 'public upload failed ');
+        }
+    };
+
+    const handleUploadToSingleCollection = () => {
+        uploadToSingleNewCollection(importSuggestion.rootFolderName);
+    };
+
+    const handleUploadToMultipleCollections = () => {
+        if (importSuggestion.hasRootLevelFileWithFolder) {
+            appContext.setDialogMessage(
+                getRootLevelFileWithFolderNotAllowMessage()
+            );
+            return;
+        }
+        uploadFilesToNewCollections(UPLOAD_STRATEGY.COLLECTION_PER_FOLDER);
+    };
+
     return (
         <>
             <UploadStrategyChoiceModal
                 open={choiceModalView}
-                onClose={() => setChoiceModalView(false)}
-                uploadToSingleCollection={() =>
-                    uploadToSingleNewCollection(importSuggestion.rootFolderName)
-                }
-                uploadToMultipleCollection={() =>
-                    uploadFilesToNewCollections(
-                        UPLOAD_STRATEGY.COLLECTION_PER_FOLDER
-                    )
-                }
+                onClose={handleChoiceModalClose}
+                uploadToSingleCollection={handleUploadToSingleCollection}
+                uploadToMultipleCollection={handleUploadToMultipleCollections}
             />
             <UploadTypeSelector
                 show={props.uploadTypeSelectorView}
-                onHide={props.closeUploadTypeSelector}
+                onClose={props.closeUploadTypeSelector}
                 uploadFiles={handleFileUpload}
                 uploadFolders={handleFolderUpload}
                 uploadGoogleTakeoutZips={handleZipUpload}
+                hideZipUploadOption={props.zipUploadDisabled}
             />
             <UploadProgress
                 open={uploadProgressView}
@@ -661,6 +765,13 @@ export default function Uploader(props: Props) {
                 retryFailed={retryFailed}
                 finishedUploads={finishedUploads}
                 cancelUploads={cancelUploads}
+            />
+            <UserNameInputDialog
+                open={userNameInputDialogView}
+                onClose={handleUserNameInputDialogClose}
+                onNameSubmit={handlePublicUpload}
+                toUploadFilesCount={toUploadFiles.current?.length}
+                uploaderName={uploaderNameRef.current}
             />
         </>
     );

@@ -1,6 +1,5 @@
 import { getLocalFiles } from '../fileService';
 import { SetFiles } from 'types/gallery';
-import { getDedicatedCryptoWorker } from 'utils/crypto';
 import {
     sortFiles,
     preservePhotoswipeProps,
@@ -18,23 +17,15 @@ import UIService from './uiService';
 import UploadService from './uploadService';
 import { CustomError } from 'utils/error';
 import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
+import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {
-    ElectronFile,
     FileWithCollection,
-    Metadata,
-    MetadataAndFileTypeInfo,
-    MetadataAndFileTypeInfoMap,
     ParsedMetadataJSON,
     ParsedMetadataJSONMap,
+    PublicUploadProps,
 } from 'types/upload';
-import {
-    UPLOAD_RESULT,
-    MAX_FILE_SIZE_SUPPORTED,
-    UPLOAD_STAGES,
-} from 'constants/upload';
-import { ComlinkWorker } from 'utils/comlink';
-import { FILE_TYPE } from 'constants/file';
+
+import { UPLOAD_RESULT, UPLOAD_STAGES } from 'constants/upload';
 import uiService from './uiService';
 import { addLogLine, getFileNameSize } from 'utils/logging';
 import isElectron from 'is-electron';
@@ -42,14 +33,23 @@ import ImportService from 'services/importService';
 import watchFolderService from 'services/watchFolder/watchFolderService';
 import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { getDedicatedCryptoWorker } from 'utils/comlink';
+import { Remote } from 'comlink';
+import {
+    getLocalPublicFiles,
+    getPublicCollectionUID,
+} from 'services/publicCollectionService';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
 
 class UploadManager {
-    private cryptoWorkers = new Array<ComlinkWorker>(MAX_CONCURRENT_UPLOADS);
+    private cryptoWorkers = new Array<
+        ComlinkWorker<typeof DedicatedCryptoWorker>
+    >(MAX_CONCURRENT_UPLOADS);
     private parsedMetadataJSONMap: ParsedMetadataJSONMap;
-    private metadataAndFileTypeInfoMap: MetadataAndFileTypeInfoMap;
     private filesToBeUploaded: FileWithCollection[];
     private remainingFiles: FileWithCollection[] = [];
     private failedFiles: FileWithCollection[];
@@ -58,12 +58,18 @@ class UploadManager {
     private setFiles: SetFiles;
     private collections: Map<number, Collection>;
     private uploadInProgress: boolean;
+    private publicUploadProps: PublicUploadProps;
+    private uploaderName: string;
 
-    public async init(progressUpdater: ProgressUpdater, setFiles: SetFiles) {
+    public async init(
+        progressUpdater: ProgressUpdater,
+        setFiles: SetFiles,
+        publicCollectProps: PublicUploadProps
+    ) {
         UIService.init(progressUpdater);
+        UploadService.init(publicCollectProps);
         this.setFiles = setFiles;
-        UIService.init(progressUpdater);
-        this.setFiles = setFiles;
+        this.publicUploadProps = publicCollectProps;
     }
 
     public isUploadRunning() {
@@ -75,10 +81,8 @@ class UploadManager {
         this.remainingFiles = [];
         this.failedFiles = [];
         this.parsedMetadataJSONMap = new Map<string, ParsedMetadataJSON>();
-        this.metadataAndFileTypeInfoMap = new Map<
-            number,
-            MetadataAndFileTypeInfo
-        >();
+
+        this.uploaderName = null;
     }
 
     prepareForNewUpload() {
@@ -89,10 +93,17 @@ class UploadManager {
     }
 
     async updateExistingFilesAndCollections(collections: Collection[]) {
-        this.existingFiles = await getLocalFiles();
-        this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
-            this.existingFiles
-        );
+        if (this.publicUploadProps.accessedThroughSharedURL) {
+            this.existingFiles = await getLocalPublicFiles(
+                getPublicCollectionUID(this.publicUploadProps.token)
+            );
+            this.userOwnedNonTrashedExistingFiles = this.existingFiles;
+        } else {
+            this.existingFiles = await getLocalFiles();
+            this.userOwnedNonTrashedExistingFiles = getUserOwnedNonTrashedFiles(
+                this.existingFiles
+            );
+        }
         this.collections = new Map(
             collections.map((collection) => [collection.id, collection])
         );
@@ -100,14 +111,19 @@ class UploadManager {
 
     public async queueFilesForUpload(
         filesWithCollectionToUploadIn: FileWithCollection[],
-        collections: Collection[]
+        collections: Collection[],
+        uploaderName?: string
     ) {
         try {
             if (this.uploadInProgress) {
                 throw Error("can't run multiple uploads at once");
             }
             this.uploadInProgress = true;
+            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
+                this.cryptoWorkers[i] = getDedicatedCryptoWorker();
+            }
             await this.updateExistingFilesAndCollections(collections);
+            this.uploaderName = uploaderName;
             addLogLine(
                 `received ${filesWithCollectionToUploadIn.length} files to upload`
             );
@@ -134,50 +150,18 @@ class UploadManager {
                 );
             }
             if (mediaFiles.length) {
-                UIService.setUploadStage(UPLOAD_STAGES.EXTRACTING_METADATA);
-                await this.extractMetadataFromFiles(mediaFiles);
-
-                UploadService.setMetadataAndFileTypeInfoMap(
-                    this.metadataAndFileTypeInfoMap
-                );
-
-                // filter out files whose metadata detection failed or those that have been skipped because the files are too large,
-                // as they will be rejected during upload and are not valid upload files which we need to clustering
-                const rejectedFileLocalIDs = new Set(
-                    [...this.metadataAndFileTypeInfoMap.entries()].map(
-                        ([localID, metadataAndFileTypeInfo]) => {
-                            if (
-                                !metadataAndFileTypeInfo.metadata ||
-                                !metadataAndFileTypeInfo.fileTypeInfo
-                            ) {
-                                return localID;
-                            }
-                        }
-                    )
-                );
-                const rejectedFiles = [];
-                const filesWithMetadata = [];
-                mediaFiles.forEach((m) => {
-                    if (rejectedFileLocalIDs.has(m.localID)) {
-                        rejectedFiles.push(m);
-                    } else {
-                        filesWithMetadata.push(m);
-                    }
-                });
-
                 addLogLine(`clusterLivePhotoFiles started`);
-
                 const analysedMediaFiles =
-                    UploadService.clusterLivePhotoFiles(filesWithMetadata);
-
+                    await UploadService.clusterLivePhotoFiles(mediaFiles);
                 addLogLine(`clusterLivePhotoFiles ended`);
-                const allFiles = [...rejectedFiles, ...analysedMediaFiles];
                 addLogLine(
-                    `got live photos: ${mediaFiles.length !== allFiles.length}`
+                    `got live photos: ${
+                        mediaFiles.length !== analysedMediaFiles.length
+                    }`
                 );
                 uiService.setFilenames(
                     new Map<number, string>(
-                        allFiles.map((mediaFile) => [
+                        analysedMediaFiles.map((mediaFile) => [
                             mediaFile.localID,
                             UploadService.getAssetName(mediaFile),
                         ])
@@ -185,10 +169,10 @@ class UploadManager {
                 );
 
                 UIService.setHasLivePhoto(
-                    mediaFiles.length !== allFiles.length
+                    mediaFiles.length !== analysedMediaFiles.length
                 );
 
-                await this.uploadMediaFiles(allFiles);
+                await this.uploadMediaFiles(analysedMediaFiles);
             }
         } catch (e) {
             if (e.message === CustomError.UPLOAD_CANCELLED) {
@@ -203,7 +187,7 @@ class UploadManager {
             UIService.setUploadStage(UPLOAD_STAGES.FINISH);
             UIService.setPercentComplete(FILE_UPLOAD_COMPLETED);
             for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
-                this.cryptoWorkers[i]?.worker.terminate();
+                this.cryptoWorkers[i]?.terminate();
             }
             this.uploadInProgress = false;
         }
@@ -273,99 +257,6 @@ class UploadManager {
         }
     }
 
-    private async extractMetadataFromFiles(mediaFiles: FileWithCollection[]) {
-        try {
-            addLogLine(`extractMetadataFromFiles executed`);
-            UIService.reset(mediaFiles.length);
-            for (const { file, localID, collectionID } of mediaFiles) {
-                UIService.setFileProgress(localID, 0);
-                if (uploadCancelService.isUploadCancelationRequested()) {
-                    throw Error(CustomError.UPLOAD_CANCELLED);
-                }
-                let fileTypeInfo = null;
-                let metadata = null;
-                let filePath = null;
-                try {
-                    addLogLine(
-                        `metadata extraction started ${getFileNameSize(file)} `
-                    );
-                    const result = await this.extractFileTypeAndMetadata(
-                        file,
-                        collectionID
-                    );
-                    fileTypeInfo = result.fileTypeInfo;
-                    metadata = result.metadata;
-                    filePath = result.filePath;
-                    addLogLine(
-                        `metadata extraction successful${getFileNameSize(
-                            file
-                        )} `
-                    );
-                } catch (e) {
-                    if (e.message === CustomError.UPLOAD_CANCELLED) {
-                        throw e;
-                    } else {
-                        // and don't break for subsequent files just log and move on
-                        logError(e, 'extractFileTypeAndMetadata failed');
-                        addLogLine(
-                            `metadata extraction failed ${getFileNameSize(
-                                file
-                            )} error: ${e.message}`
-                        );
-                    }
-                }
-                this.metadataAndFileTypeInfoMap.set(localID, {
-                    fileTypeInfo: fileTypeInfo && { ...fileTypeInfo },
-                    metadata: metadata && { ...metadata },
-                    filePath: filePath,
-                });
-                UIService.removeFromInProgressList(localID);
-                UIService.increaseFileUploaded();
-            }
-        } catch (e) {
-            if (e.message !== CustomError.UPLOAD_CANCELLED) {
-                logError(e, 'error extracting metadata');
-            }
-            throw e;
-        }
-    }
-
-    private async extractFileTypeAndMetadata(
-        file: File | ElectronFile,
-        collectionID: number
-    ) {
-        if (file.size >= MAX_FILE_SIZE_SUPPORTED) {
-            addLogLine(
-                `${getFileNameSize(file)} rejected  because of large size`
-            );
-
-            return { fileTypeInfo: null, metadata: null };
-        }
-        const fileTypeInfo = await UploadService.getFileType(file);
-        if (fileTypeInfo.fileType === FILE_TYPE.OTHERS) {
-            addLogLine(
-                `${getFileNameSize(
-                    file
-                )} rejected  because of unknown file format`
-            );
-            return { fileTypeInfo, metadata: null };
-        }
-        addLogLine(` extracting ${getFileNameSize(file)} metadata`);
-        let metadata: Metadata;
-        try {
-            metadata = await UploadService.extractFileMetadata(
-                file,
-                collectionID,
-                fileTypeInfo
-            );
-            const filePath = (file as any).path as string;
-            return { fileTypeInfo, metadata, filePath };
-        } catch (e) {
-            logError(e, 'failed to extract file metadata');
-            return { fileTypeInfo, metadata: null, filePath: null };
-        }
-    }
-
     private async uploadMediaFiles(mediaFiles: FileWithCollection[]) {
         addLogLine(`uploadMediaFiles called`);
         this.filesToBeUploaded = [...this.filesToBeUploaded, ...mediaFiles];
@@ -386,21 +277,13 @@ class UploadManager {
             i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
             i++
         ) {
-            const cryptoWorker = getDedicatedCryptoWorker();
-            if (!cryptoWorker) {
-                throw Error(CustomError.FAILED_TO_LOAD_WEB_WORKER);
-            }
-            this.cryptoWorkers[i] = cryptoWorker;
-            uploadProcesses.push(
-                this.uploadNextFileInQueue(
-                    await new this.cryptoWorkers[i].comlink()
-                )
-            );
+            const worker = await new this.cryptoWorkers[i].remote();
+            uploadProcesses.push(this.uploadNextFileInQueue(worker));
         }
         await Promise.all(uploadProcesses);
     }
 
-    private async uploadNextFileInQueue(worker: any) {
+    private async uploadNextFileInQueue(worker: Remote<DedicatedCryptoWorker>) {
         while (this.filesToBeUploaded.length > 0) {
             if (uploadCancelService.isUploadCancelationRequested()) {
                 throw Error(CustomError.UPLOAD_CANCELLED);
@@ -412,7 +295,9 @@ class UploadManager {
             const { fileUploadResult, uploadedFile } = await uploader(
                 worker,
                 this.userOwnedNonTrashedExistingFiles,
-                fileWithCollection
+                fileWithCollection,
+                this.uploaderName,
+                this.publicUploadProps?.accessedThroughSharedURL
             );
 
             const finalUploadResult = await this.postUploadTask(
@@ -431,7 +316,7 @@ class UploadManager {
 
     async postUploadTask(
         fileUploadResult: UPLOAD_RESULT,
-        uploadedFile: EnteFile | null,
+        uploadedFile: EncryptedEnteFile | EnteFile | null,
         fileWithCollection: FileWithCollection
     ) {
         try {
@@ -446,22 +331,23 @@ class UploadManager {
                     this.failedFiles.push(fileWithCollection);
                     break;
                 case UPLOAD_RESULT.ALREADY_UPLOADED:
-                    decryptedFile = uploadedFile;
+                    decryptedFile = uploadedFile as EnteFile;
                     break;
                 case UPLOAD_RESULT.ADDED_SYMLINK:
-                    decryptedFile = uploadedFile;
+                    decryptedFile = uploadedFile as EnteFile;
                     fileUploadResult = UPLOAD_RESULT.UPLOADED;
                     break;
                 case UPLOAD_RESULT.UPLOADED:
                 case UPLOAD_RESULT.UPLOADED_WITH_STATIC_THUMBNAIL:
                     decryptedFile = await decryptFile(
-                        uploadedFile,
+                        uploadedFile as EncryptedEnteFile,
                         fileWithCollection.collection.key
                     );
                     break;
                 case UPLOAD_RESULT.UNSUPPORTED:
                 case UPLOAD_RESULT.TOO_LARGE:
                 case UPLOAD_RESULT.CANCELLED:
+                case UPLOAD_RESULT.SKIPPED_VIDEOS:
                     // no-op
                     break;
                 default:
@@ -479,7 +365,7 @@ class UploadManager {
             await this.watchFolderCallback(
                 fileUploadResult,
                 fileWithCollection,
-                uploadedFile
+                uploadedFile as EncryptedEnteFile
             );
             return fileUploadResult;
         } catch (e) {
@@ -491,7 +377,7 @@ class UploadManager {
     private async watchFolderCallback(
         fileUploadResult: UPLOAD_RESULT,
         fileWithCollection: FileWithCollection,
-        uploadedFile: EnteFile
+        uploadedFile: EncryptedEnteFile
     ) {
         if (isElectron()) {
             await watchFolderService.onFileUpload(
@@ -508,11 +394,15 @@ class UploadManager {
         uploadCancelService.requestUploadCancelation();
     }
 
-    async getFailedFilesWithCollections() {
+    getFailedFilesWithCollections() {
         return {
             files: this.failedFiles,
             collections: [...this.collections.values()],
         };
+    }
+
+    getUploaderName() {
+        return this.uploaderName;
     }
 
     private updateExistingFiles(decryptedFile: EnteFile) {

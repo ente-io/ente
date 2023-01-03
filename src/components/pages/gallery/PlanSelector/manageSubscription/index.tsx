@@ -2,6 +2,7 @@ import { Stack } from '@mui/material';
 import { AppContext } from 'pages/_app';
 import React, { useContext } from 'react';
 import { Subscription } from 'types/billing';
+import { SetLoading } from 'types/gallery';
 import {
     activateSubscription,
     cancelSubscription,
@@ -15,7 +16,7 @@ import ManageSubscriptionButton from './button';
 interface Iprops {
     subscription: Subscription;
     closeModal: () => void;
-    setLoading: (value: boolean) => void;
+    setLoading: SetLoading;
 }
 
 export function ManageSubscription({

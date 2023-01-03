@@ -1,55 +1,71 @@
-import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
-import { DataStream, Metadata } from 'types/upload';
+import {
+    EncryptedMagicMetadata,
+    FileMagicMetadata,
+    FilePublicMagicMetadata,
+} from 'types/magicMetadata';
+import { Metadata } from 'types/upload';
 
-export interface fileAttribute {
-    encryptedData?: DataStream | Uint8Array;
-    objectKey?: string;
+interface FileAttributesBase {
     decryptionHeader: string;
 }
 
-export interface FileMagicMetadataProps {
-    visibility?: VISIBILITY_STATE;
-    filePaths?: string[];
+interface MetadataFileAttributes extends FileAttributesBase {
+    encryptedData: string;
+    objectKey?: string;
+}
+interface S3FileAttributes extends FileAttributesBase {
+    objectKey: string;
+    encryptedData?: string;
 }
 
-export interface FileMagicMetadata extends Omit<MagicMetadataCore, 'data'> {
-    data: FileMagicMetadataProps;
+export type FileAttributes = MetadataFileAttributes | S3FileAttributes;
+
+export interface FileInfo {
+    fileSize: number;
+    thumbSize: number;
 }
 
-export interface FilePublicMagicMetadataProps {
-    editedTime?: number;
-    editedName?: string;
-    caption?: string;
-}
-
-export interface FilePublicMagicMetadata
-    extends Omit<MagicMetadataCore, 'data'> {
-    data: FilePublicMagicMetadataProps;
-}
-
-export interface EnteFile {
+export interface EncryptedEnteFile {
     id: number;
     collectionID: number;
     ownerID: number;
-    file: fileAttribute;
-    thumbnail: fileAttribute;
+    file: FileAttributes;
+    thumbnail: FileAttributes;
+    metadata: FileAttributes;
+    info: FileInfo;
+    magicMetadata: EncryptedMagicMetadata;
+    pubMagicMetadata: EncryptedMagicMetadata;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    isDeleted: boolean;
+    updationTime: number;
+}
+
+export interface EnteFile
+    extends Omit<
+        EncryptedEnteFile,
+        | 'metadata'
+        | 'pubMagicMetadata'
+        | 'magicMetadata'
+        | 'encryptedKey'
+        | 'keyDecryptionNonce'
+    > {
     metadata: Metadata;
     magicMetadata: FileMagicMetadata;
     pubMagicMetadata: FilePublicMagicMetadata;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
     key: string;
-    src: string;
-    msrc: string;
-    html: string;
-    w: number;
-    h: number;
-    title: string;
-    isDeleted: boolean;
+    src?: string;
+    msrc?: string;
+    html?: string;
+    w?: number;
+    h?: number;
+    title?: string;
     isTrashed?: boolean;
     deleteBy?: number;
-    dataIndex: number;
-    updationTime: number;
+    isSourceLoaded?: boolean;
+    originalVideoURL?: string;
+    originalImageURL?: string;
+    dataIndex?: number;
 }
 
 export interface TrashRequest {

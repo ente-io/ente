@@ -1,10 +1,5 @@
 import { SelectedState } from 'types/gallery';
-import {
-    EnteFile,
-    fileAttribute,
-    FileMagicMetadataProps,
-    FilePublicMagicMetadataProps,
-} from 'types/file';
+import { EnteFile, EncryptedEnteFile } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
@@ -23,11 +18,22 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
-import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
+import {
+    FileMagicMetadata,
+    FileMagicMetadataProps,
+    FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
+    NEW_FILE_MAGIC_METADATA,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
 import { makeHumanReadableStorage } from 'utils/billing';
+import { CustomError } from 'utils/error';
+
+const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
+
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -159,16 +165,6 @@ export function getSelectedFiles(
     return selectedFiles;
 }
 
-export function formatDate(date: number | Date) {
-    const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-        weekday: 'short',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-    });
-    return dateTimeFormat.format(date);
-}
-
 export function sortFiles(files: EnteFile[]) {
     // sort according to modification time first
     files = files.sort((a, b) => {
@@ -197,41 +193,59 @@ export function sortFiles(files: EnteFile[]) {
     return files;
 }
 
-export async function decryptFile(file: EnteFile, collectionKey: string) {
+export async function decryptFile(
+    file: EncryptedEnteFile,
+    collectionKey: string
+): Promise<EnteFile> {
     try {
         const worker = await new CryptoWorker();
-        file.key = await worker.decryptB64(
-            file.encryptedKey,
-            file.keyDecryptionNonce,
+        const {
+            encryptedKey,
+            keyDecryptionNonce,
+            metadata,
+            magicMetadata,
+            pubMagicMetadata,
+            ...restFileProps
+        } = file;
+        const fileKey = await worker.decryptB64(
+            encryptedKey,
+            keyDecryptionNonce,
             collectionKey
         );
-        const encryptedMetadata = file.metadata as unknown as fileAttribute;
-        file.metadata = await worker.decryptMetadata(
-            encryptedMetadata.encryptedData,
-            encryptedMetadata.decryptionHeader,
-            file.key
+        const fileMetadata = await worker.decryptMetadata(
+            metadata.encryptedData,
+            metadata.decryptionHeader,
+            fileKey
         );
-        if (
-            file.magicMetadata?.data &&
-            typeof file.magicMetadata.data === 'string'
-        ) {
-            file.magicMetadata.data = await worker.decryptMetadata(
-                file.magicMetadata.data,
-                file.magicMetadata.header,
-                file.key
-            );
+        let fileMagicMetadata: FileMagicMetadata;
+        let filePubMagicMetadata: FilePublicMagicMetadata;
+        if (magicMetadata?.data) {
+            fileMagicMetadata = {
+                ...file.magicMetadata,
+                data: await worker.decryptMetadata(
+                    magicMetadata.data,
+                    magicMetadata.header,
+                    fileKey
+                ),
+            };
         }
-        if (
-            file.pubMagicMetadata?.data &&
-            typeof file.pubMagicMetadata.data === 'string'
-        ) {
-            file.pubMagicMetadata.data = await worker.decryptMetadata(
-                file.pubMagicMetadata.data,
-                file.pubMagicMetadata.header,
-                file.key
-            );
+        if (pubMagicMetadata?.data) {
+            filePubMagicMetadata = {
+                ...pubMagicMetadata,
+                data: await worker.decryptMetadata(
+                    pubMagicMetadata.data,
+                    pubMagicMetadata.header,
+                    fileKey
+                ),
+            };
         }
-        return file;
+        return {
+            ...restFileProps,
+            key: fileKey,
+            metadata: fileMetadata,
+            magicMetadata: fileMagicMetadata,
+            pubMagicMetadata: filePubMagicMetadata,
+        };
     } catch (e) {
         logError(e, 'file decryption failed');
         throw e;
@@ -293,14 +307,25 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
                 file.metadata.title,
                 fileBlob
             );
-            return [URL.createObjectURL(convertedBlob)];
+            return {
+                converted: [URL.createObjectURL(convertedBlob)],
+                original: [URL.createObjectURL(fileBlob)],
+            };
         }
         case FILE_TYPE.LIVE_PHOTO: {
             const livePhoto = await getRenderableLivePhoto(file, fileBlob);
-            return livePhoto.map((asset) => URL.createObjectURL(asset));
+            return {
+                converted: livePhoto.map((asset) => URL.createObjectURL(asset)),
+                original: [URL.createObjectURL(fileBlob)],
+            };
         }
-        default:
-            return [URL.createObjectURL(fileBlob)];
+        default: {
+            const previewURL = URL.createObjectURL(fileBlob);
+            return {
+                converted: [previewURL],
+                original: [previewURL],
+            };
+        }
     }
 }
 
@@ -525,4 +550,47 @@ export const getUserOwnedNonTrashedFiles = (files: EnteFile[]) => {
         throw Error('user missing');
     }
     return files.filter((file) => file.isTrashed || file.ownerID === user.id);
+};
+
+// doesn't work on firefox
+export const copyFileToClipboard = async (fileUrl: string) => {
+    const canvas = document.createElement('canvas');
+    const canvasCTX = canvas.getContext('2d');
+    const image = new Image();
+
+    const blobPromise = new Promise<Blob>((resolve, reject) => {
+        let timeout: NodeJS.Timeout = null;
+        try {
+            image.setAttribute('src', fileUrl);
+            image.onload = () => {
+                canvas.width = image.width;
+                canvas.height = image.height;
+                canvasCTX.drawImage(image, 0, 0, image.width, image.height);
+                canvas.toBlob(
+                    (blob) => {
+                        resolve(blob);
+                    },
+                    'image/png',
+                    1
+                );
+
+                clearTimeout(timeout);
+            };
+        } catch (e) {
+            void logError(e, 'failed to copy to clipboard');
+            reject(e);
+        } finally {
+            clearTimeout(timeout);
+        }
+        timeout = setTimeout(
+            () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
+            WAIT_TIME_IMAGE_CONVERSION
+        );
+    });
+
+    const { ClipboardItem } = window;
+
+    await navigator.clipboard
+        .write([new ClipboardItem({ 'image/png': blobPromise })])
+        .catch((e) => logError(e, 'failed to copy to clipboard'));
 };

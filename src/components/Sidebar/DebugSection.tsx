@@ -7,6 +7,12 @@ import SidebarButton from './Button';
 import isElectron from 'is-electron';
 import ElectronService from 'services/electron/common';
 import Typography from '@mui/material/Typography';
+import { isInternalUser } from 'utils/user';
+import { testUpload } from '../../../tests/upload.test';
+import {
+    testZipFileReading,
+    testZipWithRootFileReadingTest,
+} from '../../../tests/zip-file-reading.test';
 
 export default function DebugSection() {
     const appContext = useContext(AppContext);
@@ -56,9 +62,22 @@ export default function DebugSection() {
                 {constants.DOWNLOAD_UPLOAD_LOGS}
             </SidebarButton>
             {appVersion && (
-                <Typography p={2} color="text.secondary" variant="caption">
+                <Typography p={1.5} color="text.secondary" variant="caption">
                     {appVersion}
                 </Typography>
+            )}
+            {isInternalUser() && (
+                <>
+                    <SidebarButton onClick={testUpload}>
+                        Test Upload
+                    </SidebarButton>
+                    <SidebarButton onClick={testZipFileReading}>
+                        Test Zip file reading
+                    </SidebarButton>
+                    <SidebarButton onClick={testZipWithRootFileReadingTest}>
+                        Zip with Root file Test
+                    </SidebarButton>
+                </>
             )}
         </>
     );

@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useContext } from 'react';
 import { VariableSizeList as List } from 'react-window';
-import { Box, styled } from '@mui/material';
+import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
 import {
     IMAGE_CONTAINER_MAX_HEIGHT,
@@ -15,16 +15,17 @@ import {
 import constants from 'utils/strings/constants';
 import { PublicCollectionGalleryContext } from 'utils/publicCollectionGallery';
 import { ENTE_WEBSITE_LINK } from 'constants/urls';
-import { getVariantColor, ButtonVariant } from './pages/gallery/LinkButton';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { DeduplicateContext } from 'pages/deduplicate';
 import { FlexWrapper } from './Container';
 import { Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import { SpecialPadding } from 'styles/SpecialPadding';
+import { formatDate } from 'utils/time/format';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
+const ALBUM_FOOTER_HEIGHT = 75;
 
 export enum ITEM_TYPE {
     TIME = 'TIME',
@@ -128,7 +129,6 @@ const SizeAndCountContainer = styled(DateContainer)`
 `;
 
 const FooterContainer = styled(ListItemContainer)`
-    font-size: 14px;
     margin-bottom: 0.75rem;
     @media (max-width: 540px) {
         font-size: 12px;
@@ -139,6 +139,13 @@ const FooterContainer = styled(ListItemContainer)`
     justify-content: center;
     align-items: flex-end;
     margin-top: calc(2rem + 20px);
+`;
+
+const AlbumFooterContainer = styled(ListItemContainer)`
+    margin-top: 48px;
+    margin-bottom: 10px;
+    text-align: center;
+    justify-content: center;
 `;
 
 const NothingContainer = styled(ListItemContainer)`
@@ -226,11 +233,18 @@ export function PhotoList({
         if (timeStampList.length === 1) {
             timeStampList.push(getEmptyListItem());
         }
+        timeStampList.push(getVacuumItem(timeStampList));
+        if (publicCollectionGalleryContext.photoListFooter) {
+            timeStampList.push(
+                getPhotoListFooter(
+                    publicCollectionGalleryContext.photoListFooter
+                )
+            );
+        }
         if (
             showAppDownloadBanner ||
             publicCollectionGalleryContext.accessedThroughSharedURL
         ) {
-            timeStampList.push(getVacuumItem(timeStampList));
             if (publicCollectionGalleryContext.accessedThroughSharedURL) {
                 timeStampList.push(getAlbumsFooter());
             } else {
@@ -248,6 +262,7 @@ export function PhotoList({
         showAppDownloadBanner,
         publicCollectionGalleryContext.accessedThroughSharedURL,
         galleryContext.photoListHeader,
+        publicCollectionGalleryContext.photoListFooter,
         publicCollectionGalleryContext.photoListHeader,
         deduplicateContext.isOnDeduplicatePage,
         deduplicateContext.fileSizeMap,
@@ -305,22 +320,17 @@ export function PhotoList({
                 )
             ) {
                 currentDate = item.metadata.creationTime / 1000;
-                const dateTimeFormat = new Intl.DateTimeFormat('en-IN', {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                });
+
                 timeStampList.push({
                     itemType: ITEM_TYPE.TIME,
                     date: isSameDay(new Date(currentDate), new Date())
-                        ? 'Today'
+                        ? constants.TODAY
                         : isSameDay(
                               new Date(currentDate),
                               new Date(Date.now() - A_DAY)
                           )
-                        ? 'Yesterday'
-                        : dateTimeFormat.format(currentDate),
+                        ? constants.YESTERDAY
+                        : formatDate(currentDate),
                     id: currentDate.toString(),
                 });
                 timeStampList.push({
@@ -359,6 +369,17 @@ export function PhotoList({
         };
     };
 
+    const getPhotoListFooter = (photoListFooter) => {
+        return {
+            ...photoListFooter,
+            item: (
+                <ListItemContainer span={columns}>
+                    {photoListFooter.item}
+                </ListItemContainer>
+            ),
+        };
+    };
+
     const getEmptyListItem = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
@@ -372,12 +393,17 @@ export function PhotoList({
         };
     };
     const getVacuumItem = (timeStampList) => {
+        const footerHeight =
+            publicCollectionGalleryContext.accessedThroughSharedURL
+                ? ALBUM_FOOTER_HEIGHT +
+                  (publicCollectionGalleryContext.photoListFooter?.height ?? 0)
+                : FOOTER_HEIGHT;
         const photoFrameHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
                 sum += getCurrentItemSize(i);
-                if (height - sum <= FOOTER_HEIGHT) {
+                if (height - sum <= footerHeight) {
                     break;
                 }
             }
@@ -386,7 +412,7 @@ export function PhotoList({
         return {
             itemType: ITEM_TYPE.OTHER,
             item: <></>,
-            height: Math.max(height - photoFrameHeight - FOOTER_HEIGHT, 0),
+            height: Math.max(height - photoFrameHeight - footerHeight, 0),
         };
     };
 
@@ -396,7 +422,9 @@ export function PhotoList({
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
-                    <Typography>{constants.INSTALL_MOBILE_APP()}</Typography>
+                    <Typography variant="body2">
+                        {constants.INSTALL_MOBILE_APP()}
+                    </Typography>
                 </FooterContainer>
             ),
         };
@@ -405,22 +433,16 @@ export function PhotoList({
     const getAlbumsFooter = () => {
         return {
             itemType: ITEM_TYPE.OTHER,
-            height: FOOTER_HEIGHT,
+            height: ALBUM_FOOTER_HEIGHT,
             item: (
-                <FooterContainer span={columns}>
-                    <p>
-                        {constants.PRESERVED_BY}{' '}
-                        <a
-                            target="_blank"
-                            style={{
-                                color: getVariantColor(ButtonVariant.success),
-                            }}
-                            href={ENTE_WEBSITE_LINK}
-                            rel="noreferrer">
+                <AlbumFooterContainer span={columns}>
+                    <Typography variant="body2">
+                        {constants.SHARED_USING}{' '}
+                        <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {constants.ENTE_IO}
-                        </a>
-                    </p>
-                </FooterContainer>
+                        </Link>
+                    </Typography>
+                </AlbumFooterContainer>
             ),
         };
     };

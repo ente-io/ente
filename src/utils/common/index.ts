@@ -84,3 +84,7 @@ function isPromise(p: any) {
 
     return false;
 }
+
+export function isClipboardItemPresent() {
+    return typeof ClipboardItem !== 'undefined';
+}

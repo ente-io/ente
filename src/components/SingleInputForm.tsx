@@ -6,7 +6,7 @@ import SubmitButton from './SubmitButton';
 import TextField from '@mui/material/TextField';
 import ShowHidePassword from './Form/ShowHidePassword';
 import { FlexWrapper } from './Container';
-import { Button } from '@mui/material';
+import { Button, FormHelperText } from '@mui/material';
 
 interface formValues {
     inputValue: string;
@@ -24,8 +24,11 @@ export interface SingleInputFormProps {
     secondaryButtonAction?: () => void;
     disableAutoFocus?: boolean;
     hiddenPreInput?: any;
+    caption?: any;
     hiddenPostInput?: any;
     autoComplete?: string;
+    blockButton?: boolean;
+    hiddenLabel?: boolean;
 }
 
 export default function SingleInputForm(props: SingleInputFormProps) {
@@ -86,12 +89,15 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                 <form noValidate onSubmit={handleSubmit}>
                     {props.hiddenPreInput}
                     <TextField
+                        hiddenLabel={props.hiddenLabel}
                         variant="filled"
                         fullWidth
                         type={showPassword ? 'text' : props.fieldType}
                         id={props.fieldType}
                         name={props.fieldType}
-                        label={props.placeholder}
+                        {...(props.hiddenLabel
+                            ? { placeholder: props.placeholder }
+                            : { label: props.placeholder })}
                         value={values.inputValue}
                         onChange={handleChange('inputValue')}
                         error={Boolean(errors.inputValue)}
@@ -113,22 +119,45 @@ export default function SingleInputForm(props: SingleInputFormProps) {
                             ),
                         }}
                     />
+                    <FormHelperText
+                        sx={{
+                            position: 'relative',
+                            top: errors.inputValue ? '-22px' : '0',
+                            float: 'right',
+                            padding: '0 8px',
+                        }}>
+                        {props.caption}
+                    </FormHelperText>
                     {props.hiddenPostInput}
-                    <FlexWrapper justifyContent={'flex-end'}>
+                    <FlexWrapper
+                        justifyContent={'flex-end'}
+                        flexWrap={
+                            props.blockButton ? 'wrap-reverse' : 'nowrap'
+                        }>
                         {props.secondaryButtonAction && (
                             <Button
                                 onClick={props.secondaryButtonAction}
                                 size="large"
                                 color="secondary"
                                 sx={{
-                                    '&&&': { mt: 2, mb: 4, mr: 1, ...buttonSx },
+                                    '&&&': {
+                                        mt: !props.blockButton ? 2 : 0.5,
+                                        mb: !props.blockButton ? 4 : 0,
+                                        mr: !props.blockButton ? 1 : 0,
+                                        ...buttonSx,
+                                    },
                                 }}
                                 {...restSubmitButtonProps}>
                                 {constants.CANCEL}
                             </Button>
                         )}
                         <SubmitButton
-                            sx={{ '&&&': { mt: 2, ...buttonSx } }}
+                            sx={{
+                                '&&&': {
+                                    mt: 2,
+                                    ...buttonSx,
+                                },
+                            }}
                             buttonText={props.buttonText}
                             loading={loading}
                             {...restSubmitButtonProps}

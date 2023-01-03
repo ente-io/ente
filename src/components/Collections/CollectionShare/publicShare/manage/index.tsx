@@ -1,12 +1,11 @@
 import { ManageLinkPassword } from './linkPassword';
 import { ManageDeviceLimit } from './deviceLimit';
 import { ManageLinkExpiry } from './linkExpiry';
-import { PublicLinkSetPassword } from '../setPassword';
 import { Stack, Typography } from '@mui/material';
 import { GalleryContext } from 'pages/gallery';
 import React, { useContext, useState } from 'react';
 import { updateShareableURL } from 'services/collectionService';
-import { UpdatePublicURL } from 'types/collection';
+import { Collection, PublicURL, UpdatePublicURL } from 'types/collection';
 import { sleep } from 'utils/common';
 import constants from 'utils/strings/constants';
 import {
@@ -15,18 +14,23 @@ import {
 } from '../../styledComponents';
 import { ManageDownloadAccess } from './downloadAccess';
 import { handleSharingErrors } from 'utils/error/ui';
+import { SetPublicShareProp } from 'types/publicCollection';
+import { ManagePublicCollect } from './publicCollect';
+
+interface Iprops {
+    publicShareProp: PublicURL;
+    collection: Collection;
+    setPublicShareProp: SetPublicShareProp;
+}
 
 export default function PublicShareManage({
     publicShareProp,
     collection,
     setPublicShareProp,
-}) {
+}: Iprops) {
     const galleryContext = useContext(GalleryContext);
 
-    const [changePasswordView, setChangePasswordView] = useState(false);
     const [sharableLinkError, setSharableLinkError] = useState(null);
-
-    const closeConfigurePassword = () => setChangePasswordView(false);
 
     const updatePublicShareURLHelper = async (req: UpdatePublicURL) => {
         try {
@@ -73,6 +77,13 @@ export default function PublicShareManage({
                                 updatePublicShareURLHelper
                             }
                         />
+                        <ManagePublicCollect
+                            collection={collection}
+                            publicShareProp={publicShareProp}
+                            updatePublicShareURLHelper={
+                                updatePublicShareURLHelper
+                            }
+                        />
                         <ManageDownloadAccess
                             collection={collection}
                             publicShareProp={publicShareProp}
@@ -81,7 +92,6 @@ export default function PublicShareManage({
                             }
                         />
                         <ManageLinkPassword
-                            setChangePasswordView={setChangePasswordView}
                             collection={collection}
                             publicShareProp={publicShareProp}
                             updatePublicShareURLHelper={
@@ -102,14 +112,6 @@ export default function PublicShareManage({
                     )}
                 </ManageSectionOptions>
             </details>
-            <PublicLinkSetPassword
-                open={changePasswordView}
-                onClose={closeConfigurePassword}
-                collection={collection}
-                publicShareProp={publicShareProp}
-                updatePublicShareURLHelper={updatePublicShareURLHelper}
-                setChangePasswordView={setChangePasswordView}
-            />
         </>
     );
 }

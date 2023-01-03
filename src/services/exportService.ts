@@ -244,10 +244,7 @@ class ExportService {
                         file,
                         RecordType.FAILED
                     );
-                    console.log(
-                        `export failed for fileID:${file.id}, reason:`,
-                        e
-                    );
+
                     logError(
                         e,
                         'download and save failed for file during export'
@@ -624,7 +621,6 @@ class ExportService {
                 oldFileSavePath,
                 newFileSavePath
             );
-            console.log(oldFileMetadataSavePath, newFileMetadataSavePath);
             await this.electronAPIs.checkExistsAndRename(
                 oldFileMetadataSavePath,
                 newFileMetadataSavePath

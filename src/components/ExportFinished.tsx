@@ -1,8 +1,8 @@
 import { Button, DialogActions, DialogContent, Stack } from '@mui/material';
 import React from 'react';
 import { ExportStats } from 'types/export';
-import { formatDateTime } from 'utils/time';
 import constants from 'utils/strings/constants';
+import { formatDateTime } from 'utils/time/format';
 import { FlexWrapper, Label, Value } from './Container';
 import { ComfySpan } from './ExportInProgress';
 
