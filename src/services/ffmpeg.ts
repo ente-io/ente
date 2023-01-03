@@ -9,9 +9,9 @@ import { existsSync } from 'fs';
 
 const execAsync = util.promisify(require('child_process').exec);
 
-export const INPUT_PATH_PLACEHOLDER = 'INPUT';
-export const FFMPEG_PLACEHOLDER = 'FFMPEG';
-export const OUTPUT_PATH_PLACEHOLDER = 'OUTPUT';
+const INPUT_PATH_PLACEHOLDER = 'INPUT';
+const FFMPEG_PLACEHOLDER = 'FFMPEG';
+const OUTPUT_PATH_PLACEHOLDER = 'OUTPUT';
 
 function getFFmpegStaticPath() {
     return pathToFfmpeg.replace('app.asar', 'app.asar.unpacked');
