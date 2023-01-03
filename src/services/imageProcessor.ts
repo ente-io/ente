@@ -230,11 +230,17 @@ function constructThumbnailGenerationCommand(
                 if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
                     return tempOutputFilePath;
                 }
-                if (cmdPart === SAMPLE_SIZE_PLACEHOLDER) {
-                    return (2 * maxDimension).toString();
+                if (cmdPart.includes(SAMPLE_SIZE_PLACEHOLDER)) {
+                    return cmdPart.replaceAll(
+                        SAMPLE_SIZE_PLACEHOLDER,
+                        (2 * maxDimension).toString()
+                    );
                 }
-                if (cmdPart === MAX_DIMENSION_PLACEHOLDER) {
-                    return maxDimension.toString();
+                if (cmdPart.includes(MAX_DIMENSION_PLACEHOLDER)) {
+                    return cmdPart.replaceAll(
+                        MAX_DIMENSION_PLACEHOLDER,
+                        maxDimension.toString()
+                    );
                 }
                 return cmdPart;
             });
