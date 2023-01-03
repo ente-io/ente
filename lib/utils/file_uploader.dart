@@ -282,9 +282,11 @@ class FileUploader {
       return;
     }
     final connectivityResult = await (Connectivity().checkConnectivity());
-    final canUploadUnderCurrentNetworkConditions =
-        (connectivityResult == ConnectivityResult.wifi ||
-            Configuration.instance.shouldBackupOverMobileData());
+    bool canUploadUnderCurrentNetworkConditions = true;
+    if (connectivityResult == ConnectivityResult.mobile) {
+      canUploadUnderCurrentNetworkConditions =
+          Configuration.instance.shouldBackupOverMobileData();
+    }
     if (!canUploadUnderCurrentNetworkConditions) {
       throw WiFiUnavailableError();
     }
