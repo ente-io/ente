@@ -106,20 +106,15 @@ class CollectionsService {
     final updatedCollections = <Collection>[];
     int maxUpdationTime = lastCollectionUpdationTime;
     final ownerID = _config.getUserID();
+    bool fireEventForCollectionDeleted = false;
     for (final collection in fetchedCollections) {
       if (collection.isDeleted) {
         await _filesDB.deleteCollection(collection.id);
         await setCollectionSyncTime(collection.id, null);
         if (_collectionIDToCollections.containsKey(collection.id)) {
-          Bus.instance.fire(
-            LocalPhotosUpdatedEvent(
-              List<File>.empty(),
-              source: "syncCollectionDeleted",
-            ),
-          );
+          fireEventForCollectionDeleted = true;
         }
       }
-
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection.owner?.id) {
         await _db.deleteCollection(collection.id);
@@ -131,6 +126,14 @@ class CollectionsService {
       maxUpdationTime = collection.updationTime > maxUpdationTime
           ? collection.updationTime
           : maxUpdationTime;
+    }
+    if (fireEventForCollectionDeleted) {
+      Bus.instance.fire(
+        LocalPhotosUpdatedEvent(
+          List<File>.empty(),
+          source: "syncCollectionDeleted",
+        ),
+      );
     }
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
@@ -1116,6 +1119,7 @@ class CollectionsService {
     try {
       await _db.insert(collections);
     } catch (e) {
+      _logger.severe("Failed to update collections", e);
       if (attempt < kMaximumWriteAttempts) {
         return _updateDB(collections, attempt: ++attempt);
       } else {

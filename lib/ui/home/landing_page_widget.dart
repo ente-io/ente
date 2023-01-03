@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:dots_indicator/dots_indicator.dart';
@@ -12,8 +10,10 @@ import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
 import 'package:photos/ui/account/password_reentry_page.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
 
 class LandingPageWidget extends StatefulWidget {
@@ -153,7 +153,7 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
     );
   }
 
-  void _navigateToSignUpPage() {
+  Future<void> _navigateToSignUpPage() async {
     UpdateService.instance.hideChangeLog().ignore();
     UserRemoteFlagService.instance.stopPasswordReminder().ignore();
     Widget page;
@@ -212,17 +212,23 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
   Future<void> _showAutoLogoutDialogIfRequired() async {
     final bool autoLogout = Configuration.instance.showAutoLogoutDialog();
     if (autoLogout) {
-      final result = await showChoiceDialog(
-        context,
-        "Please login again",
-        '''Unfortunately, the ente app had to log you out because of some technical issues. Sorry!\n\nPlease login again.''',
-        firstAction: "Cancel",
-        secondAction: "Login",
+      final ButtonAction? result = await showDialogWidget(
+        context: context,
+        title: "Please login again",
+        body: "The developer account we use to publish ente on App Store has "
+            "changed. Because of this, you will need to login again.\n\nOur "
+            "apologies for the inconvenience, but this was unavoidable.",
+        buttons: const [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            buttonAction: ButtonAction.first,
+            labelText: "Ok",
+            isInAlert: true,
+          ),
+        ],
       );
-      if (result != null) {
-        await Configuration.instance.clearAutoLogoutFlag();
-      }
-      if (result == DialogUserChoice.secondChoice) {
+      Configuration.instance.clearAutoLogoutFlag().ignore();
+      if (result != null && result == ButtonAction.first) {
         _navigateToSignInPage();
       }
     }
