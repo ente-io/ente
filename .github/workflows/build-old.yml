@@ -15,12 +15,12 @@ jobs:
 
         steps:
             - name: Check out Git repository
-              uses: actions/checkout@v2
+              uses: actions/checkout@v3
               with:
                   submodules: recursive
 
             - name: Install Node.js, NPM and Yarn
-              uses: actions/setup-node@v2.1.5
+              uses: actions/setup-node@v3
               with:
                   node-version: 16
 
@@ -38,6 +38,7 @@ jobs:
             - name: Electron Builder Action
               uses: samuelmeuli/action-electron-builder@v1.6.0
               with:
+                  node-version: 16
                   # GitHub token, automatically provided to the action
                   # (No need to define this secret in the repo settings)
                   github_token: ${{ secrets.github_token }}
