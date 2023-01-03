@@ -159,9 +159,7 @@ export async function generateImageThumbnailUsingCanvas(
             WAIT_TIME_THUMBNAIL_GENERATION
         );
     });
-    const thumbnailBlob = await getSizeRestrictedThumbnailBlobFromCanvas(
-        canvas
-    );
+    const thumbnailBlob = await getCompressedThumbnailBlobFromCanvas(canvas);
     return await getUint8ArrayView(thumbnailBlob);
 }
 
@@ -247,15 +245,11 @@ export async function generateVideoThumbnailUsingCanvas(
             WAIT_TIME_THUMBNAIL_GENERATION
         );
     });
-    const thumbnailBlob = await getSizeRestrictedThumbnailBlobFromCanvas(
-        canvas
-    );
+    const thumbnailBlob = await getCompressedThumbnailBlobFromCanvas(canvas);
     return await getUint8ArrayView(thumbnailBlob);
 }
 
-async function getSizeRestrictedThumbnailBlobFromCanvas(
-    canvas: HTMLCanvasElement
-) {
+async function getCompressedThumbnailBlobFromCanvas(canvas: HTMLCanvasElement) {
     let thumbnailBlob: Blob = null;
     let prevSize = Number.MAX_SAFE_INTEGER;
     let quality = MAX_QUALITY;
