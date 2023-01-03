@@ -8,8 +8,56 @@ import { logErrorSentry } from './sentry';
 import { isPlatform } from '../utils/main';
 import { isDev } from '../utils/common';
 import path from 'path';
+import log from 'electron-log';
+const shellescape = require('any-shell-escape');
 
 const asyncExec = util.promisify(exec);
+
+const IMAGE_MAGICK_PLACEHOLDER = 'IMAGE_MAGICK';
+const MAX_DIMENSION_PLACEHOLDER = 'MAX_DIMENSION';
+const SAMPLE_SIZE_PLACEHOLDER = 'SAMPLE_SIZE';
+const INPUT_PATH_PLACEHOLDER = 'INPUT';
+const OUTPUT_PATH_PLACEHOLDER = 'OUTPUT';
+
+const SIPS_HEIC_CONVERT_COMMAND_TEMPLATE = [
+    'sips',
+    '-s',
+    'format',
+    'jpeg',
+    INPUT_PATH_PLACEHOLDER,
+    '--out',
+    OUTPUT_PATH_PLACEHOLDER,
+];
+
+const SIPS_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
+    'sips',
+    '-s',
+    'format',
+    'jpeg',
+    INPUT_PATH_PLACEHOLDER,
+    '-Z',
+    MAX_DIMENSION_PLACEHOLDER,
+    '--out',
+    OUTPUT_PATH_PLACEHOLDER,
+];
+
+const IMAGEMAGICK_HEIC_CONVERT_COMMAND_TEMPLATE = [
+    IMAGE_MAGICK_PLACEHOLDER,
+    INPUT_PATH_PLACEHOLDER,
+    '-quality',
+    '100%',
+    OUTPUT_PATH_PLACEHOLDER,
+];
+
+const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
+    IMAGE_MAGICK_PLACEHOLDER,
+    '-define',
+    `jpeg:size=${SAMPLE_SIZE_PLACEHOLDER}x${SAMPLE_SIZE_PLACEHOLDER}`,
+    INPUT_PATH_PLACEHOLDER,
+    '-thumbnail',
+    `${MAX_DIMENSION_PLACEHOLDER}x${MAX_DIMENSION_PLACEHOLDER}>`,
+    OUTPUT_PATH_PLACEHOLDER,
+];
 
 function getImageMagickStaticPath() {
     return isDev
@@ -58,17 +106,49 @@ async function runConvertCommand(
     tempInputFilePath: string,
     tempOutputFilePath: string
 ) {
+    const convertCmd = constructConvertCommand(
+        tempInputFilePath,
+        tempOutputFilePath
+    );
+    const escapedCmd = shellescape(convertCmd);
+    log.info('running convert command: ' + escapedCmd);
+    await asyncExec(escapedCmd);
+}
+
+function constructConvertCommand(
+    tempInputFilePath: string,
+    tempOutputFilePath: string
+) {
+    let convertCmd: string[];
     if (isPlatform('mac')) {
-        await asyncExec(
-            `sips -s format jpeg "${tempInputFilePath}" --out "${tempOutputFilePath}"`
-        );
+        convertCmd = SIPS_HEIC_CONVERT_COMMAND_TEMPLATE.map((cmdPart) => {
+            if (cmdPart === INPUT_PATH_PLACEHOLDER) {
+                return tempInputFilePath;
+            }
+            if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
+                return tempOutputFilePath;
+            }
+            return cmdPart;
+        });
     } else if (isPlatform('linux')) {
-        await asyncExec(
-            `${getImageMagickStaticPath()} "${tempInputFilePath}" -quality 100% "${tempOutputFilePath}"`
+        convertCmd = IMAGEMAGICK_HEIC_CONVERT_COMMAND_TEMPLATE.map(
+            (cmdPart) => {
+                if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
+                    return getImageMagickStaticPath();
+                }
+                if (cmdPart === INPUT_PATH_PLACEHOLDER) {
+                    return tempInputFilePath;
+                }
+                if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
+                    return tempOutputFilePath;
+                }
+                return cmdPart;
+            }
         );
     } else {
         Error(`${process.platform} native heic convert not supported yet`);
     }
+    return convertCmd;
 }
 
 export async function generateImageThumbnail(
@@ -107,20 +187,61 @@ async function runThumbnailGenerationCommand(
     tempOutputFilePath: string,
     maxDimension: number
 ) {
+    const thumbnailGenerationCmd: string[] =
+        constructThumbnailGenerationCommand(
+            inputFilePath,
+            tempOutputFilePath,
+            maxDimension
+        );
+    const escapedCmd = shellescape(thumbnailGenerationCmd);
+    log.info('running thumbnail generation command: ' + escapedCmd);
+    await asyncExec(escapedCmd);
+}
+function constructThumbnailGenerationCommand(
+    inputFilePath: string,
+    tempOutputFilePath: string,
+    maxDimension: number
+) {
+    let thumbnailGenerationCmd: string[];
     if (isPlatform('mac')) {
-        await asyncExec(
-            `sips -s format jpeg -Z ${maxDimension}  "${inputFilePath}" --out "${tempOutputFilePath}" `
+        thumbnailGenerationCmd = SIPS_THUMBNAIL_GENERATE_COMMAND_TEMPLATE.map(
+            (cmdPart) => {
+                if (cmdPart === INPUT_PATH_PLACEHOLDER) {
+                    return inputFilePath;
+                }
+                if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
+                    return tempOutputFilePath;
+                }
+                if (cmdPart === MAX_DIMENSION_PLACEHOLDER) {
+                    return maxDimension.toString();
+                }
+                return cmdPart;
+            }
         );
     } else if (isPlatform('linux')) {
-        await asyncExec(
-            `${getImageMagickStaticPath()} -define jpeg:size=${
-                2 * maxDimension
-            }x${2 * maxDimension}  "${inputFilePath}"  -auto-orient   
-                -thumbnail ${maxDimension}x${maxDimension}> -gravity center -unsharp 0x.5  "${tempOutputFilePath}"`
-        );
+        thumbnailGenerationCmd =
+            IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE.map((cmdPart) => {
+                if (cmdPart === IMAGE_MAGICK_PLACEHOLDER) {
+                    return getImageMagickStaticPath();
+                }
+                if (cmdPart === INPUT_PATH_PLACEHOLDER) {
+                    return inputFilePath;
+                }
+                if (cmdPart === OUTPUT_PATH_PLACEHOLDER) {
+                    return tempOutputFilePath;
+                }
+                if (cmdPart === SAMPLE_SIZE_PLACEHOLDER) {
+                    return (2 * maxDimension).toString();
+                }
+                if (cmdPart === MAX_DIMENSION_PLACEHOLDER) {
+                    return maxDimension.toString();
+                }
+                return cmdPart;
+            });
     } else {
         Error(
             `${process.platform} native thumbnail generation not supported yet`
         );
     }
+    return thumbnailGenerationCmd;
 }
