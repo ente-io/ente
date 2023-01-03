@@ -156,17 +156,24 @@ class CollectionsDB {
     ];
   }
 
-  Future<List<dynamic>> insert(List<Collection> collections) async {
+  Future<void> insert(List<Collection> collections) async {
     final db = await instance.database;
-    final batch = db.batch();
+    var batch = db.batch();
+    int batchCounter = 0;
     for (final collection in collections) {
+      if (batchCounter == 400) {
+        await batch.commit(noResult: true);
+        batch = db.batch();
+        batchCounter = 0;
+      }
       batch.insert(
         table,
         _getRowForCollection(collection),
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
+      batchCounter++;
     }
-    return await batch.commit();
+    await batch.commit(noResult: true);
   }
 
   Future<List<Collection>> getAllCollections() async {
