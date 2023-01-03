@@ -60,11 +60,11 @@ async function runConvertCommand(
 ) {
     if (isPlatform('mac')) {
         await asyncExec(
-            `sips -s format jpeg ${tempInputFilePath} --out ${tempOutputFilePath}`
+            `sips -s format jpeg "${tempInputFilePath}" --out "${tempOutputFilePath}"`
         );
     } else if (isPlatform('linux')) {
         await asyncExec(
-            `${getImageMagickStaticPath()} ${tempInputFilePath} -quality 100% ${tempOutputFilePath}`
+            `${getImageMagickStaticPath()} "${tempInputFilePath}" -quality 100% "${tempOutputFilePath}"`
         );
     } else {
         Error(`${process.platform} native heic convert not supported yet`);
@@ -111,14 +111,14 @@ async function runThumbnailGenerationCommand(
 ) {
     if (isPlatform('mac')) {
         await asyncExec(
-            `sips -s format jpeg -Z ${maxDimension} ${inputFilePath} --out ${tempOutputFilePath} `
+            `sips -s format jpeg -Z ${maxDimension}  "${inputFilePath}" --out "${tempOutputFilePath}" `
         );
     } else if (isPlatform('linux')) {
         await asyncExec(
             `${getImageMagickStaticPath()} -define jpeg:size=${
                 2 * maxDimension
-            }x${2 * maxDimension}  ${inputFilePath}  -auto-orient   
-                -thumbnail ${maxDimension}x${maxDimension}> -gravity center -unsharp 0x.5  ${tempOutputFilePath}`
+            }x${2 * maxDimension}  "${inputFilePath}"  -auto-orient   
+                -thumbnail ${maxDimension}x${maxDimension}> -gravity center -unsharp 0x.5  "${tempOutputFilePath}"`
         );
     } else {
         Error(
