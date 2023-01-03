@@ -258,12 +258,6 @@ class LocalSyncService {
     }
   }
 
-  Future<void> trackDownloadedFile(String localID) async {
-    final downloadedIDs = _getDownloadedFileIDs();
-    downloadedIDs.add(localID);
-    await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
-  }
-
   List<String> _getDownloadedFileIDs() {
     if (_prefs.containsKey(kDownloadedFileIDsKey)) {
       return _prefs.getStringList(kDownloadedFileIDsKey);
