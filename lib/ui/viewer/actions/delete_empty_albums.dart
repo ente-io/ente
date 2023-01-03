@@ -37,7 +37,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
         onTap: () async {
           await showActionSheet(
             context: context,
-            isDismissible: false,
+            isDismissible: true,
             buttons: [
               ButtonWidget(
                 labelText: "Yes",
@@ -91,7 +91,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
     for (int i = 0; i < collections.length; i++) {
       if (mounted && !_isCancelled) {
         _deleteProgress.value =
-            "Deleting ${(i + 1).toString().padLeft(collections.length.toString().length, '0')}/ "
+            "Deleting ${(i + 1).toString().padLeft(collections.length.toString().length, '0')} / "
             "${collections.length} ";
         try {
           await CollectionsService.instance
