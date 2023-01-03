@@ -32,7 +32,6 @@ class SocialSectionWidget extends StatelessWidget {
     );
     options.addAll(
       [
-        sectionOptionSpacing,
         const SocialsMenuItemWidget("Blog", "https://ente.io/blog"),
         sectionOptionSpacing,
         const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
