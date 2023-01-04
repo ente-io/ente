@@ -279,6 +279,7 @@ class UserService {
         Widget page;
         final String twoFASessionID = response.data["twoFactorSessionID"];
         if (twoFASessionID.isNotEmpty) {
+          setTwoFactor(value: true);
           page = TwoFactorAuthenticationPage(twoFASessionID);
         } else {
           await _saveConfiguration(response);
