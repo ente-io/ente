@@ -412,6 +412,9 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
+    //Disabling notifications for assets changing to insert the file into
+    //files db before triggering a sync.
+    PhotoManager.stopChangeNotify();
     try {
       final FileType type = file.fileType;
       final bool downloadLivePhotoOnDroid =
@@ -459,6 +462,8 @@ class FadingAppBarState extends State<FadingAppBar> {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
       showGenericErrorDialog(context: context);
+    } finally {
+      PhotoManager.startChangeNotify();
     }
   }
 
