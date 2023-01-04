@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
@@ -12,7 +10,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
 
   const ArchivedCollectionsButtonWidget(
     this.textStyle, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -26,7 +24,7 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
-          color: Theme.of(context).iconTheme.color.withOpacity(0.24),
+          color: Theme.of(context).iconTheme.color!.withOpacity(0.24),
         ),
       ),
       child: SizedBox(
@@ -47,10 +45,10 @@ class ArchivedCollectionsButtonWidget extends StatelessWidget {
                   FutureBuilder<int>(
                     future: FilesDB.instance.fileCountWithVisibility(
                       visibilityArchive,
-                      Configuration.instance.getUserID(),
+                      Configuration.instance.getUserID()!,
                     ),
                     builder: (context, snapshot) {
-                      if (snapshot.hasData && snapshot.data > 0) {
+                      if (snapshot.hasData && snapshot.data! > 0) {
                         return RichText(
                           text: TextSpan(
                             style: textStyle,

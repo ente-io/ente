@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/gestures.dart';
@@ -9,7 +9,7 @@ import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/common/web_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key key}) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -18,8 +18,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _config = Configuration.instance;
   bool _emailIsValid = false;
-  String _email;
-  Color _emailInputFieldColor;
+  String? _email;
+  Color? _emailInputFieldColor;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -57,9 +57,9 @@ class _LoginPageState extends State<LoginPage> {
         isFormValid: _emailIsValid,
         buttonText: 'Log in',
         onPressedFunction: () {
-          UserService.instance.setEmail(_email);
+          UserService.instance.setEmail(_email!);
           UserService.instance
-              .sendOtt(context, _email, isCreateAccountScreen: false);
+              .sendOtt(context, _email!, isCreateAccountScreen: false);
           FocusScope.of(context).unfocus();
         },
       ),
@@ -105,7 +105,7 @@ class _LoginPageState extends State<LoginPage> {
                               size: 20,
                               color: Theme.of(context)
                                   .inputDecorationTheme
-                                  .focusedBorder
+                                  .focusedBorder!
                                   .borderSide
                                   .color,
                             )
@@ -114,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                     onChanged: (value) {
                       setState(() {
                         _email = value.trim();
-                        _emailIsValid = EmailValidator.validate(_email);
+                        _emailIsValid = EmailValidator.validate(_email!);
                         if (_emailIsValid) {
                           _emailInputFieldColor =
                               const Color.fromRGBO(45, 194, 98, 0.2);
@@ -145,7 +145,7 @@ class _LoginPageState extends State<LoginPage> {
                           text: TextSpan(
                             style: Theme.of(context)
                                 .textTheme
-                                .subtitle1
+                                .subtitle1!
                                 .copyWith(fontSize: 12),
                             children: [
                               const TextSpan(

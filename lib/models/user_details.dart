@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
@@ -62,6 +63,22 @@ class UserDetails {
       FamilyData.fromMap(map['familyData']),
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'email': email,
+      'usage': usage,
+      'fileCount': fileCount,
+      'sharedCollectionsCount': sharedCollectionsCount,
+      'subscription': subscription.toMap(),
+      'familyData': familyData?.toMap(),
+    };
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory UserDetails.fromJson(String source) =>
+      UserDetails.fromMap(json.decode(source));
 }
 
 class FamilyMember {
@@ -70,7 +87,12 @@ class FamilyMember {
   final String id;
   final bool isAdmin;
 
-  FamilyMember(this.email, this.usage, this.id, this.isAdmin);
+  FamilyMember(
+    this.email,
+    this.usage,
+    this.id,
+    this.isAdmin,
+  );
 
   factory FamilyMember.fromMap(Map<String, dynamic> map) {
     return FamilyMember(
@@ -80,6 +102,20 @@ class FamilyMember {
       map['isAdmin'] as bool,
     );
   }
+
+
+  Map<String, dynamic> toMap() {
+    return {
+      'email': email,
+      'usage': usage,
+      'id': id,
+      'isAdmin': isAdmin,
+    };
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory FamilyMember.fromJson(String source) => FamilyMember.fromMap(json.decode(source));
 }
 
 class FamilyData {
@@ -89,7 +125,11 @@ class FamilyData {
   final int storage;
   final int expiryTime;
 
-  FamilyData(this.members, this.storage, this.expiryTime);
+  FamilyData(
+    this.members,
+    this.storage,
+    this.expiryTime,
+  );
 
   int getTotalUsage() {
     return members!.map((e) => e.usage).toList().sum;
@@ -107,6 +147,18 @@ class FamilyData {
       map['expiryTime'] as int,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'members': members?.map((x) => x.toMap()).toList(),
+      'storage': storage,
+      'expiryTime': expiryTime,
+    };
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory FamilyData.fromJson(String source) => FamilyData.fromMap(json.decode(source));
 }
 
 class FilesCount {

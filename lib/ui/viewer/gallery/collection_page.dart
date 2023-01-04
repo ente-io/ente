@@ -1,12 +1,10 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
-import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection_items.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
@@ -27,7 +25,7 @@ class CollectionPage extends StatefulWidget {
     this.tagPrefix = "collection",
     this.appBarType = GalleryType.ownedCollection,
     this.hasVerifiedLock = false,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -37,15 +35,12 @@ class CollectionPage extends StatefulWidget {
 class _CollectionPageState extends State<CollectionPage> {
   final _selectedFiles = SelectedFiles();
 
-  bool _isCollectionOwner = false;
   final GlobalKey shareButtonKey = GlobalKey();
   final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
 
   @override
   void initState() {
     _selectedFiles.addListener(_selectedFilesListener);
-    _isCollectionOwner =
-        Configuration.instance.getUserID() == widget.c.collection.owner.id;
     super.initState();
   }
 
@@ -60,8 +55,8 @@ class _CollectionPageState extends State<CollectionPage> {
     if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
       return const EmptyState();
     }
-    final initialFiles =
-        widget.c.thumbnail != null ? [widget.c.thumbnail] : null;
+    final List<File>? initialFiles =
+        widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result =

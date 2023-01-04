@@ -93,7 +93,7 @@ class _PasswordReminderState extends State<PasswordReminder> {
         );
       }
     } catch (e) {
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return;
     }
   }

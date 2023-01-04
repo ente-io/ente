@@ -38,6 +38,12 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
+  ///Setting this flag to false will restrict the loading and success states of
+  ///the button from surfacing on the UI. The ExecutionState of the button will
+  ///change irrespective of the value of this flag. Only that it won't be
+  ///surfaced on the UI
+  final bool shouldSurfaceExecutionStates;
+
   /// iconColor should only be specified when we do not want to honor the default
   /// iconColor based on buttonType. Most of the items, default iconColor is what
   /// we need unless we want to pop out the icon in a non-primary button type
@@ -54,9 +60,14 @@ class ButtonWidget extends StatelessWidget {
   ///This should be set to true if the alert which uses this button needs to
   ///return the Button's action.
   final bool isInAlert;
+
+  /// progressStatus can be used to display information about the action
+  /// progress when ExecutionState is in Progress.
+  final ValueNotifier<String>? progressStatus;
+
   const ButtonWidget({
     required this.buttonType,
-    required this.buttonSize,
+    this.buttonSize = ButtonSize.large,
     this.icon,
     this.labelText,
     this.onTap,
@@ -65,6 +76,8 @@ class ButtonWidget extends StatelessWidget {
     this.buttonAction,
     this.isInAlert = false,
     this.iconColor,
+    this.shouldSurfaceExecutionStates = true,
+    this.progressStatus,
     super.key,
   });
 
@@ -129,6 +142,8 @@ class ButtonWidget extends StatelessWidget {
       labelText: labelText,
       icon: icon,
       buttonAction: buttonAction,
+      shouldSurfaceExecutionStates: shouldSurfaceExecutionStates,
+      progressStatus: progressStatus,
     );
   }
 }
@@ -143,12 +158,17 @@ class ButtonChildWidget extends StatefulWidget {
   final ButtonSize buttonSize;
   final ButtonAction? buttonAction;
   final bool isInAlert;
+  final bool shouldSurfaceExecutionStates;
+  final ValueNotifier<String>? progressStatus;
+
   const ButtonChildWidget({
     required this.buttonStyle,
     required this.buttonType,
     required this.isDisabled,
     required this.buttonSize,
     required this.isInAlert,
+    required this.shouldSurfaceExecutionStates,
+    this.progressStatus,
     this.onTap,
     this.labelText,
     this.icon,
@@ -167,14 +187,17 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   late TextStyle labelStyle;
   late Color checkIconColor;
   late Color loadingIconColor;
+  ValueNotifier<String>? progressStatus;
 
   ///This is used to store the width of the button in idle state (small button)
   ///to be used as width for the button when the loading/succes states comes.
   double? widthOfButton;
   final _debouncer = Debouncer(const Duration(milliseconds: 300));
   ExecutionState executionState = ExecutionState.idle;
+
   @override
   void initState() {
+    progressStatus = widget.progressStatus;
     checkIconColor = widget.buttonStyle.checkIconColor ??
         widget.buttonStyle.defaultIconColor;
     loadingIconColor = widget.buttonStyle.defaultIconColor;
@@ -193,6 +216,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       iconColor = widget.buttonStyle.defaultIconColor;
       labelStyle = widget.buttonStyle.defaultLabelStyle;
     }
+
     super.initState();
   }
 
@@ -221,7 +245,8 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
               duration: const Duration(milliseconds: 175),
               switchInCurve: Curves.easeInOutExpo,
               switchOutCurve: Curves.easeInOutExpo,
-              child: executionState == ExecutionState.idle
+              child: executionState == ExecutionState.idle ||
+                      !widget.shouldSurfaceExecutionStates
                   ? widget.buttonType.hasTrailingIcon
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -304,6 +329,21 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              progressStatus == null
+                                  ? const SizedBox.shrink()
+                                  : ValueListenableBuilder<String>(
+                                      valueListenable: progressStatus!,
+                                      builder: (
+                                        BuildContext context,
+                                        String value,
+                                        Widget? child,
+                                      ) {
+                                        return Text(
+                                          value,
+                                          style: lightTextTheme.smallBold,
+                                        );
+                                      },
+                                    ),
                               EnteLoadingWidget(
                                 is20pts: true,
                                 color: loadingIconColor,
@@ -357,7 +397,9 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (executionState == ExecutionState.inProgress) {
         setState(() {
           executionState = ExecutionState.successful;
-          Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
+          Future.delayed(
+              Duration(seconds: widget.shouldSurfaceExecutionStates ? 2 : 0),
+              () {
             widget.isInAlert
                 ? Navigator.of(context, rootNavigator: true)
                     .pop(widget.buttonAction)

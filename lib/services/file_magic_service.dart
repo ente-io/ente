@@ -1,6 +1,5 @@
-// @dart=2.9
-
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
@@ -22,8 +21,8 @@ import 'package:photos/utils/file_download_util.dart';
 
 class FileMagicService {
   final _logger = Logger("FileMagicService");
-  Dio _enteDio;
-  FilesDB _filesDB;
+  late Dio _enteDio;
+  late FilesDB _filesDB;
 
   FileMagicService._privateConstructor() {
     _filesDB = FilesDB.instance;
@@ -59,12 +58,12 @@ class FileMagicService {
 
   Future<void> updatePublicMagicMetadata(
     List<File> files,
-    Map<String, dynamic> newMetadataUpdate, {
-    Map<int, Map<String, dynamic>> metadataUpdateMap,
+    Map<String, dynamic>? newMetadataUpdate, {
+    Map<int, Map<String, dynamic>>? metadataUpdateMap,
   }) async {
     final params = <String, dynamic>{};
     params['metadataList'] = [];
-    final int ownerID = Configuration.instance.getUserID();
+    final int ownerID = Configuration.instance.getUserID()!;
     try {
       for (final file in files) {
         if (file.uploadedFileID == null) {
@@ -85,8 +84,8 @@ class FileMagicService {
           "can not apply empty updates",
         );
         final Map<String, dynamic> jsonToUpdate =
-            jsonDecode(file.pubMmdEncodedJson);
-        newUpdates.forEach((key, value) {
+            jsonDecode(file.pubMmdEncodedJson ?? '{}');
+        newUpdates!.forEach((key, value) {
           jsonToUpdate[key] = value;
         });
 
@@ -96,17 +95,17 @@ class FileMagicService {
 
         final fileKey = decryptFileKey(file);
         final encryptedMMd = await CryptoUtil.encryptChaCha(
-          utf8.encode(jsonEncode(jsonToUpdate)),
+          utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
           fileKey,
         );
         params['metadataList'].add(
           UpdateMagicMetadataRequest(
-            id: file.uploadedFileID,
+            id: file.uploadedFileID!,
             magicMetadata: MetadataRequest(
               version: file.pubMmdVersion,
               count: jsonToUpdate.length,
-              data: Sodium.bin2base64(encryptedMMd.encryptedData),
-              header: Sodium.bin2base64(encryptedMMd.header),
+              data: Sodium.bin2base64(encryptedMMd.encryptedData!),
+              header: Sodium.bin2base64(encryptedMMd.header!),
             ),
           ),
         );
@@ -119,7 +118,7 @@ class FileMagicService {
       await _filesDB.insertMultiple(files);
       RemoteSyncService.instance.sync(silently: true);
     } on DioError catch (e) {
-      if (e.response != null && e.response.statusCode == 409) {
+      if (e.response != null && e.response!.statusCode == 409) {
         RemoteSyncService.instance.sync(silently: true);
       }
       rethrow;
@@ -134,7 +133,7 @@ class FileMagicService {
     Map<String, dynamic> newMetadataUpdate,
   ) async {
     final params = <String, dynamic>{};
-    final int ownerID = Configuration.instance.getUserID();
+    final int ownerID = Configuration.instance.getUserID()!;
     final batchedFiles = files.chunks(batchSize);
     try {
       for (final batch in batchedFiles) {
@@ -151,7 +150,7 @@ class FileMagicService {
           // current update is simple replace. This will be enhanced in the future,
           // as required.
           final Map<String, dynamic> jsonToUpdate =
-              jsonDecode(file.mMdEncodedJson);
+              jsonDecode(file.mMdEncodedJson ?? '{}');
           newMetadataUpdate.forEach((key, value) {
             jsonToUpdate[key] = value;
           });
@@ -162,17 +161,17 @@ class FileMagicService {
 
           final fileKey = decryptFileKey(file);
           final encryptedMMd = await CryptoUtil.encryptChaCha(
-            utf8.encode(jsonEncode(jsonToUpdate)),
+            utf8.encode(jsonEncode(jsonToUpdate)) as Uint8List,
             fileKey,
           );
           params['metadataList'].add(
             UpdateMagicMetadataRequest(
-              id: file.uploadedFileID,
+              id: file.uploadedFileID!,
               magicMetadata: MetadataRequest(
                 version: file.mMdVersion,
                 count: jsonToUpdate.length,
-                data: Sodium.bin2base64(encryptedMMd.encryptedData),
-                header: Sodium.bin2base64(encryptedMMd.header),
+                data: Sodium.bin2base64(encryptedMMd.encryptedData!),
+                header: Sodium.bin2base64(encryptedMMd.header!),
               ),
             ),
           );
@@ -187,7 +186,7 @@ class FileMagicService {
       // should be eventually synced after remote sync has completed
       RemoteSyncService.instance.sync(silently: true);
     } on DioError catch (e) {
-      if (e.response != null && e.response.statusCode == 409) {
+      if (e.response != null && e.response!.statusCode == 409) {
         RemoteSyncService.instance.sync(silently: true);
       }
       rethrow;
@@ -200,9 +199,9 @@ class FileMagicService {
 
 class UpdateMagicMetadataRequest {
   final int id;
-  final MetadataRequest magicMetadata;
+  final MetadataRequest? magicMetadata;
 
-  UpdateMagicMetadataRequest({this.id, this.magicMetadata});
+  UpdateMagicMetadataRequest({required this.id, required this.magicMetadata});
 
   factory UpdateMagicMetadataRequest.fromJson(dynamic json) {
     return UpdateMagicMetadataRequest(
@@ -217,19 +216,24 @@ class UpdateMagicMetadataRequest {
     final map = <String, dynamic>{};
     map['id'] = id;
     if (magicMetadata != null) {
-      map['magicMetadata'] = magicMetadata.toJson();
+      map['magicMetadata'] = magicMetadata!.toJson();
     }
     return map;
   }
 }
 
 class MetadataRequest {
-  int version;
-  int count;
-  String data;
-  String header;
+  int? version;
+  int? count;
+  String? data;
+  String? header;
 
-  MetadataRequest({this.version, this.count, this.data, this.header});
+  MetadataRequest({
+    required this.version,
+    required this.count,
+    required this.data,
+    required this.header,
+  });
 
   MetadataRequest.fromJson(dynamic json) {
     version = json['version'];

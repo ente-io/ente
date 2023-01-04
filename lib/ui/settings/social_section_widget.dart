@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/theme/ente_theme.dart';
@@ -10,7 +8,7 @@ import 'package:photos/ui/settings/common_settings.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class SocialSectionWidget extends StatelessWidget {
-  const SocialSectionWidget({Key key}) : super(key: key);
+  const SocialSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +32,6 @@ class SocialSectionWidget extends StatelessWidget {
     );
     options.addAll(
       [
-        sectionOptionSpacing,
         const SocialsMenuItemWidget("Blog", "https://ente.io/blog"),
         sectionOptionSpacing,
         const SocialsMenuItemWidget("Twitter", "https://twitter.com/enteio"),
@@ -60,7 +57,7 @@ class SocialSectionWidget extends StatelessWidget {
 class SocialsMenuItemWidget extends StatelessWidget {
   final String text;
   final String urlSring;
-  const SocialsMenuItemWidget(this.text, this.urlSring, {Key key})
+  const SocialsMenuItemWidget(this.text, this.urlSring, {Key? key})
       : super(key: key);
 
   @override

@@ -1,4 +1,3 @@
-// @dart=2.9
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
@@ -16,15 +15,15 @@ import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 
 class HomeGalleryWidget extends StatelessWidget {
-  final Widget header;
-  final Widget footer;
+  final Widget? header;
+  final Widget? footer;
   final SelectedFiles selectedFiles;
 
   const HomeGalleryWidget({
-    Key key,
+    Key? key,
     this.header,
     this.footer,
-    this.selectedFiles,
+    required this.selectedFiles,
   }) : super(key: key);
 
   @override
@@ -42,7 +41,7 @@ class HomeGalleryWidget extends StatelessWidget {
           result = await FilesDB.instance.getAllLocalAndUploadedFiles(
             creationStartTime,
             creationEndTime,
-            ownerID,
+            ownerID!,
             limit: limit,
             asc: asc,
             ignoredCollectionIDs: collectionsToHide,
@@ -51,7 +50,7 @@ class HomeGalleryWidget extends StatelessWidget {
           result = await FilesDB.instance.getAllPendingOrUploadedFiles(
             creationStartTime,
             creationEndTime,
-            ownerID,
+            ownerID!,
             limit: limit,
             asc: asc,
             ignoredCollectionIDs: collectionsToHide,

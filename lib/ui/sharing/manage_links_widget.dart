@@ -1,6 +1,5 @@
-// @dart=2.9
-
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
@@ -25,9 +24,9 @@ import 'package:photos/utils/toast_util.dart';
 import 'package:tuple/tuple.dart';
 
 class ManageSharedLinkWidget extends StatefulWidget {
-  final Collection collection;
+  final Collection? collection;
 
-  const ManageSharedLinkWidget({Key key, this.collection}) : super(key: key);
+  const ManageSharedLinkWidget({Key? key, this.collection}) : super(key: key);
 
   @override
   State<ManageSharedLinkWidget> createState() => _ManageSharedLinkWidgetState();
@@ -46,7 +45,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     const Tuple3(6, "Custom", -1),
   ];
 
-  Tuple3<int, String, int> _selectedExpiry;
+  late Tuple3<int, String, int> _selectedExpiry;
   int _selectedDeviceLimitIndex = 0;
   final CollectionActions sharingActions =
       CollectionActions(CollectionsService.instance);
@@ -60,7 +59,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   @override
   Widget build(BuildContext context) {
     final enteColorScheme = getEnteColorScheme(context);
-    final PublicURL url = widget.collection?.publicURLs?.firstOrNull;
+    final PublicURL url = widget.collection!.publicURLs!.firstOrNull!;
     return Scaffold(
       backgroundColor: Theme.of(context).backgroundColor,
       appBar: AppBar(
@@ -85,7 +84,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection.publicURLs?.firstOrNull
+                      value: widget.collection!.publicURLs?.firstOrNull
                               ?.enableCollect ??
                           false,
                       onChanged: (value) async {
@@ -131,7 +130,8 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   MenuItemWidget(
                     captionedTextWidget: CaptionedTextWidget(
                       title: "Device limit",
-                      subTitle: widget.collection.publicURLs.first.deviceLimit
+                      subTitle: widget
+                          .collection!.publicURLs!.first!.deviceLimit
                           .toString(),
                     ),
                     trailingIcon: Icons.chevron_right,
@@ -156,7 +156,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection.publicURLs?.firstOrNull
+                      value: widget.collection!.publicURLs?.firstOrNull
                               ?.enableDownload ??
                           true,
                       onChanged: (value) async {
@@ -205,7 +205,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
-                      value: widget.collection.publicURLs?.firstOrNull
+                      value: widget.collection!.publicURLs?.firstOrNull
                               ?.passwordEnabled ??
                           false,
                       onChanged: (enablePassword) async {
@@ -246,7 +246,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     onTap: () async {
                       final bool result = await sharingActions.publicLinkToggle(
                         context,
-                        widget.collection,
+                        widget.collection!,
                         false,
                       );
                       if (result && mounted) {
@@ -369,7 +369,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   // _showDateTimePicker return null if user doesn't select date-time
-  Future<int> _showDateTimePicker() async {
+  Future<int?> _showDateTimePicker() async {
     final dateResult = await DatePicker.showDatePicker(
       context,
       minTime: DateTime.now(),
@@ -396,7 +396,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
 
   final TextEditingController _textFieldController = TextEditingController();
 
-  Future<String> _displayLinkPasswordInput(BuildContext context) async {
+  Future<String?> _displayLinkPasswordInput(BuildContext context) async {
     _textFieldController.clear();
     return showDialog<String>(
       context: context,
@@ -469,7 +469,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     final int opsLimit = Sodium.cryptoPwhashOpslimitInteractive;
     final kekSalt = CryptoUtil.getSaltToDeriveKey();
     final result = await CryptoUtil.deriveKey(
-      utf8.encode(pass),
+      utf8.encode(pass) as Uint8List,
       kekSalt,
       memLimit,
       opsLimit,
@@ -489,40 +489,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
     try {
-      await CollectionsService.instance.updateShareUrl(widget.collection, prop);
+      await CollectionsService.instance
+          .updateShareUrl(widget.collection!, prop);
       await dialog.hide();
       showShortToast(context, "Album updated");
     } catch (e) {
       await dialog.hide();
-      await showGenericErrorDialog(context);
+      await showGenericErrorDialog(context: context);
     }
-  }
-
-  Text _getLinkExpiryTimeWidget() {
-    final int validTill =
-        widget.collection.publicURLs?.firstOrNull?.validTill ?? 0;
-    if (validTill == 0) {
-      return const Text(
-        'Never',
-        style: TextStyle(
-          color: Colors.grey,
-        ),
-      );
-    }
-    if (validTill < DateTime.now().microsecondsSinceEpoch) {
-      return Text(
-        'Expired',
-        style: TextStyle(
-          color: Colors.orange[300],
-        ),
-      );
-    }
-    return Text(
-      getFormattedTime(DateTime.fromMicrosecondsSinceEpoch(validTill)),
-      style: const TextStyle(
-        color: Colors.grey,
-      ),
-    );
   }
 
   Future<void> _showDeviceLimitPicker() async {
@@ -568,7 +542,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     onPressed: () async {
                       await _updateUrlSettings(context, {
                         'deviceLimit': int.tryParse(
-                          options[_selectedDeviceLimitIndex].data,
+                          options[_selectedDeviceLimitIndex].data!,
                         ),
                       });
                       setState(() {});

@@ -1,0 +1,37 @@
+#!/bin/sh
+# This git hook fails if a user is trying to add a new file which is
+# not null safe.
+
+# Check the contents of each file that is being added(A) or modified(N) or
+# copied (C)
+for file in `git diff --name-only --diff-filter=ACM --cached`; do
+  # Ignore the hooks from any pre-commit check
+  if echo "$file" | grep -q 'hooks/'; then
+    continue
+  fi
+  # Get the contents of the newly added lines in the file
+  newContent=`git diff --cached --unified=0 $file | grep '^+'`
+  oldContent=`git diff --cached --unified=0 $file | grep '^-'`
+  initialContent=`head -5 $file`
+
+  # Check if user has added "// @dart=2.9" in the file
+  if echo "$newContent" | grep -q '// @dart=2.9'; then
+    echo "😡 File $file looks like a newly created file but it's not null-safe"
+    exit 1
+  elif echo "$oldContent" | grep -q '// @dart=2.9'; then
+    echo "💚💚 Thank you for making $file null-safe"
+    continue
+  elif echo "$initialContent" | grep -q '// @dart=2.9'; then
+    echo "🔥🔥🔥🔥 Please make $file null-safe"
+    continue
+  else
+    continue
+  fi
+done
+
+nullUnsafeFiles=$(grep  '// @dart=2.9' -r lib/ | wc -l)
+# The xargs at the end is to trim whitepsaces https://stackoverflow.com/a/12973694/546896
+echo "🥺🥺 $nullUnsafeFiles files are still waiting for their nullSafety migrator" | xargs
+
+# If the script gets to this point, all files passed the check
+exit 0

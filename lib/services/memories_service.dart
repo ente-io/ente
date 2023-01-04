@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
@@ -18,8 +16,8 @@ class MemoriesService extends ChangeNotifier {
   static const daysBefore = 7;
   static const daysAfter = 1;
 
-  List<Memory> _cachedMemories;
-  Future<List<Memory>> _future;
+  List<Memory>? _cachedMemories;
+  Future<List<Memory>>? _future;
 
   MemoriesService._privateConstructor();
 
@@ -45,13 +43,13 @@ class MemoriesService extends ChangeNotifier {
 
   Future<List<Memory>> getMemories() async {
     if (_cachedMemories != null) {
-      return _cachedMemories;
+      return _cachedMemories!;
     }
     if (_future != null) {
-      return _future;
+      return _future!;
     }
     _future = _fetchMemories();
-    return _future;
+    return _future!;
   }
 
   Future<List<Memory>> _fetchMemories() async {
@@ -90,7 +88,7 @@ class MemoriesService extends ChangeNotifier {
       }
     }
     _cachedMemories = memories;
-    return _cachedMemories;
+    return _cachedMemories!;
   }
 
   DateTime _getDate(DateTime present, int yearAgo) {

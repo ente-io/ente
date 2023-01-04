@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:photos/models/collection.dart';
@@ -55,7 +54,8 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
   @override
   Widget build(BuildContext context) {
     debugPrint(
-        '$runtimeType building with ${widget.selectedFiles.files.length}');
+      '$runtimeType building with ${widget.selectedFiles.files.length}',
+    );
     final List<IconButtonWidget> iconsButton = [];
     final iconColor = getEnteColorScheme(context).blurStrokeBase;
     if (showDeleteOption) {

@@ -1,5 +1,4 @@
 import 'package:fast_base58/fast_base58.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:page_transition/page_transition.dart';

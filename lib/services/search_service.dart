@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:logging/logging.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
@@ -21,7 +19,7 @@ import 'package:photos/utils/date_time_util.dart';
 import 'package:tuple/tuple.dart';
 
 class SearchService {
-  Future<List<File>> _cachedFilesFuture;
+  Future<List<File>>? _cachedFilesFuture;
   final _enteDio = Network.instance.enteDio;
   final _logger = Logger((SearchService).toString());
   final _collectionService = CollectionsService.instance;
@@ -44,26 +42,12 @@ class SearchService {
 
   Future<List<File>> _getAllFiles() async {
     if (_cachedFilesFuture != null) {
-      return _cachedFilesFuture;
+      return _cachedFilesFuture!;
     }
     _logger.fine("Reading all files from db");
     _cachedFilesFuture =
         FilesDB.instance.getAllFilesFromDB(ignoreCollections());
-    return _cachedFilesFuture;
-  }
-
-  Future<List<File>> getFileSearchResults(String query) async {
-    final List<File> fileSearchResults = [];
-    final List<File> files = await _getAllFiles();
-    for (var file in files) {
-      if (fileSearchResults.length >= _maximumResultsLimit) {
-        break;
-      }
-      if (file.title.toLowerCase().contains(query.toLowerCase())) {
-        fileSearchResults.add(file);
-      }
-    }
-    return fileSearchResults;
+    return _cachedFilesFuture!;
   }
 
   void clearCache() {
@@ -89,12 +73,13 @@ class SearchService {
 
         for (var file in allFiles) {
           if (_isValidLocation(file.location) &&
-              _isLocationWithinBounds(file.location, locationData)) {
+              _isLocationWithinBounds(file.location!, locationData)) {
             filesInLocation.add(file);
           }
         }
         filesInLocation.sort(
-          (first, second) => second.creationTime.compareTo(first.creationTime),
+          (first, second) =>
+              second.creationTime!.compareTo(first.creationTime!),
         );
         if (filesInLocation.isNotEmpty) {
           searchResults.add(
@@ -130,7 +115,7 @@ class SearchService {
       }
 
       if (!c.collection.isHidden() &&
-          c.collection.name.toLowerCase().contains(
+          c.collection.name!.toLowerCase().contains(
                 query.toLowerCase(),
               )) {
         collectionSearchResults.add(AlbumSearchResult(c));
@@ -208,7 +193,7 @@ class SearchService {
     return searchResults;
   }
 
-  Future<List<GenericSearchResult>> getCaptionResults(
+  Future<List<GenericSearchResult>> getCaptionAndNameResults(
     String query,
   ) async {
     final List<GenericSearchResult> searchResults = [];
@@ -217,15 +202,31 @@ class SearchService {
     }
     final RegExp pattern = RegExp(query, caseSensitive: false);
     final List<File> allFiles = await _getAllFiles();
-    final matchedFiles = allFiles
-        .where((e) => e.caption != null && pattern.hasMatch(e.caption))
-        .toList();
-    if (matchedFiles.isNotEmpty) {
+    final List<File> captionMatch = <File>[];
+    final List<File> displayNameMatch = <File>[];
+    for (File eachFile in allFiles) {
+      if (eachFile.caption != null && pattern.hasMatch(eachFile.caption!)) {
+        captionMatch.add(eachFile);
+      }
+      if (pattern.hasMatch(eachFile.displayName)) {
+        displayNameMatch.add(eachFile);
+      }
+    }
+    if (captionMatch.isNotEmpty) {
       searchResults.add(
         GenericSearchResult(
           ResultType.fileCaption,
           query,
-          matchedFiles,
+          captionMatch,
+        ),
+      );
+    }
+    if (displayNameMatch.isNotEmpty) {
+      searchResults.add(
+        GenericSearchResult(
+          ResultType.file,
+          query,
+          displayNameMatch,
         ),
       );
     }
@@ -250,7 +251,7 @@ class SearchService {
         if (!resultMap.containsKey(exnType)) {
           resultMap[exnType] = <File>[];
         }
-        resultMap[exnType].add(eachFile);
+        resultMap[exnType]!.add(eachFile);
       }
     }
     for (MapEntry<String, List<File>> entry in resultMap.entries) {
@@ -296,7 +297,7 @@ class SearchService {
     for (var potentialDate in potentialDates) {
       final int day = potentialDate.item1;
       final int month = potentialDate.item2.monthNumber;
-      final int year = potentialDate.item3; // nullable
+      final int? year = potentialDate.item3; // nullable
       final matchedFiles =
           await FilesDB.instance.getFilesCreatedWithinDurations(
         _getDurationsForCalendarDateInEveryYear(day, month, year: year),
@@ -336,7 +337,7 @@ class SearchService {
   List<List<int>> _getDurationsForCalendarDateInEveryYear(
     int day,
     int month, {
-    int year,
+    int? year,
   }) {
     final List<List<int>> durationsOfHolidayInEveryYear = [];
     final int startYear = year ?? searchStartYear;
@@ -365,7 +366,7 @@ class SearchService {
     return durationsOfMonthInEveryYear;
   }
 
-  bool _isValidLocation(Location location) {
+  bool _isValidLocation(Location? location) {
     return location != null &&
         location.latitude != null &&
         location.latitude != 0 &&
@@ -378,14 +379,14 @@ class SearchService {
     LocationDataFromResponse locationData,
   ) {
     //format returned by the api is [lng,lat,lng,lat] where indexes 0 & 1 are southwest and 2 & 3 northeast
-    return location.longitude > locationData.bbox[0] &&
-        location.latitude > locationData.bbox[1] &&
-        location.longitude < locationData.bbox[2] &&
-        location.latitude < locationData.bbox[3];
+    return location.longitude! > locationData.bbox[0] &&
+        location.latitude! > locationData.bbox[1] &&
+        location.longitude! < locationData.bbox[2] &&
+        location.latitude! < locationData.bbox[3];
   }
 
-  List<Tuple3<int, MonthData, int>> _getPossibleEventDate(String query) {
-    final List<Tuple3<int, MonthData, int>> possibleEvents = [];
+  List<Tuple3<int, MonthData, int?>> _getPossibleEventDate(String query) {
+    final List<Tuple3<int, MonthData, int?>> possibleEvents = [];
     if (query.trim().isEmpty) {
       return possibleEvents;
     }
@@ -400,13 +401,13 @@ class SearchService {
       return possibleEvents;
     }
 
-    final int day = int.tryParse(result[0]);
+    final int? day = int.tryParse(result[0]);
     if (day == null || day < 1 || day > 31) {
       return possibleEvents;
     }
     final List<MonthData> potentialMonth =
         resultCount > 1 ? _getMatchingMonths(result[1]) : allMonths;
-    final int parsedYear = resultCount >= 3 ? int.tryParse(result[2]) : null;
+    final int? parsedYear = resultCount >= 3 ? int.tryParse(result[2]) : null;
     final List<int> matchingYears = [];
     if (parsedYear != null) {
       bool foundMatch = false;

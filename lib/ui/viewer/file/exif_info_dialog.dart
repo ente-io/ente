@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:ui';
 
@@ -9,7 +9,7 @@ import 'package:photos/utils/exif_util.dart';
 
 class ExifInfoDialog extends StatefulWidget {
   final File file;
-  const ExifInfoDialog(this.file, {Key key}) : super(key: key);
+  const ExifInfoDialog(this.file, {Key? key}) : super(key: key);
 
   @override
   State<ExifInfoDialog> createState() => _ExifInfoDialogState();
@@ -21,7 +21,7 @@ class _ExifInfoDialogState extends State<ExifInfoDialog> {
     final scrollController = ScrollController();
     return AlertDialog(
       title: Text(
-        widget.file.title,
+        widget.file.title!,
         style: Theme.of(context).textTheme.headline5,
       ),
       content: Scrollbar(

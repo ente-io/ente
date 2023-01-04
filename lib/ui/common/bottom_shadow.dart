@@ -1,11 +1,11 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 
 class BottomShadowWidget extends StatelessWidget {
   final double offsetDy;
-  final Color shadowColor;
-  const BottomShadowWidget({this.offsetDy = 28, this.shadowColor, Key key})
+  final Color? shadowColor;
+  const BottomShadowWidget({this.offsetDy = 28, this.shadowColor, Key? key})
       : super(key: key);
 
   @override

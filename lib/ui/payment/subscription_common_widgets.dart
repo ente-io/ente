@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -8,11 +8,11 @@ import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/date_time_util.dart';
 
 class SubscriptionHeaderWidget extends StatefulWidget {
-  final bool isOnboarding;
-  final int currentUsage;
+  final bool? isOnboarding;
+  final int? currentUsage;
 
   const SubscriptionHeaderWidget({
-    Key key,
+    Key? key,
     this.isOnboarding,
     this.currentUsage,
   }) : super(key: key);
@@ -26,7 +26,7 @@ class SubscriptionHeaderWidget extends StatefulWidget {
 class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
   @override
   Widget build(BuildContext context) {
-    if (widget.isOnboarding) {
+    if (widget.isOnboarding!) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         child: Column(
@@ -64,10 +64,10 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
                 TextSpan(
-                  text: formatBytes(widget.currentUsage),
+                  text: formatBytes(widget.currentUsage!),
                   style: Theme.of(context)
                       .textTheme
-                      .subtitle1
+                      .subtitle1!
                       .copyWith(fontWeight: FontWeight.bold),
                 )
               ],
@@ -80,9 +80,9 @@ class _SubscriptionHeaderWidgetState extends State<SubscriptionHeaderWidget> {
 }
 
 class ValidityWidget extends StatelessWidget {
-  final Subscription currentSubscription;
+  final Subscription? currentSubscription;
 
-  const ValidityWidget({Key key, this.currentSubscription}) : super(key: key);
+  const ValidityWidget({Key? key, this.currentSubscription}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -90,12 +90,12 @@ class ValidityWidget extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final endDate = getDateAndMonthAndYear(
-      DateTime.fromMicrosecondsSinceEpoch(currentSubscription.expiryTime),
+      DateTime.fromMicrosecondsSinceEpoch(currentSubscription!.expiryTime),
     );
     var message = "Renews on $endDate";
-    if (currentSubscription.productID == freeProductID) {
+    if (currentSubscription!.productID == freeProductID) {
       message = "Free trial valid till $endDate";
-    } else if (currentSubscription.attributes?.isCancelled ?? false) {
+    } else if (currentSubscription!.attributes?.isCancelled ?? false) {
       message = "Your subscription will be cancelled on $endDate";
     }
     return Padding(
@@ -109,7 +109,7 @@ class ValidityWidget extends StatelessWidget {
 }
 
 class SubFaqWidget extends StatelessWidget {
-  const SubFaqWidget({Key key}) : super(key: key);
+  const SubFaqWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +132,7 @@ class SubFaqWidget extends StatelessWidget {
           child: RichText(
             text: TextSpan(
               text: "Questions?",
-              style: Theme.of(context).textTheme.bodyMedium.copyWith(
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                     decoration: TextDecoration.underline,
                   ),
             ),

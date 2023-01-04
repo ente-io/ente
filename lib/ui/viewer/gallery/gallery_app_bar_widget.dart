@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:io';
@@ -21,6 +21,8 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
 import 'package:photos/ui/sharing/share_collection_page.dart';
 import 'package:photos/ui/tools/free_space_page.dart';
@@ -33,16 +35,16 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class GalleryAppBarWidget extends StatefulWidget {
   final GalleryType type;
-  final String title;
+  final String? title;
   final SelectedFiles selectedFiles;
-  final DeviceCollection deviceCollection;
-  final Collection collection;
+  final DeviceCollection? deviceCollection;
+  final Collection? collection;
 
   const GalleryAppBarWidget(
     this.type,
     this.title,
     this.selectedFiles, {
-    Key key,
+    Key? key,
     this.deviceCollection,
     this.collection,
   }) : super(key: key);
@@ -53,9 +55,9 @@ class GalleryAppBarWidget extends StatefulWidget {
 
 class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   final _logger = Logger("GalleryAppBar");
-  StreamSubscription _userAuthEventSubscription;
-  Function() _selectedFilesListener;
-  String _appBarTitle;
+  late StreamSubscription _userAuthEventSubscription;
+  late Function() _selectedFilesListener;
+  String? _appBarTitle;
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
@@ -93,10 +95,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
                 ? const SizedBox.shrink()
                 : TextButton(
                     child: Text(
-                      _appBarTitle,
+                      _appBarTitle!,
                       style: Theme.of(context)
                           .textTheme
-                          .headline5
+                          .headline5!
                           .copyWith(fontSize: 16),
                     ),
                     onPressed: () => _renameAlbum(context),
@@ -117,14 +119,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       barrierColor: Colors.black.withOpacity(0.85),
     );
     // indicates user cancelled the rename request
-    if (result == null || result.trim() == _appBarTitle.trim()) {
+    if (result == null || result.trim() == _appBarTitle!.trim()) {
       return;
     }
 
     final dialog = createProgressDialog(context, "Changing name...");
     await dialog.show();
     try {
-      await CollectionsService.instance.rename(widget.collection, result);
+      await CollectionsService.instance.rename(widget.collection!, result);
       await dialog.hide();
       if (mounted) {
         _appBarTitle = result;
@@ -132,12 +134,12 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
   Future<dynamic> _leaveAlbum(BuildContext context) async {
-    final DialogUserChoice result = await showChoiceDialog(
+    final DialogUserChoice? result = await showChoiceDialog(
       context,
       "Leave shared album?",
       "You will leave the album, and it will stop being visible to you.",
@@ -152,14 +154,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     final dialog = createProgressDialog(context, "Leaving album...");
     await dialog.show();
     try {
-      await CollectionsService.instance.leaveAlbum(widget.collection);
+      await CollectionsService.instance.leaveAlbum(widget.collection!);
       await dialog.hide();
       if (mounted) {
         Navigator.of(context).pop();
       }
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -173,10 +175,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     BackupStatus status;
     try {
       status = await SyncService.instance
-          .getBackupStatus(pathID: widget.deviceCollection.id);
+          .getBackupStatus(pathID: widget.deviceCollection!.id);
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return;
     }
 
@@ -188,7 +190,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         "You've no files in this album that can be deleted",
       );
     } else {
-      final bool result = await routeToPage(
+      final bool? result = await routeToPage(
         context,
         FreeSpacePage(status, clearSpaceForFolder: true),
       );
@@ -199,46 +201,31 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   void _showSpaceFreedDialog(BackupStatus status) {
-    final AlertDialog alert = AlertDialog(
-      title: const Text("Success"),
-      content: Text(
-        "You have successfully freed up " + formatBytes(status.size) + "!",
-      ),
-      actions: [
-        TextButton(
-          child: Text(
-            "Rate us",
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.greenAlternative,
-            ),
-          ),
-          onPressed: () {
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-            // TODO: Replace with https://pub.dev/packages/in_app_review
-            final url = UpdateService.instance.getRateDetails().item2;
-            launchUrlString(url);
-          },
-        ),
-        TextButton(
-          child: const Text(
-            "Ok",
-          ),
-          onPressed: () {
-            if (Platform.isIOS) {
-              showToast(
-                context,
-                "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
-              );
-            }
-            Navigator.of(context, rootNavigator: true).pop('dialog');
-          },
-        ),
-      ],
+    final DialogWidget dialog = choiceDialog(
+      title: "Success",
+      body: "You have successfully freed up " + formatBytes(status.size) + "!",
+      firstButtonLabel: "Rate us",
+      firstButtonOnTap: () async {
+        // TODO: Replace with https://pub.dev/packages/in_app_review
+        final url = UpdateService.instance.getRateDetails().item2;
+        launchUrlString(url);
+      },
+      firstButtonType: ButtonType.primary,
+      secondButtonLabel: "OK",
+      secondButtonOnTap: () async {
+        if (Platform.isIOS) {
+          showToast(
+            context,
+            "Also empty \"Recently Deleted\" from \"Settings\" -> \"Storage\" to claim the freed space",
+          );
+        }
+      },
     );
+
     showConfettiDialog(
       context: context,
-      builder: (BuildContext context) {
-        return alert;
+      dialogBuilder: (BuildContext context) {
+        return dialog;
       },
       barrierColor: Colors.black87,
       confettiAlignment: Alignment.topCenter,
@@ -267,7 +254,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     }
     final List<PopupMenuItem> items = [];
     if (widget.type == GalleryType.ownedCollection) {
-      if (widget.collection.type != CollectionType.favorites) {
+      if (widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
             value: 1,
@@ -283,10 +270,10 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ),
         );
       }
-      final bool isArchived = widget.collection.isArchived();
+      final bool isArchived = widget.collection!.isArchived();
       // Do not show archive option for favorite collection. If collection is
       // already archived, allow user to unarchive that collection.
-      if (isArchived || widget.collection.type != CollectionType.favorites) {
+      if (isArchived || widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
             value: 2,
@@ -302,7 +289,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           ),
         );
       }
-      if (widget.collection.type != CollectionType.favorites) {
+      if (widget.collection!.type != CollectionType.favorites) {
         items.add(
           PopupMenuItem(
             value: 3,
@@ -358,14 +345,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           itemBuilder: (context) {
             return items;
           },
-          onSelected: (value) async {
+          onSelected: (dynamic value) async {
             if (value == 1) {
               await _renameAlbum(context);
             } else if (value == 2) {
               await changeCollectionVisibility(
                 context,
-                widget.collection,
-                widget.collection.isArchived()
+                widget.collection!,
+                widget.collection!.isArchived()
                     ? visibilityVisible
                     : visibilityArchive,
               );
@@ -391,7 +378,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
         await CollectionsService.instance.getCollectionsWithThumbnails();
     final bool isEmptyCollection = collectionWithThumbnail
             .firstWhereOrNull(
-              (element) => element.collection.id == widget.collection.id,
+              (element) => element.collection.id == widget.collection!.id,
             )
             ?.thumbnail ==
         null;
@@ -416,14 +403,14 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     await dialog.show();
     try {
       await CollectionsService.instance
-          .trashCollection(widget.collection, isEmptyCollection);
+          .trashCollection(widget.collection!, isEmptyCollection);
       showShortToast(context, "Successfully deleted album");
       await dialog.hide();
       Navigator.of(context).pop();
     } catch (e, s) {
       _logger.severe("failed to trash collection", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -437,7 +424,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           "Cannot share empty collection of typex ${widget.type}",
         );
       }
-      if (Configuration.instance.getUserID() == widget.collection.owner.id) {
+      if (Configuration.instance.getUserID() == widget.collection!.owner!.id) {
         unawaited(
           routeToPage(
             context,
@@ -454,7 +441,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       }
     } catch (e, s) {
       _logger.severe(e, s);
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 }

@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -15,7 +13,7 @@ class TwoFactorRecoveryPage extends StatefulWidget {
     this.sessionID,
     this.encryptedSecret,
     this.secretDecryptionNonce, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

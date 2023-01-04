@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 
 import 'package:archive/archive_io.dart';
@@ -24,7 +22,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 final Logger _logger = Logger('email_util');
 
-bool isValidEmail(String email) {
+bool isValidEmail(String? email) {
+  if (email == null) {
+    return false;
+  }
   return EmailValidator.validate(email);
 }
 
@@ -32,9 +33,9 @@ Future<void> sendLogs(
   BuildContext context,
   String title,
   String toEmail, {
-  Function postShare,
-  String subject,
-  String body,
+  Function? postShare,
+  String? subject,
+  String? body,
 }) async {
   final List<Widget> actions = [
     TextButton(
@@ -43,7 +44,7 @@ Future<void> sendLogs(
         children: [
           Icon(
             Icons.feed_outlined,
-            color: Theme.of(context).iconTheme.color.withOpacity(0.85),
+            color: Theme.of(context).iconTheme.color!.withOpacity(0.85),
           ),
           const Padding(padding: EdgeInsets.all(4)),
           Text(
@@ -61,7 +62,7 @@ Future<void> sendLogs(
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return LogFileViewer(SuperLogging.logFile);
+            return LogFileViewer(SuperLogging.logFile!);
           },
           barrierColor: Colors.black87,
           barrierDismissible: false,
@@ -125,14 +126,14 @@ Future<void> sendLogs(
 Future<void> _sendLogs(
   BuildContext context,
   String toEmail,
-  String subject,
-  String body,
+  String? subject,
+  String? body,
 ) async {
   final String zipFilePath = await getZippedLogsFile(context);
   final Email email = Email(
     recipients: [toEmail],
-    subject: subject,
-    body: body,
+    subject: subject ?? '',
+    body: body ?? '',
     attachmentPaths: [zipFilePath],
     isHTML: false,
   );
@@ -184,13 +185,13 @@ Future<void> shareLogs(
 
 Future<void> sendEmail(
   BuildContext context, {
-  @required String to,
-  String subject,
-  String body,
+  required String to,
+  String? subject,
+  String? body,
 }) async {
   try {
     final String clientDebugInfo = await _clientInfo();
-    final EmailContent email = EmailContent(
+    final EmailContent emailContent = EmailContent(
       to: [
         to,
       ],
@@ -203,7 +204,7 @@ Future<void> sendEmail(
       final Uri params = Uri(
         scheme: 'mailto',
         path: to,
-        query: 'subject=${email.subject}&body=${email.body}',
+        query: 'subject=${emailContent.subject}&body=${emailContent.body}',
       );
       if (await canLaunchUrl(params)) {
         await launchUrl(params);
@@ -214,8 +215,8 @@ Future<void> sendEmail(
     } else {
       final OpenMailAppResult result =
           await OpenMailApp.composeNewEmailInMailApp(
-        nativePickerTitle: 'Select email app',
-        emailContent: email,
+        nativePickerTitle: 'Select emailContent app',
+        emailContent: emailContent,
       );
       if (!result.didOpen && !result.canOpen) {
         _showNoMailAppsDialog(context, to);
@@ -229,15 +230,13 @@ Future<void> sendEmail(
                 CupertinoActionSheetAction(
                   child: Text(app.name),
                   onPressed: () {
-                    final content = email;
-                    if (content != null) {
-                      OpenMailApp.composeNewEmailInSpecificMailApp(
-                        mailApp: app,
-                        emailContent: content,
-                      );
-                    } else {
-                      OpenMailApp.openSpecificMailApp(app);
-                    }
+                    final content = emailContent;
+
+                    OpenMailApp.composeNewEmailInSpecificMailApp(
+                      mailApp: app,
+                      emailContent: content,
+                    );
+
                     Navigator.of(context, rootNavigator: true).pop();
                   },
                 ),
@@ -253,14 +252,15 @@ Future<void> sendEmail(
       }
     }
   } catch (e) {
-    _logger.severe("Failed to send email to $to", e);
+    _logger.severe("Failed to send emailContent to $to", e);
     _showNoMailAppsDialog(context, to);
   }
 }
 
 Future<String> _clientInfo() async {
   final packageInfo = await PackageInfo.fromPlatform();
-  final String debugInfo = '\n\n\n\n ------------------- \nFollowing information can '
+  final String debugInfo =
+      '\n\n\n\n ------------------- \nFollowing information can '
       'help us in debugging if you are facing any issue '
       '\nRegistered email: ${Configuration.instance.getEmail()}'
       '\nClient: ${packageInfo.packageName}'
@@ -269,27 +269,15 @@ Future<String> _clientInfo() async {
 }
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
-  showDialog(
+  showNewChoiceDialog(
+    icon: Icons.email_outlined,
     context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text('Please email us at $toEmail'),
-        actions: <Widget>[
-          TextButton(
-            child: const Text("Copy email"),
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: toEmail));
-              showShortToast(context, 'Copied');
-            },
-          ),
-          TextButton(
-            child: const Text("OK"),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          )
-        ],
-      );
+    title: 'Please email us at $toEmail',
+    firstButtonLabel: "Copy email address",
+    secondButtonLabel: "Dismiss",
+    firstButtonOnTap: () async {
+      await Clipboard.setData(ClipboardData(text: toEmail));
+      showShortToast(context, 'Copied');
     },
   );
 }

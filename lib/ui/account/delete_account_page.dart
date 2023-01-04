@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -8,18 +6,21 @@ import 'package:photos/core/configuration.dart';
 import 'package:photos/models/delete_account.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dialogs.dart';
-import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
 
 class DeleteAccountPage extends StatelessWidget {
   const DeleteAccountPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = getEnteColorScheme(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -48,7 +49,10 @@ class DeleteAccountPage extends StatelessWidget {
               Center(
                 child: Text(
                   "We'll be sorry to see you go. Are you facing some issue?",
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle1!
+                      .copyWith(color: colorScheme.textMuted),
                 ),
               ),
               const SizedBox(
@@ -67,15 +71,19 @@ class DeleteAccountPage extends StatelessWidget {
                       text: ", maybe there is a way we can help.",
                     ),
                   ],
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context)
+                      .textTheme
+                      .subtitle1!
+                      .copyWith(color: colorScheme.textMuted),
                 ),
               ),
               const SizedBox(
                 height: 24,
               ),
-              GradientButton(
-                text: "Yes, send feedback",
-                iconData: Icons.check,
+              ButtonWidget(
+                buttonType: ButtonType.primary,
+                labelText: "Yes, send feedback",
+                icon: Icons.check_outlined,
                 onTap: () async {
                   await sendEmail(
                     context,
@@ -84,41 +92,14 @@ class DeleteAccountPage extends StatelessWidget {
                   );
                 },
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 8),
-              ),
-              InkWell(
-                child: SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      side: const BorderSide(
-                        color: Colors.redAccent,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 18,
-                        horizontal: 10,
-                      ),
-                      backgroundColor: Colors.white,
-                    ),
-                    label: const Text(
-                      "No, delete account",
-                      style: TextStyle(
-                        color: Colors.redAccent, // same for both themes
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    onPressed: () async => {await _initiateDelete(context)},
-                    icon: const Icon(
-                      Icons.no_accounts,
-                      color: Colors.redAccent,
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(height: 8),
+              ButtonWidget(
+                buttonType: ButtonType.tertiaryCritical,
+                labelText: "No, delete account",
+                icon: Icons.no_accounts_outlined,
+                onTap: () async => {await _initiateDelete(context)},
+                shouldSurfaceExecutionStates: false,
+              )
             ],
           ),
         ),
@@ -150,26 +131,34 @@ class DeleteAccountPage extends StatelessWidget {
     );
 
     if (hasAuthenticated) {
-      final choice = await showChoiceDialog(
-        context,
-        'Are you sure you want to delete your account?',
-        'Your uploaded data will be scheduled for deletion, and your account '
-            'will be permanently deleted. \n\nThis action is not reversible.',
-        firstAction: 'Cancel',
-        secondAction: 'Delete',
-        firstActionColor: Theme.of(context).colorScheme.onSurface,
-        secondActionColor: Colors.red,
+      final choice = await showNewChoiceDialog(
+        context: context,
+        title: 'Are you sure you want to delete your account?',
+        body:
+            'Your uploaded data will be scheduled for deletion, and your account'
+            ' will be permanently deleted. \n\nThis action is not reversible.',
+        firstButtonLabel: "Delete my account",
+        isCritical: true,
+        firstButtonOnTap: () async {
+          final decryptChallenge = CryptoUtil.openSealSync(
+            Sodium.base642bin(response.encryptedChallenge),
+            Sodium.base642bin(
+              Configuration.instance.getKeyAttributes()!.publicKey,
+            ),
+            Configuration.instance.getSecretKey()!,
+          );
+          final challengeResponseStr = utf8.decode(decryptChallenge);
+          await UserService.instance
+              .deleteAccount(context, challengeResponseStr);
+        },
       );
-      if (choice != DialogUserChoice.secondChoice) {
+      if (choice == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      if (choice != ButtonAction.first) {
         return;
       }
-      final decryptChallenge = CryptoUtil.openSealSync(
-        Sodium.base642bin(response.encryptedChallenge),
-        Sodium.base642bin(Configuration.instance.getKeyAttributes().publicKey),
-        Configuration.instance.getSecretKey(),
-      );
-      final challengeResponseStr = utf8.decode(decryptChallenge);
-      await UserService.instance.deleteAccount(context, challengeResponseStr);
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 

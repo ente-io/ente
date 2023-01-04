@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -11,14 +11,14 @@ enum ActionType {
 }
 
 // if dialog is dismissed by tapping outside, this will return null
-Future<DialogUserChoice> showChoiceDialog<T>(
+Future<DialogUserChoice?> showChoiceDialog<T>(
   BuildContext context,
   String title,
   String content, {
   String firstAction = 'Ok',
-  Color firstActionColor,
+  Color? firstActionColor,
   String secondAction = 'Cancel',
-  Color secondActionColor,
+  Color? secondActionColor,
   ActionType actionType = ActionType.confirm,
 }) {
   final AlertDialog alert = AlertDialog(

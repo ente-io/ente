@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -27,24 +27,24 @@ import 'package:flutter/material.dart';
 
 // ignore_for_file: unnecessary_this, library_private_types_in_public_api
 class AppLock extends StatefulWidget {
-  final Widget Function(Object) builder;
+  final Widget Function(Object?) builder;
   final Widget lockScreen;
   final bool enabled;
   final Duration backgroundLockLatency;
-  final ThemeData darkTheme;
-  final ThemeData lightTheme;
+  final ThemeData? darkTheme;
+  final ThemeData? lightTheme;
 
   const AppLock({
-    Key key,
-    @required this.builder,
-    @required this.lockScreen,
+    Key? key,
+    required this.builder,
+    required this.lockScreen,
     this.enabled = true,
     this.backgroundLockLatency = const Duration(seconds: 0),
     this.darkTheme,
     this.lightTheme,
   }) : super(key: key);
 
-  static _AppLockState of(BuildContext context) =>
+  static _AppLockState? of(BuildContext context) =>
       context.findAncestorStateOfType<_AppLockState>();
 
   @override
@@ -54,11 +54,11 @@ class AppLock extends StatefulWidget {
 class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   static final GlobalKey<NavigatorState> _navigatorKey = GlobalKey();
 
-  bool _didUnlockForAppLaunch;
-  bool _isLocked;
-  bool _enabled;
+  late bool _didUnlockForAppLaunch;
+  late bool _isLocked;
+  late bool _enabled;
 
-  Timer _backgroundLockLatencyTimer;
+  Timer? _backgroundLockLatencyTimer;
 
   @override
   void initState() {
@@ -139,7 +139,7 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   /// when built. Use this when you want to inject objects created from the
   /// [lockScreen] in to the rest of your app so you can better guarantee that some
   /// objects, services or databases are already instantiated before using them.
-  void didUnlock([Object args]) {
+  void didUnlock([Object? args]) {
     if (this._didUnlockForAppLaunch) {
       this._didUnlockOnAppPaused();
     } else {
@@ -178,17 +178,17 @@ class _AppLockState extends State<AppLock> with WidgetsBindingObserver {
   /// Manually show the [lockScreen].
   Future<void> showLockScreen() {
     this._isLocked = true;
-    return _navigatorKey.currentState.pushNamed('/lock-screen');
+    return _navigatorKey.currentState!.pushNamed('/lock-screen');
   }
 
-  void _didUnlockOnAppLaunch(Object args) {
+  void _didUnlockOnAppLaunch(Object? args) {
     this._didUnlockForAppLaunch = true;
-    _navigatorKey.currentState
+    _navigatorKey.currentState!
         .pushReplacementNamed('/unlocked', arguments: args);
   }
 
   void _didUnlockOnAppPaused() {
     this._isLocked = false;
-    _navigatorKey.currentState.pop();
+    _navigatorKey.currentState!.pop();
   }
 }

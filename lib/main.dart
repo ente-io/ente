@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:io';
@@ -50,6 +50,7 @@ const kFGSyncFrequency = Duration(minutes: 5);
 const kBGTaskTimeout = Duration(seconds: 25);
 const kBGPushTimeout = Duration(seconds: 28);
 const kFGTaskDeathTimeoutInMicroseconds = 5000000;
+const kBackgroundLockLatency = Duration(seconds: 3);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -69,6 +70,7 @@ Future<void> _runInForeground() async {
         enabled: Configuration.instance.shouldShowLockScreen(),
         lightTheme: lightThemeData,
         darkTheme: darkThemeData,
+        backgroundLockLatency: kBackgroundLockLatency,
       ),
     );
   });
@@ -228,7 +230,7 @@ Future<bool> _isRunningInForeground() async {
       (currentTime - kFGTaskDeathTimeoutInMicroseconds);
 }
 
-Future<void> _killBGTask([String taskId]) async {
+Future<void> _killBGTask([String? taskId]) async {
   await UploadLocksDB.instance.releaseLocksAcquiredByOwnerBefore(
     ProcessType.background.toString(),
     DateTime.now().microsecondsSinceEpoch,
@@ -279,7 +281,7 @@ Future<void> _logFGHeartBeatInfo() async {
   _logger.info('isAlreaduunningFG: $isRunningInFG, last Beat: $lastRun');
 }
 
-void _scheduleSuicide(Duration duration, [String taskID]) {
+void _scheduleSuicide(Duration duration, [String? taskID]) {
   final taskIDVal = taskID ?? 'no taskID';
   _logger.warning("Schedule seppuku taskID: $taskIDVal");
   Future.delayed(duration, () {

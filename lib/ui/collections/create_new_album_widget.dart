@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:photos/core/event_bus.dart';
@@ -7,9 +5,7 @@ import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/utils/toast_util.dart';
 
 class CreateNewAlbumWidget extends StatelessWidget {
-  const CreateNewAlbumWidget({
-    Key key,
-  }) : super(key: key);
+  const CreateNewAlbumWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,14 +19,14 @@ class CreateNewAlbumWidget extends StatelessWidget {
               blurRadius: 2,
               spreadRadius: 0,
               offset: const Offset(0, 0),
-              color: Theme.of(context).iconTheme.color.withOpacity(0.3),
+              color: Theme.of(context).iconTheme.color!.withOpacity(0.3),
             )
           ],
           borderRadius: BorderRadius.circular(4),
         ),
         child: Icon(
           Icons.add,
-          color: Theme.of(context).iconTheme.color.withOpacity(0.25),
+          color: Theme.of(context).iconTheme.color!.withOpacity(0.25),
         ),
       ),
       onTap: () async {

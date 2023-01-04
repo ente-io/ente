@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io';
 import 'dart:ui';
 
@@ -24,9 +22,9 @@ class BackupFolderSelectionPage extends StatefulWidget {
   final String buttonText;
 
   const BackupFolderSelectionPage({
-    @required this.buttonText,
+    required this.buttonText,
     this.isOnboarding = false,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -38,8 +36,8 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   final Logger _logger = Logger((_BackupFolderSelectionPageState).toString());
   final Set<String> _allDevicePathIDs = <String>{};
   final Set<String> _selectedDevicePathIDs = <String>{};
-  List<DeviceCollection> _deviceCollections;
-  Map<String, int> _pathIDToItemCount;
+  List<DeviceCollection>? _deviceCollections;
+  Map<String, int>? _pathIDToItemCount;
 
   @override
   void initState() {
@@ -50,10 +48,10 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           await FilesDB.instance.getDevicePathIDToImportedFileCount();
       setState(() {
         _deviceCollections = files;
-        _deviceCollections.sort((first, second) {
+        _deviceCollections!.sort((first, second) {
           return first.name.toLowerCase().compareTo(second.name.toLowerCase());
         });
-        for (final file in _deviceCollections) {
+        for (final file in _deviceCollections!) {
           _allDevicePathIDs.add(file.id);
           if (file.shouldBackup) {
             _selectedDevicePathIDs.add(file.id);
@@ -103,7 +101,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
             padding: const EdgeInsets.only(left: 24, right: 48),
             child: Text(
               "Selected folders will be encrypted and backed up",
-              style: Theme.of(context).textTheme.caption.copyWith(height: 1.3),
+              style: Theme.of(context).textTheme.caption!.copyWith(height: 1.3),
             ),
           ),
           const Padding(
@@ -139,7 +137,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     } else {
                       _selectedDevicePathIDs.addAll(_allDevicePathIDs);
                     }
-                    _deviceCollections.sort((first, second) {
+                    _deviceCollections!.sort((first, second) {
                       return first.name
                           .toLowerCase()
                           .compareTo(second.name.toLowerCase());
@@ -191,7 +189,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                         },
                         child: Text(
                           "Skip",
-                          style: Theme.of(context).textTheme.caption.copyWith(
+                          style: Theme.of(context).textTheme.caption!.copyWith(
                                 decoration: TextDecoration.underline,
                               ),
                         ),
@@ -228,7 +226,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
     } catch (e, s) {
       _logger.severe("Failed to updated backup folder", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 
@@ -247,11 +245,11 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
           padding: const EdgeInsets.only(right: 4),
           child: ImplicitlyAnimatedReorderableList<DeviceCollection>(
             controller: scrollController,
-            items: _deviceCollections,
+            items: _deviceCollections!,
             areItemsTheSame: (oldItem, newItem) => oldItem.id == newItem.id,
             onReorderFinished: (item, from, to, newItems) {
               setState(() {
-                _deviceCollections
+                _deviceCollections!
                   ..clear()
                   ..addAll(newItems);
               });
@@ -261,7 +259,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                 key: ValueKey(file),
                 builder: (context, dragAnimation, inDrag) {
                   final t = dragAnimation.value;
-                  final elevation = lerpDouble(0, 8, t);
+                  final elevation = lerpDouble(0, 8, t)!;
                   final themeColor = Theme.of(context).colorScheme.onSurface;
                   final color =
                       Color.lerp(themeColor, themeColor.withOpacity(0.8), t);
@@ -288,7 +286,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   Widget _getFileItem(DeviceCollection deviceCollection) {
     final isSelected = _selectedDevicePathIDs.contains(deviceCollection.id);
     final importedCount = _pathIDToItemCount != null
-        ? _pathIDToItemCount[deviceCollection.id] ?? 0
+        ? _pathIDToItemCount![deviceCollection.id] ?? 0
         : -1;
     return Padding(
       padding: const EdgeInsets.only(bottom: 1, right: 1),
@@ -326,7 +324,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                     activeColor: Colors.white,
                     value: isSelected,
                     onChanged: (value) {
-                      if (value) {
+                      if (value!) {
                         _selectedDevicePathIDs.add(deviceCollection.id);
                       } else {
                         _selectedDevicePathIDs.remove(deviceCollection.id);
@@ -360,9 +358,9 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                       const Padding(padding: EdgeInsets.only(top: 2)),
                       Text(
                         (kDebugMode ? 'inApp: $importedCount : device ' : '') +
-                            (deviceCollection.count ?? 0).toString() +
+                            (deviceCollection.count).toString() +
                             " item" +
-                            ((deviceCollection.count ?? 0) == 1 ? "" : "s"),
+                            ((deviceCollection.count) == 1 ? "" : "s"),
                         textAlign: TextAlign.left,
                         style: TextStyle(
                           fontSize: 12,
@@ -375,7 +373,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
                   ),
                 ],
               ),
-              _getThumbnail(deviceCollection.thumbnail, isSelected),
+              _getThumbnail(deviceCollection.thumbnail!, isSelected),
             ],
           ),
           onTap: () {
@@ -393,7 +391,7 @@ class _BackupFolderSelectionPageState extends State<BackupFolderSelectionPage> {
   }
 
   void _sortFiles() {
-    _deviceCollections.sort((first, second) {
+    _deviceCollections!.sort((first, second) {
       if (_selectedDevicePathIDs.contains(first.id) &&
           _selectedDevicePathIDs.contains(second.id)) {
         return first.name.toLowerCase().compareTo(second.name.toLowerCase());

@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:io';
 
@@ -15,6 +15,7 @@ import 'package:photos/ui/settings/app_version_widget.dart';
 import 'package:photos/ui/settings/backup_section_widget.dart';
 import 'package:photos/ui/settings/debug_section_widget.dart';
 import 'package:photos/ui/settings/general_section_widget.dart';
+import 'package:photos/ui/settings/inherited_settings_state.dart';
 import 'package:photos/ui/settings/security_section_widget.dart';
 import 'package:photos/ui/settings/settings_title_bar_widget.dart';
 import 'package:photos/ui/settings/social_section_widget.dart';
@@ -23,8 +24,8 @@ import 'package:photos/ui/settings/support_section_widget.dart';
 import 'package:photos/ui/settings/theme_switch_widget.dart';
 
 class SettingsPage extends StatelessWidget {
-  final ValueNotifier<String> emailNotifier;
-  const SettingsPage({Key key, @required this.emailNotifier}) : super(key: key);
+  final ValueNotifier<String?> emailNotifier;
+  const SettingsPage({Key? key, required this.emailNotifier}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,9 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       body: Container(
         color: enteColorScheme.backdropMuted,
-        child: _getBody(context, enteColorScheme),
+        child: SettingsStateContainer(
+          child: _getBody(context, enteColorScheme),
+        ),
       ),
     );
   }
@@ -51,9 +54,9 @@ class SettingsPage extends StatelessWidget {
           child: AnimatedBuilder(
             // [AnimatedBuilder] accepts any [Listenable] subtype.
             animation: emailNotifier,
-            builder: (BuildContext context, Widget child) {
+            builder: (BuildContext context, Widget? child) {
               return Text(
-                emailNotifier.value,
+                emailNotifier.value!,
                 style: enteTextTheme.body.copyWith(
                   color: colorScheme.textMuted,
                   overflow: TextOverflow.ellipsis,

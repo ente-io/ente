@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:collection/collection.dart';
@@ -23,11 +21,12 @@ import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
 import 'package:photos/ui/collections/uncat_collections_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/utils/local_settings.dart';
 
 class CollectionsGalleryWidget extends StatefulWidget {
-  const CollectionsGalleryWidget({Key key}) : super(key: key);
+  const CollectionsGalleryWidget({Key? key}) : super(key: key);
 
   @override
   State<CollectionsGalleryWidget> createState() =>
@@ -37,10 +36,11 @@ class CollectionsGalleryWidget extends StatefulWidget {
 class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
     with AutomaticKeepAliveClientMixin {
   final _logger = Logger((_CollectionsGalleryWidgetState).toString());
-  StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
-  StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
-  StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
-  AlbumSortKey sortKey;
+  late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
+  late StreamSubscription<CollectionUpdatedEvent>
+      _collectionUpdatesSubscription;
+  late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
+  AlbumSortKey? sortKey;
   String _loadReason = "init";
 
   @override
@@ -99,8 +99,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       (first, second) {
         if (sortKey == AlbumSortKey.albumName) {
           return compareAsciiLowerCaseNatural(
-            first.collection.name,
-            second.collection.name,
+            first.collection.name!,
+            second.collection.name!,
           );
         } else if (sortKey == AlbumSortKey.newestPhoto) {
           return (second.thumbnail?.creationTime ?? -1 * intMaxValue)
@@ -122,13 +122,15 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   }
 
   Widget _getCollectionsGalleryWidget(
-    List<CollectionWithThumbnail> collections,
+    List<CollectionWithThumbnail>? collections,
   ) {
+    final bool showDeleteAlbumsButton =
+        collections!.where((c) => c.thumbnail == null).length >= 3;
     final TextStyle trashAndHiddenTextStyle = Theme.of(context)
         .textTheme
-        .subtitle1
+        .subtitle1!
         .copyWith(
-          color: Theme.of(context).textTheme.subtitle1.color.withOpacity(0.5),
+          color: Theme.of(context).textTheme.subtitle1!.color!.withOpacity(0.5),
         );
 
     return SingleChildScrollView(
@@ -150,6 +152,12 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
                 _sortMenu(),
               ],
             ),
+            showDeleteAlbumsButton
+                ? const Padding(
+                    padding: EdgeInsets.only(top: 2, left: 8.5, right: 48),
+                    child: DeleteEmptyAlbums(),
+                  )
+                : const SizedBox.shrink(),
             const SizedBox(height: 12),
             Configuration.instance.hasConfiguredAccount()
                 ? RemoteCollectionsGridViewWidget(collections)
@@ -193,9 +201,9 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
       }
       return Text(
         text,
-        style: Theme.of(context).textTheme.subtitle1.copyWith(
+        style: Theme.of(context).textTheme.subtitle1!.copyWith(
               fontSize: 14,
-              color: Theme.of(context).iconTheme.color.withOpacity(0.7),
+              color: Theme.of(context).iconTheme.color!.withOpacity(0.7),
             ),
       );
     }
@@ -231,7 +239,7 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
         ),
         onSelected: (int index) async {
           sortKey = AlbumSortKey.values[index];
-          await LocalSettings.instance.setAlbumSortKey(sortKey);
+          await LocalSettings.instance.setAlbumSortKey(sortKey!);
           setState(() {});
         },
         itemBuilder: (context) {

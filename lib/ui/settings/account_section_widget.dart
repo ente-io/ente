@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -20,7 +18,7 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class AccountSectionWidget extends StatelessWidget {
-  const AccountSectionWidget({Key key}) : super(key: key);
+  const AccountSectionWidget({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +51,7 @@ class AccountSectionWidget extends StatelessWidget {
               try {
                 recoveryKey = await _getOrCreateRecoveryKey(context);
               } catch (e) {
-                await showGenericErrorDialog(context);
+                await showGenericErrorDialog(context: context);
                 return;
               }
               unawaited(
@@ -158,7 +156,7 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-    Future<void> _onLogoutTapped(BuildContext context) async {
+  Future<void> _onLogoutTapped(BuildContext context) async {
     final AlertDialog alert = AlertDialog(
       title: const Text(
         "Logout",

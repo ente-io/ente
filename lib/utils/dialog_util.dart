@@ -1,11 +1,136 @@
-// @dart=2.9
-
 import 'dart:math';
 
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
+
+typedef DialogBuilder = DialogWidget Function(BuildContext context);
+
+///Will return null if dismissed by tapping outside
+Future<ButtonAction?> showErrorDialog(
+  BuildContext context,
+  String title,
+  String? body, {
+  bool isDismissable = true,
+}) async {
+  return showDialogWidget(
+    context: context,
+    title: title,
+    body: body,
+    isDismissible: isDismissable,
+    buttons: const [
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "OK",
+        isInAlert: true,
+        buttonAction: ButtonAction.first,
+      ),
+    ],
+  );
+}
+
+///Will return null if dismissed by tapping outside
+Future<ButtonAction?> showGenericErrorDialog({
+  required BuildContext context,
+  bool isDismissible = true,
+}) async {
+  return showDialogWidget(
+    context: context,
+    title: "Error",
+    icon: Icons.error_outline_outlined,
+    body: "It looks like something went wrong. Please try again.",
+    isDismissible: isDismissible,
+    buttons: const [
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "OK",
+        isInAlert: true,
+      ),
+    ],
+  );
+}
+
+DialogWidget choiceDialog({
+  required String title,
+  String? body,
+  required String firstButtonLabel,
+  String secondButtonLabel = "Cancel",
+  ButtonType firstButtonType = ButtonType.neutral,
+  ButtonType secondButtonType = ButtonType.secondary,
+  ButtonAction firstButtonAction = ButtonAction.first,
+  ButtonAction secondButtonAction = ButtonAction.cancel,
+  FutureVoidCallback? firstButtonOnTap,
+  FutureVoidCallback? secondButtonOnTap,
+  bool isCritical = false,
+  IconData? icon,
+}) {
+  final buttons = [
+    ButtonWidget(
+      buttonType: isCritical ? ButtonType.critical : firstButtonType,
+      labelText: firstButtonLabel,
+      isInAlert: true,
+      onTap: firstButtonOnTap,
+      buttonAction: firstButtonAction,
+    ),
+    ButtonWidget(
+      buttonType: secondButtonType,
+      labelText: secondButtonLabel,
+      isInAlert: true,
+      onTap: secondButtonOnTap,
+      buttonAction: secondButtonAction,
+    ),
+  ];
+
+  return DialogWidget(title: title, body: body, buttons: buttons, icon: icon);
+}
+
+///Will return null if dismissed by tapping outside
+Future<ButtonAction?> showNewChoiceDialog({
+  required BuildContext context,
+  required String title,
+  String? body,
+  required String firstButtonLabel,
+  String secondButtonLabel = "Cancel",
+  ButtonType firstButtonType = ButtonType.neutral,
+  ButtonType secondButtonType = ButtonType.secondary,
+  ButtonAction firstButtonAction = ButtonAction.first,
+  ButtonAction secondButtonAction = ButtonAction.cancel,
+  FutureVoidCallback? firstButtonOnTap,
+  FutureVoidCallback? secondButtonOnTap,
+  bool isCritical = false,
+  IconData? icon,
+  bool isDismissible = true,
+}) async {
+  final buttons = [
+    ButtonWidget(
+      buttonType: isCritical ? ButtonType.critical : firstButtonType,
+      labelText: firstButtonLabel,
+      isInAlert: true,
+      onTap: firstButtonOnTap,
+      buttonAction: firstButtonAction,
+    ),
+    ButtonWidget(
+      buttonType: secondButtonType,
+      labelText: secondButtonLabel,
+      isInAlert: true,
+      onTap: secondButtonOnTap,
+      buttonAction: secondButtonAction,
+    ),
+  ];
+  return showDialogWidget(
+    context: context,
+    title: title,
+    body: body,
+    buttons: buttons,
+    icon: icon,
+    isDismissible: isDismissible,
+  );
+}
 
 ProgressDialog createProgressDialog(
   BuildContext context,
@@ -30,60 +155,20 @@ ProgressDialog createProgressDialog(
   return dialog;
 }
 
-Future<dynamic> showErrorDialog(
-  BuildContext context,
-  String title,
-  String content,
-) {
-  final AlertDialog alert = AlertDialog(
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    title: title.isEmpty
-        ? const SizedBox.shrink()
-        : Text(
-            title,
-            style: Theme.of(context).textTheme.headline6,
-          ),
-    content: Text(content),
-    actions: [
-      TextButton(
-        child: Text(
-          "Ok",
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-        ),
-        onPressed: () {
-          Navigator.of(context, rootNavigator: true).pop('dialog');
-        },
-      ),
-    ],
-  );
-
-  return showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return alert;
-    },
-    barrierColor: Colors.black12,
-  );
-}
-
-Future<dynamic> showGenericErrorDialog(BuildContext context) {
-  return showErrorDialog(context, "Something went wrong", "Please try again.");
-}
-
-Future<T> showConfettiDialog<T>({
-  @required BuildContext context,
-  WidgetBuilder builder,
+Future<ButtonAction?> showConfettiDialog<T>({
+  required BuildContext context,
+  required DialogBuilder dialogBuilder,
   bool barrierDismissible = true,
-  Color barrierColor,
+  Color? barrierColor,
   bool useSafeArea = true,
   bool useRootNavigator = true,
-  RouteSettings routeSettings,
+  RouteSettings? routeSettings,
   Alignment confettiAlignment = Alignment.center,
 }) {
+  final widthOfScreen = MediaQuery.of(context).size.width;
+  final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
   final pageBuilder = Builder(
-    builder: builder,
+    builder: dialogBuilder,
   );
   final ConfettiController confettiController =
       ConfettiController(duration: const Duration(seconds: 1));
@@ -91,22 +176,25 @@ Future<T> showConfettiDialog<T>({
   return showDialog(
     context: context,
     builder: (BuildContext buildContext) {
-      return Stack(
-        children: [
-          pageBuilder,
-          Align(
-            alignment: confettiAlignment,
-            child: ConfettiWidget(
-              confettiController: confettiController,
-              blastDirection: pi / 2,
-              emissionFrequency: 0,
-              numberOfParticles: 100,
-              // a lot of particles at once
-              gravity: 1,
-              blastDirectionality: BlastDirectionality.explosive,
+      return Padding(
+        padding: EdgeInsets.symmetric(horizontal: isMobileSmall ? 8 : 0),
+        child: Stack(
+          children: [
+            Align(alignment: Alignment.center, child: pageBuilder),
+            Align(
+              alignment: confettiAlignment,
+              child: ConfettiWidget(
+                confettiController: confettiController,
+                blastDirection: pi / 2,
+                emissionFrequency: 0,
+                numberOfParticles: 100,
+                // a lot of particles at once
+                gravity: 1,
+                blastDirectionality: BlastDirectionality.explosive,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     },
     barrierDismissible: barrierDismissible,

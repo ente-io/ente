@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/user_details.dart';
@@ -9,15 +7,15 @@ import 'package:photos/utils/dialog_util.dart';
 
 class ChildSubscriptionWidget extends StatelessWidget {
   const ChildSubscriptionWidget({
-    Key key,
-    @required this.userDetails,
+    Key? key,
+    required this.userDetails,
   }) : super(key: key);
 
   final UserDetails userDetails;
 
   @override
   Widget build(BuildContext context) {
-    final String familyAdmin = userDetails.familyData.members
+    final String familyAdmin = userDetails.familyData!.members!
         .firstWhere((element) => element.isAdmin)
         .email;
     return Padding(
@@ -101,7 +99,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
                     ),
                     TextSpan(
                       text: "support@ente.io",
-                      style: Theme.of(context).textTheme.bodyText2.copyWith(
+                      style: Theme.of(context).textTheme.bodyText2?.copyWith(
                             color: const Color.fromRGBO(29, 185, 84, 1),
                           ),
                     ),
@@ -140,7 +138,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
       Navigator.of(context).pop('');
     } catch (e) {
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
   }
 }

@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 import 'dart:io';
@@ -15,15 +15,15 @@ import 'package:photos/ui/common/bottom_shadow.dart';
 import 'package:photos/utils/navigation_util.dart';
 
 class LoadingPhotosWidget extends StatefulWidget {
-  const LoadingPhotosWidget({Key key}) : super(key: key);
+  const LoadingPhotosWidget({Key? key}) : super(key: key);
 
   @override
   State<LoadingPhotosWidget> createState() => _LoadingPhotosWidgetState();
 }
 
 class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
-  StreamSubscription<SyncStatusUpdate> _firstImportEvent;
-  StreamSubscription<LocalImportProgressEvent> _imprortProgressEvent;
+  late StreamSubscription<SyncStatusUpdate> _firstImportEvent;
+  late StreamSubscription<LocalImportProgressEvent> _imprortProgressEvent;
   int _currentPage = 0;
   String _loadingMessage = "Loading your photos...";
   final PageController _pageController = PageController(
@@ -145,7 +145,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                       children: [
                         Text(
                           "Did you know?",
-                          style: Theme.of(context).textTheme.headline6.copyWith(
+                          style: Theme.of(context).textTheme.headline6!.copyWith(
                                 color: Theme.of(context).colorScheme.greenText,
                               ),
                         ),
@@ -192,7 +192,7 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
       textAlign: TextAlign.start,
       style: Theme.of(context)
           .textTheme
-          .headline5
+          .headline5!
           .copyWith(color: Theme.of(context).colorScheme.defaultTextColor),
     );
   }

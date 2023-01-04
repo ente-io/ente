@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
@@ -20,7 +19,9 @@ extension CollectionFileActions on CollectionActions {
     final count = selectedFiles.files.length;
     final textTheme = getEnteTextTheme(context);
     final showDeletePrompt = await _anyItemPresentOnlyInCurrentAlbum(
-        selectedFiles.files, collection.id);
+      selectedFiles.files,
+      collection.id,
+    );
     final String title =
         showDeletePrompt ? "Delete items?" : "Remove from album?";
     final String message1 = showDeletePrompt
@@ -51,8 +52,10 @@ extension CollectionFileActions on CollectionActions {
           isDestructiveAction: true,
           onPressed: () async {
             Navigator.of(context, rootNavigator: true).pop();
-            final dialog = createProgressDialog(context,
-                showDeletePrompt ? "Deleting files..." : "Removing files...",);
+            final dialog = createProgressDialog(
+              context,
+              showDeletePrompt ? "Deleting files..." : "Removing files...",
+            );
             await dialog.show();
             try {
               await collectionsService.removeFromCollection(
@@ -64,7 +67,7 @@ extension CollectionFileActions on CollectionActions {
             } catch (e, s) {
               logger.severe(e, s);
               await dialog.hide();
-              showGenericErrorDialog(context);
+              showGenericErrorDialog(context: context);
             }
           },
           child: Text(showDeletePrompt ? "Yes, delete" : "Yes, remove"),

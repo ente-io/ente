@@ -4,6 +4,7 @@ import 'package:photos/ente_theme_data.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/settings/common_settings.dart';
+import 'package:photos/ui/settings/inherited_settings_state.dart';
 
 class ExpandableMenuItemWidget extends StatefulWidget {
   final String title;
@@ -37,6 +38,11 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isAnySectionExpanded =
+        InheritedSettingsState.maybeOf(context)?.isAnySectionExpanded ?? false;
+    final isCurrentSectionExpanded = expandableController.expanded;
+    final isSuppressed = isAnySectionExpanded && !isCurrentSectionExpanded;
+
     final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final backgroundColor =
         MediaQuery.of(context).platformBrightness == Brightness.light
@@ -59,10 +65,19 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
                 captionedTextWidget: CaptionedTextWidget(
                   title: widget.title,
                   makeTextBold: true,
+                  textColor: isSuppressed
+                      ? enteColorScheme.textMuted
+                      : enteColorScheme.textBase,
                 ),
                 isExpandable: true,
                 leadingIcon: widget.leadingIcon,
+                leadingIconColor: isSuppressed
+                    ? enteColorScheme.strokeMuted
+                    : enteColorScheme.strokeBase,
                 trailingIcon: Icons.expand_more,
+                trailingIconColor: isSuppressed
+                    ? enteColorScheme.strokeMuted
+                    : enteColorScheme.strokeBase,
                 menuItemColor: enteColorScheme.fillFaint,
                 expandableController: expandableController,
               ),
@@ -81,6 +96,12 @@ class _ExpandableMenuItemWidgetState extends State<ExpandableMenuItemWidget> {
   }
 
   void _expandableControllerListener() {
-    setState(() {});
+    setState(() {
+      if (expandableController.expanded) {
+        InheritedSettingsState.of(context).increment();
+      } else {
+        InheritedSettingsState.of(context).decrement();
+      }
+    });
   }
 }

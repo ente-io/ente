@@ -128,7 +128,7 @@ class FileUpdationDB {
     );
   }
 
-  Future<List<String?>> getLocalIDsForPotentialReUpload(
+  Future<List<String>> getLocalIDsForPotentialReUpload(
     int limit,
     String reason,
   ) async {
@@ -139,15 +139,14 @@ class FileUpdationDB {
       limit: limit,
       where: whereClause,
     );
-    final result = <String?>[];
+    final result = <String>[];
     for (final row in rows) {
-      result.add(row[columnLocalID] as String?);
+      result.add(row[columnLocalID] as String);
     }
     return result;
   }
 
-  Map<String, dynamic> _getRowForReUploadTable(String? localID, String reason) {
-    assert(localID != null);
+  Map<String, dynamic> _getRowForReUploadTable(String localID, String reason) {
     final row = <String, dynamic>{};
     row[columnLocalID] = localID;
     row[columnReason] = reason;

@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -46,14 +44,14 @@ String _actionName(CollectionActionType type, bool plural) {
 }
 
 class CreateCollectionPage extends StatefulWidget {
-  final SelectedFiles selectedFiles;
-  final List<SharedMediaFile> sharedFiles;
+  final SelectedFiles? selectedFiles;
+  final List<SharedMediaFile>? sharedFiles;
   final CollectionActionType actionType;
 
   const CreateCollectionPage(
     this.selectedFiles,
     this.sharedFiles, {
-    Key key,
+    Key? key,
     this.actionType = CollectionActionType.addFiles,
   }) : super(key: key);
 
@@ -63,13 +61,13 @@ class CreateCollectionPage extends StatefulWidget {
 
 class _CreateCollectionPageState extends State<CreateCollectionPage> {
   final _logger = Logger((_CreateCollectionPageState).toString());
-  String _albumName;
+  late String _albumName;
 
   @override
   Widget build(BuildContext context) {
     final filesCount = widget.sharedFiles != null
-        ? widget.sharedFiles.length
-        : widget.selectedFiles.files.length;
+        ? widget.sharedFiles!.length
+        : widget.selectedFiles!.files.length;
     return Scaffold(
       appBar: AppBar(
         title: Text(_actionName(widget.actionType, filesCount > 1)),
@@ -134,9 +132,9 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
         } else if (snapshot.hasData) {
           return ListView.builder(
             itemBuilder: (context, index) {
-              return _buildCollectionItem(snapshot.data[index]);
+              return _buildCollectionItem(snapshot.data![index]);
             },
-            itemCount: snapshot.data.length,
+            itemCount: snapshot.data!.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
           );
@@ -171,7 +169,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             const Padding(padding: EdgeInsets.all(8)),
             Expanded(
               child: Text(
-                item.collection.name,
+                item.collection.name!,
                 style: const TextStyle(
                   fontSize: 16,
                 ),
@@ -184,8 +182,8 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
             showShortToast(
               context,
               widget.actionType == CollectionActionType.addFiles
-                  ? "Added successfully to " + item.collection.name
-                  : "Moved successfully to " + item.collection.name,
+                  ? "Added successfully to " + item.collection.name!
+                  : "Moved successfully to " + item.collection.name!,
             );
             _navigateToCollection(item.collection);
           }
@@ -294,7 +292,6 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       case CollectionActionType.restoreFiles:
         return _restoreFilesToCollection(collectionID);
     }
-    throw AssertionError("unexpected actionType ${widget.actionType}");
   }
 
   Future<bool> _moveFilesToCollection(int toCollectionID) async {
@@ -305,11 +302,11 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     try {
       final int fromCollectionID =
-          widget.selectedFiles.files.first?.collectionID;
+          widget.selectedFiles!.files.first.collectionID!;
       await CollectionsService.instance.move(
         toCollectionID,
         fromCollectionID,
-        widget.selectedFiles.files?.toList(),
+        widget.selectedFiles!.files.toList(),
       );
       await dialog.hide();
       RemoteSyncService.instance.sync(silently: true);
@@ -318,12 +315,12 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       return true;
     } on AssertionError catch (e) {
       await dialog.hide();
-      showErrorDialog(context, "Oops", e.message);
+      showErrorDialog(context, "Oops", e.message as String?);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return false;
     }
   }
@@ -333,19 +330,19 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     await dialog.show();
     try {
       await CollectionsService.instance
-          .restore(toCollectionID, widget.selectedFiles.files?.toList());
+          .restore(toCollectionID, widget.selectedFiles!.files.toList());
       RemoteSyncService.instance.sync(silently: true);
       widget.selectedFiles?.clearAll();
       await dialog.hide();
       return true;
     } on AssertionError catch (e) {
       await dialog.hide();
-      showErrorDialog(context, "Oops", e.message);
+      showErrorDialog(context, "Oops", e.message as String?);
       return false;
     } catch (e, s) {
       _logger.severe("Could not move to album", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
       return false;
     }
   }
@@ -359,13 +356,18 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
       if (widget.sharedFiles != null) {
         filesPendingUpload.addAll(
           await convertIncomingSharedMediaToFile(
-            widget.sharedFiles,
+            widget.sharedFiles!,
             collectionID,
           ),
         );
       } else {
-        for (final file in widget.selectedFiles.files) {
-          final currentFile = await FilesDB.instance.getFile(file.generatedID);
+        for (final file in widget.selectedFiles!.files) {
+          final File? currentFile =
+              await (FilesDB.instance.getFile(file.generatedID!));
+          if (currentFile == null) {
+            _logger.severe("Failed to find fileBy genID");
+            continue;
+          }
           if (currentFile.uploadedFileID == null) {
             currentFile.collectionID = collectionID;
             filesPendingUpload.add(currentFile);
@@ -391,13 +393,13 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     } catch (e, s) {
       _logger.severe("Could not add to album", e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     }
     return false;
   }
 
-  Future<Collection> _createAlbum(String albumName) async {
-    Collection collection;
+  Future<Collection?> _createAlbum(String albumName) async {
+    Collection? collection;
     final dialog = createProgressDialog(context, "Creating album...");
     await dialog.show();
     try {
@@ -405,7 +407,7 @@ class _CreateCollectionPageState extends State<CreateCollectionPage> {
     } catch (e, s) {
       _logger.severe(e, s);
       await dialog.hide();
-      showGenericErrorDialog(context);
+      showGenericErrorDialog(context: context);
     } finally {
       await dialog.hide();
     }

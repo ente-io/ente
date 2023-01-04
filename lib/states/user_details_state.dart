@@ -19,20 +19,16 @@ class UserDetailsStateWidget extends StatefulWidget {
 }
 
 class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
-  late UserDetails? userDetails;
+  late UserDetails? _userDetails;
   late StreamSubscription<OpenedSettingsEvent> _openedSettingsEventSubscription;
+  bool _isCached = true;
 
   @override
   void initState() {
-    userDetails = null;
+    _userDetails = UserService.instance.getCachedUserDetails();
     _openedSettingsEventSubscription =
         Bus.instance.on<OpenedSettingsEvent>().listen((event) {
-      Future.delayed(
-        const Duration(
-          milliseconds: 750,
-        ),
-        _fetchUserDetails,
-      );
+      _fetchUserDetails();
     });
     super.initState();
   }
@@ -46,13 +42,17 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
   @override
   Widget build(BuildContext context) => InheritedUserDetails(
         userDetailsState: this,
-        userDetails: userDetails,
+        userDetails: _userDetails,
+        isCached: _isCached,
         child: widget.child,
       );
 
   void _fetchUserDetails() async {
-    userDetails =
-        await UserService.instance.getUserDetailsV2(memoryCount: true);
+    _userDetails = await UserService.instance.getUserDetailsV2(
+      memoryCount: true,
+      shouldCache: true,
+    );
+    _isCached = false;
     if (mounted) {
       setState(() {});
     }
@@ -62,11 +62,13 @@ class UserDetailsStateWidgetState extends State<UserDetailsStateWidget> {
 class InheritedUserDetails extends InheritedWidget {
   final UserDetailsStateWidgetState userDetailsState;
   final UserDetails? userDetails;
+  final bool isCached;
 
   const InheritedUserDetails({
     Key? key,
     required Widget child,
     required this.userDetails,
+    required this.isCached,
     required this.userDetailsState,
   }) : super(key: key, child: child);
 
@@ -76,6 +78,7 @@ class InheritedUserDetails extends InheritedWidget {
   @override
   bool updateShouldNotify(covariant InheritedUserDetails oldWidget) {
     return (userDetails?.usage != oldWidget.userDetails?.usage) ||
-        (userDetails?.fileCount != oldWidget.userDetails?.fileCount);
+        (userDetails?.fileCount != oldWidget.userDetails?.fileCount) ||
+        (isCached != oldWidget.isCached);
   }
 }

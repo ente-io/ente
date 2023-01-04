@@ -8,15 +8,17 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/utils/separators_util.dart';
 
-Future<dynamic> showDialogWidget({
+///Will return null if dismissed by tapping outside
+Future<ButtonAction?> showDialogWidget({
   required BuildContext context,
   required String title,
-  required String body,
+  String? body,
   required List<ButtonWidget> buttons,
   IconData? icon,
+  bool isDismissible = true,
 }) {
   return showDialog(
-    barrierDismissible: false,
+    barrierDismissible: isDismissible,
     barrierColor: backdropFaintDark,
     context: context,
     builder: (context) {
@@ -30,7 +32,6 @@ Future<dynamic> showDialogWidget({
             title: title,
             body: body,
             buttons: buttons,
-            isMobileSmall: isMobileSmall,
             icon: icon,
           ),
         ),
@@ -41,15 +42,13 @@ Future<dynamic> showDialogWidget({
 
 class DialogWidget extends StatelessWidget {
   final String title;
-  final String body;
+  final String? body;
   final List<ButtonWidget> buttons;
   final IconData? icon;
-  final bool isMobileSmall;
   const DialogWidget({
     required this.title,
-    required this.body,
+    this.body,
     required this.buttons,
-    required this.isMobileSmall,
     this.icon,
     super.key,
   });
@@ -57,6 +56,7 @@ class DialogWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final widthOfScreen = MediaQuery.of(context).size.width;
+    final isMobileSmall = widthOfScreen <= mobileSmallThreshold;
     final colorScheme = getEnteColorScheme(context);
     return Container(
       width: min(widthOfScreen, 320),
@@ -89,11 +89,11 @@ class DialogWidget extends StatelessWidget {
 
 class ContentContainer extends StatelessWidget {
   final String title;
-  final String body;
+  final String? body;
   final IconData? icon;
   const ContentContainer({
     required this.title,
-    required this.body,
+    this.body,
     this.icon,
     super.key,
   });
@@ -118,11 +118,13 @@ class ContentContainer extends StatelessWidget {
               ),
         icon == null ? const SizedBox.shrink() : const SizedBox(height: 19),
         Text(title, style: textTheme.h3Bold),
-        const SizedBox(height: 19),
-        Text(
-          body,
-          style: textTheme.body.copyWith(color: colorScheme.textMuted),
-        ),
+        body != null ? const SizedBox(height: 19) : const SizedBox.shrink(),
+        body != null
+            ? Text(
+                body!,
+                style: textTheme.body.copyWith(color: colorScheme.textMuted),
+              )
+            : const SizedBox.shrink(),
       ],
     );
   }
