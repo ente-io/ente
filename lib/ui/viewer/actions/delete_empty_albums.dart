@@ -73,7 +73,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
                 },
               )
             ],
-            title: "Delete empty albums",
+            title: "Delete empty albums?",
             body:
                 "This will delete all empty albums. This is useful when you want to reduce the clutter in your album list.",
             actionSheetType: ActionSheetType.defaultActionSheet,
@@ -92,7 +92,7 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
       if (mounted && !_isCancelled) {
         _deleteProgress.value =
             "Deleting ${(i + 1).toString().padLeft(collections.length.toString().length, '0')} / "
-            "${collections.length} ";
+            "${collections.length}";
         try {
           await CollectionsService.instance
               .trashEmptyCollection(collections[i].collection);
