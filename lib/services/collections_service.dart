@@ -57,6 +57,7 @@ class CollectionsService {
   final _cachedUserIdToUser = <int, User>{};
   Collection? cachedDefaultHiddenCollection;
   Future<List<File>>? _cachedLatestFiles;
+  Collection? cachedUncategorizedCollection;
 
   CollectionsService._privateConstructor() {
     _db = CollectionsDB.instance;
