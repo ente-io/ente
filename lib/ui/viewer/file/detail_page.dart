@@ -14,6 +14,7 @@ import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/navigation_util.dart';
+import 'package:photos/utils/toast_util.dart';
 
 enum DetailPageMode {
   minimalistic,
@@ -294,20 +295,31 @@ class _DetailPageState extends State<DetailPage> {
     }
     final dialog = createProgressDialog(context, "Please wait...");
     await dialog.show();
-    final imageProvider =
-        ExtendedFileImageProvider((await getFile(file))!, cacheRawData: true);
-    await precacheImage(imageProvider, context);
-    await dialog.hide();
-    replacePage(
-      context,
-      ImageEditorPage(
-        imageProvider,
-        file,
-        widget.config.copyWith(
-          files: _files,
-          selectedIndex: _selectedIndex,
+    try {
+      final ioFile = await getFile(file);
+      if (ioFile == null) {
+        showShortToast(context, "Failed to fetch original for edit");
+        await dialog.hide();
+        return;
+      }
+      final imageProvider =
+          ExtendedFileImageProvider(ioFile!, cacheRawData: true);
+      await precacheImage(imageProvider, context);
+      await dialog.hide();
+      replacePage(
+        context,
+        ImageEditorPage(
+          imageProvider,
+          file,
+          widget.config.copyWith(
+            files: _files,
+            selectedIndex: _selectedIndex,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      await dialog.hide();
+      _logger.warning("Failed to initiate edit", e);
+    }
   }
 }
