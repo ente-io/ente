@@ -5,6 +5,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
@@ -58,7 +59,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   @override
   void initState() {
     currentUserID = Configuration.instance.getUserID()!;
-    split = FilesSplit.split(widget.selectedFiles.files, currentUserID);
+    split = FilesSplit.split(<File>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
     collectionActions = CollectionActions(CollectionsService.instance);
     super.initState();
@@ -276,7 +277,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await collectionActions.showRemoveFromCollectionSheet(
+    await collectionActions.showRemoveFromCollectionSheetV2(
       context,
       widget.collection!,
       widget.selectedFiles,

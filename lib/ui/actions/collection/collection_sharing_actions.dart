@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/db/files_db.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/models/api/collection/create_request.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
+import 'package:photos/models/files_split.dart';
 import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
@@ -242,6 +244,144 @@ class CollectionActions {
         return false;
       }
     }
+  }
+
+  /*
+  _moveFilesFromCurrentCollection removes the file from the current
+  collection. Based on the file and collection ownership, files will be
+  either moved to different collection (Case A). or will just get removed
+  from current collection (Case B).
+  -------------------------------
+  Case A: Files and collection belong to the same user. Such files
+  will be moved to a collection which belongs to the user and removed from
+  the current collection as part of move operation.
+  Note: Even files are present in the
+  destination collection, we need to make move API call on the server
+  so that the files are removed from current collection and are actually
+  moved to a collection owned by the user.
+  -------------------------------
+  Case B: Owner of files and collections are different. In such cases,
+  we will just remove (not move) the files from the given collection.
+  */
+  Future<void> moveFilesFromCurrentCollection(
+    BuildContext context,
+    Collection collection,
+    Iterable<File> files,
+  ) async {
+    final int currentUserID = Configuration.instance.getUserID()!;
+    final isCollectionOwner = collection.owner!.id == currentUserID;
+    if (!isCollectionOwner) {
+      // Todo: Support for removing own files from a collection owner by
+      // someone else will be added along with collaboration changes
+      showShortToast(context, "Only collection owner can remove");
+      return;
+    }
+    final FilesSplit split = FilesSplit.split(
+      files,
+      Configuration.instance.getUserID()!,
+    );
+    if (split.ownedByOtherUsers.isNotEmpty) {
+      //  Todo: Support for removing own files from a collection owner by
+      // someone else will be added along with collaboration changes
+      showShortToast(context, "Can only remove files owned by you");
+      return;
+    }
+
+    // pendingAssignMap keeps a track of files which are yet to be assigned to
+    // to destination collection.
+    final Map<int, File> pendingAssignMap = {};
+    // destCollectionToFilesMap contains the destination collection and
+    // files entry which needs to be moved in destination.
+    // After the end of mapping logic, the number of files entries in
+    // pendingAssignMap should be equal to files in destCollectionToFilesMap
+    final Map<int, List<File>> destCollectionToFilesMap = {};
+    final List<int> uploadedIDs = [];
+    for (File f in split.ownedByCurrentUser) {
+      if (f.uploadedFileID != null) {
+        pendingAssignMap[f.uploadedFileID!] = f;
+        uploadedIDs.add(f.uploadedFileID!);
+      }
+    }
+
+    final Map<int, List<File>> collectionToFilesMap =
+        await FilesDB.instance.getAllFilesGroupByCollectionID(uploadedIDs);
+
+    // Find and map the files from current collection to to entries in other
+    // collections. This mapping is done to avoid moving all the files to
+    // uncategorized during remove from album.
+    for (MapEntry<int, List<File>> entry in collectionToFilesMap.entries) {
+      if (!_isAutoMoveCandidate(collection.id, entry.key, currentUserID)) {
+        continue;
+      }
+      final targetCollection = collectionsService.getCollectionByID(entry.key)!;
+      // for each file which already exist in the destination collection
+      // add entries in the moveDestCollectionToFiles map
+      for (File file in entry.value) {
+        // Check if the uploaded file is still waiting to be mapped
+        if (pendingAssignMap.containsKey(file.uploadedFileID)) {
+          if (!destCollectionToFilesMap.containsKey(targetCollection.id)) {
+            destCollectionToFilesMap[targetCollection.id] = <File>[];
+          }
+          destCollectionToFilesMap[targetCollection.id]!
+              .add(pendingAssignMap[file.uploadedFileID!]!);
+          pendingAssignMap.remove(file.uploadedFileID);
+        }
+      }
+    }
+    // Move the remaining files to uncategorized collection
+    if (pendingAssignMap.isNotEmpty) {
+      final Collection uncategorizedCollection =
+          await collectionsService.getUncategorizedCollection();
+      final int toCollectionID = uncategorizedCollection.id;
+      for (MapEntry<int, File> entry in pendingAssignMap.entries) {
+        final file = entry.value;
+        if (pendingAssignMap.containsKey(file.uploadedFileID)) {
+          if (!destCollectionToFilesMap.containsKey(toCollectionID)) {
+            destCollectionToFilesMap[toCollectionID] = <File>[];
+          }
+          destCollectionToFilesMap[toCollectionID]!
+              .add(pendingAssignMap[file.uploadedFileID!]!);
+        }
+      }
+    }
+
+    // Verify that all files are mapped.
+    int mappedFilesCount = 0;
+    destCollectionToFilesMap.forEach((key, value) {
+      mappedFilesCount += value.length;
+    });
+    if (mappedFilesCount == uploadedIDs.length) {
+      throw AssertionError(
+        "Failed to map all files toMap: ${uploadedIDs.length} and mapped "
+        "$mappedFilesCount",
+      );
+    }
+
+    for (MapEntry<int, List<File>> entry in destCollectionToFilesMap.entries) {
+      await collectionsService.move(entry.key, collection.id, entry.value);
+    }
+  }
+
+  // This method returns true if the given destination collection is a good
+  // target to moving files during file remove or delete collection but keey
+  // photos action. Uncategorized or favorite type of collections are not
+  // good auto-move candidates. Uncategorized will be fall back for all files
+  // which could not be mapped to a potential target collection
+  bool _isAutoMoveCandidate(int fromCollectionID, toCollectionID, int userID) {
+    if (fromCollectionID == toCollectionID) {
+      return false;
+    }
+    final Collection? targetCollection =
+        collectionsService.getCollectionByID(toCollectionID);
+    // ignore non-cached collections, uncategorized and favorite
+    // collections and collections ignored by others
+    if (targetCollection == null ||
+        (CollectionType.uncategorized == targetCollection.type ||
+            targetCollection.type == CollectionType.favorites) ||
+        targetCollection.owner!.id != userID) {
+      return false;
+    }
+    return true;
   }
 
   void _showUnSupportedAlert(BuildContext context) {
