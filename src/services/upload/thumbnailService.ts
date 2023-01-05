@@ -34,7 +34,7 @@ export async function generateThumbnail(
         let thumbnail: Uint8Array;
         try {
             if (fileTypeInfo.fileType === FILE_TYPE.IMAGE) {
-                thumbnail = await generateImageThumbnail(fileTypeInfo, file);
+                thumbnail = await generateImageThumbnail(file, fileTypeInfo);
             } else {
                 thumbnail = await generateVideoThumbnail(file, fileTypeInfo);
             }
@@ -49,6 +49,7 @@ export async function generateThumbnail(
                     }
                 );
             }
+            console.log('thumbnail Size', thumbnail.length);
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
@@ -77,14 +78,15 @@ export async function generateThumbnail(
 }
 
 async function generateImageThumbnail(
-    fileTypeInfo: FileTypeInfo,
-    file: File | ElectronFile
+    file: File | ElectronFile,
+    fileTypeInfo: FileTypeInfo
 ) {
     if (ElectronImageProcessorService.generateImageThumbnailAPIExists()) {
         try {
             return await ElectronImageProcessorService.generateImageThumbnail(
                 file,
-                MAX_THUMBNAIL_DIMENSION
+                MAX_THUMBNAIL_DIMENSION,
+                MAX_THUMBNAIL_SIZE
             );
         } catch (e) {
             logError(

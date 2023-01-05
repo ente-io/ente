@@ -44,7 +44,8 @@ class ElectronImageProcessorService {
 
     async generateImageThumbnail(
         inputFile: File | ElectronFile,
-        maxDimension: number
+        maxDimension: number,
+        maxSize: number
     ): Promise<Uint8Array> {
         try {
             if (!this.electronAPIs?.generateImageThumbnail) {
@@ -52,7 +53,8 @@ class ElectronImageProcessorService {
             }
             return await this.electronAPIs.generateImageThumbnail(
                 inputFile,
-                maxDimension
+                maxDimension,
+                maxSize
             );
         } catch (e) {
             logError(e, 'failed to generate image thumbnail natively');
