@@ -5,6 +5,7 @@ class SyncStatusUpdate extends Event {
   final int? completed;
   final int? total;
   final bool wasStopped;
+  @override
   final String reason;
   final Error? error;
   late int timestamp;
