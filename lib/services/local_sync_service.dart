@@ -384,13 +384,13 @@ class LocalSyncService {
     // In case of iOS limit permission, this call back is fired immediately
     // after file selection dialog is dismissed.
     PhotoManager.addChangeCallback((value) async {
+      _logger.info("Something changed on disk");
       checkAndSync();
     });
     PhotoManager.startChangeNotify();
   }
 
   Future<void> checkAndSync() async {
-    _logger.info("Something changed on disk");
     if (_existingSync != null) {
       await _existingSync!.future;
     }

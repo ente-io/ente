@@ -463,7 +463,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       showGenericErrorDialog(context: context);
     } finally {
       PhotoManager.startChangeNotify();
-      LocalSyncService.instance.checkAndSync();
+      LocalSyncService.instance.checkAndSync().ignore();
     }
   }
 
