@@ -31,7 +31,7 @@ Future showToast(
       ..loadingStyle = EasyLoadingStyle.custom;
     return EasyLoading.showToast(
       message,
-      duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 5 : 1),
+      duration: Duration(seconds: (toastLength == Toast.LENGTH_LONG ? 5 : 1)),
       toastPosition: EasyLoadingToastPosition.bottom,
       dismissOnTap: iOSDismissOnTap,
     );
