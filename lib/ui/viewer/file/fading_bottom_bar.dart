@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:io';
 
@@ -30,7 +30,7 @@ class FadingBottomBar extends StatefulWidget {
     this.file,
     this.onEditRequested,
     this.showOnlyInfoButton, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -96,7 +96,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
     bool isFileHidden = false;
     if (isUploadedByUser) {
       isFileHidden = CollectionsService.instance
-              .getCollectionByID(widget.file.collectionID)
+              .getCollectionByID(widget.file.collectionID!)
               ?.isHidden() ??
           false;
     }
@@ -203,7 +203,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
                             12,
                           ),
                           child: Text(
-                            widget.file.caption,
+                            widget.file.caption!,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 4,
                             style: getEnteTextTheme(context)
@@ -269,7 +269,7 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             ),
             onPressed: () async {
               final trashedFile = <TrashFile>[];
-              trashedFile.add(widget.file);
+              trashedFile.add(widget.file as TrashFile);
               if (await deleteFromTrash(context, trashedFile) == true) {
                 Navigator.pop(context);
               }

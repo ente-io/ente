@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:photos/models/file.dart';
@@ -58,9 +56,10 @@ class DuplicateFiles {
   sortByCollectionName() {
     files.sort((first, second) {
       final firstName =
-          collectionsService.getCollectionByID(first.collectionID).name;
+          collectionsService.getCollectionByID(first.collectionID!)!.name ?? '';
       final secondName =
-          collectionsService.getCollectionByID(second.collectionID).name;
+          collectionsService.getCollectionByID(second.collectionID!)!.name ??
+              '';
       return firstName.compareTo(secondName);
     });
   }

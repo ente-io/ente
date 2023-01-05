@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -8,7 +8,7 @@ class WebPage extends StatefulWidget {
   final String title;
   final String url;
 
-  const WebPage(this.title, this.url, {Key key}) : super(key: key);
+  const WebPage(this.title, this.url, {Key? key}) : super(key: key);
 
   @override
   State<WebPage> createState() => _WebPageState();

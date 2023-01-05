@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
@@ -26,7 +24,7 @@ enum PasswordEntryMode {
 class PasswordEntryPage extends StatefulWidget {
   final PasswordEntryMode mode;
 
-  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key key})
+  const PasswordEntryPage({this.mode = PasswordEntryMode.set, Key? key})
       : super(key: key);
 
   @override
@@ -41,7 +39,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   final _passwordController1 = TextEditingController(),
       _passwordController2 = TextEditingController();
   final Color _validFieldValueColor = const Color.fromRGBO(45, 194, 98, 0.2);
-  String _volatilePassword;
+  String? _volatilePassword;
   String _passwordInInputBox = '';
   String _passwordInInputConfirmationBox = '';
   double _passwordStrength = 0.0;
@@ -62,7 +60,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
     if (_volatilePassword != null) {
       Future.delayed(
         Duration.zero,
-        () => _showRecoveryCodeDialog(_volatilePassword),
+        () => _showRecoveryCodeDialog(_volatilePassword!),
       );
     }
     _password1FocusNode.addListener(() {
@@ -81,7 +79,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
   Widget build(BuildContext context) {
     final isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
 
-    FloatingActionButtonLocation fabLocation() {
+    FloatingActionButtonLocation? fabLocation() {
       if (isKeypadOpen) {
         return null;
       } else {
@@ -167,7 +165,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     textAlign: TextAlign.start,
                     style: Theme.of(context)
                         .textTheme
-                        .subtitle1
+                        .subtitle1!
                         .copyWith(fontSize: 14),
                   ),
                 ),
@@ -178,7 +176,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     text: TextSpan(
                       style: Theme.of(context)
                           .textTheme
-                          .subtitle1
+                          .subtitle1!
                           .copyWith(fontSize: 14),
                       children: [
                         const TextSpan(
@@ -187,10 +185,11 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                         ),
                         TextSpan(
                           text: "we cannot decrypt your data",
-                          style: Theme.of(context).textTheme.subtitle1.copyWith(
-                                fontSize: 14,
-                                decoration: TextDecoration.underline,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.subtitle1!.copyWith(
+                                    fontSize: 14,
+                                    decoration: TextDecoration.underline,
+                                  ),
                         ),
                       ],
                     ),
@@ -245,7 +244,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -307,7 +306,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                                   Icons.check,
                                   color: Theme.of(context)
                                       .inputDecorationTheme
-                                      .focusedBorder
+                                      .focusedBorder!
                                       .borderSide
                                       .color,
                                 )
@@ -321,8 +320,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     onChanged: (cnfPassword) {
                       setState(() {
                         _passwordInInputConfirmationBox = cnfPassword;
-                        if (_passwordInInputBox != null ||
-                            _passwordInInputBox != '') {
+                        if (_passwordInInputBox != '') {
                           _passwordsMatch = _passwordInInputBox ==
                               _passwordInInputConfirmationBox;
                         }
@@ -364,7 +362,7 @@ class _PasswordEntryPageState extends State<PasswordEntryPage> {
                     child: RichText(
                       text: TextSpan(
                         text: "How it works",
-                        style: Theme.of(context).textTheme.subtitle1.copyWith(
+                        style: Theme.of(context).textTheme.subtitle1!.copyWith(
                               fontSize: 14,
                               decoration: TextDecoration.underline,
                             ),

@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -25,28 +23,28 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 typedef GalleryLoader = Future<FileLoadResult> Function(
   int creationStartTime,
   int creationEndTime, {
-  int limit,
-  bool asc,
+  int? limit,
+  bool? asc,
 });
 
 class Gallery extends StatefulWidget {
   final GalleryLoader asyncLoader;
-  final List<File> initialFiles;
-  final Stream<FilesUpdatedEvent> reloadEvent;
-  final List<Stream<Event>> forceReloadEvents;
+  final List<File>? initialFiles;
+  final Stream<FilesUpdatedEvent>? reloadEvent;
+  final List<Stream<Event>>? forceReloadEvents;
   final Set<EventType> removalEventTypes;
   final SelectedFiles selectedFiles;
   final String tagPrefix;
-  final Widget header;
-  final Widget footer;
+  final Widget? header;
+  final Widget? footer;
   final Widget emptyState;
-  final String albumName;
+  final String? albumName;
   final double scrollBottomSafeArea;
 
   const Gallery({
-    @required this.asyncLoader,
-    @required this.selectedFiles,
-    @required this.tagPrefix,
+    required this.asyncLoader,
+    required this.selectedFiles,
+    required this.tagPrefix,
     this.initialFiles,
     this.reloadEvent,
     this.forceReloadEvents,
@@ -56,7 +54,7 @@ class Gallery extends StatefulWidget {
     this.emptyState = const EmptyState(),
     this.scrollBottomSafeArea = 120.0,
     this.albumName = '',
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -70,25 +68,25 @@ class _GalleryState extends State<Gallery> {
 
   final _hugeListViewKey = GlobalKey<HugeListViewState>();
 
-  Logger _logger;
+  late Logger _logger;
   List<List<File>> _collatedFiles = [];
   bool _hasLoadedFiles = false;
-  ItemScrollController _itemScroller;
-  StreamSubscription<FilesUpdatedEvent> _reloadEventSubscription;
-  StreamSubscription<TabDoubleTapEvent> _tabDoubleTapEvent;
+  ItemScrollController? _itemScroller;
+  StreamSubscription<FilesUpdatedEvent>? _reloadEventSubscription;
+  StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
-  String _logTag;
-  int _photoGridSize;
+  String? _logTag;
+  int? _photoGridSize;
 
   @override
   void initState() {
     _logTag =
-        "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName : ""}";
-    _logger = Logger(_logTag);
+        "Gallery_${widget.tagPrefix}${kDebugMode ? "_" + widget.albumName! : ""}";
+    _logger = Logger(_logTag!);
     _logger.finest("init Gallery");
     _itemScroller = ItemScrollController();
     if (widget.reloadEvent != null) {
-      _reloadEventSubscription = widget.reloadEvent.listen((event) async {
+      _reloadEventSubscription = widget.reloadEvent!.listen((event) async {
         // In soft refresh, setState is called for entire gallery only when
         // number of child change
         _logger.finest("Soft refresh all files on ${event.reason} ");
@@ -106,14 +104,14 @@ class _GalleryState extends State<Gallery> {
       // todo: Assign ID to Gallery and fire generic event with ID &
       //  target index/date
       if (mounted && event.selectedIndex == 0) {
-        _itemScroller.scrollTo(
+        _itemScroller!.scrollTo(
           index: 0,
           duration: const Duration(milliseconds: 150),
         );
       }
     });
     if (widget.forceReloadEvents != null) {
-      for (final event in widget.forceReloadEvents) {
+      for (final event in widget.forceReloadEvents!) {
         _forceReloadEventSubscriptions.add(
           event.listen((event) async {
             _logger.finest("Force refresh all files on ${event.reason}");
@@ -124,7 +122,7 @@ class _GalleryState extends State<Gallery> {
       }
     }
     if (widget.initialFiles != null) {
-      _onFilesLoaded(widget.initialFiles);
+      _onFilesLoaded(widget.initialFiles!);
     }
     _loadFiles(limit: kInitialLoadLimit).then((result) async {
       _setFilesAndReload(result.files);
@@ -143,7 +141,7 @@ class _GalleryState extends State<Gallery> {
     }
   }
 
-  Future<FileLoadResult> _loadFiles({int limit}) async {
+  Future<FileLoadResult> _loadFiles({int? limit}) async {
     _logger.info("Loading ${limit ?? "all"} files");
     try {
       final startTime = DateTime.now().microsecondsSinceEpoch;
@@ -219,7 +217,7 @@ class _GalleryState extends State<Gallery> {
       emptyResultBuilder: (_) {
         final List<Widget> children = [];
         if (widget.header != null) {
-          children.add(widget.header);
+          children.add(widget.header!);
         }
         children.add(
           Expanded(
@@ -227,7 +225,7 @@ class _GalleryState extends State<Gallery> {
           ),
         );
         if (widget.footer != null) {
-          children.add(widget.footer);
+          children.add(widget.footer!);
         }
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -252,17 +250,17 @@ class _GalleryState extends State<Gallery> {
           photoGirdSize: _photoGridSize,
         );
         if (widget.header != null && index == 0) {
-          gallery = Column(children: [widget.header, gallery]);
+          gallery = Column(children: [widget.header!, gallery]);
         }
         if (widget.footer != null && index == _collatedFiles.length - 1) {
-          gallery = Column(children: [gallery, widget.footer]);
+          gallery = Column(children: [gallery, widget.footer!]);
         }
         return gallery;
       },
       labelTextBuilder: (int index) {
         return getMonthAndYear(
           DateTime.fromMicrosecondsSinceEpoch(
-            _collatedFiles[index][0].creationTime,
+            _collatedFiles[index][0].creationTime!,
           ),
         );
       },
@@ -286,8 +284,8 @@ class _GalleryState extends State<Gallery> {
     for (int index = 0; index < files.length; index++) {
       if (index > 0 &&
           !areFromSameDay(
-            files[index - 1].creationTime,
-            files[index].creationTime,
+            files[index - 1].creationTime!,
+            files[index].creationTime!,
           )) {
         final List<File> collatedDailyFiles = [];
         collatedDailyFiles.addAll(dailyFiles);
@@ -300,7 +298,7 @@ class _GalleryState extends State<Gallery> {
       collatedFiles.add(dailyFiles);
     }
     collatedFiles
-        .sort((a, b) => b[0].creationTime.compareTo(a[0].creationTime));
+        .sort((a, b) => b[0].creationTime!.compareTo(a[0].creationTime!));
     return collatedFiles;
   }
 }

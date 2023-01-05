@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/widgets.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';

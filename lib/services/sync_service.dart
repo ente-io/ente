@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io';
 
@@ -33,9 +31,9 @@ class SyncService {
   final _enteDio = Network.instance.enteDio;
   final _uploader = FileUploader.instance;
   bool _syncStopRequested = false;
-  Completer<bool> _existingSync;
-  SharedPreferences _prefs;
-  SyncStatusUpdate _lastSyncStatusEvent;
+  Completer<bool>? _existingSync;
+  late SharedPreferences _prefs;
+  SyncStatusUpdate? _lastSyncStatusEvent;
 
   static const kLastStorageLimitExceededNotificationPushTime =
       "last_storage_limit_exceeded_notification_push_time";
@@ -70,24 +68,26 @@ class SyncService {
     }
   }
 
+  // Note: Do not use this future for anything except log out.
+  // This is prone to bugs due to any potential race conditions
   Future<bool> existingSync() async {
-    return _existingSync.future;
+    return _existingSync?.future ?? Future.value(true);
   }
 
   Future<bool> sync() async {
     _syncStopRequested = false;
     if (_existingSync != null) {
       _logger.warning("Sync already in progress, skipping.");
-      return _existingSync.future;
+      return _existingSync!.future;
     }
     _existingSync = Completer<bool>();
     bool successful = false;
     try {
       await _doSync();
       if (_lastSyncStatusEvent != null &&
-          _lastSyncStatusEvent.status !=
+          _lastSyncStatusEvent!.status !=
               SyncStatus.completedFirstGalleryImport &&
-          _lastSyncStatusEvent.status != SyncStatus.completedBackup) {
+          _lastSyncStatusEvent!.status != SyncStatus.completedBackup) {
         Bus.instance.fire(SyncStatusUpdate(SyncStatus.completedBackup));
       }
       successful = true;
@@ -139,7 +139,7 @@ class SyncService {
       Bus.instance.fire(SyncStatusUpdate(SyncStatus.error));
       rethrow;
     } finally {
-      _existingSync.complete(successful);
+      _existingSync?.complete(successful);
       _existingSync = null;
       _lastSyncStatusEvent = null;
       _logger.info("Syncing completed");
@@ -160,7 +160,7 @@ class SyncService {
     return _existingSync != null;
   }
 
-  SyncStatusUpdate getLastSyncStatusEvent() {
+  SyncStatusUpdate? getLastSyncStatusEvent() {
     return _lastSyncStatusEvent;
   }
 
@@ -198,7 +198,7 @@ class SyncService {
     );
   }
 
-  Future<void> deleteFilesOnServer(List<int> fileIDs) async {
+  Future<Response> deleteFilesOnServer(List<int> fileIDs) async {
     return await _enteDio.post(
       "/files/delete",
       data: {
@@ -207,14 +207,14 @@ class SyncService {
     );
   }
 
-  Future<BackupStatus> getBackupStatus({String pathID}) async {
+  Future<BackupStatus> getBackupStatus({String? pathID}) async {
     BackedUpFileIDs ids;
     if (pathID == null) {
       ids = await FilesDB.instance.getBackedUpIDs();
     } else {
       ids = await FilesDB.instance.getBackedUpForDeviceCollection(
         pathID,
-        Configuration.instance.getUserID(),
+        Configuration.instance.getUserID()!,
       );
     }
     final size = await _getFileSize(ids.uploadedIDs);

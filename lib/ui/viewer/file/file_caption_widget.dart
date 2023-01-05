@@ -81,7 +81,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   @override
   void dispose() {
     if (editedCaption != null) {
-      editFileCaption(null, widget.file, editedCaption);
+      editFileCaption(null, widget.file, editedCaption!);
     }
     _textController.dispose();
     _focusNode.removeListener(_focusNodeListener);
@@ -145,7 +145,7 @@ class _FileCaptionWidgetState extends State<FileCaptionWidget> {
   Future<void> _onDoneClick(BuildContext context) async {
     if (editedCaption != null) {
       final isSuccesful =
-          await editFileCaption(context, widget.file, editedCaption);
+          await editFileCaption(context, widget.file, editedCaption!);
       if (isSuccesful) {
         if (mounted) {
           Navigator.pop(context);

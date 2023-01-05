@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:path_provider/path_provider.dart';
@@ -26,6 +25,7 @@ class AppStorageViewer extends StatefulWidget {
 
 class _AppStorageViewerState extends State<AppStorageViewer> {
   final List<PathStorageItem> paths = [];
+  late String iosTempDirectoryPath;
   late bool internalUser;
   int _refreshCounterKey = 0;
 
@@ -40,9 +40,9 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
     final appDocumentsDirectory = (await getApplicationDocumentsDirectory());
     final appSupportDirectory = (await getApplicationSupportDirectory());
     final appTemporaryDirectory = (await getTemporaryDirectory());
-    final iOSOnlyTempDirectory = "${appDocumentsDirectory.parent.path}/tmp/";
+    iosTempDirectoryPath = "${appDocumentsDirectory.parent.path}/tmp/";
     final iOSPhotoManagerInAppCacheDirectory =
-        iOSOnlyTempDirectory + "flutter-images";
+        iosTempDirectoryPath + "flutter-images";
     final androidGlideCacheDirectory =
         "${appTemporaryDirectory.path}/image_manager_disk_cache/";
 
@@ -84,6 +84,9 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
         PathStorageItem.name(appSupportDirectory.path, "App Support Dir"),
         PathStorageItem.name(appTemporaryDirectory.path, "App Temp Dir"),
       ]);
+      if (!Platform.isAndroid) {
+        paths.add(PathStorageItem.name(iosTempDirectoryPath, "/tmp directory"));
+      }
     }
     if (mounted) {
       setState(() => {});
@@ -168,6 +171,11 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                                     pathItem.path,
                                   );
                                 }
+                              }
+                              if (!Platform.isAndroid) {
+                                await deleteDirectoryContents(
+                                  iosTempDirectoryPath,
+                                );
                               }
                               _refreshCounterKey++;
                               if (mounted) {

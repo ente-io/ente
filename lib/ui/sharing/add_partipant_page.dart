@@ -313,7 +313,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     }
     for (final c in CollectionsService.instance.getActiveCollections()) {
       if (c.owner?.id == ownerID) {
-        for (final User? u in c?.sharees ?? []) {
+        for (final User? u in c.sharees ?? []) {
           if (u != null && u.id != null && !existingUserIDs.contains(u.id)) {
             existingUserIDs.add(u.id!);
             suggestedUsers.add(u);

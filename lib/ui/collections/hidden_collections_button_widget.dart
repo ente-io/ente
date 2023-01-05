@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:photos/services/local_authentication_service.dart';
@@ -10,7 +10,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
 
   const HiddenCollectionsButtonWidget(
     this.textStyle, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -24,7 +24,7 @@ class HiddenCollectionsButtonWidget extends StatelessWidget {
         padding: const EdgeInsets.all(0),
         side: BorderSide(
           width: 0.5,
-          color: Theme.of(context).iconTheme.color.withOpacity(0.24),
+          color: Theme.of(context).iconTheme.color!.withOpacity(0.24),
         ),
       ),
       child: SizedBox(

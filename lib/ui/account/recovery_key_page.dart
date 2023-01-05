@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:io' as io;
 
@@ -15,20 +15,20 @@ import 'package:share_plus/share_plus.dart';
 import 'package:step_progress_indicator/step_progress_indicator.dart';
 
 class RecoveryKeyPage extends StatefulWidget {
-  final bool showAppBar;
+  final bool? showAppBar;
   final String recoveryKey;
   final String doneText;
-  final Function() onDone;
-  final bool isDismissible;
-  final String title;
-  final String text;
-  final String subText;
+  final Function()? onDone;
+  final bool? isDismissible;
+  final String? title;
+  final String? text;
+  final String? subText;
   final bool showProgressBar;
 
   const RecoveryKeyPage(
     this.recoveryKey,
     this.doneText, {
-    Key key,
+    Key? key,
     this.showAppBar,
     this.onDone,
     this.isDismissible,
@@ -56,7 +56,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
         'recovery code should have $mnemonicKeyWordCount words',
       );
     }
-    final double topPadding = widget.showAppBar
+    final double topPadding = widget.showAppBar!
         ? 40
         : widget.showProgressBar
             ? 32
@@ -79,7 +79,7 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                 ),
               ),
             )
-          : widget.showAppBar
+          : widget.showAppBar!
               ? AppBar(
                   elevation: 0,
                   title: Text(widget.title ?? "Recovery key"),
@@ -100,14 +100,14 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      widget.showAppBar
+                      widget.showAppBar!
                           ? const SizedBox.shrink()
                           : Text(
                               widget.title ?? "Recovery key",
                               style: Theme.of(context).textTheme.headline4,
                             ),
                       Padding(
-                        padding: EdgeInsets.all(widget.showAppBar ? 0 : 12),
+                        padding: EdgeInsets.all(widget.showAppBar! ? 0 : 12),
                       ),
                       Text(
                         widget.text ??
@@ -263,6 +263,6 @@ class _RecoveryKeyPageState extends State<RecoveryKeyPage> {
     if (_recoveryKeyFile.existsSync()) {
       await _recoveryKeyFile.delete();
     }
-    widget.onDone();
+    widget.onDone!();
   }
 }

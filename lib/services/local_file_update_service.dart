@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:core';
 import 'dart:io';
@@ -20,15 +18,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 // LocalFileUpdateService tracks all the potential local file IDs which have
 // changed/modified on the device and needed to be uploaded again.
 class LocalFileUpdateService {
-  FileUpdationDB _fileUpdationDB;
-  SharedPreferences _prefs;
-  Logger _logger;
+  late FileUpdationDB _fileUpdationDB;
+  late SharedPreferences _prefs;
+  late Logger _logger;
   static const isLocationMigrationComplete = "fm_isLocationMigrationComplete";
   static const isLocalImportDone = "fm_IsLocalImportDone";
   static const isBadCreationTimeImportDone = 'fm_badCreationTime';
   static const isBadCreationTimeMigrationComplete =
       'fm_badCreationTimeCompleted';
-  Completer<void> _existingMigration;
+  Completer<void>? _existingMigration;
 
   LocalFileUpdateService._privateConstructor() {
     _logger = Logger((LocalFileUpdateService).toString());
@@ -43,13 +41,13 @@ class LocalFileUpdateService {
       LocalFileUpdateService._privateConstructor();
 
   bool isBadCreationMigrationCompleted() {
-    return _prefs.get(isBadCreationTimeMigrationComplete) ?? false;
+    return (_prefs.getBool(isBadCreationTimeMigrationComplete) ?? false);
   }
 
   Future<void> markUpdatedFilesForReUpload() async {
     if (_existingMigration != null) {
       _logger.info("migration is already in progress, skipping");
-      return _existingMigration.future;
+      return _existingMigration!.future;
     }
     _existingMigration = Completer<void>();
     try {
@@ -107,11 +105,10 @@ class LocalFileUpdateService {
       MediaUploadData uploadData;
       try {
         uploadData = await getUploadData(file);
-        if (uploadData != null &&
-            uploadData.hashData != null &&
+        if (uploadData.hashData != null &&
             file.hash != null &&
-            (file.hash == uploadData.hashData.fileHash ||
-                file.hash == uploadData.hashData.zipHash)) {
+            (file.hash == uploadData.hashData!.fileHash ||
+                file.hash == uploadData.hashData!.zipHash)) {
           _logger.info("Skip file update as hash matched ${file.tag}");
         } else {
           _logger.info(
@@ -119,15 +116,15 @@ class LocalFileUpdateService {
           );
           await clearCache(file);
           await FilesDB.instance.updateUploadedFile(
-            file.localID,
+            file.localID!,
             file.title,
             file.location,
-            file.creationTime,
-            file.modificationTime,
+            file.creationTime!,
+            file.modificationTime!,
             null,
           );
         }
-        processedIDs.add(file.localID);
+        processedIDs.add(file.localID!);
       } catch (e) {
         _logger.severe("Failed to get file uploadData", e);
       } finally {}
@@ -144,10 +141,8 @@ class LocalFileUpdateService {
     // delete the file from app's internal cache if it was copied to app
     // for upload. Shared Media should only be cleared when the upload
     // succeeds.
-    if (Platform.isIOS &&
-        mediaUploadData != null &&
-        mediaUploadData.sourceFile != null) {
-      await mediaUploadData.sourceFile.delete();
+    if (Platform.isIOS && mediaUploadData.sourceFile != null) {
+      await mediaUploadData.sourceFile?.delete();
     }
     return mediaUploadData;
   }
@@ -165,8 +160,13 @@ class LocalFileUpdateService {
         FileUpdationDB.badCreationTime,
       );
       if (generatedIDs.isNotEmpty) {
-        final List<int> genIdIntList =
-            generatedIDs.map((e) => int.tryParse(e)).toList();
+        final List<int> genIdIntList = [];
+        for (String genIdString in generatedIDs) {
+          final int? genIdInt = int.tryParse(genIdString);
+          if (genIdInt != null) {
+            genIdIntList.add(genIdInt);
+          }
+        }
 
         final filesWithBadTime =
             (await FilesDB.instance.getFilesFromGeneratedIDs(genIdIntList))
@@ -196,7 +196,7 @@ class LocalFileUpdateService {
     }
     _logger.info('_importFilesWithBadCreationTime');
     final EnteWatch watch = EnteWatch("_importFilesWithBadCreationTime");
-    final int ownerID = Configuration.instance.getUserID();
+    final int ownerID = Configuration.instance.getUserID()!;
     final filesGeneratedID = await FilesDB.instance
         .getGeneratedIDForFilesOlderThan(jan011981Time, ownerID);
     await _fileUpdationDB.insertMultiple(

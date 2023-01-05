@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io' as io;
 
 import 'package:flutter/foundation.dart';
@@ -94,12 +92,12 @@ class FilesDB {
   static final FilesDB instance = FilesDB._privateConstructor();
 
   // only have a single app-wide reference to the database
-  static Future<Database> _dbFuture;
+  static Future<Database>? _dbFuture;
 
   Future<Database> get database async {
     // lazily instantiate the db the first time it is accessed
     _dbFuture ??= _initDatabase();
-    return _dbFuture;
+    return _dbFuture!;
   }
 
   // this opens the database (and creates it if it doesn't exist)
@@ -415,7 +413,7 @@ class FilesDB {
     );
   }
 
-  Future<File> getFile(int generatedID) async {
+  Future<File?> getFile(int generatedID) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -428,7 +426,7 @@ class FilesDB {
     return convertToFiles(results)[0];
   }
 
-  Future<File> getUploadedFile(int uploadedID, int collectionID) async {
+  Future<File?> getUploadedFile(int uploadedID, int collectionID) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -449,14 +447,15 @@ class FilesDB {
     final results = await db.query(
       filesTable,
       columns: [columnUploadedFileID],
-      where: '$columnCollectionID = ?',
+      where:
+          '$columnCollectionID = ? AND ($columnUploadedFileID IS NOT NULL AND $columnUploadedFileID IS NOT -1)',
       whereArgs: [
         collectionID,
       ],
     );
     final ids = <int>{};
     for (final result in results) {
-      ids.add(result[columnUploadedFileID]);
+      ids.add(result[columnUploadedFileID] as int);
     }
     return ids;
   }
@@ -472,8 +471,8 @@ class FilesDB {
     final localIDs = <String>{};
     final uploadedIDs = <int>{};
     for (final result in results) {
-      localIDs.add(result[columnLocalID]);
-      uploadedIDs.add(result[columnUploadedFileID]);
+      localIDs.add(result[columnLocalID] as String);
+      uploadedIDs.add(result[columnUploadedFileID] as int);
     }
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
@@ -482,10 +481,10 @@ class FilesDB {
     int startTime,
     int endTime,
     int ownerID, {
-    int limit,
-    bool asc,
+    int? limit,
+    bool? asc,
     int visibility = visibilityVisible,
-    Set<int> ignoredCollectionIDs,
+    Set<int>? ignoredCollectionIDs,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -509,9 +508,9 @@ class FilesDB {
     int startTime,
     int endTime,
     int ownerID, {
-    int limit,
-    bool asc,
-    Set<int> ignoredCollectionIDs,
+    int? limit,
+    bool? asc,
+    Set<int>? ignoredCollectionIDs,
   }) async {
     final db = await instance.database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -536,7 +535,10 @@ class FilesDB {
     final List<File> deduplicatedFiles = [];
     for (final file in files) {
       final id = file.localID;
-      if (id != null && localIDs.contains(id)) {
+      if (id == null) {
+        continue;
+      }
+      if (localIDs.contains(id)) {
         continue;
       }
       localIDs.add(id);
@@ -547,7 +549,7 @@ class FilesDB {
 
   List<File> _deduplicatedAndFilterIgnoredFiles(
     List<File> files,
-    Set<int> ignoredCollectionIDs,
+    Set<int>? ignoredCollectionIDs,
   ) {
     final Set<int> uploadedFileIDs = <int>{};
     // ignoredFileUploadIDs is to keep a track of files which are part of
@@ -574,7 +576,9 @@ class FilesDB {
       if (isFileUploaded && uploadedFileIDs.contains(id)) {
         continue;
       }
-      uploadedFileIDs.add(id);
+      if (isFileUploaded) {
+        uploadedFileIDs.add(id);
+      }
       deduplicatedFiles.add(file);
     }
     return deduplicatedFiles;
@@ -584,8 +588,8 @@ class FilesDB {
     int collectionID,
     int startTime,
     int endTime, {
-    int limit,
-    bool asc,
+    int? limit,
+    bool? asc,
     int visibility = visibilityVisible,
   }) async {
     final db = await instance.database;
@@ -611,8 +615,8 @@ class FilesDB {
     int startTime,
     int endTime,
     int userID, {
-    int limit,
-    bool asc,
+    int? limit,
+    bool? asc,
   }) async {
     if (collectionIDs.isEmpty) {
       return FileLoadResult(<File>[], false);
@@ -725,12 +729,12 @@ class FilesDB {
     );
     final uploadedFileIDs = <int>[];
     for (final row in rows) {
-      uploadedFileIDs.add(row[columnUploadedFileID]);
+      uploadedFileIDs.add(row[columnUploadedFileID] as int);
     }
     return uploadedFileIDs;
   }
 
-  Future<File> getUploadedFileInAnyCollection(int uploadedFileID) async {
+  Future<File?> getUploadedFileInAnyCollection(int uploadedFileID) async {
     final db = await instance.database;
     final results = await db.query(
       filesTable,
@@ -756,7 +760,7 @@ class FilesDB {
     );
     final result = <String>{};
     for (final row in rows) {
-      result.add(row[columnLocalID]);
+      result.add(row[columnLocalID] as String);
     }
     return result;
   }
@@ -775,7 +779,7 @@ class FilesDB {
     );
     final result = <String>{};
     for (final row in rows) {
-      result.add(row[columnLocalID]);
+      result.add(row[columnLocalID] as String);
     }
     return result;
   }
@@ -790,7 +794,7 @@ class FilesDB {
     );
     final result = <String>{};
     for (final row in rows) {
-      result.add(row[columnLocalID]);
+      result.add(row[columnLocalID] as String);
     }
     return result;
   }
@@ -819,19 +823,19 @@ class FilesDB {
 
   Future<int> updateUploadedFile(
     String localID,
-    String title,
-    Location location,
+    String? title,
+    Location? location,
     int creationTime,
     int modificationTime,
-    int updationTime,
+    int? updationTime,
   ) async {
     final db = await instance.database;
     return await db.update(
       filesTable,
       {
         columnTitle: title,
-        columnLatitude: location.latitude,
-        columnLongitude: location.longitude,
+        columnLatitude: location?.latitude,
+        columnLongitude: location?.longitude,
         columnCreationTime: creationTime,
         columnModificationTime: modificationTime,
         columnUpdationTime: updationTime,
@@ -849,8 +853,8 @@ class FilesDB {
     int ownerID,
     String localID,
     FileType fileType, {
-    @required String title,
-    @required String deviceFolder,
+    required String title,
+    required String deviceFolder,
   }) async {
     final db = await instance.database;
     // on iOS, match using localID and fileType. title can either match or
@@ -1069,7 +1073,7 @@ class FilesDB {
         '$collectionID AND $columnUploadedFileID IS NOT -1',
       ),
     );
-    return count;
+    return count ?? 0;
   }
 
   Future<int> fileCountWithVisibility(int visibility, int ownerID) async {
@@ -1081,7 +1085,7 @@ class FilesDB {
         ' = $visibility AND $columnOwnerID = $ownerID',
       ),
     );
-    return count;
+    return count ?? 0;
   }
 
   Future<int> deleteCollection(int collectionID) async {
@@ -1120,7 +1124,9 @@ class FilesDB {
   ) async {
     String inParam = "";
     for (final existingFile in existingFiles) {
-      inParam += "'" + existingFile.localID + "',";
+      if (existingFile.localID != null) {
+        inParam += "'" + existingFile.localID! + "',";
+      }
     }
     inParam = inParam.substring(0, inParam.length - 1);
     final db = await instance.database;
@@ -1134,7 +1140,7 @@ class FilesDB {
     );
     final result = <String>{};
     for (final row in rows) {
-      result.add(row[columnLocalID]);
+      result.add(row[columnLocalID] as String);
     }
     return result;
   }
@@ -1166,11 +1172,12 @@ class FilesDB {
     final collectionMap = <int, File>{};
     for (final file in files) {
       if (collectionMap.containsKey(file.collectionID)) {
-        if (collectionMap[file.collectionID].updationTime < file.updationTime) {
+        if (collectionMap[file.collectionID]!.updationTime! <
+            file.updationTime!) {
           continue;
         }
       }
-      collectionMap[file.collectionID] = file;
+      collectionMap[file.collectionID!] = file;
     }
     return collectionMap.values.toList();
   }
@@ -1226,7 +1233,7 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     for (final file in files) {
-      result[file.uploadedFileID] = file;
+      result[file.uploadedFileID!] = file;
     }
     return result;
   }
@@ -1248,7 +1255,7 @@ class FilesDB {
     );
     final files = convertToFiles(results);
     for (final file in files) {
-      result[file.generatedID] = file;
+      result[file.generatedID as int] = file;
     }
     return result;
   }
@@ -1273,9 +1280,9 @@ class FilesDB {
     final files = convertToFiles(results);
     for (File eachFile in files) {
       if (!result.containsKey(eachFile.collectionID)) {
-        result[eachFile.collectionID] = <File>[];
+        result[eachFile.collectionID as int] = <File>[];
       }
-      result[eachFile.collectionID].add(eachFile);
+      result[eachFile.collectionID]!.add(eachFile);
     }
     return result;
   }
@@ -1293,7 +1300,7 @@ class FilesDB {
     );
     final collectionIDsOfFile = <int>{};
     for (var result in results) {
-      collectionIDsOfFile.add(result['collection_id']);
+      collectionIDsOfFile.add(result['collection_id'] as int);
     }
     return collectionIDsOfFile;
   }
@@ -1343,7 +1350,9 @@ class FilesDB {
 
     final filesCount = <FileType, int>{};
     for (var e in result) {
-      filesCount.addAll({getFileType(e[columnFileType]): e.values.last});
+      filesCount.addAll(
+        {getFileType(e[columnFileType] as int): e.values.last as int},
+      );
     }
     return filesCount;
   }
@@ -1360,8 +1369,8 @@ class FilesDB {
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
     if (file.location != null) {
-      row[columnLatitude] = file.location.latitude;
-      row[columnLongitude] = file.location.longitude;
+      row[columnLatitude] = file.location!.latitude;
+      row[columnLongitude] = file.location!.longitude;
     }
     row[columnFileType] = getInt(file.fileType);
     row[columnCreationTime] = file.creationTime;
@@ -1378,17 +1387,16 @@ class FilesDB {
     row[columnHash] = file.hash;
     row[columnMetadataVersion] = file.metadataVersion;
     row[columnFileSize] = file.fileSize;
-    row[columnMMdVersion] = file.mMdVersion ?? 0;
+    row[columnMMdVersion] = file.mMdVersion;
     row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
-    row[columnMMdVisibility] =
-        file.magicMetadata?.visibility ?? visibilityVisible;
-    row[columnPubMMdVersion] = file.pubMmdVersion ?? 0;
+    row[columnMMdVisibility] = file.magicMetadata.visibility;
+    row[columnPubMMdVersion] = file.pubMmdVersion;
     row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
     if (file.pubMagicMetadata != null &&
-        file.pubMagicMetadata.editedTime != null) {
+        file.pubMagicMetadata!.editedTime != null) {
       // override existing creationTime to avoid re-writing all queries related
       // to loading the gallery
-      row[columnCreationTime] = file.pubMagicMetadata.editedTime;
+      row[columnCreationTime] = file.pubMagicMetadata!.editedTime;
     }
     return row;
   }
@@ -1401,8 +1409,8 @@ class FilesDB {
     row[columnTitle] = file.title;
     row[columnDeviceFolder] = file.deviceFolder;
     if (file.location != null) {
-      row[columnLatitude] = file.location.latitude;
-      row[columnLongitude] = file.location.longitude;
+      row[columnLatitude] = file.location!.latitude;
+      row[columnLongitude] = file.location!.longitude;
     }
     row[columnFileType] = getInt(file.fileType);
     row[columnCreationTime] = file.creationTime;
@@ -1417,18 +1425,17 @@ class FilesDB {
     row[columnHash] = file.hash;
     row[columnMetadataVersion] = file.metadataVersion;
 
-    row[columnMMdVersion] = file.mMdVersion ?? 0;
+    row[columnMMdVersion] = file.mMdVersion;
     row[columnMMdEncodedJson] = file.mMdEncodedJson ?? '{}';
-    row[columnMMdVisibility] =
-        file.magicMetadata?.visibility ?? visibilityVisible;
+    row[columnMMdVisibility] = file.magicMetadata.visibility;
 
-    row[columnPubMMdVersion] = file.pubMmdVersion ?? 0;
+    row[columnPubMMdVersion] = file.pubMmdVersion;
     row[columnPubMMdEncodedJson] = file.pubMmdEncodedJson ?? '{}';
     if (file.pubMagicMetadata != null &&
-        file.pubMagicMetadata.editedTime != null) {
+        file.pubMagicMetadata!.editedTime != null) {
       // override existing creationTime to avoid re-writing all queries related
       // to loading the gallery
-      row[columnCreationTime] = file.pubMagicMetadata.editedTime;
+      row[columnCreationTime] = file.pubMagicMetadata!.editedTime!;
     }
     return row;
   }

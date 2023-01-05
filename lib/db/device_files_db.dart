@@ -1,4 +1,4 @@
-// @dart = 2.9
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -85,7 +85,7 @@ extension DeviceFiles on FilesDB {
       );
       final result = <String, int>{};
       for (final row in rows) {
-        result[row['path_id']] = row["count"];
+        result[row['path_id'] as String] = row["count"] as int;
       }
       return result;
     } catch (e) {
@@ -102,11 +102,11 @@ extension DeviceFiles on FilesDB {
       );
       final result = <String, Set<String>>{};
       for (final row in rows) {
-        final String pathID = row['path_id'];
+        final String pathID = row['path_id'] as String;
         if (!result.containsKey(pathID)) {
           result[pathID] = <String>{};
         }
-        result[pathID].add(row['id']);
+        result[pathID]!.add(row['id'] as String);
       }
       return result;
     } catch (e) {
@@ -124,7 +124,7 @@ extension DeviceFiles on FilesDB {
     );
     final Set<String> result = <String>{};
     for (final row in rows) {
-      result.add(row['id']);
+      result.add(row['id'] as String);
     }
     return result;
   }
@@ -220,8 +220,10 @@ extension DeviceFiles on FilesDB {
       existingPathIds.removeAll(devicePathInfo.map((e) => e.item1.id).toSet());
       if (existingPathIds.isNotEmpty) {
         hasUpdated = true;
-        _logger.info('Deleting non-backed up pathIds from local '
-            '$existingPathIds');
+        _logger.info(
+          'Deleting non-backed up pathIds from local '
+          '$existingPathIds',
+        );
         for (String pathID in existingPathIds) {
           // do not delete device collection entries for paths which are
           // marked for backup. This is to handle "Free up space"
@@ -260,7 +262,7 @@ extension DeviceFiles on FilesDB {
     );
     final Set<int> result = <int>{};
     for (final row in rows) {
-      result.add(row['collection_id']);
+      result.add(row['collection_id'] as int);
     }
     return result;
   }
@@ -307,8 +309,8 @@ extension DeviceFiles on FilesDB {
     DeviceCollection deviceCollection,
     int startTime,
     int endTime, {
-    int limit,
-    bool asc,
+    int? limit,
+    bool? asc,
   }) async {
     final db = await database;
     final order = (asc ?? false ? 'ASC' : 'DESC');
@@ -348,8 +350,9 @@ extension DeviceFiles on FilesDB {
     final localIDs = <String>{};
     final uploadedIDs = <int>{};
     for (final result in results) {
-      localIDs.add(result[FilesDB.columnLocalID]);
-      uploadedIDs.add(result[FilesDB.columnUploadedFileID]);
+      // FilesDB.[columnLocalID,columnUploadedFileID] is not null check in query
+      localIDs.add(result[FilesDB.columnLocalID] as String);
+      uploadedIDs.add(result[FilesDB.columnUploadedFileID] as int);
     }
     return BackedUpFileIDs(localIDs.toList(), uploadedIDs.toList());
   }
@@ -378,21 +381,20 @@ extension DeviceFiles on FilesDB {
       final List<DeviceCollection> deviceCollections = [];
       for (var row in deviceCollectionRows) {
         final DeviceCollection deviceCollection = DeviceCollection(
-          row["id"],
-          row['name'],
-          count: row['count'],
-          collectionID: row["collection_id"],
-          coverId: row["cover_id"],
+          row["id"] as String,
+          (row['name'] ?? '') as String,
+          count: row['count'] as int,
+          collectionID: (row["collection_id"] ?? -1) as int,
+          coverId: row["cover_id"] as String?,
           shouldBackup: (row["should_backup"] ?? _sqlBoolFalse) == _sqlBoolTrue,
-          uploadStrategy: getUploadType(row["upload_strategy"] ?? 0),
+          uploadStrategy: getUploadType((row["upload_strategy"] ?? 0) as int),
         );
         if (includeCoverThumbnail) {
-          deviceCollection.thumbnail = coverFiles.firstWhere(
+          deviceCollection.thumbnail = coverFiles.firstWhereOrNull(
             (element) => element.localID == deviceCollection.coverId,
-            orElse: () => null,
           );
           if (deviceCollection.thumbnail == null) {
-            final File result =
+            final File? result =
                 await getDeviceCollectionThumbnail(deviceCollection.id);
             if (result == null) {
               _logger.finest(
@@ -409,7 +411,7 @@ extension DeviceFiles on FilesDB {
       if (includeCoverThumbnail) {
         deviceCollections.sort(
           (a, b) =>
-              b.thumbnail.creationTime.compareTo(a.thumbnail.creationTime),
+              b.thumbnail!.creationTime!.compareTo(a.thumbnail!.creationTime!),
         );
       }
       return deviceCollections;
@@ -419,7 +421,7 @@ extension DeviceFiles on FilesDB {
     }
   }
 
-  Future<File> getDeviceCollectionThumbnail(String pathID) async {
+  Future<File?> getDeviceCollectionThumbnail(String pathID) async {
     debugPrint("Call fallback method to get potential thumbnail");
     final db = await database;
     final fileRows = await db.rawQuery(

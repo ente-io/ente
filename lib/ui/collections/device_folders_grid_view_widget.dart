@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'dart:async';
 
@@ -17,7 +17,7 @@ import 'package:photos/ui/viewer/gallery/empty_state.dart';
 
 class DeviceFoldersGridViewWidget extends StatefulWidget {
   const DeviceFoldersGridViewWidget({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -27,8 +27,8 @@ class DeviceFoldersGridViewWidget extends StatefulWidget {
 
 class _DeviceFoldersGridViewWidgetState
     extends State<DeviceFoldersGridViewWidget> {
-  StreamSubscription<BackupFoldersUpdatedEvent> _backupFoldersUpdatedEvent;
-  StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
+  StreamSubscription<BackupFoldersUpdatedEvent>? _backupFoldersUpdatedEvent;
+  StreamSubscription<LocalPhotosUpdatedEvent>? _localFilesSubscription;
   String _loadReason = "init";
 
   @override
@@ -65,7 +65,7 @@ class _DeviceFoldersGridViewWidgetState
                 .getDeviceCollections(includeCoverThumbnail: true),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return snapshot.data.isEmpty
+                return snapshot.data!.isEmpty
                     ? Padding(
                         padding: const EdgeInsets.all(22),
                         child: (isMigrationDone
@@ -81,10 +81,10 @@ class _DeviceFoldersGridViewWidgetState
                         physics: const ScrollPhysics(),
                         // to disable GridView's scrolling
                         itemBuilder: (context, index) {
-                          final deviceCollection = snapshot.data[index];
+                          final deviceCollection = snapshot.data![index];
                           return DeviceFolderIcon(deviceCollection);
                         },
-                        itemCount: snapshot.data.length,
+                        itemCount: snapshot.data!.length,
                       );
               } else if (snapshot.hasError) {
                 logger.severe("failed to load device gallery", snapshot.error);

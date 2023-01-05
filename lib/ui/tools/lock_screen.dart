@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -7,7 +7,7 @@ import 'package:photos/ui/tools/app_lock.dart';
 import 'package:photos/utils/auth_util.dart';
 
 class LockScreen extends StatefulWidget {
-  const LockScreen({Key key}) : super(key: key);
+  const LockScreen({Key? key}) : super(key: key);
 
   @override
   State<LockScreen> createState() => _LockScreenState();
@@ -100,7 +100,7 @@ class _LockScreenState extends State<LockScreen> with WidgetsBindingObserver {
       );
       _isShowingLockScreen = false;
       if (result) {
-        AppLock.of(context).didUnlock();
+        AppLock.of(context)!.didUnlock();
       } else {
         _logger.info("Dismissed");
         if (!_hasPlacedAppInBackground) {

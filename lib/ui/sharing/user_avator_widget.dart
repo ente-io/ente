@@ -22,7 +22,6 @@ class UserAvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enteTextTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     final displayChar = (user.name == null || user.name!.isEmpty)
         ? ((user.email.isEmpty) ? " " : user.email.substring(0, 1))

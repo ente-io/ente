@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:io' as io;
 import 'dart:typed_data';
 
@@ -14,9 +12,9 @@ import 'package:photos/utils/crypto_util.dart';
 
 final _logger = Logger("file_download_util");
 
-Future<io.File> downloadAndDecrypt(
+Future<io.File?> downloadAndDecrypt(
   ente.File file, {
-  ProgressCallback progressCallback,
+  ProgressCallback? progressCallback,
 }) {
   _logger.info("Downloading file " + file.uploadedFileID.toString());
   final encryptedFilePath = Configuration.instance.getTempDirectory() +
@@ -57,7 +55,7 @@ Future<io.File> downloadAndDecrypt(
     await CryptoUtil.decryptFile(
       encryptedFilePath,
       decryptedFilePath,
-      Sodium.base642bin(file.fileDecryptionHeader),
+      Sodium.base642bin(file.fileDecryptionHeader!),
       decryptFileKey(file),
     );
     _logger.info("File decrypted: " + file.uploadedFileID.toString());
@@ -67,9 +65,9 @@ Future<io.File> downloadAndDecrypt(
 }
 
 Uint8List decryptFileKey(ente.File file) {
-  final encryptedKey = Sodium.base642bin(file.encryptedKey);
-  final nonce = Sodium.base642bin(file.keyDecryptionNonce);
+  final encryptedKey = Sodium.base642bin(file.encryptedKey!);
+  final nonce = Sodium.base642bin(file.keyDecryptionNonce!);
   final collectionKey =
-      CollectionsService.instance.getCollectionKey(file.collectionID);
+      CollectionsService.instance.getCollectionKey(file.collectionID!);
   return CryptoUtil.decryptSync(encryptedKey, collectionKey, nonce);
 }

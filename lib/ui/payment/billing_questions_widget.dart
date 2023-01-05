@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:convert';
 
 import 'package:expansion_tile_card/expansion_tile_card.dart';
@@ -10,7 +8,7 @@ import 'package:photos/ui/common/loading_widget.dart';
 
 class BillingQuestionsWidget extends StatelessWidget {
   const BillingQuestionsWidget({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -64,11 +62,11 @@ class BillingQuestionsWidget extends StatelessWidget {
 
 class FaqWidget extends StatelessWidget {
   const FaqWidget({
-    Key key,
-    @required this.faq,
+    Key? key,
+    required this.faq,
   }) : super(key: key);
 
-  final FaqItem faq;
+  final FaqItem? faq;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +74,7 @@ class FaqWidget extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       child: ExpansionTileCard(
         elevation: 0,
-        title: Text(faq.q),
+        title: Text(faq!.q!),
         expandedTextColor: Theme.of(context).colorScheme.greenAlternative,
         baseColor: Theme.of(context).cardColor,
         children: [
@@ -87,7 +85,7 @@ class FaqWidget extends StatelessWidget {
               bottom: 12,
             ),
             child: Text(
-              faq.a,
+              faq!.a!,
               style: const TextStyle(
                 height: 1.5,
               ),
@@ -100,16 +98,16 @@ class FaqWidget extends StatelessWidget {
 }
 
 class FaqItem {
-  final String q;
-  final String a;
+  final String? q;
+  final String? a;
   FaqItem({
     this.q,
     this.a,
   });
 
   FaqItem copyWith({
-    String q,
-    String a,
+    String? q,
+    String? a,
   }) {
     return FaqItem(
       q: q ?? this.q,
@@ -125,11 +123,9 @@ class FaqItem {
   }
 
   factory FaqItem.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return FaqItem(
-      q: map['q'],
-      a: map['a'],
+      q: map['q'] ?? 'q',
+      a: map['a'] ?? 'a',
     );
   }
 

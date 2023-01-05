@@ -1,5 +1,3 @@
-// @dart=2.9
-
 import 'dart:async';
 import 'dart:io' as dartio;
 
@@ -22,7 +20,7 @@ final _logger = Logger("ShareUtil");
 Future<void> share(
   BuildContext context,
   List<File> files, {
-  GlobalKey shareButtonKey,
+  GlobalKey? shareButtonKey,
 }) async {
   final remoteFileCount = files.where((element) => element.isRemoteFile).length;
   final dialog = createProgressDialog(
@@ -32,25 +30,27 @@ Future<void> share(
   );
   await dialog.show();
   try {
-    final List<Future<String>> pathFutures = [];
+    final List<Future<String?>> pathFutures = [];
     for (File file in files) {
       // Note: We are requesting the origin file for performance reasons on iOS.
       // This will eat up storage, which will be reset only when the app restarts.
       // We could have cleared the cache had there been a callback to the share API.
       pathFutures.add(
-        getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile.path),
+        getFile(file, isOrigin: true).then((fetchedFile) => fetchedFile?.path),
       );
       if (file.fileType == FileType.livePhoto) {
         pathFutures.add(
           getFile(file, liveVideo: true)
-              .then((fetchedFile) => fetchedFile.path),
+              .then((fetchedFile) => fetchedFile?.path),
         );
       }
     }
     final paths = await Future.wait(pathFutures);
     await dialog.hide();
+    paths.removeWhere((element) => element == null);
+    final List<String> nonNullPaths = paths.map((element) => element!).toList();
     return Share.shareFiles(
-      paths,
+      nonNullPaths,
       // required for ipad https://github.com/flutter/flutter/issues/47220#issuecomment-608453383
       sharePositionOrigin: shareButtonRect(context, shareButtonKey),
     );
@@ -65,10 +65,14 @@ Future<void> share(
   }
 }
 
-Rect shareButtonRect(BuildContext context, GlobalKey shareButtonKey) {
+Rect shareButtonRect(BuildContext context, GlobalKey? shareButtonKey) {
   Size size = MediaQuery.of(context).size;
-  final RenderBox renderBox =
+  final RenderObject? renderObject =
       shareButtonKey?.currentContext?.findRenderObject();
+  RenderBox? renderBox;
+  if (renderObject != null && renderObject is RenderBox) {
+    renderBox = renderObject;
+  }
   if (renderBox == null) {
     return Rect.fromLTWH(0, 0, size.width, size.height / 2);
   }
@@ -103,9 +107,9 @@ Future<List<File>> convertIncomingSharedMediaToFile(
     enteFile.title = basename(media.path);
     var ioFile = dartio.File(media.path);
     ioFile = ioFile.renameSync(
-      Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title,
+      Configuration.instance.getSharedMediaDirectory() + "/" + enteFile.title!,
     );
-    enteFile.localID = sharedMediaIdentifier + enteFile.title;
+    enteFile.localID = sharedMediaIdentifier + enteFile.title!;
     enteFile.collectionID = collectionID;
     enteFile.fileType =
         media.type == SharedMediaType.IMAGE ? FileType.image : FileType.video;
@@ -115,7 +119,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
         enteFile.creationTime = exifTime.microsecondsSinceEpoch;
       }
     } else if (enteFile.fileType == FileType.video) {
-      enteFile.duration = media.duration ~/ 1000 ?? 0;
+      enteFile.duration = (media.duration ?? 0) ~/ 1000;
     }
     if (enteFile.creationTime == null || enteFile.creationTime == 0) {
       final parsedDateTime =
@@ -132,7 +136,7 @@ Future<List<File>> convertIncomingSharedMediaToFile(
   return localFiles;
 }
 
-DateTime parseDateFromFileNam1e(String fileName) {
+DateTime? parseDateFromFileNam1e(String fileName) {
   if (fileName.startsWith('IMG-') || fileName.startsWith('VID-')) {
     // Whatsapp media files
     return DateTime.tryParse(fileName.split('-')[1]);

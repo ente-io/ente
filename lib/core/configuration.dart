@@ -525,9 +525,9 @@ class Configuration {
   Uint8List getRecoveryKey() {
     final keyAttributes = getKeyAttributes()!;
     return CryptoUtil.decryptSync(
-      Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey),
+      Sodium.base642bin(keyAttributes.recoveryKeyEncryptedWithMasterKey!),
       getKey(),
-      Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce),
+      Sodium.base642bin(keyAttributes.recoveryKeyDecryptionNonce!),
     );
   }
 
@@ -614,7 +614,7 @@ class Configuration {
     return _preferences.setBool(keyShouldHideFromRecents, value);
   }
 
-  void setVolatilePassword(String volatilePassword) {
+  void setVolatilePassword(String? volatilePassword) {
     _volatilePassword = volatilePassword;
   }
 

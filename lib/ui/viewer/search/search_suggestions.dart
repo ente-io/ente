@@ -1,4 +1,4 @@
-// @dart=2.9
+
 
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -18,7 +18,7 @@ class SearchSuggestionsWidget extends StatelessWidget {
 
   const SearchSuggestionsWidget(
     this.results, {
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
