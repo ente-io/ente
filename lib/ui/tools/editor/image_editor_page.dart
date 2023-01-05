@@ -13,7 +13,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/location.dart';
-import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -360,7 +359,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         }
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
-      await LocalSyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       SyncService.instance.sync();
       showShortToast(context, "Edits saved");
