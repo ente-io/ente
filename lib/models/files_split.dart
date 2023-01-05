@@ -14,7 +14,7 @@ class FilesSplit {
   int get totalFileOwnedCount =>
       pendingUploads.length + ownedByCurrentUser.length;
 
-  static split(Iterable<File> files, int currentUserID) {
+  static FilesSplit split(Iterable<File> files, int currentUserID) {
     final List<File> ownedByCurrentUser = [],
         ownedByOtherUsers = [],
         pendingUploads = [];
@@ -26,11 +26,11 @@ class FilesSplit {
       } else {
         ownedByOtherUsers.add(f);
       }
-      return FilesSplit(
-        pendingUploads: pendingUploads,
-        ownedByCurrentUser: ownedByCurrentUser,
-        ownedByOtherUsers: ownedByOtherUsers,
-      );
     }
+    return FilesSplit(
+      pendingUploads: pendingUploads,
+      ownedByCurrentUser: ownedByCurrentUser,
+      ownedByOtherUsers: ownedByOtherUsers,
+    );
   }
 }
