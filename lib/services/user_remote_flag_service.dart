@@ -20,27 +20,11 @@ class UserRemoteFlagService {
       UserRemoteFlagService._privateConstructor();
 
   static const String recoveryVerificationFlag = "recoveryKeyVerified";
-  static const String _passwordReminderFlag = "userNotify"
-      ".passwordReminderFlag";
   static const String needRecoveryKeyVerification =
       "needRecoveryKeyVerification";
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-  }
-
-  bool showPasswordReminder() {
-    if (Platform.isAndroid) {
-      return false;
-    }
-    return !_prefs.containsKey(_passwordReminderFlag);
-  }
-
-  Future<bool> stopPasswordReminder() async {
-    if (Platform.isAndroid) {
-      return Future.value(true);
-    }
-    return _prefs.setBool(_passwordReminderFlag, true);
   }
 
   bool shouldShowRecoveryVerification() {
@@ -62,13 +46,14 @@ class UserRemoteFlagService {
   // recovery key in the past or not. This helps in avoid showing the same
   // prompt to the user on re-install or signing into a different device
   Future<void> markRecoveryVerificationAsDone() async {
-    await _updateKeyValue(_passwordReminderFlag, true.toString());
+    await _updateKeyValue(recoveryVerificationFlag, true.toString());
     await _prefs.setBool(needRecoveryKeyVerification, false);
   }
 
   Future<void> _refreshRecoveryVerificationFlag() async {
     _logger.finest('refresh recovery key verification flag');
-    final remoteStatusValue = await _getValue(_passwordReminderFlag, "false");
+    final remoteStatusValue =
+        await _getValue(recoveryVerificationFlag, "false");
     final bool isNeedVerificationFlagSet =
         _prefs.containsKey(needRecoveryKeyVerification);
     if (remoteStatusValue.toLowerCase() == "true") {
