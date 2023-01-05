@@ -392,7 +392,7 @@ class LocalSyncService {
   Future<void> checkAndSync() async {
     _logger.info("Something changed on disk");
     if (_existingSync != null) {
-      await _existingSync.future;
+      await _existingSync!.future;
     }
     if (hasGrantedLimitedPermissions()) {
       syncAll();
