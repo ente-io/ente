@@ -411,15 +411,15 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _download(File file) async {
     final dialog = createProgressDialog(context, "Downloading...");
     await dialog.show();
-    //Disabling notifications for assets changing to insert the file into
-    //files db before triggering a sync.
-    PhotoManager.stopChangeNotify();
     try {
       final FileType type = file.fileType;
       final bool downloadLivePhotoOnDroid =
           type == FileType.livePhoto && Platform.isAndroid;
       AssetEntity? savedAsset;
       final io.File? fileToSave = await getFile(file);
+      //Disabling notifications for assets changing to insert the file into
+      //files db before triggering a sync.
+      PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
             .saveImageWithPath(fileToSave!.path, title: file.title!);
