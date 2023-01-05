@@ -376,10 +376,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           .files;
       // the index could be -1 if the files fetched doesn't contain the newly
       // edited files
-      final selectionIndex =
+      int selectionIndex =
           files.indexWhere((file) => file.generatedID == newFile.generatedID);
       if (selectionIndex == -1) {
         files.add(newFile);
+        selectionIndex = files.length - 1;
       }
       replacePage(
         context,
