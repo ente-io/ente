@@ -36,9 +36,10 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { ChevronLeft, ContentCopy } from '@mui/icons-material';
 import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import ChevronLeft from '@mui/icons-material/ChevronLeft';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;

@@ -9,7 +9,7 @@ import { shouldShowOptions } from 'utils/collection';
 import { CollectionSummaryType } from 'constants/collection';
 import Favorite from '@mui/icons-material/FavoriteRounded';
 import Delete from '@mui/icons-material/Delete';
-import { ArchiveOutlined } from '@mui/icons-material';
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 
 interface Iprops {
     activeCollection: Collection;
