@@ -342,12 +342,16 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               "_edited_" +
               DateTime.now().microsecondsSinceEpoch.toString() +
               path.extension(widget.originalFile.title!);
+      //Disabling notifications for assets changing to insert the file into
+      //files db before triggering a sync.
+      PhotoManager.stopChangeNotify();
       final AssetEntity? newAsset =
           await (PhotoManager.editor.saveImage(result, title: fileName));
       final newFile = await ente.File.fromAsset(
         widget.originalFile.deviceFolder!,
         newAsset!,
       );
+
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
@@ -389,6 +393,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     } catch (e, s) {
       showToast(context, "Oops, could not save edits");
       _logger.severe(e, s);
+    } finally {
+      PhotoManager.startChangeNotify();
     }
     await dialog.hide();
   }
