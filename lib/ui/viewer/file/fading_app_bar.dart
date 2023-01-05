@@ -23,6 +23,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
+import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
@@ -464,6 +465,7 @@ class FadingAppBarState extends State<FadingAppBar> {
       showGenericErrorDialog(context: context);
     } finally {
       PhotoManager.startChangeNotify();
+      LocalSyncService.instance.checkAndSync();
     }
   }
 
