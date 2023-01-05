@@ -303,7 +303,7 @@ class _DetailPageState extends State<DetailPage> {
         return;
       }
       final imageProvider =
-          ExtendedFileImageProvider(ioFile!, cacheRawData: true);
+          ExtendedFileImageProvider(ioFile, cacheRawData: true);
       await precacheImage(imageProvider, context);
       await dialog.hide();
       replacePage(
