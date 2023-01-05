@@ -236,16 +236,6 @@ class LocalSyncService {
     return hasUnsyncedFiles;
   }
 
-  Future<void> trackEditedFile(File file) async {
-    if (file.localID == null) {
-      debugPrint("Warning: Edit file has no localID");
-      return;
-    }
-    final editedIDs = _getEditedFileIDs();
-    editedIDs.add(file.localID!);
-    await _prefs.setStringList(kEditedFileIDsKey, editedIDs);
-  }
-
   List<String> _getEditedFileIDs() {
     if (_prefs.containsKey(kEditedFileIDsKey)) {
       return _prefs.getStringList(kEditedFileIDsKey)!;
