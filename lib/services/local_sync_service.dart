@@ -255,23 +255,6 @@ class LocalSyncService {
     }
   }
 
-<<<<<<< HEAD
-=======
-  Future<void> trackDownloadedFile(String localID) async {
-    final downloadedIDs = _getDownloadedFileIDs();
-    downloadedIDs.add(localID);
-    await _prefs.setStringList(kDownloadedFileIDsKey, downloadedIDs);
-  }
-
-  List<String> _getDownloadedFileIDs() {
-    if (_prefs.containsKey(kDownloadedFileIDsKey)) {
-      return _prefs.getStringList(kDownloadedFileIDsKey)!;
-    } else {
-      return <String>[];
-    }
-  }
-
->>>>>>> main
   Future<void> trackInvalidFile(File file) async {
     if (file.localID == null) {
       debugPrint("Warning: Invalid file has no localID");
@@ -401,19 +384,7 @@ class LocalSyncService {
     // In case of iOS limit permission, this call back is fired immediately
     // after file selection dialog is dismissed.
     PhotoManager.addChangeCallback((value) async {
-<<<<<<< HEAD
       checkAndSync();
-=======
-      _logger.info("Something changed on disk");
-      if (_existingSync != null) {
-        await _existingSync!.future;
-      }
-      if (hasGrantedLimitedPermissions()) {
-        syncAll();
-      } else {
-        sync().then((value) => _refreshDeviceFolderCountAndCover());
-      }
->>>>>>> main
     });
     PhotoManager.startChangeNotify();
   }
