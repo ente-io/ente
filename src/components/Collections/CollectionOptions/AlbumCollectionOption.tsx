@@ -7,7 +7,8 @@ import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
-import { ArchiveOutlined, Unarchive } from '@mui/icons-material';
+import Unarchive from '@mui/icons-material/Unarchive';
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 
 interface Iprops {
     IsArchived: boolean;

@@ -9,11 +9,12 @@ import {
 import { FlexWrapper } from 'components/Container';
 import { logError } from 'utils/sentry';
 import { FILE_TYPE } from 'constants/file';
-import { PhotoOutlined, VideocamOutlined } from '@mui/icons-material';
 import InfoItem from './InfoItem';
 import { makeHumanReadableStorage } from 'utils/billing';
 import Box from '@mui/material/Box';
 import { FileNameEditDialog } from './FileNameEditDialog';
+import VideocamOutlined from '@mui/icons-material/VideocamOutlined';
+import PhotoOutlined from '@mui/icons-material/PhotoOutlined';
 
 const getFileTitle = (filename, extension) => {
     if (extension) {

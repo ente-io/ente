@@ -47,7 +47,7 @@ import UploadSelectorInputs from 'components/UploadSelectorInputs';
 import { logoutUser } from 'services/userService';
 import UploadButton from 'components/Upload/UploadButton';
 import bs58 from 'bs58';
-import { AddPhotoAlternateOutlined } from '@mui/icons-material';
+import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
 
 const Loader = () => (
     <VerticallyCentered>
