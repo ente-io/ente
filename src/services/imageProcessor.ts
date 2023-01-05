@@ -18,6 +18,10 @@ const MAX_DIMENSION_PLACEHOLDER = 'MAX_DIMENSION';
 const SAMPLE_SIZE_PLACEHOLDER = 'SAMPLE_SIZE';
 const INPUT_PATH_PLACEHOLDER = 'INPUT';
 const OUTPUT_PATH_PLACEHOLDER = 'OUTPUT';
+const QUALITY_PLACEHOLDER = 'QUALITY';
+
+const MAX_QUALITY = 80;
+const MIN_QUALITY = 50;
 
 const SIPS_HEIC_CONVERT_COMMAND_TEMPLATE = [
     'sips',
@@ -56,6 +60,10 @@ const IMAGE_MAGICK_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     INPUT_PATH_PLACEHOLDER,
     '-thumbnail',
     `${MAX_DIMENSION_PLACEHOLDER}x${MAX_DIMENSION_PLACEHOLDER}>`,
+    '-unsharp',
+    '0x.5',
+    '-quality',
+    QUALITY_PLACEHOLDER,
     OUTPUT_PATH_PLACEHOLDER,
 ];
 
@@ -153,22 +161,35 @@ function constructConvertCommand(
 
 export async function generateImageThumbnail(
     inputFilePath: string,
-    width: number
+    width: number,
+    maxSize: number
 ): Promise<Uint8Array> {
     let tempOutputFilePath: string;
+    let quality = MAX_QUALITY;
     try {
         tempOutputFilePath = await generateTempFilePath('thumb.jpeg');
+        let thumbnail: Uint8Array;
+        do {
+            console.log(
+                'generating thumbnail',
+                'quality',
+                quality,
+                'thumbnail',
+                thumbnail?.length
+            );
+            await runThumbnailGenerationCommand(
+                inputFilePath,
+                tempOutputFilePath,
+                width,
+                quality
+            );
 
-        await runThumbnailGenerationCommand(
-            inputFilePath,
-            tempOutputFilePath,
-            width
-        );
-
-        if (!existsSync(tempOutputFilePath)) {
-            throw new Error('output thumbnail file not found');
-        }
-        const thumbnail = new Uint8Array(await readFile(tempOutputFilePath));
+            if (!existsSync(tempOutputFilePath)) {
+                throw new Error('output thumbnail file not found');
+            }
+            thumbnail = new Uint8Array(await readFile(tempOutputFilePath));
+            quality -= 10;
+        } while (thumbnail.length > maxSize && quality > MIN_QUALITY);
         return thumbnail;
     } catch (e) {
         logErrorSentry(e, 'generate image thumbnail failed');
@@ -185,13 +206,15 @@ export async function generateImageThumbnail(
 async function runThumbnailGenerationCommand(
     inputFilePath: string,
     tempOutputFilePath: string,
-    maxDimension: number
+    maxDimension: number,
+    quality: number
 ) {
     const thumbnailGenerationCmd: string[] =
         constructThumbnailGenerationCommand(
             inputFilePath,
             tempOutputFilePath,
-            maxDimension
+            maxDimension,
+            quality
         );
     const escapedCmd = shellescape(thumbnailGenerationCmd);
     log.info('running thumbnail generation command: ' + escapedCmd);
@@ -200,7 +223,8 @@ async function runThumbnailGenerationCommand(
 function constructThumbnailGenerationCommand(
     inputFilePath: string,
     tempOutputFilePath: string,
-    maxDimension: number
+    maxDimension: number,
+    quality: number
 ) {
     let thumbnailGenerationCmd: string[];
     if (isPlatform('mac')) {
@@ -214,6 +238,9 @@ function constructThumbnailGenerationCommand(
                 }
                 if (cmdPart === MAX_DIMENSION_PLACEHOLDER) {
                     return maxDimension.toString();
+                }
+                if (cmdPart === QUALITY_PLACEHOLDER) {
+                    return quality.toString();
                 }
                 return cmdPart;
             }

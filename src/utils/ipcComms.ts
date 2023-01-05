@@ -150,7 +150,10 @@ export default function setupIpcComs(
         return deleteTempFile(tempFilePath);
     });
 
-    ipcMain.handle('generate-image-thumbnail', (_, fileData, maxDimension) => {
-        return generateImageThumbnail(fileData, maxDimension);
-    });
+    ipcMain.handle(
+        'generate-image-thumbnail',
+        (_, fileData, maxDimension, maxSize) => {
+            return generateImageThumbnail(fileData, maxDimension, maxSize);
+        }
+    );
 }

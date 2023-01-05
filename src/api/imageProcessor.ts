@@ -13,7 +13,8 @@ export async function convertHEIC(fileData: Uint8Array): Promise<Uint8Array> {
 
 export async function generateImageThumbnail(
     inputFile: File | ElectronFile,
-    maxDimension: number
+    maxDimension: number,
+    maxSize: number
 ): Promise<Uint8Array> {
     let inputFilePath = null;
     let createdTempInputFile = null;
@@ -32,7 +33,8 @@ export async function generateImageThumbnail(
         const thumbnail = await ipcRenderer.invoke(
             'generate-image-thumbnail',
             inputFilePath,
-            maxDimension
+            maxDimension,
+            maxSize
         );
         return thumbnail;
     } finally {
