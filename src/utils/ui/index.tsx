@@ -5,7 +5,7 @@ import { downloadApp } from 'utils/common';
 import constants from 'utils/strings/constants';
 import ElectronUpdateService from 'services/electron/update';
 import { AppUpdateInfo } from 'types/electron';
-import { InfoOutlined } from '@mui/icons-material';
+import InfoOutlined from '@mui/icons-material/InfoRounded';
 export const getDownloadAppMessage = (): DialogBoxAttributes => {
     return {
         title: constants.DOWNLOAD_APP,
