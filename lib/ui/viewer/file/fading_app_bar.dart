@@ -417,6 +417,9 @@ class FadingAppBarState extends State<FadingAppBar> {
           type == FileType.livePhoto && Platform.isAndroid;
       AssetEntity? savedAsset;
       final io.File? fileToSave = await getFile(file);
+      //Disabling notifications for assets changing to insert the file into
+      //files db before triggering a sync.
+      PhotoManager.stopChangeNotify();
       if (type == FileType.image) {
         savedAsset = await PhotoManager.editor
             .saveImageWithPath(fileToSave!.path, title: file.title!);
@@ -441,16 +444,6 @@ class FadingAppBarState extends State<FadingAppBar> {
       }
 
       if (savedAsset != null) {
-        // immediately track assetID to avoid duplicate upload
-        await LocalSyncService.instance.trackDownloadedFile(savedAsset.id);
-        final ignoreVideoFile = IgnoredFile(
-          savedAsset.id,
-          savedAsset.title ?? "",
-          savedAsset.relativePath ?? 'remoteDownload',
-          "remoteDownload",
-        );
-        debugPrint("IgnoreFile for auto-upload ${ignoreVideoFile.toString()}");
-        await IgnoredFilesService.instance.cacheAndInsert([ignoreVideoFile]);
         file.localID = savedAsset.id;
         await FilesDB.instance.insert(file);
         Bus.instance.fire(
@@ -468,6 +461,9 @@ class FadingAppBarState extends State<FadingAppBar> {
       _logger.warning("Failed to save file", e);
       await dialog.hide();
       showGenericErrorDialog(context: context);
+    } finally {
+      PhotoManager.startChangeNotify();
+      LocalSyncService.instance.checkAndSync().ignore();
     }
   }
 
