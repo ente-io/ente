@@ -1,6 +1,5 @@
 import ElectronLog from 'electron-log';
 import { webFrame } from 'electron/renderer';
-import { isPlatform } from './main';
 
 const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
@@ -77,9 +76,9 @@ const getNormalizedProcessMemoryInfo = async (
     processMemoryInfo: Electron.ProcessMemoryInfo
 ) => {
     return {
-        residentSet: !isPlatform('mac')
-            ? convertBytesToHumanReadable(processMemoryInfo.residentSet * 1024)
-            : 0,
+        residentSet: convertBytesToHumanReadable(
+            processMemoryInfo.residentSet * 1024
+        ),
         private: convertBytesToHumanReadable(processMemoryInfo.private * 10124),
         shared: convertBytesToHumanReadable(processMemoryInfo.shared * 1024),
     };
@@ -91,12 +90,10 @@ const getNormalizedSystemMemoryInfo = (
     return {
         total: convertBytesToHumanReadable(systemMemoryInfo.total * 1024),
         free: convertBytesToHumanReadable(systemMemoryInfo.free * 1024),
-        swapTotal: !isPlatform('mac')
-            ? convertBytesToHumanReadable(systemMemoryInfo.swapTotal * 1024)
-            : 0,
-        swapFree: !isPlatform('mac')
-            ? convertBytesToHumanReadable(systemMemoryInfo.swapFree * 1024)
-            : 0,
+        swapTotal: convertBytesToHumanReadable(
+            systemMemoryInfo.swapTotal * 1024
+        ),
+        swapFree: convertBytesToHumanReadable(systemMemoryInfo.swapFree * 1024),
     };
 };
 
