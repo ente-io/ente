@@ -22,6 +22,9 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/file_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -486,99 +489,121 @@ Future<bool> shouldProceedWithDeletion(BuildContext context) async {
   return choice == DialogUserChoice.secondChoice;
 }
 
-void showDeleteSheet(BuildContext context, SelectedFiles selectedFiles) {
+Future<void> showDeleteSheet(
+  BuildContext context,
+  SelectedFiles selectedFiles,
+) async {
   final count = selectedFiles.files.length;
   bool containsUploadedFile = false, containsLocalFile = false;
   for (final file in selectedFiles.files) {
     if (file.uploadedFileID != null) {
+      debugPrint("${file.toString()} is uploaded");
       containsUploadedFile = true;
     }
     if (file.localID != null) {
+      debugPrint("${file.toString()} has local");
       containsLocalFile = true;
     }
   }
-  final actions = <Widget>[];
-  if (containsUploadedFile && containsLocalFile) {
-    actions.add(
-      CupertinoActionSheetAction(
-        isDestructiveAction: true,
-        onPressed: () async {
-          Navigator.of(context, rootNavigator: true).pop();
-          await deleteFilesOnDeviceOnly(
-            context,
-            selectedFiles.files.toList(),
-          );
-          selectedFiles.clearAll();
-          showToast(context, "Files deleted from device");
-        },
-        child: const Text("Device"),
-      ),
-    );
-    actions.add(
-      CupertinoActionSheetAction(
-        isDestructiveAction: true,
-        onPressed: () async {
-          Navigator.of(context, rootNavigator: true).pop();
+  final List<ButtonWidget> buttons = [];
+  final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
+  final bool isLocalOnly = !containsUploadedFile;
+  final bool isRemoteOnly = !containsLocalFile;
+  final String title = "Delete item${count > 1 ? 's' : ''}"
+      "${isBothLocalAndRemote ? '' : '?'}";
+  final String? bodyHighlight =
+      isBothLocalAndRemote ? "They will be deleted from all albums." : null;
+  String body = "";
+  if (isBothLocalAndRemote) {
+    body = "Some items are in both ente and your device.";
+  } else if (isRemoteOnly) {
+    body = "Selected items will be deleted from all albums and moved to trash.";
+  } else if (isLocalOnly) {
+    body = "These items will be deleted from your device.";
+  } else {
+    throw AssertionError("Unexpected state");
+  }
+  // Add option to delete from ente
+  if (isBothLocalAndRemote || isRemoteOnly) {
+    buttons.add(
+      ButtonWidget(
+        labelText: isBothLocalAndRemote ? "Delete from ente" : "Yes, delete",
+        buttonType: ButtonType.neutral,
+        buttonSize: ButtonSize.large,
+        shouldStickToDarkTheme: true,
+        buttonAction: ButtonAction.first,
+        shouldSurfaceExecutionStates: true,
+        isInAlert: true,
+        onTap: () async {
           await deleteFilesFromRemoteOnly(
             context,
             selectedFiles.files.toList(),
           );
-          selectedFiles.clearAll();
-
           showShortToast(context, "Moved to trash");
         },
-        child: const Text("ente"),
-      ),
-    );
-    actions.add(
-      CupertinoActionSheetAction(
-        isDestructiveAction: true,
-        onPressed: () async {
-          Navigator.of(context, rootNavigator: true).pop();
-          await deleteFilesFromEverywhere(
-            context,
-            selectedFiles.files.toList(),
-          );
-          selectedFiles.clearAll();
-        },
-        child: const Text("Everywhere"),
-      ),
-    );
-  } else {
-    actions.add(
-      CupertinoActionSheetAction(
-        isDestructiveAction: true,
-        onPressed: () async {
-          Navigator.of(context, rootNavigator: true).pop();
-          await deleteFilesFromEverywhere(
-            context,
-            selectedFiles.files.toList(),
-          );
-          selectedFiles.clearAll();
-        },
-        child: const Text("Delete"),
       ),
     );
   }
-  final action = CupertinoActionSheet(
-    title: Text(
-      "Delete " +
-          count.toString() +
-          " file" +
-          (count == 1 ? "" : "s") +
-          (containsUploadedFile && containsLocalFile ? " from" : "?"),
-    ),
-    actions: actions,
-    cancelButton: CupertinoActionSheetAction(
-      child: const Text("Cancel"),
-      onPressed: () {
-        Navigator.of(context, rootNavigator: true).pop();
-      },
+  // Add option to delete from local
+  if (isBothLocalAndRemote || isLocalOnly) {
+    buttons.add(
+      ButtonWidget(
+        labelText: isBothLocalAndRemote ? "Delete from device" : "Yes, delete",
+        buttonType: ButtonType.neutral,
+        buttonSize: ButtonSize.large,
+        shouldStickToDarkTheme: true,
+        buttonAction: ButtonAction.second,
+        shouldSurfaceExecutionStates: false,
+        isInAlert: true,
+        onTap: () async {
+          await deleteFilesOnDeviceOnly(context, selectedFiles.files.toList());
+        },
+      ),
+    );
+  }
+
+  if (isBothLocalAndRemote) {
+    buttons.add(
+      ButtonWidget(
+        labelText: "Delete from both",
+        buttonType: ButtonType.neutral,
+        buttonSize: ButtonSize.large,
+        shouldStickToDarkTheme: true,
+        buttonAction: ButtonAction.third,
+        shouldSurfaceExecutionStates: true,
+        isInAlert: true,
+        onTap: () async {
+          await deleteFilesFromEverywhere(
+            context,
+            selectedFiles.files.toList(),
+          );
+          // Navigator.of(context, rootNavigator: true).pop();
+          // widget.onFileRemoved(file);
+        },
+      ),
+    );
+  }
+  buttons.add(
+    const ButtonWidget(
+      labelText: "Cancel",
+      buttonType: ButtonType.secondary,
+      buttonSize: ButtonSize.large,
+      shouldStickToDarkTheme: true,
+      buttonAction: ButtonAction.fourth,
+      isInAlert: true,
     ),
   );
-  showCupertinoModalPopup(
+  final ButtonAction? result = await showActionSheet(
     context: context,
-    builder: (_) => action,
-    barrierColor: Colors.black.withOpacity(0.75),
+    buttons: buttons,
+    actionSheetType: ActionSheetType.defaultActionSheet,
+    title: title,
+    body: body,
+    bodyHighlight: bodyHighlight,
   );
+  if (result != null && result == ButtonAction.error) {
+    showGenericErrorDialog(context: context);
+  } else {
+    selectedFiles.clearAll();
+  }
 }
