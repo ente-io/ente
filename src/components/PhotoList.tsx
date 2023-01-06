@@ -354,13 +354,6 @@ export function PhotoList({
     };
 
     const isSameDay = (first, second) => {
-        console.log(
-            first,
-            second,
-            first.getFullYear() === second.getFullYear(),
-            first.getMonth() === second.getMonth(),
-            first.getDate() === second.getDate()
-        );
         return (
             first.getFullYear() === second.getFullYear() &&
             first.getMonth() === second.getMonth() &&
