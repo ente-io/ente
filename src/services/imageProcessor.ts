@@ -38,9 +38,12 @@ const SIPS_THUMBNAIL_GENERATE_COMMAND_TEMPLATE = [
     '-s',
     'format',
     'jpeg',
-    INPUT_PATH_PLACEHOLDER,
+    '-s',
+    'formatOptions',
+    QUALITY_PLACEHOLDER,
     '-Z',
     MAX_DIMENSION_PLACEHOLDER,
+    INPUT_PATH_PLACEHOLDER,
     '--out',
     OUTPUT_PATH_PLACEHOLDER,
 ];
@@ -268,6 +271,9 @@ function constructThumbnailGenerationCommand(
                         MAX_DIMENSION_PLACEHOLDER,
                         maxDimension.toString()
                     );
+                }
+                if (cmdPart === QUALITY_PLACEHOLDER) {
+                    return quality.toString();
                 }
                 return cmdPart;
             });
