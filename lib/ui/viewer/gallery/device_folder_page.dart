@@ -84,6 +84,8 @@ class BackupHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Future<List<File>> filesInDeviceCollection =
+        _filesInDeviceCollection();
     final ValueNotifier<bool> shouldBackup =
         ValueNotifier(deviceCollection.shouldBackup);
     final colorScheme = getEnteColorScheme(context);
@@ -127,22 +129,38 @@ class BackupHeaderWidget extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 24),
-              MenuItemWidget(
-                captionedTextWidget:
-                    const CaptionedTextWidget(title: "Reset ignored files"),
-                borderRadius: 8.0,
-                menuItemColor: colorScheme.fillFaint,
-                leadingIcon: Icons.cloud_off_outlined,
-                onTap: () async {
-                  await _removeFilesFromIgnoredFiles();
-                  RemoteSyncService.instance.sync(silently: true);
+              FutureBuilder(
+                future: _hasIgnoredFiles(filesInDeviceCollection),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData && snapshot.data as bool) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 24),
+                        MenuItemWidget(
+                          captionedTextWidget: const CaptionedTextWidget(
+                            title: "Reset ignored files",
+                          ),
+                          borderRadius: 8.0,
+                          menuItemColor: colorScheme.fillFaint,
+                          leadingIcon: Icons.cloud_off_outlined,
+                          onTap: () async {
+                            await _removeFilesFromIgnoredFiles(
+                              filesInDeviceCollection,
+                            );
+                            RemoteSyncService.instance.sync(silently: true);
+                          },
+                        ),
+                        const MenuSectionDescriptionWidget(
+                          content:
+                              "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const SizedBox.shrink();
+                  }
                 },
-              ),
-              const MenuSectionDescriptionWidget(
-                content:
-                    "Some files in this album are ignored from upload because they had previously been deleted from ente.",
-              ),
+              )
             ],
           ),
         ],
@@ -150,15 +168,32 @@ class BackupHeaderWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _removeFilesFromIgnoredFiles() async {
-    final List<File> filesInDeviceCollection =
-        (await FilesDB.instance.getFilesInDeviceCollection(
+  Future<List<File>> _filesInDeviceCollection() async {
+    return (await FilesDB.instance.getFilesInDeviceCollection(
       deviceCollection,
       galleryLoadStartTime,
       galleryLoadEndTime,
     ))
-            .files;
+        .files;
+  }
+
+  Future<bool> _hasIgnoredFiles(
+      Future<List<File>> filesInDeviceCollection) async {
+    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
+
+    final localIDsOfFiles = <String>{};
+    for (File file in deviceCollectionFiles) {
+      localIDsOfFiles.add(file.localID!);
+    }
+    final ignoredFiles = await IgnoredFilesService.instance.ignoredIDs;
+    return ignoredFiles.intersection(localIDsOfFiles).isNotEmpty;
+  }
+
+  Future<void> _removeFilesFromIgnoredFiles(
+    Future<List<File>> filesInDeviceCollection,
+  ) async {
+    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
     await IgnoredFilesService.instance
-        .removeIgnoredMappings(filesInDeviceCollection);
+        .removeIgnoredMappings(deviceCollectionFiles);
   }
 }
