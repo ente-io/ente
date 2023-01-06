@@ -148,48 +148,26 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
               FutureBuilder(
                 future: _hasIgnoredFiles(filesInDeviceCollection),
                 builder: (context, snapshot) {
-                  Widget child;
+                  bool shouldShowReset = false;
                   if (snapshot.hasData &&
                       snapshot.data as bool &&
                       shouldBackup.value) {
-                    child = Column(
-                      children: [
-                        const SizedBox(height: 24),
-                        MenuItemWidget(
-                          captionedTextWidget: const CaptionedTextWidget(
-                            title: "Reset ignored files",
-                          ),
-                          borderRadius: 8.0,
-                          menuItemColor: colorScheme.fillFaint,
-                          leadingIcon: Icons.cloud_off_outlined,
-                          onTap: () async {
-                            await _removeFilesFromIgnoredFiles(
-                              filesInDeviceCollection,
-                            );
-                            RemoteSyncService.instance
-                                .sync(silently: true)
-                                .then((value) {
-                              setState(() {});
-                            });
-                          },
-                        ),
-                        const MenuSectionDescriptionWidget(
-                          content:
-                              "Some files in this album are ignored from upload because they had previously been deleted from ente.",
-                        ),
-                      ],
-                    );
+                    shouldShowReset = true;
                   } else if (snapshot.hasError) {
                     Logger("BackupHeaderWidget").severe(
                       "Could not check if collection has ignored files",
                     );
-                    child = const SizedBox.shrink();
-                  } else {
-                    child = const SizedBox.shrink();
                   }
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 48),
-                    child: child,
+                  return AnimatedCrossFade(
+                    firstCurve: Curves.easeInOutExpo,
+                    secondCurve: Curves.easeInOutExpo,
+                    sizeCurve: Curves.easeInOutExpo,
+                    firstChild: firstChild(),
+                    secondChild: const SizedBox(width: double.infinity),
+                    crossFadeState: shouldShowReset
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    duration: const Duration(milliseconds: 1000),
                   );
                 },
               )
@@ -197,6 +175,34 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget firstChild() {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset ignored files",
+          ),
+          borderRadius: 8.0,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          leadingIcon: Icons.cloud_off_outlined,
+          onTap: () async {
+            await _removeFilesFromIgnoredFiles(
+              filesInDeviceCollection,
+            );
+            RemoteSyncService.instance.sync(silently: true).then((value) {
+              setState(() {});
+            });
+          },
+        ),
+        const MenuSectionDescriptionWidget(
+          content:
+              "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+        ),
+      ],
     );
   }
 
