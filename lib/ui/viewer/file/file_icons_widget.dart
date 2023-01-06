@@ -27,6 +27,32 @@ class UnSyncedIcon extends StatelessWidget {
   }
 }
 
+class DeviceIcon extends StatelessWidget {
+  const DeviceIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const _BottomLeftOverlayIcon(
+      Icons.mobile_friendly_rounded,
+      baseSize: 18,
+      color: Color.fromRGBO(1, 222, 77, 0.8),
+    );
+  }
+}
+
+class CloudOnlyIcon extends StatelessWidget {
+  const CloudOnlyIcon({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const _BottomLeftOverlayIcon(
+      Icons.cloud_done_outlined,
+      baseSize: 18,
+      color: Color.fromRGBO(1, 222, 77, 0.8),
+    );
+  }
+}
+
 class FavoriteOverlayIcon extends StatelessWidget {
   const FavoriteOverlayIcon({Key? key}) : super(key: key);
 
