@@ -24,6 +24,7 @@ enum ButtonAction {
   first,
   second,
   third,
+  fourth,
   cancel,
   error;
 }

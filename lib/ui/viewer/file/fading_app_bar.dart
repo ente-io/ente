@@ -357,11 +357,11 @@ class FadingAppBarState extends State<FadingAppBar> {
     const String bodyHighlight = "It will be deleted from all albums.";
     String body = "";
     if (isBothLocalAndRemote) {
-      body = "This photo is in both ente and your device.";
+      body = "This $fileType is in both ente and your device.";
     } else if (isRemoteOnly) {
-      body = "This photo will be deleted from ente.";
+      body = "This $fileType will be deleted from ente.";
     } else if (isLocalOnly) {
-      body = "This photo will be deleted from your device.";
+      body = "This $fileType will be deleted from your device.";
     } else {
       throw AssertionError("Unexpected state");
     }
@@ -425,6 +425,16 @@ class FadingAppBarState extends State<FadingAppBar> {
         ),
       );
     }
+    buttons.add(
+      const ButtonWidget(
+        labelText: "Cancel",
+        buttonType: ButtonType.secondary,
+        buttonSize: ButtonSize.large,
+        shouldStickToDarkTheme: true,
+        buttonAction: ButtonAction.fourth,
+        isInAlert: true,
+      ),
+    );
     final ButtonAction? result = await showActionSheet(
       context: context,
       buttons: buttons,
@@ -433,6 +443,9 @@ class FadingAppBarState extends State<FadingAppBar> {
       body: body,
       bodyHighlight: bodyHighlight,
     );
+    if (result != null && result == ButtonAction.error) {
+      showGenericErrorDialog(context: context);
+    }
   }
 
   Future<void> _download(File file) async {
