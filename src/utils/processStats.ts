@@ -1,7 +1,7 @@
 import ElectronLog from 'electron-log';
 import { webFrame } from 'electron/renderer';
 
-const FIVE_MINUTES_IN_MICROSECONDS = 30 * 1000;
+const LOGGING_INTERVAL_IN_MICROSECONDS = 1 * 1000;
 
 async function logMainProcessStats() {
     const systemMemoryInfo = process.getSystemMemoryInfo();
@@ -31,9 +31,9 @@ async function logRendererProcessStats() {
 }
 
 export function setupMainProcessStatsLogger() {
-    setInterval(logMainProcessStats, FIVE_MINUTES_IN_MICROSECONDS);
+    setInterval(logMainProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
 
 export function setupRendererProcessStatsLogger() {
-    setInterval(logRendererProcessStats, FIVE_MINUTES_IN_MICROSECONDS);
+    setInterval(logRendererProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
