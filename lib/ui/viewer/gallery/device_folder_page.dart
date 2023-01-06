@@ -77,17 +77,22 @@ class DeviceFolderPage extends StatelessWidget {
   }
 }
 
-class BackupHeaderWidget extends StatelessWidget {
+class BackupHeaderWidget extends StatefulWidget {
   final DeviceCollection deviceCollection;
 
   const BackupHeaderWidget(this.deviceCollection, {super.key});
 
   @override
+  State<BackupHeaderWidget> createState() => _BackupHeaderWidgetState();
+}
+
+class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
+  @override
   Widget build(BuildContext context) {
     final Future<List<File>> filesInDeviceCollection =
         _filesInDeviceCollection();
     final ValueNotifier<bool> shouldBackup =
-        ValueNotifier(deviceCollection.shouldBackup);
+        ValueNotifier(widget.deviceCollection.shouldBackup);
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
@@ -107,7 +112,7 @@ class BackupHeaderWidget extends StatelessWidget {
                   onChanged: () async {
                     await RemoteSyncService.instance
                         .updateDeviceFolderSyncStatus(
-                      {deviceCollection.id: !shouldBackup.value},
+                      {widget.deviceCollection.id: !shouldBackup.value},
                     ).then(
                       (val) => shouldBackup.value = !shouldBackup.value,
                       onError: (e) {
@@ -148,7 +153,11 @@ class BackupHeaderWidget extends StatelessWidget {
                             await _removeFilesFromIgnoredFiles(
                               filesInDeviceCollection,
                             );
-                            RemoteSyncService.instance.sync(silently: true);
+                            RemoteSyncService.instance
+                                .sync(silently: true)
+                                .then((value) {
+                              setState(() {});
+                            });
                           },
                         ),
                         const MenuSectionDescriptionWidget(
@@ -180,7 +189,7 @@ class BackupHeaderWidget extends StatelessWidget {
 
   Future<List<File>> _filesInDeviceCollection() async {
     return (await FilesDB.instance.getFilesInDeviceCollection(
-      deviceCollection,
+      widget.deviceCollection,
       galleryLoadStartTime,
       galleryLoadEndTime,
     ))
