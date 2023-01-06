@@ -276,13 +276,6 @@ async function getCompressedThumbnailBlobFromCanvas(canvas: HTMLCanvasElement) {
         percentageSizeDiff(thumbnailBlob.size, prevSize) >=
             MIN_COMPRESSION_PERCENTAGE_SIZE_DIFF
     );
-    if (thumbnailBlob.size > 1.5 * MAX_THUMBNAIL_SIZE) {
-        logError(
-            Error('thumbnail_too_large'),
-            'thumbnail greater than max limit',
-            { thumbnailSize: convertBytesToHumanReadable(thumbnailBlob.size) }
-        );
-    }
 
     return thumbnailBlob;
 }
