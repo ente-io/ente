@@ -3,10 +3,10 @@ import { CustomError } from 'utils/error';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
-import { makeHumanReadableStorage } from 'utils/billing';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { getDedicatedConvertWorker } from 'utils/comlink';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
@@ -52,9 +52,9 @@ class HEICConverter {
                                             CONVERT_FORMAT
                                         );
                                     addLogLine(
-                                        `originalFileSize:${makeHumanReadableStorage(
+                                        `originalFileSize:${convertBytesToHumanReadable(
                                             fileBlob?.size
-                                        )},convertedFileSize:${makeHumanReadableStorage(
+                                        )},convertedFileSize:${convertBytesToHumanReadable(
                                             convertedHEIC?.size
                                         )},  heic conversion time: ${
                                             Date.now() - startTime
@@ -74,10 +74,10 @@ class HEICConverter {
                             Error(`converted heic fileSize is Zero`),
                             'converted heic fileSize is Zero',
                             {
-                                originalFileSize: makeHumanReadableStorage(
+                                originalFileSize: convertBytesToHumanReadable(
                                     fileBlob?.size ?? 0
                                 ),
-                                convertedFileSize: makeHumanReadableStorage(
+                                convertedFileSize: convertBytesToHumanReadable(
                                     convertedHEIC?.size ?? 0
                                 ),
                             }

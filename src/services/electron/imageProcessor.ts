@@ -1,6 +1,6 @@
 import { ElectronAPIs } from 'types/electron';
 import { ElectronFile } from 'types/upload';
-import { makeHumanReadableStorage } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 
@@ -29,9 +29,9 @@ class ElectronImageProcessorService {
                 inputFileData
             );
             addLogLine(
-                `originalFileSize:${makeHumanReadableStorage(
+                `originalFileSize:${convertBytesToHumanReadable(
                     fileBlob?.size
-                )},convertedFileSize:${makeHumanReadableStorage(
+                )},convertedFileSize:${convertBytesToHumanReadable(
                     convertedFileData?.length
                 )},  native heic conversion time: ${Date.now() - startTime}ms `
             );
@@ -58,9 +58,9 @@ class ElectronImageProcessorService {
                 maxSize
             );
             addLogLine(
-                `originalFileSize:${makeHumanReadableStorage(
+                `originalFileSize:${convertBytesToHumanReadable(
                     inputFile?.size
-                )},thumbFileSize:${makeHumanReadableStorage(
+                )},thumbFileSize:${convertBytesToHumanReadable(
                     thumb?.length
                 )},  native thumbnail generation time: ${
                     Date.now() - startTime

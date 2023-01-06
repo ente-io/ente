@@ -29,8 +29,8 @@ import {
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
-import { makeHumanReadableStorage } from 'utils/billing';
 import { CustomError } from 'utils/error';
+import { convertBytesToHumanReadable } from './size';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -352,7 +352,7 @@ async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
 async function getRenderableImage(fileName: string, imageBlob: Blob) {
     if (await isFileHEIC(imageBlob, fileName)) {
         addLogLine(
-            `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
+            `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
                 imageBlob.size
             )}`
         );
