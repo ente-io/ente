@@ -49,7 +49,6 @@ export async function generateThumbnail(
                     }
                 );
             }
-            console.log('thumbnail Size', thumbnail.length);
             if (thumbnail.length === 0) {
                 throw Error('EMPTY THUMBNAIL');
             }
