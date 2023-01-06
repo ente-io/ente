@@ -162,7 +162,10 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                     firstCurve: Curves.easeInOutExpo,
                     secondCurve: Curves.easeInOutExpo,
                     sizeCurve: Curves.easeInOutExpo,
-                    firstChild: firstChild(),
+                    firstChild: ResetIgnoredFilesWidget(
+                      filesInDeviceCollection,
+                      () => setState(() {}),
+                    ),
                     secondChild: const SizedBox(width: double.infinity),
                     crossFadeState: shouldShowReset
                         ? CrossFadeState.showFirst
@@ -175,34 +178,6 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget firstChild() {
-    return Column(
-      children: [
-        const SizedBox(height: 24),
-        MenuItemWidget(
-          captionedTextWidget: const CaptionedTextWidget(
-            title: "Reset ignored files",
-          ),
-          borderRadius: 8.0,
-          menuItemColor: getEnteColorScheme(context).fillFaint,
-          leadingIcon: Icons.cloud_off_outlined,
-          onTap: () async {
-            await _removeFilesFromIgnoredFiles(
-              filesInDeviceCollection,
-            );
-            RemoteSyncService.instance.sync(silently: true).then((value) {
-              setState(() {});
-            });
-          },
-        ),
-        const MenuSectionDescriptionWidget(
-          content:
-              "Some files in this album are ignored from upload because they had previously been deleted from ente.",
-        ),
-      ],
     );
   }
 
@@ -225,6 +200,49 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
     }
     final ignoredFiles = await IgnoredFilesService.instance.ignoredIDs;
     return ignoredFiles.intersection(localIDsOfFiles).isNotEmpty;
+  }
+}
+
+class ResetIgnoredFilesWidget extends StatefulWidget {
+  final Future<List<File>> filesInDeviceCollection;
+  final VoidCallback parentSetState;
+  const ResetIgnoredFilesWidget(
+      this.filesInDeviceCollection, this.parentSetState,
+      {super.key});
+
+  @override
+  State<ResetIgnoredFilesWidget> createState() =>
+      _ResetIgnoredFilesWidgetState();
+}
+
+class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset ignored files",
+          ),
+          borderRadius: 8.0,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          leadingIcon: Icons.cloud_off_outlined,
+          onTap: () async {
+            await _removeFilesFromIgnoredFiles(
+              widget.filesInDeviceCollection,
+            );
+            RemoteSyncService.instance.sync(silently: true).then((value) {
+              widget.parentSetState.call();
+            });
+          },
+        ),
+        const MenuSectionDescriptionWidget(
+          content:
+              "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+        ),
+      ],
+    );
   }
 
   Future<void> _removeFilesFromIgnoredFiles(
