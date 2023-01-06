@@ -225,6 +225,7 @@ export default function Gallery() {
             router.push(PAGES.ROOT);
             return;
         }
+        preloadImage('/images/subscription-card-background');
         const main = async () => {
             const valid = await validateKey();
             if (!valid) {
@@ -249,7 +250,6 @@ export default function Gallery() {
             setIsFirstLoad(false);
             setJustSignedUp(false);
             setIsFirstFetch(false);
-            preloadImage('/images/subscription-card-background');
         };
         main();
     }, []);
