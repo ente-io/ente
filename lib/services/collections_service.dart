@@ -884,6 +884,8 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
     final toCollectionKey = getCollectionKey(toCollectionID);
+    final Set<String> existingLocalIDS =
+        await FilesDB.instance.getExistingLocalFileIDs();
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       params["files"] = [];
@@ -892,6 +894,11 @@ class CollectionsService {
         file.generatedID =
             null; // So that a new entry is created in the FilesDB
         file.collectionID = toCollectionID;
+        // During restore, if trash file local ID is not present in currently
+        // imported files, treat the file as deleted from device
+        if (file.localID != null && !existingLocalIDS.contains(file.localID)) {
+          file.localID = null;
+        }
         final encryptedKeyData = CryptoUtil.encryptSync(key, toCollectionKey);
         file.encryptedKey = Sodium.bin2base64(encryptedKeyData.encryptedData!);
         file.keyDecryptionNonce = Sodium.bin2base64(encryptedKeyData.nonce!);
