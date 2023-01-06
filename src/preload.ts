@@ -48,7 +48,7 @@ import {
 } from './api/common';
 import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
-import { convertHEIC } from './api/heicConvert';
+import { convertHEIC, generateImageThumbnail } from './api/imageProcessor';
 import { setupLogging } from './utils/logging';
 import { setupRendererProcessStatsLogger } from './utils/processStats';
 import { runFFmpegCmd } from './api/ffmpeg';
@@ -104,4 +104,5 @@ windowObject['ElectronAPIs'] = {
     getSentryUserID,
     getAppVersion,
     runFFmpegCmd,
+    generateImageThumbnail,
 };
