@@ -51,11 +51,22 @@ class ElectronImageProcessorService {
             if (!this.electronAPIs?.generateImageThumbnail) {
                 throw new Error('generateImageThumbnail API not available');
             }
-            return await this.electronAPIs.generateImageThumbnail(
+            const startTime = Date.now();
+            const thumb = await this.electronAPIs.generateImageThumbnail(
                 inputFile,
                 maxDimension,
                 maxSize
             );
+            addLogLine(
+                `originalFileSize:${makeHumanReadableStorage(
+                    inputFile?.size
+                )},thumbFileSize:${makeHumanReadableStorage(
+                    thumb?.length
+                )},  native thumbnail generation time: ${
+                    Date.now() - startTime
+                }ms `
+            );
+            return thumb;
         } catch (e) {
             logError(e, 'failed to generate image thumbnail natively');
             throw e;
