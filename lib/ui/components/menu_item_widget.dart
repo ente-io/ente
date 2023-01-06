@@ -1,6 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
@@ -190,8 +191,18 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   void _onTapDown(details) {
     setState(() {
-      menuItemColor = widget.pressedColor ?? widget.menuItemColor;
+      if (widget.pressedColor == null) {
+        hasPassedGestureCallbacks()
+            ? menuItemColor = getEnteColorScheme(context).fillFaintPressed
+            : menuItemColor = widget.menuItemColor;
+      } else {
+        menuItemColor = widget.pressedColor;
+      }
     });
+  }
+
+  bool hasPassedGestureCallbacks() {
+    return widget.onDoubleTap != null || widget.onTap != null;
   }
 
   void _onTapUp(details) {
