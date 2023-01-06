@@ -132,8 +132,9 @@ class BackupHeaderWidget extends StatelessWidget {
               FutureBuilder(
                 future: _hasIgnoredFiles(filesInDeviceCollection),
                 builder: (context, snapshot) {
+                  Widget child;
                   if (snapshot.hasData && snapshot.data as bool) {
-                    return Column(
+                    child = Column(
                       children: [
                         const SizedBox(height: 24),
                         MenuItemWidget(
@@ -156,9 +157,18 @@ class BackupHeaderWidget extends StatelessWidget {
                         ),
                       ],
                     );
+                  } else if (snapshot.hasError) {
+                    Logger("BackupHeaderWidget").severe(
+                      "Could not check if collection has ignored files",
+                    );
+                    child = const SizedBox.shrink();
                   } else {
-                    return const SizedBox.shrink();
+                    child = const SizedBox.shrink();
                   }
+                  return AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 48),
+                    child: child,
+                  );
                 },
               )
             ],
