@@ -173,13 +173,6 @@ export async function generateImageThumbnail(
         tempOutputFilePath = await generateTempFilePath('thumb.jpeg');
         let thumbnail: Uint8Array;
         do {
-            console.log(
-                'generating thumbnail',
-                'quality',
-                quality,
-                'thumbnail',
-                thumbnail?.length
-            );
             await runThumbnailGenerationCommand(
                 inputFilePath,
                 tempOutputFilePath,
