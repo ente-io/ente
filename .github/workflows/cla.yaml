@@ -7,6 +7,8 @@ on:
 
 jobs:
     CLAAssistant:
+        # This job only runs for pull request comments
+        if: ${{ github.event.issue.pull_request }}
         runs-on: ubuntu-latest
         steps:
             - name: "CLA Assistant"
