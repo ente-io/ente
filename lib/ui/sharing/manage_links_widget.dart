@@ -304,10 +304,13 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                   CupertinoButton(
                     onPressed: () async {
                       int newValidTill = -1;
+                      bool hasSelectedCustom = false;
                       final int expireAfterInMicroseconds =
                           _selectedExpiry.item3;
                       // need to manually select time
                       if (expireAfterInMicroseconds < 0) {
+                        hasSelectedCustom = true;
+                        Navigator.of(context).pop('');
                         final timeInMicrosecondsFromEpoch =
                             await _showDateTimePicker();
                         if (timeInMicrosecondsFromEpoch != null) {
@@ -320,14 +323,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         newValidTill = DateTime.now().microsecondsSinceEpoch +
                             expireAfterInMicroseconds;
                       }
-                      if (newValidTill >= 0) {
-                        await _updateUrlSettings(
-                          context,
-                          {'validTill': newValidTill},
-                        );
-                        setState(() {});
+                      if (!hasSelectedCustom) {
+                        Navigator.of(context).pop('');
                       }
-                      Navigator.of(context).pop('');
+                      if (newValidTill >= 0) {
+                        await updateTime(newValidTill);
+                      }
                     },
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
@@ -366,6 +367,16 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
         );
       },
     );
+  }
+
+  Future<void> updateTime(int newValidTill) async {
+    await _updateUrlSettings(
+      context,
+      {'validTill': newValidTill},
+    );
+    if(mounted) {
+      setState(() {});
+    }
   }
 
   // _showDateTimePicker return null if user doesn't select date-time

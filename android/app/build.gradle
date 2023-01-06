@@ -69,6 +69,10 @@ android {
             dimension "default"
             applicationIdSuffix ".independent"
         }
+        dev {
+            dimension "default"
+            applicationIdSuffix ".dev"
+        }
         playstore {
             dimension "default"
         }

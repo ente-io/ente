@@ -24,6 +24,7 @@ enum ButtonAction {
   first,
   second,
   third,
+  fourth,
   cancel,
   error;
 }
@@ -338,9 +339,13 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                                         String value,
                                         Widget? child,
                                       ) {
-                                        return Text(
-                                          value,
-                                          style: lightTextTheme.smallBold,
+                                        return Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 8.0),
+                                          child: Text(
+                                            value,
+                                            style: lightTextTheme.smallBold,
+                                          ),
                                         );
                                       },
                                     ),

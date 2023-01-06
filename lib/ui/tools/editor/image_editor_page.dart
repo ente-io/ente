@@ -13,7 +13,6 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/location.dart';
-import 'package:photos/services/local_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -343,12 +342,16 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
               "_edited_" +
               DateTime.now().microsecondsSinceEpoch.toString() +
               path.extension(widget.originalFile.title!);
+      //Disabling notifications for assets changing to insert the file into
+      //files db before triggering a sync.
+      PhotoManager.stopChangeNotify();
       final AssetEntity? newAsset =
           await (PhotoManager.editor.saveImage(result, title: fileName));
       final newFile = await ente.File.fromAsset(
         widget.originalFile.deviceFolder!,
         newAsset!,
       );
+
       newFile.creationTime = widget.originalFile.creationTime;
       newFile.collectionID = widget.originalFile.collectionID;
       newFile.location = widget.originalFile.location;
@@ -360,7 +363,6 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
         }
       }
       newFile.generatedID = await FilesDB.instance.insert(newFile);
-      await LocalSyncService.instance.trackEditedFile(newFile);
       Bus.instance.fire(LocalPhotosUpdatedEvent([newFile], source: "editSave"));
       SyncService.instance.sync();
       showShortToast(context, "Edits saved");
@@ -374,10 +376,11 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
           .files;
       // the index could be -1 if the files fetched doesn't contain the newly
       // edited files
-      final selectionIndex =
+      int selectionIndex =
           files.indexWhere((file) => file.generatedID == newFile.generatedID);
       if (selectionIndex == -1) {
         files.add(newFile);
+        selectionIndex = files.length - 1;
       }
       replacePage(
         context,
@@ -391,6 +394,8 @@ class _ImageEditorPageState extends State<ImageEditorPage> {
     } catch (e, s) {
       showToast(context, "Oops, could not save edits");
       _logger.severe(e, s);
+    } finally {
+      PhotoManager.startChangeNotify();
     }
     await dialog.hide();
   }

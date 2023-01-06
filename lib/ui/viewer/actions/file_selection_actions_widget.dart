@@ -267,7 +267,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   }
 
   Future<void> _onDeleteClick() async {
-    showDeleteSheet(context, widget.selectedFiles);
+    return showDeleteSheet(context, widget.selectedFiles);
   }
 
   Future<void> _removeFilesFromAlbum() async {
