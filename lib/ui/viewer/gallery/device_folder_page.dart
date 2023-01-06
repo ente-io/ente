@@ -81,7 +81,8 @@ class BackupHeaderWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool shouldBackup = deviceCollection.shouldBackup;
+    final ValueNotifier<bool> shouldBackup =
+        ValueNotifier(deviceCollection.shouldBackup);
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
@@ -96,13 +97,13 @@ class BackupHeaderWidget extends StatelessWidget {
                 menuItemColor: colorScheme.fillFaint,
                 alignCaptionedTextToLeft: true,
                 trailingWidget: ToggleSwitchWidget(
-                  value: () => shouldBackup,
+                  value: () => shouldBackup.value,
                   onChanged: () async {
                     await RemoteSyncService.instance
                         .updateDeviceFolderSyncStatus(
-                      {deviceCollection.id: !shouldBackup},
+                      {deviceCollection.id: !shouldBackup.value},
                     ).then(
-                      (value) => shouldBackup = !shouldBackup,
+                      (val) => shouldBackup.value = !shouldBackup.value,
                       onError: (e) {
                         Logger("BackupHeaderWidget").severe(
                           "Could not update device folder sync status",
@@ -112,10 +113,17 @@ class BackupHeaderWidget extends StatelessWidget {
                   },
                 ),
               ),
-              const MenuSectionDescriptionWidget(
-                content:
-                    "Turn on backup to automatically upload files added to this device folder to ente.",
-              )
+              ValueListenableBuilder(
+                valueListenable: shouldBackup,
+                builder: (BuildContext context, bool value, _) {
+                  return MenuSectionDescriptionWidget(
+                    key: ValueKey(shouldBackup),
+                    content: value
+                        ? "Files added to this device album will automatically get uploaded to ente."
+                        : "Turn on backup to automatically upload files added to this device folder to ente.",
+                  );
+                },
+              ),
             ],
           ),
         ],
