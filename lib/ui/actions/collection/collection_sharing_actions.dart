@@ -13,6 +13,9 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -33,17 +36,40 @@ class CollectionActions {
   ) async {
     // confirm if user wants to disable the url
     if (!enable) {
-      final choice = await showChoiceDialog(
-        context,
-        'Remove public link?',
-        'This will remove the public link for accessing "${collection.name}".',
-        firstAction: 'Yes, remove',
-        secondAction: 'Cancel',
-        actionType: ActionType.critical,
+      final ButtonAction? result = await showActionSheet(
+        context: context,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.critical,
+            isInAlert: true,
+            shouldStickToDarkTheme: true,
+            buttonAction: ButtonAction.first,
+            shouldSurfaceExecutionStates: true,
+            labelText: "Yes, remove",
+            onTap: () async {
+              await CollectionsService.instance.disableShareUrl(collection);
+            },
+          ),
+          const ButtonWidget(
+            buttonType: ButtonType.secondary,
+            buttonAction: ButtonAction.second,
+            isInAlert: true,
+            shouldStickToDarkTheme: true,
+            labelText: "Cancel",
+          )
+        ],
+        title: "Remove public link?",
+        body:
+            'This will remove the public link for accessing "${collection.name}".',
       );
-      if (choice != DialogUserChoice.firstChoice) {
-        return false;
+      if (result != null) {
+        if (result == ButtonAction.error) {
+          showGenericErrorDialog(context: context);
+        }
+        // return
+        return result == ButtonAction.first;
       }
+      return false;
     }
     final dialog = createProgressDialog(
       context,
@@ -243,6 +269,57 @@ class CollectionActions {
         }
         return false;
       }
+    }
+  }
+
+  Future<void> deleteCollectionSheet(
+      BuildContext bContext, Collection collection) async {
+    final currentUserID = Configuration.instance.getUserID()!;
+    if (collection.owner!.id != currentUserID) {
+      throw AssertionError("Can not delete album owned by others");
+    }
+    final actionResult = await showActionSheet(
+      context: bContext,
+      buttons: [
+        ButtonWidget(
+          labelText: "Keep Photos",
+          buttonType: ButtonType.neutral,
+          buttonSize: ButtonSize.large,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+          onTap: () async {
+            // await moveFilesFromCurrentCollection(
+            //   bContext,
+            //   collection,
+            //   selectedFiles.files,
+            // );
+          },
+        ),
+        const ButtonWidget(
+          labelText: "Delete photos",
+          buttonType: ButtonType.critical,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.second,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+        const ButtonWidget(
+          labelText: "Cancel",
+          buttonType: ButtonType.secondary,
+          buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.third,
+          shouldStickToDarkTheme: true,
+          isInAlert: true,
+        ),
+      ],
+      title: "Delete album?",
+      body: "This album will be deleted. Do you also want to delete the "
+          "photos (and videos) that are present in this album?",
+      bodyHighlight: "They will be deleted from all albums.",
+      actionSheetType: ActionSheetType.defaultActionSheet,
+    );
+    if (actionResult != null && actionResult == ButtonAction.error) {
+      showGenericErrorDialog(context: bContext);
     }
   }
 
