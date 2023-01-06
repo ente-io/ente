@@ -87,12 +87,19 @@ class BackupHeaderWidget extends StatefulWidget {
 }
 
 class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
+  late Future<List<File>> filesInDeviceCollection;
+  late ValueNotifier<bool> shouldBackup;
+  @override
+  void initState() {
+    shouldBackup = ValueNotifier(widget.deviceCollection.shouldBackup);
+
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final Future<List<File>> filesInDeviceCollection =
-        _filesInDeviceCollection();
-    final ValueNotifier<bool> shouldBackup =
-        ValueNotifier(widget.deviceCollection.shouldBackup);
+    filesInDeviceCollection = _filesInDeviceCollection();
+
     final colorScheme = getEnteColorScheme(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
@@ -114,7 +121,11 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                         .updateDeviceFolderSyncStatus(
                       {widget.deviceCollection.id: !shouldBackup.value},
                     ).then(
-                      (val) => shouldBackup.value = !shouldBackup.value,
+                      (val) {
+                        setState(() {
+                          shouldBackup.value = !shouldBackup.value;
+                        });
+                      },
                       onError: (e) {
                         Logger("BackupHeaderWidget").severe(
                           "Could not update device folder sync status",
@@ -138,7 +149,9 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
                 future: _hasIgnoredFiles(filesInDeviceCollection),
                 builder: (context, snapshot) {
                   Widget child;
-                  if (snapshot.hasData && snapshot.data as bool) {
+                  if (snapshot.hasData &&
+                      snapshot.data as bool &&
+                      shouldBackup.value) {
                     child = Column(
                       children: [
                         const SizedBox(height: 24),
