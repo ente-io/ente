@@ -37,9 +37,9 @@ export async function runFFmpegCmd(
                 return cmdPart;
             }
         });
-        cmd = shellescape(cmd);
-        log.info('running ffmpeg command', cmd);
-        await execAsync(cmd);
+        const escapedCmd = shellescape(cmd);
+        log.info('running ffmpeg command', escapedCmd);
+        await execAsync(escapedCmd);
         if (!existsSync(tempOutputFilePath)) {
             throw new Error('ffmpeg output file not found');
         }
