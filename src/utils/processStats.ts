@@ -108,7 +108,7 @@ const getNormalizedBlinkMemoryInfo = () => {
 };
 
 function convertBytesToHumanReadable(bytes: number, precision = 2): string {
-    if (bytes === 0) {
+    if (bytes === 0 || isNaN(bytes)) {
         return '0 MB';
     }
 
