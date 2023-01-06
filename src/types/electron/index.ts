@@ -82,4 +82,9 @@ export interface ElectronAPIs {
         inputFile: File | ElectronFile,
         outputFileName: string
     ) => Promise<File>;
+    generateImageThumbnail: (
+        inputFile: File | ElectronFile,
+        maxDimension: number,
+        maxSize: number
+    ) => Promise<Uint8Array>;
 }
