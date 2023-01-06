@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/ente_theme_data.dart';
 import 'package:photos/services/update_service.dart';
-import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/ui/account/email_entry_page.dart';
 import 'package:photos/ui/account/login_page.dart';
 import 'package:photos/ui/account/password_entry_page.dart';
@@ -155,7 +154,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   Future<void> _navigateToSignUpPage() async {
     UpdateService.instance.hideChangeLog().ignore();
-    UserRemoteFlagService.instance.stopPasswordReminder().ignore();
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
       page = const EmailEntryPage();
@@ -183,7 +181,6 @@ class _LandingPageWidgetState extends State<LandingPageWidget> {
 
   void _navigateToSignInPage() {
     UpdateService.instance.hideChangeLog().ignore();
-    UserRemoteFlagService.instance.stopPasswordReminder().ignore();
     Widget page;
     if (Configuration.instance.getEncryptedToken() == null) {
       page = const LoginPage();
