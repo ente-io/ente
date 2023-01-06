@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_collection.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
@@ -94,6 +97,7 @@ class BackupHeaderWidget extends StatelessWidget {
             children: [
               MenuItemWidget(
                 captionedTextWidget: const CaptionedTextWidget(title: "Backup"),
+                borderRadius: 8.0,
                 menuItemColor: colorScheme.fillFaint,
                 alignCaptionedTextToLeft: true,
                 trailingWidget: ToggleSwitchWidget(
@@ -117,17 +121,44 @@ class BackupHeaderWidget extends StatelessWidget {
                 valueListenable: shouldBackup,
                 builder: (BuildContext context, bool value, _) {
                   return MenuSectionDescriptionWidget(
-                    key: ValueKey(shouldBackup),
                     content: value
                         ? "Files added to this device album will automatically get uploaded to ente."
                         : "Turn on backup to automatically upload files added to this device folder to ente.",
                   );
                 },
               ),
+              const SizedBox(height: 24),
+              MenuItemWidget(
+                captionedTextWidget:
+                    const CaptionedTextWidget(title: "Reset ignored files"),
+                borderRadius: 8.0,
+                menuItemColor: colorScheme.fillFaint,
+                leadingIcon: Icons.cloud_off_outlined,
+                onTap: () async {
+                  await _removeFilesFromIgnoredFiles();
+                  RemoteSyncService.instance.sync(silently: true);
+                },
+              ),
+              const MenuSectionDescriptionWidget(
+                content:
+                    "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+              ),
             ],
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _removeFilesFromIgnoredFiles() async {
+    final List<File> filesInDeviceCollection =
+        (await FilesDB.instance.getFilesInDeviceCollection(
+      deviceCollection,
+      galleryLoadStartTime,
+      galleryLoadEndTime,
+    ))
+            .files;
+    await IgnoredFilesService.instance
+        .removeIgnoredMappings(filesInDeviceCollection);
   }
 }
