@@ -42,8 +42,8 @@ async function logSpikeMemoryUsage() {
 
 async function logRendererProcessStats() {
     const blinkMemoryInfo = getNormalizedBlinkMemoryInfo();
-    const heapStatistics = process.getHeapStatistics();
-    const webFrameResourceUsage = webFrame.getResourceUsage();
+    const heapStatistics = getNormalizedHeapStatistics();
+    const webFrameResourceUsage = getNormalizedWebFrameResourceUsage();
     ElectronLog.log('renderer process stats', {
         blinkMemoryInfo,
         heapStatistics,
@@ -111,6 +111,62 @@ const getNormalizedHeapStatistics = () => {
             heapStatistics.peakMallocedMemory * 1024
         ),
         doesZapGarbage: heapStatistics.doesZapGarbage,
+    };
+};
+
+const getNormalizedWebFrameResourceUsage = () => {
+    const webFrameResourceUsage = webFrame.getResourceUsage();
+    return {
+        images: {
+            count: webFrameResourceUsage.images.count,
+            size: convertBytesToHumanReadable(
+                webFrameResourceUsage.images.size
+            ),
+            liveSize: convertBytesToHumanReadable(
+                webFrameResourceUsage.images.liveSize
+            ),
+        },
+        scripts: {
+            count: webFrameResourceUsage.scripts.count,
+            size: convertBytesToHumanReadable(
+                webFrameResourceUsage.scripts.size
+            ),
+            liveSize: convertBytesToHumanReadable(
+                webFrameResourceUsage.scripts.liveSize
+            ),
+        },
+        cssStyleSheets: {
+            count: webFrameResourceUsage.cssStyleSheets.count,
+            size: convertBytesToHumanReadable(
+                webFrameResourceUsage.cssStyleSheets.size
+            ),
+            liveSize: convertBytesToHumanReadable(
+                webFrameResourceUsage.cssStyleSheets.liveSize
+            ),
+        },
+        xslStyleSheets: {
+            count: webFrameResourceUsage.xslStyleSheets.count,
+            size: convertBytesToHumanReadable(
+                webFrameResourceUsage.xslStyleSheets.size
+            ),
+            liveSize: convertBytesToHumanReadable(
+                webFrameResourceUsage.xslStyleSheets.liveSize
+            ),
+        },
+        fonts: {
+            count: webFrameResourceUsage.fonts.count,
+            size: convertBytesToHumanReadable(webFrameResourceUsage.fonts.size),
+            liveSize: convertBytesToHumanReadable(
+                webFrameResourceUsage.fonts.liveSize
+            ),
+        },
+        other: {
+            count: webFrameResourceUsage.other.count,
+            size: convertBytesToHumanReadable(webFrameResourceUsage.other.size),
+            liveSize: convertBytesToHumanReadable(
+                webFrameResourceUsage.other.liveSize
+            ),
+        },
     };
 };
 
