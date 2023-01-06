@@ -7,22 +7,16 @@ const SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS = 1 * 1000; // 1 seconds
 
 const HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 1 * 1024 * 1024; // 1 GB
 
-const LOW_MEMORY_FREE_THRESHOLD_IN_KILOBYTES = 1 * 1024 * 1024; // 1 GB
-
 async function logMainProcessStats() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const normalizedProcessMemoryInfo = await getNormalizedProcessMemoryInfo(
         processMemoryInfo
     );
-    const systemMemoryInfo = process.getSystemMemoryInfo();
-    const normalizedSystemMemoryInfo =
-        getNormalizedSystemMemoryInfo(systemMemoryInfo);
     const cpuUsage = process.getCPUUsage();
     const heapStatistics = getNormalizedHeapStatistics();
 
     ElectronLog.log('main process stats', {
         processMemoryInfo: normalizedProcessMemoryInfo,
-        systemMemoryInfo: normalizedSystemMemoryInfo,
         heapStatistics,
         cpuUsage,
     });
@@ -30,22 +24,16 @@ async function logMainProcessStats() {
 
 async function logSpikeMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
-    const systemMemoryInfo = process.getSystemMemoryInfo();
     if (
-        processMemoryInfo.residentSet >
-            HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES ||
-        systemMemoryInfo.free < LOW_MEMORY_FREE_THRESHOLD_IN_KILOBYTES
+        processMemoryInfo.residentSet > HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES
     ) {
         const normalizedProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(processMemoryInfo);
-        const normalizedSystemMemoryInfo =
-            getNormalizedSystemMemoryInfo(systemMemoryInfo);
         const cpuUsage = process.getCPUUsage();
         const heapStatistics = getNormalizedHeapStatistics();
 
         ElectronLog.log('main process stats', {
             processMemoryInfo: normalizedProcessMemoryInfo,
-            systemMemoryInfo: normalizedSystemMemoryInfo,
             heapStatistics,
             cpuUsage,
         });
@@ -81,19 +69,6 @@ const getNormalizedProcessMemoryInfo = async (
         ),
         private: convertBytesToHumanReadable(processMemoryInfo.private * 10124),
         shared: convertBytesToHumanReadable(processMemoryInfo.shared * 1024),
-    };
-};
-
-const getNormalizedSystemMemoryInfo = (
-    systemMemoryInfo: Electron.SystemMemoryInfo
-) => {
-    return {
-        total: convertBytesToHumanReadable(systemMemoryInfo.total * 1024),
-        free: convertBytesToHumanReadable(systemMemoryInfo.free * 1024),
-        swapTotal: convertBytesToHumanReadable(
-            systemMemoryInfo.swapTotal * 1024
-        ),
-        swapFree: convertBytesToHumanReadable(systemMemoryInfo.swapFree * 1024),
     };
 };
 
