@@ -18,7 +18,7 @@ async function logMainProcessStats() {
     const normalizedSystemMemoryInfo =
         getNormalizedSystemMemoryInfo(systemMemoryInfo);
     const cpuUsage = process.getCPUUsage();
-    const heapStatistics = process.getHeapStatistics();
+    const heapStatistics = getNormalizedHeapStatistics();
 
     ElectronLog.log('main process stats', {
         processMemoryInfo: normalizedProcessMemoryInfo,
@@ -41,7 +41,7 @@ async function logSpikeMemoryUsage() {
         const normalizedSystemMemoryInfo =
             getNormalizedSystemMemoryInfo(systemMemoryInfo);
         const cpuUsage = process.getCPUUsage();
-        const heapStatistics = process.getHeapStatistics();
+        const heapStatistics = getNormalizedHeapStatistics();
 
         ElectronLog.log('main process stats', {
             processMemoryInfo: normalizedProcessMemoryInfo,
@@ -104,6 +104,38 @@ const getNormalizedBlinkMemoryInfo = () => {
             blinkMemoryInfo.allocated * 1024
         ),
         total: convertBytesToHumanReadable(blinkMemoryInfo.total),
+    };
+};
+
+const getNormalizedHeapStatistics = () => {
+    const heapStatistics = process.getHeapStatistics();
+    return {
+        totalHeapSize: convertBytesToHumanReadable(
+            heapStatistics.totalHeapSize * 1024
+        ),
+        totalHeapSizeExecutable: convertBytesToHumanReadable(
+            heapStatistics.totalHeapSizeExecutable * 1024
+        ),
+        totalPhysicalSize: convertBytesToHumanReadable(
+            heapStatistics.totalPhysicalSize * 1024
+        ),
+        totalAvailableSize: convertBytesToHumanReadable(
+            heapStatistics.totalAvailableSize * 1024
+        ),
+        usedHeapSize: convertBytesToHumanReadable(
+            heapStatistics.usedHeapSize * 1024
+        ),
+
+        heapSizeLimit: convertBytesToHumanReadable(
+            heapStatistics.heapSizeLimit * 1024
+        ),
+        mallocedMemory: convertBytesToHumanReadable(
+            heapStatistics.mallocedMemory * 1024
+        ),
+        peakMallocedMemory: convertBytesToHumanReadable(
+            heapStatistics.peakMallocedMemory * 1024
+        ),
+        doesZapGarbage: heapStatistics.doesZapGarbage,
     };
 };
 
