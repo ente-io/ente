@@ -39,6 +39,8 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
+  final bool shouldShowSuccessConformation;
+
   ///Setting this flag to false will restrict the loading and success states of
   ///the button from surfacing on the UI. The ExecutionState of the button will
   ///change irrespective of the value of this flag. Only that it won't be
@@ -79,6 +81,7 @@ class ButtonWidget extends StatelessWidget {
     this.iconColor,
     this.shouldSurfaceExecutionStates = true,
     this.progressStatus,
+    this.shouldShowSuccessConformation = false,
     super.key,
   });
 
@@ -145,6 +148,7 @@ class ButtonWidget extends StatelessWidget {
       buttonAction: buttonAction,
       shouldSurfaceExecutionStates: shouldSurfaceExecutionStates,
       progressStatus: progressStatus,
+      shouldShowSuccessConformation: shouldShowSuccessConformation,
     );
   }
 }
@@ -161,6 +165,7 @@ class ButtonChildWidget extends StatefulWidget {
   final bool isInAlert;
   final bool shouldSurfaceExecutionStates;
   final ValueNotifier<String>? progressStatus;
+  final bool shouldShowSuccessConformation;
 
   const ButtonChildWidget({
     required this.buttonStyle,
@@ -169,6 +174,7 @@ class ButtonChildWidget extends StatefulWidget {
     required this.buttonSize,
     required this.isInAlert,
     required this.shouldSurfaceExecutionStates,
+    required this.shouldShowSuccessConformation,
     this.progressStatus,
     this.onTap,
     this.labelText,
@@ -223,6 +229,13 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
 
   @override
   Widget build(BuildContext context) {
+    if (executionState == ExecutionState.successful) {
+      Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
+        setState(() {
+          executionState = ExecutionState.idle;
+        });
+      });
+    }
     return GestureDetector(
       onTap: _shouldRegisterGestures ? _onTap : null,
       onTapDown: _shouldRegisterGestures ? _onTapDown : null,
@@ -389,7 +402,14 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         executionState = ExecutionState.error;
         _debouncer.cancelDebounce();
       });
+      widget.shouldShowSuccessConformation && _debouncer.isActive()
+          ? executionState = ExecutionState.successful
+          : null;
       _debouncer.cancelDebounce();
+      if (executionState == ExecutionState.successful) {
+        setState(() {});
+      }
+
       // when the time taken by widget.onTap is approximately equal to the debounce
       // time, the callback is getting executed when/after the if condition
       // below is executing/executed which results in execution state stuck at
@@ -400,22 +420,24 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     if (executionState == ExecutionState.inProgress ||
         executionState == ExecutionState.error) {
       if (executionState == ExecutionState.inProgress) {
-        setState(() {
-          executionState = ExecutionState.successful;
-          Future.delayed(
-              Duration(seconds: widget.shouldSurfaceExecutionStates ? 2 : 0),
-              () {
-            widget.isInAlert
-                ? Navigator.of(context, rootNavigator: true)
-                    .pop(widget.buttonAction)
-                : null;
-            if (mounted) {
-              setState(() {
-                executionState = ExecutionState.idle;
-              });
-            }
+        if (mounted) {
+          setState(() {
+            executionState = ExecutionState.successful;
+            Future.delayed(
+                Duration(seconds: widget.shouldSurfaceExecutionStates ? 2 : 0),
+                () {
+              widget.isInAlert
+                  ? Navigator.of(context, rootNavigator: true)
+                      .pop(widget.buttonAction)
+                  : null;
+              if (mounted) {
+                setState(() {
+                  executionState = ExecutionState.idle;
+                });
+              }
+            });
           });
-        });
+        }
       }
       if (executionState == ExecutionState.error) {
         setState(() {
@@ -432,7 +454,10 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       }
     } else {
       if (widget.isInAlert) {
-        Navigator.of(context).pop(widget.buttonAction);
+        Future.delayed(
+          Duration(seconds: widget.shouldShowSuccessConformation ? 1 : 0),
+          () => Navigator.of(context).pop(widget.buttonAction),
+        );
       }
     }
   }
