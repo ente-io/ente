@@ -155,10 +155,10 @@ class UpdateService {
       // Fall back if we fail to open play-store market app on android
       if (Platform.isAndroid && url.startsWith("market://")) {
         launchUrlString(
-                "https://play.google.com/store/apps/details?id=io"
-                ".ente.photos",
-                mode: LaunchMode.externalApplication)
-            .ignore();
+          "https://play.google.com/store/apps/details?id=io"
+          ".ente.photos",
+          mode: LaunchMode.externalApplication,
+        ).ignore();
       }
     }
   }

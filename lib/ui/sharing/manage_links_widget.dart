@@ -361,8 +361,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 diameterRatio: 1,
                 children: _expiryOptions
                     .map(
-                      (e) => Text(e.item2,
-                          style: Theme.of(context).textTheme.subtitle1),
+                      (e) => Text(
+                        e.item2,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
                     )
                     .toList(),
               ),
