@@ -9,6 +9,7 @@ import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/ui/account/recovery_page.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/home_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/email_util.dart';
@@ -80,19 +81,16 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           } on KeyDerivationError catch (e, s) {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
-            final dialogUserChoice = await showChoiceDialog(
-              context,
-              "Recreate password",
-              "The current device is not powerful enough to verify your "
+            final dialogChoice = await showNewChoiceDialog(
+              context: context,
+              title: "Recreate password",
+              body: "The current device is not powerful enough to verify your "
                   "password, so we need to regenerate it once in a way that "
                   "works with all devices. \n\nPlease login using your "
                   "recovery key and regenerate your password (you can use the same one again if you wish).",
-              firstAction: "Cancel",
-              firstActionColor: Theme.of(context).colorScheme.primary,
-              secondAction: "Use recovery key",
-              secondActionColor: Theme.of(context).colorScheme.primary,
+              firstButtonLabel: "Use recovery key",
             );
-            if (dialogUserChoice == DialogUserChoice.secondChoice) {
+            if (dialogChoice == ButtonAction.first) {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (BuildContext context) {
