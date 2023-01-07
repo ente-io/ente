@@ -359,8 +359,12 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 useMagnifier: true,
                 itemExtent: 25,
                 diameterRatio: 1,
-                children:
-                    _expiryOptions.map((e) => getOptionText(e.item2)).toList(),
+                children: _expiryOptions
+                    .map(
+                      (e) => Text(e.item2,
+                          style: Theme.of(context).textTheme.subtitle1),
+                    )
+                    .toList(),
               ),
             )
           ],
@@ -374,7 +378,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       context,
       {'validTill': newValidTill},
     );
-    if(mounted) {
+    if (mounted) {
       setState(() {});
     }
   }
