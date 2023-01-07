@@ -34,9 +34,9 @@ Uint8List cryptoPwHash(Map<String, dynamic> args) {
   );
 }
 
-Uint8List cryptoGenericHash(Map<String, dynamic> args) {
+Future<Uint8List> cryptoGenericHash(Map<String, dynamic> args) async {
   final sourceFile = io.File(args["sourceFilePath"]);
-  final sourceFileLength = sourceFile.lengthSync();
+  final sourceFileLength = await sourceFile.length();
   final inputFile = sourceFile.openSync(mode: io.FileMode.read);
   final state =
       Sodium.cryptoGenerichashInit(null, Sodium.cryptoGenerichashBytesMax);
@@ -48,11 +48,11 @@ Uint8List cryptoGenericHash(Map<String, dynamic> args) {
       chunkSize = sourceFileLength - bytesRead;
       isDone = true;
     }
-    final buffer = inputFile.readSync(chunkSize);
+    final buffer = await inputFile.read(chunkSize);
     bytesRead += chunkSize;
     Sodium.cryptoGenerichashUpdate(state, buffer);
   }
-  inputFile.closeSync();
+  await inputFile.close();
   return Sodium.cryptoGenerichashFinal(state, Sodium.cryptoGenerichashBytesMax);
 }
 
@@ -91,7 +91,7 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
       chunkSize = sourceFileLength - bytesRead;
       tag = Sodium.cryptoSecretstreamXchacha20poly1305TagFinal;
     }
-    final buffer = inputFile.readSync(chunkSize);
+    final buffer = await inputFile.read(chunkSize);
     bytesRead += chunkSize;
     final encryptedData = Sodium.cryptoSecretstreamXchacha20poly1305Push(
       initPushResult.state,
@@ -101,7 +101,7 @@ Future<EncryptionResult> chachaEncryptFile(Map<String, dynamic> args) async {
     );
     await destinationFile.writeAsBytes(encryptedData, mode: io.FileMode.append);
   }
-  inputFile.closeSync();
+  await inputFile.close();
 
   logger.info(
     "Encryption time: " +
@@ -133,7 +133,7 @@ Future<void> chachaDecryptFile(Map<String, dynamic> args) async {
     if (bytesRead + chunkSize >= sourceFileLength) {
       chunkSize = sourceFileLength - bytesRead;
     }
-    final buffer = inputFile.readSync(chunkSize);
+    final buffer = await inputFile.read(chunkSize);
     bytesRead += chunkSize;
     final pullResult =
         Sodium.cryptoSecretstreamXchacha20poly1305Pull(pullState, buffer, null);
