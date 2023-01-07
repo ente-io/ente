@@ -12,8 +12,8 @@ import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/ui/account/recovery_key_page.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -74,14 +74,15 @@ class _VerifyRecoveryPageState extends State<VerifyRecoveryPage> {
           "The recovery key you entered is not valid. Please make sure it "
           "contains 24 words, and check the spelling of each.\n\nIf you "
           "entered an older recovery code, make sure it is 64 characters long, and check each of them.";
-      final result = await showChoiceDialog(
-        context,
-        "Invalid key",
-        errMessage,
-        firstAction: "Try again",
-        secondAction: "View recovery key",
+      final result = await showNewChoiceDialog(
+        context: context,
+        title: "Invalid key",
+        body: errMessage,
+        firstButtonLabel: "Try again",
+        secondButtonLabel: "View recovery key",
+        secondButtonAction: ButtonAction.second,
       );
-      if (result == DialogUserChoice.secondChoice) {
+      if (result == ButtonAction.second) {
         await _onViewRecoveryKeyClick();
       }
     }
