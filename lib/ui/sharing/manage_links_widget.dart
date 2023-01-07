@@ -265,10 +265,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<void> showPicker() async {
-    Widget getOptionText(String text) {
-      return Text(text, style: Theme.of(context).textTheme.subtitle1);
-    }
-
     return showCupertinoModalPopup(
       context: context,
       builder: (context) {
