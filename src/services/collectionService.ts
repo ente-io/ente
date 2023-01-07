@@ -29,6 +29,7 @@ import {
     CollectionFilesCount,
     EncryptedCollection,
     CollectionMagicMetadata,
+    CollectionMagicMetadataProps,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -39,11 +40,18 @@ import {
     ALL_SECTION,
     CollectionSummaryType,
 } from 'constants/collection';
-import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
+import {
+    NEW_COLLECTION_MAGIC_METADATA,
+    SUB_TYPE,
+    UpdateMagicMetadataRequest,
+} from 'types/magicMetadata';
 import constants from 'utils/strings/constants';
-import { IsArchived } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { User } from 'types/user';
-import { getNonHiddenCollections } from 'utils/collection';
+import {
+    getNonHiddenCollections,
+    isQuickLinkCollection,
+} from 'utils/collection';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -549,6 +557,10 @@ export const renameCollection = async (
     collection: Collection,
     newCollectionName: string
 ) => {
+    if (isQuickLinkCollection(collection)) {
+        // Convert quick link collction to normal collection on rename
+        await updateCollectionSubType(collection, SUB_TYPE.DEFAULT);
+    }
     const token = getToken();
     const worker = await new CryptoWorker();
     const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
@@ -567,6 +579,25 @@ export const renameCollection = async (
         }
     );
 };
+
+const updateCollectionSubType = async (
+    collection: Collection,
+    subType: SUB_TYPE
+) => {
+    const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+        subType: subType,
+    };
+    const updatedCollection = {
+        ...collection,
+        magicMetadata: await updateMagicMetadataProps(
+            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedMagicMetadataProps
+        ),
+    } as Collection;
+    await updateCollectionMagicMetadata(updatedCollection);
+};
+
 export const shareCollection = async (
     collection: Collection,
     withUserEmail: string
