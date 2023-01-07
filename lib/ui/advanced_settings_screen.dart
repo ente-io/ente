@@ -54,7 +54,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
           ),
           SliverList(
             delegate: SliverChildBuilderDelegate(
-              (context, index) {
+              (delegateBuildContext, index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Padding(
@@ -66,7 +66,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                _showPhotoGridSizePicker();
+                                _showPhotoGridSizePicker(delegateBuildContext);
                               },
                               child: MenuItemWidget(
                                 captionedTextWidget: CaptionedTextWidget(
@@ -117,8 +117,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
     );
   }
 
-  Future<void> _showPhotoGridSizePicker() async {
-    final textTheme = getEnteTextTheme(context);
+  Future<void> _showPhotoGridSizePicker(BuildContext buildContext) async {
+    final textTheme = getEnteTextTheme(buildContext);
     final List<Text> options = [];
     for (int gridSize = photoGridSizeMin;
         gridSize <= photoGridSizeMax;
@@ -138,7 +138,7 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
           children: <Widget>[
             Container(
               decoration: BoxDecoration(
-                color: getEnteColorScheme(context).backgroundElevated2,
+                color: getEnteColorScheme(buildContext).backgroundElevated2,
                 border: const Border(
                   bottom: BorderSide(
                     color: Color(0xff999999),
@@ -189,7 +189,8 @@ class _AdvancedSettingsScreenState extends State<AdvancedSettingsScreen> {
               height: 220.0,
               color: const Color(0xfff7f7f7),
               child: CupertinoPicker(
-                backgroundColor: getEnteColorScheme(context).backgroundElevated,
+                backgroundColor:
+                    getEnteColorScheme(buildContext).backgroundElevated,
                 onSelectedItemChanged: (index) {
                   _chosenGridSize = _getPhotoGridSizeFromIndex(index);
                   setState(() {});
