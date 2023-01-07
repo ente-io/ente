@@ -81,7 +81,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
             final dialogChoice = await showNewChoiceDialog(
-              context: context,
+              context,
               title: "Recreate password",
               body: "The current device is not powerful enough to verify your "
                   "password, so we need to regenerate it once in a way that "
@@ -103,7 +103,7 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
             final dialogChoice = await showNewChoiceDialog(
-              context: context,
+              context,
               title: "Incorrect password",
               body: "Please try again",
               firstButtonLabel: "Contact Support",

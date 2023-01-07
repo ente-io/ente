@@ -254,8 +254,8 @@ Future<String> _clientInfo() async {
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
   showNewChoiceDialog(
+    context,
     icon: Icons.email_outlined,
-    context: context,
     title: 'Please email us at $toEmail',
     firstButtonLabel: "Copy email address",
     secondButtonLabel: "Dismiss",
