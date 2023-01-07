@@ -238,3 +238,6 @@ export const getNonHiddenCollections = (collections: Collection[]) => {
 export const isCollectionHidden = (collection: Collection) =>
     collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
     collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
+
+export const isQuickLinkCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;

@@ -38,7 +38,9 @@ export enum VISIBILITY_STATE {
 }
 
 export enum SUB_TYPE {
+    DEFAULT = 0,
     DEFAULT_HIDDEN = 1,
+    QUICK_LINK_COLLECTION = 2,
 }
 
 export const NEW_FILE_MAGIC_METADATA: MagicMetadataCore = {
