@@ -6,7 +6,6 @@ import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/notification/update/change_log_entry.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class ChangeLogPage extends StatefulWidget {
   const ChangeLogPage({
@@ -85,9 +84,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
                       icon: Icons.favorite_rounded,
                       iconColor: enteColorScheme.primary500,
                       onTap: () async {
-                        launchUrlString(
-                          UpdateService.instance.getRateDetails().item2,
-                        );
+                        await UpdateService.instance.launchReviewUrl();
                       },
                     ),
                     const SizedBox(height: 8),
