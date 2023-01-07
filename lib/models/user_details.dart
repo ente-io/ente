@@ -103,7 +103,6 @@ class FamilyMember {
     );
   }
 
-
   Map<String, dynamic> toMap() {
     return {
       'email': email,
@@ -115,7 +114,8 @@ class FamilyMember {
 
   String toJson() => json.encode(toMap());
 
-  factory FamilyMember.fromJson(String source) => FamilyMember.fromMap(json.decode(source));
+  factory FamilyMember.fromJson(String source) =>
+      FamilyMember.fromMap(json.decode(source));
 }
 
 class FamilyData {
@@ -158,7 +158,8 @@ class FamilyData {
 
   String toJson() => json.encode(toMap());
 
-  factory FamilyData.fromJson(String source) => FamilyData.fromMap(json.decode(source));
+  factory FamilyData.fromJson(String source) =>
+      FamilyData.fromMap(json.decode(source));
 }
 
 class FilesCount {

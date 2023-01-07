@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 // import 'package:open_file/open_file.dart';

@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:photos/utils/data_util.dart';
 

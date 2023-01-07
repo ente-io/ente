@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:photos/services/local_authentication_service.dart';
 import 'package:photos/ui/viewer/gallery/hidden_page.dart';

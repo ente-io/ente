@@ -1,5 +1,3 @@
-
-
 import 'package:exif/exif.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';

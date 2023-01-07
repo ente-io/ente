@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:io';
 
@@ -145,7 +143,10 @@ class _LoadingPhotosWidgetState extends State<LoadingPhotosWidget> {
                       children: [
                         Text(
                           "Did you know?",
-                          style: Theme.of(context).textTheme.headline6!.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline6!
+                              .copyWith(
                                 color: Theme.of(context).colorScheme.greenText,
                               ),
                         ),
