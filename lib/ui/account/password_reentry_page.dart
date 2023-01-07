@@ -7,7 +7,6 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/ui/account/recovery_page.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/dynamic_fab.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/home_widget.dart';
@@ -103,17 +102,14 @@ class _PasswordReentryPageState extends State<PasswordReentryPage> {
           } catch (e, s) {
             _logger.severe("Password verification failed", e, s);
             await dialog.hide();
-
-            final dialogUserChoice = await showChoiceDialog(
-              context,
-              "Incorrect password",
-              "Please try again",
-              firstAction: "Contact Support",
-              firstActionColor: Theme.of(context).colorScheme.primary,
-              secondAction: "Ok",
-              secondActionColor: Theme.of(context).colorScheme.primary,
+            final dialogChoice = await showNewChoiceDialog(
+              context: context,
+              title: "Incorrect password",
+              body: "Please try again",
+              firstButtonLabel: "Contact Support",
+              secondButtonLabel: "OK",
             );
-            if (dialogUserChoice == DialogUserChoice.firstChoice) {
+            if (dialogChoice == ButtonAction.first) {
               await sendLogs(
                 context,
                 "Contact support",
