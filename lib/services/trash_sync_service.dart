@@ -5,7 +5,6 @@ import 'package:logging/logging.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/core/network.dart';
-import 'package:photos/db/files_db.dart';
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/force_reload_trash_page_event.dart';
@@ -41,18 +40,9 @@ class TrashSyncService {
     bool isLocalTrashUpdated = false;
     _logger.fine('sync trash sinceTime : $lastSyncTime');
     final diff = await _diffFetcher.getTrashFilesDiff(lastSyncTime);
-    Set<String>? localFileIDs;
     if (diff.trashedFiles.isNotEmpty) {
       isLocalTrashUpdated = true;
-      localFileIDs ??= await FilesDB.instance.getExistingLocalFileIDs();
       _logger.fine("inserting ${diff.trashedFiles.length} items in trash");
-      // During sync, if trash file local ID is not present in currently
-      // imported files, treat the file as deleted from device
-      for (var trash in diff.trashedFiles) {
-        if (trash.localID != null && !localFileIDs.contains(trash.localID)) {
-          trash.localID = null;
-        }
-      }
       await _trashDB.insertMultiple(diff.trashedFiles);
     }
     if (diff.deletedUploadIDs.isNotEmpty) {

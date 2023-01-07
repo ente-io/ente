@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
+import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/device_files_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/device_collection.dart';
+import 'package:photos/models/file.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/captioned_text_widget.dart';
+import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_section_description_widget.dart';
+import 'package:photos/ui/components/toggle_switch_widget.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
@@ -41,7 +49,7 @@ class DeviceFolderPage extends StatelessWidget {
       tagPrefix: "device_folder:" + deviceCollection.name,
       selectedFiles: _selectedFiles,
       header: Configuration.instance.hasConfiguredAccount()
-          ? BackupConfigurationHeaderWidget(deviceCollection)
+          ? BackupHeaderWidget(deviceCollection)
           : const SizedBox.shrink(),
       initialFiles: [deviceCollection.thumbnail!],
     );
@@ -69,59 +77,179 @@ class DeviceFolderPage extends StatelessWidget {
   }
 }
 
-class BackupConfigurationHeaderWidget extends StatefulWidget {
+class BackupHeaderWidget extends StatefulWidget {
   final DeviceCollection deviceCollection;
 
-  const BackupConfigurationHeaderWidget(this.deviceCollection, {Key? key})
-      : super(key: key);
+  const BackupHeaderWidget(this.deviceCollection, {super.key});
 
   @override
-  State<BackupConfigurationHeaderWidget> createState() =>
-      _BackupConfigurationHeaderWidgetState();
+  State<BackupHeaderWidget> createState() => _BackupHeaderWidgetState();
 }
 
-class _BackupConfigurationHeaderWidgetState
-    extends State<BackupConfigurationHeaderWidget> {
-  late bool _isBackedUp;
-
+class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
+  late Future<List<File>> filesInDeviceCollection;
+  late ValueNotifier<bool> shouldBackup;
   @override
   void initState() {
-    _isBackedUp = widget.deviceCollection.shouldBackup;
+    shouldBackup = ValueNotifier(widget.deviceCollection.shouldBackup);
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 12, top: 4, bottom: 4),
-      margin: const EdgeInsets.only(bottom: 12),
-      color: Theme.of(context).colorScheme.backupEnabledBgColor,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    filesInDeviceCollection = _filesInDeviceCollection();
+
+    final colorScheme = getEnteColorScheme(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          _isBackedUp
-              ? const Text("Backup enabled")
-              : Text(
-                  "Backup disabled",
-                  style: TextStyle(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .defaultTextColor
-                        .withOpacity(0.7),
-                  ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              MenuItemWidget(
+                captionedTextWidget: const CaptionedTextWidget(title: "Backup"),
+                borderRadius: 8.0,
+                menuItemColor: colorScheme.fillFaint,
+                alignCaptionedTextToLeft: true,
+                trailingWidget: ToggleSwitchWidget(
+                  value: () => shouldBackup.value,
+                  onChanged: () async {
+                    await RemoteSyncService.instance
+                        .updateDeviceFolderSyncStatus(
+                      {widget.deviceCollection.id: !shouldBackup.value},
+                    ).then(
+                      (val) {
+                        setState(() {
+                          shouldBackup.value = !shouldBackup.value;
+                        });
+                      },
+                      onError: (e) {
+                        Logger("BackupHeaderWidget").severe(
+                          "Could not update device folder sync status",
+                        );
+                      },
+                    );
+                  },
                 ),
-          Switch.adaptive(
-            value: _isBackedUp,
-            onChanged: (value) async {
-              await RemoteSyncService.instance.updateDeviceFolderSyncStatus(
-                {widget.deviceCollection.id: value},
-              );
-              _isBackedUp = value;
-              setState(() {});
-            },
+              ),
+              ValueListenableBuilder(
+                valueListenable: shouldBackup,
+                builder: (BuildContext context, bool value, _) {
+                  return MenuSectionDescriptionWidget(
+                    content: value
+                        ? "Files added to this device album will automatically get uploaded to ente."
+                        : "Turn on backup to automatically upload files added to this device folder to ente.",
+                  );
+                },
+              ),
+              FutureBuilder(
+                future: _hasIgnoredFiles(filesInDeviceCollection),
+                builder: (context, snapshot) {
+                  bool shouldShowReset = false;
+                  if (snapshot.hasData &&
+                      snapshot.data as bool &&
+                      shouldBackup.value) {
+                    shouldShowReset = true;
+                  } else if (snapshot.hasError) {
+                    Logger("BackupHeaderWidget").severe(
+                      "Could not check if collection has ignored files",
+                    );
+                  }
+                  return AnimatedCrossFade(
+                    firstCurve: Curves.easeInOutExpo,
+                    secondCurve: Curves.easeInOutExpo,
+                    sizeCurve: Curves.easeInOutExpo,
+                    firstChild: ResetIgnoredFilesWidget(
+                      filesInDeviceCollection,
+                      () => setState(() {}),
+                    ),
+                    secondChild: const SizedBox(width: double.infinity),
+                    crossFadeState: shouldShowReset
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    duration: const Duration(milliseconds: 1000),
+                  );
+                },
+              )
+            ],
           ),
         ],
       ),
     );
+  }
+
+  Future<List<File>> _filesInDeviceCollection() async {
+    return (await FilesDB.instance.getFilesInDeviceCollection(
+      widget.deviceCollection,
+      galleryLoadStartTime,
+      galleryLoadEndTime,
+    ))
+        .files;
+  }
+
+  Future<bool> _hasIgnoredFiles(
+      Future<List<File>> filesInDeviceCollection) async {
+    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
+
+    final localIDsOfFiles = <String>{};
+    for (File file in deviceCollectionFiles) {
+      localIDsOfFiles.add(file.localID!);
+    }
+    final ignoredFiles = await IgnoredFilesService.instance.ignoredIDs;
+    return ignoredFiles.intersection(localIDsOfFiles).isNotEmpty;
+  }
+}
+
+class ResetIgnoredFilesWidget extends StatefulWidget {
+  final Future<List<File>> filesInDeviceCollection;
+  final VoidCallback parentSetState;
+  const ResetIgnoredFilesWidget(
+      this.filesInDeviceCollection, this.parentSetState,
+      {super.key});
+
+  @override
+  State<ResetIgnoredFilesWidget> createState() =>
+      _ResetIgnoredFilesWidgetState();
+}
+
+class _ResetIgnoredFilesWidgetState extends State<ResetIgnoredFilesWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const SizedBox(height: 24),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Reset ignored files",
+          ),
+          borderRadius: 8.0,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          leadingIcon: Icons.cloud_off_outlined,
+          onTap: () async {
+            await _removeFilesFromIgnoredFiles(
+              widget.filesInDeviceCollection,
+            );
+            RemoteSyncService.instance.sync(silently: true).then((value) {
+              widget.parentSetState.call();
+            });
+          },
+        ),
+        const MenuSectionDescriptionWidget(
+          content:
+              "Some files in this album are ignored from upload because they had previously been deleted from ente.",
+        ),
+      ],
+    );
+  }
+
+  Future<void> _removeFilesFromIgnoredFiles(
+    Future<List<File>> filesInDeviceCollection,
+  ) async {
+    final List<File> deviceCollectionFiles = await filesInDeviceCollection;
+    await IgnoredFilesService.instance
+        .removeIgnoredMappings(deviceCollectionFiles);
   }
 }
