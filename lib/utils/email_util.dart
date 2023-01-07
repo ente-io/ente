@@ -12,7 +12,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -104,6 +103,7 @@ Future<void> _sendLogs(
     await FlutterEmailSender.send(email);
   } catch (e, s) {
     _logger.severe('email sender failed', e, s);
+    Navigator.of(context, rootNavigator: true).pop();
     await shareLogs(context, toEmail, zipFilePath);
   }
 }
@@ -129,21 +129,42 @@ Future<void> shareLogs(
   String toEmail,
   String zipFilePath,
 ) async {
-  final result = await showChoiceDialog(
-    context,
-    "Email logs",
-    "Please send the logs to $toEmail",
-    firstAction: "Copy email",
-    secondAction: "Export logs",
+  final result = await showDialogWidget(
+    context: context,
+    title: "Email your logs",
+    body: "Please send the logs to \n$toEmail",
+    buttons: [
+      ButtonWidget(
+        buttonType: ButtonType.neutral,
+        labelText: "Copy email address",
+        isInAlert: true,
+        buttonAction: ButtonAction.first,
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: toEmail));
+        },
+        shouldShowSuccessConformation: true,
+      ),
+      const ButtonWidget(
+        buttonType: ButtonType.neutral,
+        labelText: "Export logs",
+        isInAlert: true,
+        buttonAction: ButtonAction.second,
+      ),
+      const ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "Cancel",
+        isInAlert: true,
+        buttonAction: ButtonAction.cancel,
+      ),
+    ],
   );
-  if (result != null && result == DialogUserChoice.firstChoice) {
-    await Clipboard.setData(ClipboardData(text: toEmail));
+  if (result != null && result == ButtonAction.second) {
+    final Size size = MediaQuery.of(context).size;
+    await Share.shareFiles(
+      [zipFilePath],
+      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+    );
   }
-  final Size size = MediaQuery.of(context).size;
-  await Share.shareFiles(
-    [zipFilePath],
-    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
-  );
 }
 
 Future<void> sendEmail(

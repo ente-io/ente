@@ -39,6 +39,9 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
+  ///Setting this flag to true will show a success conformation as a 'check'
+  ///icon once the onTap(). This is expected to be used only if time taken to
+  ///execute onTap() takes less than debouce time.
   final bool shouldShowSuccessConformation;
 
   ///Setting this flag to false will restrict the loading and success states of
