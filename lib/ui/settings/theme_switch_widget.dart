@@ -73,6 +73,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       pressedColor: getEnteColorScheme(context).fillFaint,
       isExpandable: false,
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
+      trailingExtraMargin: 4,
       onTap: () async {
         AdaptiveTheme.of(context).setThemeMode(themeMode);
         currentThemeMode = themeMode;
