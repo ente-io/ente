@@ -79,12 +79,7 @@ class _AppState extends State<App> {
           darkTheme: dartTheme,
           debugShowCheckedModeBanner: false,
           supportedLocales: AppLocalizations.supportedLocales,
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-          ],
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
           routes: _getRoutes,
         ),
       );
