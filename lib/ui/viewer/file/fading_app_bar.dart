@@ -353,7 +353,6 @@ class FadingAppBarState extends State<FadingAppBar> {
         file.uploadedFileID == null && file.localID != null;
     final bool isRemoteOnly =
         file.uploadedFileID != null && file.localID == null;
-    final String title = "Delete $fileType${isBothLocalAndRemote ? '' : '?'}";
     const String bodyHighlight = "It will be deleted from all albums.";
     String body = "";
     if (isBothLocalAndRemote) {
@@ -442,7 +441,6 @@ class FadingAppBarState extends State<FadingAppBar> {
       context: context,
       buttons: buttons,
       actionSheetType: ActionSheetType.defaultActionSheet,
-      title: title,
       body: body,
       bodyHighlight: bodyHighlight,
     );
