@@ -12,8 +12,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
-import 'package:photos/ente_theme_data.dart';
-import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/tools/debug/log_file_viewer.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/toast_util.dart';
@@ -37,89 +38,50 @@ Future<void> sendLogs(
   String? subject,
   String? body,
 }) async {
-  final List<Widget> actions = [
-    TextButton(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Icon(
-            Icons.feed_outlined,
-            color: Theme.of(context).iconTheme.color!.withOpacity(0.85),
-          ),
-          const Padding(padding: EdgeInsets.all(4)),
-          Text(
-            "View logs",
-            style: TextStyle(
-              color: Theme.of(context)
-                  .colorScheme
-                  .defaultTextColor
-                  .withOpacity(0.85),
-            ),
-          ),
-        ],
-      ),
-      onPressed: () async {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return LogFileViewer(SuperLogging.logFile!);
-          },
-          barrierColor: Colors.black87,
-          barrierDismissible: false,
-        );
-      },
-    ),
-    TextButton(
-      child: Text(
-        title,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.greenAlternative,
-        ),
-      ),
-      onPressed: () async {
-        Navigator.of(context, rootNavigator: true).pop('dialog');
-        await _sendLogs(context, toEmail, subject, body);
-        if (postShare != null) {
-          postShare();
-        }
-      },
-    ),
-  ];
-  final List<Widget> content = [];
-  content.addAll(
-    [
-      const Text(
+  showDialogWidget(
+    context: context,
+    title: "Report a bug",
+    icon: Icons.bug_report_outlined,
+    body:
         "This will send across logs to help us debug your issue. Please note that file names will be included to help track issues with specific files.",
-        style: TextStyle(
-          height: 1.5,
-          fontSize: 16,
-        ),
+    buttons: [
+      ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.neutral,
+        labelText: "Report a bug",
+        buttonAction: ButtonAction.first,
+        shouldSurfaceExecutionStates: false,
+        onTap: () async {
+          await _sendLogs(context, toEmail, subject, body);
+          if (postShare != null) {
+            postShare();
+          }
+        },
       ),
-      const Padding(padding: EdgeInsets.all(12)),
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: actions,
+      //isInAlert is false here as we don't want to the dialog to dismiss
+      //on pressing this button
+      ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "View logs",
+        buttonAction: ButtonAction.second,
+        onTap: () async {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return LogFileViewer(SuperLogging.logFile!);
+            },
+            barrierColor: Colors.black87,
+            barrierDismissible: false,
+          );
+        },
+      ),
+      const ButtonWidget(
+        isInAlert: true,
+        buttonType: ButtonType.secondary,
+        labelText: "Cancel",
+        buttonAction: ButtonAction.cancel,
       ),
     ],
-  );
-  final confirmation = AlertDialog(
-    title: Text(
-      title,
-      style: const TextStyle(
-        fontSize: 18,
-      ),
-    ),
-    content: SingleChildScrollView(
-      child: ListBody(
-        children: content,
-      ),
-    ),
-  );
-  showDialog(
-    context: context,
-    builder: (_) {
-      return confirmation;
-    },
   );
 }
 
@@ -141,6 +103,7 @@ Future<void> _sendLogs(
     await FlutterEmailSender.send(email);
   } catch (e, s) {
     _logger.severe('email sender failed', e, s);
+    Navigator.of(context, rootNavigator: true).pop();
     await shareLogs(context, toEmail, zipFilePath);
   }
 }
@@ -166,21 +129,42 @@ Future<void> shareLogs(
   String toEmail,
   String zipFilePath,
 ) async {
-  final result = await showChoiceDialog(
-    context,
-    "Email logs",
-    "Please send the logs to $toEmail",
-    firstAction: "Copy email",
-    secondAction: "Export logs",
+  final result = await showDialogWidget(
+    context: context,
+    title: "Email your logs",
+    body: "Please send the logs to \n$toEmail",
+    buttons: [
+      ButtonWidget(
+        buttonType: ButtonType.neutral,
+        labelText: "Copy email address",
+        isInAlert: true,
+        buttonAction: ButtonAction.first,
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: toEmail));
+        },
+        shouldShowSuccessConformation: true,
+      ),
+      const ButtonWidget(
+        buttonType: ButtonType.neutral,
+        labelText: "Export logs",
+        isInAlert: true,
+        buttonAction: ButtonAction.second,
+      ),
+      const ButtonWidget(
+        buttonType: ButtonType.secondary,
+        labelText: "Cancel",
+        isInAlert: true,
+        buttonAction: ButtonAction.cancel,
+      ),
+    ],
   );
-  if (result != null && result == DialogUserChoice.firstChoice) {
-    await Clipboard.setData(ClipboardData(text: toEmail));
+  if (result != null && result == ButtonAction.second) {
+    final Size size = MediaQuery.of(context).size;
+    await Share.shareFiles(
+      [zipFilePath],
+      sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+    );
   }
-  final Size size = MediaQuery.of(context).size;
-  await Share.shareFiles(
-    [zipFilePath],
-    sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
-  );
 }
 
 Future<void> sendEmail(
@@ -270,8 +254,8 @@ Future<String> _clientInfo() async {
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
   showNewChoiceDialog(
+    context,
     icon: Icons.email_outlined,
-    context: context,
     title: 'Please email us at $toEmail',
     firstButtonLabel: "Copy email address",
     secondButtonLabel: "Dismiss",
