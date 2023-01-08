@@ -12,6 +12,9 @@ class MenuItemWidget extends StatefulWidget {
   final IconData? trailingIcon;
   final Widget? trailingSwitch;
   final bool trailingIconIsMuted;
+
+  /// If provided, add this much extra spacing to the right of the trailing icon.
+  final double trailingExtraMargin;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final Color? menuItemColor;
@@ -27,6 +30,7 @@ class MenuItemWidget extends StatefulWidget {
     this.trailingIcon,
     this.trailingSwitch,
     this.trailingIconIsMuted = false,
+    this.trailingExtraMargin = 0.0,
     this.onTap,
     this.onDoubleTap,
     this.menuItemColor,
@@ -141,11 +145,15 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                   ),
                 )
               : widget.trailingIcon != null
-                  ? Icon(
-                      widget.trailingIcon,
-                      color: widget.trailingIconIsMuted
-                          ? enteColorScheme.strokeMuted
-                          : null,
+                  ? Padding(
+                      padding:
+                          EdgeInsets.only(right: widget.trailingExtraMargin),
+                      child: Icon(
+                        widget.trailingIcon,
+                        color: widget.trailingIconIsMuted
+                            ? enteColorScheme.strokeMuted
+                            : null,
+                      ),
                     )
                   : widget.trailingSwitch ?? const SizedBox.shrink(),
         ],
