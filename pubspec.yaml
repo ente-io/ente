@@ -63,7 +63,6 @@ dependencies:
   flutter_secure_storage: ^4.2.0
   flutter_sodium: ^0.2.0
   flutter_typeahead: ^4.0.0
-  flutter_windowmanager: ^0.2.0
   fluttertoast: ^8.0.6
   google_nav_bar: ^5.0.5
   http: ^0.13.4

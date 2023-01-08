@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -114,24 +112,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
       ),
       sectionOptionSpacing,
-    ]);
-    if (Platform.isAndroid) {
-      children.addAll(
-        [
-          MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Hide from recents",
-            ),
-            trailingWidget: ToggleSwitchWidget(
-              value: () => _config.shouldHideFromRecents(),
-              onChanged: _hideFromRecentsOnChanged,
-            ),
-          ),
-          sectionOptionSpacing,
-        ],
-      );
-    }
-    children.addAll([
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           title: "View active sessions",
@@ -204,75 +184,5 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         return alert;
       },
     );
-  }
-
-  Future<void> _hideFromRecentsOnChanged() async {
-    if (!_config.shouldHideFromRecents()) {
-      final AlertDialog alert = AlertDialog(
-        title: const Text("Hide from recents?"),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Text(
-                "Hiding from the task switcher will prevent you from taking screenshots in this app.",
-                style: TextStyle(
-                  height: 1.5,
-                ),
-              ),
-              Padding(padding: EdgeInsets.all(8)),
-              Text(
-                "Are you sure?",
-                style: TextStyle(
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              "No",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.defaultTextColor,
-              ),
-            ),
-            onPressed: () {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-            },
-          ),
-          TextButton(
-            child: Text(
-              "Yes",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.defaultTextColor,
-              ),
-            ),
-            onPressed: () async {
-              Navigator.of(context, rootNavigator: true).pop('dialog');
-              await _config.setShouldHideFromRecents(true);
-              await FlutterWindowManager.addFlags(
-                FlutterWindowManager.FLAG_SECURE,
-              );
-              setState(() {});
-            },
-          ),
-        ],
-      );
-
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return alert;
-        },
-      );
-    } else {
-      await _config.setShouldHideFromRecents(false);
-      await FlutterWindowManager.clearFlags(
-        FlutterWindowManager.FLAG_SECURE,
-      );
-    }
   }
 }
