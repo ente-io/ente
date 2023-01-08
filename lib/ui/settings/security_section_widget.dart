@@ -1,9 +1,6 @@
 // @dart=2.9
 
-import 'dart:io';
-
 import 'package:ente_auth/core/configuration.dart';
-import 'package:ente_auth/ente_theme_data.dart';
 import 'package:ente_auth/l10n/l10n.dart';
 import 'package:ente_auth/services/local_authentication_service.dart';
 import 'package:ente_auth/theme/ente_theme.dart';
@@ -14,7 +11,6 @@ import 'package:ente_auth/ui/components/menu_item_widget.dart';
 import 'package:ente_auth/ui/components/toggle_switch_widget.dart';
 import 'package:ente_auth/ui/settings/common_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_windowmanager/flutter_windowmanager.dart';
 
 class SecuritySectionWidget extends StatefulWidget {
   const SecuritySectionWidget({Key key}) : super(key: key);
@@ -70,97 +66,6 @@ class _SecuritySectionWidgetState extends State<SecuritySectionWidget> {
         ),
       ),
       sectionOptionSpacing,
-    ]);
-    if (Platform.isAndroid) {
-      children.addAll(
-        [
-          MenuItemWidget(
-            captionedTextWidget: const CaptionedTextWidget(
-              title: "Hide from recents",
-            ),
-            trailingSwitch: ToggleSwitchWidget(
-              value: _config.shouldHideFromRecents(),
-              onChanged: (value) async {
-                if (value) {
-                  final AlertDialog alert = AlertDialog(
-                    title: const Text("Hide from recents?"),
-                    content: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "Hiding from the task switcher may prevent you from taking screenshots in this app.",
-                            style: TextStyle(
-                              height: 1.5,
-                            ),
-                          ),
-                          Padding(padding: EdgeInsets.all(8)),
-                          Text(
-                            "Are you sure?",
-                            style: TextStyle(
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        child: Text(
-                          l10n.no,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.defaultTextColor,
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.of(context, rootNavigator: true)
-                              .pop('dialog');
-                        },
-                      ),
-                      TextButton(
-                        child: Text(
-                          l10n.yes,
-                          style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.defaultTextColor,
-                          ),
-                        ),
-                        onPressed: () async {
-                          Navigator.of(context, rootNavigator: true)
-                              .pop('dialog');
-                          await _config.setShouldHideFromRecents(true);
-                          await FlutterWindowManager.addFlags(
-                            FlutterWindowManager.FLAG_SECURE,
-                          );
-                          setState(() {});
-                        },
-                      ),
-                    ],
-                  );
-
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return alert;
-                    },
-                  );
-                } else {
-                  await _config.setShouldHideFromRecents(false);
-                  await FlutterWindowManager.clearFlags(
-                    FlutterWindowManager.FLAG_SECURE,
-                  );
-                  setState(() {});
-                }
-              },
-            ),
-          ),
-          sectionOptionSpacing,
-        ],
-      );
-    }
-    children.addAll([
       MenuItemWidget(
         captionedTextWidget: const CaptionedTextWidget(
           title: "Active sessions",

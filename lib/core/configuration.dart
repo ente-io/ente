@@ -31,7 +31,6 @@ class Configuration {
   static const emailKey = "email";
   static const keyAttributesKey = "key_attributes";
   static const keyKey = "key";
-  static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const lastTempFolderClearTimeKey = "last_temp_folder_clear_time";
   static const secretKeyKey = "secret_key";
@@ -451,14 +450,6 @@ class Configuration {
 
   Future<void> setShouldShowLockScreen(bool value) {
     return _preferences.setBool(keyShouldShowLockScreen, value);
-  }
-
-  bool shouldHideFromRecents() {
-    return _preferences.getBool(keyShouldHideFromRecents) ?? false;
-  }
-
-  Future<void> setShouldHideFromRecents(bool value) {
-    return _preferences.setBool(keyShouldHideFromRecents, value);
   }
 
   void setVolatilePassword(String volatilePassword) {
