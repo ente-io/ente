@@ -509,8 +509,6 @@ Future<void> showDeleteSheet(
   final bool isBothLocalAndRemote = containsUploadedFile && containsLocalFile;
   final bool isLocalOnly = !containsUploadedFile;
   final bool isRemoteOnly = !containsLocalFile;
-  final String title = "Delete item${count > 1 ? 's' : ''}"
-      "${isBothLocalAndRemote ? '' : '?'}";
   final String? bodyHighlight =
       isBothLocalAndRemote ? "They will be deleted from all albums." : null;
   String body = "";
@@ -597,7 +595,6 @@ Future<void> showDeleteSheet(
     context: context,
     buttons: buttons,
     actionSheetType: ActionSheetType.defaultActionSheet,
-    title: title,
     body: body,
     bodyHighlight: bodyHighlight,
   );
