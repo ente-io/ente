@@ -64,7 +64,6 @@ class Configuration {
   // keyShouldKeepDeviceAwake is used to determine whether the device screen
   // should be kept on while the app is in foreground.
   static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
-  static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
@@ -604,14 +603,6 @@ class Configuration {
 
   Future<void> setShouldShowLockScreen(bool value) {
     return _preferences.setBool(keyShouldShowLockScreen, value);
-  }
-
-  bool shouldHideFromRecents() {
-    return _preferences.getBool(keyShouldHideFromRecents) ?? false;
-  }
-
-  Future<void> setShouldHideFromRecents(bool value) {
-    return _preferences.setBool(keyShouldHideFromRecents, value);
   }
 
   void setVolatilePassword(String? volatilePassword) {
