@@ -4,11 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
 import 'package:photos/models/user_details.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/user_service.dart';
 
 class UserDetailsStateWidget extends StatefulWidget {
   final Widget child;
+
   const UserDetailsStateWidget({
     required this.child,
     Key? key,

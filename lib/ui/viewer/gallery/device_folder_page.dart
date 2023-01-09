@@ -191,7 +191,8 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   }
 
   Future<bool> _hasIgnoredFiles(
-      Future<List<File>> filesInDeviceCollection) async {
+    Future<List<File>> filesInDeviceCollection,
+  ) async {
     final List<File> deviceCollectionFiles = await filesInDeviceCollection;
 
     final localIDsOfFiles = <String>{};
@@ -207,8 +208,10 @@ class ResetIgnoredFilesWidget extends StatefulWidget {
   final Future<List<File>> filesInDeviceCollection;
   final VoidCallback parentSetState;
   const ResetIgnoredFilesWidget(
-      this.filesInDeviceCollection, this.parentSetState,
-      {super.key});
+    this.filesInDeviceCollection,
+    this.parentSetState, {
+    super.key,
+  });
 
   @override
   State<ResetIgnoredFilesWidget> createState() =>

@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:io';
 
@@ -31,7 +29,6 @@ import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class GalleryAppBarWidget extends StatefulWidget {
   final GalleryType type;
@@ -206,9 +203,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       body: "You have successfully freed up " + formatBytes(status.size) + "!",
       firstButtonLabel: "Rate us",
       firstButtonOnTap: () async {
-        // TODO: Replace with https://pub.dev/packages/in_app_review
-        final url = UpdateService.instance.getRateDetails().item2;
-        launchUrlString(url);
+        UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
       secondButtonLabel: "OK",

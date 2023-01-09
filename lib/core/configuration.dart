@@ -8,19 +8,14 @@ import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:photos/core/constants.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/core/error-reporting/super_logging.dart';
 import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/files_db.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/ignored_files_db.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/db/public_keys_db.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/db/trash_db.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/events/signed_in_event.dart';
@@ -28,17 +23,11 @@ import 'package:photos/events/user_logged_out_event.dart';
 import 'package:photos/models/key_attributes.dart';
 import 'package:photos/models/key_gen_result.dart';
 import 'package:photos/models/private_key_attributes.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/billing_service.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/collections_service.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/favorites_service.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/memories_service.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/search_service.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
 import 'package:photos/utils/validator_util.dart';
@@ -64,7 +53,6 @@ class Configuration {
   // keyShouldKeepDeviceAwake is used to determine whether the device screen
   // should be kept on while the app is in foreground.
   static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
-  static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
@@ -92,6 +80,7 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDirectory;
   late String _thumbnailCacheDirectory;
+
   // 6th July 22: Remove this after 3 months. Hopefully, active users
   // will migrate to newer version of the app, where shared media is stored
   // on appSupport directory which OS won't clean up automatically
@@ -604,14 +593,6 @@ class Configuration {
 
   Future<void> setShouldShowLockScreen(bool value) {
     return _preferences.setBool(keyShouldShowLockScreen, value);
-  }
-
-  bool shouldHideFromRecents() {
-    return _preferences.getBool(keyShouldHideFromRecents) ?? false;
-  }
-
-  Future<void> setShouldHideFromRecents(bool value) {
-    return _preferences.setBool(keyShouldHideFromRecents, value);
   }
 
   void setVolatilePassword(String? volatilePassword) {

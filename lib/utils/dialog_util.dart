@@ -90,8 +90,8 @@ DialogWidget choiceDialog({
 }
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showNewChoiceDialog({
-  required BuildContext context,
+Future<ButtonAction?> showNewChoiceDialog(
+  BuildContext context, {
   required String title,
   String? body,
   required String firstButtonLabel,

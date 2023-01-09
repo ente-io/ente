@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:math';
 
@@ -39,7 +37,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
     with AutomaticKeepAliveClientMixin {
   final Logger _logger = Logger("SharedCollectionGallery");
   late StreamSubscription<LocalPhotosUpdatedEvent> _localFilesSubscription;
-  late StreamSubscription<CollectionUpdatedEvent> _collectionUpdatesSubscription;
+  late StreamSubscription<CollectionUpdatedEvent>
+      _collectionUpdatesSubscription;
   late StreamSubscription<UserLoggedOutEvent> _loggedOutEvent;
 
   @override
@@ -70,8 +69,8 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         final List<CollectionWithThumbnail> outgoing = [];
         final List<CollectionWithThumbnail> incoming = [];
         for (final file in files) {
-          final c =
-              CollectionsService.instance.getCollectionByID(file.collectionID!)!;
+          final c = CollectionsService.instance
+              .getCollectionByID(file.collectionID!)!;
           if (c.owner!.id == Configuration.instance.getUserID()) {
             if (c.sharees!.isNotEmpty ||
                 c.publicURLs!.isNotEmpty ||

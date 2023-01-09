@@ -1,16 +1,15 @@
-
-
 import 'package:flutter/material.dart';
 
 class DividerWithPadding extends StatelessWidget {
-  final double left, top, right, bottom, thinckness;
+  final double left, top, right, bottom, thickness;
+
   const DividerWithPadding({
     Key? key,
     this.left = 0,
     this.top = 0,
     this.right = 0,
     this.bottom = 0,
-    this.thinckness = 0.5,
+    this.thickness = 0.5,
   }) : super(key: key);
 
   @override
@@ -18,7 +17,7 @@ class DividerWithPadding extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(left, top, right, bottom),
       child: Divider(
-        thickness: thinckness,
+        thickness: thickness,
       ),
     );
   }

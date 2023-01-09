@@ -1,5 +1,3 @@
-
-
 library google_nav_bar;
 
 import 'package:flutter/material.dart';
@@ -89,11 +87,12 @@ class _GNavState extends State<GNav> {
                 key: t.key,
                 border: t.border ?? widget.tabBorder,
                 activeBorder: t.activeBorder ?? widget.tabActiveBorder,
-                borderRadius: t.borderRadius as bool? ?? widget.tabBorderRadius != null
-                    ? BorderRadius.all(
-                        Radius.circular(widget.tabBorderRadius!),
-                      )
-                    : const BorderRadius.all(Radius.circular(100.0)),
+                borderRadius:
+                    t.borderRadius as bool? ?? widget.tabBorderRadius != null
+                        ? BorderRadius.all(
+                            Radius.circular(widget.tabBorderRadius!),
+                          )
+                        : const BorderRadius.all(Radius.circular(100.0)),
                 debug: widget.debug ?? false,
                 margin: t.margin ?? widget.tabMargin,
                 active: selectedIndex == widget.tabs!.indexOf(t),
