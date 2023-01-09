@@ -35,12 +35,12 @@ import { ProgressUpdater } from 'types/upload/ui';
 import uploadCancelService from './uploadCancelService';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
-import { getDedicatedCryptoWorker } from 'utils/comlink';
 import { Remote } from 'comlink';
 import {
     getLocalPublicFiles,
     getPublicCollectionUID,
 } from 'services/publicCollectionService';
+import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
 
 const MAX_CONCURRENT_UPLOADS = 4;
 const FILE_UPLOAD_COMPLETED = 100;
@@ -119,9 +119,6 @@ class UploadManager {
                 throw Error("can't run multiple uploads at once");
             }
             this.uploadInProgress = true;
-            for (let i = 0; i < MAX_CONCURRENT_UPLOADS; i++) {
-                this.cryptoWorkers[i] = getDedicatedCryptoWorker();
-            }
             await this.updateExistingFilesAndCollections(collections);
             this.uploaderName = uploaderName;
             addLogLine(
@@ -277,6 +274,7 @@ class UploadManager {
             i < MAX_CONCURRENT_UPLOADS && this.filesToBeUploaded.length > 0;
             i++
         ) {
+            this.cryptoWorkers[i] = getDedicatedCryptoWorker();
             const worker = await new this.cryptoWorkers[i].remote();
             uploadProcesses.push(this.uploadNextFileInQueue(worker));
         }
