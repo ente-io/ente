@@ -10,9 +10,9 @@ import {
     AbuseReportRequest,
     LocalSavedPublicCollectionFiles,
 } from 'types/publicCollection';
-import CryptoWorker from 'utils/crypto';
 import { REPORT_REASON } from 'constants/publicCollection';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
@@ -343,11 +343,11 @@ const decryptCollectionName = async (
     collection: EncryptedCollection,
     collectionKey: string
 ) => {
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     return (collection.name =
         collection.name ||
-        (await worker.decryptToUTF8(
+        (await cryptoWorker.decryptToUTF8(
             collection.encryptedName,
             collection.nameDecryptionNonce,
             collectionKey

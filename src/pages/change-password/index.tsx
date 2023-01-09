@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import CryptoWorker, {
+import {
     saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
 } from 'utils/crypto';
@@ -19,6 +19,7 @@ import VerticallyCentered from 'components/Container';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
@@ -39,7 +40,7 @@ export default function ChangePassword() {
         passphrase,
         setFieldError
     ) => {
-        const cryptoWorker = await new CryptoWorker();
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const key = await getActualKey();
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const kekSalt = await cryptoWorker.generateSaltToDeriveKey();

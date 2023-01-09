@@ -11,7 +11,6 @@ import {
     preservePhotoswipeProps,
     sortFiles,
 } from 'utils/file';
-import CryptoWorker from 'utils/crypto';
 import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
@@ -19,6 +18,7 @@ import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
 import { isCollectionHidden } from 'utils/collection';
 import { CustomError } from 'utils/error';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -250,12 +250,13 @@ export const updateFileMagicMetadata = async (files: EnteFile[]) => {
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const file of files) {
-        const { file: encryptedMagicMetadata } = await worker.encryptMetadata(
-            file.magicMetadata.data,
-            file.key
-        );
+        const { file: encryptedMagicMetadata } =
+            await cryptoWorker.encryptMetadata(
+                file.magicMetadata.data,
+                file.key
+            );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
@@ -286,10 +287,13 @@ export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const file of files) {
         const { file: encryptedPubMagicMetadata } =
-            await worker.encryptMetadata(file.pubMagicMetadata.data, file.key);
+            await cryptoWorker.encryptMetadata(
+                file.pubMagicMetadata.data,
+                file.key
+            );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {

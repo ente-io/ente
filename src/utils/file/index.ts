@@ -5,7 +5,6 @@ import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
-import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
@@ -31,6 +30,7 @@ import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { addLogLine } from 'utils/logging';
 import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from './size';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -198,7 +198,7 @@ export async function decryptFile(
     collectionKey: string
 ): Promise<EnteFile> {
     try {
-        const worker = await new CryptoWorker();
+        const worker = await ComlinkCryptoWorker.getInstance();
         const {
             encryptedKey,
             keyDecryptionNonce,

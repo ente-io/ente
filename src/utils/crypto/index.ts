@@ -6,12 +6,12 @@ import { setRecoveryKey } from 'services/userService';
 import { logError } from 'utils/sentry';
 import isElectron from 'is-electron';
 import safeStorageService from 'services/electron/safeStorage';
-import { CryptoWorker } from 'utils/comlink';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export async function generateKeyAttributes(
     passphrase: string
 ): Promise<{ keyAttributes: KeyAttributes; masterKey: string }> {
-    const cryptoWorker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const masterKey = await cryptoWorker.generateEncryptionKey();
     const recoveryKey = await cryptoWorker.generateEncryptionKey();
     const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
@@ -61,7 +61,7 @@ export async function generateAndSaveIntermediateKeyAttributes(
     existingKeyAttributes: KeyAttributes,
     key: string
 ): Promise<KeyAttributes> {
-    const cryptoWorker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const intermediateKekSalt = await cryptoWorker.generateSaltToDeriveKey();
     const intermediateKek = await cryptoWorker.deriveInteractiveKey(
         passphrase,
@@ -88,7 +88,7 @@ export const saveKeyInSessionStore = async (
     key: string,
     fromDesktop?: boolean
 ) => {
-    const cryptoWorker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const sessionKeyAttributes = await cryptoWorker.encryptToB64(key);
     setKey(keyType, sessionKeyAttributes);
     if (isElectron() && !fromDesktop) {
@@ -99,7 +99,7 @@ export const saveKeyInSessionStore = async (
 export const getRecoveryKey = async () => {
     let recoveryKey: string = null;
     try {
-        const cryptoWorker = await new CryptoWorker();
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
         const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
         const {
@@ -128,7 +128,7 @@ async function createNewRecoveryKey() {
     const masterKey = await getActualKey();
     const existingAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
 
-    const cryptoWorker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     const recoveryKey = await cryptoWorker.generateEncryptionKey();
     const encryptedMasterKey = await cryptoWorker.encryptToB64(
@@ -156,7 +156,7 @@ async function createNewRecoveryKey() {
     return recoveryKey;
 }
 export async function decryptAndStoreToken(masterKey: string) {
-    const cryptoWorker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const user = getData(LS_KEYS.USER);
     const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
     let decryptedToken = null;
@@ -185,7 +185,7 @@ export async function decryptAndStoreToken(masterKey: string) {
 }
 
 export async function encryptWithRecoveryKey(key: string) {
-    const cryptoWorker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const hexRecoveryKey = await getRecoveryKey();
     const recoveryKey = await cryptoWorker.fromHex(hexRecoveryKey);
     const encryptedKey = await cryptoWorker.encryptToB64(key, recoveryKey);
@@ -195,7 +195,7 @@ export async function encryptWithRecoveryKey(key: string) {
 export async function decryptDeleteAccountChallenge(
     encryptedChallenge: string
 ) {
-    const cryptoWorker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const masterKey = await getActualKey();
     const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
     const secretKey = await cryptoWorker.decryptB64(
@@ -211,4 +211,3 @@ export async function decryptDeleteAccountChallenge(
     const utf8DecryptedChallenge = atob(b64DecryptedChallenge);
     return utf8DecryptedChallenge;
 }
-export default CryptoWorker;
