@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/opened_settings_event.dart';
+import 'package:photos/services/feature_flag_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/settings/about_section_widget.dart';
@@ -99,7 +100,8 @@ class SettingsPage extends StatelessWidget {
       const AboutSectionWidget(),
     ]);
 
-    if (hasLoggedIn) {
+    if (hasLoggedIn &&
+        FeatureFlagService.instance.isInternalUserOrDebugBuild()) {
       contents.addAll([sectionSpacing, const DebugSectionWidget()]);
     }
     contents.add(const AppVersionWidget());
