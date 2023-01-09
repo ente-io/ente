@@ -258,11 +258,16 @@ class _GalleryState extends State<Gallery> {
         return gallery;
       },
       labelTextBuilder: (int index) {
-        return getMonthAndYear(
-          DateTime.fromMicrosecondsSinceEpoch(
-            _collatedFiles[index][0].creationTime!,
-          ),
-        );
+        try {
+          return getMonthAndYear(
+            DateTime.fromMicrosecondsSinceEpoch(
+              _collatedFiles[index][0].creationTime!,
+            ),
+          );
+        } catch (e) {
+          _logger.severe("label text builder failed", e);
+          return "";
+        }
       },
       thumbBackgroundColor:
           Theme.of(context).colorScheme.galleryThumbBackgroundColor,
