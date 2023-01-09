@@ -12,6 +12,7 @@ import { Box } from '@mui/material';
 import { CollectionSummaryType } from 'constants/collection';
 import Favorite from '@mui/icons-material/FavoriteRounded';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
+import GroupIcon from '@mui/icons-material/Group';
 
 interface Iprops {
     active: boolean;
@@ -52,6 +53,7 @@ function CollectionCardIcon({ collectionType }) {
             {collectionType === CollectionSummaryType.archived && (
                 <ArchiveOutlined />
             )}
+            {collectionType === CollectionSummaryType.shared && <GroupIcon />}
         </CollectionBarTileIcon>
     );
 }
