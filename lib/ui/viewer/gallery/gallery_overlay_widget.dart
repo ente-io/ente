@@ -1,5 +1,3 @@
-
-
 import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
@@ -210,7 +208,10 @@ class _OverlayWidgetState extends State<OverlayWidget> {
                       child: Center(
                         child: Text(
                           'Cancel',
-                          style: Theme.of(context).textTheme.subtitle2!.copyWith(
+                          style: Theme.of(context)
+                              .textTheme
+                              .subtitle2!
+                              .copyWith(
                                 fontWeight: FontWeight.w600,
                                 color: Theme.of(context).colorScheme.iconColor,
                               ),

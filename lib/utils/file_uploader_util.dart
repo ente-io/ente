@@ -16,7 +16,6 @@ import 'package:photos/models/file.dart' as ente;
 import 'package:photos/models/file_type.dart';
 import 'package:photos/models/location.dart';
 import 'package:photos/utils/crypto_util.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:photos/utils/file_util.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 

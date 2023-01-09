@@ -511,11 +511,10 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   void _toggleSelectAllFromDayListener() {
     if (widget.selectedFiles.files.containsAll(widget.filesInDay.toSet())) {
       setState(() {
-        widget.selectedFiles
-            .unSelectAll(widget.filesInDay.toSet() as Set<File>);
+        widget.selectedFiles.unSelectAll(widget.filesInDay.toSet());
       });
     } else {
-      widget.selectedFiles.selectAll(widget.filesInDay.toSet() as Set<File>);
+      widget.selectedFiles.selectAll(widget.filesInDay.toSet());
     }
   }
 }

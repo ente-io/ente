@@ -109,7 +109,7 @@ class _ChangeLogPageState extends State<ChangeLogPage> {
             "share, end-to-end encrypted and secure.\n\nYour quick links will "
             "appear at the bottom of the share tab so that you can remove them "
             "when they're no longer needed, or convert them to regular albums "
-            "by renaming them if you want them to stick around.\n\nDepending on the feedback, we\'ll iterate on this (automatically prune quick "
+            "by renaming them if you want them to stick around.\n\nDepending on the feedback, we'll iterate on this (automatically prune quick "
             "links, directly open the photo if only a single photo is shared, "
             "etc). So let us know which direction you wish us to head!",
       ),

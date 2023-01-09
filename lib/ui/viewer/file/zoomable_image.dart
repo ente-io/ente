@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -143,7 +141,8 @@ class _ZoomableImageState extends State<ZoomableImage>
     if (!_loadedSmallThumbnail &&
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailLruCache.get(_photo!, thumbnailSmallSize);
+      final cachedThumbnail =
+          ThumbnailLruCache.get(_photo!, thumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;

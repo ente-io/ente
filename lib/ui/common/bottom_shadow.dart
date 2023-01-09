@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 class BottomShadowWidget extends StatelessWidget {
