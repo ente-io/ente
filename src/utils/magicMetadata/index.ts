@@ -5,7 +5,7 @@ import {
     MagicMetadataCore,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
-import CryptoWorker from 'utils/crypto';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export function IsArchived(item: Collection | EnteFile) {
     if (
@@ -25,13 +25,13 @@ export async function updateMagicMetadataProps(
     decryptionKey: string,
     magicMetadataUpdates: Record<string, any>
 ) {
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     if (!originalMagicMetadata) {
         throw Error('invalid originalMagicMetadata ');
     }
     if (typeof originalMagicMetadata.data === 'string') {
-        originalMagicMetadata.data = (await worker.decryptMetadata(
+        originalMagicMetadata.data = (await cryptoWorker.decryptMetadata(
             originalMagicMetadata.data,
             originalMagicMetadata.header,
             decryptionKey

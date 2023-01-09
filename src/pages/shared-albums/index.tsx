@@ -23,7 +23,6 @@ import { CustomError, parseSharingErrorCodes } from 'utils/error';
 import VerticallyCentered, { CenteredFlex } from 'components/Container';
 import constants from 'utils/strings/constants';
 import EnteSpinner from 'components/EnteSpinner';
-import CryptoWorker from 'utils/crypto';
 import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import SingleInputForm, {
@@ -48,6 +47,7 @@ import { logoutUser } from 'services/userService';
 import UploadButton from 'components/Upload/UploadButton';
 import bs58 from 'bs58';
 import AddPhotoAlternateOutlined from '@mui/icons-material/AddPhotoAlternateOutlined';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const Loader = () => (
     <VerticallyCentered>
@@ -149,7 +149,8 @@ export default function PublicCollectionGallery() {
         }
         const main = async () => {
             try {
-                const worker = await new CryptoWorker();
+                const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+
                 url.current = window.location.href;
                 const currentURL = new URL(url.current);
                 const t = currentURL.searchParams.get('t');
@@ -159,8 +160,8 @@ export default function PublicCollectionGallery() {
                 }
                 const dck =
                     ck.length < 50
-                        ? await worker.toB64(bs58.decode(ck))
-                        : await worker.fromHex(ck);
+                        ? await cryptoWorker.toB64(bs58.decode(ck))
+                        : await cryptoWorker.fromHex(ck);
                 token.current = t;
                 collectionKey.current = dck;
                 url.current = window.location.href;
@@ -304,7 +305,7 @@ export default function PublicCollectionGallery() {
         setFieldError
     ) => {
         try {
-            const cryptoWorker = await new CryptoWorker();
+            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
             let hashedPassword: string = null;
             try {
                 const publicUrl = publicCollection.publicURLs[0];

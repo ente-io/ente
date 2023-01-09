@@ -1,7 +1,6 @@
 import React from 'react';
 
 import constants from 'utils/strings/constants';
-import CryptoWorker from 'utils/crypto';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
@@ -10,6 +9,7 @@ import { CustomError } from 'utils/error';
 
 import { Input } from '@mui/material';
 import { KeyAttributes, User } from 'types/user';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export interface VerifyMasterPasswordFormProps {
     user: User;
@@ -29,7 +29,7 @@ export default function VerifyMasterPasswordForm({
         setFieldError
     ) => {
         try {
-            const cryptoWorker = await new CryptoWorker();
+            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
             let kek: string = null;
             try {
                 kek = await cryptoWorker.deriveKey(
