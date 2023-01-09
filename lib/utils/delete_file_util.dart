@@ -262,35 +262,36 @@ Future<void> deleteFilesOnDeviceOnly(
 }
 
 Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
-  final result = await showChoiceDialog(
+  final result = await showNewChoiceDialog(
     context,
-    "Delete permanently?",
-    "This action cannot be undone",
-    firstAction: "Delete",
-    actionType: ActionType.critical,
+    title: "Delete permanently",
+    body: "This action cannot be undone",
+    firstButtonLabel: "Delete",
+    isCritical: true,
+    firstButtonOnTap: () async {
+      try {
+        await TrashSyncService.instance.deleteFromTrash(files);
+        Bus.instance.fire(
+          FilesUpdatedEvent(
+            files,
+            type: EventType.deletedFromEverywhere,
+            source: "deleteFromTrash",
+          ),
+        );
+      } catch (e, s) {
+        _logger.info("failed to delete from trash", e, s);
+        rethrow;
+      }
+    },
   );
-  if (result != DialogUserChoice.firstChoice) {
-    return false;
-  }
-  final dialog = createProgressDialog(context, "Permanently deleting...");
-  await dialog.show();
-  try {
-    await TrashSyncService.instance.deleteFromTrash(files);
-    showShortToast(context, "Successfully deleted");
-    await dialog.hide();
-    Bus.instance.fire(
-      FilesUpdatedEvent(
-        files,
-        type: EventType.deletedFromEverywhere,
-        source: "deleteFromTrash",
-      ),
-    );
-    return true;
-  } catch (e, s) {
-    _logger.info("failed to delete from trash", e, s);
-    await dialog.hide();
+  if (result == ButtonAction.error) {
     await showGenericErrorDialog(context: context);
     return false;
+  }
+  if (result == null || result == ButtonAction.cancel) {
+    return false;
+  } else {
+    return true;
   }
 }
 
