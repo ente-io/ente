@@ -1,7 +1,7 @@
 import isElectron from 'is-electron';
 import { ElectronFFmpeg } from 'services/electron/ffmpeg';
 import { ElectronFile } from 'types/upload';
-import { FFmpegWorker } from 'utils/comlink';
+import ComlinkFFmpegWorker from 'utils/comlink/ComlinkFFmpegWorker';
 
 export interface IFFmpeg {
     run: (
@@ -13,16 +13,16 @@ export interface IFFmpeg {
 
 class FFmpegFactory {
     private client: IFFmpeg;
-
     async getFFmpegClient() {
         if (!this.client) {
             if (isElectron()) {
                 this.client = new ElectronFFmpeg();
             } else {
-                this.client = await new FFmpegWorker();
+                this.client = await ComlinkFFmpegWorker.getInstance();
             }
         }
         return this.client;
     }
 }
+
 export default new FFmpegFactory();

@@ -5,8 +5,8 @@ import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
 import { DedicatedConvertWorker } from 'worker/convert.worker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
-import { getDedicatedConvertWorker } from 'utils/comlink';
 import { convertBytesToHumanReadable } from 'utils/file/size';
+import { getDedicatedConvertWorker } from 'utils/comlink/ComlinkConvertWorker';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
