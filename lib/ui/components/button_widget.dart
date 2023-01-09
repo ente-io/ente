@@ -206,7 +206,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   ExecutionState executionState = ExecutionState.idle;
 
   @override
-  void initState() {
+  Widget build(BuildContext context) {
     progressStatus = widget.progressStatus;
     checkIconColor = widget.buttonStyle.checkIconColor ??
         widget.buttonStyle.defaultIconColor;
@@ -226,12 +226,6 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       iconColor = widget.buttonStyle.defaultIconColor;
       labelStyle = widget.buttonStyle.defaultLabelStyle;
     }
-
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
         setState(() {
