@@ -18,8 +18,7 @@ const int batchSize = 1000;
 const photoGridSizeDefault = 4;
 const photoGridSizeMin = 2;
 const photoGridSizeMax = 6;
-const subGalleryLimitDefault = 80;
-const subGalleryLimitMin = 40;
+const subGalleryMultiplier = 10;
 
 // used to identify which ente file are available in app cache
 // todo: 6Jun22: delete old media identifier after 3 months
