@@ -194,12 +194,16 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
       Future<List<File>> filesInDeviceCollection) async {
     final List<File> deviceCollectionFiles = await filesInDeviceCollection;
 
-    final localIDsOfFiles = <String>{};
+    final ignoredIdsForFile = <String>{};
     for (File file in deviceCollectionFiles) {
-      localIDsOfFiles.add(file.localID!);
+      final String? ignoreID =
+          IgnoredFilesService.instance.getIgnoredIDForFile(file);
+      if (ignoreID != null) {
+        ignoredIdsForFile.add(ignoreID);
+      }
     }
     final ignoredFiles = await IgnoredFilesService.instance.ignoredIDs;
-    return ignoredFiles.intersection(localIDsOfFiles).isNotEmpty;
+    return ignoredFiles.intersection(ignoredIdsForFile).isNotEmpty;
   }
 }
 
