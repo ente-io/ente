@@ -225,11 +225,10 @@ class TrashDB {
     trashFile.fileDecryptionHeader = row[columnFileDecryptionHeader];
     trashFile.thumbnailDecryptionHeader = row[columnThumbnailDecryptionHeader];
     trashFile.updationTime = row[columnUpdationTime] ?? 0;
-
-    trashFile.localID = row[columnLocalID];
     trashFile.creationTime = row[columnCreationTime];
     final fileMetadata = row[columnFileMetadata] ?? '{}';
     trashFile.applyMetadata(jsonDecode(fileMetadata));
+    trashFile.localID = row[columnLocalID];
 
     trashFile.mMdVersion = row[columnMMdVersion] ?? 0;
     trashFile.mMdEncodedJson = row[columnMMdEncodedJson] ?? '{}';

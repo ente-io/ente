@@ -21,7 +21,6 @@ import 'package:photos/utils/data_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
 import 'package:photos/utils/toast_util.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class BackupSectionWidget extends StatefulWidget {
   const BackupSectionWidget({Key? key}) : super(key: key);
@@ -165,8 +164,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
       body: "You have successfully freed up " + formatBytes(status.size) + "!",
       firstButtonLabel: "Rate us",
       firstButtonOnTap: () async {
-        final url = UpdateService.instance.getRateDetails().item2;
-        launchUrlString(url);
+        UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
       secondButtonLabel: "OK",
@@ -205,9 +203,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
           "!",
       firstButtonLabel: "Rate us",
       firstButtonOnTap: () async {
-        // TODO: Replace with https://pub.dev/packages/in_app_review
-        final url = UpdateService.instance.getRateDetails().item2;
-        launchUrlString(url);
+        UpdateService.instance.launchReviewUrl();
       },
       firstButtonType: ButtonType.primary,
       secondButtonLabel: "OK",

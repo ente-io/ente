@@ -99,6 +99,14 @@ class IgnoredFilesService {
     );
   }
 
+  String? getIgnoredIDForFile(File file) {
+    return _getIgnoreID(
+      file.localID,
+      file.deviceFolder,
+      file.title,
+    );
+  }
+
   // _getIgnoreID will return null if don't have sufficient information
   // to ignore the file based on the platform. Uploads from web or files shared to
   // end usually don't have local id.

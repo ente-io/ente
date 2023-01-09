@@ -100,7 +100,7 @@ class ActionSheetWidget extends StatelessWidget {
                     isTitleAndBodyNull
                         ? const SizedBox.shrink()
                         : Padding(
-                            padding: const EdgeInsets.only(bottom: 36),
+                            padding: const EdgeInsets.only(bottom: 28),
                             child: ContentContainerWidget(
                               title: title,
                               body: body,

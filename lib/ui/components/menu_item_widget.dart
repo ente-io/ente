@@ -1,6 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/ente_theme_data.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
@@ -21,6 +22,9 @@ class MenuItemWidget extends StatefulWidget {
   final Color? trailingIconColor;
   final Widget? trailingWidget;
   final bool trailingIconIsMuted;
+
+  /// If provided, add this much extra spacing to the right of the trailing icon.
+  final double trailingExtraMargin;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final Color? menuItemColor;
@@ -45,6 +49,7 @@ class MenuItemWidget extends StatefulWidget {
     this.trailingIconColor,
     this.trailingWidget,
     this.trailingIconIsMuted = false,
+    this.trailingExtraMargin = 0.0,
     this.onTap,
     this.onDoubleTap,
     this.menuItemColor,
@@ -176,11 +181,16 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
                   ),
                 )
               : widget.trailingIcon != null
-                  ? Icon(
-                      widget.trailingIcon,
-                      color: widget.trailingIconIsMuted
-                          ? enteColorScheme.strokeMuted
-                          : widget.trailingIconColor,
+                  ? Padding(
+                      padding: EdgeInsets.only(
+                        right: widget.trailingExtraMargin,
+                      ),
+                      child: Icon(
+                        widget.trailingIcon,
+                        color: widget.trailingIconIsMuted
+                            ? enteColorScheme.strokeMuted
+                            : widget.trailingIconColor,
+                      ),
                     )
                   : widget.trailingWidget ?? const SizedBox.shrink(),
         ],
@@ -190,8 +200,18 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
 
   void _onTapDown(details) {
     setState(() {
-      menuItemColor = widget.pressedColor ?? widget.menuItemColor;
+      if (widget.pressedColor == null) {
+        hasPassedGestureCallbacks()
+            ? menuItemColor = getEnteColorScheme(context).fillFaintPressed
+            : menuItemColor = widget.menuItemColor;
+      } else {
+        menuItemColor = widget.pressedColor;
+      }
     });
+  }
+
+  bool hasPassedGestureCallbacks() {
+    return widget.onDoubleTap != null || widget.onTap != null;
   }
 
   void _onTapUp(details) {

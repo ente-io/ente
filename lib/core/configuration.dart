@@ -53,7 +53,6 @@ class Configuration {
   // keyShouldKeepDeviceAwake is used to determine whether the device screen
   // should be kept on while the app is in foreground.
   static const keyShouldKeepDeviceAwake = "should_keep_device_awake";
-  static const keyShouldHideFromRecents = "should_hide_from_recents";
   static const keyShouldShowLockScreen = "should_show_lock_screen";
   static const keyHasSelectedAnyBackupFolder =
       "has_selected_any_folder_for_backup";
@@ -81,6 +80,7 @@ class Configuration {
   late FlutterSecureStorage _secureStorage;
   late String _tempDirectory;
   late String _thumbnailCacheDirectory;
+
   // 6th July 22: Remove this after 3 months. Hopefully, active users
   // will migrate to newer version of the app, where shared media is stored
   // on appSupport directory which OS won't clean up automatically
@@ -593,14 +593,6 @@ class Configuration {
 
   Future<void> setShouldShowLockScreen(bool value) {
     return _preferences.setBool(keyShouldShowLockScreen, value);
-  }
-
-  bool shouldHideFromRecents() {
-    return _preferences.getBool(keyShouldHideFromRecents) ?? false;
-  }
-
-  Future<void> setShouldHideFromRecents(bool value) {
-    return _preferences.setBool(keyShouldHideFromRecents, value);
   }
 
   void setVolatilePassword(String? volatilePassword) {

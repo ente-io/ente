@@ -33,8 +33,8 @@ class FileDownloadItem {
 }
 
 Future<Uint8List> getThumbnailFromServer(File file) async {
-  final cachedThumbnail = getCachedThumbnail(file);
-  if (cachedThumbnail.existsSync()) {
+  final cachedThumbnail = cachedThumbnailPath(file);
+  if (await cachedThumbnail.exists()) {
     final data = await cachedThumbnail.readAsBytes();
     ThumbnailLruCache.put(file, data);
     return data;
@@ -67,8 +67,8 @@ Future<Uint8List?> getThumbnailFromLocal(
   if (lruCachedThumbnail != null) {
     return lruCachedThumbnail;
   }
-  final cachedThumbnail = getCachedThumbnail(file);
-  if (cachedThumbnail.existsSync()) {
+  final cachedThumbnail = cachedThumbnailPath(file);
+  if ((await cachedThumbnail.exists())) {
     final data = await cachedThumbnail.readAsBytes();
     ThumbnailLruCache.put(file, data);
     return data;
@@ -156,8 +156,8 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     data = await compressThumbnail(data);
   }
   ThumbnailLruCache.put(item.file, data);
-  final cachedThumbnail = getCachedThumbnail(item.file);
-  if (cachedThumbnail.existsSync()) {
+  final cachedThumbnail = cachedThumbnailPath(item.file);
+  if (await cachedThumbnail.exists()) {
     await cachedThumbnail.delete();
   }
   // data is already cached in-memory, no need to await on dist write
@@ -173,7 +173,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   }
 }
 
-io.File getCachedThumbnail(File file) {
+io.File cachedThumbnailPath(File file) {
   final thumbnailCacheDirectory =
       Configuration.instance.getThumbnailCacheDirectory();
   return io.File(

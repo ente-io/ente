@@ -1,5 +1,3 @@
-
-
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -73,6 +71,7 @@ class _ThemeSwitchWidgetState extends State<ThemeSwitchWidget> {
       pressedColor: getEnteColorScheme(context).fillFaint,
       isExpandable: false,
       trailingIcon: currentThemeMode == themeMode ? Icons.check : null,
+      trailingExtraMargin: 4,
       onTap: () async {
         AdaptiveTheme.of(context).setThemeMode(themeMode);
         currentThemeMode = themeMode;

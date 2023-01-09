@@ -1,5 +1,3 @@
-
-
 import 'dart:math' show max;
 
 import 'package:flutter/material.dart';

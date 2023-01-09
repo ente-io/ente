@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/cache/thumbnail_cache.dart';
@@ -156,6 +157,15 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
     ];
     if (widget.shouldShowSyncStatus && widget.file!.uploadedFileID == null) {
       viewChildren.add(const UnSyncedIcon());
+    }
+    if (kDebugMode &&
+        widget.shouldShowSyncStatus &&
+        widget.file!.uploadedFileID != null) {
+      if (widget.file!.localID != null) {
+        viewChildren.add(const DeviceIcon());
+      } else {
+        viewChildren.add(const CloudOnlyIcon());
+      }
     }
     if (widget.file is TrashFile) {
       viewChildren.add(TrashedFileOverlayText(widget.file as TrashFile));

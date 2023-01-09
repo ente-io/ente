@@ -265,10 +265,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
   }
 
   Future<void> showPicker() async {
-    Widget getOptionText(String text) {
-      return Text(text, style: Theme.of(context).textTheme.subtitle1);
-    }
-
     return showCupertinoModalPopup(
       context: context,
       builder: (context) {
@@ -327,6 +323,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         Navigator.of(context).pop('');
                       }
                       if (newValidTill >= 0) {
+                        debugPrint("Setting expirty $newValidTill");
                         await updateTime(newValidTill);
                       }
                     },
@@ -359,8 +356,14 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                 useMagnifier: true,
                 itemExtent: 25,
                 diameterRatio: 1,
-                children:
-                    _expiryOptions.map((e) => getOptionText(e.item2)).toList(),
+                children: _expiryOptions
+                    .map(
+                      (e) => Text(
+                        e.item2,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                    )
+                    .toList(),
               ),
             )
           ],
@@ -374,7 +377,10 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       context,
       {'validTill': newValidTill},
     );
-    if(mounted) {
+    if (mounted) {
+      // reset to default value. THis is needed will we move to
+      // new selection menu as per figma/
+      _selectedExpiry = _expiryOptions.first;
       setState(() {});
     }
   }
