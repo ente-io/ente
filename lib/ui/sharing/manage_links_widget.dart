@@ -327,6 +327,7 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                         Navigator.of(context).pop('');
                       }
                       if (newValidTill >= 0) {
+                        debugPrint("Setting expirty $newValidTill");
                         await updateTime(newValidTill);
                       }
                     },
@@ -379,6 +380,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
       {'validTill': newValidTill},
     );
     if (mounted) {
+      // reset to default value. THis is needed will we move to
+      // new selection menu as per figma/
+      _selectedExpiry = _expiryOptions.first;
       setState(() {});
     }
   }
