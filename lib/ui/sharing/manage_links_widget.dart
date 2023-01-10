@@ -12,7 +12,6 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
@@ -160,23 +159,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                               ?.enableDownload ??
                           true,
                       onChanged: (value) async {
-                        if (!value) {
-                          final choice = await showChoiceDialog(
-                            context,
-                            'Disable downloads',
-                            'Are you sure that you want to disable the download button for files?',
-                            firstAction: 'No',
-                            secondAction: 'Yes',
-                            firstActionColor:
-                                Theme.of(context).colorScheme.greenText,
-                            secondActionColor: Theme.of(context)
-                                .colorScheme
-                                .inverseBackgroundColor,
-                          );
-                          if (choice != DialogUserChoice.secondChoice) {
-                            return;
-                          }
-                        }
                         await _updateUrlSettings(
                           context,
                           {'enableDownload': value},

@@ -9,10 +9,10 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/payment/child_subscription_widget.dart';
 import 'package:photos/ui/payment/payment_web_page.dart';
 import 'package:photos/ui/payment/skip_subscription_widget.dart';
@@ -344,24 +344,23 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       onPressed: () async {
         bool confirmAction = false;
         if (isRenewCancelled) {
-          final choice = await showChoiceDialog(
+          final choice = await showNewChoiceDialog(
             context,
-            title,
-            "Are you sure you want to renew?",
-            firstAction: "No",
-            secondAction: "Yes",
+            title: title,
+            body: "Are you sure you want to renew?",
+            firstButtonLabel: "Yes, Renew",
           );
-          confirmAction = choice == DialogUserChoice.secondChoice;
+          confirmAction = choice == ButtonAction.first;
         } else {
-          final choice = await showChoiceDialog(
+          final choice = await showNewChoiceDialog(
             context,
-            title,
-            'Are you sure you want to cancel?',
-            firstAction: 'Yes, cancel',
-            secondAction: 'No',
-            actionType: ActionType.critical,
+            title: title,
+            body: "Are you sure you want to cancel?",
+            firstButtonLabel: "Yes, cancel",
+            secondButtonLabel: "No",
+            isCritical: true,
           );
-          confirmAction = choice == DialogUserChoice.firstChoice;
+          confirmAction = choice == ButtonAction.first;
         }
         if (confirmAction) {
           toggleStripeSubscription(isRenewCancelled);
@@ -380,7 +379,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
     } catch (e) {
       showShortToast(
         context,
-        isRenewCancelled ? 'failed to renew' : 'failed to cancel',
+        isRenewCancelled ? 'Failed to renew' : 'Failed to cancel',
       );
     }
     await _dialog.hide();
@@ -430,17 +429,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not
-                final result = await showChoiceDialog(
+                final result = await showNewChoiceDialog(
                   context,
-                  "Confirm plan change",
-                  "Are you sure you want to change your plan?",
-                  firstAction: "No",
-                  secondAction: 'Yes',
+                  title: "Confirm plan change",
+                  body: "Are you sure you want to change your plan?",
+                  firstButtonLabel: "Yes",
                 );
-                if (result != DialogUserChoice.secondChoice) {
+                if (result == ButtonAction.first) {
+                  stripPurChaseAction = 'update';
+                } else {
                   return;
                 }
-                stripPurChaseAction = 'update';
               }
               Navigator.push(
                 context,

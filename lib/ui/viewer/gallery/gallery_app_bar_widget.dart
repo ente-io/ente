@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/events/subscription_purchased_event.dart';
 import 'package:photos/models/backup_status.dart';
 import 'package:photos/models/collection.dart';
@@ -19,6 +18,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
 import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/album_participants_page.dart';
@@ -136,28 +136,20 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _leaveAlbum(BuildContext context) async {
-    final DialogUserChoice? result = await showChoiceDialog(
+    final result = await showNewChoiceDialog(
       context,
-      "Leave shared album?",
-      "You will leave the album, and it will stop being visible to you.",
-      firstAction: "Cancel",
-      secondAction: "Yes, Leave",
-      secondActionColor:
-          Theme.of(context).colorScheme.enteTheme.colorScheme.warning700,
+      title: "Leave shared album",
+      body: "You will leave the album, and it will stop being visible to you",
+      firstButtonLabel: "Yes, leave",
+      isCritical: true,
+      firstButtonOnTap: () async {
+        await CollectionsService.instance.leaveAlbum(widget.collection!);
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      },
     );
-    if (result != DialogUserChoice.secondChoice) {
-      return;
-    }
-    final dialog = createProgressDialog(context, "Leaving album...");
-    await dialog.show();
-    try {
-      await CollectionsService.instance.leaveAlbum(widget.collection!);
-      await dialog.hide();
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-    } catch (e) {
-      await dialog.hide();
+    if (result == ButtonAction.error) {
       showGenericErrorDialog(context: context);
     }
   }

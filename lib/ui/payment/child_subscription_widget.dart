@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
+import 'package:logging/logging.dart';
 import 'package:photos/models/user_details.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/utils/dialog_util.dart';
 
 class ChildSubscriptionWidget extends StatelessWidget {
@@ -118,27 +118,22 @@ class ChildSubscriptionWidget extends StatelessWidget {
   }
 
   Future<void> _leaveFamilyPlan(BuildContext context) async {
-    final choice = await showChoiceDialog(
+    final choice = await showNewChoiceDialog(
       context,
-      'Leave family',
-      'Are you sure that you want to leave the family plan?',
-      firstAction: 'No',
-      secondAction: 'Yes',
-      firstActionColor: Theme.of(context).colorScheme.greenAlternative,
-      secondActionColor: Theme.of(context).colorScheme.onSurface,
+      title: "Leave family",
+      body: "Are you sure that you want to leave the family plan?",
+      firstButtonLabel: "Leave",
+      firstButtonOnTap: () async {
+        try {
+          await UserService.instance.leaveFamilyPlan();
+        } catch (e) {
+          Logger("ChildSubscriptionWidget").severe("failed to leave family");
+          rethrow;
+        }
+      },
     );
-    if (choice != DialogUserChoice.secondChoice) {
-      return;
-    }
-    final dialog = createProgressDialog(context, "Please wait...");
-    await dialog.show();
-    try {
-      await UserService.instance.leaveFamilyPlan();
-      await dialog.hide();
-      Navigator.of(context).pop('');
-    } catch (e) {
-      await dialog.hide();
-      showGenericErrorDialog(context: context);
+    if (choice == ButtonAction.error) {
+      await showGenericErrorDialog(context: context);
     }
   }
 }

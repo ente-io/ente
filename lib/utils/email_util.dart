@@ -142,7 +142,7 @@ Future<void> shareLogs(
         onTap: () async {
           await Clipboard.setData(ClipboardData(text: toEmail));
         },
-        shouldShowSuccessConformation: true,
+        shouldShowSuccessConfirmation: true,
       ),
       const ButtonWidget(
         buttonType: ButtonType.neutral,
