@@ -21,8 +21,12 @@ export async function generateImageThumbnail(
     let createdTempInputFile = null;
     try {
         if (!existsSync(inputFile.path)) {
-            const tempFilePath = await ipcRenderer.invoke('get-temp-file-path');
-            inputFilePath = writeStream(tempFilePath, await inputFile.stream());
+            const tempFilePath = await ipcRenderer.invoke(
+                'get-temp-file-path',
+                inputFile.name
+            );
+            await writeStream(tempFilePath, await inputFile.stream());
+            inputFilePath = tempFilePath;
             createdTempInputFile = true;
         } else {
             inputFilePath = inputFile.path;
