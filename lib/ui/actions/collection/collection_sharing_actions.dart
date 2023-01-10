@@ -11,6 +11,7 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/date_time_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -31,15 +32,14 @@ class CollectionActions {
   ) async {
     // confirm if user wants to disable the url
     if (!enable) {
-      final choice = await showChoiceDialog(
+      final choice = await showNewChoiceDialog(
         context,
-        'Remove public link?',
-        'This will remove the public link for accessing "${collection.name}".',
-        firstAction: 'Yes, remove',
-        secondAction: 'Cancel',
-        actionType: ActionType.critical,
+        title: "Remove public link",
+        body:
+            'This will remove the public link for accessing "${collection.name}"',
+        firstButtonLabel: "Yes, remove",
       );
-      if (choice != DialogUserChoice.firstChoice) {
+      if (choice != ButtonAction.first) {
         return false;
       }
     }
