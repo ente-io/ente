@@ -28,11 +28,11 @@ function generateTempName(length: number) {
 }
 
 export async function generateTempFilePath(formatSuffix: string) {
-    const tempDirPath = await getTempDirPath();
-    const namePrefix = generateTempName(10);
-    const tempFilePath = path.join(
-        tempDirPath,
-        namePrefix + '-' + formatSuffix
-    );
+    let tempFilePath: string;
+    do {
+        const tempDirPath = await getTempDirPath();
+        const namePrefix = generateTempName(10);
+        tempFilePath = path.join(tempDirPath, namePrefix + '-' + formatSuffix);
+    } while (existsSync(tempFilePath));
     return tempFilePath;
 }
