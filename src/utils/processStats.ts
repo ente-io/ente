@@ -5,7 +5,9 @@ const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
 const SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS = 1 * 1000; // 1 seconds
 
-const HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 1 * 1024 * 1024; // 1 GB
+const MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 500 * 1024; // 500 MB
+
+let previousMemoryUsage = 0;
 
 async function logMainProcessStats() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
@@ -24,9 +26,15 @@ async function logMainProcessStats() {
 
 async function logSpikeMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
-    if (
-        processMemoryInfo.residentSet > HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES
-    ) {
+    const currentMemoryUsage = Math.max(
+        processMemoryInfo.residentSet,
+        processMemoryInfo.private
+    );
+    const isSpiking =
+        currentMemoryUsage - previousMemoryUsage >=
+        MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
+
+    if (isSpiking) {
         const normalizedProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(processMemoryInfo);
         const cpuUsage = process.getCPUUsage();
@@ -38,6 +46,7 @@ async function logSpikeMemoryUsage() {
             cpuUsage,
         });
     }
+    previousMemoryUsage = currentMemoryUsage;
 }
 
 async function logRendererProcessStats() {
@@ -67,7 +76,7 @@ const getNormalizedProcessMemoryInfo = async (
         residentSet: convertBytesToHumanReadable(
             processMemoryInfo.residentSet * 1024
         ),
-        private: convertBytesToHumanReadable(processMemoryInfo.private * 10124),
+        private: convertBytesToHumanReadable(processMemoryInfo.private * 1024),
         shared: convertBytesToHumanReadable(processMemoryInfo.shared * 1024),
     };
 };
@@ -78,7 +87,7 @@ const getNormalizedBlinkMemoryInfo = () => {
         allocated: convertBytesToHumanReadable(
             blinkMemoryInfo.allocated * 1024
         ),
-        total: convertBytesToHumanReadable(blinkMemoryInfo.total),
+        total: convertBytesToHumanReadable(blinkMemoryInfo.total * 1024),
     };
 };
 
