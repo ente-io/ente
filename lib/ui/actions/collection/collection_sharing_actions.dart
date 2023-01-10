@@ -9,8 +9,6 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
-import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -116,32 +114,29 @@ class CollectionActions {
     Collection collection,
     User user,
   ) async {
-    final result = await showChoiceDialog(
+    final result = await showNewChoiceDialog(
       context,
-      "Remove?",
-      "${user.email} will be removed "
-          "from this shared album.\n\nAny photos and videos added by them will also be removed from the album.",
-      firstAction: "Yes, remove",
-      secondAction: "Cancel",
-      secondActionColor: getEnteColorScheme(context).strokeBase,
-      actionType: ActionType.critical,
+      title: "Remove",
+      body: "${user.email} will be removed",
+      firstButtonLabel: "Yes, remove",
+      firstButtonOnTap: () async {
+        try {
+          final newSharees = await CollectionsService.instance
+              .unshare(collection.id, user.email);
+          collection.updateSharees(newSharees);
+        } catch (e, s) {
+          Logger("EmailItemWidget").severe(e, s);
+          rethrow;
+        }
+      },
     );
-    if (result != DialogUserChoice.firstChoice) {
-      return Future.value(null);
-    }
-    final dialog = createProgressDialog(context, "Please wait...");
-    await dialog.show();
-    try {
-      final newSharees =
-          await CollectionsService.instance.unshare(collection.id, user.email);
-      collection.updateSharees(newSharees);
-      await dialog.hide();
-      showShortToast(context, "Stopped sharing with " + user.email + ".");
-      return true;
-    } catch (e, s) {
-      Logger("EmailItemWidget").severe(e, s);
-      await dialog.hide();
+    if (result == ButtonAction.error) {
       await showGenericErrorDialog(context: context);
+      return false;
+    }
+    if (result == ButtonAction.first) {
+      return true;
+    } else {
       return false;
     }
   }
