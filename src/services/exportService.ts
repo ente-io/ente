@@ -483,16 +483,16 @@ class ExportService {
             motionPhoto.videoNameTitle,
             file.id
         );
-        this.saveMediaFile(collectionPath, videoSaveName, videoStream);
+        await this.saveMediaFile(collectionPath, videoSaveName, videoStream);
         await this.saveMetadataFile(collectionPath, videoSaveName, file);
     }
 
-    private saveMediaFile(
+    private async saveMediaFile(
         collectionFolderPath: string,
         fileSaveName: string,
         fileStream: ReadableStream<any>
     ) {
-        this.electronAPIs.saveStreamToDisk(
+        await this.electronAPIs.saveStreamToDisk(
             getFileSavePath(collectionFolderPath, fileSaveName),
             fileStream
         );

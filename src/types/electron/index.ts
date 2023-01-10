@@ -13,7 +13,10 @@ export interface ElectronAPIs {
         oldDirPath: string,
         newDirPath: string
     ) => Promise<void>;
-    saveStreamToDisk: (path: string, fileStream: ReadableStream<any>) => void;
+    saveStreamToDisk: (
+        path: string,
+        fileStream: ReadableStream<any>
+    ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectRootDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
