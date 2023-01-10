@@ -22,11 +22,11 @@ export const checkExistsAndRename = async (
     }
 };
 
-export const saveStreamToDisk = (
+export const saveStreamToDisk = async (
     filePath: string,
-    fileStream: ReadableStream<any>
+    fileStream: ReadableStream<Uint8Array>
 ) => {
-    writeStream(filePath, fileStream);
+    await writeStream(filePath, fileStream);
 };
 
 export const saveFileToDisk = async (path: string, fileData: any) => {

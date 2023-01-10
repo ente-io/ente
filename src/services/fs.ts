@@ -212,14 +212,14 @@ export const convertBrowserStreamToNode = (
     return rs;
 };
 
-export function writeStream(
+export async function writeStream(
     filePath: string,
     fileStream: ReadableStream<Uint8Array>
 ) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);
     readable.pipe(writeable);
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
         writeable.on('finish', resolve);
         writeable.on('error', reject);
     });
