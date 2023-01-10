@@ -13,7 +13,6 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/db/trash_db.dart';
@@ -26,6 +25,7 @@ import 'package:photos/models/private_key_attributes.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -160,7 +160,7 @@ class Configuration {
     await MemoriesDB.instance.clearTable();
     await PublicKeysDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
-    await IgnoredFilesDB.instance.clearTable();
+    await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
     if (!autoLogout) {
       CollectionsService.instance.clearCache();
