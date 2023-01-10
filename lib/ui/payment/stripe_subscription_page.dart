@@ -9,7 +9,6 @@ import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/common/web_page.dart';
@@ -430,17 +429,17 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not
-                final result = await showChoiceDialog(
+                final result = await showNewChoiceDialog(
                   context,
-                  "Confirm plan change",
-                  "Are you sure you want to change your plan?",
-                  firstAction: "No",
-                  secondAction: 'Yes',
+                  title: "Confirm plan change",
+                  body: "Are you sure you want to change your plan?",
+                  firstButtonLabel: "Yes",
                 );
-                if (result != DialogUserChoice.secondChoice) {
+                if (result == ButtonAction.first) {
+                  stripPurChaseAction = 'update';
+                } else {
                   return;
                 }
-                stripPurChaseAction = 'update';
               }
               Navigator.push(
                 context,
