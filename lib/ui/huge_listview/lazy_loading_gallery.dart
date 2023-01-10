@@ -32,7 +32,7 @@ class LazyLoadingGallery extends StatefulWidget {
   final String tag;
   final String? logTag;
   final Stream<int> currentIndexStream;
-  final int? photoGirdSize;
+  final int photoGirdSize;
 
   LazyLoadingGallery(
     this.files,
@@ -190,7 +190,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             getDayWidget(
               context,
               _files[0].creationTime!,
-              widget.photoGirdSize!,
+              widget.photoGirdSize,
             ),
             ValueListenableBuilder(
               valueListenable: _showSelectAllButton,
@@ -234,7 +234,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
             ? _getGallery()
             : PlaceHolderWidget(
                 _files.length,
-                widget.photoGirdSize!,
+                widget.photoGirdSize,
               ),
       ],
     );
@@ -242,9 +242,7 @@ class _LazyLoadingGalleryState extends State<LazyLoadingGallery> {
 
   Widget _getGallery() {
     final List<Widget> childGalleries = [];
-    final subGalleryItemLimit = widget.photoGirdSize! < photoGridSizeDefault
-        ? subGalleryLimitMin
-        : subGalleryLimitDefault;
+    final subGalleryItemLimit = widget.photoGirdSize * subGalleryMultiplier;
     for (int index = 0; index < _files.length; index += subGalleryItemLimit) {
       childGalleries.add(
         LazyLoadingGridView(
