@@ -17,6 +17,7 @@ import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
+import { SharedCollectionOption } from './SharedCollectionOption';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 
 interface CollectionOptionsProps {
@@ -211,6 +212,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             }}>
             {collectionSummaryType === CollectionSummaryType.trash ? (
                 <TrashCollectionOption
+                    handleCollectionAction={handleCollectionAction}
+                />
+            ) : collectionSummaryType === CollectionSummaryType.shared ? (
+                <SharedCollectionOption
                     handleCollectionAction={handleCollectionAction}
                 />
             ) : (
