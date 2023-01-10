@@ -192,7 +192,9 @@ export async function isFolder(dirPath: string) {
         .catch(() => false);
 }
 
-export const convertBrowserStreamToNode = (fileStream: any) => {
+export const convertBrowserStreamToNode = (
+    fileStream: ReadableStream<Uint8Array>
+) => {
     const reader = fileStream.getReader();
     const rs = new Readable();
 
@@ -210,10 +212,17 @@ export const convertBrowserStreamToNode = (fileStream: any) => {
     return rs;
 };
 
-export function writeStream(filePath: string, fileStream: any) {
+export function writeStream(
+    filePath: string,
+    fileStream: ReadableStream<Uint8Array>
+) {
     const writeable = fs.createWriteStream(filePath);
     const readable = convertBrowserStreamToNode(fileStream);
     readable.pipe(writeable);
+    return new Promise((resolve, reject) => {
+        writeable.on('finish', resolve);
+        writeable.on('error', reject);
+    });
 }
 
 export async function readTextFile(filePath: string) {
