@@ -414,8 +414,8 @@ class UserService {
   Future<void> setRecoveryKey(KeyAttributes keyAttributes) async {
     try {
       final setRecoveryKeyRequest = SetRecoveryKeyRequest(
-        keyAttributes.masterKeyEncryptedWithRecoveryKey,
-        keyAttributes.masterKeyDecryptionNonce,
+        keyAttributes.masterKeyEncryptedWithRecoveryKey!,
+        keyAttributes.masterKeyDecryptionNonce!,
         keyAttributes.recoveryKeyEncryptedWithMasterKey!,
         keyAttributes.recoveryKeyDecryptionNonce!,
       );

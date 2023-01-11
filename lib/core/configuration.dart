@@ -374,9 +374,9 @@ class Configuration {
     Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
-        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey),
+        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey!),
         Sodium.hex2bin(recoveryKey),
-        Sodium.base642bin(attributes.masterKeyDecryptionNonce),
+        Sodium.base642bin(attributes.masterKeyDecryptionNonce!),
       );
     } catch (e) {
       _logger.severe(e);
