@@ -7,7 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_sodium/flutter_sodium.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
@@ -19,8 +19,8 @@ import 'package:photos/utils/file_uploader_util.dart';
 import 'package:photos/utils/file_util.dart';
 
 final _logger = Logger("ThumbnailUtil");
-final _map = <int, FileDownloadItem>{};
-final _queue = Queue<int>();
+final _uploadIDToDownloadItem = <int, FileDownloadItem>{};
+final _downloadQueue = Queue<int>();
 const int kMaximumConcurrentDownloads = 500;
 
 class FileDownloadItem {
@@ -36,25 +36,27 @@ Future<Uint8List> getThumbnailFromServer(File file) async {
   final cachedThumbnail = cachedThumbnailPath(file);
   if (await cachedThumbnail.exists()) {
     final data = await cachedThumbnail.readAsBytes();
-    ThumbnailLruCache.put(file, data);
+    ThumbnailInMemoryLruCache.put(file, data);
     return data;
   }
-  if (!_map.containsKey(file.uploadedFileID)) {
-    if (_queue.length > kMaximumConcurrentDownloads) {
-      final id = _queue.removeFirst();
-      final item = _map.remove(id)!;
+  // Check if there's already in flight request for fetching thumbnail from the
+  // server
+  if (!_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
+    final item =
+        FileDownloadItem(file, Completer<Uint8List>(), CancelToken(), 1);
+    _uploadIDToDownloadItem[file.uploadedFileID!] = item;
+    if (_downloadQueue.length > kMaximumConcurrentDownloads) {
+      final id = _downloadQueue.removeFirst();
+      final FileDownloadItem item = _uploadIDToDownloadItem.remove(id)!;
       item.cancelToken.cancel();
       item.completer.completeError(RequestCancelledError());
     }
-    final item =
-        FileDownloadItem(file, Completer<Uint8List>(), CancelToken(), 1);
-    _map[file.uploadedFileID!] = item;
-    _queue.add(file.uploadedFileID!);
+    _downloadQueue.add(file.uploadedFileID!);
     _downloadItem(item);
     return item.completer.future;
   } else {
-    _map[file.uploadedFileID]!.counter++;
-    return _map[file.uploadedFileID]!.completer.future;
+    _uploadIDToDownloadItem[file.uploadedFileID]!.counter++;
+    return _uploadIDToDownloadItem[file.uploadedFileID]!.completer.future;
   }
 }
 
@@ -63,21 +65,21 @@ Future<Uint8List?> getThumbnailFromLocal(
   int size = thumbnailSmallSize,
   int quality = thumbnailQuality,
 }) async {
-  final lruCachedThumbnail = ThumbnailLruCache.get(file, size);
+  final lruCachedThumbnail = ThumbnailInMemoryLruCache.get(file, size);
   if (lruCachedThumbnail != null) {
     return lruCachedThumbnail;
   }
   final cachedThumbnail = cachedThumbnailPath(file);
   if ((await cachedThumbnail.exists())) {
     final data = await cachedThumbnail.readAsBytes();
-    ThumbnailLruCache.put(file, data);
+    ThumbnailInMemoryLruCache.put(file, data);
     return data;
   }
   if (file.isSharedMediaToAppSandbox) {
     //todo:neeraj support specifying size/quality
     return getThumbnailFromInAppCacheFile(file).then((data) {
       if (data != null) {
-        ThumbnailLruCache.put(file, data, size);
+        ThumbnailInMemoryLruCache.put(file, data, size);
       }
       return data;
     });
@@ -89,7 +91,7 @@ Future<Uint8List?> getThumbnailFromLocal(
       return asset
           .thumbnailDataWithSize(ThumbnailSize(size, size), quality: quality)
           .then((data) {
-        ThumbnailLruCache.put(file, data, size);
+        ThumbnailInMemoryLruCache.put(file, data, size);
         return data;
       });
     });
@@ -97,13 +99,13 @@ Future<Uint8List?> getThumbnailFromLocal(
 }
 
 void removePendingGetThumbnailRequestIfAny(File file) {
-  if (_map.containsKey(file.uploadedFileID)) {
-    final item = _map[file.uploadedFileID]!;
+  if (_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
+    final item = _uploadIDToDownloadItem[file.uploadedFileID]!;
     item.counter--;
     if (item.counter <= 0) {
-      _map.remove(file.uploadedFileID);
+      _uploadIDToDownloadItem.remove(file.uploadedFileID);
       item.cancelToken.cancel();
-      _queue.removeWhere((element) => element == file.uploadedFileID);
+      _downloadQueue.removeWhere((element) => element == file.uploadedFileID);
     }
   }
 }
@@ -119,8 +121,8 @@ void _downloadItem(FileDownloadItem item) async {
     );
     item.completer.completeError(e);
   }
-  _queue.removeWhere((element) => element == item.file.uploadedFileID);
-  _map.remove(item.file.uploadedFileID);
+  _downloadQueue.removeWhere((element) => element == item.file.uploadedFileID);
+  _uploadIDToDownloadItem.remove(item.file.uploadedFileID);
 }
 
 Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
@@ -142,7 +144,7 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
     }
     rethrow;
   }
-  if (!_map.containsKey(file.uploadedFileID)) {
+  if (!_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
     return;
   }
   final thumbnailDecryptionKey = decryptFileKey(file);
@@ -155,14 +157,14 @@ Future<void> _downloadAndDecryptThumbnail(FileDownloadItem item) async {
   if (thumbnailSize > thumbnailDataLimit) {
     data = await compressThumbnail(data);
   }
-  ThumbnailLruCache.put(item.file, data);
+  ThumbnailInMemoryLruCache.put(item.file, data);
   final cachedThumbnail = cachedThumbnailPath(item.file);
   if (await cachedThumbnail.exists()) {
     await cachedThumbnail.delete();
   }
   // data is already cached in-memory, no need to await on dist write
   unawaited(cachedThumbnail.writeAsBytes(data));
-  if (_map.containsKey(file.uploadedFileID)) {
+  if (_uploadIDToDownloadItem.containsKey(file.uploadedFileID)) {
     try {
       item.completer.complete(data);
     } catch (e) {
