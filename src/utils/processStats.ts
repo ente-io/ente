@@ -5,9 +5,9 @@ const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
 const SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS = 1 * 1000; // 1 seconds
 
-const MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 500 * 1024; // 500 MB
+const MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 200 * 1024; // 200 MB
 
-let previousMemoryUsage = 0;
+const HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 700 * 1024; // 700 MB
 
 async function logMainProcessStats() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
@@ -24,29 +24,54 @@ async function logMainProcessStats() {
     });
 }
 
+let previousProcessMemoryInfo: Electron.ProcessMemoryInfo = {
+    private: 0,
+    shared: 0,
+    residentSet: 0,
+};
+
+let usingHighMemory = false;
+
 async function logSpikeMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
         processMemoryInfo.residentSet,
         processMemoryInfo.private
     );
+    const previewMemoryUsage = Math.max(
+        previousProcessMemoryInfo.private,
+        previousProcessMemoryInfo.residentSet
+    );
     const isSpiking =
-        currentMemoryUsage - previousMemoryUsage >=
+        currentMemoryUsage - previewMemoryUsage >=
         MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
 
-    if (isSpiking) {
-        const normalizedProcessMemoryInfo =
+    const isHighMemoryUsage =
+        currentMemoryUsage >= HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES;
+
+    const shouldReport =
+        (isHighMemoryUsage && !usingHighMemory) ||
+        (!isHighMemoryUsage && usingHighMemory);
+
+    if (isSpiking || shouldReport) {
+        const normalizedCurrentProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(processMemoryInfo);
+        const normalizedPreviousProcessMemoryInfo =
+            await getNormalizedProcessMemoryInfo(previousProcessMemoryInfo);
         const cpuUsage = process.getCPUUsage();
         const heapStatistics = getNormalizedHeapStatistics();
 
-        ElectronLog.log('main process stats', {
-            processMemoryInfo: normalizedProcessMemoryInfo,
+        ElectronLog.log('reporting memory usage spike', {
+            currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
+            previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
             heapStatistics,
             cpuUsage,
         });
     }
-    previousMemoryUsage = currentMemoryUsage;
+    previousProcessMemoryInfo = processMemoryInfo;
+    if (shouldReport) {
+        usingHighMemory = !usingHighMemory;
+    }
 }
 
 async function logRendererProcessStats() {
