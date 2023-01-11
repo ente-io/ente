@@ -84,9 +84,14 @@ It's a dev deployment (and should use the environment override for endpoints ) i
 2. when the URL opened is that of the staging album app, or
 3. if the app is running locally (hence node_env is development)
 */
-const isDevDeployment = () =>
-    runningInBrowser() &&
-    (process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT === window.location.origin ||
-        process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
-            window.location.origin ||
-        process.env.NODE_ENV === 'development');
+const isDevDeployment = () => {
+    if (runningInBrowser()) {
+        return (
+            process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
+                window.location.origin ||
+            process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
+                window.location.origin ||
+            process.env.NODE_ENV === 'development'
+        );
+    }
+};
