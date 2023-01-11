@@ -23,11 +23,8 @@ import {
     skipAppVersion,
     updateAndRestart,
 } from '../services/appUpdater';
-import {
-    deleteTempFile,
-    runFFmpegCmd,
-    writeTempFile,
-} from '../services/ffmpeg';
+import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
+import { generateTempFilePath } from './temp';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -140,12 +137,9 @@ export default function setupIpcComs(
             return runFFmpegCmd(cmd, inputFilePath, outputFileName);
         }
     );
-    ipcMain.handle(
-        'write-temp-file',
-        (_, fileStream: Uint8Array, fileName: string) => {
-            return writeTempFile(fileStream, fileName);
-        }
-    );
+    ipcMain.handle('get-temp-file-path', (_, formatSuffix) => {
+        return generateTempFilePath(formatSuffix);
+    });
     ipcMain.handle('remove-temp-file', (_, tempFilePath: string) => {
         return deleteTempFile(tempFilePath);
     });
