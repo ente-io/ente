@@ -142,6 +142,7 @@ export default function Uploader(props: Props) {
     };
     const handleCollectionSelectorCancel = () => {
         uploadRunning.current = false;
+        appContext.resetSharedFiles();
     };
 
     const handleUserNameInputDialogClose = () => {

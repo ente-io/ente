@@ -525,13 +525,6 @@ export default function Gallery() {
         }
     };
 
-    const closeCollectionSelector = (closeBtnClick?: boolean) => {
-        if (closeBtnClick === true) {
-            appContext.resetSharedFiles();
-        }
-        setCollectionSelectorView(false);
-    };
-
     const fixTimeHelper = async () => {
         const selectedFiles = getSelectedFiles(selected, files);
         setFixCreationTimeAttributes({ files: selectedFiles });
@@ -553,6 +546,10 @@ export default function Gallery() {
 
     const openUploader = () => {
         setUploadTypeSelectorView(true);
+    };
+
+    const closeCollectionSelector = () => {
+        setCollectionSelectorView(false);
     };
 
     return (
