@@ -5,20 +5,25 @@ const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
 const SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS = 1 * 1000; // 1 seconds
 
-const MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 200 * 1024; // 200 MB
+const MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 10 * 1024; // 10 MB
 
-const HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 700 * 1024; // 700 MB
+const HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 200 * 1024; // 200 MB
+
+const HEAP_SIZE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 200 * 1024; // 200 MB
+
+const HIGH_HEAP_USAGE_THRESHOLD_IN_KILOBYTES = 700 * 1024; // 700 MB
 
 async function logMainProcessStats() {
-    const processMemoryInfo = await process.getProcessMemoryInfo();
-    const normalizedProcessMemoryInfo = await getNormalizedProcessMemoryInfo(
-        processMemoryInfo
+    const processMemoryInfo = await getNormalizedProcessMemoryInfo(
+        await process.getProcessMemoryInfo()
     );
     const cpuUsage = process.getCPUUsage();
-    const heapStatistics = getNormalizedHeapStatistics();
+    const heapStatistics = getNormalizedHeapStatistics(
+        process.getHeapStatistics()
+    );
 
     ElectronLog.log('main process stats', {
-        processMemoryInfo: normalizedProcessMemoryInfo,
+        processMemoryInfo,
         heapStatistics,
         cpuUsage,
     });
@@ -32,7 +37,7 @@ let previousProcessMemoryInfo: Electron.ProcessMemoryInfo = {
 
 let usingHighMemory = false;
 
-async function logSpikeMemoryUsage() {
+async function logSpikeMainMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
         processMemoryInfo.residentSet,
@@ -59,7 +64,9 @@ async function logSpikeMemoryUsage() {
         const normalizedPreviousProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(previousProcessMemoryInfo);
         const cpuUsage = process.getCPUUsage();
-        const heapStatistics = getNormalizedHeapStatistics();
+        const heapStatistics = getNormalizedHeapStatistics(
+            process.getHeapStatistics()
+        );
 
         ElectronLog.log('reporting memory usage spike', {
             currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
@@ -74,9 +81,61 @@ async function logSpikeMemoryUsage() {
     }
 }
 
+let previousHeapStatistics: Electron.HeapStatistics = {
+    totalHeapSize: 0,
+    totalHeapSizeExecutable: 0,
+    totalPhysicalSize: 0,
+    totalAvailableSize: 0,
+    usedHeapSize: 0,
+    heapSizeLimit: 0,
+    mallocedMemory: 0,
+    peakMallocedMemory: 0,
+    doesZapGarbage: false,
+};
+
+let usingHighHeapMemory = false;
+async function logSpikeRendererMemoryUsage() {
+    const currentHeapStatistics = process.getHeapStatistics();
+
+    const isSpiking =
+        currentHeapStatistics.totalHeapSize -
+            previousHeapStatistics.totalHeapSize >=
+        HEAP_SIZE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
+
+    const isHighHeapSize =
+        currentHeapStatistics.totalHeapSize >=
+        HIGH_HEAP_USAGE_THRESHOLD_IN_KILOBYTES;
+
+    const shouldReport =
+        (isHighHeapSize && !usingHighHeapMemory) ||
+        (!isHighHeapSize && usingHighHeapMemory);
+
+    if (isSpiking || shouldReport) {
+        const normalizedCurrentHeapStatistics = getNormalizedHeapStatistics(
+            currentHeapStatistics
+        );
+        const normalizedPreviousProcessMemoryInfo = getNormalizedHeapStatistics(
+            previousHeapStatistics
+        );
+        const cpuUsage = process.getCPUUsage();
+
+        ElectronLog.log('reporting memory usage spike', {
+            currentProcessMemoryInfo: normalizedCurrentHeapStatistics,
+            previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
+            cpuUsage,
+        });
+    }
+    previousHeapStatistics = currentHeapStatistics;
+    if (shouldReport) {
+        usingHighHeapMemory = !usingHighHeapMemory;
+    }
+}
+
 async function logRendererProcessStats() {
     const blinkMemoryInfo = getNormalizedBlinkMemoryInfo();
-    const heapStatistics = getNormalizedHeapStatistics();
+    const heapStatistics = getNormalizedHeapStatistics(
+        process.getHeapStatistics()
+    );
     const webFrameResourceUsage = getNormalizedWebFrameResourceUsage();
     ElectronLog.log('renderer process stats', {
         blinkMemoryInfo,
@@ -86,11 +145,18 @@ async function logRendererProcessStats() {
 }
 
 export function setupMainProcessStatsLogger() {
-    setInterval(logSpikeMemoryUsage, SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS);
+    setInterval(
+        logSpikeMainMemoryUsage,
+        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
+    );
     setInterval(logMainProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
 
 export function setupRendererProcessStatsLogger() {
+    setInterval(
+        logSpikeRendererMemoryUsage,
+        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
+    );
     setInterval(logRendererProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
 
@@ -116,8 +182,9 @@ const getNormalizedBlinkMemoryInfo = () => {
     };
 };
 
-const getNormalizedHeapStatistics = () => {
-    const heapStatistics = process.getHeapStatistics();
+const getNormalizedHeapStatistics = (
+    heapStatistics: Electron.HeapStatistics
+) => {
     return {
         totalHeapSize: convertBytesToHumanReadable(
             heapStatistics.totalHeapSize * 1024
