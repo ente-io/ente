@@ -70,6 +70,12 @@ export const getSentryTunnelURL = () => {
     return `https://sentry-reporter.ente.io`;
 };
 
+/*
+It's a dev deployment (and should use the environment override for endpoints ) in three cases:
+1. when the URL opened is that of the staging web app, or
+2. when the URL opened is that of the staging album app, or
+3. if the app is running locally (hence node_env is development)
+*/
 const isDevDeployment = () =>
     runningInBrowser() &&
     (process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT === window.location.origin ||
