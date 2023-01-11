@@ -17,6 +17,7 @@ import { AppContext } from 'pages/_app';
 import OverflowMenu from 'components/OverflowMenu/menu';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
+import { SharedCollectionOption } from './SharedCollectionOption';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 
 interface CollectionOptionsProps {
@@ -39,6 +40,8 @@ export enum CollectionActions {
     SHOW_SHARE_DIALOG,
     CONFIRM_EMPTY_TRASH,
     EMPTY_TRASH,
+    CONFIRM_LEAVE_SHARED_ALBUM,
+    LEAVE_SHARED_ALBUM,
 }
 
 const CollectionOptions = (props: CollectionOptionsProps) => {
@@ -93,6 +96,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.EMPTY_TRASH:
                 callback = emptyTrash;
                 break;
+            case CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM:
+                callback = confirmLeaveSharedAlbum;
+                break;
+            case CollectionActions.LEAVE_SHARED_ALBUM:
+                callback = leaveSharedAlbum;
+                break;
             default:
                 logError(
                     Error('invalid collection action '),
@@ -127,6 +136,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const deleteCollection = async () => {
         await CollectionAPI.deleteCollection(activeCollection.id);
+        redirectToAll();
+    };
+
+    const leaveSharedAlbum = async () => {
+        await CollectionAPI.leaveSharedAlbum(activeCollection.id);
         redirectToAll();
     };
 
@@ -200,6 +214,23 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             close: { text: constants.CANCEL },
         });
 
+    const confirmLeaveSharedAlbum = () => {
+        setDialogMessage({
+            title: constants.LEAVE_SHARED_ALBUM_TITLE,
+            content: constants.LEAVE_SHARED_ALBUM_MESSAGE,
+            proceed: {
+                text: constants.LEAVE_SHARED_ALBUM,
+                action: handleCollectionAction(
+                    CollectionActions.LEAVE_SHARED_ALBUM
+                ),
+                variant: 'danger',
+            },
+            close: {
+                text: constants.CANCEL,
+            },
+        });
+    };
+
     return (
         <OverflowMenu
             ariaControls={'collection-options'}
@@ -211,6 +242,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             }}>
             {collectionSummaryType === CollectionSummaryType.trash ? (
                 <TrashCollectionOption
+                    handleCollectionAction={handleCollectionAction}
+                />
+            ) : collectionSummaryType === CollectionSummaryType.shared ? (
+                <SharedCollectionOption
                     handleCollectionAction={handleCollectionAction}
                 />
             ) : (
