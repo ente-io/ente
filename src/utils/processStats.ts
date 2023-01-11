@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import ElectronLog from 'electron-log';
 import { webFrame } from 'electron/renderer';
 
@@ -5,13 +6,13 @@ const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
 const SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS = 1 * 1000; // 1 seconds
 
-const MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 10 * 1024; // 10 MB
+const MAIN_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 10 * 1024; // 10 MB
 
-const HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 100 * 1024; // 100 MB
+const HIGH_MAIN_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 100 * 1024; // 100 MB
 
-const HEAP_SIZE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 200 * 1024; // 200 MB
+const RENDERER_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 200 * 1024; // 200 MB
 
-const HIGH_HEAP_USAGE_THRESHOLD_IN_KILOBYTES = 700 * 1024; // 700 MB
+const HIGH_RENDERER_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 700 * 1024; // 700 MB
 
 async function logMainProcessStats() {
     const processMemoryInfo = await getNormalizedProcessMemoryInfo(
@@ -29,13 +30,13 @@ async function logMainProcessStats() {
     });
 }
 
-let previousProcessMemoryInfo: Electron.ProcessMemoryInfo = {
+let previousMainProcessMemoryInfo: Electron.ProcessMemoryInfo = {
     private: 0,
     shared: 0,
     residentSet: 0,
 };
 
-let usingHighMemory = false;
+let mainProcessUsingHighMemory = false;
 
 async function logSpikeMainMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
@@ -44,25 +45,25 @@ async function logSpikeMainMemoryUsage() {
         processMemoryInfo.private
     );
     const previewMemoryUsage = Math.max(
-        previousProcessMemoryInfo.private,
-        previousProcessMemoryInfo.residentSet
+        previousMainProcessMemoryInfo.private,
+        previousMainProcessMemoryInfo.residentSet
     );
     const isSpiking =
         currentMemoryUsage - previewMemoryUsage >=
-        MEMORY_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
+        MAIN_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
 
     const isHighMemoryUsage =
-        currentMemoryUsage >= HIGH_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES;
+        currentMemoryUsage >= HIGH_MAIN_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES;
 
     const shouldReport =
-        (isHighMemoryUsage && !usingHighMemory) ||
-        (!isHighMemoryUsage && usingHighMemory);
+        (isHighMemoryUsage && !mainProcessUsingHighMemory) ||
+        (!isHighMemoryUsage && mainProcessUsingHighMemory);
 
     if (isSpiking || shouldReport) {
         const normalizedCurrentProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(processMemoryInfo);
         const normalizedPreviousProcessMemoryInfo =
-            await getNormalizedProcessMemoryInfo(previousProcessMemoryInfo);
+            await getNormalizedProcessMemoryInfo(previousMainProcessMemoryInfo);
         const cpuUsage = process.getCPUUsage();
         const heapStatistics = getNormalizedHeapStatistics(
             process.getHeapStatistics()
@@ -75,59 +76,63 @@ async function logSpikeMainMemoryUsage() {
             cpuUsage,
         });
     }
-    previousProcessMemoryInfo = processMemoryInfo;
+    previousMainProcessMemoryInfo = processMemoryInfo;
     if (shouldReport) {
-        usingHighMemory = !usingHighMemory;
+        mainProcessUsingHighMemory = !mainProcessUsingHighMemory;
     }
 }
 
-let previousHeapStatistics: Electron.HeapStatistics = {
-    totalHeapSize: 0,
-    totalHeapSizeExecutable: 0,
-    totalPhysicalSize: 0,
-    totalAvailableSize: 0,
-    usedHeapSize: 0,
-    heapSizeLimit: 0,
-    mallocedMemory: 0,
-    peakMallocedMemory: 0,
-    doesZapGarbage: false,
+let previousRendererProcessMemoryInfo: Electron.ProcessMemoryInfo = {
+    private: 0,
+    shared: 0,
+    residentSet: 0,
 };
 
-let usingHighHeapMemory = false;
+let rendererUsingHighMemory = false;
+
 async function logSpikeRendererMemoryUsage() {
-    const currentHeapStatistics = process.getHeapStatistics();
-
+    const processMemoryInfo = await process.getProcessMemoryInfo();
+    const currentMemoryUsage = Math.max(
+        processMemoryInfo.residentSet,
+        processMemoryInfo.private
+    );
+    const previewMemoryUsage = Math.max(
+        previousRendererProcessMemoryInfo.private,
+        previousRendererProcessMemoryInfo.residentSet
+    );
     const isSpiking =
-        currentHeapStatistics.totalHeapSize -
-            previousHeapStatistics.totalHeapSize >=
-        HEAP_SIZE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
+        currentMemoryUsage - previewMemoryUsage >=
+        RENDERER_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
 
-    const isHighHeapSize =
-        currentHeapStatistics.totalHeapSize >=
-        HIGH_HEAP_USAGE_THRESHOLD_IN_KILOBYTES;
+    const isHighMemoryUsage =
+        currentMemoryUsage >= HIGH_RENDERER_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES;
 
     const shouldReport =
-        (isHighHeapSize && !usingHighHeapMemory) ||
-        (!isHighHeapSize && usingHighHeapMemory);
+        (isHighMemoryUsage && !rendererUsingHighMemory) ||
+        (!isHighMemoryUsage && rendererUsingHighMemory);
 
     if (isSpiking || shouldReport) {
-        const normalizedCurrentHeapStatistics = getNormalizedHeapStatistics(
-            currentHeapStatistics
-        );
-        const normalizedPreviousProcessMemoryInfo = getNormalizedHeapStatistics(
-            previousHeapStatistics
-        );
+        const normalizedCurrentProcessMemoryInfo =
+            await getNormalizedProcessMemoryInfo(processMemoryInfo);
+        const normalizedPreviousProcessMemoryInfo =
+            await getNormalizedProcessMemoryInfo(
+                previousRendererProcessMemoryInfo
+            );
         const cpuUsage = process.getCPUUsage();
+        const heapStatistics = getNormalizedHeapStatistics(
+            process.getHeapStatistics()
+        );
 
         ElectronLog.log('reporting memory usage spike', {
-            currentProcessMemoryInfo: normalizedCurrentHeapStatistics,
+            currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
             previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
+            heapStatistics,
             cpuUsage,
         });
     }
-    previousHeapStatistics = currentHeapStatistics;
+    previousRendererProcessMemoryInfo = processMemoryInfo;
     if (shouldReport) {
-        usingHighHeapMemory = !usingHighHeapMemory;
+        rendererUsingHighMemory = !rendererUsingHighMemory;
     }
 }
 
@@ -137,27 +142,34 @@ async function logRendererProcessStats() {
         process.getHeapStatistics()
     );
     const webFrameResourceUsage = getNormalizedWebFrameResourceUsage();
+    const processMemoryInfo = await getNormalizedProcessMemoryInfo(
+        await process.getProcessMemoryInfo()
+    );
     ElectronLog.log('renderer process stats', {
         blinkMemoryInfo,
         heapStatistics,
+        processMemoryInfo,
         webFrameResourceUsage,
     });
 }
 
 export function setupMainProcessStatsLogger() {
-    setInterval(
-        logSpikeMainMemoryUsage,
-        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
-    );
-    setInterval(logMainProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
+    // setInterval(
+    //     logSpikeMainMemoryUsage,
+    //     SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
+    // );
+    setInterval(logMainProcessStats, SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS);
 }
 
 export function setupRendererProcessStatsLogger() {
+    // setInterval(
+    //     logSpikeRendererMemoryUsage,
+    //     SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
+    // );
     setInterval(
-        logSpikeRendererMemoryUsage,
+        logRendererProcessStats,
         SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
     );
-    setInterval(logRendererProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
 
 const getNormalizedProcessMemoryInfo = async (
