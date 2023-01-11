@@ -18,10 +18,10 @@ export function SharedCollectionOption({ handleCollectionAction }: Iprops) {
             color="danger"
             startIcon={<DeleteOutlinedIcon />}
             onClick={handleCollectionAction(
-                CollectionActions.CONFIRM_EMPTY_TRASH,
+                CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM,
                 false
             )}>
-            {constants.LEAVE}
+            {constants.LEAVE_ALBUM}
         </OverflowMenuOption>
     );
 }

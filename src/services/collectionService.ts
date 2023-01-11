@@ -512,6 +512,22 @@ export const deleteCollection = async (collectionID: number) => {
     }
 };
 
+export const leaveSharedAlbum = async (collectionID: number) => {
+    try {
+        const token = getToken();
+
+        await HTTPService.post(
+            `${ENDPOINT}/collections/leave/${collectionID}`,
+            null,
+            null,
+            { 'X-Auth-Token': token }
+        );
+    } catch (e) {
+        logError(e, 'leave shared album failed ');
+        throw e;
+    }
+};
+
 export const updateCollectionMagicMetadata = async (collection: Collection) => {
     const token = getToken();
     if (!token) {

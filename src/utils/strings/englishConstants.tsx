@@ -270,7 +270,7 @@ const englishConstants = {
     MANAGEMENT_PORTAL: 'Manage payment method',
     MANAGE_FAMILY_PORTAL: 'Manage family',
     LEAVE_FAMILY_PLAN: 'Leave family plan',
-    LEAVE: 'Leave',
+    LEAVE_ALBUM: 'Leave Album',
     LEAVE_FAMILY_CONFIRM: 'Are you sure that you want to leave family plan?',
     CHOOSE_PLAN: 'Choose your plan',
     MANAGE_PLAN: 'Manage your subscription',
@@ -611,7 +611,11 @@ const englishConstants = {
     EMPTY_TRASH_TITLE: 'Empty trash?',
     EMPTY_TRASH_MESSAGE:
         'These files will be permanently deleted from your ente account.',
-
+    LEAVE_SHARED_ALBUM: 'Leave shared album',
+    LEAVE_SHARED_ALBUM_TITLE: 'Leave shared Album?',
+    LEAVE_SHARED_ALBUM_FAILED: 'failed to leave the album, please try again',
+    LEAVE_SHARED_ALBUM_MESSAGE:
+        'You will leave the album, and it will stop being visible to you.',
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
             <p>Are you sure you want to remove these files from the album?</p>
