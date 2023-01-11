@@ -131,7 +131,7 @@ class FavoritesService {
       await _collectionsService.addToCollection(collectionID, files);
     }
     _updateFavoriteFilesCache(files, favFlag: true);
-    RemoteSyncService.instance.sync(silently: true);
+    RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
   Future<void> updateFavorites(List<File> files, bool favFlag) async {
