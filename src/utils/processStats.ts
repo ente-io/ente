@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import ElectronLog from 'electron-log';
 import { webFrame } from 'electron/renderer';
 
@@ -154,22 +153,19 @@ async function logRendererProcessStats() {
 }
 
 export function setupMainProcessStatsLogger() {
-    // setInterval(
-    //     logSpikeMainMemoryUsage,
-    //     SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
-    // );
-    setInterval(logMainProcessStats, SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS);
+    setInterval(
+        logSpikeMainMemoryUsage,
+        SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
+    );
+    setInterval(logMainProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
 
 export function setupRendererProcessStatsLogger() {
-    // setInterval(
-    //     logSpikeRendererMemoryUsage,
-    //     SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
-    // );
     setInterval(
-        logRendererProcessStats,
+        logSpikeRendererMemoryUsage,
         SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS
     );
+    setInterval(logRendererProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
 
 const getNormalizedProcessMemoryInfo = async (
