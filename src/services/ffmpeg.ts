@@ -39,10 +39,18 @@ export async function runFFmpegCmd(
         });
         const escapedCmd = shellescape(cmd);
         log.info('running ffmpeg command', escapedCmd);
+        const startTime = Date.now();
         await execAsync(escapedCmd);
         if (!existsSync(tempOutputFilePath)) {
             throw new Error('ffmpeg output file not found');
         }
+        log.info(
+            'ffmpeg command execution time ',
+            escapedCmd,
+            Date.now() - startTime,
+            'ms'
+        );
+
         const outputFile = await readFile(tempOutputFilePath);
         return new Uint8Array(outputFile);
     } catch (e) {
