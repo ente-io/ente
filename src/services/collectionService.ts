@@ -523,7 +523,7 @@ export const leaveSharedAlbum = async (collectionID: number) => {
             { 'X-Auth-Token': token }
         );
     } catch (e) {
-        logError(e, 'leave shared album failed ');
+        logError(e, constants.LEAVE_SHARED_ALBUM_FAILED);
         throw e;
     }
 };

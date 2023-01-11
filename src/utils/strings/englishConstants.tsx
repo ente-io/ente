@@ -611,7 +611,7 @@ const englishConstants = {
     EMPTY_TRASH_TITLE: 'Empty trash?',
     EMPTY_TRASH_MESSAGE:
         'These files will be permanently deleted from your ente account.',
-    LEAVE_SHARED_ALBUM: 'Leave shared album',
+    LEAVE_SHARED_ALBUM: 'Yes, leave',
     LEAVE_SHARED_ALBUM_TITLE: 'Leave shared Album?',
     LEAVE_SHARED_ALBUM_FAILED: 'failed to leave the album, please try again',
     LEAVE_SHARED_ALBUM_MESSAGE:
