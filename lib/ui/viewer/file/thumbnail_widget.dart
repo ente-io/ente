@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/errors.dart';
@@ -187,7 +187,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_isLoadingLocalThumbnail) {
       _isLoadingLocalThumbnail = true;
       final cachedSmallThumbnail =
-          ThumbnailLruCache.get(widget.file!, thumbnailSmallSize);
+          ThumbnailInMemoryLruCache.get(widget.file!, thumbnailSmallSize);
       if (cachedSmallThumbnail != null) {
         _imageProvider = Image.memory(cachedSmallThumbnail).image;
         _hasLoadedThumbnail = true;
@@ -240,7 +240,8 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         final imageProvider = Image.memory(thumbData).image;
         _cacheAndRender(imageProvider);
       }
-      ThumbnailLruCache.put(widget.file!, thumbData, thumbnailSmallSize);
+      ThumbnailInMemoryLruCache.put(
+          widget.file!, thumbData, thumbnailSmallSize);
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _errorLoadingLocalThumbnail = true;
@@ -252,7 +253,7 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         !_errorLoadingRemoteThumbnail &&
         !_isLoadingRemoteThumbnail) {
       _isLoadingRemoteThumbnail = true;
-      final cachedThumbnail = ThumbnailLruCache.get(widget.file!);
+      final cachedThumbnail = ThumbnailInMemoryLruCache.get(widget.file!);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _hasLoadedThumbnail = true;

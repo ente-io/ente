@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
@@ -102,7 +102,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailLruCache.get(_photo!);
+      final cachedThumbnail = ThumbnailInMemoryLruCache.get(_photo!);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
@@ -142,7 +142,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
       final cachedThumbnail =
-          ThumbnailLruCache.get(_photo!, thumbnailSmallSize);
+          ThumbnailInMemoryLruCache.get(_photo!, thumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;

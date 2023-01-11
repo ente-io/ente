@@ -12,7 +12,7 @@ import 'package:logging/logging.dart';
 import 'package:motionphoto/motionphoto.dart';
 import 'package:path/path.dart';
 import 'package:photos/core/cache/image_cache.dart';
-import 'package:photos/core/cache/thumbnail_cache.dart';
+import 'package:photos/core/cache/thumbnail_in_memory_cache.dart';
 import 'package:photos/core/cache/video_cache_manager.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
@@ -337,7 +337,7 @@ Future<void> clearCache(ente.File file) async {
   if (cachedThumbnail.existsSync()) {
     await cachedThumbnail.delete();
   }
-  ThumbnailLruCache.clearCache(file);
+  ThumbnailInMemoryLruCache.clearCache(file);
 }
 
 class _LivePhoto {
