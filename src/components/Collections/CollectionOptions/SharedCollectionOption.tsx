@@ -21,7 +21,7 @@ export function SharedCollectionOption({ handleCollectionAction }: Iprops) {
                 CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM,
                 false
             )}>
-            {constants.LEAVE_ALBUM}
+            {constants.LEAVE}
         </OverflowMenuOption>
     );
 }
