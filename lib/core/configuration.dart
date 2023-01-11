@@ -273,8 +273,8 @@ class Configuration {
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       Sodium.base642bin(attributes.kekSalt),
-      attributes.memLimit,
-      attributes.opsLimit,
+      attributes.memLimit!,
+      attributes.opsLimit!,
     ).onError((e, s) {
       _logger.severe('deriveKey failed', e, s);
       throw KeyDerivationError();
@@ -318,8 +318,8 @@ class Configuration {
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       Sodium.base642bin(attributes.kekSalt),
-      attributes.memLimit,
-      attributes.opsLimit,
+      attributes.memLimit!,
+      attributes.opsLimit!,
     ).onError((e, s) {
       _logger.severe('deriveKey failed', e, s);
       throw KeyDerivationError();
@@ -374,9 +374,9 @@ class Configuration {
     Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
-        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey),
+        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey!),
         Sodium.hex2bin(recoveryKey),
-        Sodium.base642bin(attributes.masterKeyDecryptionNonce),
+        Sodium.base642bin(attributes.masterKeyDecryptionNonce!),
       );
     } catch (e) {
       _logger.severe(e);
