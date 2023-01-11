@@ -25,7 +25,10 @@ void validatePreVerificationStateCheck(
     "secretKeyDecryptionNonce",
   );
   nullOrEmptyArgCheck(keyAttr.publicKey, "publicKey");
-  if (keyAttr.memLimit <= 0 || keyAttr.opsLimit <= 0) {
+  if (keyAttr.memLimit == null || keyAttr.opsLimit == null) {
+    throw ArgumentError("Key mem/OpsLimit can not be null");
+  }
+  if (keyAttr.memLimit! <= 0 || keyAttr.opsLimit! <= 0) {
     throw ArgumentError("Key mem/OpsLimit can not be <0");
   }
   // check password encoding issues

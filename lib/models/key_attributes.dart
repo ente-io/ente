@@ -7,8 +7,8 @@ class KeyAttributes {
   final String publicKey;
   final String encryptedSecretKey;
   final String secretKeyDecryptionNonce;
-  final int memLimit;
-  final int opsLimit;
+  final int? memLimit;
+  final int? opsLimit;
   final String masterKeyEncryptedWithRecoveryKey;
   final String masterKeyDecryptionNonce;
   final String? recoveryKeyEncryptedWithMasterKey;

@@ -397,8 +397,8 @@ class UserService {
         kekSalt: keyAttributes.kekSalt,
         encryptedKey: keyAttributes.encryptedKey,
         keyDecryptionNonce: keyAttributes.keyDecryptionNonce,
-        memLimit: keyAttributes.memLimit,
-        opsLimit: keyAttributes.opsLimit,
+        memLimit: keyAttributes.memLimit!,
+        opsLimit: keyAttributes.opsLimit!,
       );
       await _enteDio.put(
         "/users/keys",
