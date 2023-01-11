@@ -23,6 +23,17 @@ class SilentlyCancelUploadsError extends Error {}
 
 class UserCancelledUploadError extends Error {}
 
+bool isHandledSyncError(Object errObj) {
+  if (errObj is UnauthorizedError ||
+      errObj is NoActiveSubscriptionError ||
+      errObj is WiFiUnavailableError ||
+      errObj is StorageLimitExceededError ||
+      errObj is SyncStopRequestedError) {
+    return true;
+  }
+  return false;
+}
+
 class LockAlreadyAcquiredError extends Error {}
 
 class UnauthorizedError extends Error {}

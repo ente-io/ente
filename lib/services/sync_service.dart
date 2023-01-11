@@ -168,7 +168,7 @@ class SyncService {
     _logger.info("Permission granted " + state.toString());
     await _localSyncService.onPermissionGranted(state);
     Bus.instance.fire(PermissionGrantedEvent());
-    _doSync();
+    _doSync().ignore();
   }
 
   void onFoldersSet(Set<String> paths) {
