@@ -11,6 +11,7 @@ import 'package:photos/app.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
 import 'package:photos/core/error-reporting/super_logging.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/core/network.dart';
 import 'package:photos/db/upload_locks_db.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -171,7 +172,9 @@ Future<void> _sync(String caller) async {
   try {
     await SyncService.instance.sync();
   } catch (e, s) {
-    _logger.severe("Sync error", e, s);
+    if (!isHandledSyncError(e)) {
+      _logger.severe("Sync error", e, s);
+    }
   }
 }
 
