@@ -15,13 +15,12 @@ interface Iprops {
 export function SharedCollectionOption({ handleCollectionAction }: Iprops) {
     return (
         <OverflowMenuOption
-            color="danger"
             startIcon={<DeleteOutlinedIcon />}
             onClick={handleCollectionAction(
                 CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM,
                 false
             )}>
-            {constants.LEAVE}
+            {constants.LEAVE_ALBUM}
         </OverflowMenuOption>
     );
 }
