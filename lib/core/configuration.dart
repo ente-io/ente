@@ -13,7 +13,6 @@ import 'package:photos/core/errors.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/collections_db.dart';
 import 'package:photos/db/files_db.dart';
-import 'package:photos/db/ignored_files_db.dart';
 import 'package:photos/db/memories_db.dart';
 import 'package:photos/db/public_keys_db.dart';
 import 'package:photos/db/trash_db.dart';
@@ -26,6 +25,7 @@ import 'package:photos/models/private_key_attributes.dart';
 import 'package:photos/services/billing_service.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/favorites_service.dart';
+import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
@@ -160,7 +160,7 @@ class Configuration {
     await MemoriesDB.instance.clearTable();
     await PublicKeysDB.instance.clearTable();
     await UploadLocksDB.instance.clearTable();
-    await IgnoredFilesDB.instance.clearTable();
+    await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
     if (!autoLogout) {
       CollectionsService.instance.clearCache();
@@ -273,8 +273,8 @@ class Configuration {
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       Sodium.base642bin(attributes.kekSalt),
-      attributes.memLimit,
-      attributes.opsLimit,
+      attributes.memLimit!,
+      attributes.opsLimit!,
     ).onError((e, s) {
       _logger.severe('deriveKey failed', e, s);
       throw KeyDerivationError();
@@ -318,8 +318,8 @@ class Configuration {
     final kek = await CryptoUtil.deriveKey(
       utf8.encode(password) as Uint8List,
       Sodium.base642bin(attributes.kekSalt),
-      attributes.memLimit,
-      attributes.opsLimit,
+      attributes.memLimit!,
+      attributes.opsLimit!,
     ).onError((e, s) {
       _logger.severe('deriveKey failed', e, s);
       throw KeyDerivationError();
@@ -374,9 +374,9 @@ class Configuration {
     Uint8List masterKey;
     try {
       masterKey = await CryptoUtil.decrypt(
-        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey),
+        Sodium.base642bin(attributes!.masterKeyEncryptedWithRecoveryKey!),
         Sodium.hex2bin(recoveryKey),
-        Sodium.base642bin(attributes.masterKeyDecryptionNonce),
+        Sodium.base642bin(attributes.masterKeyDecryptionNonce!),
       );
     } catch (e) {
       _logger.severe(e);

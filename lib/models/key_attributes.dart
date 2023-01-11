@@ -7,10 +7,20 @@ class KeyAttributes {
   final String publicKey;
   final String encryptedSecretKey;
   final String secretKeyDecryptionNonce;
-  final int memLimit;
-  final int opsLimit;
-  final String masterKeyEncryptedWithRecoveryKey;
-  final String masterKeyDecryptionNonce;
+
+  // Note: For users who signed in before we started storing memLimit and
+  // optsLimit, these fields will be null. To update these values, they need to
+  // either log in again or client needs to fetch these values from server.
+  // (internal monologue: Hopefully, the mem/ops limit used to generate the
+  // key is same as it's stored on the server)
+  // https://github.com/ente-io/photos-app/commit/8cb7f885b343f2c796e4cc9ce1f7d70c9a13a003#diff-02f19d9ee0a60ee9674372d2c780da5d5284128dc9ea65dec6cdcddfc559ebb3
+  final int? memLimit;
+  final int? opsLimit;
+  // The recovery key attributes can be null for old users who haven't generated
+  // their recovery keys yet.
+  // https://github.com/ente-io/photos-app/commit/d7acc95855c62ecdf2a29c4102e648105e17bd8c#diff-02f19d9ee0a60ee9674372d2c780da5d5284128dc9ea65dec6cdcddfc559ebb3
+  final String? masterKeyEncryptedWithRecoveryKey;
+  final String? masterKeyDecryptionNonce;
   final String? recoveryKeyEncryptedWithMasterKey;
   final String? recoveryKeyDecryptionNonce;
 
