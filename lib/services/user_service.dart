@@ -397,8 +397,8 @@ class UserService {
         kekSalt: keyAttributes.kekSalt,
         encryptedKey: keyAttributes.encryptedKey,
         keyDecryptionNonce: keyAttributes.keyDecryptionNonce,
-        memLimit: keyAttributes.memLimit,
-        opsLimit: keyAttributes.opsLimit,
+        memLimit: keyAttributes.memLimit!,
+        opsLimit: keyAttributes.opsLimit!,
       );
       await _enteDio.put(
         "/users/keys",
@@ -414,8 +414,8 @@ class UserService {
   Future<void> setRecoveryKey(KeyAttributes keyAttributes) async {
     try {
       final setRecoveryKeyRequest = SetRecoveryKeyRequest(
-        keyAttributes.masterKeyEncryptedWithRecoveryKey,
-        keyAttributes.masterKeyDecryptionNonce,
+        keyAttributes.masterKeyEncryptedWithRecoveryKey!,
+        keyAttributes.masterKeyDecryptionNonce!,
         keyAttributes.recoveryKeyEncryptedWithMasterKey!,
         keyAttributes.recoveryKeyDecryptionNonce!,
       );

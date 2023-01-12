@@ -76,7 +76,7 @@ class _GalleryState extends State<Gallery> {
   StreamSubscription<TabDoubleTapEvent>? _tabDoubleTapEvent;
   final _forceReloadEventSubscriptions = <StreamSubscription<Event>>[];
   String? _logTag;
-  int? _photoGridSize;
+  late int _photoGridSize;
 
   @override
   void initState() {

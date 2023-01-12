@@ -39,10 +39,10 @@ class ButtonWidget extends StatelessWidget {
   final bool isDisabled;
   final ButtonSize buttonSize;
 
-  ///Setting this flag to true will show a success conformation as a 'check'
+  ///Setting this flag to true will show a success confirmation as a 'check'
   ///icon once the onTap(). This is expected to be used only if time taken to
   ///execute onTap() takes less than debouce time.
-  final bool shouldShowSuccessConformation;
+  final bool shouldShowSuccessConfirmation;
 
   ///Setting this flag to false will restrict the loading and success states of
   ///the button from surfacing on the UI. The ExecutionState of the button will
@@ -84,7 +84,7 @@ class ButtonWidget extends StatelessWidget {
     this.iconColor,
     this.shouldSurfaceExecutionStates = true,
     this.progressStatus,
-    this.shouldShowSuccessConformation = false,
+    this.shouldShowSuccessConfirmation = false,
     super.key,
   });
 
@@ -151,7 +151,7 @@ class ButtonWidget extends StatelessWidget {
       buttonAction: buttonAction,
       shouldSurfaceExecutionStates: shouldSurfaceExecutionStates,
       progressStatus: progressStatus,
-      shouldShowSuccessConformation: shouldShowSuccessConformation,
+      shouldShowSuccessConfirmation: shouldShowSuccessConfirmation,
     );
   }
 }
@@ -168,7 +168,7 @@ class ButtonChildWidget extends StatefulWidget {
   final bool isInAlert;
   final bool shouldSurfaceExecutionStates;
   final ValueNotifier<String>? progressStatus;
-  final bool shouldShowSuccessConformation;
+  final bool shouldShowSuccessConfirmation;
 
   const ButtonChildWidget({
     required this.buttonStyle,
@@ -177,7 +177,7 @@ class ButtonChildWidget extends StatefulWidget {
     required this.buttonSize,
     required this.isInAlert,
     required this.shouldSurfaceExecutionStates,
-    required this.shouldShowSuccessConformation,
+    required this.shouldShowSuccessConfirmation,
     this.progressStatus,
     this.onTap,
     this.labelText,
@@ -206,7 +206,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   ExecutionState executionState = ExecutionState.idle;
 
   @override
-  void initState() {
+  Widget build(BuildContext context) {
     progressStatus = widget.progressStatus;
     checkIconColor = widget.buttonStyle.checkIconColor ??
         widget.buttonStyle.defaultIconColor;
@@ -226,12 +226,6 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       iconColor = widget.buttonStyle.defaultIconColor;
       labelStyle = widget.buttonStyle.defaultLabelStyle;
     }
-
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
         setState(() {
@@ -405,7 +399,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         executionState = ExecutionState.error;
         _debouncer.cancelDebounce();
       });
-      widget.shouldShowSuccessConformation && _debouncer.isActive()
+      widget.shouldShowSuccessConfirmation && _debouncer.isActive()
           ? executionState = ExecutionState.successful
           : null;
       _debouncer.cancelDebounce();
@@ -461,7 +455,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
     } else {
       if (widget.isInAlert) {
         Future.delayed(
-          Duration(seconds: widget.shouldShowSuccessConformation ? 1 : 0),
+          Duration(seconds: widget.shouldShowSuccessConfirmation ? 1 : 0),
           () => Navigator.of(context).pop(widget.buttonAction),
         );
       }

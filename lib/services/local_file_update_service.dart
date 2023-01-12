@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/constants.dart';
+import 'package:photos/core/errors.dart';
 import 'package:photos/db/file_updation_db.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/extensions/stop_watch.dart';
@@ -124,6 +125,9 @@ class LocalFileUpdateService {
             null,
           );
         }
+        processedIDs.add(file.localID!);
+      } on InvalidFileError {
+        // if we fail to get the file, we can ignore the update
         processedIDs.add(file.localID!);
       } catch (e) {
         _logger.severe("Failed to get file uploadData", e);
