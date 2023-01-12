@@ -1,6 +1,7 @@
 enum GalleryType {
   homepage,
   archive,
+  uncategorized,
   hidden,
   favorite,
   trash,
@@ -23,6 +24,7 @@ extension GalleyTypeExtension on GalleryType {
         return true;
 
       case GalleryType.hidden:
+      case GalleryType.uncategorized:
       case GalleryType.trash:
       case GalleryType.sharedCollection:
         return false;
@@ -32,6 +34,7 @@ extension GalleyTypeExtension on GalleryType {
   bool showMoveToAlbum() {
     switch (this) {
       case GalleryType.ownedCollection:
+      case GalleryType.uncategorized:
         return true;
 
       case GalleryType.hidden:
@@ -55,6 +58,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.favorite:
       case GalleryType.localFolder:
+      case GalleryType.uncategorized:
         return true;
       case GalleryType.trash:
       case GalleryType.archive:
@@ -70,6 +74,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.searchResults:
       case GalleryType.homepage:
       case GalleryType.favorite:
+      case GalleryType.uncategorized:
       case GalleryType.archive:
       case GalleryType.hidden:
       case GalleryType.localFolder:
@@ -87,6 +92,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.favorite:
       case GalleryType.archive:
+      case GalleryType.uncategorized:
         return true;
       case GalleryType.hidden:
       case GalleryType.localFolder:
@@ -102,6 +108,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.sharedCollection:
         return true;
       case GalleryType.hidden:
+      case GalleryType.uncategorized:
       case GalleryType.favorite:
       case GalleryType.searchResults:
       case GalleryType.homepage:
@@ -116,6 +123,7 @@ extension GalleyTypeExtension on GalleryType {
     switch (this) {
       case GalleryType.ownedCollection:
       case GalleryType.homepage:
+      case GalleryType.uncategorized:
         return true;
 
       case GalleryType.hidden:
@@ -139,6 +147,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.homepage:
       case GalleryType.searchResults:
       case GalleryType.archive:
+      case GalleryType.uncategorized:
         return true;
 
       case GalleryType.hidden:
@@ -159,6 +168,7 @@ extension GalleyTypeExtension on GalleryType {
       case GalleryType.ownedCollection:
       case GalleryType.homepage:
       case GalleryType.searchResults:
+      case GalleryType.uncategorized:
         return true;
 
       case GalleryType.hidden:
