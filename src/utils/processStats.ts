@@ -5,9 +5,9 @@ const LOGGING_INTERVAL_IN_MICROSECONDS = 30 * 1000; // 30 seconds
 
 const SPIKE_DETECTION_INTERVAL_IN_MICROSECONDS = 1 * 1000; // 1 seconds
 
-const MAIN_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 10 * 1024; // 10 MB
+const MAIN_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 50 * 1024; // 50 MB
 
-const HIGH_MAIN_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 100 * 1024; // 100 MB
+const HIGH_MAIN_MEMORY_USAGE_THRESHOLD_IN_KILOBYTES = 200 * 1024; // 200 MB
 
 const RENDERER_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE = 200 * 1024; // 200 MB
 
@@ -40,15 +40,15 @@ let mainProcessUsingHighMemory = false;
 async function logSpikeMainMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
-        processMemoryInfo.residentSet,
+        processMemoryInfo.residentSet ?? 0,
         processMemoryInfo.private
     );
-    const previewMemoryUsage = Math.max(
-        previousMainProcessMemoryInfo.private,
-        previousMainProcessMemoryInfo.residentSet
+    const previousMemoryUsage = Math.max(
+        previousMainProcessMemoryInfo.residentSet ?? 0,
+        previousMainProcessMemoryInfo.private
     );
     const isSpiking =
-        currentMemoryUsage - previewMemoryUsage >=
+        currentMemoryUsage - previousMemoryUsage >=
         MAIN_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
 
     const isHighMemoryUsage =
@@ -92,15 +92,16 @@ let rendererUsingHighMemory = false;
 async function logSpikeRendererMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
-        processMemoryInfo.residentSet,
+        processMemoryInfo.residentSet ?? 0,
         processMemoryInfo.private
     );
-    const previewMemoryUsage = Math.max(
+
+    const previousMemoryUsage = Math.max(
         previousRendererProcessMemoryInfo.private,
-        previousRendererProcessMemoryInfo.residentSet
+        previousRendererProcessMemoryInfo.residentSet ?? 0
     );
     const isSpiking =
-        currentMemoryUsage - previewMemoryUsage >=
+        currentMemoryUsage - previousMemoryUsage >=
         RENDERER_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
 
     const isHighMemoryUsage =
