@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/theme/ente_theme.dart';
 
 class PlaceHolderWidget extends StatelessWidget {
   const PlaceHolderWidget(
@@ -16,18 +17,19 @@ class PlaceHolderWidget extends StatelessWidget {
     final key = _getCacheKey(count, columns);
     if (!_gridViewCache.containsKey(key)) {
       _gridViewCache[key] = GridView.builder(
-        padding: const EdgeInsets.all(0),
+        padding: const EdgeInsets.only(top: 2),
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (context, index) {
           return Container(
-            margin: const EdgeInsets.all(2.0),
-            color: Colors.grey[900],
+            color: getEnteColorScheme(context).fillFaint,
           );
         },
         itemCount: count,
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columns,
+          crossAxisSpacing: 2,
+          mainAxisSpacing: 2,
         ),
       );
     }
