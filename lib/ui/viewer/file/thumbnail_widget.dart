@@ -241,7 +241,10 @@ class _ThumbnailWidgetState extends State<ThumbnailWidget> {
         _cacheAndRender(imageProvider);
       }
       ThumbnailInMemoryLruCache.put(
-          widget.file!, thumbData, thumbnailSmallSize);
+        widget.file!,
+        thumbData,
+        thumbnailSmallSize,
+      );
     }).catchError((e) {
       _logger.warning("Could not load image: ", e);
       _errorLoadingLocalThumbnail = true;

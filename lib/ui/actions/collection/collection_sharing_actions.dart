@@ -294,8 +294,10 @@ class CollectionActions {
                 files,
               );
               // collection should be empty on server now
-              await collectionsService.trashEmptyCollection(collection,
-                  fireEvent: true);
+              await collectionsService.trashEmptyCollection(
+                collection,
+                fireEvent: true,
+              );
             } catch (e) {
               logger.severe("Failed to keep photos and delete collection", e);
               rethrow;
