@@ -40,15 +40,15 @@ let mainProcessUsingHighMemory = false;
 async function logSpikeMainMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
-        processMemoryInfo.residentSet,
+        processMemoryInfo.residentSet ?? 0,
         processMemoryInfo.private
     );
-    const previewMemoryUsage = Math.max(
+    const previousMemoryUsage = Math.max(
         previousMainProcessMemoryInfo.residentSet ?? 0,
         previousMainProcessMemoryInfo.private
     );
     const isSpiking =
-        currentMemoryUsage - previewMemoryUsage >=
+        currentMemoryUsage - previousMemoryUsage >=
         MAIN_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
 
     const isHighMemoryUsage =
@@ -58,6 +58,10 @@ async function logSpikeMainMemoryUsage() {
         (isHighMemoryUsage && !mainProcessUsingHighMemory) ||
         (!isHighMemoryUsage && mainProcessUsingHighMemory);
 
+    ElectronLog.log(
+        'main processMemory',
+        convertBytesToHumanReadable(currentMemoryUsage * 1024)
+    );
     if (isSpiking || shouldReport) {
         const normalizedCurrentProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(processMemoryInfo);
@@ -96,12 +100,12 @@ async function logSpikeRendererMemoryUsage() {
         processMemoryInfo.private
     );
 
-    const previewMemoryUsage = Math.max(
+    const previousMemoryUsage = Math.max(
         previousRendererProcessMemoryInfo.private,
-        previousRendererProcessMemoryInfo.residentSet
+        previousRendererProcessMemoryInfo.residentSet ?? 0
     );
     const isSpiking =
-        currentMemoryUsage - previewMemoryUsage >=
+        currentMemoryUsage - previousMemoryUsage >=
         RENDERER_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
 
     const isHighMemoryUsage =
@@ -111,7 +115,10 @@ async function logSpikeRendererMemoryUsage() {
         (isHighMemoryUsage && !rendererUsingHighMemory) ||
         (!isHighMemoryUsage && rendererUsingHighMemory);
 
-    console.log(convertBytesToHumanReadable(currentMemoryUsage * 1024));
+    ElectronLog.log(
+        'renderer processMemory',
+        convertBytesToHumanReadable(currentMemoryUsage * 1024)
+    );
 
     if (isSpiking || shouldReport) {
         const normalizedCurrentProcessMemoryInfo =
