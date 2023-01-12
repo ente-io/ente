@@ -3,6 +3,7 @@ import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
@@ -55,6 +56,8 @@ class _CollectionPageState extends State<CollectionPage> {
     if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
       return const EmptyState();
     }
+    final appBarTypeValue = widget.c.collection.type == CollectionType
+        .uncategorized ? GalleryType.uncategorized : widget.appBarType;
     final List<File>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
@@ -93,7 +96,7 @@ class _CollectionPageState extends State<CollectionPage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          widget.appBarType,
+          appBarTypeValue,
           widget.c.collection.name,
           _selectedFiles,
           collection: widget.c.collection,
@@ -104,7 +107,7 @@ class _CollectionPageState extends State<CollectionPage> {
         children: [
           gallery,
           FileSelectionOverlayBar(
-            widget.appBarType,
+            appBarTypeValue,
             _selectedFiles,
             collection: widget.c.collection,
           )
