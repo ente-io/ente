@@ -1,14 +1,22 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer } from 'electron/renderer';
 import { existsSync } from 'fs';
 import { writeStream } from '../services/fs';
 import { logError } from '../services/logging';
 import { ElectronFile } from '../types';
 
-export async function runFFmpegCmd(
-    cmd: string[],
+export async function convertHEIC(fileData: Uint8Array): Promise<Uint8Array> {
+    const convertedFileData = await ipcRenderer.invoke(
+        'convert-heic',
+        fileData
+    );
+    return convertedFileData;
+}
+
+export async function generateImageThumbnail(
     inputFile: File | ElectronFile,
-    outputFileName: string
-) {
+    maxDimension: number,
+    maxSize: number
+): Promise<Uint8Array> {
     let inputFilePath = null;
     let createdTempInputFile = null;
     try {
@@ -23,13 +31,13 @@ export async function runFFmpegCmd(
         } else {
             inputFilePath = inputFile.path;
         }
-        const outputFileData = await ipcRenderer.invoke(
-            'run-ffmpeg-cmd',
-            cmd,
+        const thumbnail = await ipcRenderer.invoke(
+            'generate-image-thumbnail',
             inputFilePath,
-            outputFileName
+            maxDimension,
+            maxSize
         );
-        return new File([outputFileData], outputFileName);
+        return thumbnail;
     } finally {
         if (createdTempInputFile) {
             try {
