@@ -5,7 +5,7 @@ import { Button } from '@mui/material';
 import constants from 'utils/strings/constants';
 import uploadManager from 'services/upload/uploadManager';
 
-const Wrapper = styled('div')<{ disableShrink: boolean }>`
+const Wrapper = styled('div')<{ $disableShrink: boolean }>`
     display: flex;
     align-items: center;
     justify-content: center;
@@ -14,8 +14,8 @@ const Wrapper = styled('div')<{ disableShrink: boolean }>`
     & .mobile-button {
         display: none;
     }
-    ${({ disableShrink }) =>
-        !disableShrink &&
+    ${({ $disableShrink }) =>
+        !$disableShrink &&
         `@media (max-width: 624px) {
         & .mobile-button {
             display: block;
@@ -42,7 +42,7 @@ function UploadButton({
 }: Iprops) {
     return (
         <Wrapper
-            disableShrink={disableShrink}
+            $disableShrink={disableShrink}
             style={{
                 cursor: !uploadManager.shouldAllowNewUpload() && 'not-allowed',
             }}>
