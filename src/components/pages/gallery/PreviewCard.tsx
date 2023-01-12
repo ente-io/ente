@@ -32,7 +32,7 @@ interface IProps {
     showPlaceholder: boolean;
 }
 
-const Check = styled('input')<{ active: boolean }>`
+const Check = styled('input')<{ $active: boolean }>`
     appearance: none;
     position: absolute;
     z-index: 10;
@@ -85,7 +85,7 @@ const Check = styled('input')<{ active: boolean }>`
         border-right: 2px solid #ddd;
         border-bottom: 2px solid #ddd;
     }
-    ${(props) => props.active && 'opacity: 0.5 '};
+    ${(props) => props.$active && 'opacity: 0.5 '};
     &:checked {
         opacity: 1 !important;
     }
@@ -104,15 +104,15 @@ export const HoverOverlay = styled('div')<{ checked: boolean }>`
         'background:linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0))'};
 `;
 
-export const InSelectRangeOverLay = styled('div')<{ active: boolean }>`
-    opacity: ${(props) => (!props.active ? 0 : 1)};
+export const InSelectRangeOverLay = styled('div')<{ $active: boolean }>`
+    opacity: ${(props) => (!props.$active ? 0 : 1)};
     left: 0;
     top: 0;
     outline: none;
     height: 100%;
     width: 100%;
     position: absolute;
-    ${(props) => props.active && 'background:rgba(81, 205, 124, 0.25)'};
+    ${(props) => props.$active && 'background:rgba(81, 205, 124, 0.25)'};
 `;
 
 export const FileAndCollectionNameOverlay = styled('div')`
@@ -304,7 +304,7 @@ export default function PreviewCard(props: IProps) {
                     type="checkbox"
                     checked={selected}
                     onChange={handleSelect}
-                    active={isRangeSelectActive && isInsSelectRange}
+                    $active={isRangeSelectActive && isInsSelectRange}
                     onClick={(e) => e.stopPropagation()}
                 />
             )}
@@ -313,7 +313,7 @@ export default function PreviewCard(props: IProps) {
             <SelectedOverlay selected={selected} />
             <HoverOverlay checked={selected} />
             <InSelectRangeOverLay
-                active={isRangeSelectActive && isInsSelectRange}
+                $active={isRangeSelectActive && isInsSelectRange}
             />
             {isLivePhoto(file) && <LivePhotoIndicator />}
             {deduplicateContext.isOnDeduplicatePage && (
