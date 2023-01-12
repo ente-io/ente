@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/ui/viewer/gallery/uncategorized_page.dart';
+import 'package:photos/utils/navigation_util.dart';
 
 class UnCatCollectionsButtonWidget extends StatelessWidget {
   final TextStyle textStyle;
@@ -92,7 +94,14 @@ class UnCatCollectionsButtonWidget extends StatelessWidget {
           ),
         ),
       ),
-      onPressed: () async {},
+      onPressed: () async {
+        if (collection != null) {
+          routeToPage(
+            context,
+            UnCategorizedPage(collection),
+          );
+        }
+      },
     );
   }
 }
