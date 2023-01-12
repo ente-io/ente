@@ -172,7 +172,8 @@ extension CollectionFileActions on CollectionActions {
     await dialog.show();
 
     try {
-      await FavoritesService.instance.updateFavorites(files, markAsFavorite);
+      await FavoritesService.instance
+          .updateFavorites(context, files, markAsFavorite);
       return true;
     } catch (e, s) {
       logger.severe(e, s);

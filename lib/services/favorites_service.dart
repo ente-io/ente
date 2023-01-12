@@ -14,11 +14,14 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/utils/crypto_util.dart';
 
 class FavoritesService {
   late Configuration _config;
+
   late CollectionsService _collectionsService;
+  late CollectionActions _collectionActions;
   late FilesDB _filesDB;
   int? _cachedFavoritesCollectionID;
   final Set<int> _cachedFavUploadedIDs = {};
@@ -26,9 +29,11 @@ class FavoritesService {
   late StreamSubscription<CollectionUpdatedEvent>
       _collectionUpdatesSubscription;
 
-  FavoritesService._privateConstructor() {
+  FavoritesService._privateConstructor() {}
+  Future<void> initFav() async {
     _config = Configuration.instance;
     _collectionsService = CollectionsService.instance;
+    _collectionActions = CollectionActions(_collectionsService);
     _filesDB = FilesDB.instance;
     _collectionUpdatesSubscription =
         Bus.instance.on<CollectionUpdatedEvent>().listen((event) {
@@ -46,8 +51,6 @@ class FavoritesService {
         }
       }
     });
-  }
-  Future<void> initFav() async {
     await _warmUpCache();
   }
 
@@ -120,7 +123,7 @@ class FavoritesService {
     }
   }
 
-  Future<void> addToFavorites(File file) async {
+  Future<void> addToFavorites(BuildContext context, File file) async {
     final collectionID = await _getOrCreateFavoriteCollectionID();
     final List<File> files = [file];
     if (file.uploadedFileID == null) {
@@ -134,7 +137,8 @@ class FavoritesService {
     RemoteSyncService.instance.sync(silently: true).ignore();
   }
 
-  Future<void> updateFavorites(List<File> files, bool favFlag) async {
+  Future<void> updateFavorites(
+      BuildContext context, List<File> files, bool favFlag) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     if (files.any((f) => f.uploadedFileID == null)) {
       throw AssertionError("Can only favorite uploaded items");
@@ -146,18 +150,27 @@ class FavoritesService {
     if (favFlag) {
       await _collectionsService.addToCollection(collectionID, files);
     } else {
-      await _collectionsService.removeFromCollection(collectionID, files);
+      final Collection? favCollection = await _getFavoritesCollection();
+      await _collectionActions.moveFilesFromCurrentCollection(
+        context,
+        favCollection!,
+        files,
+      );
     }
     _updateFavoriteFilesCache(files, favFlag: favFlag);
   }
 
-  Future<void> removeFromFavorites(File file) async {
-    final collectionID = await _getOrCreateFavoriteCollectionID();
+  Future<void> removeFromFavorites(BuildContext context, File file) async {
     final fileID = file.uploadedFileID;
     if (fileID == null) {
       // Do nothing, ignore
     } else {
-      await _collectionsService.removeFromCollection(collectionID, [file]);
+      final Collection? favCollection = await _getFavoritesCollection();
+      await _collectionActions.moveFilesFromCurrentCollection(
+        context,
+        favCollection!,
+        [file],
+      );
     }
     _updateFavoriteFilesCache([file], favFlag: false);
   }
