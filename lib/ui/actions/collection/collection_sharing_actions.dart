@@ -266,8 +266,10 @@ class CollectionActions {
     }
   }
 
-  Future<void> deleteCollectionSheet(
-      BuildContext bContext, Collection collection) async {
+  Future<bool> deleteCollectionSheet(
+    BuildContext bContext,
+    Collection collection,
+  ) async {
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner!.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
@@ -279,14 +281,24 @@ class CollectionActions {
           labelText: "Keep Photos",
           buttonType: ButtonType.neutral,
           buttonSize: ButtonSize.large,
+          buttonAction: ButtonAction.first,
           shouldStickToDarkTheme: true,
           isInAlert: true,
           onTap: () async {
-            // await moveFilesFromCurrentCollection(
-            //   bContext,
-            //   collection,
-            //   selectedFiles.files,
-            // );
+            try {
+              final List<File> files =
+                  await FilesDB.instance.getAllFilesCollection(collection.id);
+              await moveFilesFromCurrentCollection(
+                bContext,
+                collection,
+                files,
+              );
+              // collection should be empty on server now
+              await collectionsService.trashEmptyCollection(collection);
+            } catch (e) {
+              logger.severe("Failed to keep photos and delete collection", e);
+              rethrow;
+            }
           },
         ),
         const ButtonWidget(
@@ -314,7 +326,14 @@ class CollectionActions {
     );
     if (actionResult != null && actionResult == ButtonAction.error) {
       showGenericErrorDialog(context: bContext);
+      return false;
     }
+    if (actionResult != null &&
+        (actionResult == ButtonAction.first ||
+            actionResult == ButtonAction.second)) {
+      return true;
+    }
+    return false;
   }
 
   /*

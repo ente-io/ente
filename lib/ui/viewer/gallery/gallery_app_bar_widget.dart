@@ -16,7 +16,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/update_service.dart';
-import 'package:photos/ui/common/dialogs.dart';
+import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
 import 'package:photos/ui/common/rename_dialog.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
@@ -55,6 +55,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   late StreamSubscription _userAuthEventSubscription;
   late Function() _selectedFilesListener;
   String? _appBarTitle;
+  late CollectionActions collectionActions;
   final GlobalKey shareButtonKey = GlobalKey();
 
   @override
@@ -62,6 +63,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
     _selectedFilesListener = () {
       setState(() {});
     };
+    collectionActions = CollectionActions(CollectionsService.instance);
     widget.selectedFiles.addListener(_selectedFilesListener);
     _userAuthEventSubscription =
         Bus.instance.on<SubscriptionPurchasedEvent>().listen((event) {
@@ -369,35 +371,33 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
             )
             ?.thumbnail ==
         null;
-    if (!isEmptyCollection) {
-      final result = await showChoiceDialog(
+    if (isEmptyCollection) {
+      final dialog = createProgressDialog(
         context,
-        "Delete album?",
-        "Files that are unique to this album "
-            "will be moved to trash, and this album will be deleted.",
-        firstAction: "Cancel",
-        secondAction: "Delete album",
-        secondActionColor: Colors.red,
+        "Please wait, deleting album",
       );
-      if (result != DialogUserChoice.secondChoice) {
-        return;
+      await dialog.show();
+      try {
+        await CollectionsService.instance
+            .trashEmptyCollection(widget.collection!);
+        showShortToast(context, "Successfully deleted album");
+        await dialog.hide();
+        Navigator.of(context).pop();
+      } catch (e, s) {
+        _logger.severe("failed to trash collection", e, s);
+        await dialog.hide();
+        showGenericErrorDialog(context: context);
       }
-    }
-    final dialog = createProgressDialog(
-      context,
-      "Please wait, deleting album",
-    );
-    await dialog.show();
-    try {
-      await CollectionsService.instance
-          .trashCollection(widget.collection!, isEmptyCollection);
-      showShortToast(context, "Successfully deleted album");
-      await dialog.hide();
-      Navigator.of(context).pop();
-    } catch (e, s) {
-      _logger.severe("failed to trash collection", e, s);
-      await dialog.hide();
-      showGenericErrorDialog(context: context);
+    } else {
+      final bool result = await collectionActions.deleteCollectionSheet(
+        context,
+        widget.collection!,
+      );
+      if (result == true) {
+        Navigator.of(context).pop();
+      } else {
+        debugPrint("No pop");
+      }
     }
   }
 
