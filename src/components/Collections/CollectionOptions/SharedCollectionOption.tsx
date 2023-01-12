@@ -1,7 +1,6 @@
 import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import React from 'react';
-
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import LogoutIcon from '@mui/icons-material/Logout';
 import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
 
@@ -15,7 +14,7 @@ interface Iprops {
 export function SharedCollectionOption({ handleCollectionAction }: Iprops) {
     return (
         <OverflowMenuOption
-            startIcon={<DeleteOutlinedIcon />}
+            startIcon={<LogoutIcon />}
             onClick={handleCollectionAction(
                 CollectionActions.CONFIRM_LEAVE_SHARED_ALBUM,
                 false
