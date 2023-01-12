@@ -98,8 +98,9 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
             "Deleting ${(i + 1).toString().padLeft(collections.length.toString().length, '0')} / "
             "${collections.length}";
         try {
-          await CollectionsService.instance
-              .trashEmptyCollection(collections[i].collection);
+          await CollectionsService.instance.trashEmptyCollection(
+              collections[i].collection,
+              isBulkDelete: true);
         } catch (_) {
           failedCount++;
         }

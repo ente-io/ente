@@ -288,29 +288,30 @@ class CollectionActions {
             try {
               final List<File> files =
                   await FilesDB.instance.getAllFilesCollection(collection.id);
-              await moveFilesFromCurrentCollection(
-                bContext,
-                collection,
-                files,
-              );
+              await moveFilesFromCurrentCollection(bContext, collection, files);
               // collection should be empty on server now
-              await collectionsService.trashEmptyCollection(
-                collection,
-                fireEvent: true,
-              );
+              await collectionsService.trashEmptyCollection(collection);
             } catch (e) {
               logger.severe("Failed to keep photos and delete collection", e);
               rethrow;
             }
           },
         ),
-        const ButtonWidget(
+        ButtonWidget(
           labelText: "Delete photos",
           buttonType: ButtonType.critical,
           buttonSize: ButtonSize.large,
           buttonAction: ButtonAction.second,
           shouldStickToDarkTheme: true,
           isInAlert: true,
+          onTap: () async {
+            try {
+              await collectionsService.trashNonEmptyCollection(collection);
+            } catch (e) {
+              logger.severe("Failed to delete collection", e);
+              rethrow;
+            }
+          },
         ),
         const ButtonWidget(
           labelText: "Cancel",

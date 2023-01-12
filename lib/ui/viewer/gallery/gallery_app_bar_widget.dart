@@ -379,7 +379,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       await dialog.show();
       try {
         await CollectionsService.instance
-            .trashEmptyCollection(widget.collection!, fireEvent: true);
+            .trashEmptyCollection(widget.collection!);
         await dialog.hide();
         Navigator.of(context).pop();
       } catch (e, s) {
