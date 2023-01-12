@@ -44,8 +44,8 @@ async function logSpikeMainMemoryUsage() {
         processMemoryInfo.private
     );
     const previewMemoryUsage = Math.max(
-        previousMainProcessMemoryInfo.private,
-        previousMainProcessMemoryInfo.residentSet
+        previousMainProcessMemoryInfo.residentSet ?? 0,
+        previousMainProcessMemoryInfo.private
     );
     const isSpiking =
         currentMemoryUsage - previewMemoryUsage >=
@@ -92,9 +92,10 @@ let rendererUsingHighMemory = false;
 async function logSpikeRendererMemoryUsage() {
     const processMemoryInfo = await process.getProcessMemoryInfo();
     const currentMemoryUsage = Math.max(
-        processMemoryInfo.residentSet,
+        processMemoryInfo.residentSet ?? 0,
         processMemoryInfo.private
     );
+
     const previewMemoryUsage = Math.max(
         previousRendererProcessMemoryInfo.private,
         previousRendererProcessMemoryInfo.residentSet
@@ -109,6 +110,8 @@ async function logSpikeRendererMemoryUsage() {
     const shouldReport =
         (isHighMemoryUsage && !rendererUsingHighMemory) ||
         (!isHighMemoryUsage && rendererUsingHighMemory);
+
+    console.log(convertBytesToHumanReadable(currentMemoryUsage * 1024));
 
     if (isSpiking || shouldReport) {
         const normalizedCurrentProcessMemoryInfo =
