@@ -379,7 +379,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
       await dialog.show();
       try {
         await CollectionsService.instance
-            .trashEmptyCollection(widget.collection!);
+            .trashEmptyCollection(widget.collection!, fireEvent: true);
         showShortToast(context, "Successfully deleted album");
         await dialog.hide();
         Navigator.of(context).pop();

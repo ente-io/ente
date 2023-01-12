@@ -396,7 +396,12 @@ class CollectionsService {
     }
   }
 
-  Future<void> trashEmptyCollection(Collection collection) async {
+  Future<void> trashEmptyCollection(
+    Collection collection, {
+    //  during bulk deletion, this event is not fired to avoid quick refresh
+    //  of the collection gallery
+    bool fireEvent = false,
+  }) async {
     try {
       // While trashing empty albums, we must pass keepFiles flag as True.
       // The server will verify that the collection is actually empty before
@@ -408,6 +413,14 @@ class CollectionsService {
       final deletedCollection = collection.copyWith(isDeleted: true);
       _collectionIDToCollections[collection.id] = deletedCollection;
       unawaited(_db.insert([deletedCollection]));
+      if (fireEvent) {
+        CollectionUpdatedEvent(
+          collection.id,
+          <File>[],
+          "delete_empty_collection",
+          type: EventType.deletedFromRemote,
+        );
+      }
     } on DioError catch (e) {
       if (e.response != null) {
         debugPrint("Error " + e.response!.toString());
