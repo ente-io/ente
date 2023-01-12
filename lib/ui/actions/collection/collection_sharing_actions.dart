@@ -421,7 +421,7 @@ class CollectionActions {
     destCollectionToFilesMap.forEach((key, value) {
       mappedFilesCount += value.length;
     });
-    if (mappedFilesCount == uploadedIDs.length) {
+    if (mappedFilesCount != uploadedIDs.length) {
       throw AssertionError(
         "Failed to map all files toMap: ${uploadedIDs.length} and mapped "
         "$mappedFilesCount",

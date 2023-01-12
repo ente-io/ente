@@ -29,11 +29,16 @@ extension CollectionFileActions on CollectionActions {
           shouldStickToDarkTheme: true,
           isInAlert: true,
           onTap: () async {
-            await moveFilesFromCurrentCollection(
-              bContext,
-              collection,
-              selectedFiles.files,
-            );
+            try {
+              await moveFilesFromCurrentCollection(
+                bContext,
+                collection,
+                selectedFiles.files,
+              );
+            } catch (e) {
+              logger.severe("Failed to move files", e);
+              rethrow;
+            }
           },
         ),
         const ButtonWidget(
