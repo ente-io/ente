@@ -58,10 +58,6 @@ async function logSpikeMainMemoryUsage() {
         (isHighMemoryUsage && !mainProcessUsingHighMemory) ||
         (!isHighMemoryUsage && mainProcessUsingHighMemory);
 
-    ElectronLog.log(
-        'main processMemory',
-        convertBytesToHumanReadable(currentMemoryUsage * 1024)
-    );
     if (isSpiking || shouldReport) {
         const normalizedCurrentProcessMemoryInfo =
             await getNormalizedProcessMemoryInfo(processMemoryInfo);
@@ -114,11 +110,6 @@ async function logSpikeRendererMemoryUsage() {
     const shouldReport =
         (isHighMemoryUsage && !rendererUsingHighMemory) ||
         (!isHighMemoryUsage && rendererUsingHighMemory);
-
-    ElectronLog.log(
-        'renderer processMemory',
-        convertBytesToHumanReadable(currentMemoryUsage * 1024)
-    );
 
     if (isSpiking || shouldReport) {
         const normalizedCurrentProcessMemoryInfo =
