@@ -6,6 +6,7 @@ import 'package:photos/data/months.dart';
 import 'package:photos/data/years.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -114,7 +115,8 @@ class SearchService {
         break;
       }
 
-      if (!c.collection.isHidden() &&
+      if (!c.collection.isHidden() && c.collection.type != CollectionType
+          .uncategorized &&
           c.collection.name!.toLowerCase().contains(
                 query.toLowerCase(),
               )) {
