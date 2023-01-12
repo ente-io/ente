@@ -1,5 +1,6 @@
 import { ipcRenderer } from 'electron/renderer';
 import { existsSync } from 'fs';
+import { writeStream } from '../services/fs';
 import { logError } from '../services/logging';
 import { ElectronFile } from '../types';
 
@@ -20,12 +21,12 @@ export async function generateImageThumbnail(
     let createdTempInputFile = null;
     try {
         if (!existsSync(inputFile.path)) {
-            const inputFileData = new Uint8Array(await inputFile.arrayBuffer());
-            inputFilePath = await ipcRenderer.invoke(
-                'write-temp-file',
-                inputFileData,
+            const tempFilePath = await ipcRenderer.invoke(
+                'get-temp-file-path',
                 inputFile.name
             );
+            await writeStream(tempFilePath, await inputFile.stream());
+            inputFilePath = tempFilePath;
             createdTempInputFile = true;
         } else {
             inputFilePath = inputFile.path;
