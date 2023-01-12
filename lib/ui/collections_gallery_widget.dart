@@ -84,14 +84,15 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Future<List<CollectionWithThumbnail>> _getCollections() async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail =
         await CollectionsService.instance.getCollectionsWithThumbnails();
+
+    // Remove uncategorized collection
+    collectionsWithThumbnail
+        .removeWhere((t) => t.collection.type == CollectionType.uncategorized);
     final ListMatch<CollectionWithThumbnail> favMathResult =
         collectionsWithThumbnail.splitMatch(
       (element) => element.collection.type == CollectionType.favorites,
     );
 
-    // Remove uncategorized collection
-    collectionsWithThumbnail
-        .removeWhere((t) => t.collection.type == CollectionType.uncategorized);
     // Hide fav collection if it's empty and not shared
     favMathResult.matched.removeWhere(
       (element) =>
