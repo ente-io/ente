@@ -118,14 +118,14 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
       return;
     }
     _isLoadingVideoPlayer = true;
-    if (_file!.isRemoteFile && !(await isFileCached(_file!, liveVideo: true))) {
+    if (_file.isRemoteFile && !(await isFileCached(_file, liveVideo: true))) {
       showShortToast(context, "Downloading...");
     }
 
     io.File? videoFile = await getFile(widget.file, liveVideo: true)
         .timeout(const Duration(seconds: 15))
         .onError((dynamic e, s) {
-      _logger.info("getFile failed ${_file!.tag}", e);
+      _logger.info("getFile failed ${_file.tag}", e);
       return null;
     });
 
@@ -133,11 +133,11 @@ class _ZoomableLiveImageState extends State<ZoomableLiveImage>
     // getFile with liveVideo as true can fail for file with localID when
     // the live photo was downloaded from remote.
     if ((videoFile == null || !videoFile.existsSync()) &&
-        _file!.uploadedFileID != null) {
+        _file.uploadedFileID != null) {
       videoFile = await getFileFromServer(widget.file, liveVideo: true)
           .timeout(const Duration(seconds: 15))
           .onError((dynamic e, s) {
-        _logger.info("getRemoteFile failed ${_file!.tag}", e);
+        _logger.info("getRemoteFile failed ${_file.tag}", e);
         return null;
       });
     }

@@ -1,4 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:photos/db/files_db.dart';
+import 'package:photos/models/collection.dart';
+import 'package:photos/services/collections_service.dart';
 
 class UnCatCollectionsButtonWidget extends StatelessWidget {
   final TextStyle textStyle;
@@ -10,6 +14,9 @@ class UnCatCollectionsButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Collection? collection = CollectionsService.instance
+        .getActiveCollections()
+        .firstWhereOrNull((e) => e.type == CollectionType.uncategorized);
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).backgroundColor,
@@ -38,7 +45,9 @@ class UnCatCollectionsButtonWidget extends StatelessWidget {
                   ),
                   const Padding(padding: EdgeInsets.all(6)),
                   FutureBuilder<int>(
-                    future: Future.value(10),
+                    future: collection == null
+                        ? Future.value(0)
+                        : FilesDB.instance.collectionFileCount(collection.id),
                     builder: (context, snapshot) {
                       if (snapshot.hasData && snapshot.data! > 0) {
                         return RichText(
