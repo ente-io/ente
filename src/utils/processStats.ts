@@ -68,7 +68,7 @@ async function logSpikeMainMemoryUsage() {
             process.getHeapStatistics()
         );
 
-        ElectronLog.log('reporting memory usage spike', {
+        ElectronLog.log('reporting main memory usage spike', {
             currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
             previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
             heapStatistics,
@@ -122,7 +122,7 @@ async function logSpikeRendererMemoryUsage() {
             process.getHeapStatistics()
         );
 
-        ElectronLog.log('reporting memory usage spike', {
+        ElectronLog.log('reporting renderer memory usage spike', {
             currentProcessMemoryInfo: normalizedCurrentProcessMemoryInfo,
             previousProcessMemoryInfo: normalizedPreviousProcessMemoryInfo,
             heapStatistics,
