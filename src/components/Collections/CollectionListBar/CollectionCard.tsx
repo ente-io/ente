@@ -51,7 +51,7 @@ function CollectionCardIcon({ collectionType }) {
         <CollectionBarTileIcon>
             {collectionType === CollectionSummaryType.favorites && <Favorite />}
             {collectionType === CollectionSummaryType.archived && (
-                <ArchiveOutlined />
+                <ArchiveOutlined color="secondary" />
             )}
             {collectionType === CollectionSummaryType.shared && <PeopleIcon />}
         </CollectionBarTileIcon>
