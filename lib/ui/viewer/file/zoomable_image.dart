@@ -102,7 +102,7 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _loadNetworkImage() {
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
-      final cachedThumbnail = ThumbnailInMemoryLruCache.get(_photo!);
+      final cachedThumbnail = ThumbnailInMemoryLruCache.get(_photo);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
@@ -142,7 +142,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         !_loadedLargeThumbnail &&
         !_loadedFinalImage) {
       final cachedThumbnail =
-          ThumbnailInMemoryLruCache.get(_photo!, thumbnailSmallSize);
+          ThumbnailInMemoryLruCache.get(_photo, thumbnailSmallSize);
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
