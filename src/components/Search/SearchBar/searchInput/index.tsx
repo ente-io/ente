@@ -44,7 +44,9 @@ export default function SearchInput(props: Iprops) {
     };
     const [defaultOptions, setDefaultOptions] = useState([]);
 
-    useEffect(() => search(value), [value]);
+    useEffect(() => {
+        search(value);
+    }, [value]);
 
     useEffect(() => {
         refreshDefaultOptions();

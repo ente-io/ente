@@ -26,7 +26,7 @@ module.exports = {
         'style-src': "'self' 'unsafe-inline'",
         'font-src ': "'self'; script-src 'self' 'unsafe-eval' blob:",
         'connect-src':
-            "'self' https://*.ente.io http://localhost:8080 data: blob: https://ente-prod-eu.s3.eu-central-003.backblazeb2.com ",
+            "'self' https://*.ente.io http://localhost:8080 data: blob: https://ente-prod-eu.s3.eu-central-003.backblazeb2.com https://ente-prod-v3.s3.eu-central-2.wasabisys.com/",
         'base-uri ': "'self'",
         // to allow worker
         'child-src': "'self' blob:",
@@ -35,11 +35,6 @@ module.exports = {
         'form-action': "'none'",
         'report-uri': ' https://csp-reporter.ente.io/local',
         'report-to': ' https://csp-reporter.ente.io/local',
-    },
-
-    WORKBOX_CONFIG: {
-        swSrc: 'src/serviceWorker.js',
-        exclude: [/manifest\.json$/i],
     },
 
     ALL_ROUTES: '/(.*)',

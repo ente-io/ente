@@ -73,6 +73,7 @@ async function extractElectronFileType(file: ElectronFile) {
     const stream = await file.stream();
     const reader = stream.getReader();
     const { value: fileDataChunk } = await reader.read();
+    await reader.cancel();
     return getFileTypeFromBuffer(fileDataChunk);
 }
 

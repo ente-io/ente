@@ -21,7 +21,6 @@ export enum CollectionSummaryType {
 export enum COLLECTION_SORT_BY {
     NAME,
     CREATION_TIME_ASCENDING,
-    CREATION_TIME_DESCENDING,
     UPDATION_TIME_DESCENDING,
 }
 
@@ -56,7 +55,6 @@ export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
 export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
-    CollectionSummaryType.shared,
     CollectionSummaryType.favorites,
 ]);
 

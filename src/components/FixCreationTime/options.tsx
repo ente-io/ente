@@ -23,7 +23,6 @@ const Option = ({
             color: value !== Number(selected) ? '#aaa' : '#fff',
         }}>
         <Form.Check.Input
-            style={{ marginTop: '6px' }}
             id={value.toString()}
             type="radio"
             value={value}

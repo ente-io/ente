@@ -40,7 +40,8 @@ export const getData = (key: LS_KEYS) => {
         if (
             typeof localStorage === 'undefined' ||
             typeof key === 'undefined' ||
-            typeof localStorage.getItem(key) === 'undefined'
+            typeof localStorage.getItem(key) === 'undefined' ||
+            localStorage.getItem(key) === 'undefined'
         ) {
             return null;
         }

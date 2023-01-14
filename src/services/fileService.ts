@@ -2,7 +2,6 @@ import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
 
 import { getToken } from 'utils/common/key';
-import { EncryptionResult } from 'types/upload';
 import { Collection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
@@ -12,13 +11,15 @@ import {
     preservePhotoswipeProps,
     sortFiles,
 } from 'utils/file';
-import CryptoWorker from 'utils/crypto';
 import { eventBus, Events } from './events';
-import { EnteFile, TrashRequest } from 'types/file';
+import { EnteFile, EncryptedEnteFile, TrashRequest } from 'types/file';
 import { SetFiles } from 'types/gallery';
 import { MAX_TRASH_BATCH_SIZE } from 'constants/file';
 import { BulkUpdateMagicMetadataRequest } from 'types/magicMetadata';
 import { addLogLine } from 'utils/logging';
+import { isCollectionHidden } from 'utils/collection';
+import { CustomError } from 'utils/error';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -69,13 +70,16 @@ export const syncFiles = async (
         if (!getToken()) {
             continue;
         }
+        if (isCollectionHidden(collection)) {
+            throw Error(CustomError.HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED);
+        }
         const lastSyncTime = await getCollectionLastSyncTime(collection);
         if (collection.updationTime === lastSyncTime) {
             continue;
         }
         const fetchedFiles =
             (await getFiles(collection, lastSyncTime, files, setFiles)) ?? [];
-        files.push(...fetchedFiles);
+        files = [...files, ...fetchedFiles];
         const latestVersionFiles = new Map<string, EnteFile>();
         files.forEach((file) => {
             const uid = `${file.collectionID}-${file.id}`;
@@ -111,7 +115,7 @@ export const getFiles = async (
     setFiles: SetFiles
 ): Promise<EnteFile[]> => {
     try {
-        const decryptedFiles: EnteFile[] = [];
+        let decryptedFiles: EnteFile[] = [];
         let time = sinceTime;
         let resp;
         do {
@@ -130,16 +134,18 @@ export const getFiles = async (
                 }
             );
 
-            decryptedFiles.push(
+            decryptedFiles = [
+                ...decryptedFiles,
                 ...(await Promise.all(
-                    resp.data.diff.map(async (file: EnteFile) => {
+                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
                         if (!file.isDeleted) {
-                            file = await decryptFile(file, collection.key);
+                            return await decryptFile(file, collection.key);
+                        } else {
+                            return file;
                         }
-                        return file;
                     }) as Promise<EnteFile>[]
-                ))
-            );
+                )),
+            ];
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updationTime;
@@ -250,16 +256,19 @@ export const updateFileMagicMetadata = async (files: EnteFile[]) => {
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const file of files) {
-        const { file: encryptedMagicMetadata }: EncryptionResult =
-            await worker.encryptMetadata(file.magicMetadata.data, file.key);
+        const { file: encryptedMagicMetadata } =
+            await cryptoWorker.encryptMetadata(
+                file.magicMetadata.data,
+                file.key
+            );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: file.magicMetadata.version,
                 count: file.magicMetadata.count,
-                data: encryptedMagicMetadata.encryptedData as unknown as string,
+                data: encryptedMagicMetadata.encryptedData,
                 header: encryptedMagicMetadata.decryptionHeader,
             },
         });
@@ -284,16 +293,19 @@ export const updateFilePublicMagicMetadata = async (files: EnteFile[]) => {
         return;
     }
     const reqBody: BulkUpdateMagicMetadataRequest = { metadataList: [] };
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const file of files) {
-        const { file: encryptedPubMagicMetadata }: EncryptionResult =
-            await worker.encryptMetadata(file.pubMagicMetadata.data, file.key);
+        const { file: encryptedPubMagicMetadata } =
+            await cryptoWorker.encryptMetadata(
+                file.pubMagicMetadata.data,
+                file.key
+            );
         reqBody.metadataList.push({
             id: file.id,
             magicMetadata: {
                 version: file.pubMagicMetadata.version,
                 count: file.pubMagicMetadata.count,
-                data: encryptedPubMagicMetadata.encryptedData as unknown as string,
+                data: encryptedPubMagicMetadata.encryptedData,
                 header: encryptedPubMagicMetadata.decryptionHeader,
             },
         });

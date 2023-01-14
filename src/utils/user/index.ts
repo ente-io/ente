@@ -1,5 +1,7 @@
-import { UserDetails } from 'types/user';
+import isElectron from 'is-electron';
+import { User, UserDetails } from 'types/user';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
+import ElectronService from 'services/electron/common';
 
 export function makeID(length) {
     let result = '';
@@ -14,15 +16,22 @@ export function makeID(length) {
     return result;
 }
 
-export function getSentryUserID() {
-    let anonymizeUserID = getData(LS_KEYS.AnonymizedUserID)?.id;
-    if (!anonymizeUserID) {
-        anonymizeUserID = makeID(6);
-        setData(LS_KEYS.AnonymizedUserID, { id: anonymizeUserID });
+export async function getSentryUserID() {
+    if (isElectron()) {
+        return await ElectronService.getSentryUserID();
+    } else {
+        let anonymizeUserID = getData(LS_KEYS.AnonymizedUserID)?.id;
+        if (!anonymizeUserID) {
+            anonymizeUserID = makeID(6);
+            setData(LS_KEYS.AnonymizedUserID, { id: anonymizeUserID });
+        }
+        return anonymizeUserID;
     }
-    return anonymizeUserID;
 }
 
 export function getLocalUserDetails(): UserDetails {
     return getData(LS_KEYS.USER_DETAILS)?.value;
 }
+
+export const isInternalUser = () =>
+    (getData(LS_KEYS.USER) as User)?.email.endsWith('@ente.io');

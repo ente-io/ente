@@ -1,6 +1,7 @@
 import { ButtonProps } from '@mui/material';
 
 export interface DialogBoxAttributes {
+    icon?: React.ReactNode;
     title?: string;
     staticBackdrop?: boolean;
     nonClosable?: boolean;

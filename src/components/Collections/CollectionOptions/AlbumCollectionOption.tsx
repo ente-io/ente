@@ -4,11 +4,11 @@ import React from 'react';
 import EditIcon from '@mui/icons-material/Edit';
 import IosShareIcon from '@mui/icons-material/IosShare';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
-import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
-import VisibilityOnOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
+import Unarchive from '@mui/icons-material/Unarchive';
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 
 interface Iprops {
     IsArchived: boolean;
@@ -53,13 +53,13 @@ export function AlbumCollectionOption({
                     onClick={handleCollectionAction(
                         CollectionActions.UNARCHIVE
                     )}
-                    startIcon={<VisibilityOnOutlinedIcon />}>
+                    startIcon={<Unarchive />}>
                     {constants.UNARCHIVE}
                 </OverflowMenuOption>
             ) : (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
-                    startIcon={<VisibilityOffOutlinedIcon />}>
+                    startIcon={<ArchiveOutlined />}>
                     {constants.ARCHIVE}
                 </OverflowMenuOption>
             )}

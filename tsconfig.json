@@ -7,7 +7,12 @@
         "lib": ["dom", "dom.iterable", "esnext", "webworker"],
         "allowJs": true,
         "skipLibCheck": true,
-        "strict": false,
+        "strict": true,
+        "strictBindCallApply": false,
+        "strictNullChecks": false,
+        "strictPropertyInitialization": false,
+        "noImplicitAny": false,
+        "useUnknownInCatchVariables": false,
         "forceConsistentCasingInFileNames": true,
         "noEmit": true,
         "esModuleInterop": true,
@@ -20,12 +25,6 @@
         "downlevelIteration": true,
         "incremental": true
     },
-    "include": [
-        "next-env.d.ts",
-        "**/*.ts",
-        "**/*.tsx",
-        "src/pages/index.tsx",
-        "configUtil.js"
-    ],
-    "exclude": ["node_modules"]
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+    "exclude": ["node_modules", "out", ".next", "thirdparty"]
 }

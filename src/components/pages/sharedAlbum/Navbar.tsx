@@ -1,18 +1,25 @@
-import { CenteredFlex, FluidContainer } from 'components/Container';
-import { EnteLogo } from 'components/EnteLogo';
+import { EnteLinkLogo } from 'components/Navbar/EnteLinkLogo';
+import { FluidContainer } from 'components/Container';
 import NavbarBase from 'components/Navbar/base';
+import UploadButton from 'components/Upload/UploadButton';
 import React from 'react';
+import constants from 'utils/strings/constants';
 import GoToEnte from './GoToEnte';
 
-export default function SharedAlbumNavbar() {
+export default function SharedAlbumNavbar({ showUploadButton, openUploader }) {
     return (
         <NavbarBase>
             <FluidContainer>
-                <CenteredFlex>
-                    <EnteLogo />
-                </CenteredFlex>
+                <EnteLinkLogo />
             </FluidContainer>
-            <GoToEnte />
+            {showUploadButton ? (
+                <UploadButton
+                    openUploader={openUploader}
+                    text={constants.ADD_PHOTOS}
+                />
+            ) : (
+                <GoToEnte />
+            )}
         </NavbarBase>
     );
 }

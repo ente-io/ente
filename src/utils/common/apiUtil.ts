@@ -66,6 +66,14 @@ export const getFamilyPortalURL = () => {
     return `https://family.ente.io`;
 };
 
+export const getAlbumsURL = () => {
+    const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT;
+    if (isDevDeployment() && albumsURL) {
+        return albumsURL;
+    }
+    return `https://albums.ente.io`;
+};
+
 export const getSentryTunnelURL = () => {
     return `https://sentry-reporter.ente.io`;
 };
@@ -80,9 +88,9 @@ const isDevDeployment = () => {
     if (runningInBrowser()) {
         return (
             process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
-                globalThis.location.origin ||
+                window.location.origin ||
             process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
-                globalThis.location.origin ||
+                window.location.origin ||
             process.env.NODE_ENV === 'development'
         );
     }

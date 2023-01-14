@@ -38,7 +38,6 @@ import {
 } from 'utils/file';
 
 import { updateFileCreationDateInEXIF } from './upload/exifService';
-import { Metadata } from 'types/upload';
 import QueueProcessor from './queueProcessor';
 import { Collection } from 'types/collection';
 import {
@@ -244,10 +243,7 @@ class ExportService {
                         file,
                         RecordType.FAILED
                     );
-                    console.log(
-                        `export failed for fileID:${file.id}, reason:`,
-                        e
-                    );
+
                     logError(
                         e,
                         'download and save failed for file during export'
@@ -459,11 +455,7 @@ class ExportService {
             await this.exportMotionPhoto(fileStream, file, collectionPath);
         } else {
             this.saveMediaFile(collectionPath, fileSaveName, fileStream);
-            await this.saveMetadataFile(
-                collectionPath,
-                fileSaveName,
-                file.metadata
-            );
+            await this.saveMetadataFile(collectionPath, fileSaveName, file);
         }
     }
 
@@ -481,11 +473,7 @@ class ExportService {
             file.id
         );
         this.saveMediaFile(collectionPath, imageSaveName, imageStream);
-        await this.saveMetadataFile(
-            collectionPath,
-            imageSaveName,
-            file.metadata
-        );
+        await this.saveMetadataFile(collectionPath, imageSaveName, file);
 
         const videoStream = generateStreamFromArrayBuffer(motionPhoto.video);
         const videoSaveName = getUniqueFileSaveName(
@@ -493,20 +481,16 @@ class ExportService {
             motionPhoto.videoNameTitle,
             file.id
         );
-        this.saveMediaFile(collectionPath, videoSaveName, videoStream);
-        await this.saveMetadataFile(
-            collectionPath,
-            videoSaveName,
-            file.metadata
-        );
+        await this.saveMediaFile(collectionPath, videoSaveName, videoStream);
+        await this.saveMetadataFile(collectionPath, videoSaveName, file);
     }
 
-    private saveMediaFile(
+    private async saveMediaFile(
         collectionFolderPath: string,
         fileSaveName: string,
         fileStream: ReadableStream<any>
     ) {
-        this.electronAPIs.saveStreamToDisk(
+        await this.electronAPIs.saveStreamToDisk(
             getFileSavePath(collectionFolderPath, fileSaveName),
             fileStream
         );
@@ -514,11 +498,11 @@ class ExportService {
     private async saveMetadataFile(
         collectionFolderPath: string,
         fileSaveName: string,
-        metadata: Metadata
+        file: EnteFile
     ) {
         await this.electronAPIs.saveFileToDisk(
             getFileMetadataSavePath(collectionFolderPath, fileSaveName),
-            getGoogleLikeMetadataFile(fileSaveName, metadata)
+            getGoogleLikeMetadataFile(fileSaveName, file)
         );
     }
 
@@ -635,7 +619,6 @@ class ExportService {
                 oldFileSavePath,
                 newFileSavePath
             );
-            console.log(oldFileMetadataSavePath, newFileMetadataSavePath);
             await this.electronAPIs.checkExistsAndRename(
                 oldFileMetadataSavePath,
                 newFileMetadataSavePath

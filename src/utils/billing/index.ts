@@ -41,7 +41,7 @@ export function makeHumanReadableStorage(
     bytes: number,
     round: 'round-up' | 'round-down' = 'round-down'
 ): string {
-    if (bytes === 0) {
+    if (bytes <= 0) {
         return '0 MB';
     }
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -153,7 +153,6 @@ export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
 }
 export function hasStripeSubscription(subscription: Subscription) {
     return (
-        hasPaidSubscription(subscription) &&
         subscription.paymentProvider.length > 0 &&
         subscription.paymentProvider === PAYMENT_PROVIDER_STRIPE
     );

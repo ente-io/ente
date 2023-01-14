@@ -26,13 +26,15 @@ import {
     SYSTEM_COLLECTION_TYPES,
     UPLOAD_NOT_ALLOWED_COLLECTION_TYPES,
 } from 'constants/collection';
-import { getAlbumSiteHost } from 'constants/pages';
 import { getUnixTimeInMicroSecondsWithDelta } from 'utils/time';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
+    SUB_TYPE,
     VISIBILITY_STATE,
 } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
+import { getAlbumsURL } from 'utils/common/apiUtil';
+import bs58 from 'bs58';
 
 export enum COLLECTION_OPS_TYPE {
     ADD,
@@ -119,12 +121,14 @@ export function appendCollectionKeyToShareURL(
     if (!url) {
         return null;
     }
-    const bs58 = require('bs58');
+
     const sharableURL = new URL(url);
-    if (process.env.NODE_ENV === 'development') {
-        sharableURL.host = getAlbumSiteHost();
-        sharableURL.protocol = 'http';
-    }
+    const albumsURL = new URL(getAlbumsURL());
+
+    sharableURL.protocol = albumsURL.protocol;
+    sharableURL.host = albumsURL.host;
+    sharableURL.pathname = albumsURL.pathname;
+
     const bytes = Buffer.from(collectionKey, 'base64');
     sharableURL.hash = bs58.encode(bytes);
     return sharableURL.href;
@@ -226,3 +230,14 @@ export const getUserOwnedCollections = (collections: Collection[]) => {
     }
     return collections.filter((collection) => collection.owner.id === user.id);
 };
+
+export const getNonHiddenCollections = (collections: Collection[]) => {
+    return collections.filter((collection) => !isCollectionHidden(collection));
+};
+
+export const isCollectionHidden = (collection: Collection) =>
+    collection.magicMetadata?.data.visibility === VISIBILITY_STATE.HIDDEN ||
+    collection.magicMetadata?.data.subType === SUB_TYPE.DEFAULT_HIDDEN;
+
+export const isQuickLinkCollection = (collection: Collection) =>
+    collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;

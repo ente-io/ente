@@ -16,7 +16,3 @@ export enum PAGES {
     ML_DEBUG = '/ml-debug',
     DEDUPLICATE = '/deduplicate',
 }
-export const getAlbumSiteHost = () =>
-    process.env.NODE_ENV === 'production'
-        ? 'albums.ente.io'
-        : `${window.location.hostname}:3002`;

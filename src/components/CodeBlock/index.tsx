@@ -1,7 +1,7 @@
 import { FreeFlowText } from '../Container';
-import React, { useState } from 'react';
+import React from 'react';
 import EnteSpinner from '../EnteSpinner';
-import { Wrapper, CodeWrapper } from './styledComponents';
+import { Wrapper, CodeWrapper, CopyButtonWrapper } from './styledComponents';
 import CopyButton from './CopyButton';
 import { BoxProps } from '@mui/material';
 
@@ -15,14 +15,6 @@ export default function CodeBlock({
     wordBreak,
     ...props
 }: BoxProps<'div', Iprops>) {
-    const [copied, setCopied] = useState<boolean>(false);
-
-    const copyToClipboardHelper = (text: string) => () => {
-        navigator.clipboard.writeText(text);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 1000);
-    };
-
     if (!code) {
         return (
             <Wrapper>
@@ -37,11 +29,9 @@ export default function CodeBlock({
                     {code}
                 </FreeFlowText>
             </CodeWrapper>
-            <CopyButton
-                code={code}
-                copied={copied}
-                copyToClipboardHelper={copyToClipboardHelper}
-            />
+            <CopyButtonWrapper>
+                <CopyButton code={code} />
+            </CopyButtonWrapper>
         </Wrapper>
     );
 }

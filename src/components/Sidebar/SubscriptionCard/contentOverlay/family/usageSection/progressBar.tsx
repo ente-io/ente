@@ -16,7 +16,7 @@ export function FamilyUsageProgressBar({
         <Box position={'relative'} width="100%">
             <Progressbar
                 sx={{ backgroundColor: 'transparent' }}
-                value={(userUsage * 100) / totalStorage}
+                value={Math.min((userUsage * 100) / totalStorage, 100)}
             />
             <Progressbar
                 sx={{
@@ -28,7 +28,7 @@ export function FamilyUsageProgressBar({
                     },
                     width: '100%',
                 }}
-                value={(totalUsage * 100) / totalStorage}
+                value={Math.min((totalUsage * 100) / totalStorage, 100)}
             />
         </Box>
     );

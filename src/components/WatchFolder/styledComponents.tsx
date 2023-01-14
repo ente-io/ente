@@ -3,14 +3,11 @@ import { Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import VerticallyCentered from 'components/Container';
 
-export const MappingsContainer = styled(Box)(({ theme }) => ({
+export const MappingsContainer = styled(Box)(() => ({
     height: '278px',
     overflow: 'auto',
     '&::-webkit-scrollbar': {
         width: '4px',
-    },
-    '&::-webkit-scrollbar-thumb': {
-        backgroundColor: theme.palette.secondary.main,
     },
 }));
 

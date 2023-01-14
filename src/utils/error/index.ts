@@ -1,5 +1,4 @@
 import { AxiosResponse } from 'axios';
-import constants from 'utils/strings/constants';
 
 export const ServerErrorCodes = {
     SESSION_EXPIRED: '401',
@@ -15,7 +14,6 @@ export const ServerErrorCodes = {
 };
 
 export enum CustomError {
-    UNKNOWN_ERROR = 'unknown error',
     SUBSCRIPTION_VERIFICATION_ERROR = 'Subscription verification failed',
     THUMBNAIL_GENERATION_FAILED = 'thumbnail generation failed',
     VIDEO_PLAYBACK_FAILED = 'video playback failed',
@@ -23,6 +21,7 @@ export enum CustomError {
     KEY_MISSING = 'encrypted key missing from localStorage',
     FAILED_TO_LOAD_WEB_WORKER = 'failed to load web worker',
     CHUNK_MORE_THAN_EXPECTED = 'chunks more than expected',
+    CHUNK_LESS_THAN_EXPECTED = 'chunks less than expected',
     UNSUPPORTED_FILE_FORMAT = 'unsupported file formats',
     FILE_TOO_LARGE = 'file too large',
     SUBSCRIPTION_EXPIRED = 'subscription expired',
@@ -37,6 +36,7 @@ export enum CustomError {
     NETWORK_ERROR = 'Network Error',
     REQUEST_FAILED = 'request failed',
     TOKEN_EXPIRED = 'token expired',
+    TOKEN_MISSING = 'token missing',
     TOO_MANY_REQUESTS = 'too many requests',
     BAD_REQUEST = 'bad request',
     SUBSCRIPTION_NEEDED = 'subscription not present',
@@ -49,6 +49,8 @@ export enum CustomError {
     INCORRECT_PASSWORD = 'incorrect password',
     UPLOAD_CANCELLED = 'upload cancelled',
     REQUEST_TIMEOUT = 'request taking too long',
+    HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED = 'hidden collection sync file attempted',
+    UNKNOWN_ERROR = 'Something went wrong, please try again',
 }
 
 export function parseServerError(error: AxiosResponse): string {
@@ -68,7 +70,7 @@ export function parseServerError(error: AxiosResponse): string {
             parsedMessage = CustomError.FILE_TOO_LARGE;
             break;
         default:
-            parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
+            parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
     }
 
     return parsedMessage;
@@ -92,7 +94,7 @@ function parseUploadErrorCodes(error) {
                 parsedMessage = CustomError.FILE_TOO_LARGE;
                 break;
             default:
-                parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
+                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
         }
     } else {
         parsedMessage = error.message;
@@ -145,29 +147,10 @@ export const parseSharingErrorCodes = (error) => {
                 parsedMessage = CustomError.TOO_MANY_REQUESTS;
                 break;
             default:
-                parsedMessage = `${constants.UNKNOWN_ERROR} statusCode:${errorCode}`;
+                parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
         }
     } else {
         parsedMessage = error.message;
     }
     return new Error(parsedMessage);
-};
-
-export const handleSharingErrors = (error) => {
-    const parsedError = parseSharingErrorCodes(error);
-    let errorMessage = '';
-    switch (parsedError.message) {
-        case CustomError.BAD_REQUEST:
-            errorMessage = constants.SHARING_BAD_REQUEST_ERROR;
-            break;
-        case CustomError.SUBSCRIPTION_NEEDED:
-            errorMessage = constants.SHARING_DISABLED_FOR_FREE_ACCOUNTS;
-            break;
-        case CustomError.NOT_FOUND:
-            errorMessage = constants.USER_DOES_NOT_EXIST;
-            break;
-        default:
-            errorMessage = parsedError.message;
-    }
-    return errorMessage;
 };

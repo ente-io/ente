@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { PeopleList } from 'components/MachineLearning/PeopleList';
-import { Legend } from 'components/PhotoSwipe/styledComponents/Legend';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { SuggestionType, Suggestion } from 'types/search';
 import { components } from 'react-select';
@@ -16,6 +15,12 @@ const LegendRow = styled(Row)`
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0px;
+`;
+
+const Legend = styled('span')`
+    font-size: 20px;
+    color: #ddd;
+    display: inline;
 `;
 
 const Caption = styled('span')`

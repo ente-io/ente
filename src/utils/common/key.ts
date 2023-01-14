@@ -1,5 +1,5 @@
-import { B64EncryptionResult } from 'utils/crypto';
-import CryptoWorker from 'utils/crypto';
+import { B64EncryptionResult } from 'types/crypto';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { CustomError } from '../error';
@@ -10,8 +10,8 @@ export const getActualKey = async () => {
             SESSION_KEYS.ENCRYPTION_KEY
         );
 
-        const cryptoWorker = await new CryptoWorker();
-        const key: string = await cryptoWorker.decryptB64(
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const key = await cryptoWorker.decryptB64(
             encryptionKeyAttributes.encryptedData,
             encryptionKeyAttributes.nonce,
             encryptionKeyAttributes.key

@@ -1,6 +1,5 @@
 import { getToken } from 'utils/common/key';
 import { getFileURL, getThumbnailURL } from 'utils/common/apiUtil';
-import CryptoWorker from 'utils/crypto';
 import {
     generateStreamFromArrayBuffer,
     getRenderableFileURL,
@@ -13,10 +12,22 @@ import { FILE_TYPE } from 'constants/file';
 import { CustomError } from 'utils/error';
 import { THUMB_CACHE } from 'constants/cache';
 import { CacheStorageService } from './cache/cacheStorageService';
+import QueueProcessor, { PROCESSING_STRATEGY } from './queueProcessor';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+
+const MAX_PARALLEL_DOWNLOADS = 10;
 
 class DownloadManager {
-    private fileObjectURLPromise = new Map<string, Promise<string[]>>();
+    private fileObjectURLPromise = new Map<
+        string,
+        Promise<{ original: string[]; converted: string[] }>
+    >();
     private thumbnailObjectURLPromise = new Map<number, Promise<string>>();
+
+    private thumbnailDownloadRequestsProcessor = new QueueProcessor<any>(
+        MAX_PARALLEL_DOWNLOADS,
+        PROCESSING_STRATEGY.LIFO
+    );
 
     public async getThumbnail(
         file: EnteFile,
@@ -40,11 +51,10 @@ class DownloadManager {
                     if (cacheResp) {
                         return URL.createObjectURL(await cacheResp.blob());
                     }
-                    const thumb = await this.downloadThumb(
-                        token,
-                        file,
-                        timeout
-                    );
+                    const thumb =
+                        await this.thumbnailDownloadRequestsProcessor.queueUpRequest(
+                            () => this.downloadThumb(token, file, timeout)
+                        ).promise;
                     const thumbBlob = new Blob([thumb]);
 
                     thumbnailCache
@@ -76,10 +86,10 @@ class DownloadManager {
         if (typeof resp.data === 'undefined') {
             throw Error(CustomError.REQUEST_FAILED);
         }
-        const worker = await new CryptoWorker();
-        const decrypted: Uint8Array = await worker.decryptThumbnail(
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const decrypted = await cryptoWorker.decryptThumbnail(
             new Uint8Array(resp.data),
-            await worker.fromB64(file.thumbnail.decryptionHeader),
+            await cryptoWorker.fromB64(file.thumbnail.decryptionHeader),
             file.key
         );
         return decrypted;
@@ -94,12 +104,11 @@ class DownloadManager {
                 if (forPreview) {
                     return await getRenderableFileURL(file, fileBlob);
                 } else {
-                    return [
-                        await createTypedObjectURL(
-                            fileBlob,
-                            file.metadata.title
-                        ),
-                    ];
+                    const fileURL = await createTypedObjectURL(
+                        fileBlob,
+                        file.metadata.title
+                    );
+                    return { converted: [fileURL], original: [fileURL] };
                 }
             };
             if (!this.fileObjectURLPromise.get(fileKey)) {
@@ -124,7 +133,8 @@ class DownloadManager {
         usingWorker?: any,
         timeout?: number
     ) {
-        const worker = usingWorker || (await new CryptoWorker());
+        const cryptoWorker =
+            usingWorker || (await ComlinkCryptoWorker.getInstance());
         const token = tokenOverride || getToken();
         if (!token) {
             return null;
@@ -142,9 +152,9 @@ class DownloadManager {
             if (typeof resp.data === 'undefined') {
                 throw Error(CustomError.REQUEST_FAILED);
             }
-            const decrypted: any = await worker.decryptFile(
+            const decrypted = await cryptoWorker.decryptFile(
                 new Uint8Array(resp.data),
-                await worker.fromB64(file.file.decryptionHeader),
+                await cryptoWorker.fromB64(file.file.decryptionHeader),
                 file.key
             );
             return generateStreamFromArrayBuffer(decrypted);
@@ -157,12 +167,15 @@ class DownloadManager {
         const reader = resp.body.getReader();
         const stream = new ReadableStream({
             async start(controller) {
-                const decryptionHeader = await worker.fromB64(
+                const decryptionHeader = await cryptoWorker.fromB64(
                     file.file.decryptionHeader
                 );
-                const fileKey = await worker.fromB64(file.key);
+                const fileKey = await cryptoWorker.fromB64(file.key);
                 const { pullState, decryptionChunkSize } =
-                    await worker.initDecryption(decryptionHeader, fileKey);
+                    await cryptoWorker.initDecryption(
+                        decryptionHeader,
+                        fileKey
+                    );
                 let data = new Uint8Array();
                 // The following function handles each data chunk
                 function push() {
@@ -181,7 +194,7 @@ class DownloadManager {
                                     decryptionChunkSize
                                 );
                                 const { decryptedData } =
-                                    await worker.decryptChunk(
+                                    await cryptoWorker.decryptChunk(
                                         fileData,
                                         pullState
                                     );
@@ -194,7 +207,10 @@ class DownloadManager {
                         } else {
                             if (data) {
                                 const { decryptedData } =
-                                    await worker.decryptChunk(data, pullState);
+                                    await cryptoWorker.decryptChunk(
+                                        data,
+                                        pullState
+                                    );
                                 controller.enqueue(decryptedData);
                                 data = null;
                             }

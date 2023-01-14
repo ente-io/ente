@@ -3,9 +3,7 @@ import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import localForage from 'utils/storage/localForage';
 
 import { getActualKey, getToken } from 'utils/common/key';
-import CryptoWorker from 'utils/crypto';
 import { getPublicKey } from './userService';
-import { B64EncryptionResult } from 'utils/crypto';
 import HTTPService from './HTTPService';
 import { EnteFile } from 'types/file';
 import { logError } from 'utils/sentry';
@@ -28,6 +26,9 @@ import {
     CollectionSummaries,
     CollectionSummary,
     CollectionFilesCount,
+    EncryptedCollection,
+    CollectionMagicMetadata,
+    CollectionMagicMetadataProps,
 } from 'types/collection';
 import {
     COLLECTION_SORT_BY,
@@ -38,60 +39,74 @@ import {
     ALL_SECTION,
     CollectionSummaryType,
 } from 'constants/collection';
-import { UpdateMagicMetadataRequest } from 'types/magicMetadata';
-import { EncryptionResult } from 'types/upload';
+import {
+    NEW_COLLECTION_MAGIC_METADATA,
+    SUB_TYPE,
+    UpdateMagicMetadataRequest,
+} from 'types/magicMetadata';
 import constants from 'utils/strings/constants';
-import { IsArchived } from 'utils/magicMetadata';
+import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { User } from 'types/user';
+import {
+    getNonHiddenCollections,
+    isQuickLinkCollection,
+} from 'utils/collection';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
 const getCollectionWithSecrets = async (
-    collection: Collection,
+    collection: EncryptedCollection,
     masterKey: string
-) => {
-    const worker = await new CryptoWorker();
+): Promise<Collection> => {
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     const userID = getData(LS_KEYS.USER).id;
-    let decryptedKey: string;
+    let collectionKey: string;
     if (collection.owner.id === userID) {
-        decryptedKey = await worker.decryptB64(
+        collectionKey = await cryptoWorker.decryptB64(
             collection.encryptedKey,
             collection.keyDecryptionNonce,
             masterKey
         );
     } else {
         const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const secretKey = await worker.decryptB64(
+        const secretKey = await cryptoWorker.decryptB64(
             keyAttributes.encryptedSecretKey,
             keyAttributes.secretKeyDecryptionNonce,
             masterKey
         );
-        decryptedKey = await worker.boxSealOpen(
+        collectionKey = await cryptoWorker.boxSealOpen(
             collection.encryptedKey,
             keyAttributes.publicKey,
             secretKey
         );
     }
-    collection.name =
+    const collectionName =
         collection.name ||
-        (await worker.decryptToUTF8(
+        (await cryptoWorker.decryptToUTF8(
             collection.encryptedName,
             collection.nameDecryptionNonce,
-            decryptedKey
+            collectionKey
         ));
 
+    let collectionMagicMetadata: CollectionMagicMetadata;
     if (collection.magicMetadata?.data) {
-        collection.magicMetadata.data = await worker.decryptMetadata(
-            collection.magicMetadata.data,
-            collection.magicMetadata.header,
-            decryptedKey
-        );
+        collectionMagicMetadata = {
+            ...collection.magicMetadata,
+            data: await cryptoWorker.decryptMetadata(
+                collection.magicMetadata.data,
+                collection.magicMetadata.header,
+                collectionKey
+            ),
+        };
     }
     return {
         ...collection,
-        key: decryptedKey,
+        name: collectionName,
+        key: collectionKey,
+        magicMetadata: collectionMagicMetadata,
     };
 };
 
@@ -108,27 +123,25 @@ const getCollections = async (
             },
             { 'X-Auth-Token': token }
         );
-        const promises: Promise<Collection>[] = resp.data.collections.map(
-            async (collection: Collection) => {
-                if (collection.isDeleted) {
-                    return collection;
+        const decryptedCollections: Collection[] = await Promise.all(
+            resp.data.collections.map(
+                async (collection: EncryptedCollection) => {
+                    if (collection.isDeleted) {
+                        return collection;
+                    }
+                    try {
+                        return await getCollectionWithSecrets(collection, key);
+                    } catch (e) {
+                        logError(e, `decryption failed for collection`, {
+                            collectionID: collection.id,
+                        });
+                        return collection;
+                    }
                 }
-                let collectionWithSecrets = collection;
-                try {
-                    collectionWithSecrets = await getCollectionWithSecrets(
-                        collection,
-                        key
-                    );
-                } catch (e) {
-                    logError(e, `decryption failed for collection`, {
-                        collectionID: collection.id,
-                    });
-                }
-                return collectionWithSecrets;
-            }
+            )
         );
         // only allow deleted or collection with key, filtering out collection whose decryption failed
-        const collections = (await Promise.all(promises)).filter(
+        const collections = decryptedCollections.filter(
             (collection) => collection.isDeleted || collection.key
         );
         return collections;
@@ -141,7 +154,7 @@ const getCollections = async (
 export const getLocalCollections = async (): Promise<Collection[]> => {
     const collections: Collection[] =
         (await localForage.getItem(COLLECTION_TABLE)) ?? [];
-    return collections;
+    return getNonHiddenCollections(collections);
 };
 
 export const getCollectionUpdationTime = async (): Promise<number> =>
@@ -186,7 +199,7 @@ export const syncCollections = async () => {
 
     await localForage.setItem(COLLECTION_TABLE, collections);
     await localForage.setItem(COLLECTION_UPDATION_TIME, updationTime);
-    return collections;
+    return getNonHiddenCollections(collections);
 };
 
 export const getCollection = async (
@@ -273,25 +286,15 @@ export const createCollection = async (
                 return collection;
             }
         }
-        const worker = await new CryptoWorker();
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const encryptionKey = await getActualKey();
         const token = getToken();
-        const collectionKey: string = await worker.generateEncryptionKey();
-        const {
-            encryptedData: encryptedKey,
-            nonce: keyDecryptionNonce,
-        }: B64EncryptionResult = await worker.encryptToB64(
-            collectionKey,
-            encryptionKey
-        );
-        const {
-            encryptedData: encryptedName,
-            nonce: nameDecryptionNonce,
-        }: B64EncryptionResult = await worker.encryptUTF8(
-            collectionName,
-            collectionKey
-        );
-        const newCollection: Collection = {
+        const collectionKey = await cryptoWorker.generateEncryptionKey();
+        const { encryptedData: encryptedKey, nonce: keyDecryptionNonce } =
+            await cryptoWorker.encryptToB64(collectionKey, encryptionKey);
+        const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+            await cryptoWorker.encryptUTF8(collectionName, collectionKey);
+        const newCollection: EncryptedCollection = {
             id: null,
             owner: null,
             encryptedKey,
@@ -305,15 +308,12 @@ export const createCollection = async (
             isDeleted: false,
             magicMetadata: null,
         };
-        let createdCollection: Collection = await postCollection(
-            newCollection,
-            token
-        );
-        createdCollection = await getCollectionWithSecrets(
+        const createdCollection = await postCollection(newCollection, token);
+        const decryptedCreatedCollection = await getCollectionWithSecrets(
             createdCollection,
             encryptionKey
         );
-        return createdCollection;
+        return decryptedCreatedCollection;
     } catch (e) {
         logError(e, 'create collection failed');
         throw e;
@@ -321,9 +321,9 @@ export const createCollection = async (
 };
 
 const postCollection = async (
-    collectionData: Collection,
+    collectionData: EncryptedCollection,
     token: string
-): Promise<Collection> => {
+): Promise<EncryptedCollection> => {
     try {
         const response = await HTTPService.post(
             `${ENDPOINT}/collections`,
@@ -456,19 +456,19 @@ const encryptWithNewCollectionKey = async (
     files: EnteFile[]
 ): Promise<EncryptedFileKey[]> => {
     const fileKeysEncryptedWithNewCollection: EncryptedFileKey[] = [];
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
     for (const file of files) {
-        const newEncryptedKey: B64EncryptionResult = await worker.encryptToB64(
+        const newEncryptedKey = await cryptoWorker.encryptToB64(
             file.key,
             newCollection.key
         );
-        file.encryptedKey = newEncryptedKey.encryptedData;
-        file.keyDecryptionNonce = newEncryptedKey.nonce;
+        const encryptedKey = newEncryptedKey.encryptedData;
+        const keyDecryptionNonce = newEncryptedKey.nonce;
 
         fileKeysEncryptedWithNewCollection.push({
             id: file.id,
-            encryptedKey: file.encryptedKey,
-            keyDecryptionNonce: file.keyDecryptionNonce,
+            encryptedKey,
+            keyDecryptionNonce,
         });
     }
     return fileKeysEncryptedWithNewCollection;
@@ -512,26 +512,41 @@ export const deleteCollection = async (collectionID: number) => {
     }
 };
 
+export const leaveSharedAlbum = async (collectionID: number) => {
+    try {
+        const token = getToken();
+
+        await HTTPService.post(
+            `${ENDPOINT}/collections/leave/${collectionID}`,
+            null,
+            null,
+            { 'X-Auth-Token': token }
+        );
+    } catch (e) {
+        logError(e, constants.LEAVE_SHARED_ALBUM_FAILED);
+        throw e;
+    }
+};
+
 export const updateCollectionMagicMetadata = async (collection: Collection) => {
     const token = getToken();
     if (!token) {
         return;
     }
 
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
-    const { file: encryptedMagicMetadata }: EncryptionResult =
-        await worker.encryptMetadata(
-            collection.magicMetadata.data,
-            collection.key
-        );
+    const { file: encryptedMagicMetadata } = await cryptoWorker.encryptMetadata(
+        collection.magicMetadata.data,
+        collection.key
+    );
 
     const reqBody: UpdateMagicMetadataRequest = {
         id: collection.id,
         magicMetadata: {
             version: collection.magicMetadata.version,
             count: collection.magicMetadata.count,
-            data: encryptedMagicMetadata.encryptedData as unknown as string,
+            data: encryptedMagicMetadata.encryptedData,
             header: encryptedMagicMetadata.decryptionHeader,
         },
     };
@@ -558,15 +573,14 @@ export const renameCollection = async (
     collection: Collection,
     newCollectionName: string
 ) => {
+    if (isQuickLinkCollection(collection)) {
+        // Convert quick link collction to normal collection on rename
+        await updateCollectionSubType(collection, SUB_TYPE.DEFAULT);
+    }
     const token = getToken();
-    const worker = await new CryptoWorker();
-    const {
-        encryptedData: encryptedName,
-        nonce: nameDecryptionNonce,
-    }: B64EncryptionResult = await worker.encryptUTF8(
-        newCollectionName,
-        collection.key
-    );
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+    const { encryptedData: encryptedName, nonce: nameDecryptionNonce } =
+        await cryptoWorker.encryptUTF8(newCollectionName, collection.key);
     const collectionRenameRequest = {
         collectionID: collection.id,
         encryptedName,
@@ -581,16 +595,34 @@ export const renameCollection = async (
         }
     );
 };
+
+const updateCollectionSubType = async (
+    collection: Collection,
+    subType: SUB_TYPE
+) => {
+    const updatedMagicMetadataProps: CollectionMagicMetadataProps = {
+        subType: subType,
+    };
+    const updatedCollection = {
+        ...collection,
+        magicMetadata: await updateMagicMetadataProps(
+            collection.magicMetadata ?? NEW_COLLECTION_MAGIC_METADATA,
+            collection.key,
+            updatedMagicMetadataProps
+        ),
+    } as Collection;
+    await updateCollectionMagicMetadata(updatedCollection);
+};
+
 export const shareCollection = async (
     collection: Collection,
     withUserEmail: string
 ) => {
     try {
-        const worker = await new CryptoWorker();
-
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const token = getToken();
         const publicKey: string = await getPublicKey(withUserEmail);
-        const encryptedKey: string = await worker.boxSeal(
+        const encryptedKey = await cryptoWorker.boxSeal(
             collection.key,
             publicKey
         );
@@ -735,11 +767,6 @@ export function sortCollectionSummaries(
     return collectionSummaries
         .sort((a, b) => {
             switch (sortBy) {
-                case COLLECTION_SORT_BY.CREATION_TIME_DESCENDING:
-                    return compareCollectionsLatestFile(
-                        b.latestFile,
-                        a.latestFile
-                    );
                 case COLLECTION_SORT_BY.CREATION_TIME_ASCENDING:
                     return (
                         -1 *

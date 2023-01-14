@@ -5,14 +5,16 @@ import { getToken } from 'utils/common/key';
 import { logError } from 'utils/sentry';
 import { getEndpoint } from 'utils/common/apiUtil';
 import HTTPService from 'services/HTTPService';
-import CryptoWorker from 'utils/crypto';
 import uploadHttpClient from 'services/upload/uploadHttpClient';
 import { SetProgressTracker } from 'components/FixLargeThumbnail';
 import { getFileType } from 'services/typeDetectionService';
 import { getLocalTrash, getTrashedFiles } from './trashService';
-import { EncryptionResult, UploadURL } from 'types/upload';
-import { fileAttribute } from 'types/file';
+import { UploadURL } from 'types/upload';
+import { FileAttributes } from 'types/file';
 import { USE_CF_PROXY } from 'constants/upload';
+import { Remote } from 'comlink';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 const REPLACE_THUMBNAIL_THRESHOLD = 500 * 1024; // 500KB
@@ -44,7 +46,7 @@ export async function replaceThumbnail(
     let completedWithError = false;
     try {
         const token = getToken();
-        const worker = await new CryptoWorker();
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
         const files = await getLocalFiles();
         const trash = await getLocalTrash();
         const trashFiles = getTrashedFiles(trash);
@@ -83,7 +85,7 @@ export async function replaceThumbnail(
                     fileTypeInfo
                 );
                 const newUploadedThumbnail = await uploadThumbnail(
-                    worker,
+                    cryptoWorker,
                     file.key,
                     newThumbnail,
                     uploadURLs.pop()
@@ -102,24 +104,26 @@ export async function replaceThumbnail(
 }
 
 export async function uploadThumbnail(
-    worker,
+    worker: Remote<DedicatedCryptoWorker>,
     fileKey: string,
     updatedThumbnail: Uint8Array,
     uploadURL: UploadURL
-): Promise<fileAttribute> {
-    const { file: encryptedThumbnail }: EncryptionResult =
-        await worker.encryptThumbnail(updatedThumbnail, fileKey);
+): Promise<FileAttributes> {
+    const { file: encryptedThumbnail } = await worker.encryptThumbnail(
+        updatedThumbnail,
+        fileKey
+    );
     let thumbnailObjectKey: string = null;
     if (USE_CF_PROXY) {
         thumbnailObjectKey = await uploadHttpClient.putFileV2(
             uploadURL,
-            encryptedThumbnail.encryptedData as Uint8Array,
+            encryptedThumbnail.encryptedData,
             () => {}
         );
     } else {
         thumbnailObjectKey = await uploadHttpClient.putFile(
             uploadURL,
-            encryptedThumbnail.encryptedData as Uint8Array,
+            encryptedThumbnail.encryptedData,
             () => {}
         );
     }
@@ -131,7 +135,7 @@ export async function uploadThumbnail(
 
 export async function updateThumbnail(
     fileID: number,
-    newThumbnail: fileAttribute
+    newThumbnail: FileAttributes
 ) {
     try {
         const token = getToken();

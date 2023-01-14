@@ -121,6 +121,18 @@ html, body {
 }
 
 
+.pswp-custom-caption-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    bottom: 56px;
+    background-color: transparent !important;
+}
+
+.pswp__caption--empty{
+    display: none;
+}
+
 .bg-upload-progress-bar {
     background-color: #51cd7c;
 }

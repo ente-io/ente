@@ -24,6 +24,9 @@ import router from 'next/router';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { styled } from '@mui/material';
 import { syncCollections } from 'services/collectionService';
+import EnteSpinner from 'components/EnteSpinner';
+import VerticallyCentered from 'components/Container';
+import { Collection } from 'types/collection';
 
 export const DeduplicateContext = createContext<DeduplicateContextType>(
     DefaultDeduplicateContext
@@ -42,6 +45,7 @@ export default function Deduplicate() {
         setRedirectURL,
     } = useContext(AppContext);
     const [duplicateFiles, setDuplicateFiles] = useState<EnteFile[]>(null);
+    const [collections, setCollection] = useState<Collection[]>([]);
     const [clubSameTimeFilesOnly, setClubSameTimeFilesOnly] = useState(false);
     const [fileSizeMap, setFileSizeMap] = useState(new Map<number, number>());
     const [collectionNameMap, setCollectionNameMap] = useState(
@@ -72,6 +76,7 @@ export default function Deduplicate() {
     const syncWithRemote = async () => {
         startLoading();
         const collections = await syncCollections();
+        setCollection(collections);
         const collectionNameMap = new Map<number, string>();
         for (const collection of collections) {
             collectionNameMap.set(collection.id, collection.name);
@@ -87,11 +92,12 @@ export default function Deduplicate() {
         let toSelectFileIDs: number[] = [];
         let count = 0;
         for (const dupe of duplicates) {
-            allDuplicateFiles = allDuplicateFiles.concat(dupe.files);
+            allDuplicateFiles = [...allDuplicateFiles, ...dupe.files];
             // select all except first file
-            toSelectFileIDs = toSelectFileIDs.concat(
-                dupe.files.slice(1).map((f) => f.id)
-            );
+            toSelectFileIDs = [
+                ...toSelectFileIDs,
+                ...dupe.files.slice(1).map((f) => f.id),
+            ];
             count += dupe.files.length - 1;
 
             for (const file of dupe.files) {
@@ -143,7 +149,13 @@ export default function Deduplicate() {
     };
 
     if (!duplicateFiles) {
-        return <></>;
+        return (
+            <VerticallyCentered>
+                <EnteSpinner>
+                    <span className="sr-only">Loading...</span>
+                </EnteSpinner>
+            </VerticallyCentered>
+        );
     }
 
     return (
@@ -165,7 +177,7 @@ export default function Deduplicate() {
             )}
             <PhotoFrame
                 files={duplicateFiles}
-                setFiles={setDuplicateFiles}
+                collections={collections}
                 syncWithRemote={syncWithRemote}
                 setSelected={setSelected}
                 selected={selected}

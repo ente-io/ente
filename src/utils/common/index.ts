@@ -1,19 +1,7 @@
-import constants from 'utils/strings/constants';
 import { CustomError } from 'utils/error';
-import GetDeviceOS, { OS } from './deviceDetection';
 import isElectron from 'is-electron';
 
-const DESKTOP_APP_GITHUB_DOWNLOAD_URL =
-    'https://github.com/ente-io/bhari-frame/releases/latest';
-
-const APP_DOWNLOAD_ENTE_URL_PREFIX = 'https://ente.io/download';
-
-export function checkConnectivity() {
-    if (navigator.onLine) {
-        return true;
-    }
-    throw new Error(constants.NO_INTERNET_CONNECTION);
-}
+export const APP_DOWNLOAD_URL = 'https://ente.io/download/desktop';
 
 export function runningInBrowser() {
     return typeof window !== 'undefined';
@@ -61,22 +49,8 @@ export async function sleep(time: number) {
     });
 }
 
-export function getOSSpecificDesktopAppDownloadLink() {
-    const os = GetDeviceOS();
-    let url = '';
-    if (os === OS.WINDOWS) {
-        url = `${APP_DOWNLOAD_ENTE_URL_PREFIX}/exe`;
-    } else if (os === OS.MAC) {
-        url = `${APP_DOWNLOAD_ENTE_URL_PREFIX}/dmg`;
-    } else {
-        url = DESKTOP_APP_GITHUB_DOWNLOAD_URL;
-    }
-    return url;
-}
 export function downloadApp() {
-    const link = getOSSpecificDesktopAppDownloadLink();
-    const win = window.open(link, '_blank');
-    win.focus();
+    openLink(APP_DOWNLOAD_URL, true);
 }
 
 export function reverseString(title: string) {
@@ -91,12 +65,12 @@ export function initiateEmail(email: string) {
     a.rel = 'noreferrer noopener';
     a.click();
 }
-export const promiseWithTimeout = async (
-    request: Promise<any>,
+export const promiseWithTimeout = async <T>(
+    request: Promise<T>,
     timeout: number
-) => {
+): Promise<T> => {
     const timeoutRef = { current: null };
-    const rejectOnTimeout = new Promise((_, reject) => {
+    const rejectOnTimeout = new Promise<null>((_, reject) => {
         timeoutRef.current = setTimeout(
             () => reject(Error(CustomError.WAIT_TIME_EXCEEDED)),
             timeout
@@ -146,4 +120,8 @@ function isPromise(p: any) {
     }
 
     return false;
+}
+
+export function isClipboardItemPresent() {
+    return typeof ClipboardItem !== 'undefined';
 }

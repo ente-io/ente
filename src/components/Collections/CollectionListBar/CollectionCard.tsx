@@ -11,7 +11,8 @@ import TruncateText from 'components/TruncateText';
 import { Box } from '@mui/material';
 import { CollectionSummaryType } from 'constants/collection';
 import Favorite from '@mui/icons-material/FavoriteRounded';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
+import PeopleIcon from '@mui/icons-material/People';
 
 interface Iprops {
     active: boolean;
@@ -50,8 +51,9 @@ function CollectionCardIcon({ collectionType }) {
         <CollectionBarTileIcon>
             {collectionType === CollectionSummaryType.favorites && <Favorite />}
             {collectionType === CollectionSummaryType.archived && (
-                <VisibilityOff />
+                <ArchiveOutlined />
             )}
+            {collectionType === CollectionSummaryType.shared && <PeopleIcon />}
         </CollectionBarTileIcon>
     );
 }

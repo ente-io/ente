@@ -8,8 +8,8 @@ import { CollectionInfoBarWrapper } from './styledComponents';
 import { shouldShowOptions } from 'utils/collection';
 import { CollectionSummaryType } from 'constants/collection';
 import Favorite from '@mui/icons-material/FavoriteRounded';
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Delete from '@mui/icons-material/Delete';
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 
 interface Iprops {
     activeCollection: Collection;
@@ -43,7 +43,7 @@ export default function CollectionInfoWithOptions({
                 return <Favorite />;
             case CollectionSummaryType.archived:
             case CollectionSummaryType.archive:
-                return <VisibilityOff />;
+                return <ArchiveOutlined />;
             case CollectionSummaryType.trash:
                 return <Delete />;
             default:

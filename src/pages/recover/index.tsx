@@ -8,15 +8,11 @@ import {
 } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
 import { PAGES } from 'constants/pages';
-import CryptoWorker, {
-    decryptAndStoreToken,
-    saveKeyInSessionStore,
-} from 'utils/crypto';
+import { decryptAndStoreToken, saveKeyInSessionStore } from 'utils/crypto';
 import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import VerticallyCentered from 'components/Container';
-import { Button } from 'react-bootstrap';
 import { AppContext } from 'pages/_app';
 import { logError } from 'utils/sentry';
 import { getKey, SESSION_KEYS } from 'utils/storage/sessionStorage';
@@ -24,6 +20,8 @@ import { KeyAttributes, User } from 'types/user';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
+import LinkButton from 'components/pages/gallery/LinkButton';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 const bip39 = require('bip39');
 // mobile client library only supports english.
 bip39.setDefaultWordlist('english');
@@ -59,15 +57,21 @@ export default function Recover() {
         setFieldError
     ) => {
         try {
+            recoveryKey = recoveryKey
+                .trim()
+                .split(' ')
+                .map((part) => part.trim())
+                .filter((part) => !!part)
+                .join(' ');
             // check if user is entering mnemonic recovery key
-            if (recoveryKey.trim().indexOf(' ') > 0) {
-                if (recoveryKey.trim().split(' ').length !== 24) {
+            if (recoveryKey.indexOf(' ') > 0) {
+                if (recoveryKey.split(' ').length !== 24) {
                     throw new Error('recovery code should have 24 words');
                 }
                 recoveryKey = bip39.mnemonicToEntropy(recoveryKey);
             }
-            const cryptoWorker = await new CryptoWorker();
-            const masterKey: string = await cryptoWorker.decryptB64(
+            const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+            const masterKey = await cryptoWorker.decryptB64(
                 keyAttributes.masterKeyEncryptedWithRecoveryKey,
                 keyAttributes.masterKeyDecryptionNonce,
                 await cryptoWorker.fromHex(recoveryKey)
@@ -102,12 +106,12 @@ export default function Recover() {
                     buttonText={constants.RECOVER}
                 />
                 <FormPaperFooter style={{ justifyContent: 'space-between' }}>
-                    <Button variant="link" onClick={showNoRecoveryKeyMessage}>
+                    <LinkButton onClick={showNoRecoveryKeyMessage}>
                         {constants.NO_RECOVERY_KEY}
-                    </Button>
-                    <Button variant="link" onClick={router.back}>
+                    </LinkButton>
+                    <LinkButton onClick={router.back}>
                         {constants.GO_BACK}
-                    </Button>
+                    </LinkButton>
                 </FormPaperFooter>
             </FormPaper>
         </VerticallyCentered>

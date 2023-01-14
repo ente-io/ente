@@ -1,25 +1,44 @@
 import { User } from 'types/user';
 import { EnteFile } from 'types/file';
 import { CollectionSummaryType, CollectionType } from 'constants/collection';
-import { MagicMetadataCore, VISIBILITY_STATE } from 'types/magicMetadata';
+import {
+    EncryptedMagicMetadata,
+    MagicMetadataCore,
+    SUB_TYPE,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 
-export interface Collection {
+export interface EncryptedCollection {
     id: number;
     owner: User;
-    key?: string;
+    // collection name was unencrypted in the past, so we need to keep it as optional
     name?: string;
-    encryptedName?: string;
-    nameDecryptionNonce?: string;
+    encryptedKey: string;
+    keyDecryptionNonce: string;
+    encryptedName: string;
+    nameDecryptionNonce: string;
     type: CollectionType;
     attributes: collectionAttributes;
     sharees: User[];
-    updationTime: number;
-    encryptedKey: string;
-    keyDecryptionNonce: string;
-    isDeleted: boolean;
-    isSharedCollection?: boolean;
     publicURLs?: PublicURL[];
-    magicMetadata?: CollectionMagicMetadata;
+    updationTime: number;
+    isDeleted: boolean;
+    magicMetadata: EncryptedMagicMetadata;
+}
+
+export interface Collection
+    extends Omit<
+        EncryptedCollection,
+        | 'encryptedKey'
+        | 'keyDecryptionNonce'
+        | 'encryptedName'
+        | 'nameDecryptionNonce'
+        | 'magicMetadata'
+    > {
+    key: string;
+    name: string;
+    isSharedCollection?: boolean;
+    magicMetadata: CollectionMagicMetadata;
 }
 
 export interface PublicURL {
@@ -27,6 +46,7 @@ export interface PublicURL {
     deviceLimit: number;
     validTill: number;
     enableDownload: boolean;
+    enableCollect: boolean;
     passwordEnabled: boolean;
     nonce?: string;
     opsLimit?: number;
@@ -37,6 +57,7 @@ export interface UpdatePublicURL {
     collectionID: number;
     disablePassword?: boolean;
     enableDownload?: boolean;
+    enableCollect?: boolean;
     validTill?: number;
     deviceLimit?: number;
     passHash?: string;
@@ -82,6 +103,7 @@ export interface RemoveFromCollectionRequest {
 
 export interface CollectionMagicMetadataProps {
     visibility?: VISIBILITY_STATE;
+    subType?: SUB_TYPE;
 }
 
 export interface CollectionMagicMetadata

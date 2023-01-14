@@ -1,27 +1,31 @@
 import * as Sentry from '@sentry/nextjs';
+import { isDEVSentryENV } from 'constants/sentry';
 import { addLogLine } from 'utils/logging';
 import { getSentryUserID } from 'utils/user';
 
-export const logError = (
+export const logError = async (
     error: any,
     msg: string,
-    info?: Record<string, unknown>
+    info?: Record<string, unknown>,
+    skipAddLogLine = false
 ) => {
     if (isErrorUnnecessaryForSentry(error)) {
         return;
     }
     const err = errorWithContext(error, msg);
-    addLogLine(
-        `error: ${error?.name} ${error?.message} ${
-            error?.stack
-        } msg: ${msg} info: ${JSON.stringify(info)}`
-    );
-    if (!process.env.NEXT_PUBLIC_SENTRY_ENV) {
+    if (!skipAddLogLine) {
+        addLogLine(
+            `error: ${error?.name} ${error?.message} ${
+                error?.stack
+            } msg: ${msg} info: ${JSON.stringify(info)}`
+        );
+    }
+    if (isDEVSentryENV()) {
         console.log(error, { msg, info });
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,
-        user: { id: getSentryUserID() },
+        user: { id: await getSentryUserID() },
         contexts: {
             ...(info && {
                 info: info,

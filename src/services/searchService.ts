@@ -24,6 +24,7 @@ import textService from './machineLearning/textService';
 import { FILE_TYPE } from 'constants/file';
 import { getFormattedDate, isInsideBox, isSameDayAnyYear } from 'utils/search';
 import { Person, ThingClass } from 'types/machineLearning';
+import { getUniqueFiles } from 'utils/file';
 
 const ENDPOINT = getEndpoint();
 
@@ -174,7 +175,7 @@ export function searchCollection(
 }
 
 function searchFiles(searchPhrase: string, files: EnteFile[]) {
-    return files
+    return getUniqueFiles(files)
         .map((file) => ({
             title: file.metadata.title,
             id: file.id,
@@ -225,6 +226,7 @@ function getFileSuggestion(
     }));
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 async function getLocationSuggestions(searchPhrase: string) {
     const locationResults = await searchLocation(searchPhrase);
 

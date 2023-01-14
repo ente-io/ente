@@ -1,6 +1,5 @@
 import { Box, Typography } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
-import { ButtonVariant } from 'components/pages/gallery/LinkButton';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
 import {
@@ -8,7 +7,7 @@ import {
     deleteShareableURL,
 } from 'services/collectionService';
 import { Collection, PublicURL } from 'types/collection';
-import { handleSharingErrors } from 'utils/error';
+import { handleSharingErrors } from 'utils/error/ui';
 import constants from 'utils/strings/constants';
 import PublicShareSwitch from './switch';
 interface Iprops {
@@ -60,7 +59,7 @@ export default function PublicShareControl({
             proceed: {
                 text: constants.DISABLE,
                 action: disablePublicSharing,
-                variant: ButtonVariant.danger,
+                variant: 'danger',
             },
         });
     };

@@ -14,7 +14,7 @@ import { getCollection } from './collectionService';
 import { EnteFile } from 'types/file';
 
 import HTTPService from './HTTPService';
-import { Trash, TrashItem } from 'types/trash';
+import { EncryptedTrashItem, Trash } from 'types/trash';
 
 const TRASH = 'file-trash';
 const TRASH_TIME = 'trash-time';
@@ -99,7 +99,8 @@ export const updateTrash = async (
                     'X-Auth-Token': token,
                 }
             );
-            for (const trashItem of resp.data.diff as TrashItem[]) {
+            // #Perf: This can be optimized by running the decryption in parallel
+            for (const trashItem of resp.data.diff as EncryptedTrashItem[]) {
                 const collectionID = trashItem.file.collectionID;
                 let collection = collections.get(collectionID);
                 if (!collection) {
@@ -110,19 +111,21 @@ export const updateTrash = async (
                     ]);
                 }
                 if (!trashItem.isDeleted && !trashItem.isRestored) {
-                    trashItem.file = await decryptFile(
+                    const decryptedFile = await decryptFile(
                         trashItem.file,
                         collection.key
                     );
+                    updatedTrash.push({ ...trashItem, file: decryptedFile });
+                } else {
+                    updatedTrash = updatedTrash.filter(
+                        (item) => item.file.id !== trashItem.file.id
+                    );
                 }
-                updatedTrash.push(trashItem);
             }
 
             if (resp.data.diff.length) {
                 time = resp.data.diff.slice(-1)[0].updatedAt;
             }
-            updatedTrash = removeDuplicates(updatedTrash);
-            updatedTrash = removeRestoredOrDeletedTrashItems(updatedTrash);
 
             setFiles(
                 preservePhotoswipeProps(
@@ -144,28 +147,6 @@ export const updateTrash = async (
     }
     return currentTrash;
 };
-
-function removeDuplicates(trash: Trash) {
-    const latestVersionTrashItems = new Map<number, TrashItem>();
-    trash.forEach(({ file, updatedAt, ...rest }) => {
-        if (
-            !latestVersionTrashItems.has(file.id) ||
-            latestVersionTrashItems.get(file.id).updatedAt < updatedAt
-        ) {
-            latestVersionTrashItems.set(file.id, { file, updatedAt, ...rest });
-        }
-    });
-    trash = [];
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    for (const [_, trashedFile] of latestVersionTrashItems) {
-        trash.push(trashedFile);
-    }
-    return trash;
-}
-
-function removeRestoredOrDeletedTrashItems(trash: Trash) {
-    return trash.filter((item) => !item.isDeleted && !item.isRestored);
-}
 
 export function getTrashedFiles(trash: Trash) {
     return mergeMetadata(
