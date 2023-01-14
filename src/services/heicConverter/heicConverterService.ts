@@ -4,7 +4,7 @@ import { createNewConvertWorker } from 'utils/heicConverter';
 import { retryAsyncFunction } from 'utils/network';
 import { logError } from 'utils/sentry';
 import { addLogLine } from 'utils/logging';
-import { makeHumanReadableStorage } from 'utils/billing';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 
 const WORKER_POOL_SIZE = 2;
 const MAX_CONVERSION_IN_PARALLEL = 1;
@@ -48,9 +48,9 @@ class HEICConverter {
                                             format
                                         );
                                     addLogLine(
-                                        `originalFileSize:${makeHumanReadableStorage(
+                                        `originalFileSize:${convertBytesToHumanReadable(
                                             fileBlob?.size
-                                        )},convertedFileSize:${makeHumanReadableStorage(
+                                        )},convertedFileSize:${convertBytesToHumanReadable(
                                             convertedHEIC?.size
                                         )},  heic conversion time: ${
                                             Date.now() - startTime
@@ -70,11 +70,11 @@ class HEICConverter {
                             Error(`converted heic fileSize is Zero`),
                             'converted heic fileSize is Zero',
                             {
-                                originalFileSize: makeHumanReadableStorage(
-                                    fileBlob?.size ?? 0
+                                originalFileSize: convertBytesToHumanReadable(
+                                    fileBlob?.size
                                 ),
-                                convertedFileSize: makeHumanReadableStorage(
-                                    convertedHEIC?.size ?? 0
+                                convertedFileSize: convertBytesToHumanReadable(
+                                    convertedHEIC?.size
                                 ),
                             }
                         );

@@ -3,7 +3,9 @@ import { convertBytesToHumanReadable } from 'utils/file/size';
 import { formatDateTime } from 'utils/time';
 import { saveLogLine, getLogs } from 'utils/storage';
 
+// commented out need fixing
 export function pipeConsoleLogsToDebugLogs() {
+    return;
     const oldLog = console.log;
     console.log = function (...args) {
         addLogLine(args.map((x) => JSON.stringify(x)).join(' '));

@@ -1,4 +1,5 @@
 import { ElectronFile } from 'types/upload';
+import { convertBytesToHumanReadable } from 'utils/file/size';
 import { logError } from 'utils/sentry';
 
 export async function getUint8ArrayView(
@@ -54,21 +55,6 @@ async function* fileChunkReaderMaker(file: File, chunkSize: number) {
         offset += chunkSize;
     }
     return null;
-}
-
-// Temporary fix for window not defined caused on importing from utils/billing
-// because this file is accessed inside worker and util/billing imports constants
-// which has reference to  window object, which cause error inside worker
-//  TODO: update worker to not read file themselves but rather have filedata passed to them
-
-function convertBytesToHumanReadable(bytes: number, precision = 2): string {
-    if (bytes === 0) {
-        return '0 MB';
-    }
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    return (bytes / Math.pow(1024, i)).toFixed(precision) + ' ' + sizes[i];
 }
 
 // depreciated

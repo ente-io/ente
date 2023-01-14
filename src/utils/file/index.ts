@@ -27,7 +27,7 @@ import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
-import { makeHumanReadableStorage } from 'utils/billing';
+import { convertBytesToHumanReadable } from './size';
 export function downloadAsFile(filename: string, content: string) {
     const file = new Blob([content], {
         type: 'text/plain',
@@ -337,7 +337,7 @@ async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
 export async function getRenderableImage(fileName: string, imageBlob: Blob) {
     if (await isFileHEIC(imageBlob, fileName)) {
         addLogLine(
-            `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
+            `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
                 imageBlob.size
             )}`
         );
