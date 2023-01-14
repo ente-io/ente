@@ -80,9 +80,9 @@ const isDevDeployment = () => {
     if (runningInBrowser()) {
         return (
             process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
-                window.location.origin ||
+                globalThis.location.origin ||
             process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
-                window.location.origin ||
+                globalThis.location.origin ||
             process.env.NODE_ENV === 'development'
         );
     }
