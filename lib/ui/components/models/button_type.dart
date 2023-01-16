@@ -58,6 +58,9 @@ enum ButtonType {
     if (isSecondary) {
       return colorScheme.fillMuted;
     }
+    if (isNeutral) {
+      return colorScheme.fillBasePressed;
+    }
     return null;
   }
 
@@ -126,8 +129,11 @@ enum ButtonType {
 
   //Returning null to fallback to default color
   Color? pressedIconColor(EnteColorScheme colorScheme, ButtonSize buttonSize) {
-    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
-      return colorScheme.strokeBase;
+    if (this == ButtonType.tertiaryCritical) {
+      return colorScheme.warning700;
+    }
+    if (this == ButtonType.tertiary && buttonSize == ButtonSize.small) {
+      return colorScheme.fillBasePressed;
     }
     return null;
   }
@@ -171,6 +177,9 @@ enum ButtonType {
   ) {
     if (this == ButtonType.tertiaryCritical) {
       return textTheme.bodyBold.copyWith(color: colorScheme.warning700);
+    }
+    if (this == ButtonType.tertiary && buttonSize == ButtonSize.small) {
+      return textTheme.bodyBold.copyWith(color: colorScheme.fillBasePressed);
     }
     return null;
   }

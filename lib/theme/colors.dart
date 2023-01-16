@@ -21,6 +21,7 @@ class EnteColorScheme {
 
   // Fill Colors
   final Color fillBase;
+  final Color fillBasePressed;
   final Color fillMuted;
   final Color fillFaint;
   final Color fillFaintPressed;
@@ -62,6 +63,7 @@ class EnteColorScheme {
     this.textFaint,
     this.blurTextBase,
     this.fillBase,
+    this.fillBasePressed,
     this.fillMuted,
     this.fillFaint,
     this.fillFaintPressed,
@@ -97,6 +99,7 @@ const EnteColorScheme lightScheme = EnteColorScheme(
   textFaintLight,
   blurTextBaseLight,
   fillBaseLight,
+  fillBasePressedLight,
   fillMutedLight,
   fillFaintLight,
   fillFaintPressedLight,
@@ -123,6 +126,7 @@ const EnteColorScheme darkScheme = EnteColorScheme(
   textFaintDark,
   blurTextBaseDark,
   fillBaseDark,
+  fillBasePressedDark,
   fillMutedDark,
   fillFaintDark,
   fillFaintPressedDark,
@@ -168,11 +172,13 @@ const Color blurTextBaseDark = Color.fromRGBO(255, 255, 255, 0.95);
 
 // Fill Colors
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
+const Color fillBasePressedLight = Color.fromRGBO(0, 0, 0, 0.8);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
 const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
 
 const Color fillBaseDark = Color.fromRGBO(255, 255, 255, 1);
+const Color fillBasePressedDark = Color.fromRGBO(255, 255, 255, 0.9);
 const Color fillMutedDark = Color.fromRGBO(255, 255, 255, 0.16);
 const Color fillFaintDark = Color.fromRGBO(255, 255, 255, 0.12);
 const Color fillFaintPressedDark = Color.fromRGBO(255, 255, 255, 0.06);
