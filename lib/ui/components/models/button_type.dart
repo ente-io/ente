@@ -88,17 +88,17 @@ enum ButtonType {
     required EnteColorScheme inverseColorScheme,
     required ButtonSize buttonSize,
   }) {
-    if (isPrimary) {
-      return colorScheme.strokeMuted;
-    }
     if (buttonSize == ButtonSize.small && this == ButtonType.tertiaryCritical) {
       return null;
     }
-    if (isSecondary || isCritical) {
+    if (isSecondary) {
       return colorScheme.strokeBase;
     }
     if (isNeutral) {
       return inverseColorScheme.strokeBase;
+    }
+    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
+      return colorScheme.warning700;
     }
     return null;
   }
@@ -176,8 +176,8 @@ enum ButtonType {
     EnteColorScheme colorScheme,
     ButtonSize buttonSize,
   ) {
-    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
-      return textTheme.bodyBold.copyWith(color: colorScheme.strokeBase);
+    if (this == ButtonType.tertiaryCritical) {
+      return textTheme.bodyBold.copyWith(color: colorScheme.warning700);
     }
     return null;
   }
