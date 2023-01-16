@@ -11,6 +11,9 @@ import isElectron from 'is-electron';
 import WatchFolder from 'components/WatchFolder';
 import { getDownloadAppMessage } from 'utils/ui';
 
+import ThemeSwitcher from './ThemeSwitcher';
+import { SpaceBetweenFlex } from 'components/Container';
+
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
     const {
@@ -18,6 +21,8 @@ export default function UtilitySection({ closeSidebar }) {
         startLoading,
         watchFolderView,
         setWatchFolderView,
+        theme,
+        setTheme,
     } = useContext(AppContext);
 
     const [recoverModalView, setRecoveryModalView] = useState(false);
@@ -70,6 +75,10 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={openRecoveryKeyModal}>
                 {constants.RECOVERY_KEY}
             </SidebarButton>
+            <SpaceBetweenFlex sx={{ px: 1.5 }}>
+                {constants.CHOSE_THEME}
+                <ThemeSwitcher theme={theme} setTheme={setTheme} />
+            </SpaceBetweenFlex>
             <SidebarButton onClick={openTwoFactorModal}>
                 {constants.TWO_FACTOR}
             </SidebarButton>
@@ -85,7 +94,6 @@ export default function UtilitySection({ closeSidebar }) {
             {/* <SidebarButton onClick={openThumbnailCompressModal}>
                 {constants.COMPRESS_THUMBNAILS}
             </SidebarButton> */}
-
             <RecoveryKey
                 show={recoverModalView}
                 onHide={closeRecoveryKeyModal}
@@ -98,7 +106,6 @@ export default function UtilitySection({ closeSidebar }) {
                 setLoading={startLoading}
             />
             <WatchFolder open={watchFolderView} onClose={closeWatchFolder} />
-
             {/* <FixLargeThumbnails
                 isOpen={fixLargeThumbsView}
                 hide={() => setFixLargeThumbsView(false)}

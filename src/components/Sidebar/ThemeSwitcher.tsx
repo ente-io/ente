@@ -2,13 +2,13 @@ import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import React from 'react';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
-import { THEMES } from 'types/theme';
+import { THEME_COLOR } from 'constants/theme';
 interface Iprops {
-    theme: THEMES;
-    setTheme: (theme: THEMES) => void;
+    theme: THEME_COLOR;
+    setTheme: (theme: THEME_COLOR) => void;
 }
 export default function ThemeSwitcher({ theme, setTheme }: Iprops) {
-    const handleChange = (event, theme: THEMES) => {
+    const handleChange = (event, theme: THEME_COLOR) => {
         if (theme !== null) {
             setTheme(theme);
         }
@@ -20,10 +20,10 @@ export default function ThemeSwitcher({ theme, setTheme }: Iprops) {
             value={theme}
             exclusive
             onChange={handleChange}>
-            <ToggleButton value={THEMES.LIGHT}>
+            <ToggleButton value={THEME_COLOR.LIGHT}>
                 <LightModeIcon />
             </ToggleButton>
-            <ToggleButton value={THEMES.DARK}>
+            <ToggleButton value={THEME_COLOR.DARK}>
                 <DarkModeIcon />
             </ToggleButton>
         </ToggleButtonGroup>
