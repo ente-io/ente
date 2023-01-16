@@ -888,6 +888,7 @@ const englishConstants = {
         </>
     ),
     ADD_X_PHOTOS: (x: number) => `Add ${x} ${x > 1 ? 'photos' : 'photo'}`,
+    CHOSE_THEME: 'Choose theme',
 };
 
 export default englishConstants;
