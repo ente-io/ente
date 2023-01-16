@@ -94,7 +94,7 @@ declare module '@mui/material/CircularProgress' {
 }
 
 // Create a theme instance.
-const darkThemeOptions = createTheme({
+const lightThemeOptions = createTheme({
     components: {
         MuiCssBaseline: {
             styleOverrides: {
@@ -110,7 +110,7 @@ const darkThemeOptions = createTheme({
             styleOverrides: {
                 root: {
                     '.MuiBackdrop-root': {
-                        backgroundColor: 'rgba(0,0,0,0.65)',
+                        backgroundColor: 'rgba(255,255,255,0.75)',
                     },
                 },
             },
@@ -119,10 +119,10 @@ const darkThemeOptions = createTheme({
             styleOverrides: {
                 root: {
                     '.MuiBackdrop-root': {
-                        backgroundColor: 'rgba(0,0,0,0.65)',
+                        backgroundColor: 'rgba(255,255,255,0.75)',
                     },
                     '& .MuiDialog-paper': {
-                        boxShadow: '0px 0px 10px 0px #252525',
+                        boxShadow: '0px 0px 10px 0px rgba(153,153,153,0.04)',
                     },
                     '& .MuiDialogTitle-root': {
                         padding: '16px',
@@ -226,15 +226,15 @@ const darkThemeOptions = createTheme({
                     switch (ownerState.color) {
                         case 'primary':
                             return {
-                                color: '#ffffff',
+                                color: '#000000',
                             };
                         case 'secondary':
                             return {
-                                color: 'rgba(255,255,255,0.24)',
+                                color: 'rgba(0,0,0,0.24)',
                             };
                         case 'disabled':
                             return {
-                                color: 'rgba(255, 255, 255, 0.16)',
+                                color: 'rgba(0, 0, 0, 0.12)',
                             };
                     }
                 },
@@ -247,16 +247,16 @@ const darkThemeOptions = createTheme({
                     switch (ownerState.color) {
                         case 'primary':
                             return {
-                                color: '#ffffff',
+                                color: '#000000',
                             };
                         case 'secondary':
                             return {
-                                color: 'rgba(255,255,255,0.24)',
+                                color: 'rgba(0,0,0,0.24)',
                             };
                     }
                     if (ownerState.disabled) {
                         return {
-                            color: 'rgba(255, 255, 255, 0.16)',
+                            color: 'rgba(0, 0, 0, 0.12)',
                         };
                     }
                 },
@@ -272,14 +272,14 @@ const darkThemeOptions = createTheme({
     },
 
     palette: {
-        mode: 'dark',
+        mode: 'light',
         primary: {
-            main: '#fff',
-            contrastText: '#000',
+            main: '#000',
+            contrastText: '#fff',
         },
         secondary: {
-            main: 'rgba(255, 255, 255, 0.12)',
-            contrastText: '#fff',
+            main: 'rgba(0, 0, 0, 0.04)',
+            contrastText: '#000',
         },
         accent: {
             main: '#1DB954',
@@ -287,13 +287,13 @@ const darkThemeOptions = createTheme({
             light: '#26CB5F',
         },
         fill: {
-            main: 'rgba(255, 255, 255, 0.16)',
-            dark: 'rgba(255, 255, 255, 0.12)',
-            light: 'rgba(255, 255, 255)',
+            main: 'rgba(0, 0, 0, 0.12)',
+            dark: 'rgba(0, 0, 0, 0.04)',
+            light: 'rgba(0, 0, 0)',
         },
         backdrop: {
-            main: 'rgba(0, 0, 0, 0.65)',
-            light: 'rgba(0, 0, 0,0.2)',
+            main: 'rgba(255, 255, 255, 0.75)',
+            light: 'rgba(255, 255, 255, 0.3)',
         },
 
         blur: {
@@ -302,23 +302,23 @@ const darkThemeOptions = createTheme({
             faint: '24px',
         },
         text: {
-            primary: '#fff',
-            secondary: 'rgba(255, 255, 255, 0.7)',
-            disabled: 'rgba(255, 255, 255, 0.5)',
+            primary: '#000',
+            secondary: 'rgba(0, 0, 0, 0.6)',
+            disabled: 'rgba(0, 0, 0, 0.5)',
         },
 
         danger: {
             main: '#EA3f3f',
         },
         stroke: {
-            primary: '#ffffff',
-            secondary: 'rgba(255,255,255,0.24)',
-            disabled: 'rgba(255,255,255,0.16)',
+            primary: '#000000',
+            secondary: 'rgba(0,0,0,0.24)',
+            disabled: 'rgba(0,0,0,0.12)',
         },
         background: {
-            default: '#000000',
-            paper: '#1b1b1b',
-            overPaper: '#252525',
+            default: '#ffffff',
+            paper: '#ffffff',
+            overPaper: ' rgba(153,153,153,0.04)',
         },
         grey: {
             A100: '#ccc',
@@ -326,7 +326,7 @@ const darkThemeOptions = createTheme({
             A400: '#434343',
             500: 'rgba(255, 255, 255, 0.5)',
         },
-        divider: 'rgba(255, 255, 255, 0.16)',
+        divider: 'rgba(0, 0, 0, 0.12)',
     },
     shape: {
         borderRadius: 8,
@@ -388,4 +388,4 @@ const darkThemeOptions = createTheme({
     },
 });
 
-export default darkThemeOptions;
+export default lightThemeOptions;
