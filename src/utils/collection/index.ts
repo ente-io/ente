@@ -241,3 +241,10 @@ export const isCollectionHidden = (collection: Collection) =>
 
 export const isQuickLinkCollection = (collection: Collection) =>
     collection.magicMetadata?.data.subType === SUB_TYPE.QUICK_LINK_COLLECTION;
+
+export function isSharedByMe(collection: Collection): boolean {
+    return collection.sharees?.length > 0;
+}
+export function isSharedWithMe(collection: Collection, user: User) {
+    return collection.owner.id !== user.id;
+}
