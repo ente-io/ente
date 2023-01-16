@@ -231,144 +231,151 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       onTapDown: _shouldRegisterGestures ? _onTapDown : null,
       onTapUp: _shouldRegisterGestures ? _onTapUp : null,
       onTapCancel: _shouldRegisterGestures ? _onTapCancel : null,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4)),
-          border: Border.all(color: borderColor),
-        ),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 16),
-          width: widget.buttonSize == ButtonSize.large ? double.infinity : null,
+      child: Padding(
+        padding: widget.buttonType == ButtonType.tertiaryCritical
+            ? const EdgeInsets.all(1)
+            : const EdgeInsets.all(0),
+        child: Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(4)),
-            color: buttonColor,
+            border: Border.all(color: borderColor),
           ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 175),
-              switchInCurve: Curves.easeInOutExpo,
-              switchOutCurve: Curves.easeInOutExpo,
-              child: executionState == ExecutionState.idle ||
-                      !widget.shouldSurfaceExecutionStates
-                  ? widget.buttonType.hasTrailingIcon
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            widget.labelText == null
-                                ? const SizedBox.shrink()
-                                : Flexible(
-                                    child: Padding(
-                                      padding: widget.icon == null
-                                          ? const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                            )
-                                          : const EdgeInsets.only(right: 16),
-                                      child: Text(
-                                        widget.labelText!,
-                                        overflow: TextOverflow.ellipsis,
-                                        maxLines: 2,
-                                        style: labelStyle,
-                                      ),
-                                    ),
-                                  ),
-                            widget.icon == null
-                                ? const SizedBox.shrink()
-                                : Icon(
-                                    widget.icon,
-                                    size: 20,
-                                    color: iconColor,
-                                  ),
-                          ],
-                        )
-                      : Builder(
-                          builder: (context) {
-                            SchedulerBinding.instance.addPostFrameCallback(
-                              (timeStamp) {
-                                final box =
-                                    context.findRenderObject() as RenderBox;
-                                widthOfButton = box.size.width;
-                              },
-                            );
-                            return Row(
-                              mainAxisSize:
-                                  widget.buttonSize == ButtonSize.large
-                                      ? MainAxisSize.max
-                                      : MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                widget.icon == null
-                                    ? const SizedBox.shrink()
-                                    : Icon(
-                                        widget.icon,
-                                        size: 20,
-                                        color: iconColor,
-                                      ),
-                                widget.icon == null || widget.labelText == null
-                                    ? const SizedBox.shrink()
-                                    : const SizedBox(width: 8),
-                                widget.labelText == null
-                                    ? const SizedBox.shrink()
-                                    : Flexible(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                          ),
-                                          child: Text(
-                                            widget.labelText!,
-                                            style: labelStyle,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ),
-                                      )
-                              ],
-                            );
-                          },
-                        )
-                  : executionState == ExecutionState.inProgress
-                      ? SizedBox(
-                          width: widthOfButton,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 16),
+            width:
+                widget.buttonSize == ButtonSize.large ? double.infinity : null,
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+              color: buttonColor,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 175),
+                switchInCurve: Curves.easeInOutExpo,
+                switchOutCurve: Curves.easeInOutExpo,
+                child: executionState == ExecutionState.idle ||
+                        !widget.shouldSurfaceExecutionStates
+                    ? widget.buttonType.hasTrailingIcon
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              progressStatus == null
+                              widget.labelText == null
                                   ? const SizedBox.shrink()
-                                  : ValueListenableBuilder<String>(
-                                      valueListenable: progressStatus!,
-                                      builder: (
-                                        BuildContext context,
-                                        String value,
-                                        Widget? child,
-                                      ) {
-                                        return Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 8.0),
-                                          child: Text(
-                                            value,
-                                            style: lightTextTheme.smallBold,
-                                          ),
-                                        );
-                                      },
+                                  : Flexible(
+                                      child: Padding(
+                                        padding: widget.icon == null
+                                            ? const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                              )
+                                            : const EdgeInsets.only(right: 16),
+                                        child: Text(
+                                          widget.labelText!,
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 2,
+                                          style: labelStyle,
+                                        ),
+                                      ),
                                     ),
-                              EnteLoadingWidget(
-                                is20pts: true,
-                                color: loadingIconColor,
-                              ),
+                              widget.icon == null
+                                  ? const SizedBox.shrink()
+                                  : Icon(
+                                      widget.icon,
+                                      size: 20,
+                                      color: iconColor,
+                                    ),
                             ],
-                          ),
-                        )
-                      : executionState == ExecutionState.successful
-                          ? SizedBox(
-                              width: widthOfButton,
-                              child: Icon(
-                                Icons.check_outlined,
-                                size: 20,
-                                color: checkIconColor,
-                              ),
-                            )
-                          : const SizedBox.shrink(), //fallback
+                          )
+                        : Builder(
+                            builder: (context) {
+                              SchedulerBinding.instance.addPostFrameCallback(
+                                (timeStamp) {
+                                  final box =
+                                      context.findRenderObject() as RenderBox;
+                                  widthOfButton = box.size.width;
+                                },
+                              );
+                              return Row(
+                                mainAxisSize:
+                                    widget.buttonSize == ButtonSize.large
+                                        ? MainAxisSize.max
+                                        : MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  widget.icon == null
+                                      ? const SizedBox.shrink()
+                                      : Icon(
+                                          widget.icon,
+                                          size: 20,
+                                          color: iconColor,
+                                        ),
+                                  widget.icon == null ||
+                                          widget.labelText == null
+                                      ? const SizedBox.shrink()
+                                      : const SizedBox(width: 8),
+                                  widget.labelText == null
+                                      ? const SizedBox.shrink()
+                                      : Flexible(
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                            child: Text(
+                                              widget.labelText!,
+                                              style: labelStyle,
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        )
+                                ],
+                              );
+                            },
+                          )
+                    : executionState == ExecutionState.inProgress
+                        ? SizedBox(
+                            width: widthOfButton,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                progressStatus == null
+                                    ? const SizedBox.shrink()
+                                    : ValueListenableBuilder<String>(
+                                        valueListenable: progressStatus!,
+                                        builder: (
+                                          BuildContext context,
+                                          String value,
+                                          Widget? child,
+                                        ) {
+                                          return Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 8.0),
+                                            child: Text(
+                                              value,
+                                              style: lightTextTheme.smallBold,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                EnteLoadingWidget(
+                                  is20pts: true,
+                                  color: loadingIconColor,
+                                ),
+                              ],
+                            ),
+                          )
+                        : executionState == ExecutionState.successful
+                            ? SizedBox(
+                                width: widthOfButton,
+                                child: Icon(
+                                  Icons.check_outlined,
+                                  size: 20,
+                                  color: checkIconColor,
+                                ),
+                              )
+                            : const SizedBox.shrink(), //fallback
+              ),
             ),
           ),
         ),
