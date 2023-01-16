@@ -55,6 +55,9 @@ enum ButtonType {
     if (isPrimary) {
       return colorScheme.primary700;
     }
+    if (isSecondary) {
+      return colorScheme.fillMuted;
+    }
     return null;
   }
 
@@ -90,9 +93,6 @@ enum ButtonType {
   }) {
     if (buttonSize == ButtonSize.small && this == ButtonType.tertiaryCritical) {
       return null;
-    }
-    if (isSecondary) {
-      return colorScheme.strokeBase;
     }
     if (isNeutral) {
       return inverseColorScheme.strokeBase;
