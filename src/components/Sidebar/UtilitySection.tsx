@@ -13,6 +13,7 @@ import { getDownloadAppMessage } from 'utils/ui';
 
 import ThemeSwitcher from './ThemeSwitcher';
 import { SpaceBetweenFlex } from 'components/Container';
+import { isInternalUser } from 'utils/user';
 
 export default function UtilitySection({ closeSidebar }) {
     const router = useRouter();
@@ -75,10 +76,12 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={openRecoveryKeyModal}>
                 {constants.RECOVERY_KEY}
             </SidebarButton>
-            <SpaceBetweenFlex sx={{ px: 1.5 }}>
-                {constants.CHOSE_THEME}
-                <ThemeSwitcher theme={theme} setTheme={setTheme} />
-            </SpaceBetweenFlex>
+            {isInternalUser() && (
+                <SpaceBetweenFlex sx={{ px: 1.5 }}>
+                    {constants.CHOSE_THEME}
+                    <ThemeSwitcher theme={theme} setTheme={setTheme} />
+                </SpaceBetweenFlex>
+            )}
             <SidebarButton onClick={openTwoFactorModal}>
                 {constants.TWO_FACTOR}
             </SidebarButton>
