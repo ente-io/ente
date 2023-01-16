@@ -38,7 +38,6 @@
     "libsodium-wrappers": "^0.7.8",
     "localforage": "^1.9.0",
     "next": "^13.0.6",
-    "next-transpile-modules": "^10.0.0",
     "photoswipe": "file:./thirdparty/photoswipe",
     "piexifjs": "^1.0.6",
     "react": "^18.2.0",
