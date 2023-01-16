@@ -88,15 +88,8 @@ enum ButtonType {
   //Returning null to fallback to default color
   Color? pressedBorderColor({
     required EnteColorScheme colorScheme,
-    required EnteColorScheme inverseColorScheme,
     required ButtonSize buttonSize,
   }) {
-    if (buttonSize == ButtonSize.small && this == ButtonType.tertiaryCritical) {
-      return null;
-    }
-    if (isNeutral) {
-      return inverseColorScheme.strokeBase;
-    }
     if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
       return colorScheme.warning700;
     }
