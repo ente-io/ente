@@ -82,7 +82,7 @@ class EnteColorScheme {
     this.primary300 = _primary300,
     this.warning700 = _warning700,
     this.warning500 = _warning500,
-    this.warning400 = _warning700,
+    this.warning400 = _warning400,
     this.caution500 = _caution500,
   });
 }
