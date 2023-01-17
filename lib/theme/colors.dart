@@ -45,6 +45,7 @@ class EnteColorScheme {
   final Color warning700;
   final Color warning500;
   final Color warning400;
+  final Color warning800;
   final Color caution500;
 
   //other colors
@@ -80,6 +81,7 @@ class EnteColorScheme {
     this.primary500 = _primary500,
     this.primary400 = _primary400,
     this.primary300 = _primary300,
+    this.warning800 = _warning800,
     this.warning700 = _warning700,
     this.warning500 = _warning500,
     this.warning400 = _warning400,
@@ -172,7 +174,7 @@ const Color blurTextBaseDark = Color.fromRGBO(255, 255, 255, 0.95);
 
 // Fill Colors
 const Color fillBaseLight = Color.fromRGBO(0, 0, 0, 1);
-const Color fillBasePressedLight = Color.fromRGBO(0, 0, 0, 0.8);
+const Color fillBasePressedLight = Color.fromRGBO(0, 0, 0, 0.87);
 const Color fillMutedLight = Color.fromRGBO(0, 0, 0, 0.12);
 const Color fillFaintLight = Color.fromRGBO(0, 0, 0, 0.04);
 const Color fillFaintPressedLight = Color.fromRGBO(0, 0, 0, 0.08);
@@ -218,6 +220,7 @@ const Color _warning700 = Color.fromRGBO(234, 63, 63, 1);
 const Color _warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color warning500 = Color.fromRGBO(255, 101, 101, 1);
 const Color _warning400 = Color.fromRGBO(255, 111, 111, 1);
+const Color _warning800 = Color(0xFFF53434);
 
 const Color _caution500 = Color.fromRGBO(255, 194, 71, 1);
 

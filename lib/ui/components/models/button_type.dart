@@ -56,10 +56,13 @@ enum ButtonType {
       return colorScheme.primary700;
     }
     if (isSecondary) {
-      return colorScheme.fillMuted;
+      return colorScheme.fillFaintPressed;
     }
     if (isNeutral) {
       return colorScheme.fillBasePressed;
+    }
+    if (this == ButtonType.critical) {
+      return colorScheme.warning800;
     }
     return null;
   }
