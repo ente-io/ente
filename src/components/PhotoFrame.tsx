@@ -535,7 +535,6 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
-                addLogLine(`[${item.id}] calling updateURL`);
                 const newFile = updateURL(item.id)(url);
                 item.msrc = newFile.msrc;
                 item.html = newFile.html;
@@ -546,7 +545,9 @@ const PhotoFrame = ({
                 item.w = newFile.w;
                 item.h = newFile.h;
 
-                addLogLine(`[${item.id}] calling invalidateCurrItems`);
+                addLogLine(
+                    `[${item.id}] calling invalidateCurrItems for thumbnail`
+                );
                 try {
                     instance.invalidateCurrItems();
                     if (instance.isOpen()) {
@@ -632,7 +633,9 @@ const PhotoFrame = ({
                 item.w = newFile.w;
                 item.h = newFile.h;
                 try {
-                    addLogLine(`[${item.id}] calling invalidateCurrItems`);
+                    addLogLine(
+                        `[${item.id}] calling invalidateCurrItems for src`
+                    );
                     instance.invalidateCurrItems();
                     if (instance.isOpen()) {
                         instance.updateSize(true);
