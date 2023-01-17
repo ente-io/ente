@@ -271,18 +271,27 @@ class FileUploader {
     }
   }
 
+  Future<void> checkNetworkForUpload({bool isForceUpload = false}) async {
+    // Note: We don't support force uploading currently. During force upload,
+    // network check is skipped completely
+    if (isForceUpload) {
+      return;
+    }
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    final canUploadUnderCurrentNetworkConditions =
+        (connectivityResult == ConnectivityResult.wifi ||
+            Configuration.instance.shouldBackupOverMobileData());
+    if (!canUploadUnderCurrentNetworkConditions) {
+      throw WiFiUnavailableError();
+    }
+  }
+
   Future<File> _tryToUpload(
     File file,
     int collectionID,
     bool forcedUpload,
   ) async {
-    final connectivityResult = await (Connectivity().checkConnectivity());
-    final canUploadUnderCurrentNetworkConditions =
-        (connectivityResult == ConnectivityResult.wifi ||
-            Configuration.instance.shouldBackupOverMobileData());
-    if (!canUploadUnderCurrentNetworkConditions && !forcedUpload) {
-      throw WiFiUnavailableError();
-    }
+    await checkNetworkForUpload(isForceUpload: forcedUpload);
     final fileOnDisk = await FilesDB.instance.getFile(file.generatedID!);
     final wasAlreadyUploaded = fileOnDisk != null &&
         fileOnDisk.uploadedFileID != null &&

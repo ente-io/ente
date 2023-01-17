@@ -55,6 +55,15 @@ enum ButtonType {
     if (isPrimary) {
       return colorScheme.primary700;
     }
+    if (isSecondary) {
+      return colorScheme.fillFaintPressed;
+    }
+    if (isNeutral) {
+      return colorScheme.fillBasePressed;
+    }
+    if (this == ButtonType.critical) {
+      return colorScheme.warning800;
+    }
     return null;
   }
 
@@ -85,20 +94,10 @@ enum ButtonType {
   //Returning null to fallback to default color
   Color? pressedBorderColor({
     required EnteColorScheme colorScheme,
-    required EnteColorScheme inverseColorScheme,
     required ButtonSize buttonSize,
   }) {
-    if (isPrimary) {
-      return colorScheme.strokeMuted;
-    }
-    if (buttonSize == ButtonSize.small && this == ButtonType.tertiaryCritical) {
-      return null;
-    }
-    if (isSecondary || isCritical) {
-      return colorScheme.strokeBase;
-    }
-    if (isNeutral) {
-      return inverseColorScheme.strokeBase;
+    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
+      return colorScheme.warning700;
     }
     return null;
   }
@@ -133,8 +132,11 @@ enum ButtonType {
 
   //Returning null to fallback to default color
   Color? pressedIconColor(EnteColorScheme colorScheme, ButtonSize buttonSize) {
-    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
-      return colorScheme.strokeBase;
+    if (this == ButtonType.tertiaryCritical) {
+      return colorScheme.warning700;
+    }
+    if (this == ButtonType.tertiary && buttonSize == ButtonSize.small) {
+      return colorScheme.fillBasePressed;
     }
     return null;
   }
@@ -176,8 +178,11 @@ enum ButtonType {
     EnteColorScheme colorScheme,
     ButtonSize buttonSize,
   ) {
-    if (this == ButtonType.tertiaryCritical && buttonSize == ButtonSize.large) {
-      return textTheme.bodyBold.copyWith(color: colorScheme.strokeBase);
+    if (this == ButtonType.tertiaryCritical) {
+      return textTheme.bodyBold.copyWith(color: colorScheme.warning700);
+    }
+    if (this == ButtonType.tertiary && buttonSize == ButtonSize.small) {
+      return textTheme.bodyBold.copyWith(color: colorScheme.fillBasePressed);
     }
     return null;
   }
