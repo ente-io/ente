@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/image_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ZoomableImage extends StatefulWidget {
@@ -221,9 +223,9 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _onFinalImageLoaded(ImageProvider imageProvider) {
     if (mounted) {
-      precacheImage(imageProvider, context).then((value) {
+      precacheImage(imageProvider, context).then((value) async {
         if (mounted) {
-          _updatePhotoViewController(imageProvider);
+          await _updatePhotoViewController(imageProvider);
           setState(() {
             _imageProvider = imageProvider;
             _loadedFinalImage = true;
@@ -234,39 +236,27 @@ class _ZoomableImageState extends State<ZoomableImage>
     }
   }
 
-  void _captureThumbnailDimensions(ImageProvider imageProvider) {
-    imageProvider.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener(
-        ((imageInfo, _) {
-          _thumbnailWidth = imageInfo.image.width;
-        }),
-      ),
-    );
+  Future<void> _captureThumbnailDimensions(ImageProvider imageProvider) async {
+    final imageInfo = await getImageInfo(imageProvider);
+    _thumbnailWidth = imageInfo.image.width;
   }
 
-  void _updatePhotoViewController(ImageProvider imageProvider) {
-    imageProvider.resolve(const ImageConfiguration()).addListener(
-      ImageStreamListener(
-        ((imageInfo, _) {
-          if (_loadedFinalImage ||
-              _thumbnailWidth == null ||
-              _photoViewController.scale == null) {
-            return;
-          }
-          final scale = _photoViewController.scale! /
-              (imageInfo.image.width / _thumbnailWidth!);
-          final currentPosition = _photoViewController.value.position;
-          final positionScaleFactor = 1 / scale;
-          final newPosition = currentPosition.scale(
-            positionScaleFactor,
-            positionScaleFactor,
-          );
-          _photoViewController = PhotoViewController(
-            initialPosition: newPosition,
-            initialScale: scale,
-          );
-        }),
-      ),
+  Future<void> _updatePhotoViewController(ImageProvider imageProvider) async {
+    if (_thumbnailWidth == null || _photoViewController.scale == null) {
+      return;
+    }
+    final imageInfo = await getImageInfo(imageProvider);
+    final scale = _photoViewController.scale! /
+        (imageInfo.image.width / _thumbnailWidth!);
+    final currentPosition = _photoViewController.value.position;
+    final positionScaleFactor = 1 / scale;
+    final newPosition = currentPosition.scale(
+      positionScaleFactor,
+      positionScaleFactor,
+    );
+    _photoViewController = PhotoViewController(
+      initialPosition: newPosition,
+      initialScale: scale,
     );
   }
 
