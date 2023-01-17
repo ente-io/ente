@@ -13,6 +13,7 @@ import { CollectionSummaryType } from 'constants/collection';
 import Favorite from '@mui/icons-material/FavoriteRounded';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import PeopleIcon from '@mui/icons-material/People';
+import LinkIcon from '@mui/icons-material/Link';
 
 interface Iprops {
     active: boolean;
@@ -54,6 +55,9 @@ function CollectionCardIcon({ collectionType }) {
                 <ArchiveOutlined color="secondary" />
             )}
             {collectionType === CollectionSummaryType.shared && <PeopleIcon />}
+            {collectionType === CollectionSummaryType.sharedViaLink && (
+                <LinkIcon />
+            )}
         </CollectionBarTileIcon>
     );
 }
