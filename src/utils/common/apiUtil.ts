@@ -1,7 +1,12 @@
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { runningInBrowser } from '.';
 
 export const getEndpoint = () => {
-    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    let endpoint = getData(LS_KEYS.API_ENDPOINT);
+    if (endpoint) {
+        return endpoint;
+    }
+    endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (isDevDeployment() && endpoint) {
         return endpoint;
     }
