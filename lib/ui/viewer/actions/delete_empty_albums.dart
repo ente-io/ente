@@ -87,9 +87,10 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
   Future<void> _deleteEmptyAlbums() async {
     final collections =
         await CollectionsService.instance.getCollectionsWithThumbnails();
+    // remove collections which are not empty or can't be deleted
     collections.removeWhere(
       (element) =>
-          element.thumbnail != null || element.collection.type.canDelete,
+          element.thumbnail != null || !element.collection.type.canDelete,
     );
     int failedCount = 0;
     for (int i = 0; i < collections.length; i++) {
