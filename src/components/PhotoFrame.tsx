@@ -32,6 +32,7 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useMemo } from 'react';
 import { Collection } from 'types/collection';
+import { addLogLine } from 'utils/logging';
 
 const Container = styled('div')`
     display: block;
@@ -500,12 +501,20 @@ const PhotoFrame = ({
         index: number,
         item: EnteFile
     ) => {
+        addLogLine(`[${item.id}] getSlideData called for`);
         if (!item.msrc) {
+            addLogLine(`[${item.id}] doesn't have thumbnail`);
             try {
                 let url: string;
                 if (galleryContext.thumbs.has(item.id)) {
+                    addLogLine(
+                        `[${item.id}] gallery context cache hit, using cached thumb`
+                    );
                     url = galleryContext.thumbs.get(item.id);
                 } else {
+                    addLogLine(
+                        `[${item.id}] gallery context cache miss, calling downloadManager to get thumb`
+                    );
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
@@ -520,6 +529,7 @@ const PhotoFrame = ({
                     }
                     galleryContext.thumbs.set(item.id, url);
                 }
+                addLogLine(`[${item.id}] calling updateURL`);
                 const newFile = updateURL(item.id)(url);
                 item.msrc = newFile.msrc;
                 item.html = newFile.html;
@@ -530,6 +540,7 @@ const PhotoFrame = ({
                 item.w = newFile.w;
                 item.h = newFile.h;
 
+                addLogLine(`[${item.id}] calling invalidateCurrItems`);
                 try {
                     instance.invalidateCurrItems();
                     if (instance.isOpen()) {
@@ -547,16 +558,23 @@ const PhotoFrame = ({
             }
         }
         if (!fetching[item.id]) {
+            addLogLine(`[${item.id}] new file download fetch original request`);
             try {
                 fetching[item.id] = true;
                 let urls: { original: string[]; converted: string[] };
                 if (galleryContext.files.has(item.id)) {
+                    addLogLine(
+                        `[${item.id}] gallery context cache hit, using cached file`
+                    );
                     const mergedURL = galleryContext.files.get(item.id);
                     urls = {
                         original: mergedURL.original.split(','),
                         converted: mergedURL.converted.split(','),
                     };
                 } else {
+                    addLogLine(
+                        `[${item.id}] gallery context cache miss, calling downloadManager to get file`
+                    );
                     appContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
@@ -593,6 +611,7 @@ const PhotoFrame = ({
                     [convertedImageURL] = urls.converted;
                 }
                 setIsSourceLoaded(false);
+                addLogLine(`[${item.id}] calling updateSrcURL`);
                 const newFile = await updateSrcURL(item.id, {
                     originalImageURL,
                     originalVideoURL,
@@ -608,6 +627,7 @@ const PhotoFrame = ({
                 item.w = newFile.w;
                 item.h = newFile.h;
                 try {
+                    addLogLine(`[${item.id}] calling invalidateCurrItems`);
                     instance.invalidateCurrItems();
                     if (instance.isOpen()) {
                         instance.updateSize(true);
