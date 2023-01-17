@@ -36,6 +36,7 @@ module.exports = (phase) =>
             },
             env: {
                 SENTRY_RELEASE: GIT_SHA,
+                NEXT_PUBLIC_IS_TEST_APP: process.env.IS_TEST_RELEASE,
             },
 
             headers() {

@@ -88,7 +88,7 @@ const isDevDeployment = () => {
             globalThis?.location?.origin ||
         process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
             globalThis?.location?.origin ||
-        process.env.IS_TEST_RELEASE === 'true' ||
+        process.env.NEXT_PUBLIC_IS_TEST_APP === 'true' ||
         process.env.NODE_ENV === 'development'
     );
 };
