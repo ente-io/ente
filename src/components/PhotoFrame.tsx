@@ -501,7 +501,13 @@ const PhotoFrame = ({
         index: number,
         item: EnteFile
     ) => {
-        addLogLine(`[${item.id}] getSlideData called for`);
+        addLogLine(
+            `[${
+                item.id
+            }] getSlideData called for thumbnail:${!!item.msrc} original:${
+                !!item.msrc && item.src !== item.msrc
+            } inProgress:${fetching[item.id]}`
+        );
         if (!item.msrc) {
             addLogLine(`[${item.id}] doesn't have thumbnail`);
             try {
@@ -611,7 +617,6 @@ const PhotoFrame = ({
                     [convertedImageURL] = urls.converted;
                 }
                 setIsSourceLoaded(false);
-                addLogLine(`[${item.id}] calling updateSrcURL`);
                 const newFile = await updateSrcURL(item.id, {
                     originalImageURL,
                     originalVideoURL,
@@ -637,13 +642,12 @@ const PhotoFrame = ({
                         e,
                         'updating photoswipe after src url update failed'
                     );
-                    // ignore
+                    throw e;
                 }
             } catch (e) {
                 logError(e, 'getSlideData failed get src url failed');
-                // no-op
-            } finally {
                 fetching[item.id] = false;
+                // no-op
             }
         }
     };
