@@ -23,7 +23,10 @@ class UnSyncedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _BottomLeftOverlayIcon(Icons.cloud_off_outlined);
+    return const _BottomLeftOverlayIcon(
+      Icons.cloud_off_outlined,
+      baseSize: 18,
+    );
   }
 }
 
@@ -186,7 +189,7 @@ class _BottomLeftOverlayIcon extends StatelessWidget {
 
         if (constraints.hasBoundedWidth) {
           final w = constraints.maxWidth;
-          if (w > 120) {
+          if (w > 125) {
             size = 24;
           } else if (w < 75) {
             inset = 3;
