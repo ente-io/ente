@@ -28,16 +28,16 @@ String _actionName(CollectionActionType type, bool plural) {
   String text = "";
   switch (type) {
     case CollectionActionType.addFiles:
-      text = "Add file";
+      text = "Add item";
       break;
     case CollectionActionType.moveFiles:
-      text = "Move file";
+      text = "Move item";
       break;
     case CollectionActionType.restoreFiles:
-      text = "Restore file";
+      text = "Restore item";
       break;
     case CollectionActionType.unHide:
-      text = "Unhide file";
+      text = "Unhide item";
       break;
   }
   return text + titleSuffix;
