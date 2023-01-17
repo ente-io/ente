@@ -117,7 +117,7 @@ class ContentContainer extends StatelessWidget {
                 ],
               ),
         icon == null ? const SizedBox.shrink() : const SizedBox(height: 19),
-        Text(title, style: textTheme.h3Bold),
+        Text(title, style: textTheme.largeBold),
         body != null ? const SizedBox(height: 19) : const SizedBox.shrink(),
         body != null
             ? Text(
