@@ -43,6 +43,11 @@ async function logSpikeMainMemoryUsage() {
         processMemoryInfo.residentSet ?? 0,
         processMemoryInfo.private
     );
+    ElectronLog.log(
+        'main ProcessMemory',
+        convertBytesToHumanReadable(currentMemoryUsage)
+    );
+
     const previousMemoryUsage = Math.max(
         previousMainProcessMemoryInfo.residentSet ?? 0,
         previousMainProcessMemoryInfo.private
@@ -94,6 +99,10 @@ async function logSpikeRendererMemoryUsage() {
     const currentMemoryUsage = Math.max(
         processMemoryInfo.residentSet ?? 0,
         processMemoryInfo.private
+    );
+    ElectronLog.log(
+        'renderer ProcessMemory',
+        convertBytesToHumanReadable(currentMemoryUsage)
     );
 
     const previousMemoryUsage = Math.max(
