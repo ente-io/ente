@@ -9,10 +9,7 @@ import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/user_remote_flag_service.dart';
 import 'package:photos/theme/text_style.dart';
 import 'package:photos/ui/account/verify_recovery_page.dart';
-import 'package:photos/ui/components/button_widget.dart';
-import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/home_header_widget.dart';
-import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/notification_warning_widget.dart';
 import 'package:photos/ui/home/header_error_widget.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -87,23 +84,7 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
               ? _showErrorBanner
                   ? const Text("ente", style: brandStyleMedium)
                   : const SyncStatusWidget()
-              : GestureDetector(
-                  child: const Text("ente", style: brandStyleMedium),
-                  onTap: () {
-                    showDialogWidget(
-                      context: context,
-                      title: "Large buttons",
-                      buttons: largeButtons,
-                    );
-                  },
-                  onDoubleTap: () {
-                    showDialogWidget(
-                      context: context,
-                      title: "Small buttons",
-                      buttons: smallButtons,
-                    );
-                  },
-                ),
+              : const Text("ente", style: brandStyleMedium),
         ),
         AnimatedOpacity(
           opacity: _showErrorBanner ? 1 : 0,
@@ -133,104 +114,6 @@ class _StatusBarWidgetState extends State<StatusBarWidget> {
     );
   }
 }
-
-List<ButtonWidget> smallButtons = [
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Primary",
-    buttonType: ButtonType.primary,
-    onTap: () async {},
-    buttonSize: ButtonSize.small,
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Secondary",
-    buttonType: ButtonType.secondary,
-    onTap: () async {},
-    buttonSize: ButtonSize.small,
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Neutral",
-    buttonType: ButtonType.neutral,
-    onTap: () async {},
-    buttonSize: ButtonSize.small,
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Tertiary",
-    buttonType: ButtonType.tertiary,
-    onTap: () async {},
-    buttonSize: ButtonSize.small,
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Critical",
-    buttonType: ButtonType.critical,
-    onTap: () async {},
-    buttonSize: ButtonSize.small,
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Tertiary Critical",
-    buttonType: ButtonType.tertiaryCritical,
-    onTap: () async {},
-    buttonSize: ButtonSize.small,
-  ),
-];
-
-List<ButtonWidget> largeButtons = [
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Primary",
-    buttonType: ButtonType.primary,
-    onTap: () async {},
-    buttonAction: ButtonAction.first,
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Secondary",
-    buttonType: ButtonType.secondary,
-    onTap: () async {},
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Neutral",
-    buttonType: ButtonType.neutral,
-    onTap: () async {},
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Critical",
-    buttonType: ButtonType.critical,
-    onTap: () async {},
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Tertiary Critical",
-    buttonType: ButtonType.tertiaryCritical,
-    onTap: () async {},
-    buttonAction: ButtonAction.cancel,
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Trailing Icon",
-    buttonType: ButtonType.trailingIcon,
-    onTap: () async {},
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Trailing Icon Primary",
-    buttonType: ButtonType.trailingIconPrimary,
-    onTap: () async {},
-  ),
-  ButtonWidget(
-    icon: Icons.add_outlined,
-    labelText: "Trailing Icon Secondary",
-    buttonType: ButtonType.trailingIconSecondary,
-    onTap: () async {},
-  ),
-];
 
 class SyncStatusWidget extends StatefulWidget {
   const SyncStatusWidget({Key? key}) : super(key: key);
