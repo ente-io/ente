@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
+import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/viewer/gallery/uncategorized_page.dart';
 import 'package:photos/utils/navigation_util.dart';
 
@@ -19,6 +20,10 @@ class UnCatCollectionsButtonWidget extends StatelessWidget {
     final Collection? collection = CollectionsService.instance
         .getActiveCollections()
         .firstWhereOrNull((e) => e.type == CollectionType.uncategorized);
+    if (collection == null) {
+      // create uncategorized collection if it's not already created
+      CollectionsService.instance.getUncategorizedCollection().ignore();
+    }
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         backgroundColor: Theme.of(context).backgroundColor,
