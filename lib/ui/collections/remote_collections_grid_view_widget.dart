@@ -14,7 +14,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
   static const maxThumbnailWidth = 224.0;
   static const fixedGapBetweenAlbum = 8.0;
   static const minGapForHorizontalPadding = 8.0;
-  static const collectionItemsToPreload = 100;
+  static const collectionItemsToPreload = 20;
 
   final List<CollectionWithThumbnail>? collections;
 
