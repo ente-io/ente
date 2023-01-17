@@ -115,7 +115,6 @@ class ButtonWidget extends StatelessWidget {
         buttonType.defaultBorderColor(colorScheme, buttonSize);
     buttonStyle.pressedBorderColor = buttonType.pressedBorderColor(
       colorScheme: colorScheme,
-      inverseColorScheme: inverseColorScheme,
       buttonSize: buttonSize,
     );
     buttonStyle.disabledBorderColor =
@@ -206,26 +205,19 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
   ExecutionState executionState = ExecutionState.idle;
 
   @override
+  void initState() {
+    _setButtonTheme();
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant ButtonChildWidget oldWidget) {
+    _setButtonTheme();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    progressStatus = widget.progressStatus;
-    checkIconColor = widget.buttonStyle.checkIconColor ??
-        widget.buttonStyle.defaultIconColor;
-    loadingIconColor = widget.buttonStyle.defaultIconColor;
-    if (widget.isDisabled) {
-      buttonColor = widget.buttonStyle.disabledButtonColor ??
-          widget.buttonStyle.defaultButtonColor;
-      borderColor = widget.buttonStyle.disabledBorderColor ??
-          widget.buttonStyle.defaultBorderColor;
-      iconColor = widget.buttonStyle.disabledIconColor ??
-          widget.buttonStyle.defaultIconColor;
-      labelStyle = widget.buttonStyle.disabledLabelStyle ??
-          widget.buttonStyle.defaultLabelStyle;
-    } else {
-      buttonColor = widget.buttonStyle.defaultButtonColor;
-      borderColor = widget.buttonStyle.defaultBorderColor;
-      iconColor = widget.buttonStyle.defaultIconColor;
-      labelStyle = widget.buttonStyle.defaultLabelStyle;
-    }
     if (executionState == ExecutionState.successful) {
       Future.delayed(Duration(seconds: widget.isInAlert ? 1 : 2), () {
         setState(() {
@@ -241,7 +233,9 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(4)),
-          border: Border.all(color: borderColor),
+          border: widget.buttonType == ButtonType.tertiaryCritical
+              ? Border.all(color: borderColor)
+              : null,
         ),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 16),
@@ -381,6 +375,28 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
         ),
       ),
     );
+  }
+
+  void _setButtonTheme() {
+    progressStatus = widget.progressStatus;
+    checkIconColor = widget.buttonStyle.checkIconColor ??
+        widget.buttonStyle.defaultIconColor;
+    loadingIconColor = widget.buttonStyle.defaultIconColor;
+    if (widget.isDisabled) {
+      buttonColor = widget.buttonStyle.disabledButtonColor ??
+          widget.buttonStyle.defaultButtonColor;
+      borderColor = widget.buttonStyle.disabledBorderColor ??
+          widget.buttonStyle.defaultBorderColor;
+      iconColor = widget.buttonStyle.disabledIconColor ??
+          widget.buttonStyle.defaultIconColor;
+      labelStyle = widget.buttonStyle.disabledLabelStyle ??
+          widget.buttonStyle.defaultLabelStyle;
+    } else {
+      buttonColor = widget.buttonStyle.defaultButtonColor;
+      borderColor = widget.buttonStyle.defaultBorderColor;
+      iconColor = widget.buttonStyle.defaultIconColor;
+      labelStyle = widget.buttonStyle.defaultLabelStyle;
+    }
   }
 
   bool get _shouldRegisterGestures =>
