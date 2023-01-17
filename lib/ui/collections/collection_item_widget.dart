@@ -4,6 +4,7 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/viewer/file/file_icons_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
@@ -147,7 +148,7 @@ class _CollectionItemThumbnailWidgetState
               showFavForAlbumOnly: true,
               key: Key(widget.heroTag),
             )
-          : const NoThumbnailWidget(),
+          : const ThumbnailPlaceHolder(),
     );
   }
 }
