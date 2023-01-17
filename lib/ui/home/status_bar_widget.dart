@@ -240,34 +240,6 @@ class RefreshIndicatorWidget extends StatelessWidget {
   }
 }
 
-class BrandingWidget extends StatelessWidget {
-  const BrandingWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Container(
-          height: kContainerHeight,
-          padding: const EdgeInsets.only(left: 12, top: 4),
-          child: const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "ente",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Montserrat',
-                fontSize: 24,
-                height: 1,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class SyncStatusCompletedWidget extends StatelessWidget {
   const SyncStatusCompletedWidget({Key? key}) : super(key: key);
 
