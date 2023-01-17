@@ -14,6 +14,7 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
   static const maxThumbnailWidth = 224.0;
   static const fixedGapBetweenAlbum = 8.0;
   static const minGapForHorizontalPadding = 8.0;
+  static const collectionItemsToPreload = 100;
 
   final List<CollectionWithThumbnail>? collections;
 
@@ -45,7 +46,11 @@ class RemoteCollectionsGridViewWidget extends StatelessWidget {
         // to disable GridView's scrolling
         itemBuilder: (context, index) {
           if (index < collections!.length) {
-            return CollectionItem(collections![index], sideOfThumbnail);
+            return CollectionItem(
+              collections![index],
+              sideOfThumbnail,
+              shouldRender: index < collectionItemsToPreload,
+            );
           } else {
             return const CreateNewAlbumWidget();
           }
