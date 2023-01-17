@@ -45,7 +45,7 @@ async function logSpikeMainMemoryUsage() {
     );
     ElectronLog.log(
         'main ProcessMemory',
-        convertBytesToHumanReadable(currentMemoryUsage)
+        convertBytesToHumanReadable(currentMemoryUsage * 1024)
     );
 
     const previousMemoryUsage = Math.max(
@@ -102,7 +102,7 @@ async function logSpikeRendererMemoryUsage() {
     );
     ElectronLog.log(
         'renderer ProcessMemory',
-        convertBytesToHumanReadable(currentMemoryUsage)
+        convertBytesToHumanReadable(currentMemoryUsage * 1024)
     );
 
     const previousMemoryUsage = Math.max(
