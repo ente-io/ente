@@ -1,3 +1,5 @@
+import { runningInBrowser } from '.';
+
 export const getEndpoint = () => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
     if (isDevDeployment() && endpoint) {
@@ -83,12 +85,14 @@ It's a dev deployment (and should use the environment override for endpoints ) i
 3. if the app is running locally (hence node_env is development)
 */
 const isDevDeployment = () => {
-    return (
-        process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
-            globalThis?.location?.origin ||
-        process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
-            globalThis?.location?.origin ||
-        process.env.NEXT_PUBLIC_IS_TEST_APP === 'true' ||
-        process.env.NODE_ENV === 'development'
-    );
+    if (runningInBrowser()) {
+        return (
+            process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
+                window.location.origin ||
+            process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
+                window.location.origin ||
+            process.env.NEXT_PUBLIC_IS_TEST_APP === 'true' ||
+            process.env.NODE_ENV === 'development'
+        );
+    }
 };
