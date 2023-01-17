@@ -55,7 +55,7 @@ function CollectionCardIcon({ collectionType }) {
                 <ArchiveOutlined color="secondary" />
             )}
             {collectionType === CollectionSummaryType.shared && <PeopleIcon />}
-            {collectionType === CollectionSummaryType.sharedViaLink && (
+            {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
                 <LinkIcon />
             )}
         </CollectionBarTileIcon>

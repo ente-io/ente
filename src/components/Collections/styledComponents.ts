@@ -78,8 +78,7 @@ export const CollectionBarTileText = styled(Overlay)`
 export const CollectionBarTileIcon = styled(Overlay)`
     padding: 4px;
     display: flex;
-    flex-direction: row-reverse;
-    justify-content: flex-end;
+    justify-content: flex-start;
     align-items: flex-end;
     & > .MuiSvgIcon-root {
         font-size: 20px;

@@ -248,6 +248,6 @@ export function isSharedByMe(collection: Collection): boolean {
 export function isSharedWithMe(collection: Collection, user: User) {
     return collection.owner.id !== user.id;
 }
-export function isSharedViaLink(collection: Collection) {
-    return collection.publicURLs?.length;
+export function isSharedOnlyViaLink(collection: Collection) {
+    return collection.publicURLs?.length && !collection.sharees?.length;
 }

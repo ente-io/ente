@@ -52,7 +52,7 @@ import {
     isQuickLinkCollection,
     isSharedByMe,
     isSharedWithMe,
-    isSharedViaLink,
+    isSharedOnlyViaLink,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
@@ -830,8 +830,8 @@ export function getCollectionSummaries(
                 type:
                     isSharedWithMe(collection, user) || isSharedByMe(collection)
                         ? CollectionSummaryType.shared
-                        : isSharedViaLink(collection)
-                        ? CollectionSummaryType.sharedViaLink
+                        : isSharedOnlyViaLink(collection)
+                        ? CollectionSummaryType.sharedOnlyViaLink
                         : IsArchived(collection)
                         ? CollectionSummaryType.archived
                         : CollectionSummaryType[collection.type],

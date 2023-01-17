@@ -16,7 +16,7 @@ export enum CollectionSummaryType {
     trash = 'trash',
     all = 'all',
     shared = 'shared',
-    sharedViaLink = 'sharedViaLink',
+    sharedOnlyViaLink = 'sharedOnlyViaLink',
     archived = 'archived',
 }
 export enum COLLECTION_SORT_BY {
@@ -35,7 +35,7 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.album, 2],
     [CollectionSummaryType.folder, 2],
     [CollectionSummaryType.shared, 2],
-    [CollectionSummaryType.sharedViaLink, 2],
+    [CollectionSummaryType.sharedOnlyViaLink, 2],
     [CollectionSummaryType.archived, 2],
     [CollectionSummaryType.archive, 3],
     [CollectionSummaryType.trash, 4],
@@ -51,7 +51,7 @@ export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
     CollectionSummaryType.shared,
-    CollectionSummaryType.sharedViaLink,
+    CollectionSummaryType.sharedOnlyViaLink,
     CollectionSummaryType.trash,
 ]);
 
