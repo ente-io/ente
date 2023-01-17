@@ -11,7 +11,7 @@ import TruncateText from 'components/TruncateText';
 import { Box } from '@mui/material';
 import { CollectionSummaryType } from 'constants/collection';
 import Favorite from '@mui/icons-material/FavoriteRounded';
-import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
+import ArchiveIcon from '@mui/icons-material/Archive';
 import PeopleIcon from '@mui/icons-material/People';
 import LinkIcon from '@mui/icons-material/Link';
 
@@ -52,7 +52,7 @@ function CollectionCardIcon({ collectionType }) {
         <CollectionBarTileIcon>
             {collectionType === CollectionSummaryType.favorites && <Favorite />}
             {collectionType === CollectionSummaryType.archived && (
-                <ArchiveOutlined color="secondary" />
+                <ArchiveIcon color="secondary" />
             )}
             {collectionType === CollectionSummaryType.shared && <PeopleIcon />}
             {collectionType === CollectionSummaryType.sharedOnlyViaLink && (

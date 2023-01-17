@@ -230,7 +230,7 @@ const lightThemeOptions = createTheme({
                             };
                         case 'secondary':
                             return {
-                                color: 'rgba(0,0,0,0.48)',
+                                color: 'rgba(0,0,0,0.24)',
                             };
                         case 'disabled':
                             return {

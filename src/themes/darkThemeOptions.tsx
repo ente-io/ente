@@ -230,7 +230,7 @@ const darkThemeOptions = createTheme({
                             };
                         case 'secondary':
                             return {
-                                color: 'rgba(255, 255, 255, 0.48);',
+                                color: 'rgba(255,255,255,0.24)',
                             };
                         case 'disabled':
                             return {
