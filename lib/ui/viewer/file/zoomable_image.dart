@@ -244,7 +244,7 @@ class _ZoomableImageState extends State<ZoomableImage>
     );
   }
 
-  void _updatePhotoViewController(ImageProvider<Object> imageProvider) {
+  void _updatePhotoViewController(ImageProvider imageProvider) {
     imageProvider.resolve(const ImageConfiguration()).addListener(
       ImageStreamListener(
         ((imageInfo, _) {
