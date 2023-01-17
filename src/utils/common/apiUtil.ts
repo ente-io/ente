@@ -1,6 +1,5 @@
 export const getEndpoint = () => {
     const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
-    console.log('endpoint', endpoint, isDevDeployment());
     if (isDevDeployment() && endpoint) {
         return endpoint;
     }
