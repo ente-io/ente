@@ -210,6 +210,11 @@ enum CollectionType {
   unknown,
 }
 
+extension CollectionTypeExtn on CollectionType {
+  bool get canDelete =>
+      this != CollectionType.favorites && this != CollectionType.uncategorized;
+}
+
 enum CollectionParticipantRole {
   unknown,
   viewer,

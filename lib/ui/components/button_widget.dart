@@ -438,11 +438,9 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
             executionState = ExecutionState.successful;
             Future.delayed(
                 Duration(
-                  seconds: widget.isInAlert
-                      ? 1
-                      : widget.shouldSurfaceExecutionStates
-                          ? 2
-                          : 0,
+                  seconds: widget.shouldSurfaceExecutionStates
+                      ? (widget.isInAlert ? 1 : 2)
+                      : 0,
                 ), () {
               widget.isInAlert
                   ? Navigator.of(context, rootNavigator: true)

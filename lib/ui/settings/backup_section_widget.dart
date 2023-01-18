@@ -193,6 +193,7 @@ class BackupSectionWidgetState extends State<BackupSectionWidget> {
     final String countText = result.count.toString() +
         " duplicate file" +
         (result.count == 1 ? "" : "s");
+
     final DialogWidget dialog = choiceDialog(
       title: "✨ Success",
       body: "You have cleaned up " +

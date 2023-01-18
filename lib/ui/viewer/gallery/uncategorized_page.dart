@@ -4,67 +4,36 @@ import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/files_updated_event.dart';
 import 'package:photos/models/collection.dart';
-import 'package:photos/models/collection_items.dart';
-import 'package:photos/models/file.dart';
 import 'package:photos/models/file_load_result.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
-import 'package:photos/ui/viewer/gallery/empty_state.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
 
-class CollectionPage extends StatefulWidget {
-  final CollectionWithThumbnail c;
+class UnCategorizedPage extends StatelessWidget {
   final String tagPrefix;
+  final Collection collection;
   final GalleryType appBarType;
-  final bool hasVerifiedLock;
+  final GalleryType overlayType;
+  final _selectedFiles = SelectedFiles();
 
-  const CollectionPage(
-    this.c, {
-    this.tagPrefix = "collection",
-    this.appBarType = GalleryType.ownedCollection,
-    this.hasVerifiedLock = false,
+  UnCategorizedPage(
+    this.collection, {
+    this.tagPrefix = "Uncategorized_page",
+    this.appBarType = GalleryType.uncategorized,
+    this.overlayType = GalleryType.uncategorized,
     Key? key,
   }) : super(key: key);
 
   @override
-  State<CollectionPage> createState() => _CollectionPageState();
-}
-
-class _CollectionPageState extends State<CollectionPage> {
-  final _selectedFiles = SelectedFiles();
-
-  final GlobalKey shareButtonKey = GlobalKey();
-  final ValueNotifier<double> _bottomPosition = ValueNotifier(-150.0);
-
-  @override
-  void initState() {
-    _selectedFiles.addListener(_selectedFilesListener);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _selectedFiles.removeListener(_selectedFilesListener);
-    super.dispose();
-  }
-
-  @override
   Widget build(Object context) {
-    if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
-      return const EmptyState();
-    }
-    final appBarTypeValue = widget.c.collection.type == CollectionType
-        .uncategorized ? GalleryType.uncategorized : widget.appBarType;
-    final List<File>? initialFiles =
-        widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) async {
         final FileLoadResult result =
             await FilesDB.instance.getFilesInCollection(
-          widget.c.collection.id,
+          collection.id,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -81,25 +50,24 @@ class _CollectionPageState extends State<CollectionPage> {
       },
       reloadEvent: Bus.instance
           .on<CollectionUpdatedEvent>()
-          .where((event) => event.collectionID == widget.c.collection.id),
+          .where((event) => event.collectionID == collection.id),
       removalEventTypes: const {
         EventType.deletedFromRemote,
         EventType.deletedFromEverywhere,
         EventType.hide,
       },
-      tagPrefix: widget.tagPrefix,
+      tagPrefix: tagPrefix,
       selectedFiles: _selectedFiles,
-      initialFiles: initialFiles,
-      albumName: widget.c.collection.name,
+      initialFiles: null,
+      albumName: "Uncategorized",
     );
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50.0),
         child: GalleryAppBarWidget(
-          appBarTypeValue,
-          widget.c.collection.name,
+          appBarType,
+          "Uncategorized",
           _selectedFiles,
-          collection: widget.c.collection,
         ),
       ),
       body: Stack(
@@ -107,18 +75,11 @@ class _CollectionPageState extends State<CollectionPage> {
         children: [
           gallery,
           FileSelectionOverlayBar(
-            appBarTypeValue,
+            overlayType,
             _selectedFiles,
-            collection: widget.c.collection,
-          )
+          ),
         ],
       ),
     );
-  }
-
-  _selectedFilesListener() {
-    _selectedFiles.files.isNotEmpty
-        ? _bottomPosition.value = 0.0
-        : _bottomPosition.value = -150.0;
   }
 }

@@ -312,7 +312,7 @@ class FadingAppBarState extends State<FadingAppBar> {
             await dialog.show();
           }
           try {
-            await FavoritesService.instance.addToFavorites(file);
+            await FavoritesService.instance.addToFavorites(context, file);
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
@@ -324,7 +324,7 @@ class FadingAppBarState extends State<FadingAppBar> {
           }
         } else {
           try {
-            await FavoritesService.instance.removeFromFavorites(file);
+            await FavoritesService.instance.removeFromFavorites(context, file);
           } catch (e, s) {
             _logger.severe(e, s);
             hasError = true;
