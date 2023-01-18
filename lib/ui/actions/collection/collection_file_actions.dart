@@ -51,9 +51,8 @@ extension CollectionFileActions on CollectionActions {
         ),
       ],
       title: "Remove from album?",
-      body: "Selected items will be removed from this album.\n\nItems which "
-          "are only in this album will be moved to uncategorized, and can be "
-          "accessed from the bottom of the albums screen.",
+      body: "Selected items will be removed from this album. Items which are "
+          "only in this album will be moved to Uncategorized.",
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult != null && actionResult == ButtonAction.error) {
