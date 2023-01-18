@@ -113,11 +113,6 @@ class _ZoomableImageState extends State<ZoomableImage>
   }
 
   void _loadNetworkImage() {
-    if (_loadingFinalImage) {
-      return;
-    } else {
-      _loadingFinalImage = true;
-    }
     if (!_loadedSmallThumbnail && !_loadedFinalImage) {
       final cachedThumbnail = ThumbnailInMemoryLruCache.get(_photo);
       if (cachedThumbnail != null) {
@@ -144,7 +139,8 @@ class _ZoomableImageState extends State<ZoomableImage>
         });
       }
     }
-    if (!_loadedFinalImage) {
+    if (!_loadedFinalImage && !_loadingFinalImage) {
+      _loadingFinalImage = true;
       getFileFromServer(_photo).then((file) {
         _onFinalImageLoaded(
           Image.file(
