@@ -169,6 +169,19 @@ export function setupRendererProcessStatsLogger() {
     setInterval(logRendererProcessStats, LOGGING_INTERVAL_IN_MICROSECONDS);
 }
 
+export async function logRendererProcessMemoryUsage(message: string) {
+    const processMemoryInfo = await process.getProcessMemoryInfo();
+    const processMemory = Math.max(
+        processMemoryInfo.private,
+        processMemoryInfo.residentSet ?? 0
+    );
+    ElectronLog.log(
+        'renderer ProcessMemory',
+        message,
+        convertBytesToHumanReadable(processMemory * 1024)
+    );
+}
+
 const getNormalizedProcessMemoryInfo = async (
     processMemoryInfo: Electron.ProcessMemoryInfo
 ) => {
