@@ -20,6 +20,12 @@ declare module '@mui/material/styles' {
         muted?: string;
         faint?: string;
     }
+
+    interface FixedColor {
+        white: string;
+        black: string;
+        strokeMutedWhite: string;
+    }
     interface Palette {
         accent: PaletteColor;
         fill: PaletteColor;
@@ -27,6 +33,7 @@ declare module '@mui/material/styles' {
         blur: BlurStrength;
         danger: PaletteColor;
         stroke: TypeText;
+        fixed: FixedColor;
     }
     interface PaletteOptions {
         accent?: PaletteColorOptions;
@@ -35,6 +42,7 @@ declare module '@mui/material/styles' {
         backdrop?: PaletteColorOptions;
         blur?: BlurStrengthOptions;
         stroke?: Partial<TypeText>;
+        fixed?: Partial<FixedColor>;
     }
 
     interface TypographyVariants {
@@ -300,6 +308,11 @@ const lightThemeOptions = createTheme({
             base: '96px',
             muted: '48px',
             faint: '24px',
+        },
+        fixed: {
+            white: '#fff',
+            black: '#000',
+            strokeMutedWhite: 'rgba(255, 255, 255, 0.48)',
         },
         text: {
             primary: '#000',
