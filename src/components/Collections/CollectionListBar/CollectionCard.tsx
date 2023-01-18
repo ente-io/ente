@@ -52,7 +52,11 @@ function CollectionCardIcon({ collectionType }) {
         <CollectionBarTileIcon>
             {collectionType === CollectionSummaryType.favorites && <Favorite />}
             {collectionType === CollectionSummaryType.archived && (
-                <ArchiveIcon color="secondary" />
+                <ArchiveIcon
+                    sx={(theme) => ({
+                        color: theme.palette.fixed.strokeMutedWhite,
+                    })}
+                />
             )}
             {collectionType === CollectionSummaryType.shared && <PeopleIcon />}
             {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
