@@ -152,7 +152,7 @@ class ContentContainerWidget extends StatelessWidget {
             ? const SizedBox.shrink()
             : Text(
                 title!,
-                style: textTheme.h3Bold
+                style: textTheme.largeBold
                     .copyWith(color: textBaseDark), //constant color
               ),
         title == null || body == null

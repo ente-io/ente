@@ -352,7 +352,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
 
   Widget _getRecyclableView() {
     return VisibilityDetector(
-      key: UniqueKey(),
+      key: Key("gallery" + widget.filesInDay.first.tag),
       onVisibilityChanged: (visibility) {
         final shouldRender = visibility.visibleFraction > 0;
         if (mounted && shouldRender != _shouldRender) {
@@ -370,7 +370,7 @@ class _LazyLoadingGridViewState extends State<LazyLoadingGridView> {
   Widget _getNonRecyclableView() {
     if (!_shouldRender!) {
       return VisibilityDetector(
-        key: UniqueKey(),
+        key: Key("gallery" + widget.filesInDay.first.tag),
         onVisibilityChanged: (visibility) {
           if (mounted && visibility.visibleFraction > 0 && !_shouldRender!) {
             setState(() {
