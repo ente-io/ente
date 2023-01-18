@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/utils/file_util.dart';
+import 'package:photos/utils/image_util.dart';
 import 'package:photos/utils/thumbnail_util.dart';
 
 class ZoomableImage extends StatefulWidget {
@@ -35,7 +37,7 @@ class ZoomableImage extends StatefulWidget {
 
 class _ZoomableImageState extends State<ZoomableImage>
     with SingleTickerProviderStateMixin {
-  final Logger _logger = Logger("ZoomableImage");
+  late Logger _logger;
   late File _photo;
   ImageProvider? _imageProvider;
   bool _loadedSmallThumbnail = false;
@@ -45,10 +47,13 @@ class _ZoomableImageState extends State<ZoomableImage>
   bool _loadedFinalImage = false;
   ValueChanged<PhotoViewScaleState>? _scaleStateChangedCallback;
   bool _isZooming = false;
+  PhotoViewController _photoViewController = PhotoViewController();
+  int? _thumbnailWidth;
 
   @override
   void initState() {
     _photo = widget.photo;
+    _logger = Logger("ZoomableImage_" + _photo.displayName);
     debugPrint('initState for ${_photo.toString()}');
     _scaleStateChangedCallback = (value) {
       if (widget.shouldDisableScroll != null) {
@@ -59,6 +64,12 @@ class _ZoomableImageState extends State<ZoomableImage>
       // _logger.info('is reakky zooming $_isZooming with state $value');
     };
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _photoViewController.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,6 +86,7 @@ class _ZoomableImageState extends State<ZoomableImage>
         axis: Axis.vertical,
         child: PhotoView(
           imageProvider: _imageProvider,
+          controller: _photoViewController,
           scaleStateChangedCallback: _scaleStateChangedCallback,
           minScale: PhotoViewComputedScale.contained,
           gaplessPlayback: true,
@@ -106,6 +118,7 @@ class _ZoomableImageState extends State<ZoomableImage>
       if (cachedThumbnail != null) {
         _imageProvider = Image.memory(cachedThumbnail).image;
         _loadedSmallThumbnail = true;
+        _captureThumbnailDimensions(_imageProvider!);
       } else {
         getThumbnailFromServer(_photo).then((file) {
           final imageProvider = Image.memory(file).image;
@@ -115,6 +128,7 @@ class _ZoomableImageState extends State<ZoomableImage>
                 setState(() {
                   _imageProvider = imageProvider;
                   _loadedSmallThumbnail = true;
+                  _captureThumbnailDimensions(_imageProvider!);
                 });
               }
             }).catchError((e) {
@@ -125,7 +139,8 @@ class _ZoomableImageState extends State<ZoomableImage>
         });
       }
     }
-    if (!_loadedFinalImage) {
+    if (!_loadedFinalImage && !_loadingFinalImage) {
+      _loadingFinalImage = true;
       getFileFromServer(_photo).then((file) {
         _onFinalImageLoaded(
           Image.file(
@@ -209,15 +224,41 @@ class _ZoomableImageState extends State<ZoomableImage>
 
   void _onFinalImageLoaded(ImageProvider imageProvider) {
     if (mounted) {
-      precacheImage(imageProvider, context).then((value) {
+      precacheImage(imageProvider, context).then((value) async {
         if (mounted) {
+          await _updatePhotoViewController(imageProvider);
           setState(() {
             _imageProvider = imageProvider;
             _loadedFinalImage = true;
+            _logger.info("Final image loaded");
           });
         }
       });
     }
+  }
+
+  Future<void> _captureThumbnailDimensions(ImageProvider imageProvider) async {
+    final imageInfo = await getImageInfo(imageProvider);
+    _thumbnailWidth = imageInfo.image.width;
+  }
+
+  Future<void> _updatePhotoViewController(ImageProvider imageProvider) async {
+    if (_thumbnailWidth == null || _photoViewController.scale == null) {
+      return;
+    }
+    final imageInfo = await getImageInfo(imageProvider);
+    final scale = _photoViewController.scale! /
+        (imageInfo.image.width / _thumbnailWidth!);
+    final currentPosition = _photoViewController.value.position;
+    final positionScaleFactor = 1 / scale;
+    final newPosition = currentPosition.scale(
+      positionScaleFactor,
+      positionScaleFactor,
+    );
+    _photoViewController = PhotoViewController(
+      initialPosition: newPosition,
+      initialScale: scale,
+    );
   }
 
   bool _isGIF() => _photo.displayName.toLowerCase().endsWith(".gif");
