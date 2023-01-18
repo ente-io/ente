@@ -320,7 +320,10 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
             };
         }
         default: {
-            const previewURL = URL.createObjectURL(fileBlob);
+            const previewURL = await createTypedObjectURL(
+                fileBlob,
+                file.metadata.title
+            );
             return {
                 converted: [previewURL],
                 original: [previewURL],
