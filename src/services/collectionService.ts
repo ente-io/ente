@@ -828,9 +828,9 @@ export function getCollectionSummaries(
                 fileCount: collectionFilesCount.get(collection.id),
                 updationTime: collection.updationTime,
                 type: isSharedWithMe(collection, user)
-                    ? CollectionSummaryType.sharedByMe
+                    ? CollectionSummaryType.incomingShare
                     : isSharedByMe(collection)
-                    ? CollectionSummaryType.sharedWithMe
+                    ? CollectionSummaryType.outgoingShare
                     : isSharedOnlyViaLink(collection)
                     ? CollectionSummaryType.sharedOnlyViaLink
                     : IsArchived(collection)

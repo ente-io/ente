@@ -58,7 +58,12 @@ function CollectionCardIcon({ collectionType }) {
                     })}
                 />
             )}
-            {collectionType === CollectionSummaryType.shared && <PeopleIcon />}
+            {collectionType === CollectionSummaryType.outgoingShare && (
+                <PeopleIcon />
+            )}
+            {collectionType === CollectionSummaryType.incomingShare && (
+                <PeopleIcon />
+            )}
             {collectionType === CollectionSummaryType.sharedOnlyViaLink && (
                 <LinkIcon />
             )}
