@@ -827,14 +827,15 @@ export function getCollectionSummaries(
                 latestFile: collectionLatestFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id),
                 updationTime: collection.updationTime,
-                type:
-                    isSharedWithMe(collection, user) || isSharedByMe(collection)
-                        ? CollectionSummaryType.shared
-                        : isSharedOnlyViaLink(collection)
-                        ? CollectionSummaryType.sharedOnlyViaLink
-                        : IsArchived(collection)
-                        ? CollectionSummaryType.archived
-                        : CollectionSummaryType[collection.type],
+                type: isSharedWithMe(collection, user)
+                    ? CollectionSummaryType.sharedByMe
+                    : isSharedByMe(collection)
+                    ? CollectionSummaryType.sharedWithMe
+                    : isSharedOnlyViaLink(collection)
+                    ? CollectionSummaryType.sharedOnlyViaLink
+                    : IsArchived(collection)
+                    ? CollectionSummaryType.archived
+                    : CollectionSummaryType[collection.type],
             });
         }
     }
