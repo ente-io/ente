@@ -258,6 +258,7 @@ export function PhotoList({
             }
 
             setTimeStampList(timeStampList);
+            refreshInProgress.current = false;
             if (shouldRefresh.current) {
                 shouldRefresh.current = false;
                 setTimeout(main, 0);
