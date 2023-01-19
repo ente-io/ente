@@ -2,7 +2,7 @@ import { OverflowMenuOption } from 'components/OverflowMenu/option';
 import React from 'react';
 
 import EditIcon from '@mui/icons-material/Edit';
-import IosShareIcon from '@mui/icons-material/IosShare';
+import PeopleIcon from '@mui/icons-material/People';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
@@ -59,7 +59,7 @@ export function AlbumCollectionOption({
                     CollectionActions.SHOW_SHARE_DIALOG,
                     false
                 )}
-                startIcon={<IosShareIcon />}>
+                startIcon={<PeopleIcon />}>
                 {constants.SHARE_COLLECTION}
             </OverflowMenuOption>
         </>
