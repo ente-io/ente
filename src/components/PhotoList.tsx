@@ -314,19 +314,16 @@ export function PhotoList({
             }
             if (publicCollectionGalleryContext.accessedThroughSharedURL) {
                 if (publicCollectionGalleryContext.photoListFooter) {
-                    setTimeStampList((timeStampList) => [
+                    return [
                         ...timeStampList,
                         getPhotoListFooter(
                             publicCollectionGalleryContext.photoListFooter
                         ),
                         getAlbumsFooter(),
-                    ]);
+                    ];
                 }
             } else if (showAppDownloadBanner) {
-                setTimeStampList((timeStampList) => [
-                    ...timeStampList,
-                    getAppDownloadFooter(),
-                ]);
+                return [...timeStampList, getAppDownloadFooter()];
             } else {
                 return timeStampList;
             }
