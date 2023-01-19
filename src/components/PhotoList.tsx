@@ -31,6 +31,9 @@ export enum ITEM_TYPE {
     TIME = 'TIME',
     FILE = 'FILE',
     SIZE_AND_COUNT = 'SIZE_AND_COUNT',
+    HEADER = 'HEADER',
+    FOOTER = 'FOOTER',
+    MARKETING_FOOTER = 'MARKETING_FOOTER',
     OTHER = 'OTHER',
 }
 
@@ -239,22 +242,17 @@ export function PhotoList({
                 timeStampList.push(getEmptyListItem());
             }
             timeStampList.push(getVacuumItem(timeStampList));
-            if (publicCollectionGalleryContext.photoListFooter) {
-                timeStampList.push(
-                    getPhotoListFooter(
-                        publicCollectionGalleryContext.photoListFooter
-                    )
-                );
-            }
-            if (
-                showAppDownloadBanner ||
-                publicCollectionGalleryContext.accessedThroughSharedURL
-            ) {
-                if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-                    timeStampList.push(getAlbumsFooter());
-                } else {
-                    timeStampList.push(getAppDownloadFooter());
+            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                if (publicCollectionGalleryContext.photoListFooter) {
+                    timeStampList.push(
+                        getPhotoListFooter(
+                            publicCollectionGalleryContext.photoListFooter
+                        )
+                    );
                 }
+                timeStampList.push(getAlbumsFooter());
+            } else if (showAppDownloadBanner) {
+                timeStampList.push(getAppDownloadFooter());
             }
 
             setTimeStampList(timeStampList);
@@ -269,13 +267,74 @@ export function PhotoList({
         width,
         height,
         filteredData,
-        showAppDownloadBanner,
-        publicCollectionGalleryContext.accessedThroughSharedURL,
-        galleryContext.photoListHeader,
-        publicCollectionGalleryContext.photoListFooter,
-        publicCollectionGalleryContext.photoListHeader,
         deduplicateContext.isOnDeduplicatePage,
         deduplicateContext.fileSizeMap,
+    ]);
+
+    useEffect(() => {
+        setTimeStampList((timeStampList) => {
+            timeStampList = timeStampList ?? [];
+            const hasHeader =
+                timeStampList.length > 0 &&
+                timeStampList[0].itemType === ITEM_TYPE.HEADER;
+
+            if (hasHeader) {
+                return timeStampList;
+            }
+            if (galleryContext.photoListHeader) {
+                return [
+                    getPhotoListHeader(galleryContext.photoListHeader),
+                    ...timeStampList,
+                ];
+            } else if (publicCollectionGalleryContext.photoListHeader) {
+                return [
+                    getPhotoListHeader(
+                        publicCollectionGalleryContext.photoListHeader
+                    ),
+                    ...timeStampList,
+                ];
+            } else {
+                return timeStampList;
+            }
+        });
+    }, [
+        galleryContext.photoListHeader,
+        publicCollectionGalleryContext.photoListHeader,
+    ]);
+
+    useEffect(() => {
+        setTimeStampList((timeStampList) => {
+            timeStampList = timeStampList ?? [];
+            const hasFooter =
+                timeStampList.length > 0 &&
+                timeStampList[timeStampList.length - 1].itemType ===
+                    ITEM_TYPE.MARKETING_FOOTER;
+            if (hasFooter) {
+                return timeStampList;
+            }
+            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                if (publicCollectionGalleryContext.photoListFooter) {
+                    setTimeStampList((timeStampList) => [
+                        ...timeStampList,
+                        getPhotoListFooter(
+                            publicCollectionGalleryContext.photoListFooter
+                        ),
+                        getAlbumsFooter(),
+                    ]);
+                }
+            } else if (showAppDownloadBanner) {
+                setTimeStampList((timeStampList) => [
+                    ...timeStampList,
+                    getAppDownloadFooter(),
+                ]);
+            } else {
+                return timeStampList;
+            }
+        });
+    }, [
+        publicCollectionGalleryContext.accessedThroughSharedURL,
+        showAppDownloadBanner,
+        publicCollectionGalleryContext.photoListFooter,
     ]);
 
     useEffect(() => {
@@ -435,7 +494,7 @@ export function PhotoList({
 
     const getAppDownloadFooter = () => {
         return {
-            itemType: ITEM_TYPE.OTHER,
+            itemType: ITEM_TYPE.MARKETING_FOOTER,
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
@@ -449,7 +508,7 @@ export function PhotoList({
 
     const getAlbumsFooter = () => {
         return {
-            itemType: ITEM_TYPE.OTHER,
+            itemType: ITEM_TYPE.MARKETING_FOOTER,
             height: ALBUM_FOOTER_HEIGHT,
             item: (
                 <AlbumFooterContainer span={columns}>

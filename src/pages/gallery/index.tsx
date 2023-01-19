@@ -344,7 +344,7 @@ export default function Gallery() {
                         searchResultSummary={searchResultSummary}
                     />
                 ),
-                itemType: ITEM_TYPE.OTHER,
+                itemType: ITEM_TYPE.HEADER,
             });
         }
     }, [isInSearchMode, searchResultSummary]);
