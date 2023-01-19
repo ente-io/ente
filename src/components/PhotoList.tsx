@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useContext } from 'react';
+import React, { useRef, useEffect, useContext, useState } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
@@ -178,16 +178,15 @@ export function PhotoList({
     resetFetching,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
-
-    const timeStampListRef = useRef([]);
-    const timeStampList = timeStampListRef?.current ?? [];
-    const filteredDataCopyRef = useRef([]);
-    const filteredDataCopy = filteredDataCopyRef.current ?? [];
-    const listRef = useRef(null);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
     const deduplicateContext = useContext(DeduplicateContext);
+
+    const [timeStampList, setTimeStampList] = useState<TimeStampListItem[]>([]);
+    const refreshInProgress = useRef(false);
+    const shouldRefresh = useRef(false);
+    const listRef = useRef(null);
 
     const fittableColumns = getFractionFittableColumns(width);
     let columns = Math.ceil(fittableColumns);
@@ -207,54 +206,64 @@ export function PhotoList({
     };
 
     useEffect(() => {
-        let timeStampList: TimeStampListItem[] = [];
-
-        if (galleryContext.photoListHeader) {
-            timeStampList.push(
-                getPhotoListHeader(galleryContext.photoListHeader)
-            );
-        } else if (publicCollectionGalleryContext.photoListHeader) {
-            timeStampList.push(
-                getPhotoListHeader(
-                    publicCollectionGalleryContext.photoListHeader
-                )
-            );
-        }
-        if (deduplicateContext.isOnDeduplicatePage) {
-            skipMerge = true;
-            groupByFileSize(timeStampList);
-        } else {
-            groupByTime(timeStampList);
-        }
-
-        if (!skipMerge) {
-            timeStampList = mergeTimeStampList(timeStampList, columns);
-        }
-        if (timeStampList.length === 1) {
-            timeStampList.push(getEmptyListItem());
-        }
-        timeStampList.push(getVacuumItem(timeStampList));
-        if (publicCollectionGalleryContext.photoListFooter) {
-            timeStampList.push(
-                getPhotoListFooter(
-                    publicCollectionGalleryContext.photoListFooter
-                )
-            );
-        }
-        if (
-            showAppDownloadBanner ||
-            publicCollectionGalleryContext.accessedThroughSharedURL
-        ) {
-            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
-                timeStampList.push(getAlbumsFooter());
-            } else {
-                timeStampList.push(getAppDownloadFooter());
+        const main = () => {
+            if (refreshInProgress.current) {
+                shouldRefresh.current = true;
+                return;
             }
-        }
+            refreshInProgress.current = true;
+            let timeStampList: TimeStampListItem[] = [];
 
-        timeStampListRef.current = timeStampList;
-        filteredDataCopyRef.current = filteredData;
-        refreshList();
+            if (galleryContext.photoListHeader) {
+                timeStampList.push(
+                    getPhotoListHeader(galleryContext.photoListHeader)
+                );
+            } else if (publicCollectionGalleryContext.photoListHeader) {
+                timeStampList.push(
+                    getPhotoListHeader(
+                        publicCollectionGalleryContext.photoListHeader
+                    )
+                );
+            }
+            if (deduplicateContext.isOnDeduplicatePage) {
+                skipMerge = true;
+                groupByFileSize(timeStampList);
+            } else {
+                groupByTime(timeStampList);
+            }
+
+            if (!skipMerge) {
+                timeStampList = mergeTimeStampList(timeStampList, columns);
+            }
+            if (timeStampList.length === 1) {
+                timeStampList.push(getEmptyListItem());
+            }
+            timeStampList.push(getVacuumItem(timeStampList));
+            if (publicCollectionGalleryContext.photoListFooter) {
+                timeStampList.push(
+                    getPhotoListFooter(
+                        publicCollectionGalleryContext.photoListFooter
+                    )
+                );
+            }
+            if (
+                showAppDownloadBanner ||
+                publicCollectionGalleryContext.accessedThroughSharedURL
+            ) {
+                if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                    timeStampList.push(getAlbumsFooter());
+                } else {
+                    timeStampList.push(getAppDownloadFooter());
+                }
+            }
+
+            setTimeStampList(timeStampList);
+            if (shouldRefresh.current) {
+                shouldRefresh.current = false;
+                setTimeout(main, 0);
+            }
+        };
+        main();
     }, [
         width,
         height,
@@ -267,6 +276,10 @@ export function PhotoList({
         deduplicateContext.isOnDeduplicatePage,
         deduplicateContext.fileSizeMap,
     ]);
+
+    useEffect(() => {
+        refreshList();
+    }, [timeStampList]);
 
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
         let index = 0;
@@ -587,7 +600,7 @@ export function PhotoList({
             case ITEM_TYPE.FILE: {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
-                        filteredDataCopy,
+                        filteredData,
                         listItem.itemStartIndex + idx,
                         isScrolling
                     )
