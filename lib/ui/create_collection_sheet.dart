@@ -11,6 +11,7 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/ui/common/loading_widget.dart';
+import 'package:photos/ui/components/album_list_item_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
@@ -109,28 +110,38 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                   caption: "Create or select album",
                 ),
                 Expanded(
-                  child: FutureBuilder(
-                    future: _getCollectionsWithThumbnail(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        //Need to show an error on the UI here
-                        return const SizedBox.shrink();
-                      } else if (snapshot.hasData) {
-                        final collectionsWithThumbnail =
-                            snapshot.data as List<CollectionWithThumbnail>;
-                        return ListView.builder(
-                          itemBuilder: (context, index) {
-                            return _buildCollectionItem(
-                              collectionsWithThumbnail[index],
-                            );
-                          },
-                          itemCount: collectionsWithThumbnail.length,
-                          shrinkWrap: true,
-                        );
-                      } else {
-                        return const EnteLoadingWidget();
-                      }
-                    },
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 48),
+                    child: FutureBuilder(
+                      future: _getCollectionsWithThumbnail(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          //Need to show an error on the UI here
+                          return const SizedBox.shrink();
+                        } else if (snapshot.hasData) {
+                          final collectionsWithThumbnail =
+                              snapshot.data as List<CollectionWithThumbnail>;
+                          return ListView.separated(
+                            itemBuilder: (context, index) {
+                              return AlbumListItemWidget(
+                                collectionsWithThumbnail[index],
+                              );
+                              // return _buildCollectionItem(
+                              //   collectionsWithThumbnail[index],
+                              // );
+                            },
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(
+                              height: 8,
+                            ),
+                            itemCount: collectionsWithThumbnail.length,
+                            shrinkWrap: true,
+                          );
+                        } else {
+                          return const EnteLoadingWidget();
+                        }
+                      },
+                    ),
                   ),
                 ),
               ],
