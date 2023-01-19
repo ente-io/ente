@@ -244,7 +244,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 <TrashCollectionOption
                     handleCollectionAction={handleCollectionAction}
                 />
-            ) : collectionSummaryType === CollectionSummaryType.shared ? (
+            ) : collectionSummaryType ===
+              CollectionSummaryType.incomingShare ? (
                 <SharedCollectionOption
                     handleCollectionAction={handleCollectionAction}
                 />
