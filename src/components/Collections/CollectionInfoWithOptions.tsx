@@ -48,7 +48,9 @@ export default function CollectionInfoWithOptions({
                 return <ArchiveOutlined />;
             case CollectionSummaryType.trash:
                 return <Delete />;
-            case CollectionSummaryType.shared:
+            case CollectionSummaryType.incomingShare:
+                return <PeopleIcon />;
+            case CollectionSummaryType.outgoingShare:
                 return <PeopleIcon />;
             case CollectionSummaryType.sharedOnlyViaLink:
                 return <LinkIcon />;
