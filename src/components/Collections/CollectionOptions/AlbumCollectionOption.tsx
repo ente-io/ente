@@ -3,7 +3,6 @@ import React from 'react';
 
 import EditIcon from '@mui/icons-material/Edit';
 import IosShareIcon from '@mui/icons-material/IosShare';
-import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import constants from 'utils/strings/constants';
 import { CollectionActions } from '.';
@@ -26,27 +25,11 @@ export function AlbumCollectionOption({
         <>
             <OverflowMenuOption
                 onClick={handleCollectionAction(
-                    CollectionActions.SHOW_SHARE_DIALOG,
-                    false
-                )}
-                startIcon={<IosShareIcon />}>
-                {constants.SHARE}
-            </OverflowMenuOption>
-            <OverflowMenuOption
-                onClick={handleCollectionAction(
-                    CollectionActions.CONFIRM_DOWNLOAD,
-                    false
-                )}
-                startIcon={<FileDownloadOutlinedIcon />}>
-                {constants.DOWNLOAD}
-            </OverflowMenuOption>
-            <OverflowMenuOption
-                onClick={handleCollectionAction(
                     CollectionActions.SHOW_RENAME_DIALOG,
                     false
                 )}
                 startIcon={<EditIcon />}>
-                {constants.RENAME}
+                {constants.RENAME_COLLECTION}
             </OverflowMenuOption>
             {IsArchived ? (
                 <OverflowMenuOption
@@ -54,13 +37,13 @@ export function AlbumCollectionOption({
                         CollectionActions.UNARCHIVE
                     )}
                     startIcon={<Unarchive />}>
-                    {constants.UNARCHIVE}
+                    {constants.UNARCHIVE_COLLECTION}
                 </OverflowMenuOption>
             ) : (
                 <OverflowMenuOption
                     onClick={handleCollectionAction(CollectionActions.ARCHIVE)}
                     startIcon={<ArchiveOutlined />}>
-                    {constants.ARCHIVE}
+                    {constants.ARCHIVE_COLLECTION}
                 </OverflowMenuOption>
             )}
             <OverflowMenuOption
@@ -69,7 +52,15 @@ export function AlbumCollectionOption({
                     CollectionActions.CONFIRM_DELETE,
                     false
                 )}>
-                {constants.DELETE}
+                {constants.DELETE_COLLECTION}
+            </OverflowMenuOption>
+            <OverflowMenuOption
+                onClick={handleCollectionAction(
+                    CollectionActions.SHOW_SHARE_DIALOG,
+                    false
+                )}
+                startIcon={<IosShareIcon />}>
+                {constants.SHARE_COLLECTION}
             </OverflowMenuOption>
         </>
     );
