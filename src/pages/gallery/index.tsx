@@ -135,8 +135,8 @@ export default function Gallery() {
     const filesUpdateInProgress = useRef(false);
     const newerFilesFN = useRef<FilesFn>(null);
 
-    const setFilesOriginalWithReSyncIfRequired = (files: EnteFile[]) => {
-        setFilesOriginal(files);
+    const setFilesOriginalWithReSyncIfRequired: SetFiles = (filesFn) => {
+        setFilesOriginal(filesFn);
         filesUpdateInProgress.current = false;
         if (newerFilesFN.current) {
             const newerFiles = newerFilesFN.current;
@@ -151,20 +151,16 @@ export default function Gallery() {
             return;
         }
         filesUpdateInProgress.current = true;
-        setFilesOriginal((previousFiles) => {
-            previousFiles = previousFiles || [];
-            const files =
-                filesFn instanceof Function ? filesFn(previousFiles) : filesFn;
-            if (files?.length > 5000 && previousFiles.length > 5000) {
-                const waitTime = getData(LS_KEYS.WAIT_TIME) ?? 5000;
-                setTimeout(() => {
-                    setFilesOriginalWithReSyncIfRequired(files);
-                }, waitTime);
-            } else {
-                setFilesOriginalWithReSyncIfRequired(files);
-            }
-            return previousFiles;
-        });
+
+        if (!files?.length || files.length < 5000) {
+            setFilesOriginalWithReSyncIfRequired(filesFn);
+        } else {
+            const waitTime = getData(LS_KEYS.WAIT_TIME) ?? 5000;
+            setTimeout(
+                () => setFilesOriginalWithReSyncIfRequired(filesFn),
+                waitTime
+            );
+        }
     };
 
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
