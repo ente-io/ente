@@ -1,5 +1,6 @@
 import { CollectionActions } from '.';
 import React from 'react';
+import { CollectionSummaryType } from 'constants/collection';
 import PeopleIcon from '@mui/icons-material/People';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import { FlexWrapper } from 'components/Container';
@@ -9,28 +10,39 @@ interface Iprops {
         action: CollectionActions,
         loader?: boolean
     ) => (...args: any[]) => Promise<void>;
+    collectionSummaryType: CollectionSummaryType;
 }
 
-export function QuickOptions({ handleCollectionAction }: Iprops) {
+export function QuickOptions({
+    handleCollectionAction,
+    collectionSummaryType,
+}: Iprops) {
     return (
         <FlexWrapper>
-            <IconButton>
-                <PeopleIcon
-                    onClick={handleCollectionAction(
-                        CollectionActions.SHOW_SHARE_DIALOG,
-                        false
-                    )}
-                />
-            </IconButton>
-            <IconButton>
-                <FileDownloadOutlinedIcon
-                    onClick={handleCollectionAction(
-                        CollectionActions.CONFIRM_DOWNLOAD,
-                        false
-                    )}
-                    aria-haspopup="true"
-                />
-            </IconButton>
+            {!(collectionSummaryType === CollectionSummaryType.trash) && (
+                <IconButton>
+                    <PeopleIcon
+                        onClick={handleCollectionAction(
+                            CollectionActions.SHOW_SHARE_DIALOG,
+                            false
+                        )}
+                    />
+                </IconButton>
+            )}
+            {!(
+                collectionSummaryType === CollectionSummaryType.incomingShare ||
+                collectionSummaryType === CollectionSummaryType.trash
+            ) && (
+                <IconButton>
+                    <FileDownloadOutlinedIcon
+                        onClick={handleCollectionAction(
+                            CollectionActions.CONFIRM_DOWNLOAD,
+                            false
+                        )}
+                        aria-haspopup="true"
+                    />
+                </IconButton>
+            )}
         </FlexWrapper>
     );
 }

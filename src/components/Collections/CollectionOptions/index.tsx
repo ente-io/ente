@@ -235,7 +235,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     return (
         <Box sx={{ display: 'inline-flex' }}>
-            <QuickOptions handleCollectionAction={handleCollectionAction} />
+            <QuickOptions
+                handleCollectionAction={handleCollectionAction}
+                collectionSummaryType={collectionSummaryType}
+            />
             <OverflowMenu
                 ariaControls={'collection-options'}
                 triggerButtonIcon={<MoreHoriz />}
