@@ -18,7 +18,9 @@ import OverflowMenu from 'components/OverflowMenu/menu';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
+import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
+import { Box } from '@mui/system';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -232,30 +234,33 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     return (
-        <OverflowMenu
-            ariaControls={'collection-options'}
-            triggerButtonIcon={<MoreHoriz />}
-            triggerButtonProps={{
-                sx: {
-                    background: (theme) => theme.palette.fill.dark,
-                },
-            }}>
-            {collectionSummaryType === CollectionSummaryType.trash ? (
-                <TrashCollectionOption
-                    handleCollectionAction={handleCollectionAction}
-                />
-            ) : collectionSummaryType ===
-              CollectionSummaryType.incomingShare ? (
-                <SharedCollectionOption
-                    handleCollectionAction={handleCollectionAction}
-                />
-            ) : (
-                <AlbumCollectionOption
-                    IsArchived={IsArchived(activeCollection)}
-                    handleCollectionAction={handleCollectionAction}
-                />
-            )}
-        </OverflowMenu>
+        <Box sx={{ display: 'inline-flex' }}>
+            <QuickOptions handleCollectionAction={handleCollectionAction} />
+            <OverflowMenu
+                ariaControls={'collection-options'}
+                triggerButtonIcon={<MoreHoriz />}
+                triggerButtonProps={{
+                    sx: {
+                        background: (theme) => theme.palette.fill.dark,
+                    },
+                }}>
+                {collectionSummaryType === CollectionSummaryType.trash ? (
+                    <TrashCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.incomingShare ? (
+                    <SharedCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : (
+                    <AlbumCollectionOption
+                        IsArchived={IsArchived(activeCollection)}
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                )}
+            </OverflowMenu>
+        </Box>
     );
 };
 
