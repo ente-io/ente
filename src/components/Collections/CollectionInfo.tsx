@@ -19,9 +19,9 @@ export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
                 </Typography>
                 {endIcon && (
                     <Box
-                        sx={{
-                            opacity: [0.6, 0.6, 0.6],
-                        }}
+                        sx={(theme) => ({
+                            color: theme.palette.fixed.strokeMutedWhite,
+                        })}
                         ml={1.5}>
                         {endIcon}
                     </Box>

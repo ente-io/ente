@@ -39,7 +39,6 @@ export function QuickOptions({
                             CollectionActions.CONFIRM_DOWNLOAD,
                             false
                         )}
-                        aria-haspopup="true"
                     />
                 </IconButton>
             )}
