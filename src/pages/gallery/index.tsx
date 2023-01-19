@@ -155,7 +155,6 @@ export default function Gallery() {
             previousFiles = previousFiles || [];
             const files =
                 filesFn instanceof Function ? filesFn(previousFiles) : filesFn;
-            console.trace('setFiles', files?.length, previousFiles.length);
             if (files?.length > 5000 && previousFiles.length > 5000) {
                 const waitTime = getData(LS_KEYS.WAIT_TIME) ?? 5000;
                 setTimeout(() => {
