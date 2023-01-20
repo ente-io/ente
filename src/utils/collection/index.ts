@@ -12,7 +12,6 @@ import { CustomError, ServerErrorCodes } from 'utils/error';
 import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { logError } from 'utils/sentry';
-import constants from 'utils/strings/constants';
 import {
     Collection,
     CollectionMagicMetadataProps,
@@ -189,7 +188,7 @@ export const changeCollectionVisibility = async (
         logError(e, 'change file visibility failed');
         switch (e.status?.toString()) {
             case ServerErrorCodes.FORBIDDEN:
-                throw Error(constants.NOT_FILE_OWNER);
+                throw Error(CustomError.NOT_FILE_OWNER);
         }
         throw e;
     }

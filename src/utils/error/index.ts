@@ -49,6 +49,7 @@ export enum CustomError {
     REQUEST_TIMEOUT = 'request taking too long',
     HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED = 'hidden collection sync file attempted',
     UNKNOWN_ERROR = 'Something went wrong, please try again',
+    NOT_FILE_OWNER = 'You cannot delete files in a shared album',
 }
 
 export function parseUploadErrorCodes(error) {

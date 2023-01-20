@@ -454,7 +454,6 @@ const englishConstants = {
             with ente
         </p>
     ),
-    NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     ADD_TO_COLLECTION: 'Add to album',
     SELECTED: 'Selected',
     VIDEO_PLAYBACK_FAILED: 'Video format not supported',
@@ -641,7 +640,6 @@ const englishConstants = {
     LEAVE_SHARED_ALBUM: 'Yes, leave',
     LEAVE_ALBUM: 'Leave album',
     LEAVE_SHARED_ALBUM_TITLE: 'Leave shared album?',
-    LEAVE_SHARED_ALBUM_FAILED: 'failed to leave the album, please try again',
     LEAVE_SHARED_ALBUM_MESSAGE:
         'You will leave the album, and it will stop being visible to you.',
     CONFIRM_REMOVE_MESSAGE: () => (
