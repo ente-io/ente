@@ -4,7 +4,10 @@ import { CollectionSummaryType } from 'constants/collection';
 import PeopleIcon from '@mui/icons-material/People';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import { FlexWrapper } from 'components/Container';
-import { IconButton } from '@mui/material';
+import { IconButton, Tooltip } from '@mui/material';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import constants from 'utils/strings/constants';
+
 interface Iprops {
     handleCollectionAction: (
         action: CollectionActions,
@@ -19,28 +22,59 @@ export function QuickOptions({
 }: Iprops) {
     return (
         <FlexWrapper sx={{ gap: '16px' }}>
-            {!(collectionSummaryType === CollectionSummaryType.trash) && (
-                <IconButton>
-                    <PeopleIcon
-                        onClick={handleCollectionAction(
-                            CollectionActions.SHOW_SHARE_DIALOG,
-                            false
-                        )}
-                    />
-                </IconButton>
-            )}
             {!(
-                collectionSummaryType === CollectionSummaryType.incomingShare ||
-                collectionSummaryType === CollectionSummaryType.trash
+                collectionSummaryType === CollectionSummaryType.trash ||
+                collectionSummaryType === CollectionSummaryType.favorites
             ) && (
-                <IconButton>
-                    <FileDownloadOutlinedIcon
-                        onClick={handleCollectionAction(
-                            CollectionActions.CONFIRM_DOWNLOAD,
-                            false
-                        )}
-                    />
-                </IconButton>
+                <Tooltip
+                    title={
+                        collectionSummaryType ===
+                        CollectionSummaryType.outgoingShare
+                            ? constants.MODIFY_SHARING
+                            : collectionSummaryType ===
+                              CollectionSummaryType.incomingShare
+                            ? constants.SHARING_DETAILS
+                            : constants.SHARE_COLLECTION
+                    }>
+                    <IconButton>
+                        <PeopleIcon
+                            onClick={handleCollectionAction(
+                                CollectionActions.SHOW_SHARE_DIALOG,
+                                false
+                            )}
+                        />
+                    </IconButton>
+                </Tooltip>
+            )}
+            {!(collectionSummaryType === CollectionSummaryType.trash) && (
+                <Tooltip
+                    title={
+                        collectionSummaryType ===
+                        CollectionSummaryType.favorites
+                            ? constants.DOWNLOAD_FAVOURITES
+                            : constants.CONFIRM_DOWNLOAD_COLLECTION
+                    }>
+                    <IconButton>
+                        <FileDownloadOutlinedIcon
+                            onClick={handleCollectionAction(
+                                CollectionActions.CONFIRM_DOWNLOAD,
+                                false
+                            )}
+                        />
+                    </IconButton>
+                </Tooltip>
+            )}
+            {collectionSummaryType === CollectionSummaryType.trash && (
+                <Tooltip title={constants.EMPTY_TRASH}>
+                    <IconButton>
+                        <DeleteOutlinedIcon
+                            onClick={handleCollectionAction(
+                                CollectionActions.CONFIRM_DELETE,
+                                false
+                            )}
+                        />
+                    </IconButton>
+                </Tooltip>
             )}
         </FlexWrapper>
     );

@@ -239,30 +239,32 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
             />
-            <OverflowMenu
-                ariaControls={'collection-options'}
-                triggerButtonIcon={<MoreHoriz />}
-                triggerButtonProps={{
-                    sx: {
-                        background: (theme) => theme.palette.fill.dark,
-                    },
-                }}>
-                {collectionSummaryType === CollectionSummaryType.trash ? (
-                    <TrashCollectionOption
-                        handleCollectionAction={handleCollectionAction}
-                    />
-                ) : collectionSummaryType ===
-                  CollectionSummaryType.incomingShare ? (
-                    <SharedCollectionOption
-                        handleCollectionAction={handleCollectionAction}
-                    />
-                ) : (
-                    <AlbumCollectionOption
-                        IsArchived={IsArchived(activeCollection)}
-                        handleCollectionAction={handleCollectionAction}
-                    />
-                )}
-            </OverflowMenu>
+            {!(collectionSummaryType === CollectionSummaryType.favorites) && (
+                <OverflowMenu
+                    ariaControls={'collection-options'}
+                    triggerButtonIcon={<MoreHoriz />}
+                    triggerButtonProps={{
+                        sx: {
+                            background: (theme) => theme.palette.fill.dark,
+                        },
+                    }}>
+                    {collectionSummaryType === CollectionSummaryType.trash ? (
+                        <TrashCollectionOption
+                            handleCollectionAction={handleCollectionAction}
+                        />
+                    ) : collectionSummaryType ===
+                      CollectionSummaryType.incomingShare ? (
+                        <SharedCollectionOption
+                            handleCollectionAction={handleCollectionAction}
+                        />
+                    ) : (
+                        <AlbumCollectionOption
+                            IsArchived={IsArchived(activeCollection)}
+                            handleCollectionAction={handleCollectionAction}
+                        />
+                    )}
+                </OverflowMenu>
+            )}
         </Box>
     );
 };
