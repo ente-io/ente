@@ -90,4 +90,5 @@ export interface ElectronAPIs {
         maxDimension: number,
         maxSize: number
     ) => Promise<Uint8Array>;
+    logRendererProcessMemoryUsage: (message: string) => Promise<void>;
 }
