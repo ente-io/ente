@@ -23,6 +23,7 @@ class AlbumListItemWidget extends StatelessWidget {
     final colorScheme = getEnteColorScheme(context);
     const sideOfThumbnail = 60.0;
     return Stack(
+      alignment: Alignment.center,
       children: [
         Row(
           children: [
@@ -101,9 +102,15 @@ class AlbumListItemWidget extends StatelessWidget {
             borderType: BorderType.RRect,
             radius: const Radius.circular(4),
             child: SizedBox(
-              height: sideOfThumbnail,
+              //Have to decrease the height and width by 1 pt as the stroke
+              //dotted border gives is of strokeAlign.center, so 0.5 inside and
+              // outside. Here for the row, stroke should be inside so we
+              //decrease the size of this sizedBox by 1 (so it shrinks 0.5 from
+              //every side) so that the strokeAlign.center of this sizedBox
+              //looks like a strokeAlign.inside in the row.
+              height: sideOfThumbnail - 1,
               //32 is to account for padding of 16pts on both sides
-              width: MediaQuery.of(context).size.width - 32,
+              width: MediaQuery.of(context).size.width - 33,
             ),
           ),
         ),
