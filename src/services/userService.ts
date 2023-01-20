@@ -19,12 +19,12 @@ import {
     UserDetails,
     DeleteChallengeResponse,
 } from 'types/user';
-import { getLocalFamilyData, isPartOfFamily } from 'utils/billing';
 import { ServerErrorCodes } from 'utils/error';
 import isElectron from 'is-electron';
 import safeStorageService from './electron/safeStorage';
 import { deleteAllCache } from 'utils/storage/cache';
 import { B64EncryptionResult } from 'types/crypto';
+import { getLocalFamilyData, isPartOfFamily } from 'utils/user/family';
 
 const ENDPOINT = getEndpoint();
 

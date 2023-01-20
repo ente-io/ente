@@ -8,8 +8,9 @@ import { CustomError } from '../error';
 import { logError } from '../sentry';
 import { SetDialogBoxAttributes } from 'types/dialogBox';
 import { getFamilyPortalRedirectURL } from 'services/userService';
-import { FamilyData, FamilyMember, User, UserDetails } from 'types/user';
 import { openLink } from 'utils/common';
+import { UserDetails } from 'types/user';
+import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 
 const PAYMENT_PROVIDER_STRIPE = 'stripe';
 const PAYMENT_PROVIDER_APPSTORE = 'appstore';
@@ -97,50 +98,8 @@ export function isSubscriptionCancelled(subscription: Subscription) {
     return subscription && subscription.attributes.isCancelled;
 }
 
-// isPartOfFamily return true if the current user is part of some family plan
-export function isPartOfFamily(familyData: FamilyData): boolean {
-    return Boolean(
-        familyData && familyData.members && familyData.members.length > 0
-    );
-}
-
-// hasNonAdminFamilyMembers return true if the admin user has members in his family
-export function hasNonAdminFamilyMembers(familyData: FamilyData): boolean {
-    return Boolean(isPartOfFamily(familyData) && familyData.members.length > 1);
-}
-
-export function isFamilyAdmin(familyData: FamilyData): boolean {
-    const familyAdmin: FamilyMember = getFamilyPlanAdmin(familyData);
-    const user: User = getData(LS_KEYS.USER);
-    return familyAdmin.email === user.email;
-}
-
-export function getFamilyPlanAdmin(familyData: FamilyData): FamilyMember {
-    if (isPartOfFamily(familyData)) {
-        return familyData.members.find((x) => x.isAdmin);
-    } else {
-        logError(
-            Error(
-                'verify user is part of family plan before calling this method'
-            ),
-            'invalid getFamilyPlanAdmin call'
-        );
-    }
-}
-
-export function getTotalFamilyUsage(familyData: FamilyData): number {
-    return familyData.members.reduce(
-        (sum, currentMember) => sum + currentMember.usage,
-        0
-    );
-}
-
 export function getLocalUserSubscription(): Subscription {
     return getData(LS_KEYS.SUBSCRIPTION);
-}
-
-export function getLocalFamilyData(): FamilyData {
-    return getData(LS_KEYS.FAMILY_DATA);
 }
 
 export function isUserSubscribedPlan(plan: Plan, subscription: Subscription) {
