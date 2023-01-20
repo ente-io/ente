@@ -1,27 +1,24 @@
 import { euclidean, TreeNode } from 'hdbscan';
 import { RawNodeDatum } from 'react-d3-tree/lib/types/common';
-import { f32Average, getAllFacesFromMap } from '.';
+// import { f32Average, getAllFacesFromMap } from '.';
 import {
     FacesCluster,
-    Cluster,
-    FaceDescriptor,
+    // Cluster,
+    // FaceDescriptor,
     FaceWithEmbedding,
     MLSyncContext,
     NearestCluster,
 } from 'types/machineLearning';
-import { getAllFacesMap } from 'utils/storage/mlStorage';
+// import { getAllFacesMap } from 'utils/storage/mlStorage';
 
-export function getClusterSummary(cluster: Cluster): FaceDescriptor {
-    // const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
-
-    // return cluster
-    //     .map((f) => this.allFaces[f].face)
-    //     .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
-
-    const descriptors = cluster.map((f) => this.allFaces[f].embedding);
-
-    return f32Average(descriptors);
-}
+// export function getClusterSummary(cluster: Cluster): FaceDescriptor {
+// const faceScore = (f) => f.detection.score; // f.alignedRect.box.width *
+// return cluster
+//     .map((f) => this.allFaces[f].face)
+//     .sort((f1, f2) => faceScore(f2) - faceScore(f1))[0].descriptor;
+// const descriptors = cluster.map((f) => this.allFaces[f].embedding);
+// return f32Average(descriptors);
+// }
 
 export function updateClusterSummaries(syncContext: MLSyncContext) {
     if (
@@ -63,36 +60,36 @@ export function getNearestCluster(
     return { cluster: nearest, distance: nearestDist };
 }
 
-export async function assignNoiseWithinLimit(syncContext: MLSyncContext) {
-    if (
-        !syncContext.mlLibraryData?.faceClusteringResults?.noise ||
-        syncContext.mlLibraryData?.faceClusteringResults.noise.length < 1
-    ) {
-        return;
-    }
+// export async function assignNoiseWithinLimit(syncContext: MLSyncContext) {
+//     if (
+//         !syncContext.mlLibraryData?.faceClusteringResults?.noise ||
+//         syncContext.mlLibraryData?.faceClusteringResults.noise.length < 1
+//     ) {
+//         return;
+//     }
 
-    const noise = syncContext.mlLibraryData.faceClusteringResults.noise;
-    const allFacesMap = await getAllFacesMap();
-    const allFaces = getAllFacesFromMap(allFacesMap);
+//     const noise = syncContext.mlLibraryData.faceClusteringResults.noise;
+//     const allFacesMap = await getAllFacesMap();
+//     const allFaces = getAllFacesFromMap(allFacesMap);
 
-    noise.forEach((n) => {
-        const noiseFace = allFaces[n];
-        const nearest = this.getNearestCluster(syncContext, noiseFace);
+//     noise.forEach((n) => {
+//         const noiseFace = allFaces[n];
+//         const nearest = this.getNearestCluster(syncContext, noiseFace);
 
-        if (nearest.cluster && nearest.distance < this.maxFaceDistance) {
-            console.log('Adding noise to cluser: ', n, nearest.distance);
-            nearest.cluster.faces.push(n);
-        } else {
-            console.log(
-                'No cluster for noise: ',
-                n,
-                'within distance: ',
-                this.maxFaceDistance
-            );
-            this.clustersWithNoise.noise.push(n);
-        }
-    });
-}
+//         if (nearest.cluster && nearest.distance < this.maxFaceDistance) {
+//             console.log('Adding noise to cluser: ', n, nearest.distance);
+//             nearest.cluster.faces.push(n);
+//         } else {
+//             console.log(
+//                 'No cluster for noise: ',
+//                 n,
+//                 'within distance: ',
+//                 this.maxFaceDistance
+//             );
+//             this.clustersWithNoise.noise.push(n);
+//         }
+//     });
+// }
 
 // TODO: remove recursion to avoid stack size limits
 export function toD3Tree(
