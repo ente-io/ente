@@ -10,6 +10,8 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/ignored_files_service.dart';
 import 'package:photos/services/remote_sync_service.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/album_list_item_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
@@ -68,6 +70,8 @@ void createCollectionSheet(
       ),
     ),
     topControl: const SizedBox.shrink(),
+    backgroundColor: getEnteColorScheme(context).backgroundElevated,
+    barrierColor: backdropFaintDark,
   );
 }
 

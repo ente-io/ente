@@ -15,65 +15,80 @@ class AlbumListItemWidget extends StatelessWidget {
     final logger = Logger("AlbumListItemWidget");
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: colorScheme.strokeFainter),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.all(
-          Radius.circular(4),
-        ),
-        child: Row(
+    const sideOfThumbnail = 60.0;
+    return Stack(
+      children: [
+        Row(
           children: [
-            SizedBox(
-              height: 60,
-              width: 60,
-              key: Key("collection_item:" + (item.thumbnail?.tag ?? "")),
-              child: item.thumbnail != null
-                  ? ThumbnailWidget(
-                      item.thumbnail,
-                      showFavForAlbumOnly: true,
-                    )
-                  : const NoThumbnailWidget(),
+            ClipRRect(
+              borderRadius: const BorderRadius.horizontal(
+                left: Radius.circular(4),
+              ),
+              child: SizedBox(
+                height: sideOfThumbnail,
+                width: sideOfThumbnail,
+                key: Key("collection_item:" + (item.thumbnail?.tag ?? "")),
+                child: item.thumbnail != null
+                    ? ThumbnailWidget(
+                        item.thumbnail,
+                        showFavForAlbumOnly: true,
+                      )
+                    : const NoThumbnailWidget(),
+              ),
             ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(item.collection.collectionName),
-                FutureBuilder<int>(
-                  future:
-                      FilesDB.instance.collectionFileCount(item.collection.id),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      final text = snapshot.data == 1 ? " memory" : " memories";
-                      return Text(
-                        snapshot.data.toString() + text,
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
-                      );
-                    } else {
-                      if (snapshot.hasError) {
-                        logger.severe(
-                          "Failed to fetch file count of collection id ${item.collection.id}",
+            Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(item.collection.collectionName),
+                  FutureBuilder<int>(
+                    future: FilesDB.instance
+                        .collectionFileCount(item.collection.id),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        final text =
+                            snapshot.data == 1 ? " memory" : " memories";
+                        return Text(
+                          snapshot.data.toString() + text,
+                          style: textTheme.small.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
+                        );
+                      } else {
+                        if (snapshot.hasError) {
+                          logger.severe(
+                            "Failed to fetch file count of collection id ${item.collection.id}",
+                          );
+                        }
+                        return Text(
+                          "",
+                          style: textTheme.small.copyWith(
+                            color: colorScheme.textMuted,
+                          ),
                         );
                       }
-                      return Text(
-                        "",
-                        style: textTheme.small.copyWith(
-                          color: colorScheme.textMuted,
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ],
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
-      ),
+        IgnorePointer(
+          child: Container(
+            height: sideOfThumbnail,
+            //32 is to account for padding of 16pts on both sides
+            width: MediaQuery.of(context).size.width - 32,
+            decoration: BoxDecoration(
+              border: Border.all(color: colorScheme.strokeFainter),
+              borderRadius: const BorderRadius.all(
+                Radius.circular(4),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
