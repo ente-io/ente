@@ -50,6 +50,9 @@ import { User } from 'types/user';
 import {
     getNonHiddenCollections,
     isQuickLinkCollection,
+    isSharedByMe,
+    isSharedWithMe,
+    isSharedOnlyViaLink,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
@@ -824,12 +827,15 @@ export function getCollectionSummaries(
                 latestFile: collectionLatestFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id),
                 updationTime: collection.updationTime,
-                type:
-                    collection.owner.id !== user.id
-                        ? CollectionSummaryType.shared
-                        : IsArchived(collection)
-                        ? CollectionSummaryType.archived
-                        : CollectionSummaryType[collection.type],
+                type: isSharedWithMe(collection, user)
+                    ? CollectionSummaryType.incomingShare
+                    : isSharedByMe(collection)
+                    ? CollectionSummaryType.outgoingShare
+                    : isSharedOnlyViaLink(collection)
+                    ? CollectionSummaryType.sharedOnlyViaLink
+                    : IsArchived(collection)
+                    ? CollectionSummaryType.archived
+                    : CollectionSummaryType[collection.type],
             });
         }
     }

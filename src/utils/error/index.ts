@@ -1,5 +1,3 @@
-import { AxiosResponse } from 'axios';
-
 export const ServerErrorCodes = {
     SESSION_EXPIRED: '401',
     NO_ACTIVE_SUBSCRIPTION: '402',
@@ -51,29 +49,6 @@ export enum CustomError {
     REQUEST_TIMEOUT = 'request taking too long',
     HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED = 'hidden collection sync file attempted',
     UNKNOWN_ERROR = 'Something went wrong, please try again',
-}
-
-export function parseServerError(error: AxiosResponse): string {
-    let parsedMessage: string = null;
-    const errorCode = error.status.toString();
-    switch (errorCode) {
-        case ServerErrorCodes.NO_ACTIVE_SUBSCRIPTION:
-            parsedMessage = CustomError.SUBSCRIPTION_EXPIRED;
-            break;
-        case ServerErrorCodes.STORAGE_LIMIT_EXCEEDED:
-            parsedMessage = CustomError.STORAGE_QUOTA_EXCEEDED;
-            break;
-        case ServerErrorCodes.SESSION_EXPIRED:
-            parsedMessage = CustomError.SESSION_EXPIRED;
-            break;
-        case ServerErrorCodes.FILE_TOO_LARGE:
-            parsedMessage = CustomError.FILE_TOO_LARGE;
-            break;
-        default:
-            parsedMessage = `${CustomError.UNKNOWN_ERROR} statusCode:${errorCode}`;
-    }
-
-    return parsedMessage;
 }
 
 function parseUploadErrorCodes(error) {

@@ -8,8 +8,8 @@ class ComlinkConvertWorker {
 
     async getInstance() {
         if (!this.comlinkWorkerInstance) {
-            const comlinkWorker = getDedicatedConvertWorker();
-            this.comlinkWorkerInstance = await new comlinkWorker.remote();
+            this.comlinkWorkerInstance = await getDedicatedConvertWorker()
+                .remote;
         }
         return this.comlinkWorkerInstance;
     }

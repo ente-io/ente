@@ -56,6 +56,14 @@ export const getPaymentsURL = () => {
     return `https://payments.ente.io`;
 };
 
+export const getAlbumsURL = () => {
+    const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT;
+    if (isDevDeployment() && albumsURL) {
+        return albumsURL;
+    }
+    return `https://albums.ente.io`;
+};
+
 // getFamilyPortalURL returns the endpoint for the family dashboard which can be used to
 // create or manage family.
 export const getFamilyPortalURL = () => {
@@ -64,14 +72,6 @@ export const getFamilyPortalURL = () => {
         return familyURL;
     }
     return `https://family.ente.io`;
-};
-
-export const getAlbumsURL = () => {
-    const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT;
-    if (isDevDeployment() && albumsURL) {
-        return albumsURL;
-    }
-    return `https://albums.ente.io`;
 };
 
 export const getSentryTunnelURL = () => {

@@ -36,7 +36,7 @@ class HEICConverter {
         const response = this.convertProcessor.queueUpRequest(() =>
             retryAsyncFunction<Blob>(async () => {
                 const convertWorker = this.workerPool.shift();
-                const worker = await new convertWorker.remote();
+                const worker = await convertWorker.remote;
                 try {
                     const convertedHEIC = await new Promise<Blob>(
                         (resolve, reject) => {

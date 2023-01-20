@@ -1,5 +1,5 @@
 import isElectron from 'is-electron';
-import { User, UserDetails } from 'types/user';
+import { UserDetails } from 'types/user';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import ElectronService from 'services/electron/common';
 
@@ -33,5 +33,10 @@ export function getLocalUserDetails(): UserDetails {
     return getData(LS_KEYS.USER_DETAILS)?.value;
 }
 
-export const isInternalUser = () =>
-    (getData(LS_KEYS.USER) as User)?.email.endsWith('@ente.io');
+export const isInternalUser = () => {
+    const userEmail = getData(LS_KEYS.USER)?.email;
+
+    return (
+        userEmail.endsWith('@ente.io') || userEmail === 'kr.anand619@gmail.com'
+    );
+};

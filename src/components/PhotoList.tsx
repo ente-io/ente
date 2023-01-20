@@ -563,11 +563,14 @@ export function PhotoList({
         switch (listItem.itemType) {
             case ITEM_TYPE.TIME:
                 return listItem.dates ? (
-                    listItem.dates.map((item) => (
-                        <DateContainer key={item.date} span={item.span}>
-                            {item.date}
-                        </DateContainer>
-                    ))
+                    listItem.dates
+                        .map((item) => [
+                            <DateContainer key={item.date} span={item.span}>
+                                {item.date}
+                            </DateContainer>,
+                            <div key={`${item.date}-gap`} />,
+                        ])
+                        .flat()
                 ) : (
                     <DateContainer span={columns}>
                         {listItem.date}
