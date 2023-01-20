@@ -128,7 +128,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                           return ListView.separated(
                             itemBuilder: (context, index) {
                               return AlbumListItemWidget(
-                                collectionsWithThumbnail[index],
+                                item: collectionsWithThumbnail[index],
                               );
                               // return _buildCollectionItem(
                               //   collectionsWithThumbnail[index],
