@@ -1,6 +1,6 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
@@ -114,81 +114,105 @@ const PhotoFrame = ({
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
 
-    const filteredData = useMemo(() => {
-        const idSet = new Set();
-        const user: User = getData(LS_KEYS.USER);
+    const updateInProgress = useRef(false);
+    const updateRequired = useRef(false);
 
-        return files
-            .map((item, index) => ({
-                ...item,
-                dataIndex: index,
-                w: window.innerWidth,
-                h: window.innerHeight,
-                title: item.pubMagicMetadata?.data.caption,
-            }))
-            .filter((item) => {
-                if (
-                    deletedFileIds?.has(item.id) &&
-                    activeCollection !== TRASH_SECTION
-                ) {
-                    return false;
-                }
-                if (
-                    search?.date &&
-                    !isSameDayAnyYear(search.date)(
-                        new Date(item.metadata.creationTime / 1000)
-                    )
-                ) {
-                    return false;
-                }
-                if (
-                    search?.location &&
-                    !isInsideBox(
-                        {
-                            latitude: item.metadata.latitude,
-                            longitude: item.metadata.longitude,
-                        },
-                        search.location
-                    )
-                ) {
-                    return false;
-                }
-                if (
-                    !isDeduplicating &&
-                    activeCollection === ALL_SECTION &&
-                    (IsArchived(item) ||
-                        archivedCollections?.has(item.collectionID))
-                ) {
-                    return false;
-                }
-                if (activeCollection === ARCHIVE_SECTION && !IsArchived(item)) {
-                    return false;
-                }
+    const [filteredData, setFilteredData] = useState<EnteFile[]>([]);
 
-                if (isSharedFile(user, item) && !isSharedCollection) {
-                    return false;
-                }
-                if (activeCollection === TRASH_SECTION && !item.isTrashed) {
-                    return false;
-                }
-                if (activeCollection !== TRASH_SECTION && item.isTrashed) {
-                    return false;
-                }
-                if (!idSet.has(item.id)) {
+    useEffect(() => {
+        const main = () => {
+            if (updateInProgress.current) {
+                updateRequired.current = true;
+                return;
+            }
+            updateInProgress.current = true;
+            const idSet = new Set();
+            const user: User = getData(LS_KEYS.USER);
+
+            const filteredData = files
+                .map((item, index) => ({
+                    ...item,
+                    dataIndex: index,
+                    w: window.innerWidth,
+                    h: window.innerHeight,
+                    title: item.pubMagicMetadata?.data.caption,
+                }))
+                .filter((item) => {
                     if (
-                        activeCollection === ALL_SECTION ||
-                        activeCollection === ARCHIVE_SECTION ||
-                        activeCollection === TRASH_SECTION ||
-                        activeCollection === item.collectionID ||
-                        isInSearchMode
+                        deletedFileIds?.has(item.id) &&
+                        activeCollection !== TRASH_SECTION
                     ) {
-                        idSet.add(item.id);
-                        return true;
+                        return false;
+                    }
+                    if (
+                        search?.date &&
+                        !isSameDayAnyYear(search.date)(
+                            new Date(item.metadata.creationTime / 1000)
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.location &&
+                        !isInsideBox(
+                            {
+                                latitude: item.metadata.latitude,
+                                longitude: item.metadata.longitude,
+                            },
+                            search.location
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        !isDeduplicating &&
+                        activeCollection === ALL_SECTION &&
+                        (IsArchived(item) ||
+                            archivedCollections?.has(item.collectionID))
+                    ) {
+                        return false;
+                    }
+                    if (
+                        activeCollection === ARCHIVE_SECTION &&
+                        !IsArchived(item)
+                    ) {
+                        return false;
+                    }
+
+                    if (isSharedFile(user, item) && !isSharedCollection) {
+                        return false;
+                    }
+                    if (activeCollection === TRASH_SECTION && !item.isTrashed) {
+                        return false;
+                    }
+                    if (activeCollection !== TRASH_SECTION && item.isTrashed) {
+                        return false;
+                    }
+                    if (!idSet.has(item.id)) {
+                        if (
+                            activeCollection === ALL_SECTION ||
+                            activeCollection === ARCHIVE_SECTION ||
+                            activeCollection === TRASH_SECTION ||
+                            activeCollection === item.collectionID ||
+                            isInSearchMode
+                        ) {
+                            idSet.add(item.id);
+                            return true;
+                        }
+                        return false;
                     }
                     return false;
-                }
-                return false;
-            });
+                });
+            setFilteredData(filteredData);
+            updateInProgress.current = false;
+            if (updateRequired.current) {
+                updateRequired.current = false;
+                setTimeout(() => {
+                    main();
+                }, 0);
+            }
+        };
+        main();
     }, [
         files,
         deletedFileIds,
