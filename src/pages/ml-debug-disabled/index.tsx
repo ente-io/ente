@@ -1,4 +1,4 @@
-// import React from 'react';
+import React from 'react';
 // import dynamic from 'next/dynamic';
 
 // const MLDebugWithNoSSR = dynamic(
@@ -8,12 +8,6 @@
 //     }
 // );
 
-// export default function MLDebug() {
-//     return (
-//         <div>
-//             <MLDebugWithNoSSR></MLDebugWithNoSSR>
-//         </div>
-//     );
-// }
-
-export {};
+export default function MLDebug() {
+    return <div>{/* <MLDebugWithNoSSR></MLDebugWithNoSSR> */}</div>;
+}
