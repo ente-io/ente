@@ -69,9 +69,11 @@ export default function UtilitySection({ closeSidebar }) {
     };
 
     const enableMlSearch = async () => {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         await updateMlSearchEnabled(true);
     };
     const disableMlSearch = async () => {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         await updateMlSearchEnabled(false);
     };
 

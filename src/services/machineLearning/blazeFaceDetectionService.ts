@@ -62,6 +62,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         console.log(
             'loaded blazeFaceModel: ',
             // await this.blazeFaceModel,
+            // eslint-disable-next-line @typescript-eslint/await-thenable
             await tf.getBackend()
         );
     }
@@ -151,6 +152,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             3,
         ]);
         const normalizedImage = tf.sub(tf.div(reshapedImage, 127.5), 1.0);
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         const results = await this.blazeFaceBackModel.predict(normalizedImage);
         // console.log('onFacesDetected: ', results);
         return results;

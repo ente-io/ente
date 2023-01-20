@@ -27,6 +27,7 @@ function transformBrowserCacheStorageToLimitedCacheStorage(
                 delete: cache.delete.bind(cache),
             };
         },
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         delete: caches.delete,
     };
 }

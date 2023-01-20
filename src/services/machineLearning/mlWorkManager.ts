@@ -35,6 +35,7 @@ class MLWorkManager {
         });
         this.mlSearchEnabled = false;
 
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         eventBus.on(Events.LOGOUT, this.logoutHandler, this);
         this.debouncedLiveSyncIdle = debounce(
             () => this.onLiveSyncIdle(),
@@ -56,6 +57,7 @@ class MLWorkManager {
 
             // eventBus.on(Events.APP_START, this.appStartHandler, this);
             // eventBus.on(Events.LOGIN, this.startSyncJob, this);
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             eventBus.on(Events.FILE_UPLOADED, this.fileUploadedHandler, this);
             eventBus.on(
                 Events.LOCAL_FILES_UPDATED,
@@ -74,6 +76,7 @@ class MLWorkManager {
             // eventBus.removeListener(Events.LOGIN, this.startSyncJob, this);
             eventBus.removeListener(
                 Events.FILE_UPLOADED,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 this.fileUploadedHandler,
                 this
             );
@@ -83,6 +86,7 @@ class MLWorkManager {
                 this
             );
 
+            // eslint-disable-next-line @typescript-eslint/await-thenable
             await this.stopSyncJob();
         }
     }
@@ -100,6 +104,7 @@ class MLWorkManager {
     private async logoutHandler() {
         console.log('logoutHandler');
         try {
+            // eslint-disable-next-line @typescript-eslint/await-thenable
             await this.stopSyncJob();
             this.mlSyncJob = undefined;
             await this.terminateLiveSyncWorker();

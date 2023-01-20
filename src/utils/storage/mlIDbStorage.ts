@@ -71,6 +71,7 @@ class MLIDbStorage {
     }
 
     private openDB(): Promise<IDBPDatabase<MLDb>> {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const mlIDbStorage = this;
         return openDB<MLDb>(MLDATA_DB_NAME, 3, {
             async terminated() {
