@@ -140,6 +140,7 @@ const englishConstants = {
     CREATE: 'Create',
     DOWNLOAD: 'Download',
     DOWNLOAD_OPTION: 'Download (D)',
+    DOWNLOAD_FAVOURITES: 'Download favourites',
     COPY_OPTION: 'Copy as PNG (Ctrl/Cmd - C)',
     TOGGLE_FULLSCREEN: 'Toggle fullscreen (F)',
     ZOOM_IN_OUT: 'Zoom in/out',
@@ -379,7 +380,7 @@ const englishConstants = {
         `Oops, you're already sharing this with ${email}`,
     SHARING_BAD_REQUEST_ERROR: 'Sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'Sharing is disabled for free accounts',
-    CONFIRM_DOWNLOAD_COLLECTION: 'Download album',
+    DOWNLOAD_COLLECTION: 'Download album',
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
             <p>Are you sure you want to download the complete album?</p>
@@ -587,10 +588,12 @@ const englishConstants = {
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
     ARCHIVE: 'Archive',
+    ARCHIVE_COLLECTION: 'Archive album',
     ARCHIVE_SECTION_NAME: 'Archive',
     ALL_SECTION_NAME: 'All',
     MOVE_TO_COLLECTION: 'Move to album',
     UNARCHIVE: 'Unarchive',
+    UNARCHIVE_COLLECTION: 'Unarchive album',
     MOVE: 'Move',
     ADD: 'Add',
     SORT: 'Sort',
@@ -680,6 +683,8 @@ const englishConstants = {
     INSTALL: 'Install',
     ALBUM_URL: 'Album url',
     PUBLIC_SHARING: 'Public link',
+    SHARING_DETAILS: 'Sharing details',
+    MODIFY_SHARING: 'Modify sharing',
     NOT_FOUND: '404 - not found',
     LINK_EXPIRED: 'Link expired',
     LINK_EXPIRED_MESSAGE: 'This link has either expired or been disabled!',
