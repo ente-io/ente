@@ -14,17 +14,17 @@ import { getSentryUserID, logErrorSentry } from '../services/sentry';
 import chokidar from 'chokidar';
 import path from 'path';
 import { getDirFilePaths } from '../services/fs';
-import { convertHEIC } from '../services/heicConverter';
+import {
+    convertHEIC,
+    generateImageThumbnail,
+} from '../services/imageProcessor';
 import {
     getAppVersion,
     skipAppVersion,
     updateAndRestart,
 } from '../services/appUpdater';
-import {
-    deleteTempFile,
-    runFFmpegCmd,
-    writeTempFile,
-} from '../services/ffmpeg';
+import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
+import { generateTempFilePath } from './temp';
 
 export default function setupIpcComs(
     tray: Tray,
@@ -137,13 +137,17 @@ export default function setupIpcComs(
             return runFFmpegCmd(cmd, inputFilePath, outputFileName);
         }
     );
-    ipcMain.handle(
-        'write-temp-file',
-        (_, fileStream: Uint8Array, fileName: string) => {
-            return writeTempFile(fileStream, fileName);
-        }
-    );
+    ipcMain.handle('get-temp-file-path', (_, formatSuffix) => {
+        return generateTempFilePath(formatSuffix);
+    });
     ipcMain.handle('remove-temp-file', (_, tempFilePath: string) => {
         return deleteTempFile(tempFilePath);
     });
+
+    ipcMain.handle(
+        'generate-image-thumbnail',
+        (_, fileData, maxDimension, maxSize) => {
+            return generateImageThumbnail(fileData, maxDimension, maxSize);
+        }
+    );
 }
