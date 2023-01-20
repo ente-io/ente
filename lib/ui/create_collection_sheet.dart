@@ -131,8 +131,13 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                               snapshot.data as List<CollectionWithThumbnail>;
                           return ListView.separated(
                             itemBuilder: (context, index) {
-                              return AlbumListItemWidget(
-                                item: collectionsWithThumbnail[index],
+                              final item = collectionsWithThumbnail[index];
+                              return GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () => _albumListItemOnTap(item),
+                                child: AlbumListItemWidget(
+                                  item: item,
+                                ),
                               );
                               // return _buildCollectionItem(
                               //   collectionsWithThumbnail[index],
@@ -158,6 +163,23 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
         ),
       ],
     );
+  }
+
+  Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
+    if (await _runCollectionAction(
+      item.collection.id,
+    )) {
+      showShortToast(
+        context,
+        widget.actionType == CollectionActionType.addFiles
+            ? "Added successfully to " + item.collection.name!
+            : "Moved successfully to " + item.collection.name!,
+      );
+      _navigateToCollection(
+        context,
+        item.collection,
+      );
+    }
   }
 
   Widget _buildCollectionItem(CollectionWithThumbnail item) {
