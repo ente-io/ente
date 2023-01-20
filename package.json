@@ -68,7 +68,7 @@
     "start": "concurrently \"yarn start-main\" \"yarn start-renderer\"",
     "build-renderer": "cd ui && yarn install && yarn build && cd ..",
     "build": "yarn build-renderer && yarn build-main",
-    "test-release": "yarn build && electron-builder --config.compression=store"
+    "test-release": "cross-env IS_TEST_RELEASE=true yarn build && electron-builder --config.compression=store"
   },
   "author": "ente <code@ente.io>",
   "devDependencies": {
@@ -83,6 +83,7 @@
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "concurrently": "^7.0.0",
+    "cross-env": "^7.0.3",
     "electron": "^21.2.2",
     "electron-builder": "^23.0.3",
     "electron-builder-notarize": "^1.2.0",
