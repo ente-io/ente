@@ -23,8 +23,6 @@ import {
     SceneDetectionMethod,
 } from 'types/machineLearning';
 import { getConcurrency } from 'utils/common/concurrency';
-import { getDedicatedCryptoWorker } from 'utils/crypto';
-import { ComlinkWorker } from 'utils/comlink';
 import { logQueueStats } from 'utils/machineLearning';
 import arcfaceAlignmentService from './arcfaceAlignmentService';
 import arcfaceCropService from './arcfaceCropService';
@@ -35,6 +33,9 @@ import dbscanClusteringService from './dbscanClusteringService';
 import ssdMobileNetV2Service from './ssdMobileNetV2Service';
 import tesseractService from './tesseractService';
 import imageSceneService from './imageSceneService';
+import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
+import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { DedicatedCryptoWorker } from 'worker/crypto.worker';
 
 export class MLFactory {
     public static getFaceDetectionService(
@@ -157,7 +158,9 @@ export class LocalMLSyncContext implements MLSyncContext {
     // private downloadQueue: PQueue;
 
     private concurrency: number;
-    private enteComlinkWorkers: Array<ComlinkWorker>;
+    private comlinkCryptoWorker: Array<
+        ComlinkWorker<typeof DedicatedCryptoWorker>
+    >;
     private enteWorkers: Array<any>;
 
     constructor(
@@ -211,15 +214,15 @@ export class LocalMLSyncContext implements MLSyncContext {
         // this.downloadQueue = new PQueue({ concurrency: 1 });
         // logQueueStats(this.downloadQueue, 'download');
 
-        this.enteComlinkWorkers = new Array(this.concurrency);
+        this.comlinkCryptoWorker = new Array(this.concurrency);
         this.enteWorkers = new Array(this.concurrency);
     }
 
     public async getEnteWorker(id: number): Promise<any> {
         const wid = id % this.enteWorkers.length;
         if (!this.enteWorkers[wid]) {
-            this.enteComlinkWorkers[wid] = getDedicatedCryptoWorker();
-            this.enteWorkers[wid] = new this.enteComlinkWorkers[wid].comlink();
+            this.comlinkCryptoWorker[wid] = getDedicatedCryptoWorker();
+            this.enteWorkers[wid] = await this.comlinkCryptoWorker[wid].remote;
         }
 
         return this.enteWorkers[wid];
@@ -232,8 +235,8 @@ export class LocalMLSyncContext implements MLSyncContext {
         this.localFilesMap = undefined;
         await this.syncQueue.onIdle();
         this.syncQueue.removeAllListeners();
-        for (const enteComlinkWorker of this.enteComlinkWorkers) {
-            enteComlinkWorker?.worker.terminate();
+        for (const enteComlinkWorker of this.comlinkCryptoWorker) {
+            enteComlinkWorker?.terminate();
         }
     }
 }
