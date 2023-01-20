@@ -275,7 +275,7 @@ class UploadManager {
             i++
         ) {
             this.cryptoWorkers[i] = getDedicatedCryptoWorker();
-            const worker = await new this.cryptoWorkers[i].remote();
+            const worker = await this.cryptoWorkers[i].remote;
             uploadProcesses.push(this.uploadNextFileInQueue(worker));
         }
         await Promise.all(uploadProcesses);
