@@ -20,6 +20,8 @@ import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/create_collection_sheet.dart'
+    as create_collection_sheet;
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -262,7 +264,12 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await _selectionCollectionForAction(CollectionActionType.addFiles);
+    // await _selectionCollectionForAction(CollectionActionType.addFiles);
+    create_collection_sheet.createCollectionSheet(
+      widget.selectedFiles,
+      null,
+      context,
+    );
   }
 
   Future<void> _onDeleteClick() async {
