@@ -8,7 +8,7 @@ class ComlinkFFmpegWorker {
     async getInstance() {
         if (!this.comlinkWorkerInstance) {
             const comlinkWorker = getDedicatedFFmpegWorker();
-            this.comlinkWorkerInstance = await new comlinkWorker.remote();
+            this.comlinkWorkerInstance = await comlinkWorker.remote;
         }
         return this.comlinkWorkerInstance;
     }
