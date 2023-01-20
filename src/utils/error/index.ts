@@ -51,7 +51,7 @@ export enum CustomError {
     UNKNOWN_ERROR = 'Something went wrong, please try again',
 }
 
-function parseUploadErrorCodes(error) {
+export function parseUploadErrorCodes(error) {
     let parsedMessage = null;
     if (error?.status) {
         const errorCode = error.status.toString();

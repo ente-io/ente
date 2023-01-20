@@ -24,7 +24,7 @@ import { getAllFacesFromMap } from 'utils/machineLearning';
 import { MLFactory } from './machineLearningFactory';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { getMLSyncConfig } from 'utils/machineLearning/config';
-import { CustomError, parseServerError } from 'utils/error';
+import { CustomError, parseUploadErrorCodes } from 'utils/error';
 import { MAX_ML_SYNC_ERROR_COUNT } from 'constants/machineLearning/config';
 import FaceService from './faceService';
 import PeopleService from './peopleService';
@@ -379,8 +379,8 @@ class MachineLearningService {
                 error
             );
             if ('status' in error) {
-                const parsedMessage = parseServerError(error);
-                error = parsedMessage ? new Error(parsedMessage) : error;
+                const parsedMessage = parseUploadErrorCodes(error);
+                error = parsedMessage;
             }
             // TODO: throw errors not related to specific file
             // sync job run should stop after these errors
