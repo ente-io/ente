@@ -18,7 +18,7 @@ export function QuickOptions({
     collectionSummaryType,
 }: Iprops) {
     return (
-        <FlexWrapper>
+        <FlexWrapper sx={{ gap: '16px' }}>
             {!(collectionSummaryType === CollectionSummaryType.trash) && (
                 <IconButton>
                     <PeopleIcon

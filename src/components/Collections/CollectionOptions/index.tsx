@@ -234,7 +234,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     return (
-        <Box sx={{ display: 'inline-flex' }}>
+        <Box sx={{ display: 'inline-flex', gap: '16px' }}>
             <QuickOptions
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}

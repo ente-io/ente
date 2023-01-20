@@ -19,9 +19,12 @@ export function CollectionInfo({ name, fileCount, endIcon }: Iprops) {
                 </Typography>
                 {endIcon && (
                     <Box
-                        sx={(theme) => ({
-                            color: theme.palette.fixed.strokeMutedWhite,
-                        })}
+                        sx={{
+                            svg: {
+                                fontSize: '17px',
+                                color: 'text.secondary',
+                            },
+                        }}
                         ml={1.5}>
                         {endIcon}
                     </Box>
