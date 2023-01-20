@@ -11,8 +11,6 @@ import {
     hasMobileSubscription,
     getLocalUserSubscription,
     hasPaidSubscription,
-    getTotalFamilyUsage,
-    isPartOfFamily,
     isSubscriptionActive,
 } from 'utils/billing';
 import { reverseString } from 'utils/common';
@@ -28,6 +26,7 @@ import { getLocalUserDetails } from 'utils/user';
 import { PLAN_PERIOD } from 'constants/gallery';
 import FreeSubscriptionPlanSelectorCard from './free';
 import PaidSubscriptionPlanSelectorCard from './paid';
+import { isPartOfFamily, getTotalFamilyUsage } from 'utils/user/family';
 
 interface Props {
     closeModal: any;

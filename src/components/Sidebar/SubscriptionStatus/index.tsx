@@ -2,9 +2,7 @@ import { GalleryContext } from 'pages/gallery';
 import React, { MouseEventHandler, useContext, useMemo } from 'react';
 import {
     hasPaidSubscription,
-    isFamilyAdmin,
     isOnFreePlan,
-    isPartOfFamily,
     hasExceededStorageQuota,
     isSubscriptionActive,
     isSubscriptionCancelled,
@@ -15,6 +13,7 @@ import { UserDetails } from 'types/user';
 import constants from 'utils/strings/constants';
 import { Typography } from '@mui/material';
 import billingService from 'services/billingService';
+import { isPartOfFamily, isFamilyAdmin } from 'utils/user/family';
 
 export default function SubscriptionStatus({
     userDetails,

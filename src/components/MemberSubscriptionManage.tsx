@@ -3,9 +3,9 @@ import VerticallyCentered, { FlexWrapper } from 'components/Container';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useEffect } from 'react';
 import billingService from 'services/billingService';
-import { getFamilyPlanAdmin } from 'utils/billing';
 import { preloadImage } from 'utils/common';
 import constants from 'utils/strings/constants';
+import { getFamilyPlanAdmin } from 'utils/user/family';
 import DialogTitleWithCloseButton from './DialogBox/TitleWithCloseButton';
 
 export function MemberSubscriptionManage({ open, userDetails, onClose }) {

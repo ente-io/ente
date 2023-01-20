@@ -642,6 +642,7 @@ const englishConstants = {
     LEAVE_SHARED_ALBUM_TITLE: 'Leave shared album?',
     LEAVE_SHARED_ALBUM_MESSAGE:
         'You will leave the album, and it will stop being visible to you.',
+    NOT_FILE_OWNER: 'You cannot delete files in a shared album',
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
             <p>Are you sure you want to remove these files from the album?</p>

@@ -1,9 +1,9 @@
 import { IndividualSubscriptionCardContent } from './individual';
 import { FamilySubscriptionCardContent } from './family';
 import React from 'react';
-import { hasNonAdminFamilyMembers } from 'utils/billing';
 import { Overlay, SpaceBetweenFlex } from 'components/Container';
 import { UserDetails } from 'types/user';
+import { hasNonAdminFamilyMembers } from 'utils/user/family';
 
 interface Iprops {
     userDetails: UserDetails;

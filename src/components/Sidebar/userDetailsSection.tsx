@@ -9,7 +9,7 @@ import SubscriptionStatus from './SubscriptionStatus';
 import { Box, Skeleton } from '@mui/material';
 import { MemberSubscriptionManage } from '../MemberSubscriptionManage';
 import { GalleryContext } from 'pages/gallery';
-import { isPartOfFamily, isFamilyAdmin } from 'utils/billing';
+import { isPartOfFamily, isFamilyAdmin } from 'utils/user/family';
 
 export default function UserDetailsSection({ sidebarView }) {
     const galleryContext = useContext(GalleryContext);
