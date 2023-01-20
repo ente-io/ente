@@ -6,10 +6,12 @@ import { FILE_TYPE } from 'constants/file';
 import { getToken } from 'utils/common/key';
 import { logQueueStats } from 'utils/machineLearning';
 import { getMLSyncJobConfig } from 'utils/machineLearning/config';
-import { MLWorkerWithProxy } from 'utils/machineLearning/worker';
 import { logError } from 'utils/sentry';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
+import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
+import { DedicatedMLWorker } from 'worker/ml.worker';
+import { getDedicatedMLWorker } from 'utils/comlink/ComlinkMLWorker';
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
@@ -17,13 +19,13 @@ const LOCAL_FILES_UPDATED_DEBOUNCE_SEC = 30;
 
 class MLWorkManager {
     private mlSyncJob: MLSyncJob;
-    private syncJobWorker: MLWorkerWithProxy;
+    private syncJobWorker: ComlinkWorker<typeof DedicatedMLWorker>;
 
     private debouncedLiveSyncIdle: () => void;
     private debouncedFilesUpdated: () => void;
 
     private liveSyncQueue: PQueue;
-    private liveSyncWorker: MLWorkerWithProxy;
+    private liveSyncWorker: ComlinkWorker<typeof DedicatedMLWorker>;
     private mlSearchEnabled: boolean;
 
     constructor() {
@@ -143,10 +145,10 @@ class MLWorkManager {
     // Live Sync
     private async getLiveSyncWorker() {
         if (!this.liveSyncWorker) {
-            this.liveSyncWorker = new MLWorkerWithProxy('ml-sync-live');
+            this.liveSyncWorker = getDedicatedMLWorker('ml-sync-live');
         }
 
-        return this.liveSyncWorker.proxy;
+        return await this.liveSyncWorker.remote;
     }
 
     private async terminateLiveSyncWorker() {
@@ -154,7 +156,7 @@ class MLWorkManager {
             return;
         }
         try {
-            const liveSyncWorker = await this.liveSyncWorker.proxy;
+            const liveSyncWorker = await this.liveSyncWorker.remote;
             await liveSyncWorker.closeLocalSyncContext();
         } catch (error) {
             console.error(
@@ -190,10 +192,10 @@ class MLWorkManager {
     // Sync Job
     private async getSyncJobWorker() {
         if (!this.syncJobWorker) {
-            this.syncJobWorker = new MLWorkerWithProxy('ml-sync-job');
+            this.syncJobWorker = getDedicatedMLWorker('ml-sync-job');
         }
 
-        return this.syncJobWorker.proxy;
+        return await this.syncJobWorker.remote;
     }
 
     private terminateSyncJobWorker() {
