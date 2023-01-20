@@ -66,9 +66,8 @@ void createCollectionSheet(
     },
     shape: const RoundedRectangleBorder(
       side: BorderSide(width: 0),
-      borderRadius: BorderRadius.only(
-        topLeft: Radius.circular(5),
-        topRight: Radius.circular(5),
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(5),
       ),
     ),
     topControl: const SizedBox.shrink(),
@@ -100,59 +99,64 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     final filesCount = widget.sharedFiles != null
         ? widget.sharedFiles!.length
         : widget.selectedFiles!.files.length;
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: min(428, MediaQuery.of(context).size.width),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(0, 32, 0, 12),
-          child: Column(
-            children: [
-              BottomOfTitleBarWidget(
-                title: TitleBarTitleWidget(
-                  title: _actionName(widget.actionType, filesCount > 1),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: min(428, MediaQuery.of(context).size.width),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(0, 32, 0, 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BottomOfTitleBarWidget(
+                  title: TitleBarTitleWidget(
+                    title: _actionName(widget.actionType, filesCount > 1),
+                  ),
+                  caption: "Create or select album",
                 ),
-                caption: "Create or select album",
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 24, 16, 48),
-                  child: FutureBuilder(
-                    future: _getCollectionsWithThumbnail(),
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        //Need to show an error on the UI here
-                        return const SizedBox.shrink();
-                      } else if (snapshot.hasData) {
-                        final collectionsWithThumbnail =
-                            snapshot.data as List<CollectionWithThumbnail>;
-                        return ListView.separated(
-                          itemBuilder: (context, index) {
-                            return AlbumListItemWidget(
-                              item: collectionsWithThumbnail[index],
-                            );
-                            // return _buildCollectionItem(
-                            //   collectionsWithThumbnail[index],
-                            // );
-                          },
-                          separatorBuilder: (context, index) => const SizedBox(
-                            height: 8,
-                          ),
-                          itemCount: collectionsWithThumbnail.length,
-                          shrinkWrap: true,
-                        );
-                      } else {
-                        return const EnteLoadingWidget();
-                      }
-                    },
+                Flexible(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 48),
+                    child: FutureBuilder(
+                      future: _getCollectionsWithThumbnail(),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          //Need to show an error on the UI here
+                          return const SizedBox.shrink();
+                        } else if (snapshot.hasData) {
+                          final collectionsWithThumbnail =
+                              snapshot.data as List<CollectionWithThumbnail>;
+                          return ListView.separated(
+                            itemBuilder: (context, index) {
+                              return AlbumListItemWidget(
+                                item: collectionsWithThumbnail[index],
+                              );
+                              // return _buildCollectionItem(
+                              //   collectionsWithThumbnail[index],
+                              // );
+                            },
+                            separatorBuilder: (context, index) =>
+                                const SizedBox(
+                              height: 8,
+                            ),
+                            itemCount: collectionsWithThumbnail.length,
+                            shrinkWrap: true,
+                          );
+                        } else {
+                          return const EnteLoadingWidget();
+                        }
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
