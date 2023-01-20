@@ -40,11 +40,15 @@ import {
     CollectionSummaryType,
 } from 'constants/collection';
 import {
+    ALL_SECTION_NAME,
+    ARCHIVE_SECTION_NAME,
+    TRASH_SECTION_NAME,
+} from 'constants/strings';
+import {
     NEW_COLLECTION_MAGIC_METADATA,
     SUB_TYPE,
     UpdateMagicMetadataRequest,
 } from 'types/magicMetadata';
-import constants from 'utils/strings/constants';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 import { User } from 'types/user';
 import {
@@ -898,7 +902,7 @@ function getAllCollectionSummaries(
 ): CollectionSummary {
     return {
         id: ALL_SECTION,
-        name: constants.ALL_SECTION_NAME,
+        name: ALL_SECTION_NAME,
         type: CollectionSummaryType.all,
         latestFile: collectionsLatestFile.get(ALL_SECTION),
         fileCount: collectionFilesCount.get(ALL_SECTION) || 0,
@@ -912,7 +916,7 @@ function getArchivedCollectionSummaries(
 ): CollectionSummary {
     return {
         id: ARCHIVE_SECTION,
-        name: constants.ARCHIVE_SECTION_NAME,
+        name: ARCHIVE_SECTION_NAME,
         type: CollectionSummaryType.archive,
         latestFile: collectionsLatestFile.get(ARCHIVE_SECTION),
         fileCount: collectionFilesCount.get(ARCHIVE_SECTION) ?? 0,
@@ -926,7 +930,7 @@ function getTrashedCollectionSummaries(
 ): CollectionSummary {
     return {
         id: TRASH_SECTION,
-        name: constants.TRASH,
+        name: TRASH_SECTION_NAME,
         type: CollectionSummaryType.trash,
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
