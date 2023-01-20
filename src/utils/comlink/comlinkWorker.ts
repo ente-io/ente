@@ -1,7 +1,7 @@
 import { Remote, wrap } from 'comlink';
 import { addLocalLog } from 'utils/logging';
 
-export class ComlinkWorker<T extends new () => object> {
+export class ComlinkWorker<T extends new () => InstanceType<T>> {
     public remote: Promise<Remote<InstanceType<T>>>;
     private worker: Worker;
     private name: string;
