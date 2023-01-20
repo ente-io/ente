@@ -710,6 +710,11 @@
   resolved "https://registry.npmjs.org/@types/debounce-promise/-/debounce-promise-3.1.4.tgz"
   integrity sha512-9SEVY3nsz+uMN2DwDocftB5TAgZe7D0cOzxxRhpotWs6T4QFqRaTXpXbOSzbk31/7iYcfCkJJPwWGzTxyuGhCg==
 
+"@types/heic-convert@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@types/heic-convert/-/heic-convert-1.2.0.tgz#6870676cf8dd95c34c3ca5d84898b9db2ffa47d4"
+  integrity sha512-+BcpzoXYcg29LX7bMwYXHy9cauU/k8FVzJYPl5R8iUN9hONj7QSDTdbZZs5jMNUZClNdMCslylLLGjT/ZnhwKw==
+
 "@types/hoist-non-react-statics@*":
   version "3.3.1"
   resolved "https://registry.npmjs.org/@types/hoist-non-react-statics/-/hoist-non-react-statics-3.3.1.tgz"
