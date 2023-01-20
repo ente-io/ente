@@ -20,7 +20,7 @@ import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
-import { Box } from '@mui/system';
+import { HorizontalFlex } from 'components/Container';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -190,7 +190,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const confirmDownloadCollection = () => {
         setDialogMessage({
-            title: constants.CONFIRM_DOWNLOAD_COLLECTION,
+            title: constants.DOWNLOAD_COLLECTION,
             content: constants.DOWNLOAD_COLLECTION_MESSAGE(),
             proceed: {
                 text: constants.DOWNLOAD,
@@ -234,7 +234,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     return (
-        <Box sx={{ display: 'inline-flex', gap: '16px' }}>
+        <HorizontalFlex sx={{ display: 'inline-flex', gap: '16px' }}>
             <QuickOptions
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
@@ -265,7 +265,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     )}
                 </OverflowMenu>
             )}
-        </Box>
+        </HorizontalFlex>
     );
 };
 

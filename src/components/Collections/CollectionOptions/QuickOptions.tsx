@@ -52,7 +52,7 @@ export function QuickOptions({
                         collectionSummaryType ===
                         CollectionSummaryType.favorites
                             ? constants.DOWNLOAD_FAVOURITES
-                            : constants.CONFIRM_DOWNLOAD_COLLECTION
+                            : constants.DOWNLOAD_COLLECTION
                     }>
                     <IconButton>
                         <FileDownloadOutlinedIcon

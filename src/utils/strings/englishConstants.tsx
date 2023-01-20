@@ -380,7 +380,7 @@ const englishConstants = {
         `Oops, you're already sharing this with ${email}`,
     SHARING_BAD_REQUEST_ERROR: 'Sharing album not allowed',
     SHARING_DISABLED_FOR_FREE_ACCOUNTS: 'Sharing is disabled for free accounts',
-    CONFIRM_DOWNLOAD_COLLECTION: 'Download album',
+    DOWNLOAD_COLLECTION: 'Download album',
     DOWNLOAD_COLLECTION_MESSAGE: () => (
         <>
             <p>Are you sure you want to download the complete album?</p>
