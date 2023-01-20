@@ -61,7 +61,6 @@ export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
 export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
-    CollectionSummaryType.favorites,
 ]);
 
 export const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([

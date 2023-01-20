@@ -202,7 +202,7 @@ export default function PublicCollectionGallery() {
                         />
                     </CollectionInfoBarWrapper>
                 ),
-                itemType: ITEM_TYPE.OTHER,
+                itemType: ITEM_TYPE.HEADER,
                 height: 68,
             });
     }, [publicCollection, publicFiles]);
@@ -221,7 +221,7 @@ export default function PublicCollectionGallery() {
                         />
                     </CenteredFlex>
                 ),
-                itemType: ITEM_TYPE.OTHER,
+                itemType: ITEM_TYPE.FOOTER,
                 height: 104,
             });
         } else {

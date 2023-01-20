@@ -34,6 +34,11 @@ class ElectronService {
             return this.electronAPIs.getAppVersion();
         }
     }
+    logRendererProcessMemoryUsage(message: string) {
+        if (this.electronAPIs?.logRendererProcessMemoryUsage) {
+            return this.electronAPIs.logRendererProcessMemoryUsage(message);
+        }
+    }
 }
 
 export default new ElectronService();

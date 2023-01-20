@@ -87,7 +87,7 @@ import FixCreationTime, {
 } from 'components/FixCreationTime';
 import { Collection, CollectionSummaries } from 'types/collection';
 import { EnteFile } from 'types/file';
-import { GalleryContextType, SelectedState } from 'types/gallery';
+import { GalleryContextType, SelectedState, SetFiles } from 'types/gallery';
 import { VISIBILITY_STATE } from 'types/magicMetadata';
 import Collections from 'components/Collections';
 import { GalleryNavbar } from 'components/pages/gallery/Navbar';
@@ -124,12 +124,45 @@ export const GalleryContext = createContext<GalleryContextType>(
     defaultGalleryContext
 );
 
+type FilesFn = EnteFile[] | ((files: EnteFile[]) => EnteFile[]);
+
 export default function Gallery() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [collections, setCollections] = useState<Collection[]>(null);
+    const [files, setFilesOriginal] = useState<EnteFile[]>(null);
 
-    const [files, setFiles] = useState<EnteFile[]>(null);
+    const filesUpdateInProgress = useRef(false);
+    const newerFilesFN = useRef<FilesFn>(null);
+
+    const setFilesOriginalWithReSyncIfRequired: SetFiles = (filesFn) => {
+        setFilesOriginal(filesFn);
+        filesUpdateInProgress.current = false;
+        if (newerFilesFN.current) {
+            const newerFiles = newerFilesFN.current;
+            setTimeout(() => setFiles(newerFiles), 0);
+            newerFilesFN.current = null;
+        }
+    };
+
+    const setFiles: SetFiles = async (filesFn) => {
+        if (filesUpdateInProgress.current) {
+            newerFilesFN.current = filesFn;
+            return;
+        }
+        filesUpdateInProgress.current = true;
+
+        if (!files?.length || files.length < 5000) {
+            setFilesOriginalWithReSyncIfRequired(filesFn);
+        } else {
+            const waitTime = getData(LS_KEYS.WAIT_TIME) ?? 5000;
+            setTimeout(
+                () => setFilesOriginalWithReSyncIfRequired(filesFn),
+                waitTime
+            );
+        }
+    };
+
     const [favItemIds, setFavItemIds] = useState<Set<number>>();
 
     const [isFirstLoad, setIsFirstLoad] = useState(false);
@@ -311,7 +344,7 @@ export default function Gallery() {
                         searchResultSummary={searchResultSummary}
                     />
                 ),
-                itemType: ITEM_TYPE.OTHER,
+                itemType: ITEM_TYPE.HEADER,
             });
         }
     }, [isInSearchMode, searchResultSummary]);
@@ -333,6 +366,7 @@ export default function Gallery() {
             let files = await syncFiles(collections, setFiles);
             const trash = await syncTrash(collections, setFiles, files);
             files = [...files, ...getTrashedFiles(trash)];
+            setFiles(sortFiles(files));
         } catch (e) {
             logError(e, 'syncWithRemote failed');
             switch (e.message) {

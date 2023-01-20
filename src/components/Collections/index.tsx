@@ -93,7 +93,7 @@ export default function Collections(props: Iprops) {
                     }
                 />
             ),
-            itemType: ITEM_TYPE.OTHER,
+            itemType: ITEM_TYPE.HEADER,
             height: 68,
         });
     }, [collectionSummaries, activeCollectionID, isInSearchMode]);
