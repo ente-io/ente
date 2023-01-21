@@ -77,7 +77,7 @@ export interface ElectronAPIs {
         showUpdateDialog: (updateInfo: AppUpdateInfo) => void
     ) => void;
     updateAndRestart: () => void;
-    skipAppVersion: (version: string) => void;
+    skipAppUpdate: (version: string) => void;
     getSentryUserID: () => Promise<string>;
     getAppVersion: () => Promise<string>;
     runFFmpegCmd: (
@@ -85,6 +85,7 @@ export interface ElectronAPIs {
         inputFile: File | ElectronFile,
         outputFileName: string
     ) => Promise<File>;
+    muteUpdateNotification: (version: string) => void;
     generateImageThumbnail: (
         inputFile: File | ElectronFile,
         maxDimension: number,
