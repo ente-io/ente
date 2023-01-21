@@ -130,7 +130,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                           child: Scrollbar(
                             radius: const Radius.circular(2),
                             child: Padding(
-                              padding: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.only(right: 12),
                               child: FutureBuilder(
                                 future: _getCollectionsWithThumbnail(),
                                 builder: (context, snapshot) {
