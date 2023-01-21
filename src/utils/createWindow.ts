@@ -6,6 +6,7 @@ import { PROD_HOST_URL } from '../config';
 import { isPlatform } from './main';
 import { getHideDockIconPreference } from '../services/userPreference';
 import autoLauncher from '../services/autoLauncher';
+import ElectronLog from 'electron-log';
 
 export async function createWindow(): Promise<BrowserWindow> {
     const appImgPath = isDev
@@ -63,6 +64,9 @@ export async function createWindow(): Promise<BrowserWindow> {
         } catch (e) {
             // ignore
         }
+    });
+    mainWindow.webContents.on('render-process-gone', (event, details) => {
+        ElectronLog.log('render-process-gone', details);
     });
     setTimeout(() => {
         try {
