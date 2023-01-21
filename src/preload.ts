@@ -51,7 +51,10 @@ import { fixHotReloadNext12 } from './utils/preload';
 import { isFolder, getDirFiles } from './api/fs';
 import { convertHEIC, generateImageThumbnail } from './api/imageProcessor';
 import { setupLogging } from './utils/logging';
-import { setupRendererProcessStatsLogger } from './utils/processStats';
+import {
+    setupRendererProcessStatsLogger,
+    logRendererProcessMemoryUsage,
+} from './utils/processStats';
 import { runFFmpegCmd } from './api/ffmpeg';
 
 fixHotReloadNext12();
@@ -107,4 +110,5 @@ windowObject['ElectronAPIs'] = {
     runFFmpegCmd,
     muteUpdateNotification,
     generateImageThumbnail,
+    logRendererProcessMemoryUsage,
 };
