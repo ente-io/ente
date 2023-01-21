@@ -147,7 +147,7 @@ const englishConstants = {
     NEXT: 'Next (→)',
     NO_INTERNET_CONNECTION:
         'Please check your internet connection and try again',
-    TITLE: 'ente.io | encrypted photo storage',
+    TITLE: 'ente Photos',
     UPLOAD_FIRST_PHOTO_DESCRIPTION: () => (
         <>
             Preserve your first memory with <strong> ente </strong>
