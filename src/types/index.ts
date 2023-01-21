@@ -57,6 +57,7 @@ export interface SafeStorageStoreType {
 export interface UserPreferencesType {
     hideDockIcon: boolean;
     skipAppVersion: string;
+    muteUpdateNotificationVersion: string;
 }
 
 export interface AppUpdateInfo {

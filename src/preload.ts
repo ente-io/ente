@@ -4,7 +4,8 @@ import {
     sendNotification,
     showOnTray,
     updateAndRestart,
-    skipAppVersion,
+    skipAppUpdate,
+    muteUpdateNotification,
 } from './api/system';
 import {
     showUploadDirsDialog,
@@ -100,9 +101,10 @@ windowObject['ElectronAPIs'] = {
     openLogDirectory,
     registerUpdateEventListener,
     updateAndRestart,
-    skipAppVersion,
+    skipAppUpdate,
     getSentryUserID,
     getAppVersion,
     runFFmpegCmd,
+    muteUpdateNotification,
     generateImageThumbnail,
 };
