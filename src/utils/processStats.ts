@@ -100,6 +100,12 @@ async function logSpikeRendererMemoryUsage() {
         previousRendererProcessMemoryInfo.private,
         previousRendererProcessMemoryInfo.residentSet ?? 0
     );
+
+    ElectronLog.log(
+        'renderer process memory usage',
+        convertBytesToHumanReadable(currentMemoryUsage * 1024)
+    );
+
     const isSpiking =
         currentMemoryUsage - previousMemoryUsage >=
         RENDERER_MEMORY_USAGE_DIFF_IN_KILOBYTES_CONSIDERED_AS_SPIKE;
