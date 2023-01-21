@@ -17,6 +17,8 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/components/album_list_item_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
+import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
@@ -73,6 +75,7 @@ void createCollectionSheet(
     topControl: const SizedBox.shrink(),
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
+    enableDrag: false,
   );
 }
 
@@ -118,43 +121,61 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                   caption: "Create or select album",
                 ),
                 Flexible(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 48),
-                    child: FutureBuilder(
-                      future: _getCollectionsWithThumbnail(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          //Need to show an error on the UI here
-                          return const SizedBox.shrink();
-                        } else if (snapshot.hasData) {
-                          final collectionsWithThumbnail =
-                              snapshot.data as List<CollectionWithThumbnail>;
-                          return ListView.separated(
-                            itemBuilder: (context, index) {
-                              final item = collectionsWithThumbnail[index];
-                              return GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () => _albumListItemOnTap(item),
-                                child: AlbumListItemWidget(
-                                  item: item,
-                                ),
-                              );
-                              // return _buildCollectionItem(
-                              //   collectionsWithThumbnail[index],
-                              // );
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Padding(
+                          // padding: const EdgeInsets.fromLTRB(16, 24, 16, 48),
+                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+                          child: FutureBuilder(
+                            future: _getCollectionsWithThumbnail(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasError) {
+                                //Need to show an error on the UI here
+                                return const SizedBox.shrink();
+                              } else if (snapshot.hasData) {
+                                final collectionsWithThumbnail = snapshot.data
+                                    as List<CollectionWithThumbnail>;
+                                return ListView.separated(
+                                  itemBuilder: (context, index) {
+                                    final item =
+                                        collectionsWithThumbnail[index];
+                                    return GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () => _albumListItemOnTap(item),
+                                      child: AlbumListItemWidget(
+                                        item: item,
+                                      ),
+                                    );
+                                    // return _buildCollectionItem(
+                                    //   collectionsWithThumbnail[index],
+                                    // );
+                                  },
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(
+                                    height: 8,
+                                  ),
+                                  itemCount: collectionsWithThumbnail.length,
+                                  shrinkWrap: true,
+                                );
+                              } else {
+                                return const EnteLoadingWidget();
+                              }
                             },
-                            separatorBuilder: (context, index) =>
-                                const SizedBox(
-                              height: 8,
-                            ),
-                            itemCount: collectionsWithThumbnail.length,
-                            shrinkWrap: true,
-                          );
-                        } else {
-                          return const EnteLoadingWidget();
-                        }
-                      },
-                    ),
+                          ),
+                        ),
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        child: ButtonWidget(
+                          buttonType: ButtonType.secondary,
+                          buttonAction: ButtonAction.cancel,
+                          isInAlert: true,
+                          labelText: "Cancel",
+                        ),
+                      )
+                    ],
                   ),
                 ),
               ],
