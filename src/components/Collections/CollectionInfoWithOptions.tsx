@@ -9,7 +9,9 @@ import { shouldShowOptions } from 'utils/collection';
 import { CollectionSummaryType } from 'constants/collection';
 import Favorite from '@mui/icons-material/FavoriteRounded';
 import Delete from '@mui/icons-material/Delete';
-import { ArchiveOutlined } from '@mui/icons-material';
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
+import PeopleIcon from '@mui/icons-material/People';
+import LinkIcon from '@mui/icons-material/Link';
 
 interface Iprops {
     activeCollection: Collection;
@@ -46,6 +48,12 @@ export default function CollectionInfoWithOptions({
                 return <ArchiveOutlined />;
             case CollectionSummaryType.trash:
                 return <Delete />;
+            case CollectionSummaryType.incomingShare:
+                return <PeopleIcon />;
+            case CollectionSummaryType.outgoingShare:
+                return <PeopleIcon />;
+            case CollectionSummaryType.sharedOnlyViaLink:
+                return <LinkIcon />;
             default:
                 return <></>;
         }

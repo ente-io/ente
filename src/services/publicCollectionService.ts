@@ -1,18 +1,18 @@
 import { getEndpoint } from 'utils/common/apiUtil';
 import localForage from 'utils/storage/localForage';
-import { Collection } from 'types/collection';
+import { Collection, EncryptedCollection } from 'types/collection';
 import HTTPService from './HTTPService';
 import { logError } from 'utils/sentry';
 import { decryptFile, mergeMetadata, sortFiles } from 'utils/file';
-import { EnteFile } from 'types/file';
+import { EncryptedEnteFile, EnteFile } from 'types/file';
 import {
     AbuseReportDetails,
     AbuseReportRequest,
     LocalSavedPublicCollectionFiles,
 } from 'types/publicCollection';
-import CryptoWorker from 'utils/crypto';
 import { REPORT_REASON } from 'constants/publicCollection';
 import { CustomError, parseSharingErrorCodes } from 'utils/error';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const ENDPOINT = getEndpoint();
 const PUBLIC_COLLECTION_FILES_TABLE = 'public-collection-files';
@@ -20,11 +20,28 @@ const PUBLIC_COLLECTIONS_TABLE = 'public-collections';
 
 export const getPublicCollectionUID = (token: string) => `${token}`;
 
-const getPublicCollectionSyncTimeUID = (collectionUID: string) =>
+const getPublicCollectionLastSyncTimeKey = (collectionUID: string) =>
     `public-${collectionUID}-time`;
 
 const getPublicCollectionPasswordKey = (collectionUID: string) =>
     `public-${collectionUID}-passkey`;
+
+const getPublicCollectionUploaderNameKey = (collectionUID: string) =>
+    `public-${collectionUID}-uploaderName`;
+
+export const getPublicCollectionUploaderName = async (collectionUID: string) =>
+    await localForage.getItem<string>(
+        getPublicCollectionUploaderNameKey(collectionUID)
+    );
+
+export const savePublicCollectionUploaderName = async (
+    collectionUID: string,
+    uploaderName: string
+) =>
+    await localForage.setItem(
+        getPublicCollectionUploaderNameKey(collectionUID),
+        uploaderName
+    );
 
 export const getLocalPublicFiles = async (collectionUID: string) => {
     const localSavedPublicCollectionFiles =
@@ -129,15 +146,15 @@ const dedupeCollectionFiles = (
 
 const getPublicCollectionLastSyncTime = async (collectionUID: string) =>
     (await localForage.getItem<number>(
-        getPublicCollectionSyncTimeUID(collectionUID)
+        getPublicCollectionLastSyncTimeKey(collectionUID)
     )) ?? 0;
 
-const setPublicCollectionLastSyncTime = async (
+const savePublicCollectionLastSyncTime = async (
     collectionUID: string,
     time: number
 ) =>
     await localForage.setItem(
-        getPublicCollectionSyncTimeUID(collectionUID),
+        getPublicCollectionLastSyncTimeKey(collectionUID),
         time
     );
 
@@ -191,7 +208,7 @@ export const syncPublicFiles = async (
                 files.push(file);
             }
             await savePublicCollectionFiles(collectionUID, files);
-            await setPublicCollectionLastSyncTime(
+            await savePublicCollectionLastSyncTime(
                 collectionUID,
                 collection.updationTime
             );
@@ -200,7 +217,6 @@ export const syncPublicFiles = async (
             const parsedError = parseSharingErrorCodes(e);
             logError(e, 'failed to sync shared collection files');
             if (parsedError.message === CustomError.TOKEN_EXPIRED) {
-                console.log('invalid token or password');
                 throw e;
             }
         }
@@ -243,11 +259,12 @@ const getPublicFiles = async (
             decryptedFiles = [
                 ...decryptedFiles,
                 ...(await Promise.all(
-                    resp.data.diff.map(async (file: EnteFile) => {
+                    resp.data.diff.map(async (file: EncryptedEnteFile) => {
                         if (!file.isDeleted) {
-                            file = await decryptFile(file, collection.key);
+                            return await decryptFile(file, collection.key);
+                        } else {
+                            return file;
                         }
-                        return file;
                     }) as Promise<EnteFile>[]
                 )),
             ];
@@ -323,14 +340,14 @@ export const verifyPublicCollectionPassword = async (
 };
 
 const decryptCollectionName = async (
-    collection: Collection,
+    collection: EncryptedCollection,
     collectionKey: string
 ) => {
-    const worker = await new CryptoWorker();
+    const cryptoWorker = await ComlinkCryptoWorker.getInstance();
 
     return (collection.name =
         collection.name ||
-        (await worker.decryptToUTF8(
+        (await cryptoWorker.decryptToUTF8(
             collection.encryptedName,
             collection.nameDecryptionNonce,
             collectionKey
@@ -379,7 +396,9 @@ export const removePublicCollectionWithFiles = async (
 
 export const removePublicFiles = async (collectionUID: string) => {
     await localForage.removeItem(getPublicCollectionPasswordKey(collectionUID));
-    await localForage.removeItem(getPublicCollectionSyncTimeUID(collectionUID));
+    await localForage.removeItem(
+        getPublicCollectionLastSyncTimeKey(collectionUID)
+    );
 
     const publicCollectionFiles =
         (await localForage.getItem<LocalSavedPublicCollectionFiles[]>(

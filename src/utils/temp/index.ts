@@ -1,14 +1,14 @@
 const CHARACTERS =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-export function generateTempName(length: number) {
-    let result = '';
+export function generateTempName(length: number, suffix: string) {
+    let tempName = '';
 
     const charactersLength = CHARACTERS.length;
     for (let i = 0; i < length; i++) {
-        result += CHARACTERS.charAt(
+        tempName += CHARACTERS.charAt(
             Math.floor(Math.random() * charactersLength)
         );
     }
-    return result;
+    return `${tempName}-${suffix}`;
 }

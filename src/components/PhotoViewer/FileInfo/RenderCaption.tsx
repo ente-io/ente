@@ -11,9 +11,9 @@ import { SmallLoadingSpinner } from '../styledComponents/SmallLoadingSpinner';
 import * as Yup from 'yup';
 import constants from 'utils/strings/constants';
 import Close from '@mui/icons-material/Close';
-import { Done } from '@mui/icons-material';
+import Done from '@mui/icons-material/Done';
 
-export interface formValues {
+interface formValues {
     caption: string;
 }
 

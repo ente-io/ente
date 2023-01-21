@@ -1,6 +1,11 @@
 import { FILE_TYPE } from 'constants/file';
 import { Collection } from 'types/collection';
-import { fileAttribute } from 'types/file';
+import { B64EncryptionResult, LocalFileAttributes } from 'types/crypto';
+import { FileAttributes } from 'types/file';
+import {
+    EncryptedMagicMetadata,
+    FilePublicMagicMetadata,
+} from 'types/magicMetadata';
 
 export interface DataStream {
     stream: ReadableStream<Uint8Array>;
@@ -9,11 +14,6 @@ export interface DataStream {
 
 export function isDataStream(object: any): object is DataStream {
     return 'stream' in object;
-}
-
-export interface EncryptionResult {
-    file: fileAttribute;
-    key: string;
 }
 
 export interface Metadata {
@@ -89,24 +89,12 @@ export interface FileWithCollection extends UploadAsset {
     collection?: Collection;
     collectionID?: number;
 }
-export interface MetadataAndFileTypeInfo {
-    metadata: Metadata;
-    fileTypeInfo: FileTypeInfo;
-    filePath: string;
-}
 
-export type MetadataAndFileTypeInfoMap = Map<number, MetadataAndFileTypeInfo>;
 export type ParsedMetadataJSONMap = Map<string, ParsedMetadataJSON>;
 
 export interface UploadURL {
     url: string;
     objectKey: string;
-}
-
-export interface B64EncryptionResult {
-    encryptedData: string;
-    key: string;
-    nonce: string;
 }
 
 export interface FileInMemory {
@@ -119,6 +107,7 @@ export interface FileWithMetadata
     extends Omit<FileInMemory, 'hasStaticThumbnail'> {
     metadata: Metadata;
     localID: number;
+    pubMagicMetadata: FilePublicMagicMetadata;
 }
 
 export interface EncryptedFile {
@@ -126,12 +115,18 @@ export interface EncryptedFile {
     fileKey: B64EncryptionResult;
 }
 export interface ProcessedFile {
-    file: fileAttribute;
-    thumbnail: fileAttribute;
-    metadata: fileAttribute;
+    file: LocalFileAttributes<Uint8Array | DataStream>;
+    thumbnail: LocalFileAttributes<Uint8Array>;
+    metadata: LocalFileAttributes<string>;
+    pubMagicMetadata: EncryptedMagicMetadata;
     localID: number;
 }
-export interface BackupedFile extends Omit<ProcessedFile, 'localID'> {}
+export interface BackupedFile {
+    file: FileAttributes;
+    thumbnail: FileAttributes;
+    metadata: FileAttributes;
+    pubMagicMetadata: EncryptedMagicMetadata;
+}
 
 export interface UploadFile extends BackupedFile {
     collectionID: number;
@@ -148,4 +143,11 @@ export interface ParsedExtractedMetadata {
 export interface ImportSuggestion {
     rootFolderName: string;
     hasNestedFolders: boolean;
+    hasRootLevelFileWithFolder: boolean;
+}
+
+export interface PublicUploadProps {
+    token: string;
+    passwordToken: string;
+    accessedThroughSharedURL: boolean;
 }

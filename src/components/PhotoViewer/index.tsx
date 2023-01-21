@@ -9,7 +9,11 @@ import {
 import { EnteFile } from 'types/file';
 import constants from 'utils/strings/constants';
 import exifr from 'exifr';
-import { downloadFile, copyFileToClipboard } from 'utils/file';
+import {
+    downloadFile,
+    copyFileToClipboard,
+    getFileExtension,
+} from 'utils/file';
 import { livePhotoBtnHTML } from 'components/LivePhotoBtn';
 import { logError } from 'utils/sentry';
 
@@ -32,9 +36,10 @@ import ChevronRight from '@mui/icons-material/ChevronRight';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { trashFiles } from 'services/fileService';
 import { getTrashFileMessage } from 'utils/ui';
-import { ChevronLeft, ContentCopy } from '@mui/icons-material';
 import { styled } from '@mui/material';
 import { addLocalLog } from 'utils/logging';
+import ContentCopy from '@mui/icons-material/ContentCopy';
+import ChevronLeft from '@mui/icons-material/ChevronLeft';
 
 interface PhotoswipeFullscreenAPI {
     enter: () => void;
@@ -114,21 +119,17 @@ function PhotoViewer(props: Iprops) {
         }
 
         function handleKeyUp(event: KeyboardEvent) {
-            if (!isOpen) {
+            if (!isOpen || showInfo) {
                 return;
             }
+
             addLocalLog(() => 'Event: ' + event.key);
-            if (event.key === 'i' || event.key === 'I') {
-                if (!showInfo) {
-                    setShowInfo(true);
-                } else {
-                    setShowInfo(false);
-                }
-            }
-            if (showInfo) {
-                return;
-            }
+
             switch (event.key) {
+                case 'i':
+                case 'I':
+                    setShowInfo(true);
+                    break;
                 case 'Backspace':
                 case 'Delete':
                     confirmTrashFile(photoSwipe?.currItem as EnteFile);
@@ -240,7 +241,6 @@ function PhotoViewer(props: Iprops) {
 
     useEffect(() => {
         exifCopy.current = exif;
-        console.log(exif);
     }, [exif]);
 
     function updateFavButton(file: EnteFile) {
@@ -294,7 +294,7 @@ function PhotoViewer(props: Iprops) {
             if (callback || event === 'destroy') {
                 photoSwipe.listen(event, function (...args) {
                     if (callback) {
-                        args.unshift(this);
+                        args.unshift(photoSwipe);
                         callback(...args);
                     }
                     if (event === 'destroy') {
@@ -308,6 +308,11 @@ function PhotoViewer(props: Iprops) {
         });
         photoSwipe.listen('beforeChange', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            updateFavButton(currItem);
+            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
+                setExif({ key: currItem.src, value: null });
+                return;
+            }
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
@@ -317,10 +322,13 @@ function PhotoViewer(props: Iprops) {
             }
             setExif({ key: currItem.src, value: undefined });
             checkExifAvailable(currItem);
-            updateFavButton(currItem);
         });
         photoSwipe.listen('resize', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
+                setExif({ key: currItem.src, value: null });
+                return;
+            }
             if (
                 !currItem ||
                 !exifCopy?.current?.value === null ||
@@ -416,16 +424,12 @@ function PhotoViewer(props: Iprops) {
 
     const checkExifAvailable = async (file: EnteFile) => {
         try {
-            console.log('checkExifAvailable', file.src);
             if (exifExtractionInProgress.current === file.src) {
-                console.log('already in process');
                 return;
             }
             try {
                 if (file.isSourceLoaded) {
-                    console.log('starting processing');
                     exifExtractionInProgress.current = file.src;
-                    console.log(file.originalImageURL);
                     const imageBlob = await (
                         await fetch(file.originalImageURL)
                     ).blob();
@@ -433,24 +437,21 @@ function PhotoViewer(props: Iprops) {
                         string,
                         any
                     >;
-                    console.log({ exifData });
-                    console.log(exifExtractionInProgress, file.src);
                     if (exifExtractionInProgress.current === file.src) {
                         if (exifData) {
-                            console.log('set extracted metadata');
                             setExif({ key: file.src, value: exifData });
                         } else {
-                            console.log("doesn't have metadata");
                             setExif({ key: file.src, value: null });
                         }
                     }
                 }
             } finally {
-                console.log('cleared exifExtractionInProgress');
                 exifExtractionInProgress.current = null;
             }
         } catch (e) {
-            logError(e, 'exifr parsing failed');
+            setExif({ key: file.src, value: null });
+            const fileExtension = getFileExtension(file.metadata.title);
+            logError(e, 'exifr parsing failed', { extension: fileExtension });
         }
     };
 
@@ -529,7 +530,7 @@ function PhotoViewer(props: Iprops) {
 
                             <button
                                 className="pswp__button pswp__button--close"
-                                title={constants.CLOSE}
+                                title={constants.CLOSE_OPTION}
                             />
 
                             {props.enableDownload && (

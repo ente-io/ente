@@ -16,6 +16,7 @@ import LoadingBar from 'react-top-loading-bar';
 import DialogBox from 'components/DialogBox';
 import { styled, ThemeProvider } from '@mui/material/styles';
 import darkThemeOptions from 'themes/darkThemeOptions';
+import lightThemeOptions from 'themes/lightThemeOptions';
 import { CssBaseline, useMediaQuery } from '@mui/material';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as types from 'styled-components/cssprop'; // need to css prop on styled component
@@ -44,6 +45,9 @@ import ArrowForward from '@mui/icons-material/ArrowForward';
 import { AppUpdateInfo } from 'types/electron';
 import { getSentryUserID } from 'utils/user';
 import { User } from 'types/user';
+import { SetTheme } from 'types/theme';
+import { useLocalState } from 'hooks/useLocalState';
+import { THEME_COLOR } from 'constants/theme';
 
 export const MessageContainer = styled('div')`
     background-color: #111;
@@ -77,6 +81,8 @@ type AppContextType = {
     watchFolderFiles: FileList;
     setWatchFolderFiles: (files: FileList) => void;
     isMobile: boolean;
+    theme: THEME_COLOR;
+    setTheme: SetTheme;
 };
 
 export enum FLASH_MESSAGE_TYPE {
@@ -119,6 +125,7 @@ export default function App({ Component, err }) {
     const closeNotification = () => setNotificationView(false);
     const [notificationAttributes, setNotificationAttributes] =
         useState<NotificationAttributes>(null);
+    const [theme, setTheme] = useLocalState(LS_KEYS.THEME, THEME_COLOR.DARK);
 
     useEffect(() => {
         HTTPService.getInterceptors().response.use(
@@ -266,7 +273,12 @@ export default function App({ Component, err }) {
                 />
             </Head>
 
-            <ThemeProvider theme={darkThemeOptions}>
+            <ThemeProvider
+                theme={
+                    theme === THEME_COLOR.DARK
+                        ? darkThemeOptions
+                        : lightThemeOptions
+                }>
                 <CssBaseline enableColorScheme />
                 {showNavbar && <AppNavbar />}
                 <MessageContainer>
@@ -325,6 +337,8 @@ export default function App({ Component, err }) {
                         setWatchFolderFiles,
                         isMobile,
                         setNotificationAttributes,
+                        theme,
+                        setTheme,
                     }}>
                     {loading ? (
                         <VerticallyCentered>

@@ -1,5 +1,5 @@
 import { Collection } from 'types/collection';
-import { EnteFile } from 'types/file';
+import { EncryptedEnteFile } from 'types/file';
 import { ElectronFile, FileWithCollection } from 'types/upload';
 import { runningInBrowser } from 'utils/common';
 import { removeFromCollection } from '../collectionService';
@@ -33,7 +33,7 @@ class watchFolderService {
     private trashingDirQueue: string[] = [];
     private isEventRunning: boolean = false;
     private uploadRunning: boolean = false;
-    private filePathToUploadedFileIDMap = new Map<string, EnteFile>();
+    private filePathToUploadedFileIDMap = new Map<string, EncryptedEnteFile>();
     private unUploadableFilePaths = new Set<string>();
     private isPaused = false;
     private setElectronFiles: (files: ElectronFile[]) => void;
@@ -295,10 +295,10 @@ class watchFolderService {
     async onFileUpload(
         fileUploadResult: UPLOAD_RESULT,
         fileWithCollection: FileWithCollection,
-        file: EnteFile
+        file: EncryptedEnteFile
     ) {
         addLocalLog(() => `onFileUpload called`);
-        if (!this.isUploadRunning) {
+        if (!this.isUploadRunning()) {
             return;
         }
         if (

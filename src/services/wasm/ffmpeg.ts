@@ -56,13 +56,15 @@ export class WasmFFmpeg {
         let tempOutputFilePath: string;
         try {
             await this.ready;
-            tempInputFilePath = `${generateTempName(10)}- ${inputFile.name}`;
+            const extension = getFileExtension(inputFile.name);
+            const tempNameSuffix = extension ? `input.${extension}` : 'input';
+            tempInputFilePath = `${generateTempName(10, tempNameSuffix)}`;
             this.ffmpeg.FS(
                 'writeFile',
                 tempInputFilePath,
                 await getUint8ArrayView(inputFile)
             );
-            tempOutputFilePath = `${generateTempName(10)}-${outputFileName}`;
+            tempOutputFilePath = `${generateTempName(10, outputFileName)}`;
 
             cmd = cmd.map((cmdPart) => {
                 if (cmdPart === FFMPEG_PLACEHOLDER) {
@@ -93,5 +95,13 @@ export class WasmFFmpeg {
                 logError(e, 'unlink output file failed');
             }
         }
+    }
+}
+
+function getFileExtension(filename: string) {
+    const lastDotPosition = filename.lastIndexOf('.');
+    if (lastDotPosition === -1) return null;
+    else {
+        return filename.slice(lastDotPosition + 1);
     }
 }

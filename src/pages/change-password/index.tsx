@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { getData, LS_KEYS, setData } from 'utils/storage/localStorage';
 import { useRouter } from 'next/router';
-import CryptoWorker, {
+import {
     saveKeyInSessionStore,
     generateAndSaveIntermediateKeyAttributes,
-    B64EncryptionResult,
 } from 'utils/crypto';
 import { getActualKey } from 'utils/common/key';
 import { setKeys } from 'services/userService';
@@ -14,12 +13,13 @@ import SetPasswordForm, {
 } from 'components/SetPasswordForm';
 import { SESSION_KEYS } from 'utils/storage/sessionStorage';
 import { PAGES } from 'constants/pages';
-import { KEK, UpdatedKey, User } from 'types/user';
+import { KEK, KeyAttributes, UpdatedKey, User } from 'types/user';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import VerticallyCentered from 'components/Container';
 import FormPaper from 'components/Form/FormPaper';
 import FormPaperFooter from 'components/Form/FormPaper/Footer';
 import FormPaperTitle from 'components/Form/FormPaper/Title';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 export default function ChangePassword() {
     const [token, setToken] = useState<string>();
@@ -40,10 +40,10 @@ export default function ChangePassword() {
         passphrase,
         setFieldError
     ) => {
-        const cryptoWorker = await new CryptoWorker();
-        const key: string = await getActualKey();
-        const keyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
-        const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const key = await getActualKey();
+        const keyAttributes: KeyAttributes = getData(LS_KEYS.KEY_ATTRIBUTES);
+        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
         let kek: KEK;
         try {
             kek = await cryptoWorker.deriveSensitiveKey(passphrase, kekSalt);
@@ -51,8 +51,10 @@ export default function ChangePassword() {
             setFieldError('confirm', constants.PASSWORD_GENERATION_FAILED);
             return;
         }
-        const encryptedKeyAttributes: B64EncryptionResult =
-            await cryptoWorker.encryptToB64(key, kek.key);
+        const encryptedKeyAttributes = await cryptoWorker.encryptToB64(
+            key,
+            kek.key
+        );
         const updatedKey: UpdatedKey = {
             kekSalt,
             encryptedKey: encryptedKeyAttributes.encryptedData,

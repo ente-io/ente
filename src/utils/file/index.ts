@@ -1,16 +1,10 @@
 import { SelectedState } from 'types/gallery';
-import {
-    EnteFile,
-    fileAttribute,
-    FileMagicMetadataProps,
-    FilePublicMagicMetadataProps,
-} from 'types/file';
+import { EnteFile, EncryptedEnteFile } from 'types/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
 import { getFileType } from 'services/typeDetectionService';
 import DownloadManager from 'services/downloadManager';
 import { logError } from 'utils/sentry';
 import { User } from 'types/user';
-import CryptoWorker from 'utils/crypto';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { updateFileCreationDateInEXIF } from 'services/upload/exifService';
 import {
@@ -23,12 +17,20 @@ import {
 import PublicCollectionDownloadManager from 'services/publicCollectionDownloadManager';
 import heicConversionService from 'services/heicConversionService';
 import * as ffmpegService from 'services/ffmpeg/ffmpegService';
-import { NEW_FILE_MAGIC_METADATA, VISIBILITY_STATE } from 'types/magicMetadata';
+import {
+    FileMagicMetadata,
+    FileMagicMetadataProps,
+    FilePublicMagicMetadata,
+    FilePublicMagicMetadataProps,
+    NEW_FILE_MAGIC_METADATA,
+    VISIBILITY_STATE,
+} from 'types/magicMetadata';
 import { IsArchived, updateMagicMetadataProps } from 'utils/magicMetadata';
 
 import { addLogLine } from 'utils/logging';
-import { makeHumanReadableStorage } from 'utils/billing';
 import { CustomError } from 'utils/error';
+import { convertBytesToHumanReadable } from './size';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 
 const WAIT_TIME_IMAGE_CONVERSION = 30 * 1000;
 
@@ -191,41 +193,59 @@ export function sortFiles(files: EnteFile[]) {
     return files;
 }
 
-export async function decryptFile(file: EnteFile, collectionKey: string) {
+export async function decryptFile(
+    file: EncryptedEnteFile,
+    collectionKey: string
+): Promise<EnteFile> {
     try {
-        const worker = await new CryptoWorker();
-        file.key = await worker.decryptB64(
-            file.encryptedKey,
-            file.keyDecryptionNonce,
+        const worker = await ComlinkCryptoWorker.getInstance();
+        const {
+            encryptedKey,
+            keyDecryptionNonce,
+            metadata,
+            magicMetadata,
+            pubMagicMetadata,
+            ...restFileProps
+        } = file;
+        const fileKey = await worker.decryptB64(
+            encryptedKey,
+            keyDecryptionNonce,
             collectionKey
         );
-        const encryptedMetadata = file.metadata as unknown as fileAttribute;
-        file.metadata = await worker.decryptMetadata(
-            encryptedMetadata.encryptedData,
-            encryptedMetadata.decryptionHeader,
-            file.key
+        const fileMetadata = await worker.decryptMetadata(
+            metadata.encryptedData,
+            metadata.decryptionHeader,
+            fileKey
         );
-        if (
-            file.magicMetadata?.data &&
-            typeof file.magicMetadata.data === 'string'
-        ) {
-            file.magicMetadata.data = await worker.decryptMetadata(
-                file.magicMetadata.data,
-                file.magicMetadata.header,
-                file.key
-            );
+        let fileMagicMetadata: FileMagicMetadata;
+        let filePubMagicMetadata: FilePublicMagicMetadata;
+        if (magicMetadata?.data) {
+            fileMagicMetadata = {
+                ...file.magicMetadata,
+                data: await worker.decryptMetadata(
+                    magicMetadata.data,
+                    magicMetadata.header,
+                    fileKey
+                ),
+            };
         }
-        if (
-            file.pubMagicMetadata?.data &&
-            typeof file.pubMagicMetadata.data === 'string'
-        ) {
-            file.pubMagicMetadata.data = await worker.decryptMetadata(
-                file.pubMagicMetadata.data,
-                file.pubMagicMetadata.header,
-                file.key
-            );
+        if (pubMagicMetadata?.data) {
+            filePubMagicMetadata = {
+                ...pubMagicMetadata,
+                data: await worker.decryptMetadata(
+                    pubMagicMetadata.data,
+                    pubMagicMetadata.header,
+                    fileKey
+                ),
+            };
         }
-        return file;
+        return {
+            ...restFileProps,
+            key: fileKey,
+            metadata: fileMetadata,
+            magicMetadata: fileMagicMetadata,
+            pubMagicMetadata: filePubMagicMetadata,
+        };
     } catch (e) {
         logError(e, 'file decryption failed');
         throw e;
@@ -300,7 +320,10 @@ export async function getRenderableFileURL(file: EnteFile, fileBlob: Blob) {
             };
         }
         default: {
-            const previewURL = URL.createObjectURL(fileBlob);
+            const previewURL = await createTypedObjectURL(
+                fileBlob,
+                file.metadata.title
+            );
             return {
                 converted: [previewURL],
                 original: [previewURL],
@@ -332,7 +355,7 @@ async function getPlayableVideo(videoNameTitle: string, video: Uint8Array) {
 async function getRenderableImage(fileName: string, imageBlob: Blob) {
     if (await isFileHEIC(imageBlob, fileName)) {
         addLogLine(
-            `HEICConverter called for ${fileName}-${makeHumanReadableStorage(
+            `HEICConverter called for ${fileName}-${convertBytesToHumanReadable(
                 imageBlob.size
             )}`
         );
@@ -477,14 +500,9 @@ export function getUniqueFiles(files: EnteFile[]) {
         }
     });
 }
-export function getNonTrashedUniqueUserFiles(files: EnteFile[]) {
-    const user: User = getData(LS_KEYS.USER) ?? {};
-    return getUniqueFiles(
-        files.filter(
-            (file) =>
-                (typeof file.isTrashed === 'undefined' || !file.isTrashed) &&
-                (!user.id || file.ownerID === user.id)
-        )
+export function getNonTrashedFiles(files: EnteFile[]) {
+    return files.filter(
+        (file) => typeof file.isTrashed === 'undefined' || !file.isTrashed
     );
 }
 

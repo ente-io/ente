@@ -4,7 +4,8 @@ import { GalleryContext } from 'pages/gallery';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import { CollectionSummaries } from 'types/collection';
 import ShortcutButton from './ShortcutButton';
-import { ArchiveOutlined, DeleteOutline } from '@mui/icons-material';
+import DeleteOutline from '@mui/icons-material/DeleteOutline';
+import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;

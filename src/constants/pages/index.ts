@@ -15,7 +15,3 @@ export enum PAGES {
     SHARED_ALBUMS = '/shared-albums',
     DEDUPLICATE = '/deduplicate',
 }
-export const getAlbumSiteHost = () =>
-    process.env.NODE_ENV === 'production'
-        ? 'albums.ente.io'
-        : `${window.location.hostname}:3002`;

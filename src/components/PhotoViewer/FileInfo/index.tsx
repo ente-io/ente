@@ -6,13 +6,7 @@ import { Box, DialogProps, Link, Stack, styled } from '@mui/material';
 import { Location } from 'types/upload';
 import { getEXIFLocation } from 'services/upload/exifService';
 import { RenderCaption } from './RenderCaption';
-import {
-    BackupOutlined,
-    CameraOutlined,
-    FolderOutlined,
-    LocationOnOutlined,
-    TextSnippetOutlined,
-} from '@mui/icons-material';
+
 import CopyButton from 'components/CodeBlock/CopyButton';
 import { formatDate, formatTime } from 'utils/time/format';
 import Titlebar from 'components/Titlebar';
@@ -24,6 +18,11 @@ import { Chip } from 'components/Chip';
 import LinkButton from 'components/pages/gallery/LinkButton';
 import { ExifData } from './ExifData';
 import { EnteDrawer } from 'components/EnteDrawer';
+import CameraOutlined from '@mui/icons-material/CameraOutlined';
+import LocationOnOutlined from '@mui/icons-material/LocationOnOutlined';
+import TextSnippetOutlined from '@mui/icons-material/TextSnippetOutlined';
+import FolderOutlined from '@mui/icons-material/FolderOutlined';
+import BackupOutlined from '@mui/icons-material/BackupOutlined';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />

@@ -19,6 +19,8 @@ export enum LS_KEYS {
     USER_DETAILS = 'userDetails',
     COLLECTION_SORT_BY = 'collectionSortBy',
     THEME = 'theme',
+    WAIT_TIME = 'waitTime',
+    API_ENDPOINT = 'apiEndpoint',
 }
 
 export const setData = (key: LS_KEYS, value: object) => {

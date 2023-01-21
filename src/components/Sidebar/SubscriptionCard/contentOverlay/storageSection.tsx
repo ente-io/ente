@@ -26,21 +26,24 @@ export default function StorageSection({ usage, storage }: Iprops) {
             <Typography variant="body2" color={'text.secondary'}>
                 {constants.STORAGE}
             </Typography>
-
-            <Typography
-                fontWeight={'bold'}
-                sx={{ fontSize: '24px', lineHeight: '30px' }}>
-                <DefaultBox>
+            <DefaultBox>
+                <Typography
+                    fontWeight={'bold'}
+                    sx={{ fontSize: '24px', lineHeight: '30px' }}>
                     {`${makeHumanReadableStorage(usage, 'round-up')} ${
                         constants.OF
                     } ${makeHumanReadableStorage(storage)} ${constants.USED}`}
-                </DefaultBox>
-                <MobileSmallBox>
+                </Typography>
+            </DefaultBox>
+            <MobileSmallBox>
+                <Typography
+                    fontWeight={'bold'}
+                    sx={{ fontSize: '24px', lineHeight: '30px' }}>
                     {`${convertBytesToGBs(usage)} /  ${convertBytesToGBs(
                         storage
                     )} ${constants.GB} ${constants.USED}`}
-                </MobileSmallBox>
-            </Typography>
+                </Typography>
+            </MobileSmallBox>
         </Box>
     );
 }

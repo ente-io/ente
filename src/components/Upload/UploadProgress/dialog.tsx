@@ -10,6 +10,7 @@ import { NotUploadSectionHeader } from './styledComponents';
 import UploadProgressContext from 'contexts/uploadProgress';
 import { dialogCloseHandler } from 'components/DialogBox/TitleWithCloseButton';
 import { APP_DOWNLOAD_URL } from 'utils/common';
+import { ENTE_WEBSITE_LINK } from 'constants/urls';
 
 export function UploadProgressDialog() {
     const { open, onClose, uploadStage, finishedUploads } = useContext(
@@ -26,7 +27,8 @@ export function UploadProgressDialog() {
             finishedUploads.get(UPLOAD_RESULT.LARGER_THAN_AVAILABLE_STORAGE)
                 ?.length > 0 ||
             finishedUploads.get(UPLOAD_RESULT.TOO_LARGE)?.length > 0 ||
-            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0
+            finishedUploads.get(UPLOAD_RESULT.UNSUPPORTED)?.length > 0 ||
+            finishedUploads.get(UPLOAD_RESULT.SKIPPED_VIDEOS)?.length > 0
         ) {
             setHasUnUploadedFiles(true);
         } else {
@@ -83,6 +85,13 @@ export function UploadProgressDialog() {
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.FAILED}
                                 sectionTitle={constants.FAILED_UPLOADS}
+                            />
+                            <ResultSection
+                                uploadResult={UPLOAD_RESULT.SKIPPED_VIDEOS}
+                                sectionTitle={constants.SKIPPED_VIDEOS}
+                                sectionInfo={constants.SKIPPED_VIDEOS_INFO(
+                                    ENTE_WEBSITE_LINK
+                                )}
                             />
                             <ResultSection
                                 uploadResult={UPLOAD_RESULT.ALREADY_UPLOADED}

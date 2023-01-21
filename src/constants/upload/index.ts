@@ -12,6 +12,7 @@ export const FORMAT_MISSED_BY_FILE_TYPE_LIB = [
     { fileType: FILE_TYPE.IMAGE, exactType: 'jpg', mimeType: 'image/jpeg' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'webm', mimeType: 'video/webm' },
     { fileType: FILE_TYPE.VIDEO, exactType: 'mod', mimeType: 'video/mpeg' },
+    { fileType: FILE_TYPE.VIDEO, exactType: 'mp4', mimeType: 'video/mp4' },
 ];
 
 // this is the chunk size of the un-encrypted file which is read and encrypted before uploading it as a single part.
@@ -52,6 +53,7 @@ export enum UPLOAD_RESULT {
     UPLOADED_WITH_STATIC_THUMBNAIL,
     ADDED_SYMLINK,
     CANCELLED,
+    SKIPPED_VIDEOS,
 }
 
 export enum PICKED_UPLOAD_TYPE {
@@ -76,6 +78,7 @@ export const USE_CF_PROXY = false;
 export const DEFAULT_IMPORT_SUGGESTION: ImportSuggestion = {
     rootFolderName: '',
     hasNestedFolders: false,
+    hasRootLevelFileWithFolder: false,
 };
 
 export const BLACK_THUMBNAIL_BASE64 =

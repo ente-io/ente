@@ -26,7 +26,7 @@ module.exports = {
         'style-src': "'self' 'unsafe-inline'",
         'font-src ': "'self'; script-src 'self' 'unsafe-eval' blob:",
         'connect-src':
-            "'self' https://*.ente.io http://localhost:8080 data: blob: https://ente-prod-eu.s3.eu-central-003.backblazeb2.com ",
+            "'self' https://*.ente.io http://localhost:8080 data: blob: https://ente-prod-eu.s3.eu-central-003.backblazeb2.com https://ente-prod-v3.s3.eu-central-2.wasabisys.com/",
         'base-uri ': "'self'",
         // to allow worker
         'child-src': "'self' blob:",

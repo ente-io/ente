@@ -13,7 +13,10 @@ export interface ElectronAPIs {
         oldDirPath: string,
         newDirPath: string
     ) => Promise<void>;
-    saveStreamToDisk: (path: string, fileStream: ReadableStream<any>) => void;
+    saveStreamToDisk: (
+        path: string,
+        fileStream: ReadableStream<any>
+    ) => Promise<void>;
     saveFileToDisk: (path: string, file: any) => Promise<void>;
     selectRootDirectory: () => Promise<string>;
     sendNotification: (content: string) => void;
@@ -83,4 +86,10 @@ export interface ElectronAPIs {
         outputFileName: string
     ) => Promise<File>;
     muteUpdateNotification: (version: string) => void;
+    generateImageThumbnail: (
+        inputFile: File | ElectronFile,
+        maxDimension: number,
+        maxSize: number
+    ) => Promise<Uint8Array>;
+    logRendererProcessMemoryUsage: (message: string) => Promise<void>;
 }

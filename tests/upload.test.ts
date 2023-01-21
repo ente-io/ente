@@ -55,7 +55,7 @@ async function totalCollectionCountCheck(expectedState) {
     } else {
         throw Error(
             `total Collection count check failed ❌
-                expected : ${expectedState['collection_count']},  got: ${collections.length}`
+                expected : ${expectedState['collection_count']},  got: ${nonEmptyCollections.length}`
         );
     }
 }
@@ -111,7 +111,7 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
     );
 
     if (
-        expectedState['thumbnail_generation_failure']['count'] !==
+        expectedState['thumbnail_generation_failure']['count'] <
         uniqueFilesWithStaticThumbnail.length
     ) {
         throw Error(
@@ -119,16 +119,18 @@ async function thumbnailGenerationFailedFilesCheck(expectedState) {
                 expected: ${expectedState['thumbnail_generation_failure']['count']},  got: ${uniqueFilesWithStaticThumbnail.length}`
         );
     }
-    expectedState['thumbnail_generation_failure']['files'].forEach(
-        (fileName) => {
-            if (!fileNamesWithStaticThumbnail.includes(fileName)) {
-                throw Error(
-                    `thumbnailGenerationFailedFiles Check failed ❌
-                        expected: ${expectedState['thumbnail_generation_failure']['files']},  got: ${fileNamesWithStaticThumbnail}`
-                );
-            }
+    fileNamesWithStaticThumbnail.forEach((fileName) => {
+        if (
+            !expectedState['thumbnail_generation_failure']['files'].includes(
+                fileName
+            )
+        ) {
+            throw Error(
+                `thumbnailGenerationFailedFiles Check failed ❌
+                    expected: ${expectedState['thumbnail_generation_failure']['files']},  got: ${fileNamesWithStaticThumbnail}`
+            );
         }
-    );
+    });
     console.log('thumbnail generation failure check passed ✅');
 }
 

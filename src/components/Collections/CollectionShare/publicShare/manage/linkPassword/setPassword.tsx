@@ -3,7 +3,7 @@ import SingleInputForm, {
     SingleInputFormProps,
 } from 'components/SingleInputForm';
 import React from 'react';
-import CryptoWorker from 'utils/crypto';
+import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 import constants from 'utils/strings/constants';
 
 export function PublicLinkSetPassword({
@@ -28,8 +28,8 @@ export function PublicLinkSetPassword({
     };
 
     const enablePublicUrlPassword = async (password: string) => {
-        const cryptoWorker = await new CryptoWorker();
-        const kekSalt: string = await cryptoWorker.generateSaltToDeriveKey();
+        const cryptoWorker = await ComlinkCryptoWorker.getInstance();
+        const kekSalt = await cryptoWorker.generateSaltToDeriveKey();
         const kek = await cryptoWorker.deriveInteractiveKey(password, kekSalt);
 
         return updatePublicShareURLHelper({

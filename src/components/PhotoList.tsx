@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useContext } from 'react';
+import React, { useRef, useEffect, useContext, useState } from 'react';
 import { VariableSizeList as List } from 'react-window';
 import { Box, Link, styled } from '@mui/material';
 import { EnteFile } from 'types/file';
@@ -25,11 +25,15 @@ import { formatDate } from 'utils/time/format';
 
 const A_DAY = 24 * 60 * 60 * 1000;
 const FOOTER_HEIGHT = 90;
+const ALBUM_FOOTER_HEIGHT = 75;
 
 export enum ITEM_TYPE {
     TIME = 'TIME',
     FILE = 'FILE',
     SIZE_AND_COUNT = 'SIZE_AND_COUNT',
+    HEADER = 'HEADER',
+    FOOTER = 'FOOTER',
+    MARKETING_FOOTER = 'MARKETING_FOOTER',
     OTHER = 'OTHER',
 }
 
@@ -128,7 +132,6 @@ const SizeAndCountContainer = styled(DateContainer)`
 `;
 
 const FooterContainer = styled(ListItemContainer)`
-    font-size: 14px;
     margin-bottom: 0.75rem;
     @media (max-width: 540px) {
         font-size: 12px;
@@ -139,6 +142,13 @@ const FooterContainer = styled(ListItemContainer)`
     justify-content: center;
     align-items: flex-end;
     margin-top: calc(2rem + 20px);
+`;
+
+const AlbumFooterContainer = styled(ListItemContainer)`
+    margin-top: 48px;
+    margin-bottom: 10px;
+    text-align: center;
+    justify-content: center;
 `;
 
 const NothingContainer = styled(ListItemContainer)`
@@ -171,16 +181,15 @@ export function PhotoList({
     resetFetching,
 }: Props) {
     const galleryContext = useContext(GalleryContext);
-
-    const timeStampListRef = useRef([]);
-    const timeStampList = timeStampListRef?.current ?? [];
-    const filteredDataCopyRef = useRef([]);
-    const filteredDataCopy = filteredDataCopyRef.current ?? [];
-    const listRef = useRef(null);
     const publicCollectionGalleryContext = useContext(
         PublicCollectionGalleryContext
     );
     const deduplicateContext = useContext(DeduplicateContext);
+
+    const [timeStampList, setTimeStampList] = useState<TimeStampListItem[]>([]);
+    const refreshInProgress = useRef(false);
+    const shouldRefresh = useRef(false);
+    const listRef = useRef(null);
 
     const fittableColumns = getFractionFittableColumns(width);
     let columns = Math.ceil(fittableColumns);
@@ -200,58 +209,134 @@ export function PhotoList({
     };
 
     useEffect(() => {
-        let timeStampList: TimeStampListItem[] = [];
+        const main = () => {
+            if (refreshInProgress.current) {
+                shouldRefresh.current = true;
+                return;
+            }
+            refreshInProgress.current = true;
+            let timeStampList: TimeStampListItem[] = [];
 
-        if (galleryContext.photoListHeader) {
-            timeStampList.push(
-                getPhotoListHeader(galleryContext.photoListHeader)
-            );
-        } else if (publicCollectionGalleryContext.photoListHeader) {
-            timeStampList.push(
-                getPhotoListHeader(
-                    publicCollectionGalleryContext.photoListHeader
-                )
-            );
-        }
-        if (deduplicateContext.isOnDeduplicatePage) {
-            skipMerge = true;
-            groupByFileSize(timeStampList);
-        } else {
-            groupByTime(timeStampList);
-        }
+            if (galleryContext.photoListHeader) {
+                timeStampList.push(
+                    getPhotoListHeader(galleryContext.photoListHeader)
+                );
+            } else if (publicCollectionGalleryContext.photoListHeader) {
+                timeStampList.push(
+                    getPhotoListHeader(
+                        publicCollectionGalleryContext.photoListHeader
+                    )
+                );
+            }
+            if (deduplicateContext.isOnDeduplicatePage) {
+                skipMerge = true;
+                groupByFileSize(timeStampList);
+            } else {
+                groupByTime(timeStampList);
+            }
 
-        if (!skipMerge) {
-            timeStampList = mergeTimeStampList(timeStampList, columns);
-        }
-        if (timeStampList.length === 1) {
-            timeStampList.push(getEmptyListItem());
-        }
-        if (
-            showAppDownloadBanner ||
-            publicCollectionGalleryContext.accessedThroughSharedURL
-        ) {
+            if (!skipMerge) {
+                timeStampList = mergeTimeStampList(timeStampList, columns);
+            }
+            if (timeStampList.length === 1) {
+                timeStampList.push(getEmptyListItem());
+            }
             timeStampList.push(getVacuumItem(timeStampList));
             if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                if (publicCollectionGalleryContext.photoListFooter) {
+                    timeStampList.push(
+                        getPhotoListFooter(
+                            publicCollectionGalleryContext.photoListFooter
+                        )
+                    );
+                }
                 timeStampList.push(getAlbumsFooter());
-            } else {
+            } else if (showAppDownloadBanner) {
                 timeStampList.push(getAppDownloadFooter());
             }
-        }
 
-        timeStampListRef.current = timeStampList;
-        filteredDataCopyRef.current = filteredData;
-        refreshList();
+            setTimeStampList(timeStampList);
+            refreshInProgress.current = false;
+            if (shouldRefresh.current) {
+                shouldRefresh.current = false;
+                setTimeout(main, 0);
+            }
+        };
+        main();
     }, [
         width,
         height,
         filteredData,
-        showAppDownloadBanner,
-        publicCollectionGalleryContext.accessedThroughSharedURL,
-        galleryContext.photoListHeader,
-        publicCollectionGalleryContext.photoListHeader,
         deduplicateContext.isOnDeduplicatePage,
         deduplicateContext.fileSizeMap,
     ]);
+
+    useEffect(() => {
+        setTimeStampList((timeStampList) => {
+            timeStampList = timeStampList ?? [];
+            const hasHeader =
+                timeStampList.length > 0 &&
+                timeStampList[0].itemType === ITEM_TYPE.HEADER;
+
+            if (hasHeader) {
+                return timeStampList;
+            }
+            if (galleryContext.photoListHeader) {
+                return [
+                    getPhotoListHeader(galleryContext.photoListHeader),
+                    ...timeStampList,
+                ];
+            } else if (publicCollectionGalleryContext.photoListHeader) {
+                return [
+                    getPhotoListHeader(
+                        publicCollectionGalleryContext.photoListHeader
+                    ),
+                    ...timeStampList,
+                ];
+            } else {
+                return timeStampList;
+            }
+        });
+    }, [
+        galleryContext.photoListHeader,
+        publicCollectionGalleryContext.photoListHeader,
+    ]);
+
+    useEffect(() => {
+        setTimeStampList((timeStampList) => {
+            timeStampList = timeStampList ?? [];
+            const hasFooter =
+                timeStampList.length > 0 &&
+                timeStampList[timeStampList.length - 1].itemType ===
+                    ITEM_TYPE.MARKETING_FOOTER;
+            if (hasFooter) {
+                return timeStampList;
+            }
+            if (publicCollectionGalleryContext.accessedThroughSharedURL) {
+                if (publicCollectionGalleryContext.photoListFooter) {
+                    return [
+                        ...timeStampList,
+                        getPhotoListFooter(
+                            publicCollectionGalleryContext.photoListFooter
+                        ),
+                        getAlbumsFooter(),
+                    ];
+                }
+            } else if (showAppDownloadBanner) {
+                return [...timeStampList, getAppDownloadFooter()];
+            } else {
+                return timeStampList;
+            }
+        });
+    }, [
+        publicCollectionGalleryContext.accessedThroughSharedURL,
+        showAppDownloadBanner,
+        publicCollectionGalleryContext.photoListFooter,
+    ]);
+
+    useEffect(() => {
+        refreshList();
+    }, [timeStampList]);
 
     const groupByFileSize = (timeStampList: TimeStampListItem[]) => {
         let index = 0;
@@ -295,10 +380,10 @@ export function PhotoList({
 
     const groupByTime = (timeStampList: TimeStampListItem[]) => {
         let listItemIndex = 0;
-        let currentDate = -1;
-
+        let currentDate;
         filteredData.forEach((item, index) => {
             if (
+                !currentDate ||
                 !isSameDay(
                     new Date(item.metadata.creationTime / 1000),
                     new Date(currentDate)
@@ -338,10 +423,13 @@ export function PhotoList({
         });
     };
 
-    const isSameDay = (first, second) =>
-        first.getFullYear() === second.getFullYear() &&
-        first.getMonth() === second.getMonth() &&
-        first.getDate() === second.getDate();
+    const isSameDay = (first, second) => {
+        return (
+            first.getFullYear() === second.getFullYear() &&
+            first.getMonth() === second.getMonth() &&
+            first.getDate() === second.getDate()
+        );
+    };
 
     const getPhotoListHeader = (photoListHeader) => {
         return {
@@ -349,6 +437,17 @@ export function PhotoList({
             item: (
                 <ListItemContainer span={columns}>
                     {photoListHeader.item}
+                </ListItemContainer>
+            ),
+        };
+    };
+
+    const getPhotoListFooter = (photoListFooter) => {
+        return {
+            ...photoListFooter,
+            item: (
+                <ListItemContainer span={columns}>
+                    {photoListFooter.item}
                 </ListItemContainer>
             ),
         };
@@ -367,12 +466,17 @@ export function PhotoList({
         };
     };
     const getVacuumItem = (timeStampList) => {
+        const footerHeight =
+            publicCollectionGalleryContext.accessedThroughSharedURL
+                ? ALBUM_FOOTER_HEIGHT +
+                  (publicCollectionGalleryContext.photoListFooter?.height ?? 0)
+                : FOOTER_HEIGHT;
         const photoFrameHeight = (() => {
             let sum = 0;
             const getCurrentItemSize = getItemSize(timeStampList);
             for (let i = 0; i < timeStampList.length; i++) {
                 sum += getCurrentItemSize(i);
-                if (height - sum <= FOOTER_HEIGHT) {
+                if (height - sum <= footerHeight) {
                     break;
                 }
             }
@@ -381,17 +485,19 @@ export function PhotoList({
         return {
             itemType: ITEM_TYPE.OTHER,
             item: <></>,
-            height: Math.max(height - photoFrameHeight - FOOTER_HEIGHT, 0),
+            height: Math.max(height - photoFrameHeight - footerHeight, 0),
         };
     };
 
     const getAppDownloadFooter = () => {
         return {
-            itemType: ITEM_TYPE.OTHER,
+            itemType: ITEM_TYPE.MARKETING_FOOTER,
             height: FOOTER_HEIGHT,
             item: (
                 <FooterContainer span={columns}>
-                    <Typography>{constants.INSTALL_MOBILE_APP()}</Typography>
+                    <Typography variant="body2">
+                        {constants.INSTALL_MOBILE_APP()}
+                    </Typography>
                 </FooterContainer>
             ),
         };
@@ -399,17 +505,17 @@ export function PhotoList({
 
     const getAlbumsFooter = () => {
         return {
-            itemType: ITEM_TYPE.OTHER,
-            height: FOOTER_HEIGHT,
+            itemType: ITEM_TYPE.MARKETING_FOOTER,
+            height: ALBUM_FOOTER_HEIGHT,
             item: (
-                <FooterContainer span={columns}>
-                    <p>
-                        {constants.PRESERVED_BY}{' '}
+                <AlbumFooterContainer span={columns}>
+                    <Typography variant="body2">
+                        {constants.SHARED_USING}{' '}
                         <Link target="_blank" href={ENTE_WEBSITE_LINK}>
                             {constants.ENTE_IO}
                         </Link>
-                    </p>
-                </FooterContainer>
+                    </Typography>
+                </AlbumFooterContainer>
             ),
         };
     };
@@ -527,14 +633,14 @@ export function PhotoList({
         switch (listItem.itemType) {
             case ITEM_TYPE.TIME:
                 return listItem.dates ? (
-                    listItem.dates.map((item) => (
-                        <>
+                    listItem.dates
+                        .map((item) => [
                             <DateContainer key={item.date} span={item.span}>
                                 {item.date}
-                            </DateContainer>
-                            <div />
-                        </>
-                    ))
+                            </DateContainer>,
+                            <div key={`${item.date}-gap`} />,
+                        ])
+                        .flat()
                 ) : (
                     <DateContainer span={columns}>
                         {listItem.date}
@@ -551,7 +657,7 @@ export function PhotoList({
             case ITEM_TYPE.FILE: {
                 const ret = listItem.items.map((item, idx) =>
                     getThumbnail(
-                        filteredDataCopy,
+                        filteredData,
                         listItem.itemStartIndex + idx,
                         isScrolling
                     )

@@ -1,60 +1,103 @@
+import { getData, LS_KEYS } from 'utils/storage/localStorage';
+import { runningInBrowser } from '.';
+
 export const getEndpoint = () => {
-    const endPoint =
-        process.env.NEXT_PUBLIC_ENTE_ENDPOINT ?? 'https://api.ente.io';
-    return endPoint;
+    let endpoint = getData(LS_KEYS.API_ENDPOINT);
+    if (endpoint) {
+        return endpoint;
+    }
+    endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return endpoint;
+    }
+    return 'https://api.ente.io';
 };
 
 export const getFileURL = (id: number) => {
-    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/download/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return `${endpoint}/files/download/${id}`;
     }
     return `https://files.ente.io/?fileID=${id}`;
 };
 
 export const getPublicCollectionFileURL = (id: number) => {
-    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/download/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return `${endpoint}/public-collection/files/download/${id}`;
     }
     return `https://public-albums.ente.io/download/?fileID=${id}`;
 };
 
 export const getThumbnailURL = (id: number) => {
-    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/files/preview/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return `${endpoint}/files/preview/${id}`;
     }
     return `https://thumbnails.ente.io/?fileID=${id}`;
 };
 
 export const getPublicCollectionThumbnailURL = (id: number) => {
-    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return `${process.env.NEXT_PUBLIC_ENTE_ENDPOINT}/public-collection/files/preview/${id}`;
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return `${endpoint}/public-collection/files/preview/${id}`;
     }
     return `https://public-albums.ente.io/preview/?fileID=${id}`;
+};
+
+export const getUploadEndpoint = () => {
+    const endpoint = process.env.NEXT_PUBLIC_ENTE_ENDPOINT;
+    if (isDevDeployment() && endpoint) {
+        return endpoint;
+    }
+    return `https://uploader.ente.io`;
+};
+
+export const getPaymentsURL = () => {
+    const paymentsURL = process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
+    if (isDevDeployment() && paymentsURL) {
+        return paymentsURL;
+    }
+    return `https://payments.ente.io`;
+};
+
+export const getAlbumsURL = () => {
+    const albumsURL = process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT;
+    if (isDevDeployment() && albumsURL) {
+        return albumsURL;
+    }
+    return `https://albums.ente.io`;
+};
+
+// getFamilyPortalURL returns the endpoint for the family dashboard which can be used to
+// create or manage family.
+export const getFamilyPortalURL = () => {
+    const familyURL = process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT;
+    if (isDevDeployment() && familyURL) {
+        return familyURL;
+    }
+    return `https://family.ente.io`;
 };
 
 export const getSentryTunnelURL = () => {
     return `https://sentry-reporter.ente.io`;
 };
 
-export const getPaymentsURL = () => {
-    if (process.env.NEXT_PUBLIC_ENTE_ENDPOINT !== undefined) {
-        return process.env.NEXT_PUBLIC_ENTE_PAYMENT_ENDPOINT;
+/*
+It's a dev deployment (and should use the environment override for endpoints ) in three cases:
+1. when the URL opened is that of the staging web app, or
+2. when the URL opened is that of the staging album app, or
+3. if the app is running locally (hence node_env is development)
+*/
+const isDevDeployment = () => {
+    if (runningInBrowser()) {
+        return (
+            process.env.NEXT_PUBLIC_ENTE_WEB_ENDPOINT ===
+                window.location.origin ||
+            process.env.NEXT_PUBLIC_ENTE_ALBUM_ENDPOINT ===
+                window.location.origin ||
+            process.env.NEXT_PUBLIC_IS_TEST_APP === 'true' ||
+            process.env.NODE_ENV === 'development'
+        );
     }
-    return `https://payments.ente.io`;
-};
-
-// getFamilyPortalURL returns the endpoint for the family dashboard which can be used to
-// create or manage family.
-export const getFamilyPortalURL = () => {
-    if (process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT !== undefined) {
-        return process.env.NEXT_PUBLIC_ENTE_FAMILY_PORTAL_ENDPOINT;
-    }
-    return `https://family.ente.io`;
-};
-
-export const getUploadEndpoint = () => {
-    if (process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT !== undefined) {
-        return process.env.NEXT_PUBLIC_ENTE_UPLOAD_ENDPOINT;
-    }
-    return `https://uploader.ente.io`;
 };

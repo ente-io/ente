@@ -1,6 +1,6 @@
 import { GalleryContext } from 'pages/gallery';
 import PreviewCard from './pages/gallery/PreviewCard';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EnteFile } from 'types/file';
 import { styled } from '@mui/material';
 import DownloadManager from 'services/downloadManager';
@@ -32,6 +32,7 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { useMemo } from 'react';
 import { Collection } from 'types/collection';
+import { addLogLine } from 'utils/logging';
 
 const Container = styled('div')`
     display: block;
@@ -113,81 +114,112 @@ const PhotoFrame = ({
     const router = useRouter();
     const [isSourceLoaded, setIsSourceLoaded] = useState(false);
 
-    const filteredData = useMemo(() => {
-        const idSet = new Set();
-        const user: User = getData(LS_KEYS.USER);
+    const updateInProgress = useRef(false);
+    const updateRequired = useRef(false);
 
-        return files
-            .map((item, index) => ({
-                ...item,
-                dataIndex: index,
-                w: window.innerWidth,
-                h: window.innerHeight,
-                title: item.pubMagicMetadata?.data.caption,
-            }))
-            .filter((item) => {
-                if (
-                    deletedFileIds?.has(item.id) &&
-                    activeCollection !== TRASH_SECTION
-                ) {
-                    return false;
-                }
-                if (
-                    search?.date &&
-                    !isSameDayAnyYear(search.date)(
-                        new Date(item.metadata.creationTime / 1000)
-                    )
-                ) {
-                    return false;
-                }
-                if (
-                    search?.location &&
-                    !isInsideBox(
-                        {
-                            latitude: item.metadata.latitude,
-                            longitude: item.metadata.longitude,
-                        },
-                        search.location
-                    )
-                ) {
-                    return false;
-                }
-                if (
-                    !isDeduplicating &&
-                    activeCollection === ALL_SECTION &&
-                    (IsArchived(item) ||
-                        archivedCollections?.has(item.collectionID))
-                ) {
-                    return false;
-                }
-                if (activeCollection === ARCHIVE_SECTION && !IsArchived(item)) {
-                    return false;
-                }
+    const [filteredData, setFilteredData] = useState<EnteFile[]>([]);
 
-                if (isSharedFile(user, item) && !isSharedCollection) {
-                    return false;
-                }
-                if (activeCollection === TRASH_SECTION && !item.isTrashed) {
-                    return false;
-                }
-                if (activeCollection !== TRASH_SECTION && item.isTrashed) {
-                    return false;
-                }
-                if (!idSet.has(item.id)) {
+    useEffect(() => {
+        const main = () => {
+            if (updateInProgress.current) {
+                updateRequired.current = true;
+                return;
+            }
+            updateInProgress.current = true;
+            const idSet = new Set();
+            const user: User = getData(LS_KEYS.USER);
+
+            const filteredData = files
+                .map((item, index) => ({
+                    ...item,
+                    dataIndex: index,
+                    w: window.innerWidth,
+                    h: window.innerHeight,
+                    title: item.pubMagicMetadata?.data.caption,
+                }))
+                .filter((item) => {
                     if (
-                        activeCollection === ALL_SECTION ||
-                        activeCollection === ARCHIVE_SECTION ||
-                        activeCollection === TRASH_SECTION ||
-                        activeCollection === item.collectionID
+                        deletedFileIds?.has(item.id) &&
+                        activeCollection !== TRASH_SECTION
                     ) {
-                        idSet.add(item.id);
-                        return true;
+                        return false;
+                    }
+                    if (
+                        search?.date &&
+                        !isSameDayAnyYear(search.date)(
+                            new Date(item.metadata.creationTime / 1000)
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        search?.location &&
+                        !isInsideBox(
+                            {
+                                latitude: item.metadata.latitude,
+                                longitude: item.metadata.longitude,
+                            },
+                            search.location
+                        )
+                    ) {
+                        return false;
+                    }
+                    if (
+                        !isDeduplicating &&
+                        activeCollection === ALL_SECTION &&
+                        (IsArchived(item) ||
+                            archivedCollections?.has(item.collectionID))
+                    ) {
+                        return false;
+                    }
+                    if (
+                        activeCollection === ARCHIVE_SECTION &&
+                        !IsArchived(item)
+                    ) {
+                        return false;
+                    }
+
+                    if (isSharedFile(user, item) && !isSharedCollection) {
+                        return false;
+                    }
+                    if (activeCollection === TRASH_SECTION && !item.isTrashed) {
+                        return false;
+                    }
+                    if (activeCollection !== TRASH_SECTION && item.isTrashed) {
+                        return false;
+                    }
+                    if (!idSet.has(item.id)) {
+                        if (
+                            activeCollection === ALL_SECTION ||
+                            activeCollection === ARCHIVE_SECTION ||
+                            activeCollection === TRASH_SECTION ||
+                            activeCollection === item.collectionID ||
+                            isInSearchMode
+                        ) {
+                            idSet.add(item.id);
+                            return true;
+                        }
+                        return false;
                     }
                     return false;
-                }
-                return false;
-            });
-    }, [files, deletedFileIds, search, activeCollection]);
+                });
+            setFilteredData(filteredData);
+            updateInProgress.current = false;
+            if (updateRequired.current) {
+                updateRequired.current = false;
+                setTimeout(() => {
+                    main();
+                }, 0);
+            }
+        };
+        main();
+    }, [
+        files,
+        deletedFileIds,
+        search?.date,
+        search?.location,
+        activeCollection,
+    ]);
 
     const fileToCollectionsMap = useMemo(() => {
         const fileToCollectionsMap = new Map<number, number[]>();
@@ -493,12 +525,26 @@ const PhotoFrame = ({
         index: number,
         item: EnteFile
     ) => {
+        addLogLine(
+            `[${
+                item.id
+            }] getSlideData called for thumbnail:${!!item.msrc} original:${
+                !!item.msrc && item.src !== item.msrc
+            } inProgress:${fetching[item.id]}`
+        );
         if (!item.msrc) {
+            addLogLine(`[${item.id}] doesn't have thumbnail`);
             try {
                 let url: string;
                 if (galleryContext.thumbs.has(item.id)) {
+                    addLogLine(
+                        `[${item.id}] gallery context cache hit, using cached thumb`
+                    );
                     url = galleryContext.thumbs.get(item.id);
                 } else {
+                    addLogLine(
+                        `[${item.id}] gallery context cache miss, calling downloadManager to get thumb`
+                    );
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
                     ) {
@@ -523,6 +569,9 @@ const PhotoFrame = ({
                 item.w = newFile.w;
                 item.h = newFile.h;
 
+                addLogLine(
+                    `[${item.id}] calling invalidateCurrItems for thumbnail`
+                );
                 try {
                     instance.invalidateCurrItems();
                     if (instance.isOpen()) {
@@ -540,16 +589,23 @@ const PhotoFrame = ({
             }
         }
         if (!fetching[item.id]) {
+            addLogLine(`[${item.id}] new file download fetch original request`);
             try {
                 fetching[item.id] = true;
                 let urls: { original: string[]; converted: string[] };
                 if (galleryContext.files.has(item.id)) {
+                    addLogLine(
+                        `[${item.id}] gallery context cache hit, using cached file`
+                    );
                     const mergedURL = galleryContext.files.get(item.id);
                     urls = {
                         original: mergedURL.original.split(','),
                         converted: mergedURL.converted.split(','),
                     };
                 } else {
+                    addLogLine(
+                        `[${item.id}] gallery context cache miss, calling downloadManager to get file`
+                    );
                     appContext.startLoading();
                     if (
                         publicCollectionGalleryContext.accessedThroughSharedURL
@@ -576,7 +632,8 @@ const PhotoFrame = ({
                 let convertedVideoURL;
 
                 if (item.metadata.fileType === FILE_TYPE.LIVE_PHOTO) {
-                    [originalImageURL, originalVideoURL] = urls.converted;
+                    [originalImageURL, originalVideoURL] = urls.original;
+                    [convertedImageURL, convertedVideoURL] = urls.converted;
                 } else if (item.metadata.fileType === FILE_TYPE.VIDEO) {
                     [originalVideoURL] = urls.original;
                     [convertedVideoURL] = urls.converted;
@@ -600,6 +657,9 @@ const PhotoFrame = ({
                 item.w = newFile.w;
                 item.h = newFile.h;
                 try {
+                    addLogLine(
+                        `[${item.id}] calling invalidateCurrItems for src`
+                    );
                     instance.invalidateCurrItems();
                     if (instance.isOpen()) {
                         instance.updateSize(true);
@@ -609,13 +669,12 @@ const PhotoFrame = ({
                         e,
                         'updating photoswipe after src url update failed'
                     );
-                    // ignore
+                    throw e;
                 }
             } catch (e) {
                 logError(e, 'getSlideData failed get src url failed');
-                // no-op
-            } finally {
                 fetching[item.id] = false;
+                // no-op
             }
         }
     };
