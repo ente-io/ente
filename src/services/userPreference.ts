@@ -11,6 +11,15 @@ export function setHideDockIconPreference(shouldHideDockIcon: boolean) {
 export function getSkipAppVersion() {
     return userPreferencesStore.get('skipAppVersion');
 }
+
 export function setSkipAppVersion(version: string) {
     userPreferencesStore.set('skipAppVersion', version);
+}
+
+export function getMuteUpdateNotificationVersion() {
+    return userPreferencesStore.get('muteUpdateNotificationVersion');
+}
+
+export function setMuteUpdateNotificationVersion(version: string) {
+    userPreferencesStore.set('muteUpdateNotificationVersion', version);
 }

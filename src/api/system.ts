@@ -24,6 +24,10 @@ export const updateAndRestart = () => {
     ipcRenderer.send('update-and-restart');
 };
 
-export const skipAppVersion = (version: string) => {
-    ipcRenderer.send('skip-app-version', version);
+export const skipAppUpdate = (version: string) => {
+    ipcRenderer.send('skip-app-update', version);
+};
+
+export const muteUpdateNotification = (version: string) => {
+    ipcRenderer.send('mute-update-notification', version);
 };

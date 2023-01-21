@@ -20,7 +20,8 @@ import {
 } from '../services/imageProcessor';
 import {
     getAppVersion,
-    skipAppVersion,
+    muteUpdateNotification,
+    skipAppUpdate,
     updateAndRestart,
 } from '../services/appUpdater';
 import { deleteTempFile, runFFmpegCmd } from '../services/ffmpeg';
@@ -120,8 +121,12 @@ export default function setupIpcComs(
     ipcMain.on('update-and-restart', () => {
         updateAndRestart();
     });
-    ipcMain.on('skip-app-version', (_, version) => {
-        skipAppVersion(version);
+    ipcMain.on('skip-app-update', (_, version) => {
+        skipAppUpdate(version);
+    });
+
+    ipcMain.on('mute-update-notification', (_, version) => {
+        muteUpdateNotification(version);
     });
     ipcMain.handle('get-sentry-id', () => {
         return getSentryUserID();
