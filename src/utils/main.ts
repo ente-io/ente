@@ -18,9 +18,13 @@ export function handleUpdates(mainWindow: BrowserWindow) {
     }
 }
 export function setupTrayItem(mainWindow: BrowserWindow) {
-    const trayImgPath = isDev
-        ? 'build/taskbar-icon.png'
-        : path.join(process.resourcesPath, 'taskbar-icon.png');
+    const iconName = isPlatform('mac')
+        ? 'taskbar-icon-Template.png'
+        : 'taskbar-icon.png';
+    const trayImgPath = path.join(
+        isDev ? 'build' : process.resourcesPath,
+        iconName
+    );
     const trayIcon = nativeImage.createFromPath(trayImgPath);
     const tray = new Tray(trayIcon);
     tray.setToolTip('ente');
@@ -80,19 +84,23 @@ export function setupNextElectronServe() {
     });
 }
 
-export function isPlatformMac() {
-    return process.platform === 'darwin';
-}
-
-export function isPlatformWindows() {
-    return process.platform === 'win32';
+export function isPlatform(platform: 'mac' | 'windows' | 'linux') {
+    if (process.platform === 'darwin') {
+        return platform === 'mac';
+    } else if (process.platform === 'win32') {
+        return platform === 'windows';
+    } else if (process.platform === 'linux') {
+        return platform === 'linux';
+    } else {
+        return false;
+    }
 }
 
 export async function handleDockIconHideOnAutoLaunch() {
     const shouldHideDockIcon = getHideDockIconPreference();
     const wasAutoLaunched = await autoLauncher.wasAutoLaunched();
 
-    if (isPlatformMac() && shouldHideDockIcon && wasAutoLaunched) {
+    if (isPlatform('mac') && shouldHideDockIcon && wasAutoLaunched) {
         app.dock.hide();
     }
 }

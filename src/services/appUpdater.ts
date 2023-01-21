@@ -10,9 +10,9 @@ import {
     setSkipAppVersion,
 } from './userPreference';
 import fetch from 'node-fetch';
-import { isPlatformMac } from '../utils/main';
 import { logErrorSentry } from './sentry';
 import ElectronLog from 'electron-log';
+import { isPlatform } from '../utils/main';
 
 const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
 const ONE_DAY_IN_MICROSECOND = 1 * 24 * 60 * 60 * 1000;
@@ -53,7 +53,7 @@ async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
         const desktopCutoffVersion = await getDesktopCutoffVersion();
         if (
             desktopCutoffVersion &&
-            isPlatformMac() &&
+            isPlatform('mac') &&
             semVerCmp(
                 updateCheckResult.updateInfo.version,
                 desktopCutoffVersion
