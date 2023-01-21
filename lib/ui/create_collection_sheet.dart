@@ -142,8 +142,17 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                         .data as List<CollectionWithThumbnail>;
                                     return ListView.separated(
                                       itemBuilder: (context, index) {
+                                        if (index == 0) {
+                                          return GestureDetector(
+                                            onTap: () {},
+                                            behavior: HitTestBehavior.opaque,
+                                            child: const AlbumListItemWidget(
+                                              isNew: true,
+                                            ),
+                                          );
+                                        }
                                         final item =
-                                            collectionsWithThumbnail[index];
+                                            collectionsWithThumbnail[index - 1];
                                         return GestureDetector(
                                           behavior: HitTestBehavior.opaque,
                                           onTap: () =>
@@ -161,7 +170,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                         height: 8,
                                       ),
                                       itemCount:
-                                          collectionsWithThumbnail.length,
+                                          collectionsWithThumbnail.length + 1,
                                       shrinkWrap: true,
                                       physics: const BouncingScrollPhysics(),
                                     );
