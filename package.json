@@ -10,11 +10,7 @@
     "artifactName": "${productName}-${version}.${ext}",
     "linux": {
       "target": [
-        "AppImage",
-        "deb",
-        "rpm",
-        "pacman",
-        "tar.gz"
+        "AppImage"
       ],
       "icon": "./build/icon.icns",
       "category": "Photography"
