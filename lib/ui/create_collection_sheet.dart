@@ -126,43 +126,50 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                     children: [
                       Flexible(
                         child: Padding(
-                          // padding: const EdgeInsets.fromLTRB(16, 24, 16, 48),
-                          padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
-                          child: FutureBuilder(
-                            future: _getCollectionsWithThumbnail(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                //Need to show an error on the UI here
-                                return const SizedBox.shrink();
-                              } else if (snapshot.hasData) {
-                                final collectionsWithThumbnail = snapshot.data
-                                    as List<CollectionWithThumbnail>;
-                                return ListView.separated(
-                                  itemBuilder: (context, index) {
-                                    final item =
-                                        collectionsWithThumbnail[index];
-                                    return GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: () => _albumListItemOnTap(item),
-                                      child: AlbumListItemWidget(
-                                        item: item,
+                          padding: const EdgeInsets.fromLTRB(16, 24, 4, 0),
+                          child: Scrollbar(
+                            radius: const Radius.circular(2),
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: FutureBuilder(
+                                future: _getCollectionsWithThumbnail(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasError) {
+                                    //Need to show an error on the UI here
+                                    return const SizedBox.shrink();
+                                  } else if (snapshot.hasData) {
+                                    final collectionsWithThumbnail = snapshot
+                                        .data as List<CollectionWithThumbnail>;
+                                    return ListView.separated(
+                                      itemBuilder: (context, index) {
+                                        final item =
+                                            collectionsWithThumbnail[index];
+                                        return GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: () =>
+                                              _albumListItemOnTap(item),
+                                          child: AlbumListItemWidget(
+                                            item: item,
+                                          ),
+                                        );
+                                        // return _buildCollectionItem(
+                                        //   collectionsWithThumbnail[index],
+                                        // );
+                                      },
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(
+                                        height: 8,
                                       ),
+                                      itemCount:
+                                          collectionsWithThumbnail.length,
+                                      shrinkWrap: true,
                                     );
-                                    // return _buildCollectionItem(
-                                    //   collectionsWithThumbnail[index],
-                                    // );
-                                  },
-                                  separatorBuilder: (context, index) =>
-                                      const SizedBox(
-                                    height: 8,
-                                  ),
-                                  itemCount: collectionsWithThumbnail.length,
-                                  shrinkWrap: true,
-                                );
-                              } else {
-                                return const EnteLoadingWidget();
-                              }
-                            },
+                                  } else {
+                                    return const EnteLoadingWidget();
+                                  }
+                                },
+                              ),
+                            ),
                           ),
                         ),
                       ),
