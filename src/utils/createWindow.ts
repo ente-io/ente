@@ -66,8 +66,15 @@ export async function createWindow(): Promise<BrowserWindow> {
         }
     });
     mainWindow.webContents.on('render-process-gone', (event, details) => {
-        ElectronLog.log('render-process-gone', details);
+        ElectronLog.log('webContents event render-process-gone', details);
     });
+    mainWindow.webContents.on('destroyed', () => {
+        ElectronLog.log('webContents event destroyed');
+    });
+    mainWindow.webContents.on('unresponsive', () => {
+        ElectronLog.log('webContents event unresponsive');
+    });
+
     setTimeout(() => {
         try {
             splash.destroy();
