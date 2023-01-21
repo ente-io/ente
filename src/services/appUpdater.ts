@@ -4,20 +4,30 @@ import log from 'electron-log';
 import { setIsAppQuitting, setIsUpdateAvailable } from '../main';
 import semVerCmp from 'semver-compare';
 import { AppUpdateInfo, GetFeatureFlagResponse } from '../types';
-import { getSkipAppVersion, setSkipAppVersion } from './userPreference';
+import {
+    getSkipAppVersion,
+    setMuteUpdateNotificationVersion,
+    setSkipAppVersion,
+} from './userPreference';
 import fetch from 'node-fetch';
 import { logErrorSentry } from './sentry';
 import ElectronLog from 'electron-log';
 import { isPlatform } from '../utils/main';
 
 const FIVE_MIN_IN_MICROSECOND = 5 * 60 * 1000;
+const ONE_DAY_IN_MICROSECOND = 1 * 24 * 60 * 60 * 1000;
 
-export function setupAutoUpdater() {
+export function setupAutoUpdater(mainWindow: BrowserWindow) {
     autoUpdater.logger = log;
     autoUpdater.autoDownload = false;
+    checkForUpdateAndNotify(mainWindow);
+    setInterval(
+        () => checkForUpdateAndNotify(mainWindow),
+        ONE_DAY_IN_MICROSECOND
+    );
 }
 
-export async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
+async function checkForUpdateAndNotify(mainWindow: BrowserWindow) {
     try {
         log.debug('checkForUpdateAndNotify called');
         const updateCheckResult = await autoUpdater.checkForUpdates();
@@ -93,8 +103,12 @@ export function getAppVersion() {
     return `v${app.getVersion()}`;
 }
 
-export function skipAppVersion(version: string) {
+export function skipAppUpdate(version: string) {
     setSkipAppVersion(version);
+}
+
+export function muteUpdateNotification(version: string) {
+    setMuteUpdateNotificationVersion(version);
 }
 
 async function getDesktopCutoffVersion() {
