@@ -163,6 +163,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                       itemCount:
                                           collectionsWithThumbnail.length,
                                       shrinkWrap: true,
+                                      physics: const BouncingScrollPhysics(),
                                     );
                                   } else {
                                     return const EnteLoadingWidget();
