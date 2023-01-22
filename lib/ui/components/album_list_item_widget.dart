@@ -8,10 +8,10 @@ import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
 import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 class AlbumListItemWidget extends StatelessWidget {
-  final CollectionWithThumbnail item;
+  final CollectionWithThumbnail? item;
   final bool isNew;
   const AlbumListItemWidget({
-    required this.item,
+    this.item,
     this.isNew = false,
     super.key,
   });
@@ -36,15 +36,15 @@ class AlbumListItemWidget extends StatelessWidget {
                   child: SizedBox(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
-                    key: Key("collection_item:" + (item.thumbnail?.tag ?? "")),
+                    key: Key("collection_item:" + (item?.thumbnail?.tag ?? "")),
                     child: isNew
                         ? Icon(
                             Icons.add_outlined,
                             color: colorScheme.strokeMuted,
                           )
-                        : item.thumbnail != null
+                        : item?.thumbnail != null
                             ? ThumbnailWidget(
-                                item.thumbnail,
+                                item!.thumbnail,
                                 showFavForAlbumOnly: true,
                               )
                             : const NoThumbnailWidget(),
@@ -61,36 +61,40 @@ class AlbumListItemWidget extends StatelessWidget {
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(item.collection.collectionName),
-                            FutureBuilder<int>(
-                              future: FilesDB.instance
-                                  .collectionFileCount(item.collection.id),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  final text = snapshot.data == 1
-                                      ? " memory"
-                                      : " memories";
-                                  return Text(
-                                    snapshot.data.toString() + text,
-                                    style: textTheme.small.copyWith(
-                                      color: colorScheme.textMuted,
+                            Text(item?.collection.collectionName ?? ""),
+                            item != null
+                                ? FutureBuilder<int>(
+                                    future:
+                                        FilesDB.instance.collectionFileCount(
+                                      item!.collection.id,
                                     ),
-                                  );
-                                } else {
-                                  if (snapshot.hasError) {
-                                    logger.severe(
-                                      "Failed to fetch file count of collection id ${item.collection.id}",
-                                    );
-                                  }
-                                  return Text(
-                                    "",
-                                    style: textTheme.small.copyWith(
-                                      color: colorScheme.textMuted,
-                                    ),
-                                  );
-                                }
-                              },
-                            ),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        final text = snapshot.data == 1
+                                            ? " memory"
+                                            : " memories";
+                                        return Text(
+                                          snapshot.data.toString() + text,
+                                          style: textTheme.small.copyWith(
+                                            color: colorScheme.textMuted,
+                                          ),
+                                        );
+                                      } else {
+                                        if (snapshot.hasError) {
+                                          logger.severe(
+                                            "Failed to fetch file count of collection id ${item!.collection.id}",
+                                          );
+                                        }
+                                        return Text(
+                                          "",
+                                          style: textTheme.small.copyWith(
+                                            color: colorScheme.textMuted,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  )
+                                : throw "CollectionWithThumbnail item cannot be null",
                           ],
                         ),
                 ),
