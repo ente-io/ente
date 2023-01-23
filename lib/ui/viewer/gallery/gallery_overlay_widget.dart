@@ -17,6 +17,8 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/create_collection_sheet.dart'
+    as create_collection_sheet;
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -464,16 +466,12 @@ class _OverlayWidgetState extends State<OverlayWidget> {
             Icons.restore,
           ),
           onPressed: () {
-            Navigator.push(
+            create_collection_sheet.createCollectionSheet(
+              widget.selectedFiles,
+              null,
               context,
-              PageTransition(
-                type: PageTransitionType.bottomToTop,
-                child: CreateCollectionPage(
-                  widget.selectedFiles,
-                  null,
-                  actionType: CollectionActionType.restoreFiles,
-                ),
-              ),
+              actionType:
+                  create_collection_sheet.CollectionActionType.restoreFiles,
             );
           },
         ),
