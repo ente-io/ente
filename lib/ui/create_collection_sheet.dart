@@ -110,7 +110,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
             maxWidth: min(428, MediaQuery.of(context).size.width),
           ),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 32, 0, 12),
+            padding: const EdgeInsets.fromLTRB(0, 32, 0, 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -185,13 +185,15 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                           ),
                         ),
                       ),
-                      const Padding(
-                        padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-                        child: ButtonWidget(
-                          buttonType: ButtonType.secondary,
-                          buttonAction: ButtonAction.cancel,
-                          isInAlert: true,
-                          labelText: "Cancel",
+                      const SafeArea(
+                        child: Padding(
+                          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                          child: ButtonWidget(
+                            buttonType: ButtonType.secondary,
+                            buttonAction: ButtonAction.cancel,
+                            isInAlert: true,
+                            labelText: "Cancel",
+                          ),
                         ),
                       )
                     ],
