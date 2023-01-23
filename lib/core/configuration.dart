@@ -30,6 +30,7 @@ import 'package:photos/services/memories_service.dart';
 import 'package:photos/services/search_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/utils/crypto_util.dart';
+import 'package:photos/utils/file_uploader.dart';
 import 'package:photos/utils/validator_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -162,6 +163,7 @@ class Configuration {
     await UploadLocksDB.instance.clearTable();
     await IgnoredFilesService.instance.reset();
     await TrashDB.instance.clearTable();
+    FileUploader.instance.clearCachedUploadURLs();
     if (!autoLogout) {
       CollectionsService.instance.clearCache();
       FavoritesService.instance.clearCache();

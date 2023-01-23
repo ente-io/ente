@@ -176,6 +176,10 @@ class FileUploader {
     _totalCountInUploadSession = 0;
   }
 
+  void clearCachedUploadURLs() {
+    _uploadURLs.clear();
+  }
+
   void removeFromQueueWhere(final bool Function(File) fn, final Error reason) {
     final List<String> uploadsToBeRemoved = [];
     _queue.entries
