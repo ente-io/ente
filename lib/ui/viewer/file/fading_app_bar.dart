@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:like_button/like_button.dart';
 import 'package:logging/logging.dart';
 import 'package:media_extension/media_extension.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:path/path.dart' as file_path;
 import 'package:photo_manager/photo_manager.dart';
 import 'package:photos/core/event_bus.dart';
@@ -26,7 +25,8 @@ import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/create_collection_sheet.dart'
+    as create_collection_sheet;
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -272,16 +272,12 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _handleUnHideRequest(BuildContext context) async {
     final s = SelectedFiles();
     s.files.add(widget.file);
-    Navigator.push(
+    Navigator.pop(context);
+    create_collection_sheet.createCollectionSheet(
+      s,
+      null,
       context,
-      PageTransition(
-        type: PageTransitionType.bottomToTop,
-        child: CreateCollectionPage(
-          s,
-          null,
-          actionType: CollectionActionType.unHide,
-        ),
-      ),
+      actionType: create_collection_sheet.CollectionActionType.unHide,
     );
   }
 

@@ -1,7 +1,6 @@
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
@@ -19,7 +18,6 @@ import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/create_collection_sheet.dart'
     as create_collection_sheet;
 import 'package:photos/ui/sharing/manage_links_widget.dart';
@@ -256,7 +254,12 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await _selectionCollectionForAction(CollectionActionType.moveFiles);
+    create_collection_sheet.createCollectionSheet(
+      widget.selectedFiles,
+      null,
+      context,
+      actionType: create_collection_sheet.CollectionActionType.moveFiles,
+    );
   }
 
   Future<void> _addToAlbum() async {
@@ -264,7 +267,6 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    // await _selectionCollectionForAction(CollectionActionType.addFiles);
     create_collection_sheet.createCollectionSheet(
       widget.selectedFiles,
       null,
@@ -345,7 +347,12 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await _selectionCollectionForAction(CollectionActionType.unHide);
+    create_collection_sheet.createCollectionSheet(
+      widget.selectedFiles,
+      null,
+      context,
+      actionType: create_collection_sheet.CollectionActionType.unHide,
+    );
   }
 
   Future<void> _onCreatedSharedLinkClicked() async {
@@ -412,21 +419,5 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       await Clipboard.setData(ClipboardData(text: url));
       showShortToast(context, "Link copied to clipboard");
     }
-  }
-
-  Future<Object?> _selectionCollectionForAction(
-    CollectionActionType type,
-  ) async {
-    return Navigator.push(
-      context,
-      PageTransition(
-        type: PageTransitionType.bottomToTop,
-        child: CreateCollectionPage(
-          widget.selectedFiles,
-          null,
-          actionType: type,
-        ),
-      ),
-    );
   }
 }
