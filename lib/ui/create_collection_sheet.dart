@@ -144,7 +144,9 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                       itemBuilder: (context, index) {
                                         if (index == 0) {
                                           return GestureDetector(
-                                            onTap: () {},
+                                            onTap: () {
+                                              _showNameAlbumDialog();
+                                            },
                                             behavior: HitTestBehavior.opaque,
                                             child: const AlbumListItemWidget(
                                               isNew: true,
@@ -203,6 +205,80 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     );
   }
 
+  void _showNameAlbumDialog() async {
+    String? albumName;
+    final AlertDialog alert = AlertDialog(
+      title: const Text("Album title"),
+      content: TextFormField(
+        decoration: const InputDecoration(
+          hintText: "Christmas 2020 / Dinner at Alice's",
+          contentPadding: EdgeInsets.all(8),
+        ),
+        onChanged: (value) {
+          albumName = value;
+        },
+        autofocus: true,
+        keyboardType: TextInputType.text,
+        textCapitalization: TextCapitalization.words,
+      ),
+      actions: [
+        TextButton(
+          child: Text(
+            "Ok",
+            style: TextStyle(
+              color: getEnteColorScheme(context).primary500,
+            ),
+          ),
+          onPressed: () async {
+            if (albumName != null && albumName!.isNotEmpty) {
+              Navigator.of(context, rootNavigator: true).pop('dialog');
+              final collection = await _createAlbum(albumName!);
+              if (collection != null) {
+                if (await _runCollectionAction(collection.id)) {
+                  if (widget.actionType == CollectionActionType.restoreFiles) {
+                    showShortToast(
+                      context,
+                      'Restored files to album ' + albumName!,
+                    );
+                  } else {
+                    showShortToast(
+                      context,
+                      "Album '" + albumName! + "' created.",
+                    );
+                  }
+                  _navigateToCollection(collection);
+                }
+              }
+            }
+          },
+        ),
+      ],
+    );
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  Future<Collection?> _createAlbum(String albumName) async {
+    Collection? collection;
+    final dialog = createProgressDialog(context, "Creating album...");
+    await dialog.show();
+    try {
+      collection = await CollectionsService.instance.createAlbum(albumName);
+    } catch (e, s) {
+      _logger.severe(e, s);
+      await dialog.hide();
+      showGenericErrorDialog(context: context);
+    } finally {
+      await dialog.hide();
+    }
+    return collection;
+  }
+
   Future<void> _albumListItemOnTap(CollectionWithThumbnail item) async {
     if (await _runCollectionAction(
       item.collection.id,
@@ -214,7 +290,6 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
             : "Moved successfully to " + item.collection.name!,
       );
       _navigateToCollection(
-        context,
         item.collection,
       );
     }
@@ -260,7 +335,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                   ? "Added successfully to " + item.collection.name!
                   : "Moved successfully to " + item.collection.name!,
             );
-            _navigateToCollection(context, item.collection);
+            _navigateToCollection(item.collection);
           }
         },
       ),
@@ -289,7 +364,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     return collectionsWithThumbnail;
   }
 
-  void _navigateToCollection(BuildContext context, Collection collection) {
+  void _navigateToCollection(Collection collection) {
     Navigator.pop(context);
     routeToPage(
       context,
