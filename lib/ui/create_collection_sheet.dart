@@ -20,8 +20,6 @@ import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
-import 'package:photos/ui/viewer/file/no_thumbnail_widget.dart';
-import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
 import 'package:photos/utils/navigation_util.dart';
@@ -163,9 +161,6 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                             item: item,
                                           ),
                                         );
-                                        // return _buildCollectionItem(
-                                        //   collectionsWithThumbnail[index],
-                                        // );
                                       },
                                       separatorBuilder: (context, index) =>
                                           const SizedBox(
@@ -295,53 +290,6 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
         item.collection,
       );
     }
-  }
-
-  Widget _buildCollectionItem(CollectionWithThumbnail item) {
-    return Container(
-      padding: const EdgeInsets.only(left: 24, bottom: 16),
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        child: Row(
-          children: <Widget>[
-            ClipRRect(
-              borderRadius: BorderRadius.circular(2.0),
-              child: SizedBox(
-                height: 64,
-                width: 64,
-                key: Key("collection_item:" + (item.thumbnail?.tag ?? "")),
-                child: item.thumbnail != null
-                    ? ThumbnailWidget(
-                        item.thumbnail,
-                        showFavForAlbumOnly: true,
-                      )
-                    : const NoThumbnailWidget(),
-              ),
-            ),
-            const Padding(padding: EdgeInsets.all(8)),
-            Expanded(
-              child: Text(
-                item.collection.name!,
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
-        onTap: () async {
-          if (await _runCollectionAction(item.collection.id)) {
-            showShortToast(
-              context,
-              widget.actionType == CollectionActionType.addFiles
-                  ? "Added successfully to " + item.collection.name!
-                  : "Moved successfully to " + item.collection.name!,
-            );
-            _navigateToCollection(item.collection);
-          }
-        },
-      ),
-    );
   }
 
   Future<List<CollectionWithThumbnail>> _getCollectionsWithThumbnail() async {
