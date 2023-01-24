@@ -18,6 +18,7 @@ import OverflowMenu from 'components/OverflowMenu/menu';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
+import { FavoritiesCollectionOption } from './FavoritiesCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
@@ -239,32 +240,36 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 handleCollectionAction={handleCollectionAction}
                 collectionSummaryType={collectionSummaryType}
             />
-            {!(collectionSummaryType === CollectionSummaryType.favorites) && (
-                <OverflowMenu
-                    ariaControls={'collection-options'}
-                    triggerButtonIcon={<MoreHoriz />}
-                    triggerButtonProps={{
-                        sx: {
-                            background: (theme) => theme.palette.fill.dark,
-                        },
-                    }}>
-                    {collectionSummaryType === CollectionSummaryType.trash ? (
-                        <TrashCollectionOption
-                            handleCollectionAction={handleCollectionAction}
-                        />
-                    ) : collectionSummaryType ===
-                      CollectionSummaryType.incomingShare ? (
-                        <SharedCollectionOption
-                            handleCollectionAction={handleCollectionAction}
-                        />
-                    ) : (
-                        <AlbumCollectionOption
-                            IsArchived={IsArchived(activeCollection)}
-                            handleCollectionAction={handleCollectionAction}
-                        />
-                    )}
-                </OverflowMenu>
-            )}
+
+            <OverflowMenu
+                ariaControls={'collection-options'}
+                triggerButtonIcon={<MoreHoriz />}
+                triggerButtonProps={{
+                    sx: {
+                        background: (theme) => theme.palette.fill.dark,
+                    },
+                }}>
+                {collectionSummaryType === CollectionSummaryType.trash ? (
+                    <TrashCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.favorites ? (
+                    <FavoritiesCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.incomingShare ? (
+                    <SharedCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : (
+                    <AlbumCollectionOption
+                        IsArchived={IsArchived(activeCollection)}
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                )}
+            </OverflowMenu>
         </HorizontalFlex>
     );
 };
