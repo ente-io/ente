@@ -30,23 +30,26 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 enum CollectionActionType { addFiles, moveFiles, restoreFiles, unHide }
 
 String _actionName(CollectionActionType type, bool plural) {
+  bool addTitleSuffix = false;
   final titleSuffix = (plural ? "s" : "");
   String text = "";
   switch (type) {
     case CollectionActionType.addFiles:
       text = "Add item";
+      addTitleSuffix = true;
       break;
     case CollectionActionType.moveFiles:
       text = "Move item";
+      addTitleSuffix = true;
       break;
     case CollectionActionType.restoreFiles:
-      text = "Restore item";
+      text = "Restore to album";
       break;
     case CollectionActionType.unHide:
-      text = "Unhide item";
+      text = "Unhide to album";
       break;
   }
-  return text + titleSuffix;
+  return addTitleSuffix ? text + titleSuffix : text;
 }
 
 void createCollectionSheet(
