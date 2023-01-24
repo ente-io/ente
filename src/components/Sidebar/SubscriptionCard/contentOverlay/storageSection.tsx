@@ -30,7 +30,7 @@ export default function StorageSection({ usage, storage }: Iprops) {
                 <Typography
                     fontWeight={'bold'}
                     sx={{ fontSize: '24px', lineHeight: '30px' }}>
-                    {`${makeHumanReadableStorage(usage, 'round-up')} ${
+                    {`${makeHumanReadableStorage(usage, { roundUp: true })} ${
                         constants.OF
                     } ${makeHumanReadableStorage(storage)} ${constants.USED}`}
                 </Typography>
