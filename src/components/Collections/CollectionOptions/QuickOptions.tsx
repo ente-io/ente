@@ -24,16 +24,14 @@ export function QuickOptions({
         <FlexWrapper sx={{ gap: '16px' }}>
             {!(
                 collectionSummaryType === CollectionSummaryType.trash ||
-                collectionSummaryType === CollectionSummaryType.favorites
+                collectionSummaryType === CollectionSummaryType.favorites ||
+                collectionSummaryType === CollectionSummaryType.incomingShare
             ) && (
                 <Tooltip
                     title={
                         collectionSummaryType ===
                         CollectionSummaryType.outgoingShare
                             ? constants.MODIFY_SHARING
-                            : collectionSummaryType ===
-                              CollectionSummaryType.incomingShare
-                            ? constants.SHARING_DETAILS
                             : constants.SHARE_COLLECTION
                     }>
                     <IconButton>
