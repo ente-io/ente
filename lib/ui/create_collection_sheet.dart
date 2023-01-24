@@ -79,6 +79,7 @@ void createCollectionSheet(
     backgroundColor: getEnteColorScheme(context).backgroundElevated,
     barrierColor: backdropFaintDark,
     enableDrag: false,
+    useRootNavigator: true,
   );
 }
 
