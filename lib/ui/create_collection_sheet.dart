@@ -54,6 +54,7 @@ void createCollectionSheet(
   List<SharedMediaFile>? sharedFiles,
   BuildContext context, {
   CollectionActionType actionType = CollectionActionType.addFiles,
+  bool showOptionToCreateNewAlbum = true,
 }) {
   showBarModalBottomSheet(
     context: context,
@@ -62,6 +63,7 @@ void createCollectionSheet(
         selectedFiles: selectedFiles,
         sharedFiles: sharedFiles,
         actionType: actionType,
+        showOptionToCreateNewAlbum: showOptionToCreateNewAlbum,
       );
     },
     shape: const RoundedRectangleBorder(
@@ -81,10 +83,12 @@ class CreateCollectionSheet extends StatefulWidget {
   final SelectedFiles? selectedFiles;
   final List<SharedMediaFile>? sharedFiles;
   final CollectionActionType actionType;
+  final bool showOptionToCreateNewAlbum;
   const CreateCollectionSheet({
     required this.selectedFiles,
     required this.sharedFiles,
     required this.actionType,
+    required this.showOptionToCreateNewAlbum,
     super.key,
   });
 
@@ -140,7 +144,8 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                         .data as List<CollectionWithThumbnail>;
                                     return ListView.separated(
                                       itemBuilder: (context, index) {
-                                        if (index == 0) {
+                                        if (index == 0 &&
+                                            widget.showOptionToCreateNewAlbum) {
                                           return GestureDetector(
                                             onTap: () {
                                               _showNameAlbumDialog();
@@ -151,8 +156,11 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                             ),
                                           );
                                         }
-                                        final item =
-                                            collectionsWithThumbnail[index - 1];
+                                        final item = collectionsWithThumbnail[
+                                            index -
+                                                (widget.showOptionToCreateNewAlbum
+                                                    ? 1
+                                                    : 0)];
                                         return GestureDetector(
                                           behavior: HitTestBehavior.opaque,
                                           onTap: () =>
@@ -167,7 +175,10 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                         height: 8,
                                       ),
                                       itemCount:
-                                          collectionsWithThumbnail.length + 1,
+                                          collectionsWithThumbnail.length +
+                                              (widget.showOptionToCreateNewAlbum
+                                                  ? 1
+                                                  : 0),
                                       shrinkWrap: true,
                                       physics: const BouncingScrollPhysics(),
                                     );
