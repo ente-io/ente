@@ -5,7 +5,6 @@ import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/ente_theme_data.dart';
@@ -16,7 +15,6 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
-import 'package:photos/ui/create_collection_page.dart';
 import 'package:photos/ui/create_collection_sheet.dart'
     as create_collection_sheet;
 import 'package:photos/utils/delete_file_util.dart';
@@ -234,36 +232,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     widget.selectedFiles.clearAll();
   }
 
-  Future<void> _createCollectionAction(CollectionActionType type) async {
-    Navigator.push(
-      context,
-      PageTransition(
-        type: PageTransitionType.bottomToTop,
-        child: CreateCollectionPage(
-          widget.selectedFiles,
-          null,
-          actionType: type,
-        ),
-      ),
-    );
-  }
-
-  Future<void> _moveFiles() async {
-    unawaited(
-      Navigator.push(
-        context,
-        PageTransition(
-          type: PageTransitionType.bottomToTop,
-          child: CreateCollectionPage(
-            widget.selectedFiles,
-            null,
-            actionType: CollectionActionType.moveFiles,
-          ),
-        ),
-      ),
-    );
-  }
-
   List<Widget> _getActions(BuildContext context) {
     final List<Widget> actions = <Widget>[];
     if (widget.type == GalleryType.trash) {
@@ -293,21 +261,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
       );
     }
 
-    if (Configuration.instance.hasConfiguredAccount() &&
-        widget.type == GalleryType.hidden) {
-      actions.add(
-        Tooltip(
-          message: "Unhide",
-          child: IconButton(
-            color: Theme.of(context).colorScheme.iconColor,
-            icon: const Icon(Icons.visibility),
-            onPressed: () {
-              _createCollectionAction(CollectionActionType.unHide);
-            },
-          ),
-        ),
-      );
-    }
     if (Configuration.instance.hasConfiguredAccount() &&
         widget.type == GalleryType.ownedCollection &&
         widget.collection!.type != CollectionType.favorites) {
@@ -438,12 +391,6 @@ class _OverlayWidgetState extends State<OverlayWidget> {
     switch (value.toLowerCase()) {
       case 'hide':
         await _handleHideRequest(context);
-        break;
-      case 'add':
-        await _createCollectionAction(CollectionActionType.addFiles);
-        break;
-      case 'move':
-        await _moveFiles();
         break;
       case 'archive':
         await _handleVisibilityChangeRequest(context, visibilityArchive);
