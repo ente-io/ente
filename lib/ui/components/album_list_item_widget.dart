@@ -47,7 +47,9 @@ class AlbumListItemWidget extends StatelessWidget {
                                 item!.thumbnail,
                                 showFavForAlbumOnly: true,
                               )
-                            : const NoThumbnailWidget(),
+                            : const NoThumbnailWidget(
+                                hasBorder: false,
+                              ),
                   ),
                 ),
                 Padding(
