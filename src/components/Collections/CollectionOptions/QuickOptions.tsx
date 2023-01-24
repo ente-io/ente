@@ -70,7 +70,7 @@ export function QuickOptions({
                     <IconButton>
                         <DeleteOutlinedIcon
                             onClick={handleCollectionAction(
-                                CollectionActions.CONFIRM_DELETE,
+                                CollectionActions.CONFIRM_EMPTY_TRASH,
                                 false
                             )}
                         />
