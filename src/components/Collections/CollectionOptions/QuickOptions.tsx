@@ -29,6 +29,9 @@ export function QuickOptions({
             ) && (
                 <Tooltip
                     title={
+                        /*: collectionSummaryType ===
+                            CollectionSummaryType.incomingShare
+                          ? constants.SHARING_DETAILS*/
                         collectionSummaryType ===
                         CollectionSummaryType.outgoingShare
                             ? constants.MODIFY_SHARING
