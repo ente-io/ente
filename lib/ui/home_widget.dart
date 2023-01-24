@@ -73,6 +73,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   // ignore: unused_field
   StreamSubscription? _intentDataStreamSubscription;
   List<SharedMediaFile>? _sharedFiles;
+  bool _shouldRenderCreateCollectionSheet = false;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -237,6 +238,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         ReceiveSharingIntent.getMediaStream().listen(
       (List<SharedMediaFile> value) {
         setState(() {
+          _shouldRenderCreateCollectionSheet = true;
           _sharedFiles = value;
         });
       },
@@ -318,7 +320,13 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LoadingPhotosWidget();
     }
 
-    if (_sharedFiles != null && _sharedFiles!.isNotEmpty) {
+    if (_sharedFiles != null &&
+        _sharedFiles!.isNotEmpty &&
+        _shouldRenderCreateCollectionSheet) {
+      //The gallery is getting rebuilt for some reason when the keyboard is up.
+      //So to stop showing multiple CreateCollectionSheets, this flag
+      //needs to be set to false the first time it is rendered.
+      _shouldRenderCreateCollectionSheet = false;
       ReceiveSharingIntent.reset();
       Future.delayed(const Duration(milliseconds: 10), () {
         create_collection_sheet.createCollectionSheet(
