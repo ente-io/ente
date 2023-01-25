@@ -443,8 +443,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
                       : 0,
                 ), () {
               widget.isInAlert
-                  ? Navigator.of(context, rootNavigator: true)
-                      .pop(widget.buttonAction)
+                  ? _popWithButtonAction(context, widget.buttonAction)
                   : null;
               if (mounted) {
                 setState(() {
@@ -461,9 +460,7 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
           widget.isInAlert
               ? Future.delayed(
                   const Duration(seconds: 0),
-                  () => Navigator.of(context, rootNavigator: true).pop(
-                    ButtonAction.error,
-                  ),
+                  () => _popWithButtonAction(context, ButtonAction.error),
                 )
               : null;
         });
@@ -472,10 +469,18 @@ class _ButtonChildWidgetState extends State<ButtonChildWidget> {
       if (widget.isInAlert) {
         Future.delayed(
           Duration(seconds: widget.shouldShowSuccessConfirmation ? 1 : 0),
-          () => Navigator.of(context).pop(widget.buttonAction),
+          () => _popWithButtonAction(context, widget.buttonAction),
         );
       }
     }
+  }
+
+  void _popWithButtonAction(BuildContext context, ButtonAction? buttonAction) {
+    Navigator.of(context).canPop()
+        ? Navigator.of(context).pop(
+            buttonAction,
+          )
+        : null;
   }
 
   void _onTapDown(details) {
