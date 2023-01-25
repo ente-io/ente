@@ -19,6 +19,7 @@ import 'package:photos/ui/components/album_list_item_widget.dart';
 import 'package:photos/ui/components/bottom_of_title_bar_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
+import 'package:photos/ui/components/new_album_list_widget.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
 import 'package:photos/ui/viewer/gallery/collection_page.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -154,9 +155,8 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                               _showNameAlbumDialog();
                                             },
                                             behavior: HitTestBehavior.opaque,
-                                            child: const AlbumListItemWidget(
-                                              isNew: true,
-                                            ),
+                                            child:
+                                                const NewAlbumListItemWidget(),
                                           );
                                         }
                                         final item = collectionsWithThumbnail[
