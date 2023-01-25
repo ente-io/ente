@@ -308,6 +308,7 @@ function PhotoViewer(props: Iprops) {
         });
         photoSwipe.listen('beforeChange', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            if (!currItem) return;
             updateFavButton(currItem);
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
                 setExif({ key: currItem.src, value: null });
@@ -325,6 +326,7 @@ function PhotoViewer(props: Iprops) {
         });
         photoSwipe.listen('resize', () => {
             const currItem = photoSwipe?.currItem as EnteFile;
+            if (!currItem) return;
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
                 setExif({ key: currItem.src, value: null });
                 return;
@@ -368,6 +370,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const onFavClick = async (file: EnteFile) => {
+        if (!file) return;
         const { favItemIds } = props;
         if (!isInFav(file)) {
             favItemIds.add(file.id);
@@ -390,7 +393,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const confirmTrashFile = (file: EnteFile) => {
-        if (props.isSharedCollection || props.isTrashCollection) {
+        if (!file || props.isSharedCollection || props.isTrashCollection) {
             return;
         }
         appContext.setDialogMessage(getTrashFileMessage(() => trashFile(file)));
@@ -463,7 +466,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        if (props.enableDownload) {
+        if (!file && props.enableDownload) {
             appContext.startLoading();
             await downloadFile(
                 file,
@@ -476,7 +479,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const copyToClipboardHelper = async (file: EnteFile) => {
-        if (props.enableDownload && shouldShowCopyOption) {
+        if (!file && props.enableDownload && shouldShowCopyOption) {
             appContext.startLoading();
             await copyFileToClipboard(file.src);
             appContext.finishLoading();
