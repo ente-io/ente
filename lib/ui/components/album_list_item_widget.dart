@@ -18,7 +18,6 @@ class AlbumListItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logger = Logger("AlbumListItemWidget");
     final textTheme = getEnteTextTheme(context);
     final colorScheme = getEnteColorScheme(context);
     const sideOfThumbnail = 60.0;
@@ -83,7 +82,7 @@ class AlbumListItemWidget extends StatelessWidget {
                                         );
                                       } else {
                                         if (snapshot.hasError) {
-                                          logger.severe(
+                                          Logger("AlbumListItemWidget").severe(
                                             "Failed to fetch file count of collection id ${item!.collection.id}",
                                           );
                                         }
