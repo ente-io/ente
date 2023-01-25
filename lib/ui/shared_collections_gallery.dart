@@ -72,9 +72,7 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
           final c = CollectionsService.instance
               .getCollectionByID(file.collectionID!)!;
           if (c.owner!.id == Configuration.instance.getUserID()) {
-            if (c.sharees!.isNotEmpty ||
-                c.publicURLs!.isNotEmpty ||
-                c.isSharedFilesCollection()) {
+            if (c.hasSharees || c.hasLink || c.isSharedFilesCollection()) {
               outgoing.add(
                 CollectionWithThumbnail(
                   c,
@@ -268,27 +266,29 @@ class OutgoingCollectionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sharees = <String?>[];
-    for (int index = 0; index < c.collection.sharees!.length; index++) {
-      final sharee = c.collection.sharees![index]!;
-      final name =
-          (sharee.name?.isNotEmpty ?? false) ? sharee.name : sharee.email;
-      if (index < 2) {
-        sharees.add(name);
-      } else {
-        final remaining = c.collection.sharees!.length - index;
-        if (remaining == 1) {
-          // If it's the last sharee
-          sharees.add(name);
+    final shareesName = <String>[];
+    if (c.collection.hasSharees) {
+      for (int index = 0; index < c.collection.sharees!.length; index++) {
+        final sharee = c.collection.sharees![index]!;
+        final String name =
+            (sharee.name?.isNotEmpty ?? false) ? sharee.name! : sharee.email;
+        if (index < 2) {
+          shareesName.add(name);
         } else {
-          sharees.add(
-            "and " +
-                remaining.toString() +
-                " other" +
-                (remaining > 1 ? "s" : ""),
-          );
+          final remaining = c.collection.sharees!.length - index;
+          if (remaining == 1) {
+            // If it's the last sharee
+            shareesName.add(name);
+          } else {
+            shareesName.add(
+              "and " +
+                  remaining.toString() +
+                  " other" +
+                  (remaining > 1 ? "s" : ""),
+            );
+          }
+          break;
         }
-        break;
       }
     }
     return GestureDetector(
@@ -325,22 +325,22 @@ class OutgoingCollectionItem extends StatelessWidget {
                         ),
                       ),
                       const Padding(padding: EdgeInsets.all(2)),
-                      c.collection.publicURLs!.isEmpty
-                          ? Container()
-                          : (c.collection.publicURLs!.first!.isExpired
+                      c.collection.hasLink
+                          ? (c.collection.publicURLs!.first!.isExpired
                               ? const Icon(
                                   Icons.link,
                                   color: warning500,
                                 )
-                              : const Icon(Icons.link)),
+                              : const Icon(Icons.link))
+                          : Container(),
                     ],
                   ),
-                  sharees.isEmpty
+                  shareesName.isEmpty
                       ? Container()
                       : Padding(
                           padding: const EdgeInsets.fromLTRB(0, 4, 0, 0),
                           child: Text(
-                            "Shared with " + sharees.join(", "),
+                            "Shared with " + shareesName.join(", "),
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(context).primaryColorLight,

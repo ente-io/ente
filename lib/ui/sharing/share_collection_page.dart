@@ -46,7 +46,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
   @override
   Widget build(BuildContext context) {
     _sharees = widget.collection.sharees ?? [];
-    final bool hasUrl = widget.collection.publicURLs?.isNotEmpty ?? false;
+    final bool hasUrl = widget.collection.hasLink;
     final children = <Widget>[];
     children.add(
       MenuSectionTitle(
