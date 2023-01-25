@@ -71,13 +71,11 @@ class CollectionActions {
     }
     final dialog = createProgressDialog(
       context,
-      enable ? "Creating link..." : "Disabling link...",
+      "Creating link...",
     );
     try {
       await dialog.show();
-      enable
-          ? await CollectionsService.instance.createShareUrl(collection)
-          : await CollectionsService.instance.disableShareUrl(collection);
+      await CollectionsService.instance.createShareUrl(collection);
       dialog.hide();
       return true;
     } catch (e) {
