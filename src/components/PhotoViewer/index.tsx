@@ -307,8 +307,8 @@ function PhotoViewer(props: Iprops) {
             }
         });
         photoSwipe.listen('beforeChange', () => {
-            const currItem = photoSwipe?.currItem as EnteFile;
-            if (!currItem) return;
+            if (!photoSwipe?.currItem) return;
+            const currItem = photoSwipe.currItem as EnteFile;
             updateFavButton(currItem);
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
                 setExif({ key: currItem.src, value: null });
@@ -325,8 +325,8 @@ function PhotoViewer(props: Iprops) {
             checkExifAvailable(currItem);
         });
         photoSwipe.listen('resize', () => {
-            const currItem = photoSwipe?.currItem as EnteFile;
-            if (!currItem) return;
+            if (!photoSwipe?.currItem) return;
+            const currItem = photoSwipe.currItem as EnteFile;
             if (currItem.metadata.fileType !== FILE_TYPE.IMAGE) {
                 setExif({ key: currItem.src, value: null });
                 return;
