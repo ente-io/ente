@@ -8,7 +8,7 @@ import { PAGES } from 'constants/pages';
 import { useRouter } from 'next/router';
 import { AppContext } from 'pages/_app';
 import { canEnableMlSearch } from 'utils/machineLearning/compatibility';
-import mlIDbStorage from 'utils/storage/mlIDbStorage';
+// import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import isElectron from 'is-electron';
 import WatchFolder from 'components/WatchFolder';
 import { getDownloadAppMessage } from 'utils/ui';
@@ -70,9 +70,9 @@ export default function UtilitySection({ closeSidebar }) {
             close: { variant: 'danger' },
         });
 
-    const redirectToMLDebug = () => {
-        router.push(PAGES.ML_DEBUG);
-    };
+    // const redirectToMLDebug = () => {
+    //     router.push(PAGES.ML_DEBUG);
+    // };
 
     const enableMlSearch = async () => {
         // eslint-disable-next-line @typescript-eslint/await-thenable
@@ -83,9 +83,9 @@ export default function UtilitySection({ closeSidebar }) {
         await updateMlSearchEnabled(false);
     };
 
-    const clearMLDB = async () => {
-        await mlIDbStorage.clearMLDB();
-    };
+    // const clearMLDB = async () => {
+    //     await mlIDbStorage.clearMLDB();
+    // };
 
     const toggleMLSearch = () => {
         if (!mlSearchEnabled) {
@@ -146,7 +146,7 @@ export default function UtilitySection({ closeSidebar }) {
                     : constants.ENABLE_ML_SEARCH}
             </SidebarButton>
 
-            <SidebarButton
+            {/* <SidebarButton
                 onClick={() => {
                     if (!mlSearchEnabled) {
                         if (!canEnableMlSearch()) {
@@ -177,7 +177,7 @@ export default function UtilitySection({ closeSidebar }) {
 
             <SidebarButton onClick={redirectToMLDebug}>
                 {constants.ML_DEBUG}
-            </SidebarButton>
+            </SidebarButton> */}
 
             {/* <SidebarButton onClick={openThumbnailCompressModal}>
                 {constants.COMPRESS_THUMBNAILS}
