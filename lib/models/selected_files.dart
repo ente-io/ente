@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/clear_selections_event.dart';
 import 'package:photos/models/file.dart';
-import 'package:photos/models/selected_file_breakup.dart';
 
 class SelectedFiles extends ChangeNotifier {
   final files = <File>{};
@@ -64,26 +63,6 @@ class SelectedFiles extends ChangeNotifier {
       return first.uploadedFileID == second.uploadedFileID;
     }
     return false;
-  }
-
-  SelectedFileSplit split(int currentUseID) {
-    final List<File> ownedByCurrentUser = [],
-        ownedByOtherUsers = [],
-        pendingUploads = [];
-    for (var f in files) {
-      if (f.ownerID == null || f.uploadedFileID == null) {
-        pendingUploads.add(f);
-      } else if (f.ownerID == currentUseID) {
-        ownedByCurrentUser.add(f);
-      } else {
-        ownedByOtherUsers.add(f);
-      }
-    }
-    return SelectedFileSplit(
-      pendingUploads: pendingUploads,
-      ownedByCurrentUser: ownedByCurrentUser,
-      ownedByOtherUsers: ownedByOtherUsers,
-    );
   }
 
   void clearAll() {

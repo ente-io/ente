@@ -610,6 +610,19 @@ class FilesDB {
     return FileLoadResult(files, files.length == limit);
   }
 
+  Future<List<File>> getAllFilesCollection(int collectionID) async {
+    final db = await instance.database;
+    const String whereClause = '$columnCollectionID = ?';
+    final List<Object> whereArgs = [collectionID];
+    final results = await db.query(
+      filesTable,
+      where: whereClause,
+      whereArgs: whereArgs,
+    );
+    final files = convertToFiles(results);
+    return files;
+  }
+
   Future<FileLoadResult> getFilesInCollections(
     List<int> collectionIDs,
     int startTime,

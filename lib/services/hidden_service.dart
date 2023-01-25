@@ -41,6 +41,26 @@ extension HiddenService on CollectionsService {
     return cachedDefaultHiddenCollection!;
   }
 
+  // getUncategorizedCollection will return the uncategorized collection
+  // for the given user
+  Future<Collection> getUncategorizedCollection() async {
+    if (cachedUncategorizedCollection != null) {
+      return cachedUncategorizedCollection!;
+    }
+    final int userID = config.getUserID()!;
+    final Collection? matchedCollection =
+        collectionIDToCollections.values.firstWhereOrNull(
+      (element) =>
+          element.type == CollectionType.uncategorized &&
+          element.owner!.id == userID,
+    );
+    if (matchedCollection != null) {
+      cachedUncategorizedCollection = matchedCollection;
+      return cachedUncategorizedCollection!;
+    }
+    return _createUncategorizedCollection();
+  }
+
   Future<bool> hideFiles(
     BuildContext context,
     List<File> filesToHide, {
@@ -111,6 +131,25 @@ extension HiddenService on CollectionsService {
         await fetchCollectionByID(collection.id);
     _logger.info("Fetched Created Hidden Collection Successfully");
     return collectionFromServer;
+  }
+
+  Future<Collection> _createUncategorizedCollection() async {
+    final key = CryptoUtil.generateKey();
+    final encKey = CryptoUtil.encryptSync(key, config.getKey()!);
+    final encName =
+        CryptoUtil.encryptSync(utf8.encode("Uncategorized") as Uint8List, key);
+    final collection = await createAndCacheCollection(
+      CreateRequest(
+        encryptedKey: Sodium.bin2base64(encKey.encryptedData!),
+        keyDecryptionNonce: Sodium.bin2base64(encKey.nonce!),
+        encryptedName: Sodium.bin2base64(encName.encryptedData!),
+        nameDecryptionNonce: Sodium.bin2base64(encName.nonce!),
+        type: CollectionType.uncategorized,
+        attributes: CollectionAttributes(),
+      ),
+    );
+    cachedUncategorizedCollection = collection;
+    return cachedUncategorizedCollection!;
   }
 
   Future<CreateRequest> buildCollectionCreateRequest(

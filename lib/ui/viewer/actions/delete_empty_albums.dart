@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/events/collection_updated_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
@@ -86,7 +87,11 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
   Future<void> _deleteEmptyAlbums() async {
     final collections =
         await CollectionsService.instance.getCollectionsWithThumbnails();
-    collections.removeWhere((element) => element.thumbnail != null);
+    // remove collections which are not empty or can't be deleted
+    collections.removeWhere(
+      (element) =>
+          element.thumbnail != null || !element.collection.type.canDelete,
+    );
     int failedCount = 0;
     for (int i = 0; i < collections.length; i++) {
       if (mounted && !_isCancelled) {
@@ -94,8 +99,9 @@ class _DeleteEmptyAlbumsState extends State<DeleteEmptyAlbums> {
             "Deleting ${(i + 1).toString().padLeft(collections.length.toString().length, '0')} / "
             "${collections.length}";
         try {
-          await CollectionsService.instance
-              .trashEmptyCollection(collections[i].collection);
+          await CollectionsService.instance.trashEmptyCollection(
+              collections[i].collection,
+              isBulkDelete: true);
         } catch (_) {
           failedCount++;
         }

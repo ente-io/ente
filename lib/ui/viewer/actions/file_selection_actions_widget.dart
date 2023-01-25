@@ -4,9 +4,10 @@ import 'package:flutter/services.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
+import 'package:photos/models/file.dart';
+import 'package:photos/models/files_split.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/magic_metadata.dart';
-import 'package:photos/models/selected_file_breakup.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
@@ -46,7 +47,7 @@ class FileSelectionActionWidget extends StatefulWidget {
 
 class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   late int currentUserID;
-  late SelectedFileSplit split;
+  late FilesSplit split;
   late CollectionActions collectionActions;
 
   // _cachedCollectionForSharedLink is primarly used to avoid creating duplicate
@@ -57,7 +58,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   @override
   void initState() {
     currentUserID = Configuration.instance.getUserID()!;
-    split = widget.selectedFiles.split(currentUserID);
+    split = FilesSplit.split(<File>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
     collectionActions = CollectionActions(CollectionsService.instance);
     super.initState();
@@ -73,7 +74,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     if (_cachedCollectionForSharedLink != null) {
       _cachedCollectionForSharedLink = null;
     }
-    split = widget.selectedFiles.split(currentUserID);
+    split = FilesSplit.split(widget.selectedFiles.files, currentUserID);
     if (mounted) {
       setState(() => {});
     }
@@ -284,7 +285,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await collectionActions.showRemoveFromCollectionSheet(
+    await collectionActions.showRemoveFromCollectionSheetV2(
       context,
       widget.collection!,
       widget.selectedFiles,

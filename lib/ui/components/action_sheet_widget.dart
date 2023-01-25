@@ -18,7 +18,7 @@ enum ActionSheetType {
 Future<ButtonAction?> showActionSheet({
   required BuildContext context,
   required List<ButtonWidget> buttons,
-  required ActionSheetType actionSheetType,
+  ActionSheetType actionSheetType = ActionSheetType.defaultActionSheet,
   bool enableDrag = true,
   bool isDismissible = true,
   bool isCheckIconGreen = false,

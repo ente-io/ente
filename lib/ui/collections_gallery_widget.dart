@@ -19,6 +19,7 @@ import 'package:photos/ui/collections/hidden_collections_button_widget.dart';
 import 'package:photos/ui/collections/remote_collections_grid_view_widget.dart';
 import 'package:photos/ui/collections/section_title.dart';
 import 'package:photos/ui/collections/trash_button_widget.dart';
+import 'package:photos/ui/collections/uncat_collections_button_widget.dart';
 import 'package:photos/ui/common/loading_widget.dart';
 import 'package:photos/ui/viewer/actions/delete_empty_albums.dart';
 import 'package:photos/ui/viewer/gallery/empty_state.dart';
@@ -83,10 +84,15 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
   Future<List<CollectionWithThumbnail>> _getCollections() async {
     final List<CollectionWithThumbnail> collectionsWithThumbnail =
         await CollectionsService.instance.getCollectionsWithThumbnails();
+
+    // Remove uncategorized collection
+    collectionsWithThumbnail
+        .removeWhere((t) => t.collection.type == CollectionType.uncategorized);
     final ListMatch<CollectionWithThumbnail> favMathResult =
         collectionsWithThumbnail.splitMatch(
       (element) => element.collection.type == CollectionType.favorites,
     );
+
     // Hide fav collection if it's empty and not shared
     favMathResult.matched.removeWhere(
       (element) =>
@@ -168,6 +174,8 @@ class _CollectionsGalleryWidgetState extends State<CollectionsGalleryWidget>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 children: [
+                  UnCatCollectionsButtonWidget(trashAndHiddenTextStyle),
+                  const SizedBox(height: 12),
                   ArchivedCollectionsButtonWidget(trashAndHiddenTextStyle),
                   const SizedBox(height: 12),
                   HiddenCollectionsButtonWidget(trashAndHiddenTextStyle),
