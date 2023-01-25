@@ -33,7 +33,6 @@ import { ObjectLabelList } from 'components/MachineLearning/ObjectList';
 import { WordList } from 'components/MachineLearning/WordList';
 import MLServiceFileInfoButton from 'components/MachineLearning/MLServiceFileInfoButton';
 import { AppContext } from 'pages/_app';
-import { Legend } from '../styledComponents/Legend';
 
 export const FileInfoSidebar = styled((props: DialogProps) => (
     <EnteDrawer {...props} anchor="right" />
@@ -281,39 +280,29 @@ export function FileInfo({
                 )}
                 {appContext.mlSearchEnabled && (
                     <>
-                        <div>
-                            <Legend>{constants.PEOPLE}</Legend>
-                        </div>
                         <PhotoPeopleList
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
                         />
-                        <div>
-                            <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
-                        </div>
                         <UnidentifiedFaces
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
                         />
-                        <div>
-                            <Legend>{constants.OBJECTS}</Legend>
-                            <ObjectLabelList
-                                file={file}
-                                updateMLDataIndex={updateMLDataIndex}
-                            />
-                        </div>
-                        <div>
-                            <Legend>{constants.TEXT}</Legend>
-                            <WordList
-                                file={file}
-                                updateMLDataIndex={updateMLDataIndex}
-                            />
-                        </div>
-                        <MLServiceFileInfoButton
+                        <ObjectLabelList
                             file={file}
                             updateMLDataIndex={updateMLDataIndex}
-                            setUpdateMLDataIndex={setUpdateMLDataIndex}
                         />
+                        <WordList
+                            file={file}
+                            updateMLDataIndex={updateMLDataIndex}
+                        />
+                        <Box pt={1}>
+                            <MLServiceFileInfoButton
+                                file={file}
+                                updateMLDataIndex={updateMLDataIndex}
+                                setUpdateMLDataIndex={setUpdateMLDataIndex}
+                            />
+                        </Box>
                     </>
                 )}
             </Stack>

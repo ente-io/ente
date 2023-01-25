@@ -9,6 +9,8 @@ import styled from 'styled-components';
 import { EnteFile } from 'types/file';
 import { ImageCacheView } from './ImageViews';
 import { FACE_CROPS_CACHE } from 'constants/cache';
+import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
+import constants from 'utils/strings/constants';
 
 const FaceChipContainer = styled.div`
     display: flex;
@@ -95,7 +97,14 @@ export function PhotoPeopleList(props: PhotoPeopleListProps) {
         };
     }, [props.file, props.updateMLDataIndex]);
 
-    return <PeopleList people={people} onSelect={props.onSelect}></PeopleList>;
+    if (people.length === 0) return <></>;
+
+    return (
+        <div>
+            <Legend>{constants.PEOPLE}</Legend>
+            <PeopleList people={people} onSelect={props.onSelect}></PeopleList>
+        </div>
+    );
 }
 
 export interface AllPeopleListProps extends PeopleListPropsBase {
@@ -147,17 +156,24 @@ export function UnidentifiedFaces(props: {
         };
     }, [props.file, props.updateMLDataIndex]);
 
+    if (!faces || faces.length === 0) return <></>;
+
     return (
-        <FaceChipContainer>
-            {faces &&
-                faces.map((face, index) => (
-                    <FaceChip key={index}>
-                        <ImageCacheView
-                            url={face.crop?.imageUrl}
-                            cacheName={FACE_CROPS_CACHE}
-                        />
-                    </FaceChip>
-                ))}
-        </FaceChipContainer>
+        <>
+            <div>
+                <Legend>{constants.UNIDENTIFIED_FACES}</Legend>
+            </div>
+            <FaceChipContainer>
+                {faces &&
+                    faces.map((face, index) => (
+                        <FaceChip key={index}>
+                            <ImageCacheView
+                                url={face.crop?.imageUrl}
+                                cacheName={FACE_CROPS_CACHE}
+                            />
+                        </FaceChip>
+                    ))}
+            </FaceChipContainer>
+        </>
     );
 }

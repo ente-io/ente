@@ -1,7 +1,10 @@
-import { Chip } from 'components/pages/gallery/Collections';
+import Box from '@mui/material/Box';
+import { Chip } from 'components/Chip';
+import { Legend } from 'components/PhotoViewer/styledComponents/Legend';
 import React, { useState, useEffect } from 'react';
 import { EnteFile } from 'types/file';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
+import constants from 'utils/strings/constants';
 
 export function WordList(props: { file: EnteFile; updateMLDataIndex: number }) {
     const [words, setWords] = useState<string[]>([]);
@@ -25,20 +28,21 @@ export function WordList(props: { file: EnteFile; updateMLDataIndex: number }) {
         };
     }, [props.file, props.updateMLDataIndex]);
 
+    if (words.length === 0) return <></>;
+
     return (
-        <div>
-            {words.map((object) => (
-                <Chip
-                    active={true}
-                    style={{
-                        paddingLeft: 0,
-                        padding: '5px 10px',
-                        cursor: 'default',
-                    }}
-                    key={object}>
-                    {object}
-                </Chip>
-            ))}
-        </div>
+        <>
+            <Legend>{constants.TEXT}</Legend>
+            <Box
+                display={'flex'}
+                gap={1}
+                flexWrap="wrap"
+                justifyContent={'flex-start'}
+                alignItems={'flex-start'}>
+                {words.map((word) => (
+                    <Chip key={word}>{word}</Chip>
+                ))}
+            </Box>
+        </>
     );
 }
