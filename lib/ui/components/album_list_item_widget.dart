@@ -8,9 +8,9 @@ import 'package:photos/ui/viewer/file/thumbnail_widget.dart';
 
 ///https://www.figma.com/file/SYtMyLBs5SAOkTbfMMzhqt/ente-Visual-Design?node-id=7480%3A33462&t=H5AvR79OYDnB9ekw-4
 class AlbumListItemWidget extends StatelessWidget {
-  final CollectionWithThumbnail? item;
-  const AlbumListItemWidget({
-    this.item,
+  final CollectionWithThumbnail item;
+  const AlbumListItemWidget(
+    this.item, {
     super.key,
   });
 
@@ -33,9 +33,9 @@ class AlbumListItemWidget extends StatelessWidget {
                   child: SizedBox(
                     height: sideOfThumbnail,
                     width: sideOfThumbnail,
-                    child: item?.thumbnail != null
+                    child: item.thumbnail != null
                         ? ThumbnailWidget(
-                            item!.thumbnail,
+                            item.thumbnail,
                             showFavForAlbumOnly: true,
                           )
                         : const NoThumbnailWidget(
@@ -48,39 +48,36 @@ class AlbumListItemWidget extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item?.collection.collectionName ?? ""),
-                      item != null
-                          ? FutureBuilder<int>(
-                              future: FilesDB.instance.collectionFileCount(
-                                item!.collection.id,
+                      Text(item.collection.collectionName),
+                      FutureBuilder<int>(
+                        future: FilesDB.instance.collectionFileCount(
+                          item.collection.id,
+                        ),
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            final text =
+                                snapshot.data == 1 ? " memory" : " memories";
+                            return Text(
+                              snapshot.data.toString() + text,
+                              style: textTheme.small.copyWith(
+                                color: colorScheme.textMuted,
                               ),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  final text = snapshot.data == 1
-                                      ? " memory"
-                                      : " memories";
-                                  return Text(
-                                    snapshot.data.toString() + text,
-                                    style: textTheme.small.copyWith(
-                                      color: colorScheme.textMuted,
-                                    ),
-                                  );
-                                } else {
-                                  if (snapshot.hasError) {
-                                    Logger("AlbumListItemWidget").severe(
-                                      "Failed to fetch file count of collection id ${item!.collection.id}",
-                                    );
-                                  }
-                                  return Text(
-                                    "",
-                                    style: textTheme.small.copyWith(
-                                      color: colorScheme.textMuted,
-                                    ),
-                                  );
-                                }
-                              },
-                            )
-                          : throw "CollectionWithThumbnail item cannot be null",
+                            );
+                          } else {
+                            if (snapshot.hasError) {
+                              Logger("AlbumListItemWidget").severe(
+                                "Failed to fetch file count of collection id ${item.collection.id}",
+                              );
+                            }
+                            return Text(
+                              "",
+                              style: textTheme.small.copyWith(
+                                color: colorScheme.textMuted,
+                              ),
+                            );
+                          }
+                        },
+                      )
                     ],
                   ),
                 ),

@@ -169,7 +169,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                                           onTap: () =>
                                               _albumListItemOnTap(item),
                                           child: AlbumListItemWidget(
-                                            item: item,
+                                            item,
                                           ),
                                         );
                                       },
