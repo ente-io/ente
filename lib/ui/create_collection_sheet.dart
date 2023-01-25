@@ -194,10 +194,18 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
                           ),
                         ),
                       ),
-                      const SafeArea(
-                        child: Padding(
-                          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
-                          child: ButtonWidget(
+                      SafeArea(
+                        child: Container(
+                          //inner stroke of 1pt + 15 pts of top padding = 16 pts
+                          padding: const EdgeInsets.fromLTRB(16, 15, 16, 8),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(
+                                color: getEnteColorScheme(context).strokeFaint,
+                              ),
+                            ),
+                          ),
+                          child: const ButtonWidget(
                             buttonType: ButtonType.secondary,
                             buttonAction: ButtonAction.cancel,
                             isInAlert: true,
