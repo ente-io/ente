@@ -236,6 +236,7 @@ const PhotoFrame = ({
         deletedFileIds,
         search?.date,
         search?.location,
+        search?.person,
         activeCollection,
     ]);
 
