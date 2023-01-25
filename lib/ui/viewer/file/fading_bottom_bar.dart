@@ -12,8 +12,7 @@ import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/create_collection_sheet.dart'
-    as create_collection_sheet;
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/file/file_info_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -239,12 +238,11 @@ class FadingBottomBarState extends State<FadingBottomBar> {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
               Navigator.pop(context);
-              create_collection_sheet.createCollectionSheet(
+              createCollectionSheet(
                 selectedFiles,
                 null,
                 context,
-                actionType:
-                    create_collection_sheet.CollectionActionType.restoreFiles,
+                actionType: CollectionActionType.restoreFiles,
               );
             },
           ),

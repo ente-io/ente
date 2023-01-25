@@ -28,8 +28,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
-import 'package:photos/ui/create_collection_sheet.dart'
-    as create_collection_sheet;
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
@@ -329,11 +328,11 @@ class _HomeWidgetState extends State<HomeWidget> {
       _shouldRenderCreateCollectionSheet = false;
       ReceiveSharingIntent.reset();
       Future.delayed(const Duration(milliseconds: 10), () {
-        create_collection_sheet.createCollectionSheet(
+        createCollectionSheet(
           null,
           _sharedFiles,
           context,
-          actionType: create_collection_sheet.CollectionActionType.addFiles,
+          actionType: CollectionActionType.addFiles,
         );
       });
     }

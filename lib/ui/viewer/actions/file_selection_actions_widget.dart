@@ -18,8 +18,7 @@ import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/create_collection_sheet.dart'
-    as create_collection_sheet;
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -254,11 +253,11 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    create_collection_sheet.createCollectionSheet(
+    createCollectionSheet(
       widget.selectedFiles,
       null,
       context,
-      actionType: create_collection_sheet.CollectionActionType.moveFiles,
+      actionType: CollectionActionType.moveFiles,
     );
   }
 
@@ -267,7 +266,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    create_collection_sheet.createCollectionSheet(
+    createCollectionSheet(
       widget.selectedFiles,
       null,
       context,
@@ -347,11 +346,11 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    create_collection_sheet.createCollectionSheet(
+    createCollectionSheet(
       widget.selectedFiles,
       null,
       context,
-      actionType: create_collection_sheet.CollectionActionType.unHide,
+      actionType: CollectionActionType.unHide,
     );
   }
 

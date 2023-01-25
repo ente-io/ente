@@ -25,8 +25,7 @@ import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/create_collection_sheet.dart'
-    as create_collection_sheet;
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/file/custom_app_bar.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/dialog_util.dart';
@@ -273,11 +272,11 @@ class FadingAppBarState extends State<FadingAppBar> {
     final s = SelectedFiles();
     s.files.add(widget.file);
     Navigator.pop(context);
-    create_collection_sheet.createCollectionSheet(
+    createCollectionSheet(
       s,
       null,
       context,
-      actionType: create_collection_sheet.CollectionActionType.unHide,
+      actionType: CollectionActionType.unHide,
     );
   }
 
