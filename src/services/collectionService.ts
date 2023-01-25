@@ -54,8 +54,8 @@ import { User } from 'types/user';
 import {
     getNonHiddenCollections,
     isQuickLinkCollection,
-    isSharedByMe,
-    isSharedWithMe,
+    isOutgoingShare,
+    isIncomingShare,
     isSharedOnlyViaLink,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -831,9 +831,9 @@ export function getCollectionSummaries(
                 latestFile: collectionLatestFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id),
                 updationTime: collection.updationTime,
-                type: isSharedWithMe(collection, user)
+                type: isIncomingShare(collection, user)
                     ? CollectionSummaryType.incomingShare
-                    : isSharedByMe(collection)
+                    : isOutgoingShare(collection)
                     ? CollectionSummaryType.outgoingShare
                     : isSharedOnlyViaLink(collection)
                     ? CollectionSummaryType.sharedOnlyViaLink

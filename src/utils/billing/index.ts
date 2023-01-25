@@ -40,7 +40,7 @@ export function convertBytesToGBs(bytes: number, precision = 0): string {
 
 export function makeHumanReadableStorage(
     bytes: number,
-    round: 'round-up' | 'round-down' = 'round-down'
+    { roundUp } = { roundUp: false }
 ): string {
     if (bytes <= 0) {
         return '0 MB';
@@ -58,8 +58,8 @@ export function makeHumanReadableStorage(
     quantity = Number(quantity.toFixed(1));
 
     if (bytes >= 10 * ONE_GB) {
-        if (round === 'round-up') {
-            quantity = Math.round(quantity + 1);
+        if (roundUp) {
+            quantity = Math.ceil(quantity);
         } else {
             quantity = Math.round(quantity);
         }
