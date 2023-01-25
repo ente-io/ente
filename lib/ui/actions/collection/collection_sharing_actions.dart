@@ -50,13 +50,13 @@ class CollectionActions {
           ),
           const ButtonWidget(
             buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.second,
+            buttonAction: ButtonAction.cancel,
             isInAlert: true,
             shouldStickToDarkTheme: true,
             labelText: "Cancel",
           )
         ],
-        title: "Remove public link?",
+        title: "Remove public link",
         body:
             'This will remove the public link for accessing "${collection.name}".',
       );
@@ -64,19 +64,18 @@ class CollectionActions {
         if (result == ButtonAction.error) {
           showGenericErrorDialog(context: context);
         }
-        // return
         return result == ButtonAction.first;
+      } else {
+        return false;
       }
     }
     final dialog = createProgressDialog(
       context,
-      enable ? "Creating link..." : "Disabling link...",
+      "Creating link...",
     );
     try {
       await dialog.show();
-      enable
-          ? await CollectionsService.instance.createShareUrl(collection)
-          : await CollectionsService.instance.disableShareUrl(collection);
+      await CollectionsService.instance.createShareUrl(collection);
       dialog.hide();
       return true;
     } catch (e) {
