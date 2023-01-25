@@ -66,12 +66,14 @@ export async function createWindow(): Promise<BrowserWindow> {
         }
     });
     mainWindow.webContents.on('render-process-gone', (event, details) => {
+        mainWindow.webContents.reload();
         ElectronLog.log('webContents event render-process-gone', details);
     });
     mainWindow.webContents.on('destroyed', () => {
         ElectronLog.log('webContents event destroyed');
     });
     mainWindow.webContents.on('unresponsive', () => {
+        mainWindow.webContents.forcefullyCrashRenderer();
         ElectronLog.log('webContents event unresponsive');
     });
 
