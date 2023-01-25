@@ -111,8 +111,12 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         if (snapshot.hasData) {
           return _getSharedCollectionsGallery(snapshot.data!);
         } else if (snapshot.hasError) {
-          _logger.shout(snapshot.error);
-          return Center(child: Text(snapshot.error.toString()));
+          _logger.severe(
+            "critical: failed to load share gallery",
+            snapshot.error,
+            snapshot.stackTrace,
+          );
+          return const Center(child: Text("Something went wrong."));
         } else {
           return const EnteLoadingWidget();
         }
