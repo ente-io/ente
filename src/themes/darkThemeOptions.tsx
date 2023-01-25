@@ -232,20 +232,7 @@ const darkThemeOptions = createTheme({
         MuiSvgIcon: {
             styleOverrides: {
                 root: ({ ownerState }) => {
-                    switch (ownerState.color) {
-                        case 'primary':
-                            return {
-                                color: '#ffffff',
-                            };
-                        case 'secondary':
-                            return {
-                                color: 'rgba(255,255,255,0.24)',
-                            };
-                        case 'disabled':
-                            return {
-                                color: 'rgba(255, 255, 255, 0.16)',
-                            };
-                    }
+                    return { ...setColor(ownerState) };
                 },
             },
         },
@@ -253,21 +240,7 @@ const darkThemeOptions = createTheme({
         MuiIconButton: {
             styleOverrides: {
                 root: ({ ownerState }) => {
-                    switch (ownerState.color) {
-                        case 'primary':
-                            return {
-                                color: '#ffffff',
-                            };
-                        case 'secondary':
-                            return {
-                                color: 'rgba(255,255,255,0.24)',
-                            };
-                    }
-                    if (ownerState.disabled) {
-                        return {
-                            color: 'rgba(255, 255, 255, 0.16)',
-                        };
-                    }
+                    return { ...setColor(ownerState), padding: '12px' };
                 },
             },
         },
@@ -403,3 +376,19 @@ const darkThemeOptions = createTheme({
 });
 
 export default darkThemeOptions;
+function setColor(ownerState) {
+    switch (ownerState.color) {
+        case 'primary':
+            return {
+                color: '#ffffff',
+            };
+        case 'secondary':
+            return {
+                color: 'rgba(255,255,255,0.24)',
+            };
+        case 'disabled':
+            return {
+                color: 'rgba(255, 255, 255, 0.16)',
+            };
+    }
+}

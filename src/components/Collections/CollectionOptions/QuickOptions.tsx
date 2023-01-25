@@ -24,16 +24,17 @@ export function QuickOptions({
         <FlexWrapper sx={{ gap: '16px' }}>
             {!(
                 collectionSummaryType === CollectionSummaryType.trash ||
-                collectionSummaryType === CollectionSummaryType.favorites
+                collectionSummaryType === CollectionSummaryType.favorites ||
+                collectionSummaryType === CollectionSummaryType.incomingShare
             ) && (
                 <Tooltip
                     title={
+                        /*: collectionSummaryType ===
+                            CollectionSummaryType.incomingShare
+                          ? constants.SHARING_DETAILS*/
                         collectionSummaryType ===
                         CollectionSummaryType.outgoingShare
                             ? constants.MODIFY_SHARING
-                            : collectionSummaryType ===
-                              CollectionSummaryType.incomingShare
-                            ? constants.SHARING_DETAILS
                             : constants.SHARE_COLLECTION
                     }>
                     <IconButton>
@@ -69,7 +70,7 @@ export function QuickOptions({
                     <IconButton>
                         <DeleteOutlinedIcon
                             onClick={handleCollectionAction(
-                                CollectionActions.CONFIRM_DELETE,
+                                CollectionActions.CONFIRM_EMPTY_TRASH,
                                 false
                             )}
                         />
