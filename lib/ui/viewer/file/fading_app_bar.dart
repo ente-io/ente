@@ -271,7 +271,6 @@ class FadingAppBarState extends State<FadingAppBar> {
   Future<void> _handleUnHideRequest(BuildContext context) async {
     final s = SelectedFiles();
     s.files.add(widget.file);
-    Navigator.pop(context);
     createCollectionSheet(
       s,
       null,
