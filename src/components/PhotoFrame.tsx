@@ -237,6 +237,8 @@ const PhotoFrame = ({
         search?.date,
         search?.location,
         search?.person,
+        search?.thing,
+        search?.text,
         activeCollection,
     ]);
 
