@@ -1,19 +1,24 @@
 #!/bin/sh
 
-# Install CocoaPods using Homebrew.
-brew install cocoapods
+# by default, the execution directory of this script is the ci_scripts directory
+# CI_WORKSPACE is the directory of your cloned repo
+echo "🟩 Navigate from ($PWD) to ($CI_WORKSPACE)"
+cd $CI_WORKSPACE
 
-# Install Flutter
-brew install --cask flutter
+echo "🟩 Install Flutter"
+time git clone https://github.com/flutter/flutter.git -b stable $HOME/flutter
+export PATH="$PATH:$HOME/flutter/bin"
 
-# Run Flutter doctor
-flutter doctor
+echo "🟩 Flutter Precache"
+time flutter precache --ios
 
-# Get packages
-flutter packages get
+echo "🟩 Install Flutter Dependencies"
+time flutter pub get
 
-# Update generated files
-flutter pub run build_runner build
+echo "🟩 Install CocoaPods via Homebrew"
+time HOMEBREW_NO_AUTO_UPDATE=1 brew install cocoapods
 
-# Build ios app
-flutter build ios --no-codesign
+echo "🟩 Install CocoaPods dependencies..."
+time cd ios && pod install
+
+exit 0
