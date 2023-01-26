@@ -11,6 +11,7 @@ import 'package:photos/events/collection_updated_event.dart';
 import 'package:photos/events/local_photos_updated_event.dart';
 import 'package:photos/events/tab_changed_event.dart';
 import 'package:photos/events/user_logged_out_event.dart';
+import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/services/collections_service.dart';
@@ -69,8 +70,20 @@ class _SharedCollectionGalleryState extends State<SharedCollectionGallery>
         final List<CollectionWithThumbnail> outgoing = [];
         final List<CollectionWithThumbnail> incoming = [];
         for (final file in files) {
-          final c = CollectionsService.instance
-              .getCollectionByID(file.collectionID!)!;
+          if (file.collectionID == null) {
+            _logger.severe("collection id should not be null");
+            continue;
+          }
+          final Collection? c =
+              CollectionsService.instance.getCollectionByID(file.collectionID!);
+          if (c == null) {
+            _logger
+                .severe("shared collection is not cached ${file.collectionID}");
+            CollectionsService.instance
+                .fetchCollectionByID(file.collectionID!)
+                .ignore();
+            continue;
+          }
           if (c.owner!.id == Configuration.instance.getUserID()) {
             if (c.hasSharees || c.hasLink || c.isSharedFilesCollection()) {
               outgoing.add(
