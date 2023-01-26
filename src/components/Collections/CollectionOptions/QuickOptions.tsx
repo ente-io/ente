@@ -37,13 +37,12 @@ export function QuickOptions({
                             ? constants.MODIFY_SHARING
                             : constants.SHARE_COLLECTION
                     }>
-                    <IconButton>
-                        <PeopleIcon
-                            onClick={handleCollectionAction(
-                                CollectionActions.SHOW_SHARE_DIALOG,
-                                false
-                            )}
-                        />
+                    <IconButton
+                        onClick={handleCollectionAction(
+                            CollectionActions.SHOW_SHARE_DIALOG,
+                            false
+                        )}>
+                        <PeopleIcon />
                     </IconButton>
                 </Tooltip>
             )}
@@ -55,25 +54,23 @@ export function QuickOptions({
                             ? constants.DOWNLOAD_FAVOURITES
                             : constants.DOWNLOAD_COLLECTION
                     }>
-                    <IconButton>
-                        <FileDownloadOutlinedIcon
-                            onClick={handleCollectionAction(
-                                CollectionActions.CONFIRM_DOWNLOAD,
-                                false
-                            )}
-                        />
+                    <IconButton
+                        onClick={handleCollectionAction(
+                            CollectionActions.CONFIRM_DOWNLOAD,
+                            false
+                        )}>
+                        <FileDownloadOutlinedIcon />
                     </IconButton>
                 </Tooltip>
             )}
             {collectionSummaryType === CollectionSummaryType.trash && (
                 <Tooltip title={constants.EMPTY_TRASH}>
-                    <IconButton>
-                        <DeleteOutlinedIcon
-                            onClick={handleCollectionAction(
-                                CollectionActions.CONFIRM_EMPTY_TRASH,
-                                false
-                            )}
-                        />
+                    <IconButton
+                        onClick={handleCollectionAction(
+                            CollectionActions.CONFIRM_EMPTY_TRASH,
+                            false
+                        )}>
+                        <DeleteOutlinedIcon />
                     </IconButton>
                 </Tooltip>
             )}

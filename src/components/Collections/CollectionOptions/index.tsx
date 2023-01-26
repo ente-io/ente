@@ -243,12 +243,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
             <OverflowMenu
                 ariaControls={'collection-options'}
-                triggerButtonIcon={<MoreHoriz />}
-                triggerButtonProps={{
-                    sx: {
-                        background: (theme) => theme.palette.fill.dark,
-                    },
-                }}>
+                triggerButtonIcon={<MoreHoriz />}>
                 {collectionSummaryType === CollectionSummaryType.trash ? (
                     <TrashCollectionOption
                         handleCollectionAction={handleCollectionAction}
