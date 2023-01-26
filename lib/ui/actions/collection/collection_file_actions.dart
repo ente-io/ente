@@ -50,6 +50,7 @@ extension CollectionFileActions on CollectionActions {
           isInAlert: true,
         ),
       ],
+      title: "Remove from album?",
       body: "Selected items will be removed from this album. Items which are "
           "only in this album will be moved to Uncategorized.",
       actionSheetType: ActionSheetType.defaultActionSheet,
