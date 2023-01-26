@@ -108,6 +108,7 @@ class ActionSheetWidget extends StatelessWidget {
                             padding: const EdgeInsets.only(bottom: 28),
                             child: ContentContainerWidget(
                               title: title,
+                              bodyWidget: bodyWidget,
                               body: body,
                               bodyHighlight: bodyHighlight,
                               actionSheetType: actionSheetType,
@@ -150,6 +151,7 @@ class ContentContainerWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
     final bool bodyMissing = body == null && bodyWidget == null;
+    debugPrint("body missing $bodyMissing");
     return Column(
       mainAxisSize: MainAxisSize.min,
       //todo: set cross axis to center when icon should be shown in place of body
