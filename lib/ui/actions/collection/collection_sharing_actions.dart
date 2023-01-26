@@ -11,6 +11,8 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -269,6 +271,7 @@ class CollectionActions {
     BuildContext bContext,
     Collection collection,
   ) async {
+    final textTheme = getEnteTextTheme(bContext);
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner!.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
@@ -321,10 +324,24 @@ class CollectionActions {
           isInAlert: true,
         ),
       ],
-      title: "Delete album?",
-      body: "This album will be deleted. Do you also want to delete the "
-          "photos (and videos) that are present in this album?",
-      bodyHighlight: "They will be deleted from all albums.",
+      bodyWidget: RichText(
+        text: TextSpan(
+          style: textTheme.body.copyWith(color: textMutedDark),
+          children: <TextSpan>[
+            const TextSpan(
+              text: 'Also delete the photos (and videos) present in this '
+                  'album from ',
+            ),
+            TextSpan(
+              text: 'all',
+              style: textTheme.body.copyWith(color: textBaseDark),
+            ),
+            const TextSpan(
+              text: ' other albums they are part of?',
+            ),
+          ],
+        ),
+      ),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult != null && actionResult == ButtonAction.error) {
