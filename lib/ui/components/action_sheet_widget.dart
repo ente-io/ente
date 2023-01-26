@@ -23,6 +23,7 @@ Future<ButtonAction?> showActionSheet({
   bool isDismissible = true,
   bool isCheckIconGreen = false,
   String? title,
+  Widget? bodyWidget,
   String? body,
   String? bodyHighlight,
 }) {
@@ -36,6 +37,7 @@ Future<ButtonAction?> showActionSheet({
     builder: (_) {
       return ActionSheetWidget(
         title: title,
+        bodyWidget: bodyWidget,
         body: body,
         bodyHighlight: bodyHighlight,
         actionButtons: buttons,
@@ -48,6 +50,7 @@ Future<ButtonAction?> showActionSheet({
 
 class ActionSheetWidget extends StatelessWidget {
   final String? title;
+  final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
   final List<ButtonWidget> actionButtons;
@@ -59,6 +62,7 @@ class ActionSheetWidget extends StatelessWidget {
     required this.actionSheetType,
     required this.isCheckIconGreen,
     this.title,
+    this.bodyWidget,
     this.body,
     this.bodyHighlight,
     super.key,
@@ -66,7 +70,8 @@ class ActionSheetWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isTitleAndBodyNull = title == null && body == null;
+    final isTitleAndBodyNull =
+        title == null && bodyWidget == null && body == null;
     final blur = MediaQuery.of(context).platformBrightness == Brightness.light
         ? blurMuted
         : blurBase;
@@ -125,14 +130,17 @@ class ActionSheetWidget extends StatelessWidget {
 
 class ContentContainerWidget extends StatelessWidget {
   final String? title;
+  final Widget? bodyWidget;
   final String? body;
   final String? bodyHighlight;
   final ActionSheetType actionSheetType;
   final bool isCheckIconGreen;
+
   const ContentContainerWidget({
     required this.actionSheetType,
     required this.isCheckIconGreen,
     this.title,
+    this.bodyWidget,
     this.body,
     this.bodyHighlight,
     super.key,
@@ -141,6 +149,7 @@ class ContentContainerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = getEnteTextTheme(context);
+    final bool bodyMissing = body == null && bodyWidget == null;
     return Column(
       mainAxisSize: MainAxisSize.min,
       //todo: set cross axis to center when icon should be shown in place of body
@@ -155,17 +164,19 @@ class ContentContainerWidget extends StatelessWidget {
                 style: textTheme.largeBold
                     .copyWith(color: textBaseDark), //constant color
               ),
-        title == null || body == null
+        title == null || bodyMissing
             ? const SizedBox.shrink()
             : const SizedBox(height: 19),
         actionSheetType == ActionSheetType.defaultActionSheet
-            ? body == null
+            ? bodyMissing
                 ? const SizedBox.shrink()
-                : Text(
-                    body!,
-                    style: textTheme.body
-                        .copyWith(color: textMutedDark), //constant color
-                  )
+                : (bodyWidget != null
+                    ? bodyWidget!
+                    : Text(
+                        body!,
+                        style: textTheme.body
+                            .copyWith(color: textMutedDark), //constant color
+                      ))
             : Icon(
                 Icons.check_outlined,
                 size: 48,
