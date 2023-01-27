@@ -208,7 +208,11 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
-      showGenericErrorDialog(context: context);
+      Future.delayed(
+        const Duration(milliseconds: 150),
+        () => showGenericErrorDialog(context: context),
+      );
+      rethrow;
     }
   }
 
