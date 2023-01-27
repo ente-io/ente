@@ -1,6 +1,6 @@
 import { FILE_TYPE } from 'constants/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
-import { FORMAT_MISSED_BY_FILE_TYPE_LIB } from 'constants/upload';
+import { FILE_TYPE_LIB_MISSED_FORMATS } from 'constants/upload';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -46,7 +46,7 @@ export async function getFileType(
         };
     } catch (e) {
         const fileFormat = getFileExtension(receivedFile.name);
-        const formatMissedByTypeDetection = FORMAT_MISSED_BY_FILE_TYPE_LIB.find(
+        const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
             (a) => a.exactType === fileFormat
         );
         if (formatMissedByTypeDetection) {

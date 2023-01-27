@@ -454,7 +454,9 @@ function PhotoViewer(props: Iprops) {
         } catch (e) {
             setExif({ key: file.src, value: null });
             const fileExtension = getFileExtension(file.metadata.title);
-            logError(e, 'exifr parsing failed', { extension: fileExtension });
+            logError(e, 'checkExifAvailable failed', {
+                extension: fileExtension,
+            });
         }
     };
 
