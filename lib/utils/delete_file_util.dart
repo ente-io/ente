@@ -471,6 +471,7 @@ Future<bool> shouldProceedWithDeletion(BuildContext context) async {
     body:
         "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
     firstButtonLabel: "Delete",
+    isCritical: true,
   );
   if (choice == null) {
     return false;
