@@ -35,8 +35,6 @@ Future<void> deleteFilesFromEverywhere(
   BuildContext context,
   List<File> files,
 ) async {
-  final dialog = createProgressDialog(context, "Deleting...");
-  await dialog.show();
   _logger.info("Trying to deleteFilesFromEverywhere " + files.toString());
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
@@ -60,7 +58,6 @@ Future<void> deleteFilesFromEverywhere(
   if (hasLocalOnlyFiles && Platform.isAndroid) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
-      await dialog.hide();
       return;
     }
   }
@@ -102,12 +99,9 @@ Future<void> deleteFilesFromEverywhere(
           uploadedFilesToBeTrashed.map((item) => item.fileID).toList();
       await TrashSyncService.instance
           .trashFilesOnServer(uploadedFilesToBeTrashed);
-      // await SyncService.instance
-      //     .deleteFilesOnServer(fileIDs);
       await FilesDB.instance.deleteMultipleUploadedFiles(fileIDs);
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
       showGenericErrorDialog(context: context);
       rethrow;
     }
@@ -138,7 +132,6 @@ Future<void> deleteFilesFromEverywhere(
       showShortToast(context, "Moved to trash");
     }
   }
-  await dialog.hide();
   if (uploadedFilesToBeTrashed.isNotEmpty) {
     RemoteSyncService.instance.sync(silently: true);
   }
@@ -153,8 +146,6 @@ Future<void> deleteFilesFromRemoteOnly(
     showToast(context, "Selected files are not on ente");
     return;
   }
-  final dialog = createProgressDialog(context, "Deleting...");
-  await dialog.show();
   _logger.info(
     "Trying to deleteFilesFromRemoteOnly " +
         files.map((f) => f.uploadedFileID).toString(),
@@ -172,7 +163,6 @@ Future<void> deleteFilesFromRemoteOnly(
     await FilesDB.instance.deleteMultipleUploadedFiles(uploadedFileIDs);
   } catch (e, s) {
     _logger.severe("Failed to delete files from remote", e, s);
-    await dialog.hide();
     showGenericErrorDialog(context: context);
     rethrow;
   }
@@ -194,7 +184,6 @@ Future<void> deleteFilesFromRemoteOnly(
     ),
   );
   SyncService.instance.sync();
-  await dialog.hide();
   RemoteSyncService.instance.sync(silently: true);
 }
 
@@ -202,8 +191,6 @@ Future<void> deleteFilesOnDeviceOnly(
   BuildContext context,
   List<File> files,
 ) async {
-  final dialog = createProgressDialog(context, "Deleting...");
-  await dialog.show();
   _logger.info("Trying to deleteFilesOnDeviceOnly" + files.toString());
   final List<String> localAssetIDs = [];
   final List<String> localSharedMediaIDs = [];
@@ -227,7 +214,6 @@ Future<void> deleteFilesOnDeviceOnly(
   if (hasLocalOnlyFiles && Platform.isAndroid) {
     final shouldProceed = await shouldProceedWithDeletion(context);
     if (!shouldProceed) {
-      await dialog.hide();
       return;
     }
   }
@@ -258,7 +244,6 @@ Future<void> deleteFilesOnDeviceOnly(
       ),
     );
   }
-  await dialog.hide();
 }
 
 Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
@@ -494,7 +479,6 @@ Future<void> showDeleteSheet(
   BuildContext context,
   SelectedFiles selectedFiles,
 ) async {
-  final count = selectedFiles.files.length;
   bool containsUploadedFile = false, containsLocalFile = false;
   for (final file in selectedFiles.files) {
     if (file.uploadedFileID != null) {
