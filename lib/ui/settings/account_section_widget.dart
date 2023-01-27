@@ -155,7 +155,7 @@ class AccountSectionWidget extends StatelessWidget {
     );
   }
 
-  Future<void> _onLogoutTapped(BuildContext context) async {
+  void _onLogoutTapped(BuildContext context) {
     showChoiceActionSheet(
       context,
       title: "Are you sure you want to logout?",

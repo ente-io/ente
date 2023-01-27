@@ -198,7 +198,6 @@ class UserService {
 
   Future<void> logout(BuildContext context) async {
     try {
-      await Future.delayed(const Duration(seconds: 3));
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await Configuration.instance.logout();
@@ -208,6 +207,8 @@ class UserService {
       }
     } catch (e) {
       _logger.severe(e);
+      //This future is for waiting for the dialog from which logout() is called
+      //to close and only then to show the error dialog.
       Future.delayed(
         const Duration(milliseconds: 150),
         () => showGenericErrorDialog(context: context),
