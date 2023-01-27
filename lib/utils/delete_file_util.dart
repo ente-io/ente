@@ -20,7 +20,6 @@ import 'package:photos/models/trash_item_request.dart';
 import 'package:photos/services/remote_sync_service.dart';
 import 'package:photos/services/sync_service.dart';
 import 'package:photos/services/trash_sync_service.dart';
-import 'package:photos/ui/common/dialogs.dart';
 import 'package:photos/ui/common/linear_progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
@@ -464,15 +463,18 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
 }
 
 Future<bool> shouldProceedWithDeletion(BuildContext context) async {
-  final choice = await showChoiceDialog(
+  final choice = await showNewChoiceDialog(
     context,
-    "Are you sure?",
-    "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
-    firstAction: "Cancel",
-    secondAction: "Delete",
-    secondActionColor: Colors.red,
+    title: "Are you sure?",
+    body:
+        "Some of the files you are trying to delete are only available on your device and cannot be recovered if deleted",
+    firstButtonLabel: "Delete",
   );
-  return choice == DialogUserChoice.secondChoice;
+  if (choice == null) {
+    return false;
+  } else {
+    return choice == ButtonAction.first;
+  }
 }
 
 Future<void> showDeleteSheet(
