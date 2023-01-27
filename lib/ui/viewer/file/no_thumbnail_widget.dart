@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:photos/theme/ente_theme.dart';
 
 class NoThumbnailWidget extends StatelessWidget {
-  final bool hasBorder;
-  const NoThumbnailWidget({this.hasBorder = true, Key? key}) : super(key: key);
+  final bool addBorder;
+  const NoThumbnailWidget({this.addBorder = true, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -11,7 +11,7 @@ class NoThumbnailWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1),
-        border: hasBorder
+        border: addBorder
             ? Border.all(
                 color: enteColorScheme.strokeFaint,
                 width: 1,

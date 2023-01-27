@@ -39,7 +39,7 @@ class AlbumListItemWidget extends StatelessWidget {
                             showFavForAlbumOnly: true,
                           )
                         : const NoThumbnailWidget(
-                            hasBorder: false,
+                            addBorder: false,
                           ),
                   ),
                 ),
@@ -66,7 +66,8 @@ class AlbumListItemWidget extends StatelessWidget {
                           } else {
                             if (snapshot.hasError) {
                               Logger("AlbumListItemWidget").severe(
-                                "Failed to fetch file count of collection id ${item.collection.id}",
+                                "Failed to fetch file count of collection",
+                                snapshot.error,
                               );
                             }
                             return Text(
