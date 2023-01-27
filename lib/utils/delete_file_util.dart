@@ -265,7 +265,7 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
   bool didDeletionStart = false;
   final result = await showNewChoiceDialog(
     context,
-    title: "Delete permanently",
+    title: "Permanently delete?",
     body: "This action cannot be undone",
     firstButtonLabel: "Delete",
     isCritical: true,
@@ -300,7 +300,9 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
 Future<bool> emptyTrash(BuildContext context) async {
   final result = await showNewChoiceDialog(
     context,
-    title: "Empty trash",
+    title: "Empty trash?",
+    body:
+        "All items in trash will be permanently deleted\n\nThis action cannot be undone",
     firstButtonLabel: "Empty",
     isCritical: true,
     firstButtonOnTap: () async {

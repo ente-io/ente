@@ -184,4 +184,12 @@ extension GalleyTypeExtension on GalleryType {
   bool showUnFavoriteOption() {
     return this == GalleryType.favorite;
   }
+
+  bool showRestoreOption() {
+    return this == GalleryType.trash;
+  }
+
+  bool showPermanentlyDeleteOption() {
+    return this == GalleryType.trash;
+  }
 }
