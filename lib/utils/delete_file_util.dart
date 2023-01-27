@@ -246,6 +246,7 @@ Future<void> deleteFilesOnDeviceOnly(
 }
 
 Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
+  bool didDeletionStart = false;
   final result = await showChoiceDialog(
     context,
     title: "Delete permanently",
@@ -254,6 +255,7 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
     isCritical: true,
     firstButtonOnTap: () async {
       try {
+        didDeletionStart = true;
         await TrashSyncService.instance.deleteFromTrash(files);
         Bus.instance.fire(
           FilesUpdatedEvent(
@@ -273,7 +275,7 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
     return false;
   }
   if (result == null || result == ButtonAction.cancel) {
-    return false;
+    return didDeletionStart ? true : false;
   } else {
     return true;
   }
