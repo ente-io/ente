@@ -1,4 +1,9 @@
-import { NULL_EXTRACTED_METADATA, NULL_LOCATION } from 'constants/upload';
+import {
+    EXIFLESS_FORMATS,
+    EXIF_LIBRARY_UNSUPPORTED_FORMATS,
+    NULL_EXTRACTED_METADATA,
+    NULL_LOCATION,
+} from 'constants/upload';
 import { ElectronFile, Location } from 'types/upload';
 import exifr from 'exifr';
 import piexif from 'piexifjs';
@@ -121,10 +126,19 @@ export async function getRawExif(
     try {
         exifData = await exifr.parse(receivedFile, EXIF_TAGS_NEEDED);
     } catch (e) {
-        logError(e, 'file missing exif data ', {
-            fileType: fileTypeInfo.exactType,
-        });
-        // ignore exif parsing errors
+        if (!EXIFLESS_FORMATS.includes(fileTypeInfo.mimeType)) {
+            if (
+                EXIF_LIBRARY_UNSUPPORTED_FORMATS.includes(fileTypeInfo.mimeType)
+            ) {
+                logError(e, 'exif library unsupported format', {
+                    fileType: fileTypeInfo.exactType,
+                });
+            } else {
+                logError(e, 'get raw exif failed', {
+                    fileType: fileTypeInfo.exactType,
+                });
+            }
+        }
     }
     return exifData;
 }
