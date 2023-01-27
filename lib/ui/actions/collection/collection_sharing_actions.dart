@@ -142,7 +142,7 @@ class CollectionActions {
     Collection collection,
     User user,
   ) async {
-    final result = await showNewChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: "Remove",
       body: "${user.email} will be removed",

@@ -91,7 +91,7 @@ DialogWidget choiceDialog({
 }
 
 ///Will return null if dismissed by tapping outside
-Future<ButtonAction?> showNewChoiceDialog(
+Future<ButtonAction?> showChoiceDialog(
   BuildContext context, {
   required String title,
   String? body,

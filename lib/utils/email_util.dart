@@ -253,7 +253,7 @@ Future<String> _clientInfo() async {
 }
 
 void _showNoMailAppsDialog(BuildContext context, String toEmail) {
-  showNewChoiceDialog(
+  showChoiceDialog(
     context,
     icon: Icons.email_outlined,
     title: 'Please email us at $toEmail',

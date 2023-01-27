@@ -118,7 +118,7 @@ class ChildSubscriptionWidget extends StatelessWidget {
   }
 
   Future<void> _leaveFamilyPlan(BuildContext context) async {
-    final choice = await showNewChoiceDialog(
+    final choice = await showChoiceDialog(
       context,
       title: "Leave family",
       body: "Are you sure that you want to leave the family plan?",

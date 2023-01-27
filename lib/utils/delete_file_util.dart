@@ -246,7 +246,7 @@ Future<void> deleteFilesOnDeviceOnly(
 }
 
 Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
-  final result = await showNewChoiceDialog(
+  final result = await showChoiceDialog(
     context,
     title: "Delete permanently",
     body: "This action cannot be undone",
@@ -280,7 +280,7 @@ Future<bool> deleteFromTrash(BuildContext context, List<File> files) async {
 }
 
 Future<bool> emptyTrash(BuildContext context) async {
-  final result = await showNewChoiceDialog(
+  final result = await showChoiceDialog(
     context,
     title: "Empty trash",
     firstButtonLabel: "Empty",
@@ -463,7 +463,7 @@ Future<List<String>> _tryDeleteSharedMediaFiles(List<String> localIDs) {
 }
 
 Future<bool> shouldProceedWithDeletion(BuildContext context) async {
-  final choice = await showNewChoiceDialog(
+  final choice = await showChoiceDialog(
     context,
     title: "Are you sure?",
     body:
