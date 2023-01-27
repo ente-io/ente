@@ -95,11 +95,28 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
         ),
       );
     }
+    if (widget.galleryType == GalleryType.trash) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.delete_forever_outlined,
+          iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
+          onTap: () async {
+            if (await deleteFromTrash(
+              context,
+              widget.selectedFiles.files.toList(),
+            )) {
+              widget.selectedFiles.clearAll();
+            }
+          },
+        ),
+      );
+    }
     iconsButton.add(
       IconButtonWidget(
         icon: Icons.adaptive.share_outlined,
         iconButtonType: IconButtonType.primary,
-        iconColor: getEnteColorScheme(context).blurStrokeBase,
+        iconColor: iconColor,
         onTap: () => shareSelected(
           context,
           shareButtonKey,

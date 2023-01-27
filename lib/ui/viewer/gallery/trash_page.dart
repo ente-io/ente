@@ -9,9 +9,9 @@ import 'package:photos/events/force_reload_trash_page_event.dart';
 import 'package:photos/models/gallery_type.dart';
 import 'package:photos/models/selected_files.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
+import 'package:photos/ui/viewer/actions/file_selection_overlay_bar.dart';
 import 'package:photos/ui/viewer/gallery/gallery.dart';
 import 'package:photos/ui/viewer/gallery/gallery_app_bar_widget.dart';
-import 'package:photos/ui/viewer/gallery/gallery_overlay_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 
 class TrashPage extends StatefulWidget {
@@ -109,10 +109,7 @@ class _TrashPageState extends State<TrashPage> {
               ),
             ),
           ),
-          GalleryOverlayWidget(
-            widget.overlayType,
-            widget._selectedFiles,
-          )
+          FileSelectionOverlayBar(GalleryType.trash, widget._selectedFiles)
         ],
       ),
     );

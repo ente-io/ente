@@ -233,6 +233,28 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       );
     }
 
+    if (widget.type.showRestoreOption()) {
+      secondList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.visibility,
+          labelText: "Restore",
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _restore,
+        ),
+      );
+    }
+
+    if (widget.type.showPermanentlyDeleteOption()) {
+      secondList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.delete_forever_outlined,
+          labelText: "Permanently delete now",
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _permanentlyDelete,
+        ),
+      );
+    }
+
     if (firstList.isNotEmpty || secondList.isNotEmpty) {
       if (firstList.isNotEmpty) {
         items.add(firstList);
@@ -418,6 +440,24 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           "${_cachedCollectionForSharedLink!.publicURLs?.first?.url}#$collectionKey";
       await Clipboard.setData(ClipboardData(text: url));
       showShortToast(context, "Link copied to clipboard");
+    }
+  }
+
+  void _restore() {
+    createCollectionSheet(
+      widget.selectedFiles,
+      null,
+      context,
+      actionType: CollectionActionType.restoreFiles,
+    );
+  }
+
+  Future<void> _permanentlyDelete() async {
+    if (await deleteFromTrash(
+      context,
+      widget.selectedFiles.files.toList(),
+    )) {
+      widget.selectedFiles.clearAll();
     }
   }
 }
