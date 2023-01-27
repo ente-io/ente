@@ -10,6 +10,7 @@ export const CopyButtonWrapper = styled(Box)`
     position: absolute;
     top: 0px;
     right: 0px;
+    margin-top: ${({ theme }) => theme.spacing(1)};
 `;
 
 export const CodeWrapper = styled('div')`
