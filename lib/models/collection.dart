@@ -88,6 +88,8 @@ class Collection {
     return (owner?.id ?? 0) == userID;
   }
 
+  String get collectionName => name ?? "Unnamed collection";
+
   void updateSharees(List<User> newSharees) {
     sharees?.clear();
     sharees?.addAll(newSharees);

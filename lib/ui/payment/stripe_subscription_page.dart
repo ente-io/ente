@@ -344,7 +344,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
       onPressed: () async {
         bool confirmAction = false;
         if (isRenewCancelled) {
-          final choice = await showNewChoiceDialog(
+          final choice = await showChoiceDialog(
             context,
             title: title,
             body: "Are you sure you want to renew?",
@@ -352,7 +352,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
           );
           confirmAction = choice == ButtonAction.first;
         } else {
-          final choice = await showNewChoiceDialog(
+          final choice = await showChoiceDialog(
             context,
             title: title,
             body: "Are you sure you want to cancel?",
@@ -429,7 +429,7 @@ class _StripeSubscriptionPageState extends State<StripeSubscriptionPage> {
               String stripPurChaseAction = 'buy';
               if (_isStripeSubscriber && _hasActiveSubscription) {
                 // confirm if user wants to change plan or not
-                final result = await showNewChoiceDialog(
+                final result = await showChoiceDialog(
                   context,
                   title: "Confirm plan change",
                   body: "Are you sure you want to change your plan?",

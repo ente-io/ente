@@ -11,6 +11,8 @@ import 'package:photos/models/magic_metadata.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
+import 'package:photos/theme/colors.dart';
+import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -50,13 +52,13 @@ class CollectionActions {
           ),
           const ButtonWidget(
             buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.second,
+            buttonAction: ButtonAction.cancel,
             isInAlert: true,
             shouldStickToDarkTheme: true,
             labelText: "Cancel",
           )
         ],
-        title: "Remove public link?",
+        title: "Remove public link",
         body:
             'This will remove the public link for accessing "${collection.name}".',
       );
@@ -64,19 +66,18 @@ class CollectionActions {
         if (result == ButtonAction.error) {
           showGenericErrorDialog(context: context);
         }
-        // return
         return result == ButtonAction.first;
+      } else {
+        return false;
       }
     }
     final dialog = createProgressDialog(
       context,
-      enable ? "Creating link..." : "Disabling link...",
+      "Creating link...",
     );
     try {
       await dialog.show();
-      enable
-          ? await CollectionsService.instance.createShareUrl(collection)
-          : await CollectionsService.instance.disableShareUrl(collection);
+      await CollectionsService.instance.createShareUrl(collection);
       dialog.hide();
       return true;
     } catch (e) {
@@ -141,7 +142,7 @@ class CollectionActions {
     Collection collection,
     User user,
   ) async {
-    final result = await showNewChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: "Remove",
       body: "${user.email} will be removed",
@@ -270,6 +271,7 @@ class CollectionActions {
     BuildContext bContext,
     Collection collection,
   ) async {
+    final textTheme = getEnteTextTheme(bContext);
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner!.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
@@ -322,10 +324,24 @@ class CollectionActions {
           isInAlert: true,
         ),
       ],
-      title: "Delete album?",
-      body: "This album will be deleted. Do you also want to delete the "
-          "photos (and videos) that are present in this album?",
-      bodyHighlight: "They will be deleted from all albums.",
+      bodyWidget: RichText(
+        text: TextSpan(
+          style: textTheme.body.copyWith(color: textMutedDark),
+          children: <TextSpan>[
+            const TextSpan(
+              text: 'Also delete the photos (and videos) present in this '
+                  'album from ',
+            ),
+            TextSpan(
+              text: 'all',
+              style: textTheme.body.copyWith(color: textBaseDark),
+            ),
+            const TextSpan(
+              text: ' other albums they are part of?',
+            ),
+          ],
+        ),
+      ),
       actionSheetType: ActionSheetType.defaultActionSheet,
     );
     if (actionResult != null && actionResult == ButtonAction.error) {

@@ -1,7 +1,6 @@
 import 'package:fast_base58/fast_base58.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
@@ -20,7 +19,7 @@ import 'package:photos/ui/components/blur_menu_item_widget.dart';
 import 'package:photos/ui/components/bottom_action_bar/expanded_menu_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
-import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/sharing/manage_links_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -234,6 +233,28 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       );
     }
 
+    if (widget.type.showRestoreOption()) {
+      secondList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.visibility,
+          labelText: "Restore",
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _restore,
+        ),
+      );
+    }
+
+    if (widget.type.showPermanentlyDeleteOption()) {
+      secondList.add(
+        BlurMenuItemWidget(
+          leadingIcon: Icons.delete_forever_outlined,
+          labelText: "Permanently delete",
+          menuItemColor: colorScheme.fillFaint,
+          onTap: _permanentlyDelete,
+        ),
+      );
+    }
+
     if (firstList.isNotEmpty || secondList.isNotEmpty) {
       if (firstList.isNotEmpty) {
         items.add(firstList);
@@ -255,7 +276,12 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await _selectionCollectionForAction(CollectionActionType.moveFiles);
+    createCollectionSheet(
+      widget.selectedFiles,
+      null,
+      context,
+      actionType: CollectionActionType.moveFiles,
+    );
   }
 
   Future<void> _addToAlbum() async {
@@ -263,7 +289,11 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await _selectionCollectionForAction(CollectionActionType.addFiles);
+    createCollectionSheet(
+      widget.selectedFiles,
+      null,
+      context,
+    );
   }
 
   Future<void> _onDeleteClick() async {
@@ -339,7 +369,12 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }
-    await _selectionCollectionForAction(CollectionActionType.unHide);
+    createCollectionSheet(
+      widget.selectedFiles,
+      null,
+      context,
+      actionType: CollectionActionType.unHide,
+    );
   }
 
   Future<void> _onCreatedSharedLinkClicked() async {
@@ -408,19 +443,21 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     }
   }
 
-  Future<Object?> _selectionCollectionForAction(
-    CollectionActionType type,
-  ) async {
-    return Navigator.push(
+  void _restore() {
+    createCollectionSheet(
+      widget.selectedFiles,
+      null,
       context,
-      PageTransition(
-        type: PageTransitionType.bottomToTop,
-        child: CreateCollectionPage(
-          widget.selectedFiles,
-          null,
-          actionType: type,
-        ),
-      ),
+      actionType: CollectionActionType.restoreFiles,
     );
+  }
+
+  Future<void> _permanentlyDelete() async {
+    if (await deleteFromTrash(
+      context,
+      widget.selectedFiles.files.toList(),
+    )) {
+      widget.selectedFiles.clearAll();
+    }
   }
 }

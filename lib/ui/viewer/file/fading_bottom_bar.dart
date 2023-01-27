@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/file.dart';
 import 'package:photos/models/file_type.dart';
@@ -13,7 +12,7 @@ import 'package:photos/models/trash_file.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
-import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/file/file_info_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -238,16 +237,11 @@ class FadingBottomBarState extends State<FadingBottomBar> {
             onPressed: () {
               final selectedFiles = SelectedFiles();
               selectedFiles.toggleSelection(widget.file);
-              Navigator.push(
+              createCollectionSheet(
+                selectedFiles,
+                null,
                 context,
-                PageTransition(
-                  type: PageTransitionType.bottomToTop,
-                  child: CreateCollectionPage(
-                    selectedFiles,
-                    null,
-                    actionType: CollectionActionType.restoreFiles,
-                  ),
-                ),
+                actionType: CollectionActionType.restoreFiles,
               );
             },
           ),

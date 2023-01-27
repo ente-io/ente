@@ -138,7 +138,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
   }
 
   Future<dynamic> _leaveAlbum(BuildContext context) async {
-    final result = await showNewChoiceDialog(
+    final result = await showChoiceDialog(
       context,
       title: "Leave shared album",
       body: "You will leave the album, and it will stop being visible to you",

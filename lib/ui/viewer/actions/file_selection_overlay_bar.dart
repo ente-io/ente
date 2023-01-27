@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/device_collection.dart';
 import 'package:photos/models/gallery_type.dart';
@@ -8,7 +7,7 @@ import 'package:photos/models/selected_files.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/components/bottom_action_bar/bottom_action_bar_widget.dart';
 import 'package:photos/ui/components/icon_button_widget.dart';
-import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/viewer/actions/file_selection_actions_widget.dart';
 import 'package:photos/utils/delete_file_util.dart';
 import 'package:photos/utils/magic_util.dart';
@@ -85,9 +84,31 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
           icon: Icons.visibility_off_outlined,
           iconButtonType: IconButtonType.primary,
           iconColor: iconColor,
-          onTap: () => _selectionCollectionForAction(
-            CollectionActionType.unHide,
-          ),
+          onTap: () {
+            createCollectionSheet(
+              widget.selectedFiles,
+              null,
+              context,
+              actionType: CollectionActionType.unHide,
+            );
+          },
+        ),
+      );
+    }
+    if (widget.galleryType == GalleryType.trash) {
+      iconsButton.add(
+        IconButtonWidget(
+          icon: Icons.delete_forever_outlined,
+          iconButtonType: IconButtonType.primary,
+          iconColor: iconColor,
+          onTap: () async {
+            if (await deleteFromTrash(
+              context,
+              widget.selectedFiles.files.toList(),
+            )) {
+              widget.selectedFiles.clearAll();
+            }
+          },
         ),
       );
     }
@@ -95,7 +116,7 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       IconButtonWidget(
         icon: Icons.adaptive.share_outlined,
         iconButtonType: IconButtonType.primary,
-        iconColor: getEnteColorScheme(context).blurStrokeBase,
+        iconColor: iconColor,
         onTap: () => shareSelected(
           context,
           shareButtonKey,
@@ -141,22 +162,6 @@ class _FileSelectionOverlayBarState extends State<FileSelectionOverlayBar> {
       visibilityVisible,
     );
     widget.selectedFiles.clearAll();
-  }
-
-  Future<Object?> _selectionCollectionForAction(
-    CollectionActionType type,
-  ) async {
-    return Navigator.push(
-      context,
-      PageTransition(
-        type: PageTransitionType.bottomToTop,
-        child: CreateCollectionPage(
-          widget.selectedFiles,
-          null,
-          actionType: type,
-        ),
-      ),
-    );
   }
 
   _selectedFilesListener() {

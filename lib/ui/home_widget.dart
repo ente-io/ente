@@ -28,7 +28,7 @@ import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/collections_gallery_widget.dart';
 import 'package:photos/ui/common/bottom_shadow.dart';
-import 'package:photos/ui/create_collection_page.dart';
+import 'package:photos/ui/create_collection_sheet.dart';
 import 'package:photos/ui/extents_page_view.dart';
 import 'package:photos/ui/home/grant_permissions_widget.dart';
 import 'package:photos/ui/home/header_widget.dart';
@@ -72,6 +72,7 @@ class _HomeWidgetState extends State<HomeWidget> {
   // ignore: unused_field
   StreamSubscription? _intentDataStreamSubscription;
   List<SharedMediaFile>? _sharedFiles;
+  bool _shouldRenderCreateCollectionSheet = false;
 
   late StreamSubscription<TabChangedEvent> _tabChangedEventSubscription;
   late StreamSubscription<SubscriptionPurchasedEvent>
@@ -236,6 +237,7 @@ class _HomeWidgetState extends State<HomeWidget> {
         ReceiveSharingIntent.getMediaStream().listen(
       (List<SharedMediaFile> value) {
         setState(() {
+          _shouldRenderCreateCollectionSheet = true;
           _sharedFiles = value;
         });
       },
@@ -317,9 +319,22 @@ class _HomeWidgetState extends State<HomeWidget> {
       return const LoadingPhotosWidget();
     }
 
-    if (_sharedFiles != null && _sharedFiles!.isNotEmpty) {
+    if (_sharedFiles != null &&
+        _sharedFiles!.isNotEmpty &&
+        _shouldRenderCreateCollectionSheet) {
+      //The gallery is getting rebuilt for some reason when the keyboard is up.
+      //So to stop showing multiple CreateCollectionSheets, this flag
+      //needs to be set to false the first time it is rendered.
+      _shouldRenderCreateCollectionSheet = false;
       ReceiveSharingIntent.reset();
-      return CreateCollectionPage(null, _sharedFiles);
+      Future.delayed(const Duration(milliseconds: 10), () {
+        createCollectionSheet(
+          null,
+          _sharedFiles,
+          context,
+          actionType: CollectionActionType.addFiles,
+        );
+      });
     }
     final isBottomInsetPresent = MediaQuery.of(context).viewPadding.bottom != 0;
 
