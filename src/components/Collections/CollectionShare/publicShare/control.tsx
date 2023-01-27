@@ -1,5 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import { FlexWrapper } from 'components/Container';
+import { GalleryContext } from 'pages/gallery';
 import { AppContext } from 'pages/_app';
 import React, { useContext, useState } from 'react';
 import {
@@ -22,7 +23,7 @@ export default function PublicShareControl({
     setPublicShareProp,
 }: Iprops) {
     const appContext = useContext(AppContext);
-
+    const galleryContext = useContext(GalleryContext);
     const [sharableLinkError, setSharableLinkError] = useState(null);
 
     const createSharableURLHelper = async () => {
@@ -30,6 +31,7 @@ export default function PublicShareControl({
             appContext.startLoading();
             const publicURL = await createShareableURL(collection);
             setPublicShareProp(publicURL);
+            await galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
@@ -43,6 +45,7 @@ export default function PublicShareControl({
             appContext.startLoading();
             await deleteShareableURL(collection);
             setPublicShareProp(null);
+            await galleryContext.syncWithRemote(false, true);
         } catch (e) {
             const errorMessage = handleSharingErrors(e);
             setSharableLinkError(errorMessage);
