@@ -197,20 +197,17 @@ class UserService {
   }
 
   Future<void> logout(BuildContext context) async {
-    final dialog = createProgressDialog(context, "Logging out...");
-    await dialog.show();
     try {
+      await Future.delayed(const Duration(seconds: 3));
       final response = await _enteDio.post("/users/logout");
       if (response.statusCode == 200) {
         await Configuration.instance.logout();
-        await dialog.hide();
         Navigator.of(context).popUntil((route) => route.isFirst);
       } else {
         throw Exception("Log out action failed");
       }
     } catch (e) {
       _logger.severe(e);
-      await dialog.hide();
       showGenericErrorDialog(context: context);
     }
   }
