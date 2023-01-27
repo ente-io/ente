@@ -123,7 +123,7 @@ class _TrashPageState extends State<TrashPage> {
           return Padding(
             padding: const EdgeInsets.all(16),
             child: Text(
-              'Items show the number the days remaining before permanent deletion',
+              'Items show the number of days remaining before permanent deletion',
               style:
                   Theme.of(context).textTheme.caption!.copyWith(fontSize: 16),
             ),

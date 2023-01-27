@@ -248,7 +248,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.delete_forever_outlined,
-          labelText: "Permanently delete now",
+          labelText: "Permanently delete",
           menuItemColor: colorScheme.fillFaint,
           onTap: _permanentlyDelete,
         ),
