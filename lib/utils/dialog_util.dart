@@ -157,6 +157,7 @@ Future<ButtonAction?> showChoiceActionSheet(
       isInAlert: true,
       onTap: firstButtonOnTap,
       buttonAction: firstButtonAction,
+      shouldStickToDarkTheme: true,
     ),
     ButtonWidget(
       buttonType: secondButtonType,
@@ -164,6 +165,7 @@ Future<ButtonAction?> showChoiceActionSheet(
       isInAlert: true,
       onTap: secondButtonOnTap,
       buttonAction: secondButtonAction,
+      shouldStickToDarkTheme: true,
     ),
   ];
   return showActionSheet(
