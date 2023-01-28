@@ -54,6 +54,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
     final enteTextTheme = getEnteTextTheme(context);
     final List<User> suggestedUsers = _getSuggestedUser();
     hideListOfEmails = suggestedUsers.isEmpty;
+    debugPrint("hide list $hideListOfEmails");
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
@@ -76,7 +77,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: _getEmailField(),
           ),
-          (hideListOfEmails || isKeypadOpen)
+          (hideListOfEmails)
               ? const Expanded(child: SizedBox())
               : Expanded(
                   child: Padding(
@@ -281,13 +282,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
           selectedEmail = '';
         }
         _email = value.trim();
-        if (_emailIsValid != EmailValidator.validate(_email)) {
-          setState(() {
-            _emailIsValid = EmailValidator.validate(_email);
-          });
-        } else if (_email.length < 2) {
-          setState(() {});
-        }
+        _emailIsValid = EmailValidator.validate(_email);
+        setState(() {});
       },
       autocorrect: false,
       keyboardType: TextInputType.emailAddress,
@@ -320,7 +316,13 @@ class _AddParticipantPage extends State<AddParticipantPage> {
         suggestedUsers.add(c.owner!);
       }
     }
+    if (_textController.text.trim().isNotEmpty) {
+      suggestedUsers.removeWhere((element) => !element.email
+          .toLowerCase()
+          .contains(_textController.text.trim().toLowerCase()));
+    }
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
+
     return suggestedUsers;
   }
 }
