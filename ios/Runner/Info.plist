@@ -31,6 +31,8 @@
 		<string>$(FLUTTER_BUILD_NUMBER)</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 		<key>MinimumOSVersion</key>
 		<string>12.0</string>
 		<key>NSCameraUsageDescription</key>
