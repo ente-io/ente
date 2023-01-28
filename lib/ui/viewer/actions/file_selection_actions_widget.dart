@@ -165,7 +165,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
           leadingIcon: Icons.remove_outlined,
           labelText: "Remove from album$removeSuffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: anyUploadedFiles ? _removeFilesFromAlbum : null,
+          onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
         ),
       );
     }

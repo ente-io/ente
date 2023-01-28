@@ -384,16 +384,19 @@ class CollectionActions {
       files,
       Configuration.instance.getUserID()!,
     );
-    if (isCollectionOwner) {
+    if (isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
       await collectionsService.removeFromCollection(
         collection.id,
         split.ownedByOtherUsers,
       );
-    } else {
+    } else if (!isCollectionOwner && split.ownedByCurrentUser.isNotEmpty) {
+      // collection is not owned by the user, just remove files owned
+      // by current user and return
       await collectionsService.removeFromCollection(
         collection.id,
         split.ownedByCurrentUser,
       );
+      return;
     }
 
     if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
