@@ -88,6 +88,9 @@ tokens has been documented [here](architecture/README.md).
 4. For Android, run `flutter build apk --release --flavor independent`
 5. For iOS, run `flutter build ios` 
 
+For maintainers, there is [additional documentation](RELEASES.md) on
+automatically publishing the main branch to App store, Play store and GitHub
+releases.
 
 ## 🙋‍♂️ Support
 
