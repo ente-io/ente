@@ -67,7 +67,8 @@ class Code {
 
   static String _getAccount(Uri uri) {
     try {
-      return uri.path.split(':')[1];
+      final String path = Uri.decodeComponent(uri.path);
+      return path.split(':')[1];
     } catch (e) {
       return "";
     }
@@ -75,7 +76,8 @@ class Code {
 
   static String _getIssuer(Uri uri) {
     try {
-      return uri.path.split(':')[0].substring(1);
+      final String path = Uri.decodeComponent(uri.path);
+      return path.split(':')[0].substring(1);
     } catch (e) {
       return "";
     }
