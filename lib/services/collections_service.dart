@@ -116,12 +116,8 @@ class CollectionsService {
           fireEventForCollectionDeleted = true;
         }
       }
-      if (ownerID != collection.owner!.id) {
-        debugPrint("Incoming collection updated ${collection.isDeleted}");
-      }
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection.owner?.id) {
-        debugPrint("Incoming collection unshared");
         await _db.deleteCollection(collection.id);
       } else {
         // keep entry for deletedCollection as collectionKey may be used during
