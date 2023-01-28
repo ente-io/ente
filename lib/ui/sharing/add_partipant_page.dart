@@ -1,5 +1,4 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/core/configuration.dart';
 import 'package:photos/models/collection.dart';
@@ -13,7 +12,6 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class AddParticipantPage extends StatefulWidget {
   final Collection collection;
@@ -170,11 +168,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingIcon: !selectAsViewer ? Icons.check : null,
                     onTap: () async {
-                      if (kDebugMode) {
-                        setState(() => {selectAsViewer = false});
-                      } else {
-                        showShortToast(context, "Coming soon...");
-                      }
+                      setState(() => {selectAsViewer = false});
                     },
                     isBottomBorderRadiusRemoved: true,
                   ),

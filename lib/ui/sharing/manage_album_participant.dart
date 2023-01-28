@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
@@ -11,7 +10,6 @@ import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
-import 'package:photos/utils/toast_util.dart';
 
 class ManageIndividualParticipant extends StatefulWidget {
   final Collection collection;
@@ -76,10 +74,6 @@ class _ManageIndividualParticipantState
               onTap: widget.user.isCollaborator
                   ? null
                   : () async {
-                      if (!kDebugMode) {
-                        showShortToast(context, "Coming soon...");
-                        return;
-                      }
                       final result =
                           await collectionActions.addEmailToCollection(
                         context,
