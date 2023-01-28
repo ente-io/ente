@@ -374,8 +374,17 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
         );
       } else {
         for (final file in widget.selectedFiles!.files) {
-          final File? currentFile =
-              await (FilesDB.instance.getFile(file.generatedID!));
+          File? currentFile;
+          if (file.uploadedFileID != null) {
+            currentFile = file;
+          } else if (file.generatedID != null) {
+            // when file is not uploaded, refresh the state from the db to
+            // ensure we have latest upload status for given file before
+            // queueing it up as pending upload
+            currentFile = await (FilesDB.instance.getFile(file.generatedID!));
+          } else if (file.generatedID == null) {
+            _logger.severe("generated id should not be null");
+          }
           if (currentFile == null) {
             _logger.severe("Failed to find fileBy genID");
             continue;
