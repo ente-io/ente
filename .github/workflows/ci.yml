@@ -50,7 +50,7 @@ jobs:
 
             # Build Play store aab.
             - name: Build
-              run: flutter build appbundle --release --flavor playstore && mv build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab build/app/outputs/flutter-apk/ente-auth.aab
+              run: flutter build appbundle --release --flavor playstore
               env:
                   SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
                   SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
@@ -82,5 +82,5 @@ jobs:
               with:
                   serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: build/app/outputs/flutter-apk/ente-auth.aab
+                  releaseFiles: build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab
                   track: internal
