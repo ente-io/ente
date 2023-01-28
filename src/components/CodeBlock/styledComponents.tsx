@@ -1,13 +1,12 @@
-import { IconButton } from '@mui/material';
 import { CenteredFlex } from 'components/Container';
-import { styled } from '@mui/material';
+import { Box, styled } from '@mui/material';
 export const Wrapper = styled(CenteredFlex)`
     position: relative;
     background: ${({ theme }) => theme.palette.accent.dark};
     border-radius: ${({ theme }) => theme.shape.borderRadius}px;
     min-height: 80px;
 `;
-export const CopyButtonWrapper = styled(IconButton)`
+export const CopyButtonWrapper = styled(Box)`
     position: absolute;
     top: 0px;
     right: 0px;

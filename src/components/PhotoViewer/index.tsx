@@ -468,7 +468,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const downloadFileHelper = async (file) => {
-        if (!file && props.enableDownload) {
+        if (file && props.enableDownload) {
             appContext.startLoading();
             await downloadFile(
                 file,
@@ -481,7 +481,7 @@ function PhotoViewer(props: Iprops) {
     };
 
     const copyToClipboardHelper = async (file: EnteFile) => {
-        if (!file && props.enableDownload && shouldShowCopyOption) {
+        if (file && props.enableDownload && shouldShowCopyOption) {
             appContext.startLoading();
             await copyFileToClipboard(file.src);
             appContext.finishLoading();

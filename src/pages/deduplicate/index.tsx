@@ -66,7 +66,6 @@ export default function Deduplicate() {
             return;
         }
         showNavBar(true);
-        setDuplicateFiles([]);
     }, []);
 
     useEffect(() => {

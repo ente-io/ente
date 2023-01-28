@@ -40,12 +40,13 @@ export default function SingleInputForm(props: SingleInputFormProps) {
 
     const submitForm = async (
         values: formValues,
-        { setFieldError }: FormikHelpers<formValues>
+        { setFieldError, resetForm }: FormikHelpers<formValues>
     ) => {
         SetLoading(true);
         await props.callback(values.inputValue, (message) =>
             setFieldError('inputValue', message)
         );
+        resetForm();
         SetLoading(false);
     };
 
