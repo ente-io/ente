@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/core/event_bus.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/events/collection_updated_event.dart';
@@ -56,8 +57,8 @@ class _CollectionPageState extends State<CollectionPage> {
     if (widget.hasVerifiedLock == false && widget.c.collection.isHidden()) {
       return const EmptyState();
     }
-    final appBarTypeValue = widget.c.collection.type == CollectionType
-        .uncategorized ? GalleryType.uncategorized : widget.appBarType;
+
+    final appBarTypeValue = _getGalleryType(widget.c.collection);
     final List<File>? initialFiles =
         widget.c.thumbnail != null ? [widget.c.thumbnail!] : null;
     final gallery = Gallery(
@@ -114,6 +115,21 @@ class _CollectionPageState extends State<CollectionPage> {
         ],
       ),
     );
+  }
+
+  GalleryType _getGalleryType(Collection c) {
+    final currentUserID = Configuration.instance.getUserID()!;
+    if (!c.isOwner(currentUserID)) {
+      return GalleryType.sharedCollection;
+    }
+    if (c.isDefaultHidden()) {
+      return GalleryType.hidden;
+    } else if (c.type == CollectionType.uncategorized) {
+      return GalleryType.uncategorized;
+    } else if (c.type == CollectionType.favorites) {
+      return GalleryType.favorite;
+    }
+    return widget.appBarType;
   }
 
   _selectedFilesListener() {
