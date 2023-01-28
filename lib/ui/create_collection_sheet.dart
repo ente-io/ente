@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:photos/core/configuration.dart';
 import 'package:photos/db/files_db.dart';
 import 'package:photos/models/collection.dart';
 import 'package:photos/models/collection_items.dart';
@@ -365,6 +366,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     try {
       final List<File> files = [];
       final List<File> filesPendingUpload = [];
+      final int currentUserID = Configuration.instance.getUserID()!;
       if (widget.sharedFiles != null) {
         filesPendingUpload.addAll(
           await convertIncomingSharedMediaToFile(
@@ -398,11 +400,20 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
         }
       }
       if (filesPendingUpload.isNotEmpty) {
-        // filesPendingUpload might be getting ignored during auto-upload
-        // because the user deleted these files from ente in the past.
-        await IgnoredFilesService.instance
-            .removeIgnoredMappings(filesPendingUpload);
-        await FilesDB.instance.insertMultiple(filesPendingUpload);
+        // Newly created collection might not be cached
+        final Collection? c =
+            CollectionsService.instance.getCollectionByID(collectionID);
+        if (c != null && c.owner!.id != currentUserID) {
+          showToast(context, "Can not upload to albums owned by others");
+          await dialog.hide();
+          return false;
+        } else {
+          // filesPendingUpload might be getting ignored during auto-upload
+          // because the user deleted these files from ente in the past.
+          await IgnoredFilesService.instance
+              .removeIgnoredMappings(filesPendingUpload);
+          await FilesDB.instance.insertMultiple(filesPendingUpload);
+        }
       }
       if (files.isNotEmpty) {
         await CollectionsService.instance.addToCollection(collectionID, files);
