@@ -48,7 +48,7 @@ file, that adheres to the above format.
 ### Android
 
 This repository's [GitHub
-releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apks)
+releases](https://github.com/ente-io/auth/releases/latest/download/ente-auth.apk)
 contains APKs, built straight from source. These builds keep themselves updated,
 without relying on third party stores.
 
