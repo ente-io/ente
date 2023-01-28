@@ -48,6 +48,15 @@ jobs:
                   SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
                   SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
+            # Build Play store aab.
+            - name: Build
+              run: flutter build appbundle --release --flavor playstore && mv build/app/outputs/bundle/playstoreRelease/app-playstore-release.aab build/app/outputs/flutter-apk/ente-auth.aab
+              env:
+                  SIGNING_KEY_PATH: "/home/runner/work/_temp/keystore/ente_auth_key.jks"
+                  SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+                  SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+                  SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+
             - name: Checksum
               run: sha256sum build/app/outputs/flutter-apk/ente-auth.apk > build/app/outputs/flutter-apk/sha256sum
 
@@ -71,9 +80,9 @@ jobs:
             # Upload to Play store
             - uses: ente/upload-google-play@v1
               with:
-                  serviceAccountJsonPlainText: ${{ SERVICE_ACCOUNT_JSON }}
+                  serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
                   packageName: io.ente.auth
-                  releaseFiles: build/app/outputs/flutter-apk/ente-auth.apk
+                  releaseFiles: build/app/outputs/flutter-apk/ente-auth.aab
                   track: internal
-                  #mappingFile: app/build/outputs/mapping/release/mapping.txt
-                  #debugSymbols: app/intermediates/merged_native_libs/release/out/lib
+                  mappingFile: build/app/outputs/mapping/playstoreRelease/mapping.txt
+                  debugSymbols: build/app/intermediates/merged_native_libs/playstoreRelease/out/lib/
