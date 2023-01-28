@@ -380,19 +380,26 @@ class CollectionActions {
   ) async {
     final int currentUserID = Configuration.instance.getUserID()!;
     final isCollectionOwner = collection.owner!.id == currentUserID;
-    if (!isCollectionOwner) {
-      // Todo: Support for removing own files from a collection owner by
-      // someone else will be added along with collaboration changes
-      showShortToast(context, "Only collection owner can remove");
-      return;
-    }
     final FilesSplit split = FilesSplit.split(
       files,
       Configuration.instance.getUserID()!,
     );
-    if (split.ownedByOtherUsers.isNotEmpty) {
-      //  Todo: Support for removing own files from a collection owner by
-      // someone else will be added along with collaboration changes
+    if (isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
+      await collectionsService.removeFromCollection(
+        collection.id,
+        split.ownedByOtherUsers,
+      );
+    } else if (!isCollectionOwner && split.ownedByCurrentUser.isNotEmpty) {
+      // collection is not owned by the user, just remove files owned
+      // by current user and return
+      await collectionsService.removeFromCollection(
+        collection.id,
+        split.ownedByCurrentUser,
+      );
+      return;
+    }
+
+    if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
       showShortToast(context, "Can only remove files owned by you");
       return;
     }

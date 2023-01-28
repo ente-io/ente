@@ -49,6 +49,7 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   late int currentUserID;
   late FilesSplit split;
   late CollectionActions collectionActions;
+  late bool isCollectionOwner;
 
   // _cachedCollectionForSharedLink is primarly used to avoid creating duplicate
   // links if user keeps on creating Create link button after selecting
@@ -61,6 +62,8 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
     split = FilesSplit.split(<File>[], currentUserID);
     widget.selectedFiles.addListener(_selectFileChangeListener);
     collectionActions = CollectionActions(CollectionsService.instance);
+    isCollectionOwner =
+        widget.collection != null && widget.collection!.isOwner(currentUserID);
     super.initState();
   }
 
@@ -88,17 +91,21 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
         ? " (${split.ownedByCurrentUser.length})"
             ""
         : "";
+    final int removeCount = split.ownedByCurrentUser.length +
+        (isCollectionOwner ? split.ownedByOtherUsers.length : 0);
+    final String removeSuffix = showPrefix
+        ? " ($removeCount)"
+            ""
+        : "";
     final String suffixInPending = split.ownedByOtherUsers.isNotEmpty
         ? " (${split.ownedByCurrentUser.length + split.pendingUploads.length})"
             ""
         : "";
+
     final bool anyOwnedFiles =
         split.pendingUploads.isNotEmpty || split.ownedByCurrentUser.isNotEmpty;
     final bool anyUploadedFiles = split.ownedByCurrentUser.isNotEmpty;
-    bool showRemoveOption = widget.type.showRemoveFromAlbum();
-    if (showRemoveOption && widget.type == GalleryType.sharedCollection) {
-      showRemoveOption = split.ownedByCurrentUser.isNotEmpty;
-    }
+    final bool showRemoveOption = widget.type.showRemoveFromAlbum();
     debugPrint('$runtimeType building  $mounted');
     final colorScheme = getEnteColorScheme(context);
     final List<List<BlurMenuItemWidget>> items = [];
@@ -156,9 +163,9 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
       secondList.add(
         BlurMenuItemWidget(
           leadingIcon: Icons.remove_outlined,
-          labelText: "Remove from album$suffix",
+          labelText: "Remove from album$removeSuffix",
           menuItemColor: colorScheme.fillFaint,
-          onTap: anyUploadedFiles ? _removeFilesFromAlbum : null,
+          onTap: removeCount > 0 ? _removeFilesFromAlbum : null,
         ),
       );
     }
@@ -301,9 +308,11 @@ class _FileSelectionActionWidgetState extends State<FileSelectionActionWidget> {
   }
 
   Future<void> _removeFilesFromAlbum() async {
-    if (split.pendingUploads.isNotEmpty || split.ownedByOtherUsers.isNotEmpty) {
+    if (split.pendingUploads.isNotEmpty) {
       widget.selectedFiles
           .unSelectAll(split.pendingUploads.toSet(), skipNotify: true);
+    }
+    if (!isCollectionOwner && split.ownedByOtherUsers.isNotEmpty) {
       widget.selectedFiles
           .unSelectAll(split.ownedByOtherUsers.toSet(), skipNotify: true);
     }

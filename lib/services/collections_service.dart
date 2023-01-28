@@ -138,7 +138,7 @@ class CollectionsService {
     }
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
-    watch.logAndReset("till DB insertion");
+    watch.logAndReset("till DB insertion ${updatedCollections.length}");
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
@@ -238,7 +238,7 @@ class CollectionsService {
                 (u) => u.id == userID,
               );
           if (matchingUser != null) {
-            _cachedUserIdToUser[userID] = collection.owner!;
+            _cachedUserIdToUser[userID] = matchingUser;
           }
         }
       }
@@ -1048,7 +1048,7 @@ class CollectionsService {
         params["fileIDs"].add(file.uploadedFileID);
       }
       await _enteDio.post(
-        "/collections/v2/remove-files",
+        "/collections/v3/remove-files",
         data: params,
       );
 
