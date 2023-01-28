@@ -84,5 +84,3 @@ jobs:
                   packageName: io.ente.auth
                   releaseFiles: build/app/outputs/flutter-apk/ente-auth.aab
                   track: internal
-                  mappingFile: build/app/outputs/mapping/playstoreRelease/mapping.txt
-                  debugSymbols: build/app/intermediates/merged_native_libs/playstoreRelease/out/lib/
