@@ -116,8 +116,12 @@ class CollectionsService {
           fireEventForCollectionDeleted = true;
         }
       }
+      if (ownerID != collection.owner!.id) {
+        debugPrint("Incoming collection updated ${collection.isDeleted}");
+      }
       // remove reference for incoming collections when unshared/deleted
       if (collection.isDeleted && ownerID != collection.owner?.id) {
+        debugPrint("Incoming collection unshared");
         await _db.deleteCollection(collection.id);
       } else {
         // keep entry for deletedCollection as collectionKey may be used during
@@ -138,7 +142,7 @@ class CollectionsService {
     }
     await _updateDB(updatedCollections);
     _prefs.setInt(_collectionsSyncTimeKey, maxUpdationTime);
-    watch.logAndReset("till DB insertion");
+    watch.logAndReset("till DB insertion ${updatedCollections.length}");
     final collections = await _db.getAllCollections();
     for (final collection in collections) {
       _cacheCollectionAttributes(collection);
@@ -238,7 +242,7 @@ class CollectionsService {
                 (u) => u.id == userID,
               );
           if (matchingUser != null) {
-            _cachedUserIdToUser[userID] = collection.owner!;
+            _cachedUserIdToUser[userID] = matchingUser;
           }
         }
       }
