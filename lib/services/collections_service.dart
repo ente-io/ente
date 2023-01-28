@@ -1052,7 +1052,7 @@ class CollectionsService {
         params["fileIDs"].add(file.uploadedFileID);
       }
       await _enteDio.post(
-        "/collections/v2/remove-files",
+        "/collections/v3/remove-files",
         data: params,
       );
 
