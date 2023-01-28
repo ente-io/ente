@@ -27,6 +27,9 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   StreamSubscription<SignedOutEvent> _signedOutEvent;
   StreamSubscription<SignedInEvent> _signedInEvent;
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+  ];
 
   @override
   void initState() {
@@ -78,7 +81,16 @@ class _AppState extends State<App> {
           theme: lightTheme,
           darkTheme: dartTheme,
           debugShowCheckedModeBanner: false,
-          supportedLocales: AppLocalizations.supportedLocales,
+          supportedLocales: supportedLocales,
+          localeListResolutionCallback: (locales, supportedLocales) {
+            for (Locale locale in locales) {
+              if (supportedLocales.contains(locale)) {
+                return locale;
+              }
+            }
+            // if device language is not supported by the app, use en as default
+            return const Locale('en');
+          },
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           routes: _getRoutes,
         ),
@@ -90,7 +102,16 @@ class _AppState extends State<App> {
         theme: lightThemeData,
         darkTheme: darkThemeData,
         debugShowCheckedModeBanner: false,
-        supportedLocales: AppLocalizations.supportedLocales,
+        supportedLocales: supportedLocales,
+        localeListResolutionCallback: (locales, supportedLocales) {
+          for (Locale locale in locales) {
+            if (supportedLocales.contains(locale)) {
+              return locale;
+            }
+          }
+          // if device language is not supported by the app, use en as default
+          return const Locale('en');
+        },
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
