@@ -113,7 +113,7 @@ class _SetupEnterSecretKeyPageState extends State<SetupEnterSecretKeyPage> {
                         final code = Code.fromAccountAndSecret(
                           _accountController.text.trim(),
                           _issuerController.text.trim(),
-                          _secretController.text.trim(),
+                          _secretController.text.trim().replaceAll(' ', ''),
                         );
                         // Verify the validity of the code
                         getTotp(code);
