@@ -82,12 +82,10 @@ export async function convertHEIC(
 ): Promise<Uint8Array> {
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
+    if (isPlatform('windows')) {
+        throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
+    }
     try {
-        if (isPlatform('windows')) {
-            throw Error(
-                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
-            );
-        }
         tempInputFilePath = await generateTempFilePath('input.heic');
         tempOutputFilePath = await generateTempFilePath('output.jpeg');
 
@@ -175,12 +173,10 @@ export async function generateImageThumbnail(
 ): Promise<Uint8Array> {
     let tempOutputFilePath: string;
     let quality = MAX_QUALITY;
+    if (isPlatform('windows')) {
+        throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
+    }
     try {
-        if (isPlatform('windows')) {
-            throw Error(
-                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
-            );
-        }
         tempOutputFilePath = await generateTempFilePath('thumb.jpeg');
         let thumbnail: Uint8Array;
         do {
