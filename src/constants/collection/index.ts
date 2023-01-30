@@ -6,6 +6,7 @@ export enum CollectionType {
     folder = 'folder',
     favorites = 'favorites',
     album = 'album',
+    uncategorized = 'uncategorized',
 }
 
 export enum CollectionSummaryType {
@@ -26,6 +27,9 @@ export enum COLLECTION_SORT_BY {
     CREATION_TIME_ASCENDING,
     UPDATION_TIME_DESCENDING,
 }
+
+export const UNCATEGORIZED_COLLECTION_NAME = 'Uncategorized';
+export const FAVORITE_COLLECTION_NAME = 'Favorites';
 
 export const COLLECTION_SHARE_DEFAULT_VALID_DURATION =
     10 * 24 * 60 * 60 * 1000 * 1000;

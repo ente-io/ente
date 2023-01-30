@@ -19,7 +19,6 @@ import {
     AddToCollectionRequest,
     MoveToCollectionRequest,
     EncryptedFileKey,
-    RemoveFromCollectionRequest,
     CreatePublicAccessTokenRequest,
     PublicURL,
     UpdatePublicURL,
@@ -39,6 +38,8 @@ import {
     ALL_SECTION,
     CollectionSummaryType,
     UNCATEGORIZED_SECTION,
+    UNCATEGORIZED_COLLECTION_NAME,
+    FAVORITE_COLLECTION_NAME,
 } from 'constants/collection';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
@@ -346,7 +347,7 @@ export const addToFavorites = async (file: EnteFile) => {
         let favCollection = await getFavCollection();
         if (!favCollection) {
             favCollection = await createCollection(
-                'Favorites',
+                FAVORITE_COLLECTION_NAME,
                 CollectionType.favorites
             );
             const localCollections = await getLocalCollections();
@@ -482,18 +483,8 @@ export const removeFromCollection = async (
     files: EnteFile[]
 ) => {
     try {
-        const token = getToken();
-        const request: RemoveFromCollectionRequest = {
-            collectionID: collectionID,
-            fileIDs: files.map((file) => file.id),
-        };
-
-        await HTTPService.post(
-            `${ENDPOINT}/collections/v2/remove-files`,
-            request,
-            null,
-            { 'X-Auth-Token': token }
-        );
+        const uncategorizedCollection = await getUncategorizedCollection();
+        await moveToCollection(uncategorizedCollection, collectionID, files);
     } catch (e) {
         logError(e, 'remove from collection failed ');
         throw e;
@@ -956,4 +947,22 @@ function getUncategorizedCollectionSummaries(
         updationTime: collectionsLatestFile.get(UNCATEGORIZED_SECTION)
             ?.updationTime,
     };
+}
+
+async function getUncategorizedCollection(): Promise<Collection> {
+    const collections = await getLocalCollections();
+    let uncategorizedCollection = collections.find(
+        (collection) => collection.type === CollectionType.uncategorized
+    );
+    if (!uncategorizedCollection) {
+        uncategorizedCollection = await createUnCategorizedCollection();
+    }
+    return uncategorizedCollection;
+}
+
+async function createUnCategorizedCollection() {
+    return createCollection(
+        UNCATEGORIZED_COLLECTION_NAME,
+        CollectionType.uncategorized
+    );
 }
