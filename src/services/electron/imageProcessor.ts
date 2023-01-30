@@ -78,9 +78,8 @@ class ElectronImageProcessorService {
                 e.message !==
                 CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
             ) {
-                logError(e, 'failed to convert heic natively');
+                logError(e, 'failed to generate image thumbnail natively');
             }
-            logError(e, 'failed to generate image thumbnail natively');
             throw e;
         }
     }
