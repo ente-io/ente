@@ -100,7 +100,6 @@ import { User } from 'types/user';
 import { getData, LS_KEYS } from 'utils/storage/localStorage';
 import { CenteredFlex } from 'components/Container';
 import { checkConnectivity } from 'utils/error/ui';
-import common from 'services/electron/common';
 
 export const DeadCenter = styled('div')`
     flex: 1;
@@ -138,7 +137,6 @@ export default function Gallery() {
     const newerFilesFN = useRef<FilesFn>(null);
 
     const setFilesOriginalWithReSyncIfRequired: SetFiles = (filesFn) => {
-        common.logRendererProcessMemoryUsage('memory before setFilesOriginal');
         setFilesOriginal((currentFiles) => {
             let newFiles: EnteFile[];
             if (typeof filesFn === 'function') {
