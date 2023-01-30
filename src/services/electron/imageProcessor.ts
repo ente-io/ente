@@ -1,5 +1,6 @@
 import { ElectronAPIs } from 'types/electron';
 import { ElectronFile } from 'types/upload';
+import { CustomError } from 'utils/error';
 import { convertBytesToHumanReadable } from 'utils/file/size';
 import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
@@ -37,7 +38,12 @@ class ElectronImageProcessorService {
             );
             return new Blob([convertedFileData]);
         } catch (e) {
-            logError(e, 'failed to convert heic natively');
+            if (
+                e.message !==
+                CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+            ) {
+                logError(e, 'failed to convert heic natively');
+            }
             throw e;
         }
     }
@@ -68,6 +74,12 @@ class ElectronImageProcessorService {
             );
             return thumb;
         } catch (e) {
+            if (
+                e.message !==
+                CustomError.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+            ) {
+                logError(e, 'failed to convert heic natively');
+            }
             logError(e, 'failed to generate image thumbnail natively');
             throw e;
         }

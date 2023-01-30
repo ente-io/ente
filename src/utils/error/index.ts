@@ -48,6 +48,7 @@ export enum CustomError {
     REQUEST_TIMEOUT = 'request taking too long',
     HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED = 'hidden collection sync file attempted',
     UNKNOWN_ERROR = 'Something went wrong, please try again',
+    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED = 'Windows native image processing is not supported',
 }
 
 function parseUploadErrorCodes(error) {
