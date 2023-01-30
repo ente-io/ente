@@ -763,13 +763,15 @@ class FilesDB {
     return convertToFiles(results)[0];
   }
 
-  Future<Set<String>> getExistingLocalFileIDs() async {
+  Future<Set<String>> getExistingLocalFileIDs(int ownerID) async {
     final db = await instance.database;
     final rows = await db.query(
       filesTable,
       columns: [columnLocalID],
       distinct: true,
-      where: '$columnLocalID IS NOT NULL',
+      where: '$columnLocalID IS NOT NULL AND ($columnOwnerID IS NULL OR '
+          '$columnOwnerID = ?)',
+      whereArgs: [ownerID],
     );
     final result = <String>{};
     for (final row in rows) {

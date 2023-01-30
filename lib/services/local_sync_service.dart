@@ -75,7 +75,8 @@ class LocalSyncService {
       return _existingSync!.future;
     }
     _existingSync = Completer<void>();
-    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
+    final int ownerID = Configuration.instance.getUserID()!;
+    final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
     _logger.info(
       existingLocalFileIDs.length.toString() + " localIDs were discovered",
     );
@@ -178,6 +179,7 @@ class LocalSyncService {
 
   Future<bool> syncAll() async {
     final stopwatch = EnteWatch("localSyncAll")..start();
+
     final localAssets = await getAllLocalAssets();
     _logger.info(
       "Loading allLocalAssets ${localAssets.length} took ${stopwatch.elapsedMilliseconds}ms ",
@@ -186,7 +188,8 @@ class LocalSyncService {
     _logger.info(
       "refreshDeviceFolderCountAndCover + allLocalAssets took ${stopwatch.elapsedMilliseconds}ms ",
     );
-    final existingLocalFileIDs = await _db.getExistingLocalFileIDs();
+    final int ownerID = Configuration.instance.getUserID()!;
+    final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
     final Map<String, Set<String>> pathToLocalIDs =
         await _db.getDevicePathIDToLocalIDMap();
     final invalidIDs = _getInvalidFileIDs().toSet();
