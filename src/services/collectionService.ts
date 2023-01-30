@@ -60,6 +60,14 @@ const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
 
+export const getCollectionLastSyncTime = async (collection: Collection) =>
+    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+
+export const setCollectionLastSyncTime = async (
+    collection: Collection,
+    time: number
+) => await localForage.setItem<number>(`${collection.id}-time`, time);
+
 const getCollectionWithSecrets = async (
     collection: EncryptedCollection,
     masterKey: string
@@ -197,6 +205,8 @@ export const syncCollections = async () => {
         if (!collection.isDeleted) {
             collections.push(collection);
             updationTime = Math.max(updationTime, collection.updationTime);
+        } else {
+            setCollectionLastSyncTime(collection, 0);
         }
     }
 

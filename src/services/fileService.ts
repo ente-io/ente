@@ -19,6 +19,10 @@ import { addLogLine } from 'utils/logging';
 import { isCollectionHidden } from 'utils/collection';
 import { CustomError } from 'utils/error';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import {
+    getCollectionLastSyncTime,
+    setCollectionLastSyncTime,
+} from './collectionService';
 
 const ENDPOINT = getEndpoint();
 const FILES_TABLE = 'files';
@@ -46,9 +50,6 @@ const setLocalFiles = async (files: EnteFile[]) => {
         throw e1;
     }
 };
-
-const getCollectionLastSyncTime = async (collection: Collection) =>
-    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
 
 export const syncFiles = async (
     collections: Collection[],
@@ -93,10 +94,7 @@ export const syncFiles = async (
             files.push(file);
         }
         await setLocalFiles(files);
-        await localForage.setItem(
-            `${collection.id}-time`,
-            collection.updationTime
-        );
+        setCollectionLastSyncTime(collection, collection.updationTime);
         setFiles(preservePhotoswipeProps([...sortFiles(mergeMetadata(files))]));
     }
     return sortFiles(mergeMetadata(files));
