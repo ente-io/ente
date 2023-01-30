@@ -551,6 +551,7 @@ export default function Gallery() {
             });
         } finally {
             await syncWithRemote(false, true);
+            setDeletedFileIds(new Set());
             finishLoading();
         }
     };
