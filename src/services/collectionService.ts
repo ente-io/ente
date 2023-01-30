@@ -38,6 +38,7 @@ import {
     COLLECTION_SORT_ORDER,
     ALL_SECTION,
     CollectionSummaryType,
+    UNCATEGORIZED_SECTION,
 } from 'constants/collection';
 import {
     NEW_COLLECTION_MAGIC_METADATA,
@@ -858,6 +859,14 @@ export function getCollectionSummaries(
         )
     );
 
+    collectionSummaries.set(
+        UNCATEGORIZED_SECTION,
+        getUncategorizedCollectionSummaries(
+            collectionFilesCount,
+            collectionLatestFiles
+        )
+    );
+
     return collectionSummaries;
 }
 
@@ -931,5 +940,20 @@ function getTrashedCollectionSummaries(
         latestFile: collectionsLatestFile.get(TRASH_SECTION),
         fileCount: collectionFilesCount.get(TRASH_SECTION) ?? 0,
         updationTime: collectionsLatestFile.get(TRASH_SECTION)?.updationTime,
+    };
+}
+
+function getUncategorizedCollectionSummaries(
+    collectionFilesCount: CollectionFilesCount,
+    collectionsLatestFile: CollectionLatestFiles
+): CollectionSummary {
+    return {
+        id: UNCATEGORIZED_SECTION,
+        name: constants.UNCATEGORIZED,
+        type: CollectionSummaryType.uncategorized,
+        latestFile: collectionsLatestFile.get(UNCATEGORIZED_SECTION),
+        fileCount: collectionFilesCount.get(UNCATEGORIZED_SECTION) ?? 0,
+        updationTime: collectionsLatestFile.get(UNCATEGORIZED_SECTION)
+            ?.updationTime,
     };
 }

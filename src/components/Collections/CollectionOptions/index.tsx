@@ -18,7 +18,7 @@ import OverflowMenu from 'components/OverflowMenu/menu';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
-import { FavoritiesCollectionOption } from './FavoritiesCollectionOption';
+import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
@@ -248,9 +248,10 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     <TrashCollectionOption
                         handleCollectionAction={handleCollectionAction}
                     />
-                ) : collectionSummaryType ===
-                  CollectionSummaryType.favorites ? (
-                    <FavoritiesCollectionOption
+                ) : collectionSummaryType === CollectionSummaryType.favorites ||
+                  collectionSummaryType ===
+                      CollectionSummaryType.uncategorized ? (
+                    <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
                     />
                 ) : collectionSummaryType ===

@@ -14,6 +14,7 @@ export enum CollectionSummaryType {
     album = 'album',
     archive = 'archive',
     trash = 'trash',
+    uncategorized = 'uncategorized',
     all = 'all',
     outgoingShare = 'outgoingShare',
     incomingShare = 'incomingShare',
@@ -41,12 +42,14 @@ export const COLLECTION_SORT_ORDER = new Map([
     [CollectionSummaryType.archived, 2],
     [CollectionSummaryType.archive, 3],
     [CollectionSummaryType.trash, 4],
+    [CollectionSummaryType.uncategorized, 4],
 ]);
 
 export const SYSTEM_COLLECTION_TYPES = new Set([
     CollectionSummaryType.all,
     CollectionSummaryType.archive,
     CollectionSummaryType.trash,
+    CollectionSummaryType.uncategorized,
 ]);
 
 export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
@@ -56,6 +59,7 @@ export const UPLOAD_NOT_ALLOWED_COLLECTION_TYPES = new Set([
     CollectionSummaryType.outgoingShare,
     CollectionSummaryType.sharedOnlyViaLink,
     CollectionSummaryType.trash,
+    CollectionSummaryType.uncategorized,
 ]);
 
 export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
@@ -66,4 +70,5 @@ export const OPTIONS_NOT_HAVING_COLLECTION_TYPES = new Set([
 export const HIDE_FROM_COLLECTION_BAR_TYPES = new Set([
     CollectionSummaryType.trash,
     CollectionSummaryType.archive,
+    CollectionSummaryType.uncategorized,
 ]);

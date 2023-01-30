@@ -12,7 +12,9 @@ interface Iprops {
     ) => (...args: any[]) => Promise<void>;
 }
 
-export function FavoritiesCollectionOption({ handleCollectionAction }: Iprops) {
+export function OnlyDownloadCollectionOption({
+    handleCollectionAction,
+}: Iprops) {
     return (
         <OverflowMenuOption
             startIcon={<FileDownloadOutlinedIcon />}
