@@ -18,7 +18,10 @@ import OverflowMenu from 'components/OverflowMenu/menu';
 import { CollectionSummaryType } from 'constants/collection';
 import { TrashCollectionOption } from './TrashCollectionOption';
 import { SharedCollectionOption } from './SharedCollectionOption';
+import { FavoritiesCollectionOption } from './FavoritiesCollectionOption';
+import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
+import { HorizontalFlex } from 'components/Container';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -188,7 +191,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
 
     const confirmDownloadCollection = () => {
         setDialogMessage({
-            title: constants.CONFIRM_DOWNLOAD_COLLECTION,
+            title: constants.DOWNLOAD_COLLECTION,
             content: constants.DOWNLOAD_COLLECTION_MESSAGE(),
             proceed: {
                 text: constants.DOWNLOAD,
@@ -232,30 +235,37 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     return (
-        <OverflowMenu
-            ariaControls={'collection-options'}
-            triggerButtonIcon={<MoreHoriz />}
-            triggerButtonProps={{
-                sx: {
-                    background: (theme) => theme.palette.fill.dark,
-                },
-            }}>
-            {collectionSummaryType === CollectionSummaryType.trash ? (
-                <TrashCollectionOption
-                    handleCollectionAction={handleCollectionAction}
-                />
-            ) : collectionSummaryType ===
-              CollectionSummaryType.incomingShare ? (
-                <SharedCollectionOption
-                    handleCollectionAction={handleCollectionAction}
-                />
-            ) : (
-                <AlbumCollectionOption
-                    IsArchived={IsArchived(activeCollection)}
-                    handleCollectionAction={handleCollectionAction}
-                />
-            )}
-        </OverflowMenu>
+        <HorizontalFlex sx={{ display: 'inline-flex', gap: '16px' }}>
+            <QuickOptions
+                handleCollectionAction={handleCollectionAction}
+                collectionSummaryType={collectionSummaryType}
+            />
+
+            <OverflowMenu
+                ariaControls={'collection-options'}
+                triggerButtonIcon={<MoreHoriz />}>
+                {collectionSummaryType === CollectionSummaryType.trash ? (
+                    <TrashCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.favorites ? (
+                    <FavoritiesCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.incomingShare ? (
+                    <SharedCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                ) : (
+                    <AlbumCollectionOption
+                        IsArchived={IsArchived(activeCollection)}
+                        handleCollectionAction={handleCollectionAction}
+                    />
+                )}
+            </OverflowMenu>
+        </HorizontalFlex>
     );
 };
 

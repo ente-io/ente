@@ -50,8 +50,8 @@ import { User } from 'types/user';
 import {
     getNonHiddenCollections,
     isQuickLinkCollection,
-    isSharedByMe,
-    isSharedWithMe,
+    isOutgoingShare,
+    isIncomingShare,
     isSharedOnlyViaLink,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
@@ -59,6 +59,17 @@ import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
 const COLLECTION_UPDATION_TIME = 'collection-updation-time';
+
+export const getCollectionLastSyncTime = async (collection: Collection) =>
+    (await localForage.getItem<number>(`${collection.id}-time`)) ?? 0;
+
+export const setCollectionLastSyncTime = async (
+    collection: Collection,
+    time: number
+) => await localForage.setItem<number>(`${collection.id}-time`, time);
+
+export const removeCollectionLastSyncTime = async (collection: Collection) =>
+    await localForage.removeItem(`${collection.id}-time`);
 
 const getCollectionWithSecrets = async (
     collection: EncryptedCollection,
@@ -197,6 +208,8 @@ export const syncCollections = async () => {
         if (!collection.isDeleted) {
             collections.push(collection);
             updationTime = Math.max(updationTime, collection.updationTime);
+        } else {
+            removeCollectionLastSyncTime(collection);
         }
     }
 
@@ -827,9 +840,9 @@ export function getCollectionSummaries(
                 latestFile: collectionLatestFiles.get(collection.id),
                 fileCount: collectionFilesCount.get(collection.id),
                 updationTime: collection.updationTime,
-                type: isSharedWithMe(collection, user)
+                type: isIncomingShare(collection, user)
                     ? CollectionSummaryType.incomingShare
-                    : isSharedByMe(collection)
+                    : isOutgoingShare(collection)
                     ? CollectionSummaryType.outgoingShare
                     : isSharedOnlyViaLink(collection)
                     ? CollectionSummaryType.sharedOnlyViaLink
