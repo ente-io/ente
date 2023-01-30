@@ -37,6 +37,7 @@ class CollectionActions {
     final dialog = createProgressDialog(
       context,
       "Creating link...",
+      isDismissible: true,
     );
     try {
       await dialog.show();
