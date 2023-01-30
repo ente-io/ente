@@ -592,12 +592,16 @@ class CollectionsService {
     }
   }
 
-  Future<void> createShareUrl(Collection collection) async {
+  Future<void> createShareUrl(
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
     try {
       final response = await _enteDio.post(
         "/collections/share-url",
         data: {
           "collectionID": collection.id,
+          "enableCollect": enableCollect,
         },
       );
       collection.publicURLs?.add(PublicURL.fromMap(response.data["result"]));
