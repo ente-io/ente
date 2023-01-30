@@ -68,6 +68,9 @@ export const setCollectionLastSyncTime = async (
     time: number
 ) => await localForage.setItem<number>(`${collection.id}-time`, time);
 
+export const removeCollectionLastSyncTime = async (collection: Collection) =>
+    await localForage.removeItem(`${collection.id}-time`);
+
 const getCollectionWithSecrets = async (
     collection: EncryptedCollection,
     masterKey: string
@@ -206,7 +209,7 @@ export const syncCollections = async () => {
             collections.push(collection);
             updationTime = Math.max(updationTime, collection.updationTime);
         } else {
-            setCollectionLastSyncTime(collection, 0);
+            removeCollectionLastSyncTime(collection);
         }
     }
 
