@@ -221,7 +221,9 @@ export default function Gallery() {
         useState<SearchResultSummary>(null);
     const syncInProgress = useRef(true);
     const resync = useRef(false);
-    const [deletedFileIds, setDeletedFileIds] = useState(new Set<number>());
+    const [deletedFileIds, setDeletedFileIds] = useState<Set<number>>(
+        new Set<number>()
+    );
     const { startLoading, finishLoading, setDialogMessage, ...appContext } =
         useContext(AppContext);
     const [collectionSummaries, setCollectionSummaries] =
