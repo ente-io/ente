@@ -9,6 +9,7 @@ import { isPlatform } from '../utils/main';
 import { isDev } from '../utils/common';
 import path from 'path';
 import log from 'electron-log';
+import { CustomErrors } from '../constants/errors';
 const shellescape = require('any-shell-escape');
 
 const asyncExec = util.promisify(exec);
@@ -82,6 +83,11 @@ export async function convertHEIC(
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
     try {
+        if (isPlatform('windows')) {
+            throw Error(
+                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+            );
+        }
         tempInputFilePath = await generateTempFilePath('input.heic');
         tempOutputFilePath = await generateTempFilePath('output.jpeg');
 
@@ -157,7 +163,7 @@ function constructConvertCommand(
             }
         );
     } else {
-        Error(`${process.platform} native heic convert not supported yet`);
+        throw Error(CustomErrors.INVALID_OS);
     }
     return convertCmd;
 }
@@ -170,6 +176,11 @@ export async function generateImageThumbnail(
     let tempOutputFilePath: string;
     let quality = MAX_QUALITY;
     try {
+        if (isPlatform('windows')) {
+            throw Error(
+                CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED
+            );
+        }
         tempOutputFilePath = await generateTempFilePath('thumb.jpeg');
         let thumbnail: Uint8Array;
         do {
@@ -271,7 +282,7 @@ function constructThumbnailGenerationCommand(
                 return cmdPart;
             });
     } else {
-        Error(
+        throw Error(
             `${process.platform} native thumbnail generation not supported yet`
         );
     }
