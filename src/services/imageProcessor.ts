@@ -161,7 +161,7 @@ function constructConvertCommand(
             }
         );
     } else {
-        throw Error(CustomErrors.INVALID_OS);
+        throw Error(CustomErrors.INVALID_OS(process.platform));
     }
     return convertCmd;
 }
@@ -278,9 +278,7 @@ function constructThumbnailGenerationCommand(
                 return cmdPart;
             });
     } else {
-        throw Error(
-            `${process.platform} native thumbnail generation not supported yet`
-        );
+        throw Error(CustomErrors.INVALID_OS(process.platform));
     }
     return thumbnailGenerationCmd;
 }
