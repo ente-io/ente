@@ -25,7 +25,7 @@ export enum CustomError {
     SUBSCRIPTION_EXPIRED = 'subscription expired',
     STORAGE_QUOTA_EXCEEDED = 'storage quota exceeded',
     SESSION_EXPIRED = 'session expired',
-    TYPE_DETECTION_FAILED = 'type detection failed',
+    INVALID_MIME_TYPE = 'invalid mime type',
     SIGNUP_FAILED = 'signup failed',
     FAV_COLLECTION_MISSING = 'favorite collection missing',
     INVALID_COLLECTION_OPERATION = 'invalid collection operation',

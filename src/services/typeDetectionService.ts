@@ -1,6 +1,9 @@
 import { FILE_TYPE } from 'constants/file';
 import { ElectronFile, FileTypeInfo } from 'types/upload';
-import { FILE_TYPE_LIB_MISSED_FORMATS } from 'constants/upload';
+import {
+    FILE_TYPE_LIB_MISSED_FORMATS,
+    KNOWN_NON_MEDIA_FORMATS,
+} from 'constants/upload';
 import { CustomError } from 'utils/error';
 import { getFileExtension } from 'utils/file';
 import { logError } from 'utils/sentry';
@@ -27,7 +30,7 @@ export async function getFileType(
         const mimTypeParts: string[] = typeResult.mime?.split('/');
 
         if (mimTypeParts?.length !== 2) {
-            throw Error(CustomError.TYPE_DETECTION_FAILED);
+            throw Error(CustomError.INVALID_MIME_TYPE);
         }
         switch (mimTypeParts[0]) {
             case TYPE_IMAGE:
@@ -52,9 +55,11 @@ export async function getFileType(
         if (formatMissedByTypeDetection) {
             return formatMissedByTypeDetection;
         }
-        logError(e, CustomError.TYPE_DETECTION_FAILED, {
-            fileFormat,
-        });
+        if (!KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+            logError(e, 'type detection failed', {
+                fileFormat,
+            });
+        }
         return {
             fileType: FILE_TYPE.OTHERS,
             exactType: fileFormat,
@@ -81,15 +86,17 @@ async function getFileTypeFromBuffer(buffer: Uint8Array) {
     try {
         const result = await FileType.fromBuffer(buffer);
         if (!result.mime) {
-            logError(
-                Error('mimetype missing from file type result'),
-                CustomError.TYPE_DETECTION_FAILED,
-                { result }
-            );
-            throw Error(CustomError.TYPE_DETECTION_FAILED);
+            let logableInfo = '';
+            try {
+                logableInfo = JSON.stringify(result);
+            } catch (e) {
+                logableInfo = 'failed to stringify result';
+            }
+            throw Error('mimetype missing from file type result' + logableInfo);
         }
         return result;
     } catch (e) {
-        throw Error(CustomError.TYPE_DETECTION_FAILED);
+        logError(e, 'getFileTypeFromBuffer failed');
+        throw e;
     }
 }
