@@ -140,13 +140,11 @@ export default function UtilitySection({ closeSidebar }) {
             <SidebarButton onClick={redirectToDeduplicatePage}>
                 {constants.DEDUPLICATE_FILES}
             </SidebarButton>
-            {isInternalUser() && (
-                <SidebarButton onClick={toggleMLSearch}>
-                    {mlSearchEnabled
-                        ? constants.DISABLE_ML_SEARCH
-                        : constants.ENABLE_ML_SEARCH}
-                </SidebarButton>
-            )}
+            <SidebarButton onClick={toggleMLSearch}>
+                {mlSearchEnabled
+                    ? constants.DISABLE_ML_SEARCH
+                    : constants.ENABLE_ML_SEARCH}
+            </SidebarButton>
 
             {/* <SidebarButton
                 onClick={() => {
