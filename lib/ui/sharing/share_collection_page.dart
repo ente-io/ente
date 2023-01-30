@@ -66,8 +66,38 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
 
     children.add(
       MenuItemWidget(
-        captionedTextWidget: CaptionedTextWidget(
-          title: _sharees.isEmpty ? "Add email" : "Add more",
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Add viewer",
+          makeTextBold: true,
+        ),
+        leadingIcon: Icons.add,
+        menuItemColor: getEnteColorScheme(context).fillFaint,
+        pressedColor: getEnteColorScheme(context).fillFaint,
+        borderRadius: 4.0,
+        isTopBorderRadiusRemoved: _sharees.isNotEmpty,
+        isBottomBorderRadiusRemoved: true,
+        onTap: () async {
+          routeToPage(
+            context,
+            AddParticipantPage(widget.collection, true),
+          ).then(
+            (value) => {
+              if (mounted) {setState(() => {})}
+            },
+          );
+        },
+      ),
+    );
+    children.add(
+      DividerWidget(
+        dividerType: DividerType.menu,
+        bgColor: getEnteColorScheme(context).fillFaint,
+      ),
+    );
+    children.add(
+      MenuItemWidget(
+        captionedTextWidget: const CaptionedTextWidget(
+          title: "Add collaborator",
           makeTextBold: true,
         ),
         leadingIcon: Icons.add,
@@ -76,7 +106,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         borderRadius: 4.0,
         isTopBorderRadiusRemoved: _sharees.isNotEmpty,
         onTap: () async {
-          routeToPage(context, AddParticipantPage(widget.collection)).then(
+          routeToPage(context, AddParticipantPage(widget.collection, false))
+              .then(
             (value) => {
               if (mounted) {setState(() => {})}
             },
@@ -202,6 +233,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             title: "Create public link",
+            makeTextBold: true,
           ),
           leadingIcon: Icons.link,
           menuItemColor: getEnteColorScheme(context).fillFaint,
@@ -222,6 +254,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             title: "Collect photos",
+            makeTextBold: true,
           ),
           leadingIcon: Icons.link,
           menuItemColor: getEnteColorScheme(context).fillFaint,

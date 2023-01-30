@@ -15,18 +15,18 @@ import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class AddParticipantPage extends StatefulWidget {
   final Collection collection;
+  final bool isAddingViewer;
 
-  const AddParticipantPage(this.collection, {super.key});
+  const AddParticipantPage(this.collection, this.isAddingViewer, {super.key});
 
   @override
   State<StatefulWidget> createState() => _AddParticipantPage();
 }
 
 class _AddParticipantPage extends State<AddParticipantPage> {
-  late bool selectAsViewer;
   String selectedEmail = '';
   String _email = '';
-  bool hideListOfEmails = false;
+  bool isEmailListEmpty = false;
   bool _emailIsValid = false;
   bool isKeypadOpen = false;
   late CollectionActions collectionActions;
@@ -37,7 +37,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
 
   @override
   void initState() {
-    selectAsViewer = true;
     collectionActions = CollectionActions(CollectionsService.instance);
     super.initState();
   }
@@ -52,13 +51,13 @@ class _AddParticipantPage extends State<AddParticipantPage> {
   Widget build(BuildContext context) {
     isKeypadOpen = MediaQuery.of(context).viewInsets.bottom > 100;
     final enteTextTheme = getEnteTextTheme(context);
+    final enteColorScheme = getEnteColorScheme(context);
     final List<User> suggestedUsers = _getSuggestedUser();
-    hideListOfEmails = suggestedUsers.isEmpty;
-    debugPrint("hide list $hideListOfEmails");
+    isEmailListEmpty = suggestedUsers.isEmpty;
     return Scaffold(
       resizeToAvoidBottomInset: isKeypadOpen,
       appBar: AppBar(
-        title: const Text("Add people"),
+        title: Text(widget.isAddingViewer ? "Add viewer" : "Add collaborator"),
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -69,7 +68,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               "Add a new email",
-              style: enteTextTheme.body,
+              style: enteTextTheme.small
+                  .copyWith(color: enteColorScheme.textMuted),
             ),
           ),
           const SizedBox(height: 4),
@@ -77,20 +77,32 @@ class _AddParticipantPage extends State<AddParticipantPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: _getEmailField(),
           ),
-          (hideListOfEmails)
-              ? const Expanded(child: SizedBox())
+          (isEmailListEmpty && widget.isAddingViewer)
+              ? const Expanded(child: SizedBox.shrink())
               : Expanded(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Column(
                       children: [
-                        const SizedBox(height: 24),
-                        const MenuSectionTitle(
-                          title: "or pick an existing one",
-                        ),
+                        !isEmailListEmpty
+                            ? const MenuSectionTitle(
+                                title: "Or pick an existing one",
+                              )
+                            : const SizedBox.shrink(),
                         Expanded(
                           child: ListView.builder(
                             itemBuilder: (context, index) {
+                              if (index >= suggestedUsers.length) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(
+                                    vertical: 8.0,
+                                  ),
+                                  child: MenuSectionDescriptionWidget(
+                                    content:
+                                        "Collaborators can add photos and videos to the shared album.",
+                                  ),
+                                );
+                              }
                               final currentUser = suggestedUsers[index];
                               return Column(
                                 children: [
@@ -136,8 +148,8 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 ],
                               );
                             },
-                            itemCount: suggestedUsers.length,
-
+                            itemCount: suggestedUsers.length +
+                                (widget.isAddingViewer ? 0 : 1),
                             // physics: const ClampingScrollPhysics(),
                           ),
                         ),
@@ -145,9 +157,6 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                     ),
                   ),
                 ),
-          const DividerWidget(
-            dividerType: DividerType.solid,
-          ),
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.only(
@@ -159,45 +168,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const MenuSectionTitle(title: "Add as"),
-                  MenuItemWidget(
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Collaborator",
-                    ),
-                    leadingIcon: Icons.edit_outlined,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
-                    pressedColor: getEnteColorScheme(context).fillFaint,
-                    trailingIcon: !selectAsViewer ? Icons.check : null,
-                    onTap: () async {
-                      setState(() => {selectAsViewer = false});
-                    },
-                    isBottomBorderRadiusRemoved: true,
-                  ),
-                  DividerWidget(
-                    dividerType: DividerType.menu,
-                    bgColor: getEnteColorScheme(context).fillFaint,
-                  ),
-                  MenuItemWidget(
-                    captionedTextWidget: const CaptionedTextWidget(
-                      title: "Viewer",
-                    ),
-                    leadingIcon: Icons.photo_outlined,
-                    menuItemColor: getEnteColorScheme(context).fillFaint,
-                    pressedColor: getEnteColorScheme(context).fillFaint,
-                    trailingIcon: selectAsViewer ? Icons.check : null,
-                    onTap: () async {
-                      setState(() => {selectAsViewer = true});
-                      // showShortToast(context, "yet to implement");
-                    },
-                    isTopBorderRadiusRemoved: true,
-                  ),
-                  !isKeypadOpen
-                      ? const MenuSectionDescriptionWidget(
-                          content:
-                              "Collaborators can add photos and videos to the shared album.",
-                        )
-                      : const SizedBox.shrink(),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: GradientButton(
@@ -211,7 +182,7 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 context,
                                 widget.collection,
                                 emailToAdd,
-                                role: selectAsViewer
+                                role: widget.isAddingViewer
                                     ? CollectionParticipantRole.viewer
                                     : CollectionParticipantRole.collaborator,
                               );
@@ -219,7 +190,9 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                                 Navigator.of(context).pop(true);
                               }
                             },
-                      text: selectAsViewer ? "Add viewer" : "Add collaborator",
+                      text: widget.isAddingViewer
+                          ? "Add viewer"
+                          : "Add collaborator",
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -317,9 +290,11 @@ class _AddParticipantPage extends State<AddParticipantPage> {
       }
     }
     if (_textController.text.trim().isNotEmpty) {
-      suggestedUsers.removeWhere((element) => !element.email
-          .toLowerCase()
-          .contains(_textController.text.trim().toLowerCase()));
+      suggestedUsers.removeWhere(
+        (element) => !element.email
+            .toLowerCase()
+            .contains(_textController.text.trim().toLowerCase()),
+      );
     }
     suggestedUsers.sort((a, b) => a.email.compareTo(b.email));
 
