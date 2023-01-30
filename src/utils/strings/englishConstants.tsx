@@ -690,7 +690,7 @@ const englishConstants = {
     LINK_EXPIRED_MESSAGE: 'This link has either expired or been disabled!',
     MANAGE_LINK: 'Manage link',
     LINK_TOO_MANY_REQUESTS: 'This album is too popular for us to handle!',
-    DISABLE_PUBLIC_SHARING: "'Disable public sharing",
+    DISABLE_PUBLIC_SHARING: 'Disable public sharing',
     DISABLE_PUBLIC_SHARING_MESSAGE:
         'Are you sure you want to disable public sharing?',
     FILE_DOWNLOAD: 'Allow downloads',
