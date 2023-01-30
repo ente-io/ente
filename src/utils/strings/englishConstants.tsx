@@ -588,6 +588,7 @@ const englishConstants = {
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
     UNCATEGORIZED: 'Uncategorized',
+    MOVE_TO_UNCATEGORIZED: 'Move to uncategorized',
     ARCHIVE: 'Archive',
     ARCHIVE_COLLECTION: 'Archive album',
     ARCHIVE_SECTION_NAME: 'Archive',
@@ -599,7 +600,9 @@ const englishConstants = {
     ADD: 'Add',
     SORT: 'Sort',
     REMOVE: 'Remove',
+    YES_REMOVE: 'Yes, Remove',
     CONFIRM_REMOVE: 'Confirm removal',
+    REMOVE_FROM_COLLECTION: 'Remove from album',
     TRASH: 'Trash',
     MOVE_TO_TRASH: 'Move to trash',
     TRASH_FILES_MESSAGE:
@@ -623,9 +626,9 @@ const englishConstants = {
         'You will leave the album, and it will stop being visible to you.',
     CONFIRM_REMOVE_MESSAGE: () => (
         <>
-            <p>Are you sure you want to remove these files from the album?</p>
             <p>
-                All files that are unique to this album will be moved to trash
+                Selected items will be removed from this album. Items which are
+                only in this album will be moved to Uncategorized.
             </p>
         </>
     ),
