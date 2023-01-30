@@ -587,6 +587,7 @@ const englishConstants = {
     THUMBNAIL_GENERATION_FAILED_INFO:
         'These files were uploaded, but unfortunately we could not generate the thumbnails for them.',
     UPLOAD_TO_COLLECTION: 'Upload to album',
+    UNCATEGORIZED: 'Uncategorized',
     ARCHIVE: 'Archive',
     ARCHIVE_COLLECTION: 'Archive album',
     ARCHIVE_SECTION_NAME: 'Archive',

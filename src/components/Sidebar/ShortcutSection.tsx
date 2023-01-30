@@ -1,11 +1,16 @@
 import React, { useContext } from 'react';
 import constants from 'utils/strings/constants';
 import { GalleryContext } from 'pages/gallery';
-import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
+import {
+    ARCHIVE_SECTION,
+    TRASH_SECTION,
+    UNCATEGORIZED_SECTION,
+} from 'constants/collection';
 import { CollectionSummaries } from 'types/collection';
 import ShortcutButton from './ShortcutButton';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
+import CategoryIcon from '@mui/icons-material/Category';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;
@@ -16,6 +21,11 @@ export default function ShortcutSection({
     collectionSummaries,
 }: Iprops) {
     const galleryContext = useContext(GalleryContext);
+
+    const openUncategorizedSection = () => {
+        galleryContext.setActiveCollection(UNCATEGORIZED_SECTION);
+        closeSidebar();
+    };
 
     const openTrashSection = () => {
         galleryContext.setActiveCollection(TRASH_SECTION);
@@ -29,6 +39,14 @@ export default function ShortcutSection({
 
     return (
         <>
+            <ShortcutButton
+                startIcon={<CategoryIcon />}
+                label={constants.UNCATEGORIZED}
+                count={
+                    collectionSummaries.get(UNCATEGORIZED_SECTION)?.fileCount
+                }
+                onClick={openUncategorizedSection}
+            />
             <ShortcutButton
                 startIcon={<DeleteOutline />}
                 label={constants.TRASH}
