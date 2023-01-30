@@ -12,6 +12,7 @@ import {
     isSharedFile,
     sortFiles,
     groupFilesBasedOnCollectionID,
+    groupFilesBasedOnID,
 } from 'utils/file';
 import {
     Collection,
@@ -56,6 +57,7 @@ import {
     isSharedOnlyViaLink,
 } from 'utils/collection';
 import ComlinkCryptoWorker from 'utils/comlink/ComlinkCryptoWorker';
+import { getLocalFiles } from './fileService';
 
 const ENDPOINT = getEndpoint();
 const COLLECTION_TABLE = 'collections';
@@ -483,7 +485,24 @@ export const removeFromCollection = async (
 ) => {
     try {
         const uncategorizedCollection = await getUncategorizedCollection();
-        await moveToCollection(uncategorizedCollection, collectionID, files);
+        const allFiles = await getLocalFiles();
+        const groupiedFiles = groupFilesBasedOnID(allFiles);
+        for (const file of files) {
+            if (groupiedFiles[file.id].length === 1) {
+                await moveToCollection(uncategorizedCollection, collectionID, [
+                    file,
+                ]);
+            } else {
+                const differentCollectionFile = groupiedFiles[file.id].find(
+                    (f) => f.collectionID !== collectionID
+                );
+                const collections = await getLocalCollections();
+                const collection = collections.find(
+                    (c) => c.id === differentCollectionFile?.collectionID
+                );
+                await moveToCollection(collection, collectionID, [file]);
+            }
+        }
     } catch (e) {
         logError(e, 'remove from collection failed ');
         throw e;
