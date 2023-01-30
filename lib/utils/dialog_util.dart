@@ -44,7 +44,8 @@ Future<ButtonAction?> showGenericErrorDialog({
     context: context,
     title: "Error",
     icon: Icons.error_outline_outlined,
-    body: "It looks like something went wrong. Please try again.",
+    body:
+        "It looks like something went wrong. Please retry after some time. If the error persists, please contact our support team.",
     isDismissible: isDismissible,
     buttons: const [
       ButtonWidget(

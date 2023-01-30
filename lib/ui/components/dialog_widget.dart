@@ -112,7 +112,7 @@ class ContentContainer extends StatelessWidget {
                 children: [
                   Icon(
                     icon,
-                    size: 48,
+                    size: 32,
                   ),
                 ],
               ),
