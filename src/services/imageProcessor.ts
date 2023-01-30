@@ -5,7 +5,7 @@ import { existsSync, rmSync } from 'fs';
 import { readFile, writeFile } from 'promise-fs';
 import { generateTempFilePath } from '../utils/temp';
 import { logErrorSentry } from './sentry';
-import { isPlatform } from '../utils/main';
+import { isPlatform } from '../utils/common/platform';
 import { isDev } from '../utils/common';
 import path from 'path';
 import log from 'electron-log';
@@ -82,9 +82,6 @@ export async function convertHEIC(
 ): Promise<Uint8Array> {
     let tempInputFilePath: string;
     let tempOutputFilePath: string;
-    if (isPlatform('windows')) {
-        throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
-    }
     try {
         tempInputFilePath = await generateTempFilePath('input.heic');
         tempOutputFilePath = await generateTempFilePath('output.jpeg');
@@ -173,9 +170,6 @@ export async function generateImageThumbnail(
 ): Promise<Uint8Array> {
     let tempOutputFilePath: string;
     let quality = MAX_QUALITY;
-    if (isPlatform('windows')) {
-        throw Error(CustomErrors.WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED);
-    }
     try {
         tempOutputFilePath = await generateTempFilePath('thumb.jpeg');
         let thumbnail: Uint8Array;
