@@ -73,6 +73,7 @@ import {
     handleCollectionOps,
     getSelectedCollection,
     isFavoriteCollection,
+    isUncategorizedCollection,
     getArchivedCollections,
     hasNonSystemCollections,
 } from 'utils/collection';
@@ -766,6 +767,10 @@ export default function Gallery() {
                             clearSelection={clearSelection}
                             activeCollection={activeCollection}
                             isFavoriteCollection={isFavoriteCollection(
+                                activeCollection,
+                                collections
+                            )}
+                            isUncategorizedCollection={isUncategorizedCollection(
                                 activeCollection,
                                 collections
                             )}

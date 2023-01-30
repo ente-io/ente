@@ -40,6 +40,7 @@ interface Props {
     unArchiveFilesHelper: () => void;
     activeCollection: number;
     isFavoriteCollection: boolean;
+    isUncategorizedCollection: boolean;
 }
 
 const SelectedFileOptions = ({
@@ -58,6 +59,7 @@ const SelectedFileOptions = ({
     unArchiveFilesHelper,
     activeCollection,
     isFavoriteCollection,
+    isUncategorizedCollection,
 }: Props) => {
     const { setDialogMessage } = useContext(AppContext);
     const addToCollection = () =>
@@ -134,6 +136,19 @@ const SelectedFileOptions = ({
                         </Tooltip>
                         <Tooltip title={constants.DELETE_PERMANENTLY}>
                             <IconButton onClick={permanentlyDeleteHandler}>
+                                <DeleteIcon />
+                            </IconButton>
+                        </Tooltip>
+                    </>
+                ) : isUncategorizedCollection ? (
+                    <>
+                        <Tooltip title={constants.MOVE}>
+                            <IconButton onClick={moveToCollection}>
+                                <MoveIcon />
+                            </IconButton>
+                        </Tooltip>
+                        <Tooltip title={constants.DELETE}>
+                            <IconButton onClick={trashHandler}>
                                 <DeleteIcon />
                             </IconButton>
                         </Tooltip>

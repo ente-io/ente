@@ -101,6 +101,17 @@ export function isFavoriteCollection(
         return collection.type === CollectionType.favorites;
     }
 }
+export function isUncategorizedCollection(
+    collectionID: number,
+    collections: Collection[]
+) {
+    const collection = getSelectedCollection(collectionID, collections);
+    if (!collection) {
+        return false;
+    } else {
+        return collection.type === CollectionType.uncategorized;
+    }
+}
 
 export async function downloadAllCollectionFiles(collectionID: number) {
     try {
