@@ -72,7 +72,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     final splitResult =
         widget.collection.getSharees().splitMatch((x) => x.isViewer);
     final List<User> viewers = splitResult.matched;
+    viewers.sort((a, b) => a.email.compareTo(b.email));
     final List<User> collaborators = splitResult.unmatched;
+    collaborators.sort((a, b) => a.email.compareTo(b.email));
 
     return Scaffold(
       body: CustomScrollView(
