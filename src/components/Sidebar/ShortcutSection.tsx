@@ -11,6 +11,7 @@ import ShortcutButton from './ShortcutButton';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
 import ArchiveOutlined from '@mui/icons-material/ArchiveOutlined';
 import CategoryIcon from '@mui/icons-material/Category';
+import { getUncategorizedCollection } from 'services/collectionService';
 interface Iprops {
     closeSidebar: () => void;
     collectionSummaries: CollectionSummaries;
@@ -22,8 +23,9 @@ export default function ShortcutSection({
 }: Iprops) {
     const galleryContext = useContext(GalleryContext);
 
-    const openUncategorizedSection = () => {
-        galleryContext.setActiveCollection(UNCATEGORIZED_SECTION);
+    const openUncategorizedSection = async () => {
+        const uncategorisedCollection = await getUncategorizedCollection();
+        galleryContext.setActiveCollection(uncategorisedCollection.id);
         closeSidebar();
     };
 

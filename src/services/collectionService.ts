@@ -37,7 +37,6 @@ import {
     COLLECTION_SORT_ORDER,
     ALL_SECTION,
     CollectionSummaryType,
-    UNCATEGORIZED_SECTION,
     UNCATEGORIZED_COLLECTION_NAME,
     FAVORITE_COLLECTION_NAME,
 } from 'constants/collection';
@@ -850,14 +849,6 @@ export function getCollectionSummaries(
         )
     );
 
-    collectionSummaries.set(
-        UNCATEGORIZED_SECTION,
-        getUncategorizedCollectionSummaries(
-            collectionFilesCount,
-            collectionLatestFiles
-        )
-    );
-
     return collectionSummaries;
 }
 
@@ -934,22 +925,7 @@ function getTrashedCollectionSummaries(
     };
 }
 
-function getUncategorizedCollectionSummaries(
-    collectionFilesCount: CollectionFilesCount,
-    collectionsLatestFile: CollectionLatestFiles
-): CollectionSummary {
-    return {
-        id: UNCATEGORIZED_SECTION,
-        name: constants.UNCATEGORIZED,
-        type: CollectionSummaryType.uncategorized,
-        latestFile: collectionsLatestFile.get(UNCATEGORIZED_SECTION),
-        fileCount: collectionFilesCount.get(UNCATEGORIZED_SECTION) ?? 0,
-        updationTime: collectionsLatestFile.get(UNCATEGORIZED_SECTION)
-            ?.updationTime,
-    };
-}
-
-async function getUncategorizedCollection(): Promise<Collection> {
+export async function getUncategorizedCollection(): Promise<Collection> {
     const collections = await getLocalCollections();
     let uncategorizedCollection = collections.find(
         (collection) => collection.type === CollectionType.uncategorized
