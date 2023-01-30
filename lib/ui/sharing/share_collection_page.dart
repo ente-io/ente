@@ -207,11 +207,8 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           menuItemColor: getEnteColorScheme(context).fillFaint,
           pressedColor: getEnteColorScheme(context).fillFaint,
           onTap: () async {
-            final bool result = await collectionActions.publicLinkToggle(
-              context,
-              widget.collection,
-              true,
-            );
+            final bool result =
+                await collectionActions.enableUrl(context, widget.collection);
             if (result && mounted) {
               setState(() => {});
             }

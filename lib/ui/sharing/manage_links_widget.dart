@@ -226,10 +226,9 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     menuItemColor: getEnteColorScheme(context).fillFaint,
                     pressedColor: getEnteColorScheme(context).fillFaint,
                     onTap: () async {
-                      final bool result = await sharingActions.publicLinkToggle(
+                      final bool result = await sharingActions.disableUrl(
                         context,
                         widget.collection!,
-                        false,
                       );
                       if (result && mounted) {
                         Navigator.of(context).pop();

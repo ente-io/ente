@@ -29,48 +29,10 @@ class CollectionActions {
 
   CollectionActions(this.collectionsService);
 
-  Future<bool> publicLinkToggle(
+  Future<bool> enableUrl(
     BuildContext context,
     Collection collection,
-    bool enable,
   ) async {
-    // confirm if user wants to disable the url
-    if (!enable) {
-      final ButtonAction? result = await showActionSheet(
-        context: context,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.critical,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.first,
-            shouldSurfaceExecutionStates: true,
-            labelText: "Yes, remove",
-            onTap: () async {
-              await CollectionsService.instance.disableShareUrl(collection);
-            },
-          ),
-          const ButtonWidget(
-            buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            labelText: "Cancel",
-          )
-        ],
-        title: "Remove public link",
-        body:
-            'This will remove the public link for accessing "${collection.name}".',
-      );
-      if (result != null) {
-        if (result == ButtonAction.error) {
-          showGenericErrorDialog(context: context);
-        }
-        return result == ButtonAction.first;
-      } else {
-        return false;
-      }
-    }
     final dialog = createProgressDialog(
       context,
       "Creating link...",
@@ -88,6 +50,43 @@ class CollectionActions {
         logger.severe("Failed to update shareUrl collection", e);
         showGenericErrorDialog(context: context);
       }
+      return false;
+    }
+  }
+
+  Future<bool> disableUrl(BuildContext context, Collection collection) async {
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Yes, remove",
+          onTap: () async {
+            await CollectionsService.instance.disableShareUrl(collection);
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Remove public link",
+      body:
+          'This will remove the public link for accessing "${collection.name}".',
+    );
+    if (result != null) {
+      if (result == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      return result == ButtonAction.first;
+    } else {
       return false;
     }
   }
