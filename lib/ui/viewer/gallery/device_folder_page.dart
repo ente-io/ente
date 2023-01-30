@@ -30,10 +30,12 @@ class DeviceFolderPage extends StatelessWidget {
 
   @override
   Widget build(Object context) {
+    final int? userID = Configuration.instance.getUserID();
     final gallery = Gallery(
       asyncLoader: (creationStartTime, creationEndTime, {limit, asc}) {
         return FilesDB.instance.getFilesInDeviceCollection(
           deviceCollection,
+          userID,
           creationStartTime,
           creationEndTime,
           limit: limit,
@@ -184,6 +186,7 @@ class _BackupHeaderWidgetState extends State<BackupHeaderWidget> {
   Future<List<File>> _filesInDeviceCollection() async {
     return (await FilesDB.instance.getFilesInDeviceCollection(
       widget.deviceCollection,
+      Configuration.instance.getUserID(),
       galleryLoadStartTime,
       galleryLoadEndTime,
     ))

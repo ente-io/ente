@@ -894,8 +894,9 @@ class CollectionsService {
     final params = <String, dynamic>{};
     params["collectionID"] = toCollectionID;
     final toCollectionKey = getCollectionKey(toCollectionID);
+    final int ownerID = Configuration.instance.getUserID()!;
     final Set<String> existingLocalIDS =
-        await FilesDB.instance.getExistingLocalFileIDs();
+        await FilesDB.instance.getExistingLocalFileIDs(ownerID);
     final batchedFiles = files.chunks(batchSize);
     for (final batch in batchedFiles) {
       params["files"] = [];
