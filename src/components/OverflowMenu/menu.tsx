@@ -20,7 +20,6 @@ const StyledMenu = styled(Menu)`
     & .MuiList-root {
         padding: 0;
         border: none;
-        width: 220px;
     }
 `;
 

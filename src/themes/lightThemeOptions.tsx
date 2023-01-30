@@ -300,7 +300,7 @@ const lightThemeOptions = createTheme({
             light: 'rgba(0, 0, 0)',
         },
         backdrop: {
-            main: 'rgba(255, 255, 255, 0.75)',
+            main: 'rgba(0, 0, 0, 0.65)',
             light: 'rgba(255, 255, 255, 0.3)',
         },
 

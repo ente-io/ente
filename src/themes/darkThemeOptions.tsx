@@ -131,7 +131,7 @@ const darkThemeOptions = createTheme({
                         backgroundColor: 'rgba(0,0,0,0.65)',
                     },
                     '& .MuiDialog-paper': {
-                        boxShadow: '0px 0px 10px 0px #252525',
+                        boxShadow: '0px 0px 10px 0px rgba(0, 0, 0, 0.25)',
                     },
                     '& .MuiDialogTitle-root': {
                         padding: '16px',
@@ -274,7 +274,7 @@ const darkThemeOptions = createTheme({
             light: 'rgba(255, 255, 255)',
         },
         backdrop: {
-            main: 'rgba(0, 0, 0, 0.65)',
+            main: 'rgba(255, 255, 255, 0.75)',
             light: 'rgba(0, 0, 0,0.2)',
         },
 

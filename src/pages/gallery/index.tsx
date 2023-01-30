@@ -133,10 +133,20 @@ export default function Gallery() {
     const [files, setFilesOriginal] = useState<EnteFile[]>(null);
 
     const filesUpdateInProgress = useRef(false);
+    const filesCount = useRef(0);
     const newerFilesFN = useRef<FilesFn>(null);
 
     const setFilesOriginalWithReSyncIfRequired: SetFiles = (filesFn) => {
-        setFilesOriginal(filesFn);
+        setFilesOriginal((currentFiles) => {
+            let newFiles: EnteFile[];
+            if (typeof filesFn === 'function') {
+                newFiles = filesFn(currentFiles);
+            } else {
+                newFiles = filesFn;
+            }
+            filesCount.current = newFiles?.length;
+            return newFiles;
+        });
         filesUpdateInProgress.current = false;
         if (newerFilesFN.current) {
             const newerFiles = newerFilesFN.current;
@@ -152,7 +162,7 @@ export default function Gallery() {
         }
         filesUpdateInProgress.current = true;
 
-        if (!files?.length || files.length < 5000) {
+        if (!filesCount.current || filesCount.current < 5000) {
             setFilesOriginalWithReSyncIfRequired(filesFn);
         } else {
             const waitTime = getData(LS_KEYS.WAIT_TIME) ?? 5000;
