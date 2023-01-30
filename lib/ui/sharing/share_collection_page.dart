@@ -198,7 +198,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
         ],
       );
     } else {
-      children.add(
+      children.addAll([
         MenuItemWidget(
           captionedTextWidget: const CaptionedTextWidget(
             title: "Create public link",
@@ -206,6 +206,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           leadingIcon: Icons.link,
           menuItemColor: getEnteColorScheme(context).fillFaint,
           pressedColor: getEnteColorScheme(context).fillFaint,
+          isBottomBorderRadiusRemoved: true,
           onTap: () async {
             final bool result =
                 await collectionActions.enableUrl(context, widget.collection);
@@ -214,7 +215,29 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
             }
           },
         ),
-      );
+        DividerWidget(
+          dividerType: DividerType.menu,
+          bgColor: getEnteColorScheme(context).fillFaint,
+        ),
+        MenuItemWidget(
+          captionedTextWidget: const CaptionedTextWidget(
+            title: "Collect photos",
+          ),
+          leadingIcon: Icons.link,
+          menuItemColor: getEnteColorScheme(context).fillFaint,
+          pressedColor: getEnteColorScheme(context).fillFaint,
+          onTap: () async {
+            final bool result = await collectionActions.enableUrl(
+              context,
+              widget.collection,
+              enableCollect: true,
+            );
+            if (result && mounted) {
+              setState(() => {});
+            }
+          },
+        ),
+      ]);
       if (_sharees.isEmpty && !hasUrl) {
         children.add(
           const MenuSectionDescriptionWidget(

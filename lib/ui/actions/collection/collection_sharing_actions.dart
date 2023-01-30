@@ -31,15 +31,19 @@ class CollectionActions {
 
   Future<bool> enableUrl(
     BuildContext context,
-    Collection collection,
-  ) async {
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
     final dialog = createProgressDialog(
       context,
       "Creating link...",
     );
     try {
       await dialog.show();
-      await CollectionsService.instance.createShareUrl(collection);
+      await CollectionsService.instance.createShareUrl(
+        collection,
+        enableCollect: enableCollect,
+      );
       dialog.hide();
       return true;
     } catch (e) {
