@@ -509,14 +509,17 @@ export const removeFromCollection = async (
     }
 };
 
-export const deleteCollection = async (collectionID: number) => {
+export const deleteCollection = async (
+    collectionID: number,
+    keepPhotos: boolean
+) => {
     try {
         const token = getToken();
 
         await HTTPService.delete(
-            `${ENDPOINT}/collections/v2/${collectionID}`,
+            `${ENDPOINT}/collections/v3/${collectionID}`,
             null,
-            null,
+            { collectionID, keepPhotos },
             { 'X-Auth-Token': token }
         );
     } catch (e) {
