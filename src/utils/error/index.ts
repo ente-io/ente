@@ -51,6 +51,8 @@ export const CustomError = {
     UNKNOWN_ERROR: 'Something went wrong, please try again',
     TYPE_DETECTION_FAILED: (fileFormat: string) =>
         `type detection failed ${fileFormat}`,
+    WINDOWS_NATIVE_IMAGE_PROCESSING_NOT_SUPPORTED:
+        'Windows native image processing is not supported',
 };
 
 function parseUploadErrorCodes(error) {
