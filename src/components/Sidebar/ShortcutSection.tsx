@@ -1,11 +1,7 @@
-import React, { useContext } from 'react';
+import React, { useContext, useRef, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { GalleryContext } from 'pages/gallery';
-import {
-    ARCHIVE_SECTION,
-    TRASH_SECTION,
-    UNCATEGORIZED_SECTION,
-} from 'constants/collection';
+import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
 import { CollectionSummaries } from 'types/collection';
 import ShortcutButton from './ShortcutButton';
 import DeleteOutline from '@mui/icons-material/DeleteOutline';
@@ -22,10 +18,23 @@ export default function ShortcutSection({
     collectionSummaries,
 }: Iprops) {
     const galleryContext = useContext(GalleryContext);
+    const unCategorizedCollectionId = useRef(0);
+    useEffect(() => {
+        const UncategorizedSection = async () => {
+            const uncategorisedCollection = await getUncategorizedCollection();
+            unCategorizedCollectionId.current = uncategorisedCollection.id;
+            console.log(unCategorizedCollectionId.current);
+            console.log('hi');
+        };
+        return () => {
+            UncategorizedSection;
+        };
+    }, []);
 
     const openUncategorizedSection = async () => {
         const uncategorisedCollection = await getUncategorizedCollection();
-        galleryContext.setActiveCollection(uncategorisedCollection.id);
+        unCategorizedCollectionId.current = uncategorisedCollection.id;
+        galleryContext.setActiveCollection(unCategorizedCollectionId.current);
         closeSidebar();
     };
 
@@ -38,16 +47,16 @@ export default function ShortcutSection({
         galleryContext.setActiveCollection(ARCHIVE_SECTION);
         closeSidebar();
     };
-
     return (
         <>
             <ShortcutButton
                 startIcon={<CategoryIcon />}
                 label={constants.UNCATEGORIZED}
-                count={
-                    collectionSummaries.get(UNCATEGORIZED_SECTION)?.fileCount
-                }
                 onClick={openUncategorizedSection}
+                count={
+                    collectionSummaries.get(unCategorizedCollectionId.current)
+                        .fileCount
+                }
             />
             <ShortcutButton
                 startIcon={<DeleteOutline />}

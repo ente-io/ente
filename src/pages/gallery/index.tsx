@@ -59,7 +59,6 @@ import PlanSelector from 'components/pages/gallery/PlanSelector';
 import Uploader from 'components/Upload/Uploader';
 import {
     ALL_SECTION,
-    UNCATEGORIZED_SECTION,
     ARCHIVE_SECTION,
     CollectionType,
     TRASH_SECTION,
@@ -314,9 +313,7 @@ export default function Gallery() {
         let collectionURL = '';
         if (activeCollection !== ALL_SECTION) {
             collectionURL += '?collection=';
-            if (activeCollection === UNCATEGORIZED_SECTION) {
-                collectionURL += constants.UNCATEGORIZED;
-            } else if (activeCollection === ARCHIVE_SECTION) {
+            if (activeCollection === ARCHIVE_SECTION) {
                 collectionURL += constants.ARCHIVE;
             } else if (activeCollection === TRASH_SECTION) {
                 collectionURL += constants.TRASH;
