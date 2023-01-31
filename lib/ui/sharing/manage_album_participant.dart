@@ -136,7 +136,6 @@ class _ManageIndividualParticipantState
               leadingIcon: Icons.not_interested_outlined,
               leadingIconColor: warning500,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
               onTap: () async {
                 final result = await collectionActions.removeParticipant(
                   context,
