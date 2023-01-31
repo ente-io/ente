@@ -49,6 +49,7 @@ export const CustomError = {
     HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED:
         'hidden collection sync file attempted',
     UNKNOWN_ERROR: 'Something went wrong, please try again',
+    INVALID_FILE_TYPE: (type: string) => `invalid file type- ${type}`,
 };
 
 function parseUploadErrorCodes(error) {

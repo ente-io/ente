@@ -60,11 +60,7 @@ export async function getFileType(
                 fileFormat,
             });
         }
-        return {
-            fileType: FILE_TYPE.OTHERS,
-            exactType: fileFormat,
-            mimeType: receivedFile instanceof File ? receivedFile.type : null,
-        };
+        throw Error(CustomError.INVALID_FILE_TYPE(fileFormat));
     }
 }
 
@@ -85,14 +81,16 @@ async function extractElectronFileType(file: ElectronFile) {
 async function getFileTypeFromBuffer(buffer: Uint8Array) {
     try {
         const result = await FileType.fromBuffer(buffer);
-        if (!result.mime) {
+        if (!result?.mime) {
             let logableInfo = '';
             try {
-                logableInfo = JSON.stringify(result);
+                logableInfo = `result: ${JSON.stringify(result)}`;
             } catch (e) {
                 logableInfo = 'failed to stringify result';
             }
-            throw Error('mimetype missing from file type result' + logableInfo);
+            throw Error(
+                `mimetype missing from file type result - ${logableInfo}`
+            );
         }
         return result;
     } catch (e) {
