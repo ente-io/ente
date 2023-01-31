@@ -181,9 +181,8 @@ class CollectionActions {
         showGenericErrorDialog(context: context);
       }
       return result == ButtonAction.first;
-    } else {
-      return false;
     }
+    return false;
   }
 
   // addEmailToCollection returns true if add operation was successful

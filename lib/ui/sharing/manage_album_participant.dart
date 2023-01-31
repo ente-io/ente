@@ -4,12 +4,16 @@ import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
+import 'package:photos/ui/components/action_sheet_widget.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/components/title_bar_title_widget.dart';
+import 'package:photos/utils/dialog_util.dart';
 
 class ManageIndividualParticipant extends StatefulWidget {
   final Collection collection;
@@ -34,6 +38,7 @@ class _ManageIndividualParticipantState
   Widget build(BuildContext context) {
     final colorScheme = getEnteColorScheme(context);
     final textTheme = getEnteTextTheme(context);
+    bool isConvertToViewSuccess = false;
     return Scaffold(
       appBar: AppBar(),
       body: Padding(
@@ -105,18 +110,51 @@ class _ManageIndividualParticipantState
               onTap: widget.user.isViewer
                   ? null
                   : () async {
-                      final result =
-                          await collectionActions.addEmailToCollection(
-                        context,
-                        widget.collection,
-                        widget.user.email,
-                        CollectionParticipantRole.viewer,
-                        showProgress: true,
+                      final ButtonAction? result = await showActionSheet(
+                        context: context,
+                        buttons: [
+                          ButtonWidget(
+                            buttonType: ButtonType.critical,
+                            isInAlert: true,
+                            shouldStickToDarkTheme: true,
+                            buttonAction: ButtonAction.first,
+                            shouldSurfaceExecutionStates: true,
+                            labelText: "Yes, convert to viewer",
+                            onTap: () async {
+                              isConvertToViewSuccess =
+                                  await collectionActions.addEmailToCollection(
+                                context,
+                                widget.collection,
+                                widget.user.email,
+                                CollectionParticipantRole.viewer,
+                              );
+                            },
+                          ),
+                          const ButtonWidget(
+                            buttonType: ButtonType.secondary,
+                            buttonAction: ButtonAction.cancel,
+                            isInAlert: true,
+                            shouldStickToDarkTheme: true,
+                            labelText: "Cancel",
+                          )
+                        ],
+                        title: "Change permissions?",
+                        body:
+                            '${widget.user.email} will not be able to add more photos to this album\n\nThey will still be able to remove existing photos added by them',
                       );
-                      if (result && mounted) {
-                        widget.user.role =
-                            CollectionParticipantRole.viewer.toStringVal();
-                        setState(() => {});
+                      if (result != null) {
+                        if (result == ButtonAction.error) {
+                          showGenericErrorDialog(context: context);
+                        }
+                        if (result == ButtonAction.first &&
+                            isConvertToViewSuccess &&
+                            mounted) {
+                          // reset value
+                          isConvertToViewSuccess = false;
+                          widget.user.role =
+                              CollectionParticipantRole.viewer.toStringVal();
+                          setState(() => {});
+                        }
                       }
                     },
               isTopBorderRadiusRemoved: true,
