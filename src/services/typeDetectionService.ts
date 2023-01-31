@@ -40,7 +40,7 @@ export async function getFileType(
                 fileType = FILE_TYPE.VIDEO;
                 break;
             default:
-                fileType = FILE_TYPE.OTHERS;
+                throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
         return {
             fileType,
@@ -48,6 +48,9 @@ export async function getFileType(
             mimeType: typeResult.mime,
         };
     } catch (e) {
+        if (e.message === CustomError.UNSUPPORTED_FILE_FORMAT) {
+            throw e;
+        }
         const fileFormat = getFileExtension(receivedFile.name);
         const formatMissedByTypeDetection = FILE_TYPE_LIB_MISSED_FORMATS.find(
             (a) => a.exactType === fileFormat
@@ -55,16 +58,13 @@ export async function getFileType(
         if (formatMissedByTypeDetection) {
             return formatMissedByTypeDetection;
         }
-        if (!KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
-            logError(e, 'type detection failed', {
-                fileFormat,
-            });
+        if (KNOWN_NON_MEDIA_FORMATS.includes(fileFormat)) {
+            throw Error(CustomError.UNSUPPORTED_FILE_FORMAT);
         }
-        return {
-            fileType: FILE_TYPE.OTHERS,
-            exactType: fileFormat,
-            mimeType: receivedFile instanceof File ? receivedFile.type : null,
-        };
+        logError(e, 'type detection failed', {
+            fileFormat,
+        });
+        throw Error(CustomError.TYPE_DETECTION_FAILED(fileFormat));
     }
 }
 
@@ -83,22 +83,15 @@ async function extractElectronFileType(file: ElectronFile) {
 }
 
 async function getFileTypeFromBuffer(buffer: Uint8Array) {
-    try {
-        const result = await FileType.fromBuffer(buffer);
-        if (!result?.mime) {
-            let logableInfo = '';
-            try {
-                logableInfo = `result: ${JSON.stringify(result)}`;
-            } catch (e) {
-                logableInfo = 'failed to stringify result';
-            }
-            throw Error(
-                `mimetype missing from file type result - ${logableInfo}`
-            );
+    const result = await FileType.fromBuffer(buffer);
+    if (!result?.mime) {
+        let logableInfo = '';
+        try {
+            logableInfo = `result: ${JSON.stringify(result)}`;
+        } catch (e) {
+            logableInfo = 'failed to stringify result';
         }
-        return result;
-    } catch (e) {
-        logError(e, 'getFileTypeFromBuffer failed');
-        throw e;
+        throw Error(`mimetype missing from file type result - ${logableInfo}`);
     }
+    return result;
 }

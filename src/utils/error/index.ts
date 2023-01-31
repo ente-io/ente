@@ -20,7 +20,7 @@ export const CustomError = {
     FAILED_TO_LOAD_WEB_WORKER: 'failed to load web worker',
     CHUNK_MORE_THAN_EXPECTED: 'chunks more than expected',
     CHUNK_LESS_THAN_EXPECTED: 'chunks less than expected',
-    UNSUPPORTED_FILE_FORMAT: 'unsupported file formats',
+    UNSUPPORTED_FILE_FORMAT: 'unsupported file format',
     FILE_TOO_LARGE: 'file too large',
     SUBSCRIPTION_EXPIRED: 'subscription expired',
     STORAGE_QUOTA_EXCEEDED: 'storage quota exceeded',
@@ -49,6 +49,8 @@ export const CustomError = {
     HIDDEN_COLLECTION_SYNC_FILE_ATTEMPTED:
         'hidden collection sync file attempted',
     UNKNOWN_ERROR: 'Something went wrong, please try again',
+    TYPE_DETECTION_FAILED: (fileFormat: string) =>
+        `type detection failed ${fileFormat}`,
 };
 
 function parseUploadErrorCodes(error) {
