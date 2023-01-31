@@ -186,11 +186,12 @@ class CollectionActions {
     }
   }
 
-  Future<bool?> addEmailToCollection(
+  // addEmailToCollection returns true if add operation was successful
+  Future<bool> addEmailToCollection(
     BuildContext context,
     Collection collection,
-    String email, {
-    CollectionParticipantRole role = CollectionParticipantRole.viewer,
+    String email,
+    CollectionParticipantRole role, {
     bool showProgress = false,
   }) async {
     if (!isValidEmail(email)) {
@@ -199,10 +200,10 @@ class CollectionActions {
         "Invalid email address",
         "Please enter a valid email address.",
       );
-      return null;
+      return false;
     } else if (email.trim() == Configuration.instance.getEmail()) {
       await showErrorDialog(context, "Oops", "You cannot share with yourself");
-      return null;
+      return false;
     }
 
     ProgressDialog? dialog;
@@ -247,7 +248,7 @@ class CollectionActions {
           ),
         ],
       );
-      return null;
+      return false;
     } else {
       try {
         final newSharees = await CollectionsService.instance

@@ -78,10 +78,10 @@ class _ManageIndividualParticipantState
                         context,
                         widget.collection,
                         widget.user.email,
-                        role: CollectionParticipantRole.collaborator,
+                        CollectionParticipantRole.collaborator,
                         showProgress: true,
                       );
-                      if ((result ?? false) && mounted) {
+                      if (result && mounted) {
                         widget.user.role = CollectionParticipantRole
                             .collaborator
                             .toStringVal();
@@ -110,10 +110,10 @@ class _ManageIndividualParticipantState
                         context,
                         widget.collection,
                         widget.user.email,
-                        role: CollectionParticipantRole.viewer,
+                        CollectionParticipantRole.viewer,
                         showProgress: true,
                       );
-                      if ((result ?? false) && mounted) {
+                      if (result && mounted) {
                         widget.user.role =
                             CollectionParticipantRole.viewer.toStringVal();
                         setState(() => {});
