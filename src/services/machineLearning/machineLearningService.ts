@@ -131,7 +131,7 @@ class MachineLearningService {
     }
 
     private async syncLocalFiles(syncContext: MLSyncContext) {
-        console.time('syncLocalFiles');
+        const startTime = Date.now();
         const localFilesMap = await this.getLocalFilesMap(syncContext);
 
         const db = await mlIDbStorage.db;
@@ -175,7 +175,7 @@ class MachineLearningService {
             await mlIDbStorage.incrementIndexVersion('files');
         }
 
-        console.timeEnd('syncLocalFiles');
+        addLogLine('syncLocalFiles', Date.now() - startTime, 'ms');
     }
 
     // TODO: not required if ml data is stored as field inside ente file object
@@ -203,7 +203,7 @@ class MachineLearningService {
     // }
 
     private async getOutOfSyncFiles(syncContext: MLSyncContext) {
-        console.time('getOutOfSyncFiles');
+        const startTime = Date.now();
         const fileIds = await mlIDbStorage.getFileIds(
             syncContext.config.batchSize,
             syncContext.config.mlVersion,
@@ -216,7 +216,7 @@ class MachineLearningService {
         syncContext.outOfSyncFiles = fileIds.map((fileId) =>
             localFilesMap.get(fileId)
         );
-        console.timeEnd('getOutOfSyncFiles');
+        addLogLine('getOutOfSyncFiles', Date.now() - startTime, 'ms');
     }
 
     // TODO: optimize, use indexdb indexes, move facecrops to cache to reduce io
@@ -254,7 +254,7 @@ class MachineLearningService {
     //         syncContext,
     //         [...existingFilesMap.values()]
     //     );
-    //     console.timeEnd('getUniqueOutOfSyncFiles');
+    //     addLogLine('getUniqueOutOfSyncFiles');
     //     addLogLine(
     //         'Got unique outOfSyncFiles: ',
     //         syncContext.outOfSyncFiles.length,
@@ -569,7 +569,7 @@ class MachineLearningService {
         fileContext: MLSyncFileContext
     ) {
         const { newMlFile } = fileContext;
-        console.time(`face detection time taken ${fileContext.enteFile.id}`);
+        const startTime = Date.now();
         await FaceService.syncFileFaceDetections(syncContext, fileContext);
 
         if (newMlFile.faces && newMlFile.faces.length > 0) {
@@ -579,7 +579,11 @@ class MachineLearningService {
 
             await FaceService.syncFileFaceEmbeddings(syncContext, fileContext);
         }
-        console.timeEnd(`face detection time taken ${fileContext.enteFile.id}`);
+        addLogLine(
+            `face detection time taken ${fileContext.enteFile.id}`,
+            Date.now() - startTime,
+            'ms'
+        );
     }
 }
 

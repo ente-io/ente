@@ -18,7 +18,7 @@ class ObjectService {
         syncContext: MLSyncContext,
         fileContext: MLSyncFileContext
     ) {
-        console.time(`object detection time taken ${fileContext.enteFile.id}`);
+        const startTime = Date.now();
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !isDifferentOrOld(
@@ -77,8 +77,10 @@ class ObjectService {
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
         // );
-        console.timeEnd(
-            `object detection time taken ${fileContext.enteFile.id}`
+        addLogLine(
+            `object detection time taken ${fileContext.enteFile.id}`,
+            Date.now() - startTime,
+            'ms'
         );
 
         addLogLine('[MLService] Detected Objects: ', newMlFile.things?.length);

@@ -267,7 +267,7 @@ class MLIDbStorage {
     }
 
     public async getAllFacesMap() {
-        console.time('getAllFacesMap');
+        const startTime = Date.now();
         const db = await this.db;
         const allFiles = await db.getAll('files');
         const allFacesMap = new Map<number, Array<Face>>();
@@ -276,13 +276,13 @@ class MLIDbStorage {
                 mlFileData.faces &&
                 allFacesMap.set(mlFileData.fileId, mlFileData.faces)
         );
-        console.timeEnd('getAllFacesMap');
+        addLogLine('getAllFacesMap', Date.now() - startTime, 'ms');
 
         return allFacesMap;
     }
 
     public async updateFaces(allFacesMap: Map<number, Face[]>) {
-        console.time('updateFaces');
+        const startTime = Date.now();
         const db = await this.db;
         const tx = db.transaction('files', 'readwrite');
         let cursor = await tx.store.openCursor();
@@ -295,11 +295,11 @@ class MLIDbStorage {
             cursor = await cursor.continue();
         }
         await tx.done;
-        console.timeEnd('updateFaces');
+        addLogLine('updateFaces', Date.now() - startTime, 'ms');
     }
 
     public async getAllThingsMap() {
-        console.time('getAllThingsMap');
+        const startTime = Date.now();
         const db = await this.db;
         const allFiles = await db.getAll('files');
         const allThingsMap = new Map<number, Array<Thing>>();
@@ -308,13 +308,13 @@ class MLIDbStorage {
                 mlFileData.things &&
                 allThingsMap.set(mlFileData.fileId, mlFileData.things)
         );
-        console.timeEnd('getAllThingsMap');
+        addLogLine('getAllThingsMap', Date.now() - startTime, 'ms');
 
         return allThingsMap;
     }
 
     public async getAllTextMap() {
-        console.time('getAllTextMap');
+        const startTime = Date.now();
         const db = await this.db;
         const allFiles = await db.getAll('files');
         const allTextMap = new Map<number, DetectedText[]>();
@@ -323,7 +323,7 @@ class MLIDbStorage {
                 mlFileData.text &&
                 allTextMap.set(mlFileData.fileId, mlFileData.text)
         );
-        console.timeEnd('getAllTextMap');
+        addLogLine('getAllTextMap', Date.now() - startTime, 'ms');
 
         return allTextMap;
     }

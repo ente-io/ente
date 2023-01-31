@@ -15,7 +15,7 @@ class TextService {
         fileContext: MLSyncFileContext,
         textDetectionTimeoutIndex?: number
     ) {
-        console.time(`text detection time taken ${fileContext.enteFile.id}`);
+        const startTime = Date.now();
         const { oldMlFile, newMlFile } = fileContext;
         if (
             !isDifferentOrOld(
@@ -45,8 +45,10 @@ class TextService {
                 oldMlFile?.errorCount ?? textDetectionTimeoutIndex ?? 0
             );
         if (textDetections instanceof Error) {
-            console.timeEnd(
-                `text detection time taken ${fileContext.enteFile.id}`
+            addLogLine(
+                `text detection time taken ${fileContext.enteFile.id}`,
+                Date.now() - startTime,
+                'ms'
             );
 
             newMlFile.errorCount = 2;
@@ -60,7 +62,11 @@ class TextService {
             })
         );
         newMlFile.text = detectedText;
-        console.timeEnd(`text detection time taken ${fileContext.enteFile.id}`);
+        addLogLine(
+            `text detection time taken ${fileContext.enteFile.id}`,
+            Date.now() - startTime,
+            'ms'
+        );
         addLogLine(
             '[MLService] Detected text: ',
             fileContext.enteFile.metadata.title,

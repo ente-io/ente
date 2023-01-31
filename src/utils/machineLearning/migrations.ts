@@ -28,7 +28,7 @@ export async function migrateExistingFiles() {
 }
 
 export async function migrateFaceCropsToCache() {
-    console.time('migrateFaceCropsToCache');
+    const startTime = Date.now();
     addLogLine('migrateFaceCropsToCache started');
     const allFiles = await mlIDbStorage.getAllFiles();
     const allFilesWithFaces = allFiles.filter(
@@ -62,11 +62,11 @@ export async function migrateFaceCropsToCache() {
     } else {
         addLogLine('not updating face crops: ', updatedFacesMap.size);
     }
-    console.timeEnd('migrateFaceCropsToCache');
+    addLogLine('migrateFaceCropsToCache', Date.now() - startTime, 'ms');
 }
 
 export async function migrateFaceInterfaceUpdate() {
-    console.time('migrateFaceInterfaceUpdate');
+    const startTime = Date.now();
     addLogLine('migrateFaceInterfaceUpdate started');
 
     const faceSchemaVersion = await mlIDbStorage.getIndexVersion('faceSchema');
@@ -132,5 +132,5 @@ export async function migrateFaceInterfaceUpdate() {
 
     await mlIDbStorage.setIndexVersion('faceSchema', 1);
     addLogLine('migrateFaceInterfaceUpdate done');
-    console.timeEnd('migrateFaceInterfaceUpdate');
+    addLogLine('migrateFaceInterfaceUpdate', Date.now() - startTime, 'ms');
 }

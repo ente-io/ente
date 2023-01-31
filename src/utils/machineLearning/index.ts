@@ -418,9 +418,13 @@ export async function getLocalFileImageBitmap(
 }
 
 export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
-    console.time('getPeopleList:mlFilesStore:getItem');
+    let startTime = Date.now();
     const mlFileData: MlFileData = await mlIDbStorage.getFile(file.id);
-    console.timeEnd('getPeopleList:mlFilesStore:getItem');
+    addLogLine(
+        'getPeopleList:mlFilesStore:getItem',
+        Date.now() - startTime,
+        'ms'
+    );
     if (!mlFileData?.faces || mlFileData.faces.length < 1) {
         return [];
     }
@@ -432,12 +436,16 @@ export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
         return [];
     }
     // addLogLine("peopleIds: ", peopleIds);
-    console.time('getPeopleList:mlPeopleStore:getItems');
+    startTime = Date.now();
     const peoplePromises = peopleIds.map(
         (p) => mlIDbStorage.getPerson(p) as Promise<Person>
     );
     const peopleList = await Promise.all(peoplePromises);
-    console.timeEnd('getPeopleList:mlPeopleStore:getItems');
+    addLogLine(
+        'getPeopleList:mlPeopleStore:getItems',
+        Date.now() - startTime,
+        'ms'
+    );
     // addLogLine("peopleList: ", peopleList);
 
     return peopleList;

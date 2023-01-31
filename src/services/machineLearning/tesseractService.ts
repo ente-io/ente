@@ -150,12 +150,12 @@ class TesseractService implements TextDetectionService {
             `detecting text (${imageBitmap.width}px,${imageBitmap.height}px) fileType=${fileTypeInfo.exactType}`
         );
         try {
-            console.time('detecting text ' + id);
+            const startTime = Date.now();
             const detections = (await promiseWithTimeout(
                 tesseractWorker.recognize(file),
                 TEXT_DETECTION_TIMEOUT_MS[attemptNumber]
             )) as Tesseract.RecognizeResult;
-            console.timeEnd('detecting text ' + id);
+            addLogLine('detecting text ' + id, Date.now() - startTime, 'ms');
             const filteredDetections = detections.data.words.filter(
                 ({ confidence }) => confidence >= minAccuracy
             );
