@@ -5,12 +5,13 @@ import 'package:photos/models/collection.dart';
 import 'package:photos/services/collections_service.dart';
 import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/actions/collection/collection_sharing_actions.dart';
-import 'package:photos/ui/common/gradient_button.dart';
+import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/divider_widget.dart';
 import 'package:photos/ui/components/menu_item_widget.dart';
 import 'package:photos/ui/components/menu_section_description_widget.dart';
 import 'package:photos/ui/components/menu_section_title.dart';
+import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/sharing/user_avator_widget.dart';
 
 class AddParticipantPage extends StatefulWidget {
@@ -169,33 +170,33 @@ class _AddParticipantPage extends State<AddParticipantPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  SizedBox(
-                    width: double.infinity,
-                    child: GradientButton(
-                      onTap: (selectedEmail == '' && !_emailIsValid)
-                          ? null
-                          : () async {
-                              final emailToAdd =
-                                  selectedEmail == '' ? _email : selectedEmail;
-                              final result =
-                                  await collectionActions.addEmailToCollection(
-                                context,
-                                widget.collection,
-                                emailToAdd,
-                                role: widget.isAddingViewer
-                                    ? CollectionParticipantRole.viewer
-                                    : CollectionParticipantRole.collaborator,
-                              );
-                              if (result != null && result && mounted) {
-                                Navigator.of(context).pop(true);
-                              }
-                            },
-                      text: widget.isAddingViewer
-                          ? "Add viewer"
-                          : "Add collaborator",
-                    ),
+                  ButtonWidget(
+                    buttonType: ButtonType.primary,
+                    buttonSize: ButtonSize.large,
+                    labelText: widget.isAddingViewer
+                        ? "Add viewer"
+                        : "Add collaborator",
+                    isDisabled: (selectedEmail == '' && !_emailIsValid),
+                    onTap: (selectedEmail == '' && !_emailIsValid)
+                        ? null
+                        : () async {
+                            final emailToAdd =
+                                selectedEmail == '' ? _email : selectedEmail;
+                            final result =
+                                await collectionActions.addEmailToCollection(
+                              context,
+                              widget.collection,
+                              emailToAdd,
+                              role: widget.isAddingViewer
+                                  ? CollectionParticipantRole.viewer
+                                  : CollectionParticipantRole.collaborator,
+                            );
+                            if (result != null && result && mounted) {
+                              Navigator.of(context).pop(true);
+                            }
+                          },
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
