@@ -247,7 +247,7 @@ class _ShareCollectionPageState extends State<ShareCollectionPage> {
           height: 24,
         ),
         const MenuSectionTitle(
-          title: "Collaborative links",
+          title: "Collaborative link",
           iconData: Icons.public,
         ),
         MenuItemWidget(
