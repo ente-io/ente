@@ -368,8 +368,14 @@ const englishConstants = {
     DELETE_COLLECTION_TITLE: 'Delete album?',
     DELETE_COLLECTION: 'Delete album',
     DELETE_COLLECTION_FAILED: 'Album deletion failed, please try again',
-    DELETE_COLLECTION_MESSAGE:
-        'Files that are unique to this album will be moved to trash, and this album would be deleted.',
+    DELETE_COLLECTION_MESSAGE: () => (
+        <p>
+            Also delete the photos (and videos) present in this album from
+            <strong> all </strong> other albums they are part of?
+        </p>
+    ),
+    DELETE_PHOTOS: 'Delete photos',
+    KEEP_PHOTOS: 'Keep photos',
     SHARE: 'Share',
     SHARE_COLLECTION: 'Share album',
     SHARE_WITH_PEOPLE: 'Share with your loved ones',

@@ -40,6 +40,7 @@ export enum CollectionActions {
     UNARCHIVE,
     CONFIRM_DELETE,
     DELETE,
+    KEEP_PHOTOS,
     SHOW_SHARE_DIALOG,
     CONFIRM_EMPTY_TRASH,
     EMPTY_TRASH,
@@ -90,6 +91,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.DELETE:
                 callback = deleteCollection;
                 break;
+            case CollectionActions.KEEP_PHOTOS:
+                callback = keepPhotos;
+                break;
             case CollectionActions.SHOW_SHARE_DIALOG:
                 callback = showCollectionShareModal;
                 break;
@@ -138,7 +142,12 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     };
 
     const deleteCollection = async () => {
-        await CollectionAPI.deleteCollection(activeCollection.id);
+        await CollectionAPI.deleteCollection(activeCollection.id, false);
+        redirectToAll();
+    };
+
+    const keepPhotos = async () => {
+        await CollectionAPI.deleteCollection(activeCollection.id, true);
         redirectToAll();
     };
 
@@ -177,7 +186,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
     const confirmDeleteCollection = () => {
         setDialogMessage({
             title: constants.DELETE_COLLECTION_TITLE,
-            content: constants.DELETE_COLLECTION_MESSAGE,
+            content: constants.DELETE_COLLECTION_MESSAGE(),
             proceed: {
                 text: constants.DELETE_COLLECTION,
                 action: handleCollectionAction(CollectionActions.DELETE),
