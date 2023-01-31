@@ -27,9 +27,7 @@ export default function ShortcutSection({
         main();
     }, []);
 
-    const openUncategorizedSection = async () => {
-        // const uncategorisedCollection = await getUncategorizedCollection();
-        // unCategorizedCollectionId.current = uncategorisedCollection.id;
+    const openUncategorizedSection = () => {
         galleryContext.setActiveCollection(unCategorizedCollectionId);
         closeSidebar();
     };

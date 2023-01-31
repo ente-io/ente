@@ -41,7 +41,7 @@ export enum CollectionActions {
     UNARCHIVE,
     CONFIRM_DELETE,
     DELETE,
-    KEEP_FILES,
+    DELETE_BUT_KEEP_FILES,
     SHOW_SHARE_DIALOG,
     CONFIRM_EMPTY_TRASH,
     EMPTY_TRASH,
@@ -92,8 +92,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.DELETE:
                 callback = deleteCollection;
                 break;
-            case CollectionActions.KEEP_FILES:
-                callback = keepFiles;
+            case CollectionActions.DELETE_BUT_KEEP_FILES:
+                callback = deleteButkeepFiles;
                 break;
             case CollectionActions.SHOW_SHARE_DIALOG:
                 callback = showCollectionShareModal;
@@ -147,7 +147,7 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         redirectToAll();
     };
 
-    const keepFiles = async () => {
+    const deleteButkeepFiles = async () => {
         const allFiles = await getLocalFiles();
         const collectionFiles = allFiles.filter((file) => {
             return file.collectionID === activeCollection.id;
@@ -204,7 +204,9 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             },
             secondary: {
                 text: constants.KEEP_PHOTOS,
-                action: handleCollectionAction(CollectionActions.KEEP_FILES),
+                action: handleCollectionAction(
+                    CollectionActions.DELETE_BUT_KEEP_FILES
+                ),
                 variant: 'primary',
             },
             close: {
