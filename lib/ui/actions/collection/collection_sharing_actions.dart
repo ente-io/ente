@@ -181,18 +181,17 @@ class CollectionActions {
         showGenericErrorDialog(context: context);
       }
       return result == ButtonAction.first;
-    } else {
-      return false;
     }
+    return false;
   }
 
-  Future<bool?> addEmailToCollection(
+  // addEmailToCollection returns true if add operation was successful
+  Future<bool> addEmailToCollection(
     BuildContext context,
     Collection collection,
-    String email, {
-    CollectionParticipantRole role = CollectionParticipantRole.viewer,
+    String email,
+    CollectionParticipantRole role, {
     bool showProgress = false,
-    String? publicKey,
   }) async {
     if (!isValidEmail(email)) {
       await showErrorDialog(
@@ -200,31 +199,29 @@ class CollectionActions {
         "Invalid email address",
         "Please enter a valid email address.",
       );
-      return null;
-    } else if (email == Configuration.instance.getEmail()) {
+      return false;
+    } else if (email.trim() == Configuration.instance.getEmail()) {
       await showErrorDialog(context, "Oops", "You cannot share with yourself");
-      return null;
+      return false;
     }
 
     ProgressDialog? dialog;
-    if (publicKey == null) {
-      if (showProgress) {
-        dialog = createProgressDialog(context, "Searching for user...");
-        await dialog.show();
-      }
-
-      try {
-        publicKey = await UserService.instance.getPublicKey(email);
-        await dialog?.hide();
-      } catch (e) {
-        await dialog?.hide();
-        logger.severe("Failed to get public key", e);
-        showGenericErrorDialog(context: context);
-        return false;
-      }
+    String? publicKey;
+    if (showProgress) {
+      dialog = createProgressDialog(context, "Sharing...", isDismissible: true);
+      await dialog.show();
     }
-    // getPublicKey can return null
-    // ignore: unnecessary_null_comparison
+
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      await dialog?.hide();
+      logger.severe("Failed to get public key", e);
+      showGenericErrorDialog(context: context);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
     if (publicKey == null || publicKey == '') {
       // todo: neeraj replace this as per the design where a new screen
       // is used for error. Do this change along with handling of network errors
@@ -250,16 +247,8 @@ class CollectionActions {
           ),
         ],
       );
-      return null;
+      return false;
     } else {
-      if (showProgress) {
-        dialog = createProgressDialog(
-          context,
-          "Sharing...",
-          isDismissible: true,
-        );
-        await dialog.show();
-      }
       try {
         final newSharees = await CollectionsService.instance
             .share(collection.id, email, publicKey, role);
@@ -279,6 +268,7 @@ class CollectionActions {
     }
   }
 
+  // deleteCollectionSheet returns true if the album is successfully deleted
   Future<bool> deleteCollectionSheet(
     BuildContext bContext,
     Collection collection,
@@ -287,6 +277,13 @@ class CollectionActions {
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner!.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
+    }
+    if (collection.hasSharees) {
+      final bool confirmDelete =
+          await _confirmSharedAlbumDeletion(bContext, collection);
+      if (!confirmDelete) {
+        return false;
+      }
     }
     final actionResult = await showActionSheet(
       context: bContext,
@@ -366,6 +363,37 @@ class CollectionActions {
       return true;
     }
     return false;
+  }
+
+  // _confirmSharedAlbumDeletion should be shown when user tries to delete an
+  // album shared with other ente users.
+  Future<bool> _confirmSharedAlbumDeletion(
+    BuildContext context,
+    Collection collection,
+  ) async {
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        const ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          labelText: "Delete album",
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Delete shared album?",
+      body: "The album will be deleted for everyone\n\nYou will lose access to "
+          "shared photos in this album that are owned by others",
+    );
+    return result != null && result == ButtonAction.first;
   }
 
   /*
