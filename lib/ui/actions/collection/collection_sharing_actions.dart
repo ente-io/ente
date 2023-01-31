@@ -13,6 +13,7 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
@@ -178,6 +179,7 @@ class CollectionActions {
     Collection collection,
     String email, {
     CollectionParticipantRole role = CollectionParticipantRole.viewer,
+    bool showProgress = false,
     String? publicKey,
   }) async {
     if (!isValidEmail(email)) {
@@ -190,32 +192,29 @@ class CollectionActions {
     } else if (email == Configuration.instance.getEmail()) {
       await showErrorDialog(context, "Oops", "You cannot share with yourself");
       return null;
-    } else {
-      // if (collection.getSharees().any((user) => user.email == email)) {
-      //   showErrorDialog(
-      //     context,
-      //     "Oops",
-      //     "You're already sharing this with " + email,
-      //   );
-      //   return null;
-      // }
     }
+
+    ProgressDialog? dialog;
     if (publicKey == null) {
-      final dialog = createProgressDialog(context, "Searching for user...");
-      await dialog.show();
+      if (showProgress) {
+        dialog = createProgressDialog(context, "Searching for user...");
+        await dialog.show();
+      }
+
       try {
         publicKey = await UserService.instance.getPublicKey(email);
-        await dialog.hide();
+        await dialog?.hide();
       } catch (e) {
+        await dialog?.hide();
         logger.severe("Failed to get public key", e);
         showGenericErrorDialog(context: context);
-        await dialog.hide();
+        return false;
       }
     }
     // getPublicKey can return null
     // ignore: unnecessary_null_comparison
     if (publicKey == null || publicKey == '') {
-      final dialog = AlertDialog(
+      final alertDialog = AlertDialog(
         title: const Text("Invite to ente?"),
         content: Text(
           "Looks like " +
@@ -244,22 +243,27 @@ class CollectionActions {
       await showDialog(
         context: context,
         builder: (BuildContext context) {
-          return dialog;
+          return alertDialog;
         },
       );
       return null;
     } else {
-      final dialog = createProgressDialog(context, "Sharing...");
-      await dialog.show();
+      if (showProgress) {
+        dialog = createProgressDialog(
+          context,
+          "Sharing...",
+          isDismissible: true,
+        );
+        await dialog.show();
+      }
       try {
         final newSharees = await CollectionsService.instance
             .share(collection.id, email, publicKey, role);
+        await dialog?.hide();
         collection.updateSharees(newSharees);
-        await dialog.hide();
-        showShortToast(context, "Shared successfully!");
         return true;
       } catch (e) {
-        await dialog.hide();
+        await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
           _showUnSupportedAlert(context);
         } else {
