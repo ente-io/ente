@@ -143,33 +143,44 @@ class CollectionActions {
   }
 
   // removeParticipant remove the user from a share album
-  Future<bool?> removeParticipant(
+  Future<bool> removeParticipant(
     BuildContext context,
     Collection collection,
     User user,
   ) async {
-    final result = await showChoiceDialog(
-      context,
-      title: "Remove",
-      body: "${user.email} will be removed",
-      firstButtonLabel: "Yes, remove",
-      firstButtonOnTap: () async {
-        try {
-          final newSharees = await CollectionsService.instance
-              .unshare(collection.id, user.email);
-          collection.updateSharees(newSharees);
-        } catch (e, s) {
-          Logger("EmailItemWidget").severe(e, s);
-          rethrow;
-        }
-      },
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Yes, remove",
+          onTap: () async {
+            final newSharees = await CollectionsService.instance
+                .unshare(collection.id, user.email);
+            collection.updateSharees(newSharees);
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Remove?",
+      body: '${user.email} will be removed from this shared album\n\nAny '
+          'photos added by them will also be removed from the album',
     );
-    if (result == ButtonAction.error) {
-      await showGenericErrorDialog(context: context);
-      return false;
-    }
-    if (result == ButtonAction.first) {
-      return true;
+    if (result != null) {
+      if (result == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      return result == ButtonAction.first;
     } else {
       return false;
     }
