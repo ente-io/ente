@@ -33,7 +33,6 @@ class LocalSyncService {
   static const hasImportedDeviceCollections = "has_imported_device_collections";
   static const kHasGrantedPermissionsKey = "has_granted_permissions";
   static const kPermissionStateKey = "permission_state";
-  static const kEditedFileIDsKey = "edited_file_ids";
 
   // Adding `_2` as a suffic to pull files that were earlier ignored due to permission errors
   // See https://github.com/CaiJingLong/flutter_photo_manager/issues/589
@@ -80,7 +79,7 @@ class LocalSyncService {
     _logger.info(
       existingLocalFileIDs.length.toString() + " localIDs were discovered",
     );
-    final editedFileIDs = _getEditedFileIDs().toSet();
+
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
     final startTime = DateTime.now().microsecondsSinceEpoch;
@@ -89,7 +88,6 @@ class LocalSyncService {
         lastDBUpdationTime,
         syncStartTime,
         existingLocalFileIDs,
-        editedFileIDs,
       );
     } else {
       // Load from 0 - 01.01.2010
@@ -98,22 +96,12 @@ class LocalSyncService {
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
       while (toTime < syncStartTime) {
-        await _loadAndStorePhotos(
-          startTime,
-          toTime,
-          existingLocalFileIDs,
-          editedFileIDs,
-        );
+        await _loadAndStorePhotos(startTime, toTime, existingLocalFileIDs);
         startTime = toTime;
         toYear++;
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
-      await _loadAndStorePhotos(
-        startTime,
-        syncStartTime,
-        existingLocalFileIDs,
-        editedFileIDs,
-      );
+      await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
     }
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !(_prefs.getBool(kHasCompletedFirstImportKey)!)) {
@@ -239,15 +227,6 @@ class LocalSyncService {
     return hasUnsyncedFiles;
   }
 
-  List<String> _getEditedFileIDs() {
-    if (_prefs.containsKey(kEditedFileIDsKey)) {
-      return _prefs.getStringList(kEditedFileIDsKey)!;
-    } else {
-      final List<String> editedIDs = [];
-      return editedIDs;
-    }
-  }
-
   Future<void> trackInvalidFile(File file) async {
     if (file.localID == null) {
       debugPrint("Warning: Invalid file has no localID");
@@ -299,7 +278,6 @@ class LocalSyncService {
       kHasCompletedFirstImportKey,
       hasImportedDeviceCollections,
       kDbUpdationTimeKey,
-      kEditedFileIDsKey,
       "has_synced_edit_time",
       "has_selected_all_folders_for_backup",
     ]) {
@@ -311,7 +289,6 @@ class LocalSyncService {
     int fromTime,
     int toTime,
     Set<String> existingLocalFileIDs,
-    Set<String> editedFileIDs,
   ) async {
     final Tuple2<List<LocalPathAsset>, List<File>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
@@ -327,11 +304,7 @@ class LocalSyncService {
           DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
     );
     if (files.isNotEmpty) {
-      await _trackUpdatedFiles(
-        files,
-        existingLocalFileIDs,
-        editedFileIDs,
-      );
+      await _trackUpdatedFiles(files, existingLocalFileIDs);
       final List<File> allFiles = [];
       allFiles.addAll(files);
       files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
@@ -350,12 +323,10 @@ class LocalSyncService {
   Future<void> _trackUpdatedFiles(
     List<File> files,
     Set<String> existingLocalFileIDs,
-    Set<String> editedFileIDs,
   ) async {
     final updatedFiles = files
         .where((file) => existingLocalFileIDs.contains(file.localID))
         .toList();
-    updatedFiles.removeWhere((file) => editedFileIDs.contains(file.localID));
     if (updatedFiles.isNotEmpty) {
       _logger.info(
         updatedFiles.length.toString() + " local files were updated.",
