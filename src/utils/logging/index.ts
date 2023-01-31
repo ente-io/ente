@@ -20,27 +20,21 @@ export interface Log {
     logLine: string;
 }
 
-// commented out need fixing
-export function pipeConsoleLogsToDebugLogs() {
-    return;
-    const oldLog = console.log;
-    console.log = function (...args) {
-        addLogLine(args.map((x) => JSON.stringify(x)).join(' '));
-        oldLog.apply(console, args);
-    };
-}
-
-export function addLogLine(log: string) {
+export function addLogLine(log: any, ...optionalParams: any[]) {
     try {
+        const completeLog =
+            JSON.stringify(log) +
+            optionalParams.map((x) => JSON.stringify(x)).join(' ');
         if (isDEVSentryENV()) {
-            console.log(log);
+            console.log(completeLog);
         }
+
         if (isElectron()) {
-            ElectronService.logToDisk(log);
+            ElectronService.logToDisk(completeLog);
         } else {
             saveLogLine({
                 timestamp: Date.now(),
-                logLine: log,
+                logLine: completeLog,
             });
         }
     } catch (e) {
