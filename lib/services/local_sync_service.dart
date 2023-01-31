@@ -85,9 +85,9 @@ class LocalSyncService {
     final startTime = DateTime.now().microsecondsSinceEpoch;
     if (lastDBUpdationTime != 0) {
       await _loadAndStorePhotos(
-        lastDBUpdationTime,
-        syncStartTime,
         existingLocalFileIDs,
+        fromTime: lastDBUpdationTime,
+        toTime: syncStartTime,
       );
     } else {
       // Load from 0 - 01.01.2010
@@ -96,12 +96,20 @@ class LocalSyncService {
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
       while (toTime < syncStartTime) {
-        await _loadAndStorePhotos(startTime, toTime, existingLocalFileIDs);
+        await _loadAndStorePhotos(
+          existingLocalFileIDs,
+          fromTime: startTime,
+          toTime: toTime,
+        );
         startTime = toTime;
         toYear++;
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
-      await _loadAndStorePhotos(startTime, syncStartTime, existingLocalFileIDs);
+      await _loadAndStorePhotos(
+        existingLocalFileIDs,
+        fromTime: startTime,
+        toTime: syncStartTime,
+      );
     }
     if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
         !(_prefs.getBool(kHasCompletedFirstImportKey)!)) {
@@ -286,10 +294,10 @@ class LocalSyncService {
   }
 
   Future<void> _loadAndStorePhotos(
-    int fromTime,
-    int toTime,
-    Set<String> existingLocalFileIDs,
-  ) async {
+    Set<String> existingLocalDs, {
+    required int fromTime,
+    required int toTime,
+  }) async {
     final Tuple2<List<LocalPathAsset>, List<File>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
     await FilesDB.instance.insertLocalAssets(
@@ -304,10 +312,10 @@ class LocalSyncService {
           DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
     );
     if (files.isNotEmpty) {
-      await _trackUpdatedFiles(files, existingLocalFileIDs);
+      await _trackUpdatedFiles(files, existingLocalDs);
       final List<File> allFiles = [];
       allFiles.addAll(files);
-      files.removeWhere((file) => existingLocalFileIDs.contains(file.localID));
+      files.removeWhere((file) => existingLocalDs.contains(file.localID));
       await _db.insertMultiple(
         files,
         conflictAlgorithm: ConflictAlgorithm.ignore,
