@@ -60,7 +60,11 @@ export async function getFileType(
                 fileFormat,
             });
         }
-        throw Error(CustomError.INVALID_FILE_TYPE(fileFormat));
+        return {
+            fileType: FILE_TYPE.OTHERS,
+            exactType: fileFormat,
+            mimeType: receivedFile instanceof File ? receivedFile.type : null,
+        };
     }
 }
 
