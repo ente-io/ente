@@ -16,6 +16,7 @@ import 'package:photos/theme/ente_theme.dart';
 import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -214,37 +215,27 @@ class CollectionActions {
     // getPublicKey can return null
     // ignore: unnecessary_null_comparison
     if (publicKey == null || publicKey == '') {
-      final alertDialog = AlertDialog(
-        title: const Text("Invite to ente?"),
-        content: Text(
-          "Looks like " +
-              email +
-              " hasn't signed up for ente yet. would you like to invite them?",
-          style: const TextStyle(
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              "Invite",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.greenAlternative,
-              ),
-            ),
-            onPressed: () {
+      await showDialogWidget(
+        context: context,
+        title: "Invite to ente",
+        icon: Icons.info_outline,
+        body: "$email does not have an ente account\n\nSend them an invite to"
+            " add them after they sign up",
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            icon: Icons.adaptive.share,
+            labelText: "Send invite",
+            isInAlert: true,
+            onTap: () async {
               shareText(
-                "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.",
+                "Download ente so we can easily share original quality photos"
+                " and videos\n\nhttps://ente.io/#download",
               );
             },
           ),
         ],
-      );
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return alertDialog;
-        },
       );
       return null;
     } else {
