@@ -30,7 +30,7 @@ export async function getFileType(
         const mimTypeParts: string[] = typeResult.mime?.split('/');
 
         if (mimTypeParts?.length !== 2) {
-            throw Error(CustomError.INVALID_MIME_TYPE);
+            throw Error(CustomError.INVALID_MIME_TYPE(typeResult.mime));
         }
         switch (mimTypeParts[0]) {
             case TYPE_IMAGE:
