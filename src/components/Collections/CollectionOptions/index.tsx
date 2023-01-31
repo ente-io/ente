@@ -202,6 +202,11 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                 action: handleCollectionAction(CollectionActions.DELETE),
                 variant: 'danger',
             },
+            secondary: {
+                text: constants.KEEP_PHOTOS,
+                action: handleCollectionAction(CollectionActions.KEEP_FILES),
+                variant: 'primary',
+            },
             close: {
                 text: constants.CANCEL,
             },
