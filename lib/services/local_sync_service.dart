@@ -109,8 +109,7 @@ class LocalSyncService {
         toTime: syncStartTime,
       );
     }
-    if (!_prefs.containsKey(kHasCompletedFirstImportKey) ||
-        !(_prefs.getBool(kHasCompletedFirstImportKey)!)) {
+    if (!hasCompletedFirstImport()) {
       await _prefs.setBool(kHasCompletedFirstImportKey, true);
       // mark device collection has imported on first import
       await _refreshDeviceFolderCountAndCover(isFirstSync: true);
@@ -298,10 +297,14 @@ class LocalSyncService {
   }) async {
     final Tuple2<List<LocalPathAsset>, List<File>> result =
         await getLocalPathAssetsAndFiles(fromTime, toTime, _computer);
+
+    // Update the mapping for device path_id to local file id. Also, keep track
+    // of newly discovered device paths
     await FilesDB.instance.insertLocalAssets(
       result.item1,
       shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
+
     final List<File> files = result.item2;
     if (files.isNotEmpty) {
       _logger.info(
@@ -311,8 +314,10 @@ class LocalSyncService {
             DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
       );
       await _trackUpdatedFiles(files, existingLocalDs);
+      // keep reference of all Files for firing LocalPhotosUpdatedEvent
       final List<File> allFiles = [];
       allFiles.addAll(files);
+      // remove existing files and insert newly imported files in the table
       files.removeWhere((file) => existingLocalDs.contains(file.localID));
       await _db.insertMultiple(
         files,
@@ -330,19 +335,15 @@ class LocalSyncService {
     List<File> files,
     Set<String> existingLocalFileIDs,
   ) async {
-    final updatedFiles = files
-        .where((file) => existingLocalFileIDs.contains(file.localID))
+    final List<String> updatedLocalIDs = files
+        .where(
+          (file) =>
+              file.localID != null &&
+              existingLocalFileIDs.contains(file.localID),
+        )
+        .map((e) => e.localID!)
         .toList();
-    if (updatedFiles.isNotEmpty) {
-      _logger.info(
-        updatedFiles.length.toString() + " local files were updated.",
-      );
-      final List<String> updatedLocalIDs = [];
-      for (final file in updatedFiles) {
-        if (file.localID != null) {
-          updatedLocalIDs.add(file.localID!);
-        }
-      }
+    if (updatedLocalIDs.isNotEmpty) {
       await FileUpdationDB.instance.insertMultiple(
         updatedLocalIDs,
         FileUpdationDB.modificationTimeUpdated,
