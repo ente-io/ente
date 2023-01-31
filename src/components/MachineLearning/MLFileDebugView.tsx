@@ -102,13 +102,13 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
                 DEFAULT_ML_SYNC_CONFIG.objectDetection.maxNumBoxes,
                 DEFAULT_ML_SYNC_CONFIG.objectDetection.minScore
             );
-            addLogLine('detectedObjects: ', objectDetections);
+            addLogLine('detectedObjects: ', JSON.stringify(objectDetections));
 
             const sceneDetections = await imageSceneService.detectScenes(
                 imageBitmap,
                 DEFAULT_ML_SYNC_CONFIG.sceneDetection.minScore
             );
-            addLogLine('detectedScenes: ', sceneDetections);
+            addLogLine('detectedScenes: ', JSON.stringify(sceneDetections));
 
             // const textDetections = await tesseractService.detectText(
             //     imageBitmap,
@@ -133,7 +133,7 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             const faceAlignments = faceDetections.map((detection) =>
                 arcfaceAlignmentService.getFaceAlignment(detection)
             );
-            addLogLine('alignedFaces: ', faceAlignments);
+            addLogLine('alignedFaces: ', JSON.stringify(faceAlignments));
 
             const canvas: HTMLCanvasElement = canvasRef.current;
             canvas.width = imageBitmap.width;

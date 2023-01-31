@@ -105,7 +105,7 @@ export async function removeOldFaceCrops(
 }
 
 export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
-    addLogLine('Removing face crop urls: ', faceCropUrls);
+    addLogLine('Removing face crop urls: ', JSON.stringify(faceCropUrls));
     const faceCropCache = await CacheStorageService.open(FACE_CROPS_CACHE);
     const urlRemovalPromises = faceCropUrls?.map((url) =>
         faceCropCache.delete(url)

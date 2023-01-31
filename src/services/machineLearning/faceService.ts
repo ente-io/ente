@@ -48,7 +48,7 @@ class FaceService {
         );
         const faceDetections =
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
-        // addLogLine('3 TF Memory stats: ', tf.memory());
+        // addLogLine('3 TF Memory stats: ',JSON.stringify(tf.memory()));
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
             return {
@@ -126,7 +126,7 @@ class FaceService {
             );
         }
         addLogLine('[MLService] alignedFaces: ', newMlFile.faces?.length);
-        // addLogLine('4 TF Memory stats: ', tf.memory());
+        // addLogLine('4 TF Memory stats: ',JSON.stringify(tf.memory()));
     }
 
     async syncFileFaceEmbeddings(
@@ -166,7 +166,7 @@ class FaceService {
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
         addLogLine('[MLService] facesWithEmbeddings: ', newMlFile.faces.length);
-        // addLogLine('5 TF Memory stats: ', tf.memory());
+        // addLogLine('5 TF Memory stats: ',JSON.stringify(tf.memory()));
     }
 
     async saveFaceCrop(
@@ -222,7 +222,7 @@ class FaceService {
             syncContext.faceClusteringService.method;
         addLogLine(
             '[MLService] Got face clustering results: ',
-            syncContext.mlLibraryData.faceClusteringResults
+            JSON.stringify(syncContext.mlLibraryData.faceClusteringResults)
         );
 
         // syncContext.faceClustersWithNoise = {

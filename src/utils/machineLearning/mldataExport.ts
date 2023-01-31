@@ -77,8 +77,10 @@ async function exportMlDataToZipWriter(zipWriter: zip.ZipWriter) {
     faceClusteringResults && (faceClusteringResults.debugInfo = undefined);
     addLogLine(
         'Exporting ML DB data: ',
-        Object.keys(mlDbData),
-        Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
+        JSON.stringify(Object.keys(mlDbData)),
+        JSON.stringify(
+            Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
+        )
     );
     await zipWriter.add(
         'indexeddb/mldata.json',
@@ -150,8 +152,10 @@ async function importMlDataFromZipReader(zipReader: zip.ZipReader) {
     const mlDbData = JSON.parse(mlDataJsonStr);
     addLogLine(
         'importing ML DB data: ',
-        Object.keys(mlDbData),
-        Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
+        JSON.stringify(Object.keys(mlDbData)),
+        JSON.stringify(
+            Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
+        )
     );
     await mlIDbStorage.putAllMLData(mlDbData);
 }

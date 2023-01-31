@@ -107,7 +107,7 @@ class MachineLearningService {
         // addLogLine('[MLService] sync results: ', mlSyncResult);
 
         // await syncContext.dispose();
-        addLogLine('Final TF Memory stats: ', tf.memory());
+        addLogLine('Final TF Memory stats: ', JSON.stringify(tf.memory()));
 
         return mlSyncResult;
     }
@@ -210,7 +210,7 @@ class MachineLearningService {
             MAX_ML_SYNC_ERROR_COUNT
         );
 
-        addLogLine('fileIds: ', fileIds);
+        addLogLine('fileIds: ', JSON.stringify(fileIds));
 
         const localFilesMap = await this.getLocalFilesMap(syncContext);
         syncContext.outOfSyncFiles = fileIds.map((fileId) =>
@@ -396,7 +396,7 @@ class MachineLearningService {
             await this.persistMLFileSyncError(syncContext, enteFile, error);
             syncContext.nSyncedFiles += 1;
         } finally {
-            addLogLine('TF Memory stats: ', tf.memory());
+            addLogLine('TF Memory stats: ', JSON.stringify(tf.memory()));
         }
     }
 
@@ -454,7 +454,7 @@ class MachineLearningService {
         } finally {
             fileContext.tfImage && fileContext.tfImage.dispose();
             fileContext.imageBitmap && fileContext.imageBitmap.close();
-            // addLogLine('8 TF Memory stats: ', tf.memory());
+            // addLogLine('8 TF Memory stats: ',JSON.stringify(tf.memory()));
 
             // TODO: enable once faceId changes go in
             // await removeOldFaceCrops(
@@ -473,15 +473,15 @@ class MachineLearningService {
 
         await tf.ready();
 
-        addLogLine('01 TF Memory stats: ', tf.memory());
+        addLogLine('01 TF Memory stats: ', JSON.stringify(tf.memory()));
         // await tfjsFaceDetectionService.init();
-        // // addLogLine('02 TF Memory stats: ', tf.memory());
+        // // addLogLine('02 TF Memory stats: ',JSON.stringify(tf.memory()));
         // await this.faceLandmarkService.init();
         // await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
-        // // addLogLine('03 TF Memory stats: ', tf.memory());
+        // // addLogLine('03 TF Memory stats: ',JSON.stringify(tf.memory()));
         // await tfjsFaceEmbeddingService.init();
         // await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
-        // addLogLine('04 TF Memory stats: ', tf.memory());
+        // addLogLine('04 TF Memory stats: ',JSON.stringify(tf.memory()));
 
         this.initialized = true;
     }
@@ -489,11 +489,11 @@ class MachineLearningService {
     public async dispose() {
         this.initialized = false;
         // await this.faceDetectionService.dispose();
-        // addLogLine('11 TF Memory stats: ', tf.memory());
+        // addLogLine('11 TF Memory stats: ',JSON.stringify(tf.memory()));
         // await this.faceLandmarkService.dispose();
-        // addLogLine('12 TF Memory stats: ', tf.memory());
+        // addLogLine('12 TF Memory stats: ',JSON.stringify(tf.memory()));
         // await this.faceEmbeddingService.dispose();
-        // addLogLine('13 TF Memory stats: ', tf.memory());
+        // addLogLine('13 TF Memory stats: ',JSON.stringify(tf.memory()));
     }
 
     private async getMLFileData(fileId: number) {

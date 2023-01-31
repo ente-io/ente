@@ -61,7 +61,7 @@ class ObjectService {
                 syncContext.config.sceneDetection.minScore
             ))
         );
-        // addLogLine('3 TF Memory stats: ', tf.memory());
+        // addLogLine('3 TF Memory stats: ',JSON.stringify(tf.memory()));
         // TODO: reenable faces filtering based on width
         const detectedObjects = objectDetections?.map((detection) => {
             return {

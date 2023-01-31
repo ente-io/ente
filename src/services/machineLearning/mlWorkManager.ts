@@ -228,7 +228,7 @@ class MLWorkManager {
                 !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
             mlSyncResult,
         };
-        addLogLine('ML Sync Job result: ', jobResult);
+        addLogLine('ML Sync Job result: ', JSON.stringify(jobResult));
 
         // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
 

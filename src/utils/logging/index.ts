@@ -20,11 +20,12 @@ export interface Log {
     logLine: string;
 }
 
-export function addLogLine(log: any, ...optionalParams: any[]) {
+export function addLogLine(
+    log: string | number | boolean,
+    ...optionalParams: (string | number | boolean)[]
+) {
     try {
-        const completeLog =
-            JSON.stringify(log) +
-            optionalParams.map((x) => JSON.stringify(x)).join(' ');
+        const completeLog = [log, ...optionalParams].join(' ');
         if (isDEVSentryENV()) {
             console.log(completeLog);
         }
