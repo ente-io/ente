@@ -51,7 +51,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
   Future<void> _navigateToAddUser(bool addingViewer) async {
     await routeToPage(
       context,
-      AddParticipantPage(widget.collection),
+      AddParticipantPage(widget.collection, addingViewer),
     );
     if (mounted) {
       setState(() => {});
@@ -72,7 +72,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
     final splitResult =
         widget.collection.getSharees().splitMatch((x) => x.isViewer);
     final List<User> viewers = splitResult.matched;
+    viewers.sort((a, b) => a.email.compareTo(b.email));
     final List<User> collaborators = splitResult.unmatched;
+    collaborators.sort((a, b) => a.email.compareTo(b.email));
 
     return Scaffold(
       body: CustomScrollView(
@@ -174,8 +176,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index == (1 + collaborators.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title:
-                            collaborators.isNotEmpty ? "Add more" : "Add email",
+                        title: collaborators.isNotEmpty
+                            ? "Add more"
+                            : "Add collaborator",
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
@@ -249,7 +252,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index == (1 + viewers.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: viewers.isNotEmpty ? "Add more" : "Add Viewer",
+                        title: viewers.isNotEmpty ? "Add more" : "Add viewer",
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,

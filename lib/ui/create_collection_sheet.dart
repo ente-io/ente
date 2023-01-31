@@ -361,7 +361,12 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
   }
 
   Future<bool> _addToCollection(int collectionID) async {
-    final dialog = createProgressDialog(context, "Uploading files to album...");
+    final dialog = createProgressDialog(
+      context,
+      "Uploading files to album"
+      "...",
+      isDismissible: true,
+    );
     await dialog.show();
     try {
       final List<File> files = [];
@@ -434,7 +439,7 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
     final String message = widget.actionType == CollectionActionType.moveFiles
         ? "Moving files to album..."
         : "Unhiding files to album";
-    final dialog = createProgressDialog(context, message);
+    final dialog = createProgressDialog(context, message, isDismissible: true);
     await dialog.show();
     try {
       final int fromCollectionID =
@@ -462,7 +467,8 @@ class _CreateCollectionSheetState extends State<CreateCollectionSheet> {
   }
 
   Future<bool> _restoreFilesToCollection(int toCollectionID) async {
-    final dialog = createProgressDialog(context, "Restoring files...");
+    final dialog = createProgressDialog(context, "Restoring files...",
+        isDismissible: true);
     await dialog.show();
     try {
       await CollectionsService.instance

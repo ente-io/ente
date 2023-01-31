@@ -117,6 +117,8 @@ class UserService {
     }
   }
 
+  // getPublicKey returns null value if email id is not
+  // associated with another ente account
   Future<String?> getPublicKey(String email) async {
     try {
       final response = await _enteDio.get(
@@ -127,8 +129,10 @@ class UserService {
       await PublicKeysDB.instance.setKey(PublicKey(email, publicKey));
       return publicKey;
     } on DioError catch (e) {
-      _logger.info(e);
-      return null;
+      if (e.response != null && e.response?.statusCode == 404) {
+        return null;
+      }
+      rethrow;
     }
   }
 

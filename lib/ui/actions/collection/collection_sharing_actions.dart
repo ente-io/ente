@@ -13,8 +13,10 @@ import 'package:photos/services/hidden_service.dart';
 import 'package:photos/services/user_service.dart';
 import 'package:photos/theme/colors.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/common/progress_dialog.dart';
 import 'package:photos/ui/components/action_sheet_widget.dart';
 import 'package:photos/ui/components/button_widget.dart';
+import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/payment/subscription.dart';
 import 'package:photos/utils/date_time_util.dart';
@@ -29,55 +31,22 @@ class CollectionActions {
 
   CollectionActions(this.collectionsService);
 
-  Future<bool> publicLinkToggle(
+  Future<bool> enableUrl(
     BuildContext context,
-    Collection collection,
-    bool enable,
-  ) async {
-    // confirm if user wants to disable the url
-    if (!enable) {
-      final ButtonAction? result = await showActionSheet(
-        context: context,
-        buttons: [
-          ButtonWidget(
-            buttonType: ButtonType.critical,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            buttonAction: ButtonAction.first,
-            shouldSurfaceExecutionStates: true,
-            labelText: "Yes, remove",
-            onTap: () async {
-              await CollectionsService.instance.disableShareUrl(collection);
-            },
-          ),
-          const ButtonWidget(
-            buttonType: ButtonType.secondary,
-            buttonAction: ButtonAction.cancel,
-            isInAlert: true,
-            shouldStickToDarkTheme: true,
-            labelText: "Cancel",
-          )
-        ],
-        title: "Remove public link",
-        body:
-            'This will remove the public link for accessing "${collection.name}".',
-      );
-      if (result != null) {
-        if (result == ButtonAction.error) {
-          showGenericErrorDialog(context: context);
-        }
-        return result == ButtonAction.first;
-      } else {
-        return false;
-      }
-    }
+    Collection collection, {
+    bool enableCollect = false,
+  }) async {
     final dialog = createProgressDialog(
       context,
       "Creating link...",
+      isDismissible: true,
     );
     try {
       await dialog.show();
-      await CollectionsService.instance.createShareUrl(collection);
+      await CollectionsService.instance.createShareUrl(
+        collection,
+        enableCollect: enableCollect,
+      );
       dialog.hide();
       return true;
     } catch (e) {
@@ -88,6 +57,43 @@ class CollectionActions {
         logger.severe("Failed to update shareUrl collection", e);
         showGenericErrorDialog(context: context);
       }
+      return false;
+    }
+  }
+
+  Future<bool> disableUrl(BuildContext context, Collection collection) async {
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Yes, remove",
+          onTap: () async {
+            await CollectionsService.instance.disableShareUrl(collection);
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Remove public link",
+      body:
+          'This will remove the public link for accessing "${collection.name}".',
+    );
+    if (result != null) {
+      if (result == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      return result == ButtonAction.first;
+    } else {
       return false;
     }
   }
@@ -137,33 +143,44 @@ class CollectionActions {
   }
 
   // removeParticipant remove the user from a share album
-  Future<bool?> removeParticipant(
+  Future<bool> removeParticipant(
     BuildContext context,
     Collection collection,
     User user,
   ) async {
-    final result = await showChoiceDialog(
-      context,
-      title: "Remove",
-      body: "${user.email} will be removed",
-      firstButtonLabel: "Yes, remove",
-      firstButtonOnTap: () async {
-        try {
-          final newSharees = await CollectionsService.instance
-              .unshare(collection.id, user.email);
-          collection.updateSharees(newSharees);
-        } catch (e, s) {
-          Logger("EmailItemWidget").severe(e, s);
-          rethrow;
-        }
-      },
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          shouldSurfaceExecutionStates: true,
+          labelText: "Yes, remove",
+          onTap: () async {
+            final newSharees = await CollectionsService.instance
+                .unshare(collection.id, user.email);
+            collection.updateSharees(newSharees);
+          },
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Remove?",
+      body: '${user.email} will be removed from this shared album\n\nAny '
+          'photos added by them will also be removed from the album',
     );
-    if (result == ButtonAction.error) {
-      await showGenericErrorDialog(context: context);
-      return false;
-    }
-    if (result == ButtonAction.first) {
-      return true;
+    if (result != null) {
+      if (result == ButtonAction.error) {
+        showGenericErrorDialog(context: context);
+      }
+      return result == ButtonAction.first;
     } else {
       return false;
     }
@@ -174,6 +191,7 @@ class CollectionActions {
     Collection collection,
     String email, {
     CollectionParticipantRole role = CollectionParticipantRole.viewer,
+    bool showProgress = false,
     String? publicKey,
   }) async {
     if (!isValidEmail(email)) {
@@ -186,76 +204,70 @@ class CollectionActions {
     } else if (email == Configuration.instance.getEmail()) {
       await showErrorDialog(context, "Oops", "You cannot share with yourself");
       return null;
-    } else {
-      // if (collection.getSharees().any((user) => user.email == email)) {
-      //   showErrorDialog(
-      //     context,
-      //     "Oops",
-      //     "You're already sharing this with " + email,
-      //   );
-      //   return null;
-      // }
     }
+
+    ProgressDialog? dialog;
     if (publicKey == null) {
-      final dialog = createProgressDialog(context, "Searching for user...");
-      await dialog.show();
+      if (showProgress) {
+        dialog = createProgressDialog(context, "Searching for user...");
+        await dialog.show();
+      }
+
       try {
         publicKey = await UserService.instance.getPublicKey(email);
-        await dialog.hide();
+        await dialog?.hide();
       } catch (e) {
+        await dialog?.hide();
         logger.severe("Failed to get public key", e);
         showGenericErrorDialog(context: context);
-        await dialog.hide();
+        return false;
       }
     }
     // getPublicKey can return null
     // ignore: unnecessary_null_comparison
     if (publicKey == null || publicKey == '') {
-      final dialog = AlertDialog(
-        title: const Text("Invite to ente?"),
-        content: Text(
-          "Looks like " +
-              email +
-              " hasn't signed up for ente yet. would you like to invite them?",
-          style: const TextStyle(
-            height: 1.4,
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: Text(
-              "Invite",
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.greenAlternative,
-              ),
-            ),
-            onPressed: () {
+      // todo: neeraj replace this as per the design where a new screen
+      // is used for error. Do this change along with handling of network errors
+      await showDialogWidget(
+        context: context,
+        title: "Invite to ente",
+        icon: Icons.info_outline,
+        body: "$email does not have an ente account\n\nSend them an invite to"
+            " add them after they sign up",
+        isDismissible: true,
+        buttons: [
+          ButtonWidget(
+            buttonType: ButtonType.neutral,
+            icon: Icons.adaptive.share,
+            labelText: "Send invite",
+            isInAlert: true,
+            onTap: () async {
               shareText(
-                "Hey, I have some photos to share. Please install https://ente.io so that I can share them privately.",
+                "Download ente so we can easily share original quality photos"
+                " and videos\n\nhttps://ente.io/#download",
               );
             },
           ),
         ],
       );
-      await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return dialog;
-        },
-      );
       return null;
     } else {
-      final dialog = createProgressDialog(context, "Sharing...");
-      await dialog.show();
+      if (showProgress) {
+        dialog = createProgressDialog(
+          context,
+          "Sharing...",
+          isDismissible: true,
+        );
+        await dialog.show();
+      }
       try {
         final newSharees = await CollectionsService.instance
             .share(collection.id, email, publicKey, role);
+        await dialog?.hide();
         collection.updateSharees(newSharees);
-        await dialog.hide();
-        showShortToast(context, "Shared successfully!");
         return true;
       } catch (e) {
-        await dialog.hide();
+        await dialog?.hide();
         if (e is SharingNotPermittedForFreeAccountsError) {
           _showUnSupportedAlert(context);
         } else {

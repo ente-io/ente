@@ -80,6 +80,7 @@ class _ManageIndividualParticipantState
                         widget.collection,
                         widget.user.email,
                         role: CollectionParticipantRole.collaborator,
+                        showProgress: true,
                       );
                       if ((result ?? false) && mounted) {
                         widget.user.role = CollectionParticipantRole
@@ -112,6 +113,7 @@ class _ManageIndividualParticipantState
                         widget.collection,
                         widget.user.email,
                         role: CollectionParticipantRole.viewer,
+                        showProgress: true,
                       );
                       if ((result ?? false) && mounted) {
                         widget.user.role =
@@ -144,7 +146,7 @@ class _ManageIndividualParticipantState
                   widget.user,
                 );
 
-                if ((result ?? false) && mounted) {
+                if ((result) && mounted) {
                   Navigator.of(context).pop(true);
                 }
               },
