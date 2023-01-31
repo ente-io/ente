@@ -176,8 +176,9 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index == (1 + collaborators.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title:
-                            collaborators.isNotEmpty ? "Add more" : "Add email",
+                        title: collaborators.isNotEmpty
+                            ? "Add more"
+                            : "Add collaborator",
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
@@ -251,7 +252,7 @@ class _AlbumParticipantsPageState extends State<AlbumParticipantsPage> {
                   } else if (index == (1 + viewers.length) && isOwner) {
                     return MenuItemWidget(
                       captionedTextWidget: CaptionedTextWidget(
-                        title: viewers.isNotEmpty ? "Add more" : "Add Viewer",
+                        title: viewers.isNotEmpty ? "Add more" : "Add viewer",
                         makeTextBold: true,
                       ),
                       leadingIcon: Icons.add_outlined,
