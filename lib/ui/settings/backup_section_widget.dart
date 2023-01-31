@@ -12,7 +12,7 @@ import 'package:photos/ui/backup_settings_screen.dart';
 import 'package:photos/ui/components/captioned_text_widget.dart';
 import 'package:photos/ui/components/dialog_widget.dart';
 import 'package:photos/ui/components/expandable_menu_item_widget.dart';
-import 'package:photos/ui/components/menu_item_widget.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_widget.dart';
 import 'package:photos/ui/components/models/button_type.dart';
 import 'package:photos/ui/settings/common_settings.dart';
 import 'package:photos/ui/tools/deduplicate_page.dart';

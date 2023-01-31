@@ -1,7 +1,7 @@
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
-import 'package:photos/ente_theme_data.dart';
 import 'package:photos/theme/ente_theme.dart';
+import 'package:photos/ui/components/menu_item_widget/menu_item_child_widgets.dart';
 
 class MenuItemWidget extends StatefulWidget {
   final Widget captionedTextWidget;
@@ -110,7 +110,6 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
   }
 
   Widget menuItemWidget(BuildContext context) {
-    final enteColorScheme = Theme.of(context).colorScheme.enteTheme.colorScheme;
     final borderRadius = Radius.circular(widget.borderRadius);
     final isExpanded = widget.expandableController?.value;
     final bottomBorderRadius =
@@ -138,61 +137,27 @@ class _MenuItemWidgetState extends State<MenuItemWidget> {
         children: [
           widget.alignCaptionedTextToLeft && widget.leadingIcon == null
               ? const SizedBox.shrink()
-              : Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: SizedBox(
-                    height: widget.leadingIconSize,
-                    width: widget.leadingIconSize,
-                    child: widget.leadingIcon == null
-                        ? (widget.leadingIconWidget != null
-                            ? FittedBox(
-                                fit: BoxFit.contain,
-                                child: widget.leadingIconWidget,
-                              )
-                            : const SizedBox.shrink())
-                        : FittedBox(
-                            fit: BoxFit.contain,
-                            child: Icon(
-                              widget.leadingIcon,
-                              color: widget.leadingIconColor ??
-                                  enteColorScheme.strokeBase,
-                            ),
-                          ),
-                  ),
+              : LeadingWidget(
+                  leadingIconSize: widget.leadingIconSize,
+                  leadingIcon: widget.leadingIcon,
+                  leadingIconColor: widget.leadingIconColor,
+                  leadingIconWidget: widget.leadingIconWidget,
                 ),
           widget.captionedTextWidget,
-          widget.expandableController != null
-              ? AnimatedOpacity(
-                  duration: const Duration(milliseconds: 100),
-                  curve: Curves.easeInOut,
-                  opacity: isExpanded! ? 0 : 1,
-                  child: AnimatedSwitcher(
-                    transitionBuilder: (child, animation) {
-                      return ScaleTransition(scale: animation, child: child);
-                    },
-                    duration: const Duration(milliseconds: 200),
-                    switchInCurve: Curves.easeOut,
-                    child: isExpanded
-                        ? const SizedBox.shrink()
-                        : Icon(
-                            widget.trailingIcon,
-                            color: widget.trailingIconColor,
-                          ),
-                  ),
-                )
-              : widget.trailingIcon != null
-                  ? Padding(
-                      padding: EdgeInsets.only(
-                        right: widget.trailingExtraMargin,
-                      ),
-                      child: Icon(
-                        widget.trailingIcon,
-                        color: widget.trailingIconIsMuted
-                            ? enteColorScheme.strokeMuted
-                            : widget.trailingIconColor,
-                      ),
-                    )
-                  : widget.trailingWidget ?? const SizedBox.shrink(),
+          if (widget.expandableController != null)
+            ExpansionTrailingIcon(
+              isExpanded: isExpanded!,
+              trailingIcon: widget.trailingIcon,
+              trailingIconColor: widget.trailingIconColor,
+            )
+          else
+            TrailingWidget(
+              trailingIcon: widget.trailingIcon,
+              trailingIconColor: widget.trailingIconColor,
+              trailingWidget: widget.trailingWidget,
+              trailingIconIsMuted: widget.trailingIconIsMuted,
+              trailingExtraMargin: widget.trailingExtraMargin,
+            ),
         ],
       ),
     );
