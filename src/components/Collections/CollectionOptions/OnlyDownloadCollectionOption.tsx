@@ -10,10 +10,12 @@ interface Iprops {
         action: CollectionActions,
         loader?: boolean
     ) => (...args: any[]) => Promise<void>;
+    downloadOptionText?: string;
 }
 
 export function OnlyDownloadCollectionOption({
     handleCollectionAction,
+    downloadOptionText = constants.DOWNLOAD,
 }: Iprops) {
     return (
         <OverflowMenuOption
@@ -22,7 +24,7 @@ export function OnlyDownloadCollectionOption({
                 CollectionActions.CONFIRM_DOWNLOAD,
                 false
             )}>
-            {constants.DOWNLOAD_COLLECTION}
+            {downloadOptionText}
         </OverflowMenuOption>
     );
 }

@@ -272,9 +272,14 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
                     <TrashCollectionOption
                         handleCollectionAction={handleCollectionAction}
                     />
-                ) : collectionSummaryType === CollectionSummaryType.favorites ||
-                  collectionSummaryType ===
-                      CollectionSummaryType.uncategorized ? (
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.favorites ? (
+                    <OnlyDownloadCollectionOption
+                        handleCollectionAction={handleCollectionAction}
+                        downloadOptionText={constants.DOWNLOAD_FAVOURITES}
+                    />
+                ) : collectionSummaryType ===
+                  CollectionSummaryType.uncategorized ? (
                     <OnlyDownloadCollectionOption
                         handleCollectionAction={handleCollectionAction}
                     />
