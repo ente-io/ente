@@ -511,7 +511,7 @@ export const removeFromCollection = async (
 
 export const deleteCollection = async (
     collectionID: number,
-    keepPhotos: boolean
+    keepFiles: boolean
 ) => {
     try {
         const token = getToken();
@@ -519,7 +519,7 @@ export const deleteCollection = async (
         await HTTPService.delete(
             `${ENDPOINT}/collections/v3/${collectionID}`,
             null,
-            { collectionID, keepPhotos },
+            { collectionID, keepFiles },
             { 'X-Auth-Token': token }
         );
     } catch (e) {

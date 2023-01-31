@@ -22,6 +22,7 @@ import { OnlyDownloadCollectionOption } from './OnlyDownloadCollectionOption';
 import { QuickOptions } from './QuickOptions';
 import MoreHoriz from '@mui/icons-material/MoreHoriz';
 import { HorizontalFlex } from 'components/Container';
+import { getLocalFiles } from 'services/fileService';
 
 interface CollectionOptionsProps {
     setCollectionNamerAttributes: SetCollectionNamerAttributes;
@@ -40,7 +41,7 @@ export enum CollectionActions {
     UNARCHIVE,
     CONFIRM_DELETE,
     DELETE,
-    KEEP_PHOTOS,
+    KEEP_FILES,
     SHOW_SHARE_DIALOG,
     CONFIRM_EMPTY_TRASH,
     EMPTY_TRASH,
@@ -91,8 +92,8 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
             case CollectionActions.DELETE:
                 callback = deleteCollection;
                 break;
-            case CollectionActions.KEEP_PHOTOS:
-                callback = keepPhotos;
+            case CollectionActions.KEEP_FILES:
+                callback = keepFiles;
                 break;
             case CollectionActions.SHOW_SHARE_DIALOG:
                 callback = showCollectionShareModal;
@@ -146,7 +147,16 @@ const CollectionOptions = (props: CollectionOptionsProps) => {
         redirectToAll();
     };
 
-    const keepPhotos = async () => {
+    const keepFiles = async () => {
+        const allFiles = await getLocalFiles();
+        const collectionFiles = allFiles.filter((file) => {
+            return file.collectionID === activeCollection.id;
+        });
+        await CollectionAPI.removeFromCollection(
+            activeCollection.id,
+            collectionFiles
+        );
+        console.log(collectionFiles);
         await CollectionAPI.deleteCollection(activeCollection.id, true);
         redirectToAll();
     };

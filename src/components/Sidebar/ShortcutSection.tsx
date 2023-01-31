@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useEffect } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import constants from 'utils/strings/constants';
 import { GalleryContext } from 'pages/gallery';
 import { ARCHIVE_SECTION, TRASH_SECTION } from 'constants/collection';
@@ -18,23 +18,19 @@ export default function ShortcutSection({
     collectionSummaries,
 }: Iprops) {
     const galleryContext = useContext(GalleryContext);
-    const unCategorizedCollectionId = useRef(0);
+    const [unCategorizedCollectionId, setUncategorezedId] = useState<number>();
     useEffect(() => {
-        const UncategorizedSection = async () => {
-            const uncategorisedCollection = await getUncategorizedCollection();
-            unCategorizedCollectionId.current = uncategorisedCollection.id;
-            console.log(unCategorizedCollectionId.current);
-            console.log('hi');
+        const main = async () => {
+            const unCategorisedCollection = await getUncategorizedCollection();
+            setUncategorezedId(unCategorisedCollection.id);
         };
-        return () => {
-            UncategorizedSection;
-        };
+        main();
     }, []);
 
     const openUncategorizedSection = async () => {
-        const uncategorisedCollection = await getUncategorizedCollection();
-        unCategorizedCollectionId.current = uncategorisedCollection.id;
-        galleryContext.setActiveCollection(unCategorizedCollectionId.current);
+        // const uncategorisedCollection = await getUncategorizedCollection();
+        // unCategorizedCollectionId.current = uncategorisedCollection.id;
+        galleryContext.setActiveCollection(unCategorizedCollectionId);
         closeSidebar();
     };
 
@@ -54,8 +50,8 @@ export default function ShortcutSection({
                 label={constants.UNCATEGORIZED}
                 onClick={openUncategorizedSection}
                 count={
-                    collectionSummaries.get(unCategorizedCollectionId.current)
-                        .fileCount
+                    collectionSummaries.get(unCategorizedCollectionId)
+                        ?.fileCount
                 }
             />
             <ShortcutButton
