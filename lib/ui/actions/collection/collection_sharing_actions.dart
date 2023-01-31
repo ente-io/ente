@@ -215,6 +215,8 @@ class CollectionActions {
     // getPublicKey can return null
     // ignore: unnecessary_null_comparison
     if (publicKey == null || publicKey == '') {
+      // todo: neeraj replace this as per the design where a new screen
+      // is used for error. Do this change along with handling of network errors
       await showDialogWidget(
         context: context,
         title: "Invite to ente",
