@@ -192,7 +192,6 @@ class CollectionActions {
     String email, {
     CollectionParticipantRole role = CollectionParticipantRole.viewer,
     bool showProgress = false,
-    String? publicKey,
   }) async {
     if (!isValidEmail(email)) {
       await showErrorDialog(
@@ -201,30 +200,28 @@ class CollectionActions {
         "Please enter a valid email address.",
       );
       return null;
-    } else if (email == Configuration.instance.getEmail()) {
+    } else if (email.trim() == Configuration.instance.getEmail()) {
       await showErrorDialog(context, "Oops", "You cannot share with yourself");
       return null;
     }
 
     ProgressDialog? dialog;
-    if (publicKey == null) {
-      if (showProgress) {
-        dialog = createProgressDialog(context, "Searching for user...");
-        await dialog.show();
-      }
-
-      try {
-        publicKey = await UserService.instance.getPublicKey(email);
-        await dialog?.hide();
-      } catch (e) {
-        await dialog?.hide();
-        logger.severe("Failed to get public key", e);
-        showGenericErrorDialog(context: context);
-        return false;
-      }
+    String? publicKey;
+    if (showProgress) {
+      dialog = createProgressDialog(context, "Sharing...", isDismissible: true);
+      await dialog.show();
     }
-    // getPublicKey can return null
-    // ignore: unnecessary_null_comparison
+
+    try {
+      publicKey = await UserService.instance.getPublicKey(email);
+    } catch (e) {
+      await dialog?.hide();
+      logger.severe("Failed to get public key", e);
+      showGenericErrorDialog(context: context);
+      return false;
+    }
+    // getPublicKey can return null when no user is associated with given
+    // email id
     if (publicKey == null || publicKey == '') {
       // todo: neeraj replace this as per the design where a new screen
       // is used for error. Do this change along with handling of network errors
@@ -252,14 +249,6 @@ class CollectionActions {
       );
       return null;
     } else {
-      if (showProgress) {
-        dialog = createProgressDialog(
-          context,
-          "Sharing...",
-          isDismissible: true,
-        );
-        await dialog.show();
-      }
       try {
         final newSharees = await CollectionsService.instance
             .share(collection.id, email, publicKey, role);
