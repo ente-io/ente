@@ -161,7 +161,7 @@ class _GalleryAppBarWidgetState extends State<GalleryAppBarWidget> {
           labelText: "Cancel",
         )
       ],
-      title: "Leave shared album??",
+      title: "Leave shared album?",
       body: "Photos added by you will be removed from the album",
     );
     if (result != null && mounted) {

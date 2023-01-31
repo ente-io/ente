@@ -279,6 +279,7 @@ class CollectionActions {
     }
   }
 
+  // deleteCollectionSheet returns true if the album is successfully deleted
   Future<bool> deleteCollectionSheet(
     BuildContext bContext,
     Collection collection,
@@ -287,6 +288,13 @@ class CollectionActions {
     final currentUserID = Configuration.instance.getUserID()!;
     if (collection.owner!.id != currentUserID) {
       throw AssertionError("Can not delete album owned by others");
+    }
+    if (collection.hasSharees) {
+      final bool confirmDelete =
+          await _confirmSharedAlbumDeletion(bContext, collection);
+      if (!confirmDelete) {
+        return false;
+      }
     }
     final actionResult = await showActionSheet(
       context: bContext,
@@ -366,6 +374,37 @@ class CollectionActions {
       return true;
     }
     return false;
+  }
+
+  // _confirmSharedAlbumDeletion should be shown when user tries to delete an
+  // album shared with other ente users.
+  Future<bool> _confirmSharedAlbumDeletion(
+    BuildContext context,
+    Collection collection,
+  ) async {
+    final ButtonAction? result = await showActionSheet(
+      context: context,
+      buttons: [
+        const ButtonWidget(
+          buttonType: ButtonType.critical,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          buttonAction: ButtonAction.first,
+          labelText: "Delete album",
+        ),
+        const ButtonWidget(
+          buttonType: ButtonType.secondary,
+          buttonAction: ButtonAction.cancel,
+          isInAlert: true,
+          shouldStickToDarkTheme: true,
+          labelText: "Cancel",
+        )
+      ],
+      title: "Delete shared album?",
+      body: "The album will be deleted for everyone\n\nYou will lose access to "
+          "shared photos in this album that are owned by others",
+    );
+    return result != null && result == ButtonAction.first;
   }
 
   /*
