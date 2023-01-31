@@ -18,6 +18,7 @@ import {
     TEXT_DETECTION_TIMEOUT_MS,
 } from 'constants/machineLearning/config';
 import { promiseWithTimeout } from 'utils/common/promiseTimeout';
+import { addLogLine } from 'utils/logging';
 
 const TESSERACT_MAX_CONCURRENT_PROCESSES = 4;
 class TesseractService implements TextDetectionService {
@@ -59,9 +60,9 @@ class TesseractService implements TextDetectionService {
     private async init() {
         for (let i = 0; i < TESSERACT_MAX_CONCURRENT_PROCESSES; i++) {
             this.tesseractWorkerPool[i] = await this.createTesseractWorker();
-            console.log('loaded tesseract worker no', i);
+            addLogLine('loaded tesseract worker no', i);
         }
-        console.log('loaded tesseract worker pool');
+        addLogLine('loaded tesseract worker pool');
     }
 
     private async getTesseractWorker() {
@@ -109,7 +110,7 @@ class TesseractService implements TextDetectionService {
                 imageHeight >= TESSERACT_MIN_IMAGE_HEIGHT
             )
         ) {
-            console.log(
+            addLogLine(
                 `file too small for tesseract- (${imageWidth},${imageHeight}) skipping text detection...`
             );
             return Error(
@@ -117,7 +118,7 @@ class TesseractService implements TextDetectionService {
             );
         }
         if (imageHeight > TESSERACT_MAX_IMAGE_DIMENSION) {
-            console.log(
+            addLogLine(
                 `original dimension (${imageBitmap.width}px,${imageBitmap.height}px)`
             );
             imageBitmap = resizeToSquare(
@@ -135,7 +136,7 @@ class TesseractService implements TextDetectionService {
             fileTypeInfo.fileType !== FILE_TYPE.IMAGE &&
             !['png', 'jpg', 'bmp', 'pbm'].includes(fileTypeInfo.exactType)
         ) {
-            console.log(
+            addLogLine(
                 `unsupported file type- ${fileTypeInfo.exactType}, skipping text detection....`
             );
             return Error(
@@ -145,7 +146,7 @@ class TesseractService implements TextDetectionService {
 
         let tesseractWorker = await this.getTesseractWorker();
         const id = makeID(6);
-        console.log(
+        addLogLine(
             `detecting text (${imageBitmap.width}px,${imageBitmap.height}px) fileType=${fileTypeInfo.exactType}`
         );
         try {

@@ -4,6 +4,7 @@ import {
     DetectedFace,
     Face,
 } from 'types/machineLearning';
+import { addLogLine } from 'utils/logging';
 import {
     isDifferentOrOld,
     getFaceId,
@@ -47,7 +48,7 @@ class FaceService {
         );
         const faceDetections =
             await syncContext.faceDetectionService.detectFaces(imageBitmap);
-        // console.log('3 TF Memory stats: ', tf.memory());
+        // addLogLine('3 TF Memory stats: ', tf.memory());
         // TODO: reenable faces filtering based on width
         const detectedFaces = faceDetections?.map((detection) => {
             return {
@@ -62,7 +63,7 @@ class FaceService {
         // ?.filter((f) =>
         //     f.box.width > syncContext.config.faceDetection.minFaceSize
         // );
-        console.log('[MLService] Detected Faces: ', newMlFile.faces?.length);
+        addLogLine('[MLService] Detected Faces: ', newMlFile.faces?.length);
     }
 
     async syncFileFaceCrops(
@@ -124,8 +125,8 @@ class FaceService {
                 face.detection
             );
         }
-        console.log('[MLService] alignedFaces: ', newMlFile.faces?.length);
-        // console.log('4 TF Memory stats: ', tf.memory());
+        addLogLine('[MLService] alignedFaces: ', newMlFile.faces?.length);
+        // addLogLine('4 TF Memory stats: ', tf.memory());
     }
 
     async syncFileFaceEmbeddings(
@@ -164,11 +165,8 @@ class FaceService {
         faceImages.forEach((faceImage) => faceImage.close());
         newMlFile.faces.forEach((f, i) => (f.embedding = embeddings[i]));
 
-        console.log(
-            '[MLService] facesWithEmbeddings: ',
-            newMlFile.faces.length
-        );
-        // console.log('5 TF Memory stats: ', tf.memory());
+        addLogLine('[MLService] facesWithEmbeddings: ', newMlFile.faces.length);
+        // addLogLine('5 TF Memory stats: ', tf.memory());
     }
 
     async saveFaceCrop(
@@ -207,14 +205,14 @@ class FaceService {
         const clusteringConfig = syncContext.config.faceClustering;
 
         if (!allFaces || allFaces.length < clusteringConfig.minInputSize) {
-            console.log(
+            addLogLine(
                 '[MLService] Too few faces to cluster, not running clustering: ',
                 allFaces.length
             );
             return;
         }
 
-        console.log('Running clustering allFaces: ', allFaces.length);
+        addLogLine('Running clustering allFaces: ', allFaces.length);
         syncContext.mlLibraryData.faceClusteringResults =
             await syncContext.faceClusteringService.cluster(
                 allFaces.map((f) => Array.from(f.embedding)),
@@ -222,7 +220,7 @@ class FaceService {
             );
         syncContext.mlLibraryData.faceClusteringMethod =
             syncContext.faceClusteringService.method;
-        console.log(
+        addLogLine(
             '[MLService] Got face clustering results: ',
             syncContext.mlLibraryData.faceClusteringResults
         );

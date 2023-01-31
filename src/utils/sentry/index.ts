@@ -21,7 +21,7 @@ export const logError = async (
         );
     }
     if (isDEVSentryENV()) {
-        console.log(error, { msg, info });
+        addLogLine(error, { msg, info });
     }
     Sentry.captureException(err, {
         level: Sentry.Severity.Info,

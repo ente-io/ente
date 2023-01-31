@@ -9,6 +9,7 @@ import {
     MLSyncContext,
     NearestCluster,
 } from 'types/machineLearning';
+import { addLogLine } from 'utils/logging';
 // import { getAllFacesMap } from 'utils/storage/mlStorage';
 
 // export function getClusterSummary(cluster: Cluster): FaceDescriptor {
@@ -56,7 +57,7 @@ export function getNearestCluster(
         }
     });
 
-    console.log('nearestDist: ', nearestDist);
+    addLogLine('nearestDist: ', nearestDist);
     return { cluster: nearest, distance: nearestDist };
 }
 
@@ -77,10 +78,10 @@ export function getNearestCluster(
 //         const nearest = this.getNearestCluster(syncContext, noiseFace);
 
 //         if (nearest.cluster && nearest.distance < this.maxFaceDistance) {
-//             console.log('Adding noise to cluser: ', n, nearest.distance);
+//             addLogLine('Adding noise to cluser: ', n, nearest.distance);
 //             nearest.cluster.faces.push(n);
 //         } else {
-//             console.log(
+//             addLogLine(
 //                 'No cluster for noise: ',
 //                 n,
 //                 'within distance: ',

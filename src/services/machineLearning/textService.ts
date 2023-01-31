@@ -4,6 +4,7 @@ import {
     DetectedText,
     WordGroup,
 } from 'types/machineLearning';
+import { addLogLine } from 'utils/logging';
 import { isDifferentOrOld, getAllTextFromMap } from 'utils/machineLearning';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import ReaderService from './readerService';
@@ -60,7 +61,7 @@ class TextService {
         );
         newMlFile.text = detectedText;
         console.timeEnd(`text detection time taken ${fileContext.enteFile.id}`);
-        console.log(
+        addLogLine(
             '[MLService] Detected text: ',
             fileContext.enteFile.metadata.title,
             newMlFile.text?.length
@@ -97,14 +98,14 @@ class TextService {
 
     // async syncThingClassesIndex(syncContext: MLSyncContext) {
     //     const filesVersion = await mlIDbStorage.getIndexVersion('files');
-    //     console.log(
+    //     addLogLine(
     //         'thingClasses',
     //         await mlIDbStorage.getIndexVersion('thingClasses')
     //     );
     //     if (
     //         filesVersion <= (await mlIDbStorage.getIndexVersion('thingClasses'))
     //     ) {
-    //         console.log(
+    //         addLogLine(
     //             '[MLService] Skipping people index as already synced to latest version'
     //         );
     //         return;

@@ -22,7 +22,7 @@ class HdbscanClusteringService implements ClusteringService {
         input: ClusteringInput,
         config: ClusteringConfig
     ): Promise<HdbscanResults> {
-        // console.log('Clustering input: ', input);
+        // addLogLine('Clustering input: ', input);
         const hdbscan = new Hdbscan({
             input,
 

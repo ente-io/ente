@@ -31,7 +31,7 @@ const Caption = styled('span')`
 
 const MenuWithPeople = (props) => {
     const appContext = useContext(AppContext);
-    // console.log("props.selectProps.options: ", selectRef);
+    // addLogLine("props.selectProps.options: ", selectRef);
     const peopleSuggestions = props.selectProps.options.filter(
         (o) => o.type === SuggestionType.PERSON
     );

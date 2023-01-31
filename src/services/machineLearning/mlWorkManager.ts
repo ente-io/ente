@@ -12,6 +12,7 @@ import { MLSyncJobResult, MLSyncJob } from './mlSyncJob';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { DedicatedMLWorker } from 'worker/ml.worker';
 import { getDedicatedMLWorker } from 'utils/comlink/ComlinkMLWorker';
+import { addLogLine } from 'utils/logging';
 
 const LIVE_SYNC_IDLE_DEBOUNCE_SEC = 30;
 const LIVE_SYNC_QUEUE_TIMEOUT_SEC = 300;
@@ -51,7 +52,7 @@ class MLWorkManager {
 
     public async setMlSearchEnabled(enabled: boolean) {
         if (!this.mlSearchEnabled && enabled) {
-            console.log('Enabling MLWorkManager');
+            addLogLine('Enabling MLWorkManager');
             this.mlSearchEnabled = true;
 
             logQueueStats(this.liveSyncQueue, 'livesync');
@@ -69,7 +70,7 @@ class MLWorkManager {
 
             await this.startSyncJob();
         } else if (this.mlSearchEnabled && !enabled) {
-            console.log('Disabling MLWorkManager');
+            addLogLine('Disabling MLWorkManager');
             this.mlSearchEnabled = false;
 
             this.liveSyncQueue.removeAllListeners();
@@ -95,7 +96,7 @@ class MLWorkManager {
 
     // Handlers
     private async appStartHandler() {
-        console.log('appStartHandler');
+        addLogLine('appStartHandler');
         try {
             this.startSyncJob();
         } catch (e) {
@@ -104,7 +105,7 @@ class MLWorkManager {
     }
 
     private async logoutHandler() {
-        console.log('logoutHandler');
+        addLogLine('logoutHandler');
         try {
             // eslint-disable-next-line @typescript-eslint/await-thenable
             await this.stopSyncJob();
@@ -123,9 +124,9 @@ class MLWorkManager {
         if (!this.mlSearchEnabled) {
             return;
         }
-        console.log('fileUploadedHandler: ', arg.enteFile.id);
+        addLogLine('fileUploadedHandler: ', arg.enteFile.id);
         if (arg.enteFile.metadata.fileType !== FILE_TYPE.IMAGE) {
-            console.log('Skipping non image file for local file processing');
+            addLogLine('Skipping non image file for local file processing');
             return;
         }
         try {
@@ -138,7 +139,7 @@ class MLWorkManager {
     }
 
     private async localFilesUpdatedHandler() {
-        console.log('Local files updated');
+        addLogLine('Local files updated');
         this.startSyncJob();
     }
 
@@ -169,7 +170,7 @@ class MLWorkManager {
     }
 
     private async onLiveSyncIdle() {
-        console.log('Live sync idle');
+        addLogLine('Live sync idle');
         await this.terminateLiveSyncWorker();
         this.mlSearchEnabled && this.startSyncJob();
     }
@@ -207,7 +208,7 @@ class MLWorkManager {
         // TODO: skipping is not required if we are caching chunks through service worker
         // currently worker chunk itself is not loaded when network is not there
         if (!navigator.onLine) {
-            console.log(
+            addLogLine(
                 'Skipping ml-sync job run as not connected to internet.'
             );
             return {
@@ -227,7 +228,7 @@ class MLWorkManager {
                 !!mlSyncResult.error || mlSyncResult.nOutOfSyncFiles < 1,
             mlSyncResult,
         };
-        console.log('ML Sync Job result: ', jobResult);
+        addLogLine('ML Sync Job result: ', jobResult);
 
         // TODO: redirect/refresh to gallery in case of session_expired, stop ml sync job
 
@@ -236,13 +237,13 @@ class MLWorkManager {
 
     public async startSyncJob() {
         try {
-            console.log('MLWorkManager.startSyncJob');
+            addLogLine('MLWorkManager.startSyncJob');
             if (!this.mlSearchEnabled) {
-                console.log('ML Search disabled, not starting ml sync job');
+                addLogLine('ML Search disabled, not starting ml sync job');
                 return;
             }
             if (!getToken()) {
-                console.log('User not logged in, not starting ml sync job');
+                addLogLine('User not logged in, not starting ml sync job');
                 return;
             }
             const mlSyncJobConfig = await getMLSyncJobConfig();
@@ -259,7 +260,7 @@ class MLWorkManager {
 
     public stopSyncJob(terminateWorker: boolean = true) {
         try {
-            console.log('MLWorkManager.stopSyncJob');
+            addLogLine('MLWorkManager.stopSyncJob');
             this.mlSyncJob?.stop();
             terminateWorker && this.terminateSyncJobWorker();
         } catch (e) {

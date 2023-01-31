@@ -8,6 +8,7 @@ import {
 } from 'types/machineLearning';
 import { SCENE_DETECTION_IMAGE_SIZE } from 'constants/machineLearning/config';
 import { resizeToSquare } from 'utils/image';
+import { addLogLine } from 'utils/logging';
 
 class ImageScene implements SceneDetectionService {
     method: Versioned<SceneDetectionMethod>;
@@ -25,7 +26,7 @@ class ImageScene implements SceneDetectionService {
     }
 
     private async init() {
-        console.log(`[${this.workerID}]`, 'ImageScene init called');
+        addLogLine(`[${this.workerID}]`, 'ImageScene init called');
         if (this.model) {
             return;
         }
@@ -37,7 +38,7 @@ class ImageScene implements SceneDetectionService {
         this.model = await tfjsConverter.loadGraphModel(
             '/models/imagescene/model.json'
         );
-        console.log(
+        addLogLine(
             `[${this.workerID}]`,
             'loaded ImageScene model',
             tf.getBackend()
@@ -51,7 +52,7 @@ class ImageScene implements SceneDetectionService {
     }
 
     private async getImageSceneModel() {
-        console.log(
+        addLogLine(
             `[${this.workerID}]`,
             'ImageScene getImageSceneModel called'
         );

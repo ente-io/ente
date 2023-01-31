@@ -154,15 +154,16 @@ export {};
 
 //     const getDedicatedMLWorker = (): ComlinkWorker => {
 //         if (token) {
-//             console.log('Toen present');
+//             addLogLine('Toen present');
+
 //         }
 //         if (runningInBrowser()) {
-//             console.log('initiating worker');
+//             addLogLine('initiating worker');
 //             const worker = new Worker(
 //                 new URL('worker/machineLearning.worker', import.meta.url),
 //                 { name: 'ml-worker' }
 //             );
-//             console.log('initiated worker');
+//             addLogLine('initiated worker');
 //             const comlink = Comlink.wrap(worker);
 //             return { comlink, worker };
 //         }
@@ -183,7 +184,7 @@ export {};
 //         try {
 //             if (!MLWorker) {
 //                 MLWorker = getDedicatedMLWorker();
-//                 console.log('initiated MLWorker');
+//                 addLogLine('initiated MLWorker');
 //             }
 //             const mlWorker = await new MLWorker.comlink();
 //             const result = await mlWorker.sync(
@@ -200,7 +201,7 @@ export {};
 //             throw e;
 //         } finally {
 //             // setTimeout(()=>{
-//             //     console.log('terminating ml-worker');
+//             //     addLogLine('terminating ml-worker');
 //             MLWorker.worker.terminate();
 //             // }, 30000);
 //         }
@@ -307,7 +308,7 @@ export {};
 //     };
 
 //     const showFilteredFaces = async () => {
-//         console.log('Filtering with: ', minProbability, maxProbability);
+//         addLogLine('Filtering with: ', minProbability, maxProbability);
 //         const allFacesMap = await mlIDbStorage.getAllFacesMap();
 //         const allFaces = getAllFacesFromMap(allFacesMap);
 //         const filteredFaces = allFaces

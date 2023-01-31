@@ -1,4 +1,5 @@
 import { JobResult, JobConfig, JobState } from 'types/common/job';
+import { addLogLine } from 'utils/logging';
 
 export class SimpleJob<R extends JobResult> {
     private config: JobConfig;
@@ -26,7 +27,7 @@ export class SimpleJob<R extends JobResult> {
         if (this.state !== 'Running') {
             this.scheduleNext();
         } else {
-            console.log('Job already running, not scheduling');
+            addLogLine('Job already running, not scheduling');
         }
     }
 
@@ -40,7 +41,7 @@ export class SimpleJob<R extends JobResult> {
             this.intervalSec * 1000
         );
         this.state = 'Scheduled';
-        console.log('Scheduled next job after: ', this.intervalSec);
+        addLogLine('Scheduled next job after: ', this.intervalSec);
     }
 
     async run() {
@@ -57,7 +58,7 @@ export class SimpleJob<R extends JobResult> {
             } else {
                 this.resetInterval();
             }
-            console.log('Job completed');
+            addLogLine('Job completed');
         } catch (e) {
             console.error('Error while running Job: ', e);
         } finally {
@@ -76,6 +77,6 @@ export class SimpleJob<R extends JobResult> {
         clearTimeout(this.nextTimeoutId);
         this.nextTimeoutId = undefined;
         this.state = 'NotScheduled';
-        console.log('Cleared next job');
+        addLogLine('Cleared next job');
     }
 }

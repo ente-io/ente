@@ -36,6 +36,7 @@ import imageSceneService from './imageSceneService';
 import { getDedicatedCryptoWorker } from 'utils/comlink/ComlinkCryptoWorker';
 import { ComlinkWorker } from 'utils/comlink/comlinkWorker';
 import { DedicatedCryptoWorker } from 'worker/crypto.worker';
+import { addLogLine } from 'utils/logging';
 
 export class MLFactory {
     public static getFaceDetectionService(
@@ -206,7 +207,7 @@ export class LocalMLSyncContext implements MLSyncContext {
 
         this.concurrency = concurrency || getConcurrency();
 
-        console.log('Using concurrency: ', this.concurrency);
+        addLogLine('Using concurrency: ', this.concurrency);
         // timeout is added on downloads
         // timeout on queue will keep the operation open till worker is terminated
         this.syncQueue = new PQueue({ concurrency: this.concurrency });

@@ -3,6 +3,7 @@ import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import * as zip from '@zip.js/zip.js';
 import { FACE_CROPS_CACHE } from 'constants/cache';
 import { CacheStorageService } from 'services/cache/cacheStorageService';
+import { addLogLine } from 'utils/logging';
 
 class FileSystemWriter extends zip.Writer {
     writableStream: FileSystemWritableFileStream;
@@ -13,7 +14,7 @@ class FileSystemWriter extends zip.Writer {
     }
 
     async writeUint8Array(array: Uint8Array) {
-        // console.log('zipWriter needs to write data: ', array.byteLength);
+        // addLogLine('zipWriter needs to write data: ', array.byteLength);
         return this.writableStream.write(array);
     }
 
@@ -32,14 +33,14 @@ class FileReader extends zip.Reader {
 
     public async init() {
         this.size = this.file.size;
-        // console.log('zipReader init, size: ', this.size);
+        // addLogLine('zipReader init, size: ', this.size);
     }
 
     public async readUint8Array(
         index: number,
         length: number
     ): Promise<Uint8Array> {
-        // console.log('zipReader needs data: ', index, length);
+        // addLogLine('zipReader needs data: ', index, length);
         const slicedFile = this.file.slice(index, index + length);
         const arrayBuffer = await slicedFile.arrayBuffer();
 
@@ -66,7 +67,7 @@ export async function exportMlData(
     }
 
     await mlDataZipWritable.close();
-    console.log('Ml Data Exported');
+    addLogLine('Ml Data Exported');
 }
 
 async function exportMlDataToZipWriter(zipWriter: zip.ZipWriter) {
@@ -74,7 +75,7 @@ async function exportMlDataToZipWriter(zipWriter: zip.ZipWriter) {
     const faceClusteringResults =
         mlDbData?.library?.data?.faceClusteringResults;
     faceClusteringResults && (faceClusteringResults.debugInfo = undefined);
-    console.log(
+    addLogLine(
         'Exporting ML DB data: ',
         Object.keys(mlDbData),
         Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)
@@ -120,12 +121,12 @@ export async function importMlData(mlDataZipFile: File) {
         await zipReader.close();
     }
 
-    console.log('ML Data Imported');
+    addLogLine('ML Data Imported');
 }
 
 async function importMlDataFromZipReader(zipReader: zip.ZipReader) {
     const zipEntries = await zipReader.getEntries();
-    // console.log(zipEntries);
+    // addLogLine(zipEntries);
 
     const faceCropPath = `caches/${FACE_CROPS_CACHE}`;
     const faceCropCache = await CacheStorageService.open(FACE_CROPS_CACHE);
@@ -135,7 +136,7 @@ async function importMlDataFromZipReader(zipReader: zip.ZipReader) {
             mldataEntry = entry;
         } else if (entry.filename.startsWith(faceCropPath)) {
             const faceCropUrl = entry.filename.substring(faceCropPath.length);
-            // console.log('importing faceCropUrl: ', faceCropUrl);
+            // addLogLine('importing faceCropUrl: ', faceCropUrl);
             const faceCropCacheBlob: Blob = await entry.getData(
                 new zip.BlobWriter('image/jpeg')
             );
@@ -147,7 +148,7 @@ async function importMlDataFromZipReader(zipReader: zip.ZipReader) {
         new zip.TextWriter()
     );
     const mlDbData = JSON.parse(mlDataJsonStr);
-    console.log(
+    addLogLine(
         'importing ML DB data: ',
         Object.keys(mlDbData),
         Object.keys(mlDbData)?.map((k) => Object.keys(mlDbData[k])?.length)

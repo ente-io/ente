@@ -1,4 +1,5 @@
 import { MlFileData, Face } from 'types/machineLearning';
+import { addLogLine } from 'utils/logging';
 import mlIDbStorage from 'utils/storage/mlIDbStorage';
 import { mlFilesStore } from 'utils/storage/mlStorage';
 import { getFaceId } from '.';
@@ -13,14 +14,14 @@ export async function migrateExistingFiles() {
             existingFiles.push(mlFileData);
         }
     });
-    console.log('existing files: ', existingFiles.length);
+    addLogLine('existing files: ', existingFiles.length);
 
     try {
         for (const file of existingFiles) {
             await mlIDbStorage.putFile(file);
         }
         await mlIDbStorage.setIndexVersion('files', 1);
-        console.log('migrateExistingFiles done');
+        addLogLine('migrateExistingFiles done');
     } catch (e) {
         console.error(e);
     }
@@ -28,7 +29,7 @@ export async function migrateExistingFiles() {
 
 export async function migrateFaceCropsToCache() {
     console.time('migrateFaceCropsToCache');
-    console.log('migrateFaceCropsToCache started');
+    addLogLine('migrateFaceCropsToCache started');
     const allFiles = await mlIDbStorage.getAllFiles();
     const allFilesWithFaces = allFiles.filter(
         (f) => f.faces && f.faces.length > 0
@@ -56,21 +57,21 @@ export async function migrateFaceCropsToCache() {
     }
 
     if (updatedFacesMap.size > 0) {
-        console.log('updating face crops: ', updatedFacesMap.size);
+        addLogLine('updating face crops: ', updatedFacesMap.size);
         await mlIDbStorage.updateFaces(updatedFacesMap);
     } else {
-        console.log('not updating face crops: ', updatedFacesMap.size);
+        addLogLine('not updating face crops: ', updatedFacesMap.size);
     }
     console.timeEnd('migrateFaceCropsToCache');
 }
 
 export async function migrateFaceInterfaceUpdate() {
     console.time('migrateFaceInterfaceUpdate');
-    console.log('migrateFaceInterfaceUpdate started');
+    addLogLine('migrateFaceInterfaceUpdate started');
 
     const faceSchemaVersion = await mlIDbStorage.getIndexVersion('faceSchema');
     if (faceSchemaVersion) {
-        console.log('not running migrateFaceInterfaceUpdate');
+        addLogLine('not running migrateFaceInterfaceUpdate');
         return;
     }
 
@@ -126,10 +127,10 @@ export async function migrateFaceInterfaceUpdate() {
         return updated;
     });
 
-    console.log('migrateFaceInterfaceUpdate updating: ', updatedFiles.length);
+    addLogLine('migrateFaceInterfaceUpdate updating: ', updatedFiles.length);
     await mlIDbStorage.putAllFilesInTx(updatedFiles);
 
     await mlIDbStorage.setIndexVersion('faceSchema', 1);
-    console.log('migrateFaceInterfaceUpdate done');
+    addLogLine('migrateFaceInterfaceUpdate done');
     console.timeEnd('migrateFaceInterfaceUpdate');
 }

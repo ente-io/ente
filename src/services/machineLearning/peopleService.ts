@@ -1,4 +1,5 @@
 import { Face, MLSyncContext, Person } from 'types/machineLearning';
+import { addLogLine } from 'utils/logging';
 import {
     isDifferentOrOld,
     getAllFacesFromMap,
@@ -19,7 +20,7 @@ class PeopleService {
                 syncContext.faceClusteringService.method
             )
         ) {
-            console.log(
+            addLogLine(
                 '[MLService] Skipping people index as already synced to latest version'
             );
             return;
@@ -86,7 +87,7 @@ class PeopleService {
             faces.forEach((face) => {
                 face.personId = person.id;
             });
-            // console.log("Creating person: ", person, faces);
+            // addLogLine("Creating person: ", person, faces);
         }
 
         await mlIDbStorage.updateFaces(allFacesMap);

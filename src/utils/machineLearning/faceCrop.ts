@@ -12,6 +12,7 @@ import {
     FaceDetection,
 } from 'types/machineLearning';
 import { cropWithRotation, imageBitmapToBlob } from 'utils/image';
+import { addLogLine } from 'utils/logging';
 import { getBlobFromCache } from 'utils/storage/cache';
 import { enlargeBox } from '.';
 import { Box } from '../../../thirdparty/face-api/classes';
@@ -104,7 +105,7 @@ export async function removeOldFaceCrops(
 }
 
 export async function removeFaceCropUrls(faceCropUrls: Array<string>) {
-    console.log('Removing face crop urls: ', faceCropUrls);
+    addLogLine('Removing face crop urls: ', faceCropUrls);
     const faceCropCache = await CacheStorageService.open(FACE_CROPS_CACHE);
     const urlRemovalPromises = faceCropUrls?.map((url) =>
         faceCropCache.delete(url)
@@ -131,7 +132,7 @@ export function extractFaceImageFromCrop(
         .shift(-imageBox.x, -imageBox.y)
         .rescale(scale)
         .round();
-    // console.log({ box, imageBox, faceCropImage, scale, scaledBox, scaledImageBox, shiftedBox });
+    // addLogLine({ box, imageBox, faceCropImage, scale, scaledBox, scaledImageBox, shiftedBox });
 
     const faceSizeDimentions: Dimensions = {
         width: faceSize,

@@ -245,7 +245,7 @@ export {};
 //     const getOptions = debounce(getAutoCompleteSuggestions, 250);
 
 //     const search = (selectedOption: Suggestion) => {
-//         // console.log('search...');
+//         // addLogLine('search...');
 //         if (!selectedOption) {
 //             return;
 //         }
@@ -356,7 +356,7 @@ export {};
 //     );
 
 //     const CustomMenu = (props) => {
-//         // console.log("props.selectProps.options: ", selectRef);
+//         // addLogLine("props.selectProps.options: ", selectRef);
 //         const peopleSuggestions = props.selectProps.options.filter(
 //             (o) => o.type === SuggestionType.PERSON
 //         );

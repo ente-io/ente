@@ -33,6 +33,7 @@ import {
     BLAZEFACE_SCORE_THRESHOLD,
     MAX_FACE_DISTANCE_PERCENT,
 } from 'constants/machineLearning/config';
+import { addLogLine } from 'utils/logging';
 
 class BlazeFaceDetectionService implements FaceDetectionService {
     private blazeFaceModel: Promise<BlazeFaceModel>;
@@ -59,7 +60,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             inputHeight: BLAZEFACE_INPUT_SIZE,
             inputWidth: BLAZEFACE_INPUT_SIZE,
         });
-        console.log(
+        addLogLine(
             'loaded blazeFaceModel: ',
             // await this.blazeFaceModel,
             // eslint-disable-next-line @typescript-eslint/await-thenable
@@ -120,20 +121,20 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         let desiredDist = desiredRightEyeX - this.desiredLeftEye[0];
         desiredDist *= this.desiredFaceSize;
         const scale = desiredDist / dist;
-        // console.log("scale: ", scale);
+        // addLogLine("scale: ", scale);
 
         const eyesCenter = [];
         eyesCenter[0] = Math.floor((leftEye[0] + rightEye[0]) / 2);
         eyesCenter[1] = Math.floor((leftEye[1] + rightEye[1]) / 2);
-        // console.log("eyesCenter: ", eyesCenter);
+        // addLogLine("eyesCenter: ", eyesCenter);
 
         const faceWidth = this.desiredFaceSize / scale;
         const faceHeight = this.desiredFaceSize / scale;
-        // console.log("faceWidth: ", faceWidth, "faceHeight: ", faceHeight)
+        // addLogLine("faceWidth: ", faceWidth, "faceHeight: ", faceHeight)
 
         const tx = eyesCenter[0] - faceWidth * 0.5;
         const ty = eyesCenter[1] - faceHeight * this.desiredLeftEye[1];
-        // console.log("tx: ", tx, "ty: ", ty);
+        // addLogLine("tx: ", tx, "ty: ", ty);
 
         return new Box({
             left: tx,
@@ -154,7 +155,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         const normalizedImage = tf.sub(tf.div(reshapedImage, 127.5), 1.0);
         // eslint-disable-next-line @typescript-eslint/await-thenable
         const results = await this.blazeFaceBackModel.predict(normalizedImage);
-        // console.log('onFacesDetected: ', results);
+        // addLogLine('onFacesDetected: ', results);
         return results;
     }
 
@@ -179,7 +180,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
         const inBox = newBox(0, 0, resized.width, resized.height);
         const toBox = newBox(0, 0, imageBitmap.width, imageBitmap.height);
         const transform = computeTransformToBox(inBox, toBox);
-        // console.log("1st pass: ", { transform });
+        // addLogLine("1st pass: ", { transform });
 
         const faceDetections: Array<FaceDetection> = faces?.map((f) => {
             const box = transformBox(normFaceBox(f), transform);
@@ -222,7 +223,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             );
             let selected = pass2Detections?.[0];
             if (pass2Detections?.length > 1) {
-                // console.log('2nd pass >1 face', pass2Detections.length);
+                // addLogLine('2nd pass >1 face', pass2Detections.length);
                 selected = getNearestDetection(
                     pass1Detection,
                     pass2Detections
@@ -233,7 +234,7 @@ class BlazeFaceDetectionService implements FaceDetectionService {
             // we might miss 1st pass face actually having score within threshold
             // it is ok as results will be consistent with 2nd pass only detections
             if (selected && selected.probability >= BLAZEFACE_SCORE_THRESHOLD) {
-                // console.log("pass2: ", { imageBox, paddedBox, transform, selected });
+                // addLogLine("pass2: ", { imageBox, paddedBox, transform, selected });
                 detections.push(selected);
             }
         }

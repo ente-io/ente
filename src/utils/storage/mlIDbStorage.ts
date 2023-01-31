@@ -24,6 +24,7 @@ import {
 } from 'types/machineLearning';
 import { IndexStatus } from 'types/machineLearning/ui';
 import { runningInBrowser } from 'utils/common';
+import { addLogLine } from 'utils/logging';
 import { logError } from 'utils/sentry';
 
 export const ML_SYNC_JOB_CONFIG_NAME = 'ml-sync-job';
@@ -132,7 +133,7 @@ class MLIDbStorage {
                         .objectStore('configs')
                         .add(DEFAULT_ML_SEARCH_CONFIG, ML_SEARCH_CONFIG_NAME);
                 }
-                console.log(
+                addLogLine(
                     `Ml DB upgraded to version: ${newVersion} from version: ${oldVersion}`
                 );
             },
@@ -142,7 +143,7 @@ class MLIDbStorage {
     public get db(): Promise<IDBPDatabase<MLDb>> {
         if (!this._db) {
             this._db = this.openDB();
-            console.log('Opening Ml DB');
+            addLogLine('Opening Ml DB');
         }
 
         return this._db;
@@ -152,7 +153,7 @@ class MLIDbStorage {
         const db = await this.db;
         db.close();
         await deleteDB(MLDATA_DB_NAME);
-        console.log('Cleared Ml DB');
+        addLogLine('Cleared Ml DB');
         this._db = undefined;
         await this.db;
     }

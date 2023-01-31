@@ -17,6 +17,7 @@ import ssdMobileNetV2Service from 'services/machineLearning/ssdMobileNetV2Servic
 import { DEFAULT_ML_SYNC_CONFIG } from 'constants/machineLearning/config';
 // import tesseractService from 'services/machineLearning/tesseractService';
 import imageSceneService from 'services/machineLearning/imageSceneService';
+import { addLogLine } from 'utils/logging';
 
 interface MLFileDebugViewProps {
     file: File;
@@ -94,27 +95,27 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             const faceDetections = await blazeFaceDetectionService.detectFaces(
                 imageBitmap
             );
-            console.log('detectedFaces: ', faceDetections.length);
+            addLogLine('detectedFaces: ', faceDetections.length);
 
             const objectDetections = await ssdMobileNetV2Service.detectObjects(
                 imageBitmap,
                 DEFAULT_ML_SYNC_CONFIG.objectDetection.maxNumBoxes,
                 DEFAULT_ML_SYNC_CONFIG.objectDetection.minScore
             );
-            console.log('detectedObjects: ', objectDetections);
+            addLogLine('detectedObjects: ', objectDetections);
 
             const sceneDetections = await imageSceneService.detectScenes(
                 imageBitmap,
                 DEFAULT_ML_SYNC_CONFIG.sceneDetection.minScore
             );
-            console.log('detectedScenes: ', sceneDetections);
+            addLogLine('detectedScenes: ', sceneDetections);
 
             // const textDetections = await tesseractService.detectText(
             //     imageBitmap,
             //     DEFAULT_ML_SYNC_CONFIG.textDetection.minAccuracy,
             //     0
             // );
-            // console.log('detectedTexts: ', textDetections);
+            // addLogLine('detectedTexts: ', textDetections);
 
             const mlSyncConfig = await getMLSyncConfig();
             const faceCropPromises = faceDetections.map(async (faceDetection) =>
@@ -132,7 +133,7 @@ export default function MLFileDebugView(props: MLFileDebugViewProps) {
             const faceAlignments = faceDetections.map((detection) =>
                 arcfaceAlignmentService.getFaceAlignment(detection)
             );
-            console.log('alignedFaces: ', faceAlignments);
+            addLogLine('alignedFaces: ', faceAlignments);
 
             const canvas: HTMLCanvasElement = canvasRef.current;
             canvas.width = imageBitmap.width;

@@ -40,6 +40,7 @@ import {
 import { FILE_CACHE } from 'constants/cache';
 import { FILE_TYPE } from 'constants/file';
 import { decodeMotionPhoto } from 'services/motionPhotoService';
+import { addLogLine } from 'utils/logging';
 
 export function f32Average(descriptors: Float32Array[]) {
     if (descriptors.length < 1) {
@@ -134,7 +135,7 @@ export function extractFaces(
             ];
         });
 
-        // console.log('boxes: ', boxes[0]);
+        // addLogLine('boxes: ', boxes[0]);
 
         const faceImagesTensor = tf.image.cropAndResize(
             reshapedImage,
@@ -389,7 +390,7 @@ export async function getOriginalImageBitmap(
             queue
         );
     }
-    console.log('[MLService] Got file: ', file.id.toString());
+    addLogLine('[MLService] Got file: ', file.id.toString());
 
     return getImageBlobBitmap(fileBlob);
 }
@@ -400,7 +401,7 @@ export async function getThumbnailImageBitmap(file: EnteFile, token: string) {
         token,
         ML_SYNC_DOWNLOAD_TIMEOUT_MS
     );
-    console.log('[MLService] Got thumbnail: ', file.id.toString());
+    addLogLine('[MLService] Got thumbnail: ', file.id.toString());
 
     const thumbFile = await fetch(fileUrl);
 
@@ -430,14 +431,14 @@ export async function getPeopleList(file: EnteFile): Promise<Array<Person>> {
     if (!peopleIds || peopleIds.length < 1) {
         return [];
     }
-    // console.log("peopleIds: ", peopleIds);
+    // addLogLine("peopleIds: ", peopleIds);
     console.time('getPeopleList:mlPeopleStore:getItems');
     const peoplePromises = peopleIds.map(
         (p) => mlIDbStorage.getPerson(p) as Promise<Person>
     );
     const peopleList = await Promise.all(peoplePromises);
     console.timeEnd('getPeopleList:mlPeopleStore:getItems');
-    // console.log("peopleList: ", peopleList);
+    // addLogLine("peopleList: ", peopleList);
 
     return peopleList;
 }
@@ -545,7 +546,7 @@ export function getNearestPointIndex(
         (a, b) => Math.abs(a.distance) - Math.abs(b.distance)
     );
 
-    // console.log('Nearest dist: ', nearest.distance, maxDistance);
+    // addLogLine('Nearest dist: ', nearest.distance, maxDistance);
     if (!maxDistance || nearest.distance <= maxDistance) {
         return nearest.index;
     }
@@ -553,11 +554,11 @@ export function getNearestPointIndex(
 
 export function logQueueStats(queue: PQueue, name: string) {
     queue.on('active', () =>
-        console.log(
+        addLogLine(
             `queuestats: ${name}: Active, Size: ${queue.size} Pending: ${queue.pending}`
         )
     );
-    queue.on('idle', () => console.log(`queuestats: ${name}: Idle`));
+    queue.on('idle', () => addLogLine(`queuestats: ${name}: Idle`));
     queue.on('error', (error) =>
         console.error(`queuestats: ${name}: Error, `, error)
     );

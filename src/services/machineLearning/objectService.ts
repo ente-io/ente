@@ -4,6 +4,7 @@ import {
     DetectedObject,
     ThingClass,
 } from 'types/machineLearning';
+import { addLogLine } from 'utils/logging';
 import {
     isDifferentOrOld,
     getObjectId,
@@ -60,7 +61,7 @@ class ObjectService {
                 syncContext.config.sceneDetection.minScore
             ))
         );
-        // console.log('3 TF Memory stats: ', tf.memory());
+        // addLogLine('3 TF Memory stats: ', tf.memory());
         // TODO: reenable faces filtering based on width
         const detectedObjects = objectDetections?.map((detection) => {
             return {
@@ -80,7 +81,7 @@ class ObjectService {
             `object detection time taken ${fileContext.enteFile.id}`
         );
 
-        console.log('[MLService] Detected Objects: ', newMlFile.things?.length);
+        addLogLine('[MLService] Detected Objects: ', newMlFile.things?.length);
     }
 
     async getAllSyncedThingsMap(syncContext: MLSyncContext) {
@@ -114,14 +115,14 @@ class ObjectService {
 
     async syncThingClassesIndex(syncContext: MLSyncContext) {
         const filesVersion = await mlIDbStorage.getIndexVersion('files');
-        console.log(
+        addLogLine(
             'thingClasses',
             await mlIDbStorage.getIndexVersion('thingClasses')
         );
         if (
             filesVersion <= (await mlIDbStorage.getIndexVersion('thingClasses'))
         ) {
-            console.log(
+            addLogLine(
                 '[MLService] Skipping people index as already synced to latest version'
             );
             return;

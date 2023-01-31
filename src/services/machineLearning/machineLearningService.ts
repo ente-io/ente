@@ -32,6 +32,7 @@ import ObjectService from './objectService';
 // import TextService from './textService';
 import ReaderService from './readerService';
 import { logError } from 'utils/sentry';
+import { addLogLine } from 'utils/logging';
 class MachineLearningService {
     private initialized = false;
     // private faceDetectionService: FaceDetectionService;
@@ -103,10 +104,10 @@ class MachineLearningService {
             tsne: syncContext.tsne,
             error: syncContext.error,
         };
-        // console.log('[MLService] sync results: ', mlSyncResult);
+        // addLogLine('[MLService] sync results: ', mlSyncResult);
 
         // await syncContext.dispose();
-        console.log('Final TF Memory stats: ', tf.memory());
+        addLogLine('Final TF Memory stats: ', tf.memory());
 
         return mlSyncResult;
     }
@@ -148,7 +149,7 @@ class MachineLearningService {
 
         let updated = false;
         if (newFileIds.length > 0) {
-            console.log('newFiles: ', newFileIds.length);
+            addLogLine('newFiles: ', newFileIds.length);
             const newFiles = newFileIds.map((fileId) => this.newMlData(fileId));
             await mlIDbStorage.putAllFiles(newFiles, tx);
             updated = true;
@@ -162,7 +163,7 @@ class MachineLearningService {
         }
 
         if (removedFileIds.length > 0) {
-            console.log('removedFiles: ', removedFileIds.length);
+            addLogLine('removedFiles: ', removedFileIds.length);
             await mlIDbStorage.removeAllFiles(removedFileIds, tx);
             updated = true;
         }
@@ -196,7 +197,7 @@ class MachineLearningService {
     //     }
 
     //     removedFileIds.forEach((fileId) => mlFilesStore.removeItem(fileId));
-    //     console.log('Removed local file ids: ', removedFileIds);
+    //     addLogLine('Removed local file ids: ', removedFileIds);
 
     //     await incrementIndexVersion('files');
     // }
@@ -209,7 +210,7 @@ class MachineLearningService {
             MAX_ML_SYNC_ERROR_COUNT
         );
 
-        console.log('fileIds: ', fileIds);
+        addLogLine('fileIds: ', fileIds);
 
         const localFilesMap = await this.getLocalFilesMap(syncContext);
         syncContext.outOfSyncFiles = fileIds.map((fileId) =>
@@ -254,7 +255,7 @@ class MachineLearningService {
     //         [...existingFilesMap.values()]
     //     );
     //     console.timeEnd('getUniqueOutOfSyncFiles');
-    //     console.log(
+    //     addLogLine(
     //         'Got unique outOfSyncFiles: ',
     //         syncContext.outOfSyncFiles.length,
     //         'for batchSize: ',
@@ -282,7 +283,7 @@ class MachineLearningService {
             syncContext.error = error;
         }
         await syncContext.syncQueue.onIdle();
-        console.log('allFaces: ', syncContext.nSyncedFaces);
+        addLogLine('allFaces: ', syncContext.nSyncedFaces);
 
         // TODO: In case syncJob has to use multiple ml workers
         // do in same transaction with each file update
@@ -293,32 +294,32 @@ class MachineLearningService {
 
     private async getSyncContext(token: string) {
         if (!this.syncContext) {
-            console.log('Creating syncContext');
+            addLogLine('Creating syncContext');
 
             this.syncContext = getMLSyncConfig().then((mlSyncConfig) =>
                 MLFactory.getMLSyncContext(token, mlSyncConfig, true)
             );
         } else {
-            console.log('reusing existing syncContext');
+            addLogLine('reusing existing syncContext');
         }
         return this.syncContext;
     }
 
     private async getLocalSyncContext(token: string) {
         if (!this.localSyncContext) {
-            console.log('Creating localSyncContext');
+            addLogLine('Creating localSyncContext');
             this.localSyncContext = getMLSyncConfig().then((mlSyncConfig) =>
                 MLFactory.getMLSyncContext(token, mlSyncConfig, false)
             );
         } else {
-            console.log('reusing existing localSyncContext');
+            addLogLine('reusing existing localSyncContext');
         }
         return this.localSyncContext;
     }
 
     public async closeLocalSyncContext() {
         if (this.localSyncContext) {
-            console.log('Closing localSyncContext');
+            addLogLine('Closing localSyncContext');
             const syncContext = await this.localSyncContext;
             await syncContext.dispose();
             this.localSyncContext = undefined;
@@ -395,7 +396,7 @@ class MachineLearningService {
             await this.persistMLFileSyncError(syncContext, enteFile, error);
             syncContext.nSyncedFiles += 1;
         } finally {
-            console.log('TF Memory stats: ', tf.memory());
+            addLogLine('TF Memory stats: ', tf.memory());
         }
     }
 
@@ -453,7 +454,7 @@ class MachineLearningService {
         } finally {
             fileContext.tfImage && fileContext.tfImage.dispose();
             fileContext.imageBitmap && fileContext.imageBitmap.close();
-            // console.log('8 TF Memory stats: ', tf.memory());
+            // addLogLine('8 TF Memory stats: ', tf.memory());
 
             // TODO: enable once faceId changes go in
             // await removeOldFaceCrops(
@@ -472,15 +473,15 @@ class MachineLearningService {
 
         await tf.ready();
 
-        console.log('01 TF Memory stats: ', tf.memory());
+        addLogLine('01 TF Memory stats: ', tf.memory());
         // await tfjsFaceDetectionService.init();
-        // // console.log('02 TF Memory stats: ', tf.memory());
+        // // addLogLine('02 TF Memory stats: ', tf.memory());
         // await this.faceLandmarkService.init();
         // await faceapi.nets.faceLandmark68Net.loadFromUri('/models/face-api/');
-        // // console.log('03 TF Memory stats: ', tf.memory());
+        // // addLogLine('03 TF Memory stats: ', tf.memory());
         // await tfjsFaceEmbeddingService.init();
         // await faceapi.nets.faceRecognitionNet.loadFromUri('/models/face-api/');
-        // console.log('04 TF Memory stats: ', tf.memory());
+        // addLogLine('04 TF Memory stats: ', tf.memory());
 
         this.initialized = true;
     }
@@ -488,11 +489,11 @@ class MachineLearningService {
     public async dispose() {
         this.initialized = false;
         // await this.faceDetectionService.dispose();
-        // console.log('11 TF Memory stats: ', tf.memory());
+        // addLogLine('11 TF Memory stats: ', tf.memory());
         // await this.faceLandmarkService.dispose();
-        // console.log('12 TF Memory stats: ', tf.memory());
+        // addLogLine('12 TF Memory stats: ', tf.memory());
         // await this.faceEmbeddingService.dispose();
-        // console.log('13 TF Memory stats: ', tf.memory());
+        // addLogLine('13 TF Memory stats: ', tf.memory());
     }
 
     private async getMLFileData(fileId: number) {
@@ -560,7 +561,7 @@ class MachineLearningService {
             .slice(0, syncContext.config.tsne.samples)
             .map((f) => Array.from(f.embedding));
         syncContext.tsne = toTSNE(input, syncContext.config.tsne);
-        console.log('tsne: ', syncContext.tsne);
+        addLogLine('tsne: ', syncContext.tsne);
     }
 
     private async syncFaceDetections(

@@ -2,14 +2,13 @@ import { expose } from 'comlink';
 import { EnteFile } from 'types/file';
 import mlService from 'services/machineLearning/machineLearningService';
 import { MachineLearningWorker } from 'types/machineLearning';
-import { pipeConsoleLogsToDebugLogs } from 'utils/logging';
+import { addLogLine } from 'utils/logging';
 // import ReverseProxiedElectronCacheStorageProxy from './electronCacheStorageProxy.proxy';
 // import { setupResponseComlinkTransferHandler } from 'utils/comlink';
 
 export class DedicatedMLWorker implements MachineLearningWorker {
     constructor() {
-        console.log('DedicatedMLWorker constructor called');
-        pipeConsoleLogsToDebugLogs();
+        addLogLine('DedicatedMLWorker constructor called');
         // this.init();
     }
 
@@ -18,7 +17,7 @@ export class DedicatedMLWorker implements MachineLearningWorker {
     //     const cacheProxy = await recp.open('thumbs');
 
     //     const thumb = await cacheProxy.match('13578875');
-    //     console.log('worker init cache.match', thumb);
+    //     addLogLine('worker init cache.match', thumb);
     // }
 
     public async closeLocalSyncContext() {

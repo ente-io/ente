@@ -8,6 +8,7 @@ import {
     FaceEmbeddingService,
     Versioned,
 } from 'types/machineLearning';
+import { addLogLine } from 'utils/logging';
 import { imageBitmapsToTensor4D } from 'utils/machineLearning';
 
 class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
@@ -36,7 +37,7 @@ class MobileFaceNetEmbeddingService implements FaceEmbeddingService {
             '/models/mobilefacenet/mobilefacenet.tflite'
         );
 
-        console.log('loaded mobileFaceNetModel: ', tf.getBackend());
+        addLogLine('loaded mobileFaceNetModel: ', tf.getBackend());
     }
 
     private async getMobileFaceNetModel() {

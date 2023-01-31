@@ -16,7 +16,7 @@ class ReaderService {
             if (fileContext.imageBitmap) {
                 return fileContext.imageBitmap;
             }
-            // console.log('1 TF Memory stats: ', tf.memory());
+            // addLogLine('1 TF Memory stats: ', tf.memory());
             if (fileContext.localFile) {
                 if (
                     fileContext.enteFile.metadata.fileType !== FILE_TYPE.IMAGE
@@ -50,7 +50,7 @@ class ReaderService {
             fileContext.newMlFile.imageSource = syncContext.config.imageSource;
             const { width, height } = fileContext.imageBitmap;
             fileContext.newMlFile.imageDimensions = { width, height };
-            // console.log('2 TF Memory stats: ', tf.memory());
+            // addLogLine('2 TF Memory stats: ', tf.memory());
 
             return fileContext.imageBitmap;
         } catch (e) {
