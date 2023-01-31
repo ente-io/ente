@@ -69,7 +69,6 @@ class _ManageIndividualParticipantState
               ),
               leadingIcon: Icons.edit_outlined,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isCollaborator ? Icons.check : null,
               onTap: widget.user.isCollaborator
                   ? null
@@ -102,7 +101,6 @@ class _ManageIndividualParticipantState
               leadingIcon: Icons.photo_outlined,
               leadingIconColor: getEnteColorScheme(context).strokeBase,
               menuItemColor: getEnteColorScheme(context).fillFaint,
-              pressedColor: getEnteColorScheme(context).fillFaint,
               trailingIcon: widget.user.isViewer ? Icons.check : null,
               onTap: widget.user.isViewer
                   ? null

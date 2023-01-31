@@ -81,7 +81,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     ),
                     alignCaptionedTextToLeft: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
                       value: widget.collection!.publicURLs?.firstOrNull
                               ?.enableCollect ??
@@ -153,7 +152,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     isBottomBorderRadiusRemoved: true,
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
                       value: widget.collection!.publicURLs?.firstOrNull
                               ?.enableDownload ??
@@ -185,7 +183,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     alignCaptionedTextToLeft: true,
                     isTopBorderRadiusRemoved: true,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    pressedColor: getEnteColorScheme(context).fillFaint,
                     trailingWidget: Switch.adaptive(
                       value: widget.collection!.publicURLs?.firstOrNull
                               ?.passwordEnabled ??
@@ -224,7 +221,6 @@ class _ManageSharedLinkWidgetState extends State<ManageSharedLinkWidget> {
                     leadingIcon: Icons.remove_circle_outline,
                     leadingIconColor: warning500,
                     menuItemColor: getEnteColorScheme(context).fillFaint,
-                    pressedColor: getEnteColorScheme(context).fillFaint,
                     onTap: () async {
                       final bool result = await sharingActions.disableUrl(
                         context,

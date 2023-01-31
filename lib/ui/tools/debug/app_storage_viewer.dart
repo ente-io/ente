@@ -161,8 +161,6 @@ class _AppStorageViewerState extends State<AppStorageViewer> {
                             ),
                             menuItemColor:
                                 getEnteColorScheme(context).fillFaint,
-                            pressedColor:
-                                getEnteColorScheme(context).fillFaintPressed,
                             borderRadius: 8,
                             onTap: () async {
                               for (var pathItem in paths) {
