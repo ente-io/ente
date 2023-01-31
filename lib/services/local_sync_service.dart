@@ -76,15 +76,13 @@ class LocalSyncService {
     _existingSync = Completer<void>();
     final int ownerID = Configuration.instance.getUserID()!;
     final existingLocalFileIDs = await _db.getExistingLocalFileIDs(ownerID);
-    _logger.info(
-      existingLocalFileIDs.length.toString() + " localIDs were discovered",
-    );
+    _logger.info("${existingLocalFileIDs.length} localIDs were discovered");
 
     final syncStartTime = DateTime.now().microsecondsSinceEpoch;
     final lastDBUpdationTime = _prefs.getInt(kDbUpdationTimeKey) ?? 0;
     final startTime = DateTime.now().microsecondsSinceEpoch;
     if (lastDBUpdationTime != 0) {
-      await _loadAndStorePhotos(
+      await _loadAndStoreDiff(
         existingLocalFileIDs,
         fromTime: lastDBUpdationTime,
         toTime: syncStartTime,
@@ -96,7 +94,7 @@ class LocalSyncService {
       var toYear = 2010;
       var toTime = DateTime(toYear).microsecondsSinceEpoch;
       while (toTime < syncStartTime) {
-        await _loadAndStorePhotos(
+        await _loadAndStoreDiff(
           existingLocalFileIDs,
           fromTime: startTime,
           toTime: toTime,
@@ -105,7 +103,7 @@ class LocalSyncService {
         toYear++;
         toTime = DateTime(toYear).microsecondsSinceEpoch;
       }
-      await _loadAndStorePhotos(
+      await _loadAndStoreDiff(
         existingLocalFileIDs,
         fromTime: startTime,
         toTime: syncStartTime,
@@ -293,7 +291,7 @@ class LocalSyncService {
     }
   }
 
-  Future<void> _loadAndStorePhotos(
+  Future<void> _loadAndStoreDiff(
     Set<String> existingLocalDs, {
     required int fromTime,
     required int toTime,
@@ -305,13 +303,13 @@ class LocalSyncService {
       shouldAutoBackup: Configuration.instance.hasSelectedAllFoldersForBackup(),
     );
     final List<File> files = result.item2;
-    _logger.info(
-      "Loaded ${files.length} photos from " +
-          DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
-          " to " +
-          DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
-    );
     if (files.isNotEmpty) {
+      _logger.info(
+        "Loaded ${files.length} photos from " +
+            DateTime.fromMicrosecondsSinceEpoch(fromTime).toString() +
+            " to " +
+            DateTime.fromMicrosecondsSinceEpoch(toTime).toString(),
+      );
       await _trackUpdatedFiles(files, existingLocalDs);
       final List<File> allFiles = [];
       allFiles.addAll(files);
@@ -320,7 +318,7 @@ class LocalSyncService {
         files,
         conflictAlgorithm: ConflictAlgorithm.ignore,
       );
-      _logger.info("Inserted " + files.length.toString() + " files.");
+      _logger.info('Inserted ${files.length} files');
       Bus.instance.fire(
         LocalPhotosUpdatedEvent(allFiles, source: "loadedPhoto"),
       );
